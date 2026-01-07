@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,7 +136,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int8Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * Int8Array.BYTES_PER_ELEMENT
@@ -1624,7 +1624,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int16Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * Int16Array.BYTES_PER_ELEMENT
@@ -3129,7 +3129,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Int32Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * Int32Array.BYTES_PER_ELEMENT
@@ -4598,7 +4598,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / BigInt64Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT
@@ -6109,7 +6109,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Float32Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * Float32Array.BYTES_PER_ELEMENT
@@ -7609,7 +7609,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Float64Array.BYTES_PER_ELEMENT).toInt()) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLength = this.lengthInt * Float64Array.BYTES_PER_ELEMENT

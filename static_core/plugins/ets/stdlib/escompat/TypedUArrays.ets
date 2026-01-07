@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Uint8ClampedArray.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLengthInt = this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT
@@ -1606,7 +1606,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Uint8Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLengthInt = this.lengthInt * Uint8Array.BYTES_PER_ELEMENT
@@ -3097,7 +3097,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Uint16Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLengthInt = this.lengthInt * Uint16Array.BYTES_PER_ELEMENT
@@ -4589,7 +4589,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / Uint32Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLengthInt = this.lengthInt * Uint32Array.BYTES_PER_ELEMENT
@@ -6104,7 +6104,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      */
     public constructor(length: number) {
         if (length < 0 || length > (Int.MAX_VALUE / BigUint64Array.BYTES_PER_ELEMENT)) {
-            throw new TypeError("Type Error: length " + length + " is outside the bounds of the buffer")
+            throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
         this.lengthInt = length.toInt()
         this.byteLengthInt = this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT
