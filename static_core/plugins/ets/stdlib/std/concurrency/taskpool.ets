@@ -1020,11 +1020,16 @@ export namespace taskpool {
                     InternalTask.of(task).reject.push(reject);
                 });
             });
-            if (this.impl.isRunning) {
-                this.impl.tasks.push(task);
-            } else {
-                this.impl.isRunning = true;
-                InternalTask.of(task).enqueue(this.impl.priority);
+            ConcurrencyHelpers.mutexLock(this.impl.stateMutex);
+            try {
+                if (this.impl.isRunning) {
+                    this.impl.tasks.push(task);
+                } else {
+                    this.impl.isRunning = true;
+                    InternalTask.of(task).enqueue(this.impl.priority);
+                }
+            } finally {
+                ConcurrencyHelpers.mutexUnlock(this.impl.stateMutex);
             }
             notifyExecuteTask();
             return promise;
