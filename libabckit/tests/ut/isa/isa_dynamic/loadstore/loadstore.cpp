@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -669,7 +669,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbynameValid)
 {
     auto output =
         helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname.abc", "ldobjbyname");
-    EXPECT_TRUE(helpers::Match(output, "just_data\n"));
+    EXPECT_TRUE(helpers::Match(output, "just_data\n123\nresult: 43\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname.abc",
@@ -690,7 +690,7 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynLdobjbynameValid)
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname_modified.abc",
                                         "ldobjbyname");
-    EXPECT_TRUE(helpers::Match(output, "field_data\n"));
+    EXPECT_TRUE(helpers::Match(output, "field_data\n123\nresult: 43\n"));
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex, abc-kind=ArkTS1, category=positive, extension=c
@@ -848,6 +848,39 @@ TEST_F(LibAbcKitCreateDynOwnInstTest, IcreateDynStglobalvarValid)
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/stglobalvar_modified.abc",
                                         "stglobalvar");
     EXPECT_TRUE(helpers::Match(output, "funcfoo_data\n"));
+}
+
+TEST_F(LibAbcKitCreateDynOwnInstTest, ReplaceCallBack)
+{
+    auto output =
+        helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname.abc", "ldobjbyname");
+    EXPECT_TRUE(helpers::Match(output, "just_data\n123\nresult: 43\n"));
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname_modified.abc", "runNamedThen",
+        [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+            // find definefunc instruction (reference anonymous function)
+            auto *defineFuncInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC);
+            ASSERT_NE(defineFuncInst, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            // create ldglobalvar instruction to load then_cb
+            AbckitString *thenCbName = g_implM->createString(file, "then_cb", strlen("then_cb"));
+            ASSERT_NE(thenCbName, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitInst *ldglobalvarInst = g_dynG->iCreateLdglobalvar(graph, thenCbName);
+            ASSERT_NE(ldglobalvarInst, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            helpers::ReplaceInst(defineFuncInst, ldglobalvarInst);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        },
+        [&](AbckitGraph *graph) { g_implG->gDump(graph, 1); });
+
+    output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/ldobjbyname_modified.abc",
+                                        "ldobjbyname");
+    EXPECT_TRUE(helpers::Match(output, "just_data\nthen_cb\nresult: 40\n"));
 }
 
 }  // namespace libabckit::test

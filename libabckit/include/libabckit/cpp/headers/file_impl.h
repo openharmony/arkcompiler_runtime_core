@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,6 +140,13 @@ inline abckit::Literal File::CreateLiteralLiteralArray(const abckit::LiteralArra
 inline abckit::Literal File::CreateLiteralString(std::string_view val) const
 {
     AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.data(), val.size());
+    CheckError(GetApiConfig());
+    return abckit::Literal(literal, GetApiConfig(), this);
+}
+
+inline abckit::Literal File::CreateLiteralNullValue() const
+{
+    AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralNullValue(GetResource());
     CheckError(GetApiConfig());
     return abckit::Literal(literal, GetApiConfig(), this);
 }

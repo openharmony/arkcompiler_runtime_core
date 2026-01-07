@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,3 +21,25 @@ function foo() {
 }
 
 print(foo());
+
+
+
+globalThis.then_cb = function(x) {
+    print("then_cb");
+    return x - 1;
+}
+
+function runNamedThen() {
+    return Promise.resolve(41).then(
+        //after aop, then_cb will replace this callback
+        (x) => {
+        print("123");
+        return x + 2;
+    }
+);
+}
+
+
+runNamedThen()
+    .then((v) => print("result:", v))
+    .catch((e) => print("error:", e));

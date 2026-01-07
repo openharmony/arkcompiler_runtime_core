@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -906,6 +906,7 @@ struct AbckitFile {
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> litArrLits;
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> stringLits;
         std::unordered_map<std::string, std::unique_ptr<AbckitLiteral>> methodLits;
+        std::unique_ptr<AbckitLiteral> nullValueLit;
     };
     struct AbcKitValues {
         std::unordered_map<int, std::unique_ptr<AbckitValue>> intVals;

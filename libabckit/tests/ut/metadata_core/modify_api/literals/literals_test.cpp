@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,6 +148,47 @@ TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ModifyApiImpl::createLiteralNullValue, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralNullValue_1)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
+    AbckitLiteral *res = g_implM->createLiteralNullValue(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(res, nullptr);
+    // Write output file
+    g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=ModifyApiImpl::createLiteralNullValue, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitModifyApiLiteralsTest, CreateLiteralNullValueInArray_1)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/literals/literals_dynamic.abc", &file);
+    auto arr = std::vector<AbckitLiteral *>();
+    AbckitLiteral *res1 = g_implM->createLiteralString(file, "test", strlen("test"));
+    AbckitLiteral *res2 = g_implM->createLiteralNullValue(file);
+    AbckitLiteral *res3 = g_implM->createLiteralDouble(file, 3.14);
+    arr.emplace_back(res1);
+    arr.emplace_back(res2);
+    arr.emplace_back(res3);
+    auto litArr = g_implM->createLiteralArray(file, arr.data(), arr.size());
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(litArr, nullptr);
+    // Verify that multiple calls return the same nullValue literal
+    AbckitLiteral *nullValue1 = g_implM->createLiteralNullValue(file);
+    AbckitLiteral *nullValue2 = g_implM->createLiteralNullValue(file);
+    ASSERT_EQ(nullValue1, nullValue2);
+    ASSERT_EQ(res2, nullValue1);
     g_impl->writeAbc(file, MODIFIED_DYNAMIC, strlen(MODIFIED_DYNAMIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
