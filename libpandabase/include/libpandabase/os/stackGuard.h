@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ namespace panda {
 [[maybe_unused]] NO_INLINE static uintptr_t GetCurrentFrameAddress()
 {
 #if defined(__clang__) || defined(__GNUC__)
-// Linux、OHOS、MAC OS
+// Linux\OHOS\MAC OS
     return reinterpret_cast<uintptr_t>(__builtin_frame_address(0));
 #elif defined(_MSC_VER)
 // Windows
@@ -45,7 +45,7 @@ public:
     {
         uintptr_t initialFrame = GetCurrentFrameAddress();
     #if defined(PANDA_TARGET_UNIX)
-    // Linux、OHOS、MAC OS. The stack space is limited to 96% of the default stack space
+    // Linux\OHOS\MAC OS. The stack space is limited to 96% of the default stack space
         stackLimit_ = initialFrame - PANDA_STACK_SIZE;
     #elif defined(PANDA_TARGET_WINDOWS)
     // Windows platform. The stack space is limited to 96% of the default stack space
