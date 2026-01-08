@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -314,6 +314,7 @@ config("ark_common_config") {
     cflags_cc += [ "-g" ]
     if (defined(use_hwasan) && use_hwasan) {
       defines += [ "__SANITIZE_HWADDRESS__" ]
+      defines += [ "USE_HWASAN" ]
     } else {
       defines += [ "__SANITIZE_ADDRESS__" ]
     }
@@ -328,7 +329,7 @@ config("ark_common_config") {
 
   if (ark_hybrid) {
     defines += [ "ARK_HYBRID" ]
-  } else {
+  } else if (!(defined(use_hwasan) && use_hwasan && current_cpu == "arm64")) {
     defines += [ "PANDA_32_BIT_MANAGED_POINTER" ]
   }
 
@@ -356,8 +357,12 @@ config("ark_common_config") {
     defines += [
       "PANDA_TARGET_ARM64",
       "PANDA_TARGET_64",
-      "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES",
     ]
+    # This optimization conflicts with HWASAN implementation
+    # Both use x20 register
+    if (!defined(use_hwasan) || !use_hwasan) {
+      defines += [ "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES" ]
+    }
   } else if (current_cpu == "x86") {
     defines += [
       "PANDA_TARGET_32",

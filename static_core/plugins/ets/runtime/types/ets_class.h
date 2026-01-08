@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -866,9 +866,15 @@ private:
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
     FIELD_UNUSED ObjectPointer<EtsRuntimeLinker> linker_;
+#if defined(PANDA_32_BIT_MANAGED_POINTER)
     FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
     FIELD_UNUSED EtsLong overloadMap_;
+#else
+    FIELD_UNUSED EtsLong typeMetaData_;
+    FIELD_UNUSED EtsLong overloadMap_;
+    FIELD_UNUSED uint32_t flags_;
+#endif
     // NOTE(zhushihao8, #20712) remove this field after removal of `GetMethodsNum`
     std::atomic_uint32_t methodsNum_ {0};
     // ets.Class fields END

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,12 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
 #endif
 #ifndef PANDA_WITH_IRTOC
             if (interpreterType == InterpreterType::IRTOC) {
+                interpreterType = InterpreterType::CPP;
+            }
+#endif
+#if defined(USE_HWASAN)
+            if (interpreterType != InterpreterType::CPP) {
+                LOG(INFO, RUNTIME) << "interpreter type is downgraded into CPP due to HWASAN config";
                 interpreterType = InterpreterType::CPP;
             }
 #endif
