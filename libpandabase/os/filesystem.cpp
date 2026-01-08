@@ -29,12 +29,12 @@ namespace panda::os {
 
 void CreateDirectories(const std::string &folder_name)
 {
-#ifdef PANDA_TARGET_MOBILE
+#if defined(PANDA_TARGET_MOBILE) || defined(IOS_PLATFORM)
     constexpr auto DIR_PERMISSIONS = 0775;
     mkdir(folder_name.c_str(), DIR_PERMISSIONS);
-#elif PANDA_TARGET_MACOS || PANDA_TARGET_OHOS
+#elif defined(PANDA_TARGET_MACOS) || defined(PANDA_TARGET_OHOS)
     std::filesystem::create_directories(std::filesystem::path(folder_name));
-#elif PANDA_TARGET_WINDOWS
+#elif defined(PANDA_TARGET_WINDOWS)
     CreateDirectory(folder_name.c_str(), NULL);
 #else
     constexpr auto DIR_PERMISSIONS = 0775;
