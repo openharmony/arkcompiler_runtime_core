@@ -1042,7 +1042,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     private sliceFromTo(begin: int, end: int): Int8Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new Int8Array(buf)
     }
 
@@ -1064,7 +1064,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new Int8Array(this.buffer, relStart * Int8Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
@@ -2534,7 +2534,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     private sliceFromTo(begin: int, end: int): Int16Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new Int16Array(buf)
     }
 
@@ -2556,7 +2556,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new Int16Array(this.buffer, relStart * Int16Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
@@ -4003,7 +4003,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     private sliceFromTo(begin: int, end: int): Int32Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new Int32Array(buf)
     }
 
@@ -4025,7 +4025,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new Int32Array(this.buffer, relStart * Int32Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
@@ -5510,7 +5510,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     private sliceFromTo(begin: int, end: int): BigInt64Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new BigInt64Array(buf)
     }
 
@@ -5532,7 +5532,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         if (count < 0) {
             count = 0
         }
-        return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new BigInt64Array(this.buffer, relStart * BigInt64Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
@@ -6997,7 +6997,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     private sliceFromTo(begin: int, end: int): Float32Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new Float32Array(buf)
     }
 
@@ -7019,7 +7019,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new Float32Array(this.buffer, relStart * Float32Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
@@ -8394,7 +8394,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     private sliceFromTo(begin: int, end: int): Float64Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new Float64Array(buf)
     }
 
@@ -8416,7 +8416,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (count < 0) {
             count = 0
         }
-        return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new Float64Array(this.buffer, relStart * Float64Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**

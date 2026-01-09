@@ -1287,7 +1287,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     private sliceFromTo(begin: int, end: int): {{N}}Array {
         const relStart: int = normalizeIndex(begin, this.lengthInt)
         const relEnd: int = normalizeIndex(end, this.lengthInt)
-        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT, relEnd * this.BYTES_PER_ELEMENT)
+        let buf: ArrayBuffer = this.buffer.slice(relStart * this.BYTES_PER_ELEMENT + this.byteOffset, relEnd * this.BYTES_PER_ELEMENT + this.byteOffset)
         return new {{N}}Array(buf)
     }
 
@@ -1309,7 +1309,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (count < 0) {
             count = 0
         }
-        return new {{N}}Array(this.buffer, relStart * {{N}}Array.BYTES_PER_ELEMENT.toInt(), count)
+        return new {{N}}Array(this.buffer, relStart * {{N}}Array.BYTES_PER_ELEMENT + this.byteOffset, count)
     }
 
     /**
