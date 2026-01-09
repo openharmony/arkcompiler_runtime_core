@@ -138,7 +138,7 @@ enum Status {
 function testEnum() {
     let dir: Direction = Direction.Up;
     let status: Status = Status.Active;
-    arktest.assertEQ(typeof dir, "number");
+    arktest.assertEQ(typeof dir, "int");
     arktest.assertEQ(typeof status, "string");
     // The enum is wrapped as an object type when calling erase
     arktest.assertEQ(typeof erase(dir), "int");

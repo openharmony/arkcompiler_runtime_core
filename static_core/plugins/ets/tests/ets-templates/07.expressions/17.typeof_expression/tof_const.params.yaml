@@ -125,7 +125,7 @@ cases:
           - { type: 'I[]|null', expr: '[new A()]' }
           - { type: 'I[]|null', expr: 'null' }
 
-    - res: 'number'
+    - res: 'int'
       decl: |-
           enum Color { Red, Green, Blue }
           enum Size { S, M, L, XL }

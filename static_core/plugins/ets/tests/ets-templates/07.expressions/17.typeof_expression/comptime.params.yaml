@@ -13,7 +13,7 @@
 
 ---
 cases:
-    - { name: 'number', decl: 'const c:EN = EN.a', desc: 'enum' }
+    - { name: 'int', decl: 'const c:EN = EN.a', desc: 'enum' }
     - { name: 'string', decl: 'const c:ES = ES.a', desc: 'enum' }
     - { name: 'bigint', decl: 'const c:bigint = 123n', desc: 'bigint' }
     - { name: 'boolean', decl: 'const c:boolean = true', desc: 'boolean' }
