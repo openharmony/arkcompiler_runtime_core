@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,8 @@ export interface CallableInterface {
 export interface OptionalMethodInterface {
     method1?(): void;
     method2(): void;
+    method3(a: string, b: number): string
+    method4?(a: number, b: Array<number>): string
 }
 
 export interface MixedInterface {

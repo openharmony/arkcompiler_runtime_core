@@ -1131,10 +1131,10 @@ export class Autofixer {
      */
 
     if (ts.isInterfaceDeclaration(node)) {
+      const updatedMembers: Array<ts.TypeElement> = []
       for (const member of node.members) {
         if (ts.isIndexSignatureDeclaration(member) ||
-          ts.isCallSignatureDeclaration(member) ||
-          (ts.isMethodSignature(member) && member.questionToken)) {
+          ts.isCallSignatureDeclaration(member)) {
           /**
            * If the header comment of an interface declaration contains `@noninterop` field, 
            * the interface node will not be converted.
@@ -1151,7 +1151,18 @@ export class Autofixer {
 
           return typeAliasDeclaration;
         }
+        if (!(ts.isMethodSignature(member) && member.questionToken)) {
+          updatedMembers.push(member);
+        }
       }
+      return this.context.factory.updateInterfaceDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        updatedMembers
+      )
     }
 
     return node;
