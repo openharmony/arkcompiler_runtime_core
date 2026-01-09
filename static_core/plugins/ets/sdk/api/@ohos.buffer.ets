@@ -256,11 +256,11 @@ export default namespace buffer {
             }
         }
         if (length != undefined) {
-            if (length < 0 || length > arrayBuffer.byteLength) {
+            if (length < 0 || length > arrayBuffer.byteLength.toInt() - resolvedByteOffset) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. `+
-                    `It must be >= 0 and <= ${arrayBuffer.byteLength}. Received value is: ${length}`)
+                    `It must be >= 0 and <= ${arrayBuffer.byteLength.toInt() - resolvedByteOffset}. Received value is: ${length}`)
             }
-            return new Buffer(ArrayBuffer.from(arrayBuffer, resolvedByteOffset, resolvedLength));
+            return new Buffer(arrayBuffer, resolvedByteOffset, length)
         }
         let buffer = new Buffer(arrayBuffer, resolvedByteOffset)
         return buffer
@@ -681,25 +681,37 @@ export default namespace buffer {
         private bufferData: ArrayBuffer;
         /** The offset into the buffer where this Buffer instance starts */
         private readonly byteOffsetNumber: int;
+        /** The length of ArrayBuffer */
+        private readonly byteLength: int;
 
         /**
          * Gets the length of the buffer in bytes
          * @returns {int} The number of bytes in the buffer
          */
-        get length(): int { return this.buffer.getByteLength() - this.byteOffsetNumber}
+        get length(): int { 
+            return this.byteLength 
+        }
 
-        get byteOffset(): int { return this.byteOffsetNumber }
+        get byteOffset(): int { 
+            return this.byteOffsetNumber 
+        }
 
-        get buffer(): ArrayBuffer { return this.bufferData }
+        get buffer(): ArrayBuffer { 
+            return this.bufferData 
+        }
         /**
          * Creates a new Buffer instance
          * @param {ArrayBuffer} buffer - The underlying ArrayBuffer to use
          * @param {int} [byteOffset=0] - The starting offset into the ArrayBuffer
          */
-        public constructor(buffer: ArrayBuffer, byteOffset: int = 0)
-        {
+        public constructor(buffer: ArrayBuffer, byteOffset: int = 0, byteLength?: int) {
             this.bufferData = buffer;
             this.byteOffsetNumber = byteOffset;
+            if (byteLength == undefined) {
+                this.byteLength = buffer.getByteLength() - byteOffset;
+            } else {
+                this.byteLength = byteLength;
+            }
             if (byteOffset >= this.buffer.getByteLength() && this.buffer.getByteLength() > 0) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "byteOffset" is out of range. Received value is: ${byteOffset}`)
             }
