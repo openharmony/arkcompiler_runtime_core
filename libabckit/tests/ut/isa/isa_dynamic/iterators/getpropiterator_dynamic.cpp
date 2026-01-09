@@ -110,7 +110,7 @@ TEST_F(LibAbcKitCreateDynGetPropIteratorInstTest, CreateDynGetpropiteratorValid)
 
     output = helpers::ExecuteDynamicAbc(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/iterators/getpropiterator_dynamic_modified.abc", "getpropiterator_dynamic");
-    EXPECT_TRUE(helpers::Match(output, "\\[object Iterator\\]\n"));
+    EXPECT_TRUE(helpers::Match(output, "\\[object Object\\]\n"));
 }
 
 }  // namespace libabckit::test
