@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,15 +37,14 @@ bool IsFunction(const std::string &str)
 
 void ark::guard::NameCacheParser::Parse()
 {
-    std::string content = FileUtil::GetFileContent(applyNameCache_);
-    if (content.empty()) {
-        content = FileUtil::GetFileContent(defaultNameCache_);
-    }
-    if (content.empty()) {
+    if (applyNameCache_.empty()) {
         return;
     }
-    LOG_I << "Name Cache Content: " << content;
+    std::string content = FileUtil::GetFileContent(applyNameCache_);
+    ARK_GUARD_ASSERT(content.empty(), ErrorCode::NAME_CACHE_FORMAT_ERROR,
+                     "NameCache parsing failed, can not read apply name cache file:" + applyNameCache_);
 
+    LOG_I << "Name Cache Content: " << content;
     ParseNameCache(content);
 }
 

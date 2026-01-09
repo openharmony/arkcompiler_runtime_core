@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -487,6 +487,36 @@ HWTEST(NameMarkerTest, name_marker_class_test_012, TestSize.Level1)
     AssertKept(fileView, "class_test_012.ClassC.foo1:class_test_012.ClassC;{Ustd.core.Int,std.core.String};");
     AssertNotKept(fileView, "class_test_012.ClassB.f3");
     AssertNotKept(fileView, "class_test_012.ClassB.f4");
+}
+
+/**
+ * @tc.name: name_marker_class_test_013
+ * @tc.desc: test the keep effect in the scenario where the types do not match
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(NameMarkerTest, name_marker_class_test_013, TestSize.Level1)
+{
+    const std::string abcFilePath = ARK_GUARD_ABC_FILE_DIR "ut/name_mark/code_sample/class_test_013.abc";
+    const std::string configFilePath = ARK_GUARD_UNIT_TEST_DIR "ut/name_mark/code_sample/class_test_013_config.json";
+    abckit_wrapper::FileView fileView;
+    NameMarkerTestExecute(abcFilePath, configFilePath, fileView);
+
+    AssertModuleNotKept(fileView, "class_test_013");
+
+    AssertKept(fileView, "class_test_013.ClassA");
+    AssertKept(fileView, "class_test_013.ClassA.f1");
+    AssertKept(fileView, "class_test_013.ClassB");
+    AssertKept(fileView, "class_test_013.ClassB.f1");
+    AssertNotKept(fileView, "class_test_013.ClassC");
+    AssertKept(fileView, "class_test_013.ClassC.f1");
+
+    AssertNotKept(fileView, "class_test_013.ClassD");
+    AssertNotKept(fileView, "class_test_013.ClassD.f1");
+    AssertNotKept(fileView, "class_test_013.ClassE");
+    AssertNotKept(fileView, "class_test_013.ClassE.f1");
+    AssertNotKept(fileView, "class_test_013.ClassF");
+    AssertNotKept(fileView, "class_test_013.ClassF.f1");
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -783,6 +783,8 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_018, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("class_demo1.ClassLong.field1", "field1");
     AddElement<abckit_wrapper::Class>("class_demo1.ClassFloat", "ClassFloat");
     AddElement<abckit_wrapper::Field>("class_demo1.ClassFloat.field1", "field1");
+    AddElement<abckit_wrapper::Class>("class_demo1.BaseClass", "BaseClass");
+    AddElement<abckit_wrapper::Field>("class_demo1.BaseClass.field1", "field1");
 
     this->VerifyObfuscated();
 }
@@ -869,8 +871,17 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     AddElement<abckit_wrapper::Class>("class_demo2.FinalClass", "FinalClass");
     AddElement<abckit_wrapper::Method>("class_demo2.FinalClass.methodFinal:class_demo2.FinalClass;void;",
                                        "methodFinal");
+    AddElement<abckit_wrapper::Class>("class_demo2.ChildClass", "ChildClass");
+    AddElement<abckit_wrapper::Field>("class_demo2.ChildClass.field2", "field2");
+    const auto externalClass = this->fileView_.Get<abckit_wrapper::Class>("class_demo1.BaseClass");
+    ASSERT_TRUE(externalClass.has_value());
+    const auto externalField = this->fileView_.Get<abckit_wrapper::Field>("class_demo1.BaseClass.field1");
+    ASSERT_TRUE(externalField.has_value());
 
     this->VerifyObfuscated();
+
+    ASSERT_EQ(externalClass.value()->GetName(), "BaseClass");
+    ASSERT_EQ(externalField.value()->GetRawName(), "field1");
 }
 
 /*
