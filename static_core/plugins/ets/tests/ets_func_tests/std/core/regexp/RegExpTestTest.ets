@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,16 @@ function test(): void {
     arktest.assertEQ(RegExp("\\1(a)").test("aa"), true)
 }
 
+function main(): int {
+    const suite = new arktest.ArkTestsuite("RegExp.test")
+
+    suite.addTest('test', test)
+    suite.addTest('RegExp.testSurrogate', testSurrogate)
+    suite.addTest("CaselessTest", caselessTest)
+
+    return suite.run()
+}
+
 function testSurrogate(): void {
     let regex = new RegExp('\uD800', 'u');
     let result = regex.exec('\uD800');
@@ -53,11 +63,20 @@ function testSurrogate(): void {
     arktest.assertEQ(result?.[0], '\uD800');
 }
 
-function main(): int {
-    const suite = new arktest.ArkTestsuite("RegExp.test")
+function caselessTest(): void {
+    let regex = new RegExp('\u00C7', 'i');
+    arktest.assertTrue(regex.test('ç'), "RegExp('\u00C7', 'i').test('ç') should be true");
+    arktest.assertTrue(regex.test('Ç'), "RegExp('\u00C7', 'i').test('Ç') should be true");
+    arktest.assertFalse(regex.test('c'), "RegExp('\u00C7', 'i').test('c') should be false");
 
-    suite.addTest('test', test)
-    suite.addTest('RegExp.testSurrogate', testSurrogate)
+    regex = new RegExp('Z', 'i');
+    arktest.assertTrue(regex.test('z'), "RegExp('Z', 'i').test('z') should be true");
+    arktest.assertTrue(regex.test('Z'), "RegExp('Z', 'i').test('Z') should be true");
+    arktest.assertFalse(regex.test('Ż'), "RegExp('Z', 'i').test('Ż') should be false");
+    arktest.assertFalse(regex.test('ż'), "RegExp('Z', 'i').test('ż') should be false");
 
-    return suite.run()
+    regex = new RegExp('\u017B', 'i');
+    arktest.assertTrue(regex.test('ż'), "RegExp('\u017B', 'i').test('ż') should be true");
+    arktest.assertTrue(regex.test('Ż'), "RegExp('\u017B', 'i').test('Ż') should be true");
+    arktest.assertFalse(regex.test('z'), "RegExp('\u017B', 'i').test('z') should be false");
 }

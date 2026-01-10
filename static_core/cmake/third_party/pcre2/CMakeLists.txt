@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,8 @@
 # limitations under the License.
 
 project(pcre2)
+
+option(PANDA_ETS_PCRE2_NEWLINE_PATCH "Enable ETS PCRE2 newline patch" ON)
 
 set(PCRE2_DIR
     ${PANDA_THIRD_PARTY_SOURCES_DIR}/pcre2/pcre2/
@@ -96,6 +98,19 @@ endif(PCRE2_EBCDIC_NL25)
 set(PCRE2_CFLAGS_CC
     -fPIC
 )
+
+if (PANDA_ETS_PCRE2_NEWLINE_PATCH)
+    set(PCRE2_ORIG_NEWLINE ${PCRE2_SRC_DIR}/pcre2_newline.c)
+    set(PCRE2_NEWLINE_PATCH
+        ${PANDA_ROOT}/plugins/ets/runtime/patches/pcre2_newline.patch)
+
+    add_custom_target(pcre2_newline_patch
+        COMMAND ${CMAKE_COMMAND} -E echo "Applying patch to ${PCRE2_ORIG_NEWLINE}"
+        COMMAND patch -N ${PCRE2_ORIG_NEWLINE} ${PCRE2_NEWLINE_PATCH} || true
+        DEPENDS ${PCRE2_ORIG_NEWLINE} ${PCRE2_NEWLINE_PATCH}
+        COMMENT "Applying patch to pcre2_newline.c"
+    )
+endif()
 
 set(PCRE2_SOURCES
   ${PCRE2_SRC_DIR}/pcre2_auto_possess.c
@@ -214,7 +229,12 @@ set_target_properties(pcre2-16-static PROPERTIES
   SOVERSION ${LIBPCRE2_16_SOVERSION})
 panda_target_compile_definitions(pcre2-16-static PUBLIC PCRE2_STATIC)
 set(targets ${targets} pcre2-16-static)
-
+if (PANDA_ETS_PCRE2_NEWLINE_PATCH)
+    add_dependencies(pcre2-8-static pcre2_newline_patch)
+    add_dependencies(pcre2-16-static pcre2_newline_patch)
+    panda_target_compile_definitions(pcre2-8-static PUBLIC ARK_PCRE2_NEWLINE_PATCH)
+    panda_target_compile_definitions(pcre2-16-static PUBLIC ARK_PCRE2_NEWLINE_PATCH)
+endif()
 if(MSVC)
   set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME pcre2-16-static)
 else(MSVC)
