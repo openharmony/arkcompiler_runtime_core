@@ -613,7 +613,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = false;
     } else if (valueCls->IsEtsEnum()) {
         isSuccessful = false;
-    } else if (valueCls->IsEtsEnum()) {
+    } else if (value->IsInstanceOf(platformTypes->coreArrayLike)) {
         isSuccessful = false;
     } else {
         if (value->IsInstanceOf(platformTypes->coreRegExpResultArray)) {

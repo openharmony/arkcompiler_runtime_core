@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -988,6 +988,10 @@ class JSONWriter {
             this.writeObject(obj.toJSON())
         } else if (obj instanceof Array) {
             this.writeEscompatArray(obj)
+        } else if(obj instanceof Int8Array || obj instanceof Int16Array || obj instanceof Int32Array || obj instanceof Uint8Array || obj instanceof BigInt64Array
+                || obj instanceof Uint16Array || obj instanceof Uint32Array || obj instanceof Float32Array || obj instanceof Float64Array
+                || obj instanceof BigUint64Array || obj instanceof Uint8ClampedArray) {
+            this.writeTypedArray(obj)
         } else if (obj instanceof Set || obj instanceof Promise || obj instanceof Map) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Object) {
@@ -1500,6 +1504,62 @@ class JSONWriter {
         } else {
             return false
         }
+    }
+
+    private writeTypedArray(array: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | 
+        Uint32Array | Float32Array | Float64Array | BigInt64Array | BigUint64Array | Uint8ClampedArray): void {
+        this.buffer.append("{")
+
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
+        if (array.length > 0) {
+            this.path.add(array)
+            
+            const lastElementIndex: int = array.length.toInt() - 1
+
+            for (let idx: int = 0; idx < lastElementIndex; idx++) {
+                this.buffer.append("\"")
+                this.buffer.append(idx)
+                this.buffer.append("\"")
+                this.buffer.append(":")
+
+                if (array instanceof BigInt64Array | BigUint64Array) {
+                    this.writeObjectsArrayElement((array as ArrayLike<bigint>)[idx], idx)
+                } else {
+                    this.writeObjectsArrayElement((array as ArrayLike<Double>)[idx], idx)
+                }
+                this.buffer.append(",")
+
+                if (this.useIndent) {
+                    this.buffer.append("\n")
+                }
+            }
+
+            this.buffer.append("\"")
+            this.buffer.append(lastElementIndex)
+            this.buffer.append("\"")
+            this.buffer.append(":")
+
+            if (array instanceof BigInt64Array | BigUint64Array) {
+                this.writeObjectsArrayElement((array as ArrayLike<bigint>)[lastElementIndex], lastElementIndex)
+            } else {
+                this.writeObjectsArrayElement((array as ArrayLike<Double>)[lastElementIndex], lastElementIndex)
+            }
+
+            this.path.delete(array)
+        }
+
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+
+        this.buffer.append("}")
     }
 
     private writeEscompatArray<T>(array: Array<T>): void {
