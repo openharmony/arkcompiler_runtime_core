@@ -109,7 +109,7 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 let tns = STValue.findNamespace('stvalue_test.testNameSpace');
 let student = tns.namespaceGetVariable('student', SType.REFERENCE);
-let JSONCls = STValue.findClass("escompat.JSON");
+let JSONCls = STValue.findClass("std.core.JSON");
 // Invoke stringify; the function signature indicates the input parameter is of Object type and the return value is of String type
 let stringfyRes = JSONCls.classInvokeStaticMethod('stringify', 'C{std.core.Object}:C{std.core.String}', [student]);
 let str = stringfyRes.unwrapToString(); // {"name":"student"}
@@ -154,7 +154,7 @@ Used to find class definitions based on ArkTS-Sta class names, accept a fully qu
 | STValue | encapsulates the STValue object of this class |
 
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -178,8 +178,8 @@ try {
     // Invalid Class
     let klass = STValue.findClass('stvalue_accessor/Animal');
 } catch (e: Error) {
-    // Throw Error 
-    console.log(e.message); 
+    // Throw Error
+    console.log(e.message);
 }
 // FindClass failed, invalid className: className=stvalue_accessor/Animal, aniStatus=4
 ```
@@ -227,10 +227,10 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 try{
     // Invalid Namespace
-    let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#'); 
+    let exampleNs = STValue.findNamespace('stvalue_accessor.Namespace#');
 } catch (e: Error) {
-    // Throw Error 
-    console.log(e.message);  
+    // Throw Error
+    console.log(e.message);
 }
 // FindNamespace failed, invalid namespaceName: namespaceName=stvalue_accessor.Namespace#, aniStatus=4
 ```
@@ -279,9 +279,9 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 try{
     // Invalid Enum
-    let testEnum = STValue.findEnum('stvalue_accessor.COLOR#'); 
+    let testEnum = STValue.findEnum('stvalue_accessor.COLOR#');
 }catch (e: Error){
-    // Throw Error 
+    // Throw Error
     console.log(e.message);
 }
 // FindEnum failed, invalid enumName: enumName=stvalue_accessor.COLOR#, aniStatus=4
@@ -781,7 +781,7 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 try {
     // Invalid Instance
-    let notArray = STValue.wrapInt(111);  
+    let notArray = STValue.wrapInt(111);
     notArray.fixedArrayGet(-1, SType.REFERENCE);
 } catch (e: Error) {
     // Throw Error
@@ -1006,7 +1006,7 @@ try {
 
 Used to retrieve the element at the specified index of a dynamic array, encapsulate it as an STValue object and return it. The object invoking this method must be a valid STValue reference-type array object.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter | Type   | Required | Description                |
 | :-------: | :-----: | :------: | :------------------------- |
@@ -1063,7 +1063,7 @@ try {
 
 Used to set the value of the element at the specified index of a dynamic array. The object invoking this method must be a valid STValue reference-type array object, and the array value `val` to be set must be an STValue object encapsulating a reference-type object.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter | Type     | Required | Description                          |
 | :-------: | :-------: | :------: | :----------------------------------- |
@@ -1119,7 +1119,7 @@ try {
 
 Adds a new element to the end of a dynamic array. The object invoking this method must be a valid STValue reference-type array object, and the new array value `val` to be added must be an STValue object encapsulating a reference-type object.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter | Type     | Required | Description                          |
 | :-------: | :-------: | :------: | :----------------------------------- |
@@ -1176,7 +1176,7 @@ Removes and returns the last element of a dynamic array. The object invoking thi
 
 **Parameters:** None
 
-**Return Value:** 
+**Return Value:**
 
 | Type     | Description                                          |
 | :------: | :--------------------------------------------------- |
@@ -1227,7 +1227,7 @@ Used to retrieve the length of a dynamic array. The object invoking this method 
 
 **Parameters:** None
 
-**Return Value:** 
+**Return Value:**
 
 | Type    | Description                          |
 | :-----: | :----------------------------------- |
@@ -1319,7 +1319,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-let isStr = str.isString(1); 
+let isStr = str.isString(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -1362,7 +1362,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-    let isBigInt = 'STValue'.isBigInt(); 
+    let isBigInt = 'STValue'.isBigInt();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -1423,13 +1423,13 @@ Used to check whether the STValue object is wrapped with `undefined` of ArkTS-St
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :--------------------------------------
 | boolean | Returns true if undefined, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1449,7 +1449,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-    let isUndef = 'STValue'.isUndefined(); 
+    let isUndef = 'STValue'.isUndefined();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -1466,19 +1466,19 @@ try {
 
 Used to compare whether the ArkTS-Sta object references wrapped with `this` and `other` are equal, returning a Boolean result. The `this` and `other` wrappers need to wrap ArkTS-Sta object references. If the parameters are wrong or the types do not match, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :-----: | :-----: | :-----------------------
 | other | STValue | yes | another STValue object to compare |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :---------------------------------------------
 | boolean | If two references are equal true, otherwise return false |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1525,19 +1525,19 @@ try{
 
 ArkTS-Sta object references used to compare `this` and `other` wrappers are strictly equal, returning a Boolean result. The `this` and `other` wrappers need to wrap ArkTS-Sta object references.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :-----:| :-----: | :-----------------------
 | other | STValue | yes | another STValue object to compare |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------------
 | boolean | Returns true if two objects are strictly equal, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1588,13 +1588,13 @@ Used to check whether the STValue object is wrapped with the boolean value of Ar
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | boolean | Returns true if boolean, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1631,13 +1631,13 @@ Used to check whether the STValue object is wrapped with the byte value of ArkTS
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | boolean | Returns true if it is a byte type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1673,13 +1673,13 @@ Used to check whether the STValue object is wrapped with the char value of ArkTS
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | boolean | Returns true if it is a character type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1716,13 +1716,13 @@ Used to check whether the STValue object is wrapped with a short value of ArkTS-
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------------------
 | boolean | Returns true if it is a short integer type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1759,13 +1759,13 @@ Used to check whether the STValue object is wrapped with an int value of ArkTS-S
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | boolean | Returns true if it is an integer type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1802,13 +1802,13 @@ The long value of ArkTS-Sta is used to check whether the STValue object is wrapp
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------------------
 | boolean | Returns true if it is a long integer type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1827,7 +1827,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-    let isLong = longValue.isLong(1); 
+    let isLong = longValue.isLong(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -1845,13 +1845,13 @@ The STValue object is used to check whether it is wrapped with the float value o
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------------
 | boolean | Returns true if it is a single-precision floating-point type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1870,7 +1870,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-    let isFloat = floatValue.isFloat(1); 
+    let isFloat = floatValue.isFloat(1);
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -1888,13 +1888,13 @@ Used to check whether the STValue object is wrapped with the number/double value
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------------
 | boolean | Returns true if double-precision floating-point type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1929,20 +1929,20 @@ try {
 
 Used to check assignment compatibility between types, it accepts two parameters: source type (fromType) and target type (toType), and returns a Boolean result. fromType and toType generally come from the return values of `findClass`, `objectGetType` and `classGetSuperClass`. Based on the rules of the underlying type system, it is determined whether the value of the source type can be safely assigned to a variable of the target type.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :------: | :-----: | :------: | :------------------------
 | fromType | STValue | yes | Source type (the type being assigned) |
 | toType | STValue | yes | Target Type (assigned target type) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------------------------------
 | boolean | Returns true if fromType can be assigned to toType, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -1983,19 +1983,19 @@ try {
 
 Used to check whether an object is an instance of a specified type, accepts a parameter (type object), and returns a Boolean result. Returns true if the object is an instance of the specified type, false otherwise.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :-----: | :-----: | :------: | :----------------------
 | typeArg | STValue | yes | Type to check (class or interface) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :---------------------------------------
 | boolean | Returns true if an instance of this type, false otherwise |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2020,7 +2020,7 @@ Example:
 ```typescript
 try {
     // Invalid Arguments Number
-    let isInstance = stuObj.objectInstanceOf(); 
+    let isInstance = stuObj.objectInstanceOf();
 } catch (e: Error) {
     // Throw Error
     console.log(e.message);
@@ -2038,20 +2038,20 @@ try {
 
 Used to instantiate an object through the class`s constructor, accepting two parameters: the constructor signature and the parameter array, and returning the newly created object. Dynamically create class instances, support constructor calls with parameters, and throw exceptions if the class does not exist, the constructor does not match, or the parameters are incorrect.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
 | ctorSignature | string | yes | constructor(`parameter type: return type`) |
 | args | STValue[] | yes | constructor parameter array |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :--------------: |
 | STValue | Newly created object instance |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2097,20 +2097,20 @@ try {
 
 Used to create a base type array of fixed length in preallocated memory, it only accepts two parameters: array length and element type (SType enumeration), and returns the created array object. Each basic type has a fixed default value (for example, SType.BOOLEAN defaults to false and SType.INT defaults to 0), so there is no need to pass in the initial value of the array element. You only need to specify the array length and element type. All basic data types are supported, and an exception is thrown if the element type is not supported or the parameters are incorrect.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
 | length | number | yes | array length |
 | elementType | SType | yes | Array element type (numeric form) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------------: |
 | STValue | STValue object of a newly created fixed-length array |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2164,7 +2164,7 @@ try {
 
 Used to create an array of reference types of fixed length in preallocated memory, it accepts three parameters: array length, element type and **initial element**, and returns the created array object. Since there is no unified default value for reference types, when creating an array of reference types, in addition to the length and element type, you also need to specify **initial element** to initialize all array elements to references of that element. Classes, interfaces, etc. are supported to reference type elements. All elements of the array are initialized to the same initial value. If the parameters are wrong or the types do not match, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
@@ -2172,13 +2172,13 @@ Used to create an array of reference types of fixed length in preallocated memor
 | elementType | STValue | yes | Array element type |
 | initialElement | STValue | yes | the initial value of the array element |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | STValue | STValue object of a newly created fixed-length reference array |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2282,7 +2282,7 @@ try {
 
 Used to call a specified function in a namespace, it accepts three parameters: function name, function signature and parameter array, and returns the result of the function call. The main function is to execute global functions or static functions in the namespace, supporting function calls with parameters. If the function does not exist, the signature does not match, or the parameters are wrong, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
@@ -2290,13 +2290,13 @@ Used to call a specified function in a namespace, it accepts three parameters: f
 | signature | string | yes | function signature(`parameter type: return type`) |
 | args | STValue[] | yes | function parameter array |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------: |
 | STValue | STValue object of function call result |
 
-**Example:** 
+**Example:**
 
 
 ```typescript
@@ -2315,7 +2315,7 @@ export namespace Invoke{
   // boolean type
   export function BooleanInvoke(b1: Boolean, b2: Boolean): Boolean{
       return b1 & b2;
-  }    
+  }
 }
 ```
 
@@ -2341,19 +2341,19 @@ try {
 
 Used to call functional objects (such as lambda expressions or function objects), it accepts an array of parameters (must be reference types and needs to be boxed in advance if you need to use primitive), and returns the result of the function call. The main function is to execute functional objects and support calls with parameters. If the parameters are non-reference types or the function object is invalid, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
 | args | STValue[] | yes | Function parameter array (must be reference type) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------------: |
 | STValue | STValue object (reference type) of function call result |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2408,7 +2408,7 @@ try {
 A method used to dynamically call an object that accepts three parameters: the method name, the method signature, and an array of parameters, and returns the result of the method call. The main function is to execute the instance method of the object, supporting method calls with parameters. If the method does not exist, the signature does not match or the parameters are wrong, an exception will be thrown.
 
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----------: | :--------: | :--: | :-----: |
@@ -2416,13 +2416,13 @@ A method used to dynamically call an object that accepts three parameters: the m
 | signature | string | yes | method signature(`parameter type: return type`) |
 | args | STValue[] | yes | method parameter array |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------------------------
 | STValue | STValue object of method call result (void method returns null) |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2430,7 +2430,7 @@ import {STValue, SType} from "static.@ohos.lang.interop";
 
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let clsObj = studentCls.classInstantiate('iC{std.core.String}:', [STValue.wrapInt(18), STValue.wrapString('stu1')]);
-let stuAge = clsObj.objectInvokeMethod('getStudentAge', ':i', []); 
+let stuAge = clsObj.objectInvokeMethod('getStudentAge', ':i', []);
 let unwrapStuAge = stuAge.unwrapToNumber(); // 18
 let stuName = clsObj.objectInvokeMethod('getStudentName', ':C{std.core.String}', []);
 let unwrapstuName.unwrapToString(); // 'stu1'
@@ -2478,7 +2478,7 @@ try {
 
 A static method used to call a class that accepts three parameters: the method name, the method signature, and an array of parameters, and returns the result of the method call. The main function is to execute static methods of the class, supporting method calls with parameters. If the method does not exist, the signature does not match, or the parameters are wrong, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :-------: | :-------: | :--: | :-------: |
@@ -2486,13 +2486,13 @@ A static method used to call a class that accepts three parameters: the method n
 | signature | string | yes | method signature(`parameter type: return type`) |
 | args | STValue[] | yes | method parameter array |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :----: |
 | STValue | STValue object of method call result (void method returns null) |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2548,13 +2548,13 @@ Used to unpack STValue objects into numbers, not accept any parameters, and retu
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :----: | :------------: |
 | number | Unpacked number value |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2591,13 +2591,13 @@ Used to unpack the STValue object into a string, do not accept any parameters, a
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :----: | :--------------: |
 | string | Unwrapped string value |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2634,13 +2634,13 @@ Used to unpack the STValue object into a Boolean value, not accept any parameter
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :------------: |
 | boolean | Unwrapped boolean value |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2677,23 +2677,23 @@ try {
 
 `unwrapToBigInt(): bigint`
 
-Used to unpack large integer objects in STValue into BigInt type, does not accept any parameters, and returns large integer value results. Supports a specific large integer type (`escompat.BigInt`), other types will throw exceptions.
+Used to unpack large integer objects in STValue into BigInt type, does not accept any parameters, and returns large integer value results. Supports a specific large integer type (`std.core.BigInt`), other types will throw exceptions.
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :----: | :--------------: |
 | bigint | large integer value after unpacking |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
 import {STValue, SType} from "static.@ohos.lang.interop";
 
-let bigIntValue = STValue.wrapBigInt(12345678901234567890n); 
+let bigIntValue = STValue.wrapBigInt(12345678901234567890n);
 let bigInt = bigIntValue.unwrapToBigInt(); // 12345678901234567890n
 ```
 
@@ -2725,19 +2725,19 @@ try {
 
 An STValue object used to wrap numbers into byte bytes (8-bit signed integers), accepts a numeric argument, and returns the wrapped STValue object. If the value is outside the byte range (-128 to 127), an exception is thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
-| :----: | :----: | :--: | :-------------: | 
+| :----: | :----: | :--: | :-------------: |
 | value | number | yes | number value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------: |
 | STValue | Wrapped byte type STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2772,19 +2772,19 @@ try {
 
 An STValue object used to wrap a string as a character type (16-bit Unicode characters), accepts a string parameter, and returns the wrapped STValue object. is a string that converts a single character to a character type. If the string length is not 1, an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :----------------: |
 | str | string | yes | a single-byte character to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------: |
 | STValue | Wrapped character type STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2819,19 +2819,19 @@ try {
 
 An STValue object used to wrap numbers into short integers (16-bit signed integers), accepts a numeric argument, and returns the wrapped STValue object. If the value exceeds the short integer range (-2<sup>15</sup> to 2<sup>15</sup>-1), an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :----: |
 | value | number | yes | number value to wrap (-2<sup>15</sup> to 2<sup>15</sup>-1) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------: |
 | STValue | Wrapped short STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2865,19 +2865,19 @@ try {
 
 An STValue object used to wrap numbers into an integer (a 32-bit signed integer), accepts a numeric argument, and returns the wrapped STValue object. If the value exceeds the integer range (-2<sup>31</sup> to 2<sup>31</sup>-1), an exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
-| :----: | :----: | :--: | :----: | 
+| :----: | :----: | :--: | :----: |
 | value | number | yes | number value to wrap (-2<sup>31</sup> to 2<sup>31</sup>-1) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :---------------------: |
 | STValue | Wrapped integer STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2912,19 +2912,19 @@ try {
 
 An STValue object used to wrap a number or large integer into a long integer (a 64-bit signed integer), accepting a number or BigInt parameter, and returning the wrapped STValue object. If the input number type value exceeds the integer precision range (-2<sup>53</sup>-1 to 2<sup>53</sup>-1), or the input value exceeds the long integer range (-2<sup>63</sup> to 2<sup>63</sup>-1), An exception will be thrown.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :----: |
 | value | number\|BigInt | yes | the number value to wrap (-2<sup>63</sup> to 2<sup>63</sup>-1) |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------: |
 | STValue | Wrapped long STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -2963,19 +2963,19 @@ try {
 
 An STValue object used to wrap numbers as single-precision floating-point numbers (32-bit floating-point numbers). For the conversion from double-precision floating-point value to single-precision floating-point float, the actual effect is the same as `static_cast<float>(value)` in C++. Accepts a numeric argument and returns the wrapped STValue object. If a numeric parameter exceeds the representable range of a single-precision floating-point number, it will be converted to positive infinity (+Infinity) or negative infinity (-Infinity).
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :-------------: |
 | value | number | yes | number value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------: |
 | STValue | Wrapped single precision floating point STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3010,19 +3010,19 @@ try {
 
 An STValue object used to wrap numbers into double-precision floating-point types (64-bit floating-point numbers), accepts a number parameter, and returns the wrapped STValue object. If a numeric parameter exceeds the representable range of a double-precision floating-point number, it will be converted to positive infinity (+Infinity) or negative infinity (-Infinity).
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
-| :----: | :----: | :--: | :-------------: | 
+| :----: | :----: | :--: | :-------------: |
 | value | number | yes | number value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-----------------------------: |
 | STValue | Wrapped double-precision floating-point STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3057,19 +3057,19 @@ try {
 
 It is used to wrap Boolean values into STValue objects of Boolean type, accept a Boolean parameter, and return the wrapped STValue object. It supports both true and false values.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
-| :----: | :-----: | :--: | :------------: | 
+| :----: | :-----: | :--: | :------------: |
 | value | boolean | yes | numeric value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------------: |
 | STValue | Wrapped Boolean STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3104,19 +3104,19 @@ try {
 
 Used to wrap a string into an STValue object of type string, accept a string parameter, and return the wrapped STValue object.
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
 | :----: | :----: | :--: | :-----: |
 | value | string | yes | string value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :---------------------------: |
 | STValue | Wrapped string type STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3152,19 +3152,19 @@ try {
 Used to wrap the ArkTS-Dyn BigInt object into an STValue object of the ArkTS-Sta BigInt type, accept a BigInt parameter, and return the wrapped STValue object.
 
 
-**Parameters:** 
+**Parameters:**
 
 | Parameter Name | Type | Required | Description |
-| :----: | :----: | :--: | :-----: | 
+| :----: | :----: | :--: | :-----: |
 | value | bigint | yes | large integer value to wrap |
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :---------------------------: |
 | STValue | Wrapped BigInt type STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3201,13 +3201,13 @@ Used to get the STValue object representing ArkTS-Sta null, does not accept any 
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :-------------------: |
 | STValue | STValue object representing null |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn
@@ -3246,13 +3246,13 @@ Used to get the STValue object representing ArkTS-Sta undefined, does not accept
 
 **Parameters:** None
 
-**Return value:** 
+**Return value:**
 
 | Type | Description |
 | :-----: | :------------------------: |
 | STValue | represents an undefined STValue object |
 
-**Example:** 
+**Example:**
 
 ```typescript
 // ArkTS-Dyn

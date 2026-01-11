@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/types/ets_atomic_flag.h"
 #include "plugins/ets/runtime/types/atomics/ets_atomic_ref.h"
 #include "plugins/ets/runtime/types/atomics/ets_atomic_primitives.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"

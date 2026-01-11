@@ -81,14 +81,14 @@ public:
         return charCodeArray;
     }
 
-    EtsEscompatArray *CreateEtsEscompatArray(const std::vector<int> &codes)
+    EtsStdCoreArray *CreateEtsStdCoreArray(const std::vector<int> &codes)
     {
         // Allocate and create the buffer
         auto *buffer = CreateCharCodeArray(codes.begin(), codes.end());
         // Allocate the array object
-        auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coroutine_), codes.size());
+        auto *array = EtsStdCoreArray::Create(EtsExecutionContext::FromMT(coroutine_), codes.size());
         // Fill the array with the pre-created buffer
-        ObjectAccessor::SetObject(coroutine_, array, EtsEscompatArray::GetBufferOffset(), buffer->GetCoreType());
+        ObjectAccessor::SetObject(coroutine_, array, EtsStdCoreArray::GetBufferOffset(), buffer->GetCoreType());
         return array;
     }
 

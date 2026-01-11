@@ -10,13 +10,13 @@ codegen.
 - `optimizer/ir_builder/js_interop/` - JS interop IR building (conditional: `PANDA_ETS_INTEROP_JS`)
 - `optimizer/optimizations/interop_js/` - JS interop optimization pass `InteropIntrinsicOptimization` (scope merging, wrap/unwrap elimination, partial redundancy elimination)
 - `optimizer/ets_intrinsics_peephole.cpp` - ETS intrinsic peephole optimizations (StringEquals, Typeof, Equals, Nullcheck, etc.)
-- `optimizer/ets_intrinsics_inlining_expansion.cpp` - Intrinsic inlining expansion (EscompatArrayGet/Set)
+- `optimizer/ets_intrinsics_inlining_expansion.cpp` - Intrinsic inlining expansion (StdCoreArrayGet/Set)
 - `optimizer/ets_codegen_extensions.{cpp,h}` - Native call code generation (JIT uses direct pointers / AOT uses AOT data table lookup, deoptimizes on null)
 - `ir_build_intrinsics_ets.cpp` - Intrinsic IR building (IsFinite, Signbit, TypedArray operations, Unsafe operations, etc.)
 - `codegen_intrinsics_ets.cpp` - Intrinsic target code generation (Math, ArrayCopy, StringBuilder, etc.)
 - `compiler_intrinsic_id_mapping_inl.h` - mapping between ETS intrinsics and compiler/runtime ids
 - `runtime_adapter_ets.{cpp,h}` - `EtsBytecodeOptimizerRuntimeAdapter`, provides ETS runtime queries (String/StringBuilder identification, constructor detection, etc.)
-- `ets_compiler_interface.h` - Compiler extension interface (virtual methods for EscompatArray, TypedArray, ArrayBuffer)
+- `ets_compiler_interface.h` - Compiler extension interface (virtual methods for StdCoreArray, TypedArray, ArrayBuffer)
 - `tools/paoc_compile_stdlib.sh` - helper script used by ETS tests to compile stdlib in AOT/JIT/LLVM/OSR modes
 - `product_options.h` - Only `compiler-inline-external-methods` and `compiler-regex` are allowed in production builds
 

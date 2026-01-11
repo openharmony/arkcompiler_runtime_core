@@ -150,11 +150,11 @@
        coreFinalizationRegistryExecCleanup)                                                                           \
     TP("Lstd/core/FinRegNode;", coreFinRegNode)                                                                       \
     /* Containers */                                                                                                  \
-    TP("Lstd/core/Array;", escompatArray)                                                                             \
-    IM("Lstd/core/Array;", "pop", ":LY;", escompatArrayPop)                                                           \
-    IM("Lstd/core/Array;", "%%get-length", ":I", escompatArrayGetLength)                                              \
-    IM("Lstd/core/Array;", "$_get", "I:LY;", escompatArrayGet)                                                        \
-    IM("Lstd/core/Array;", "$_set", "ILY;:V", escompatArraySet)                                                       \
+    TP("Lstd/core/Array;", coreArray)                                                                                 \
+    IM("Lstd/core/Array;", "pop", ":LY;", coreArrayPop)                                                               \
+    IM("Lstd/core/Array;", "%%get-length", ":I", coreArrayGetLength)                                                  \
+    IM("Lstd/core/Array;", "$_get", "I:LY;", coreArrayGet)                                                            \
+    IM("Lstd/core/Array;", "$_set", "ILY;:V", coreArraySet)                                                           \
     /* ArrayBuffer */                                                                                                 \
     TP("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
     TP("Lstd/core/DataView;", coreDataView)                                                                           \
@@ -181,7 +181,7 @@
     TP("Lstd/core/MapIteratorImpl;", coreMapIteratorImpl)                                                             \
     TP("Lstd/core/SetIteratorImpl;", coreSetIteratorImpl)                                                             \
     TP("Lstd/core/EmptyMapIteratorImpl;", coreEmptyMapIteratorImpl)                                                   \
-    TP("Lstd/core/ArrayEntriesIterator_T;", escompatArrayEntriesIteratorT)                                            \
+    TP("Lstd/core/ArrayEntriesIterator_T;", coreArrayEntriesIteratorT)                                                \
     TP("Lstd/core/ArrayKeysIterator;", coreArrayKeysIterator)                                                         \
     TP("Lstd/core/ArrayValuesIterator_T;", coreArrayValuesIteratorT)                                                  \
     TP("Lstd/core/IteratorResult;", coreIteratorResult)                                                               \

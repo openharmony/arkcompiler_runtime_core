@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_16_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_16_H
 
 #include "plugins/ets/stdlib/native/core/regexp/regexp_exec_result.h"
 
@@ -38,4 +38,4 @@ public:
 };
 
 }  // namespace ark::ets::stdlib
-#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_16_H
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_16_H

@@ -17,7 +17,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 
 using ark::coretypes::FlatStringInfo;
 

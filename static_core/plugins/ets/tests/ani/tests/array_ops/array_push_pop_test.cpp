@@ -33,9 +33,9 @@ public:
         ani_boolean result = ANI_FALSE;
         ASSERT_EQ(env_->Reference_IsNullishValue(throwingArray, &result), ANI_OK);
         ASSERT_EQ(result, ANI_FALSE);
-        ani_class escompatArray {};
-        ASSERT_EQ(env_->FindClass("std.core.Array", &escompatArray), ANI_OK);
-        ASSERT_EQ(env_->Object_InstanceOf(throwingArray, escompatArray, &result), ANI_OK);
+        ani_class stdCoreArray {};
+        ASSERT_EQ(env_->FindClass("std.core.Array", &stdCoreArray), ANI_OK);
+        ASSERT_EQ(env_->Object_InstanceOf(throwingArray, stdCoreArray, &result), ANI_OK);
         ASSERT_EQ(result, ANI_TRUE);
         *resultArray = static_cast<ani_array>(throwingArray);
     }

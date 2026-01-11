@@ -1,5 +1,5 @@
 # plugin ets_map
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,13 +23,13 @@ module MapConstants
 
   CLASS_STRING_CLASS_FLAG = "ark::Class::STRING_CLASS"
 
-  ENTRY_KEY_OFFSET = "cross_values::GetEscompatMapEntryKeyOffset(graph->GetArch())"
-  ENTRY_VAL_OFFSET = "cross_values::GetEscompatMapEntryValOffset(graph->GetArch())"
-  ENTRY_PREV_OFFSET = "cross_values::GetEscompatMapEntryPrevOffset(graph->GetArch())"
-  ENTRY_NEXT_OFFSET = "cross_values::GetEscompatMapEntryNextOffset(graph->GetArch())"
+  ENTRY_KEY_OFFSET = "cross_values::GetStdCoreMapEntryKeyOffset(graph->GetArch())"
+  ENTRY_VAL_OFFSET = "cross_values::GetStdCoreMapEntryValOffset(graph->GetArch())"
+  ENTRY_PREV_OFFSET = "cross_values::GetStdCoreMapEntryPrevOffset(graph->GetArch())"
+  ENTRY_NEXT_OFFSET = "cross_values::GetStdCoreMapEntryNextOffset(graph->GetArch())"
 
-  SIZE_OFFSET = "cross_values::GetEscompatMapSizeOffset(graph->GetArch())"
-  BUCKETS_OFFSET = "cross_values::GetEscompatMapBucketsOffset(graph->GetArch())"
+  SIZE_OFFSET = "cross_values::GetStdCoreMapSizeOffset(graph->GetArch())"
+  BUCKETS_OFFSET = "cross_values::GetStdCoreMapBucketsOffset(graph->GetArch())"
 
   PLATFORM_TYPES_CORE_LONG_TYPE_OFFSET = "cross_values::GetPlatformTypesCoreLongTypeOffset(graph->GetArch())"
   PLATFORM_TYPES_CORE_FLOAT_TYPE_OFFSET = "cross_values::GetPlatformTypesCoreFloatTypeOffset(graph->GetArch())"
@@ -44,7 +44,7 @@ module MapConstants
   FLOAT32_NAN = "0x7fc00000"
   FLOAT64_NAN = "0x7ff8000000000000"
 
-  SET_ELEMENTS_OFFSET = "cross_values::GetEscompatSetElementsOffset(graph->GetArch())"
+  SET_ELEMENTS_OFFSET = "cross_values::GetStdCoreSetElementsOffset(graph->GetArch())"
 end
 
 ################################################################
@@ -366,18 +366,18 @@ end
 
 macro(:findOffset) do |map, key, ret_none_expr|
   buck_arr_hdr := LoadI(map).Imm(MapConstants::BUCKETS_OFFSET).ref
-  buck_arr_len := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+  buck_arr_len := LoadI(buck_arr_hdr).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
   If(key, 0).EQ.Unlikely.b {
-    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
+    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::STD_CORE_ARRAY_DATA_OFFSET).ref
     buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
     buck_hdr_undef := LoadI(buck_array_data).Imm(EtsConstants::OBJ_PTR_SIZE).ref # buckect number 1, like ETS
     If(buck_hdr_undef, 0).EQ.b {
       eval(ret_none_expr) # return
     }
 
-    buck_len_undef := LoadI(buck_hdr_undef).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
-    bucket_undef := get_object_pointer_imm(buck_hdr_undef, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    buck_len_undef := LoadI(buck_hdr_undef).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    bucket_undef := get_object_pointer_imm(buck_hdr_undef, EtsConstants::STD_CORE_ARRAY_DATA_OFFSET)
     buck_data_undef := AddI(bucket_undef).Imm(Constants::ARRAY_DATA_OFFSET).ptr
 
     offset_undef := findKeyByRef(buck_data_undef, buck_len_undef, key)
@@ -391,15 +391,15 @@ macro(:findOffset) do |map, key, ret_none_expr|
       Goto(:SlowPathEntrypoint)
     }
 
-    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET).ref
+    buck_array := LoadI(buck_arr_hdr).Imm(EtsConstants::STD_CORE_ARRAY_DATA_OFFSET).ref
     buck_array_data := AddI(buck_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
     buck_hdr_norm := Load(buck_array_data, Mul(buck_idx, EtsConstants::OBJ_PTR_SIZE).u32).ref
     If(buck_hdr_norm, 0).EQ.b {
       eval(ret_none_expr) # return
     }
 
-    buck_len_norm := LoadI(buck_hdr_norm).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
-    bucket_norm := get_object_pointer_imm(buck_hdr_norm, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    buck_len_norm := LoadI(buck_hdr_norm).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    bucket_norm := get_object_pointer_imm(buck_hdr_norm, EtsConstants::STD_CORE_ARRAY_DATA_OFFSET)
     buck_data_norm := AddI(bucket_norm).Imm(Constants::ARRAY_DATA_OFFSET).ptr
 
     offset_norm := findKey(buck_data_norm, buck_len_norm, key, type, flags, is_string)
@@ -452,7 +452,7 @@ scoped_macro(:processMapDelete) do |map, key|
   Store(entry_next, MapConstants::ENTRY_PREV_OFFSET, entry_prev).ref
 
   new_len := SubI(buck_len).Imm(1).u32
-  StoreI(buck_hdr, new_len).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+  StoreI(buck_hdr, new_len).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
   last_item_ofs := Mul(new_len, EtsConstants::OBJ_PTR_SIZE).i32
   If(offset, last_item_ofs).NE.b {

@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 #include "plugins/ets/runtime/types/ets_map.h"

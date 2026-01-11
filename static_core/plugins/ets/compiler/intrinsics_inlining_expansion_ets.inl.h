@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_INLINING_EXPANSION_ETS_INL_H
 #define PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_INLINING_EXPANSION_ETS_INL_H
 
-void ExpandIntrinsicEscompatArrayGet(CallInst *callInst);
-void ExpandIntrinsicEscompatArraySet(CallInst *callInst);
+void ExpandIntrinsicCoreArrayGet(CallInst *callInst);
+void ExpandIntrinsicCoreArraySet(CallInst *callInst);
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_INLINING_EXPANSION_ETS_INL_H

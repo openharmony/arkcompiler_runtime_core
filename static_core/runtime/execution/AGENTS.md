@@ -61,7 +61,6 @@ Foundation Layer (../fibers)
 ../../plugins/ets/stdlib/std/core/          # Core constructs (Coroutine, Job, Promise, SyncPrimitives)
 ../../plugins/ets/stdlib/std/concurrency/   # High-level APIs (launch, Atomics, AsyncLock, taskpool)
 ../../plugins/ets/stdlib/std/containers/    # Concurrent collections (ConcurrentHashMap, BlockingQueue)
-../../plugins/ets/stdlib/escompat/          # JavaScript ES compatibility
 
 ../../docs/coroutines/                     # Runtime-level technical documentation
 ../../plugins/ets/doc/concurrency/         # Language-level user documentation

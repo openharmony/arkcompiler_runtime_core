@@ -24,7 +24,7 @@
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "types/ets_array.h"
-#include "types/ets_escompat_array.h"
+#include "types/ets_std_core_array.h"
 #include "types/ets_object.h"
 #include "ets_vm.h"
 #include "ets_class_linker_extension.h"
@@ -113,7 +113,7 @@ public:
     void CheckSetAndGetElementByIdx(T val)
     {
         auto *coro = EtsCoroutine::GetCurrent();
-        auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
+        auto *array = EtsStdCoreArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
         auto *baseObject = reinterpret_cast<common_vm::BaseObject *>(array);
         ASSERT_NE(baseObject, nullptr);
         StaticObjectAccessor staticObjectAccessor;
@@ -271,7 +271,7 @@ TEST_F(StaticObjectAccessorTest, SetAndGetElementByIdx1)
     EtsClass *klass = GetTestClass("Triangle");
     ASSERT_NE(klass, nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
-    auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
+    auto *array = EtsStdCoreArray::Create(EtsExecutionContext::FromMT(coro), ARRAY_LENGTH);
     ASSERT_NE(array, nullptr);
     auto obj = EtsObject::Create(klass);
     EtsObject *valueObject = EtsBoxPrimitive<EtsDouble>::Create(EtsExecutionContext::FromMT(coro), VAL_DOUBLE);

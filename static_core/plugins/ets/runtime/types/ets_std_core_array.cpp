@@ -1,0 +1,195 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
+
+#include "runtime/include/managed_thread.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_method.h"
+
+namespace ark::ets {
+
+/* static */
+EtsStdCoreArray *EtsStdCoreArray::Create(EtsExecutionContext *executionCtx, size_t length)
+{
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+
+    EtsHandleScope scope(executionCtx);
+
+    const EtsPlatformTypes *platformTypes = PlatformTypes(executionCtx);
+
+    // Create std.core array
+    EtsClass *klass = platformTypes->coreArray;
+    EtsHandle<EtsStdCoreArray> arrayHandle(executionCtx, FromEtsObject(EtsObject::Create(executionCtx, klass)));
+    if (UNLIKELY(arrayHandle.GetPtr() == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+
+    // Create fixed array, field of core
+    EtsClass *cls = platformTypes->coreObject;
+    auto buffer = EtsObjectArray::Create(cls, length);
+    if (UNLIKELY(buffer == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+    ObjectAccessor::SetObject(executionCtx->GetMT(), arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
+
+    // Set length
+    arrayHandle->actualLength_ = length;
+
+    return arrayHandle.GetPtr();
+}
+
+static bool IsOutOfBounds(EtsInt index, EtsInt actualLength)
+{
+    if (UNLIKELY(index < 0 || index >= actualLength)) {
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, "Out of bounds");
+        return true;
+    }
+    return false;
+}
+
+EtsObject *EtsStdCoreArray::StdCoreArrayGet(EtsInt index)
+{
+    // Can use private fields as part of `std.core.Array` method implementation
+    if (UNLIKELY(IsOutOfBounds(index, GetActualLengthFromStdCoreArrayImpl()))) {
+        return nullptr;
+    }
+    return GetDataFromStdCoreArrayImpl()->Get(index);
+}
+
+void EtsStdCoreArray::StdCoreArraySet(EtsInt index, EtsObject *value)
+{
+    // Can use private fields as part of `std.core.Array` method implementation
+    if (UNLIKELY(IsOutOfBounds(index, GetActualLengthFromStdCoreArrayImpl()))) {
+        return;
+    }
+    GetDataFromStdCoreArrayImpl()->Set(index, value);
+}
+
+EtsObject *EtsStdCoreArray::StdCoreArrayGetUnsafe(EtsInt index)
+{
+    ASSERT(index >= 0);
+    [[maybe_unused]] EtsInt actualLength = GetActualLengthFromStdCoreArrayImpl();
+    ASSERT(index < actualLength);
+    return GetDataFromStdCoreArrayImpl()->Get(index);
+}
+
+void EtsStdCoreArray::StdCoreArraySetUnsafe(EtsInt index, EtsObject *value)
+{
+    ASSERT(index >= 0);
+    [[maybe_unused]] EtsInt actualLength = GetActualLengthFromStdCoreArrayImpl();
+    ASSERT(index < actualLength);
+    GetDataFromStdCoreArrayImpl()->Set(index, value);
+}
+
+bool EtsStdCoreArray::GetLength(EtsExecutionContext *executionCtx, EtsInt *result)
+{
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    ASSERT(result != nullptr);
+    if (LIKELY(IsExactlyStdCoreArray(executionCtx))) {
+        // Fast path, object is exactly `std.core.Array`
+        *result = GetActualLengthFromStdCoreArray();
+        return true;
+    }
+    // Slow path, because `length` getter might be overriden
+    EtsMethod *lengthGetter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreArrayGetLength);
+    ASSERT(lengthGetter != nullptr);
+    Value args(GetCoreType());
+    Value resultLength = lengthGetter->GetPandaMethod()->Invoke(executionCtx->GetMT(), &args);
+    if (executionCtx->GetMT()->HasPendingException()) {
+        return false;
+    }
+    *result = resultLength.GetAs<EtsInt>();
+    return true;
+}
+
+bool EtsStdCoreArray::SetRef(EtsExecutionContext *executionCtx, size_t index, EtsObject *ref)
+{
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyStdCoreArray(executionCtx))) {
+        // Fast path, object is exactly `std.core.Array`
+        StdCoreArraySet(index, ref);
+    } else {
+        // Slow path, because `$_set` might be overriden
+        EtsMethod *setter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreArraySet);
+        ASSERT(setter != nullptr);
+        std::array args = {Value(GetCoreType()), Value(static_cast<EtsInt>(index)), Value(ref->GetCoreType())};
+        setter->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+    }
+    return !executionCtx->GetMT()->HasPendingException();
+}
+
+std::optional<EtsObject *> EtsStdCoreArray::GetRef(EtsExecutionContext *executionCtx, size_t index)
+{
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyStdCoreArray(executionCtx))) {
+        // Fast path, object is exactly `std.core.Array`
+        auto *obj = StdCoreArrayGet(index);
+        return executionCtx->GetMT()->HasPendingException() ? std::nullopt : std::optional<EtsObject *>(obj);
+    }
+    // Slow path, because `$_get` might be overriden
+    EtsMethod *getter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreArrayGet);
+    ASSERT(getter != nullptr);
+    std::array args = {Value(GetCoreType()), Value(static_cast<EtsInt>(index))};
+    Value result = getter->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+    if (executionCtx->GetMT()->HasPendingException()) {
+        return {};
+    }
+    return EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
+}
+
+EtsObject *EtsStdCoreArray::Pop(EtsExecutionContext *executionCtx)
+{
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyStdCoreArray(executionCtx))) {
+        // Fast path, object is exactly `std.core.Array`
+        return StdCoreArrayPop();
+    }
+
+    // Slow path, because `pop` might be overriden
+    auto *popMethod = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreArrayPop);
+    ASSERT(popMethod != nullptr);
+
+    Value arg(GetCoreType());
+    Value result = popMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), &arg);
+    if (executionCtx->GetMT()->HasPendingException()) {
+        return nullptr;
+    }
+    return EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
+}
+
+EtsObject *EtsStdCoreArray::StdCoreArrayPop()
+{
+    auto length = GetActualLengthFromStdCoreArrayImpl();
+    if (length == 0) {
+        return nullptr;
+    }
+    --length;
+
+    auto *underlyingBuffer = GetDataFromStdCoreArrayImpl();
+    auto ref = underlyingBuffer->Get(length);
+    underlyingBuffer->Set(length, nullptr);
+    SetActualLengthFromStdCoreArrayImpl(length);
+    return ref;
+}
+
+}  // namespace ark::ets

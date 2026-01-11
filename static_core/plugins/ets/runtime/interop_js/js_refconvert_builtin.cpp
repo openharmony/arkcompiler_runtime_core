@@ -213,7 +213,7 @@ private:
             {utf::CStringAsMutf8("toSpliced"), {"II[LY;:Lstd/core/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
-        wArray_ = RegisterClass(PlatformTypes()->escompatArray->GetDescriptor(), "Array", &W_ARRAY_OVERLOADS);
+        wArray_ = RegisterClass(PlatformTypes()->coreArray->GetDescriptor(), "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";
         wArray_->GetOverloadNameMapping()["pushArray"] = "push";
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
@@ -509,7 +509,7 @@ public:
         RegisterMap();
         RegisterSet();
 
-        RegisterClassWithLeafMatcher(PlatformTypes()->escompatArrayEntriesIteratorT->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreArrayEntriesIteratorT->GetDescriptor(), nullptr);
         RegisterClassWithLeafMatcher(PlatformTypes()->coreIteratorResult->GetDescriptor(), nullptr);
         RegisterClassWithLeafMatcher(PlatformTypes()->coreArrayKeysIterator->GetDescriptor(), nullptr);
         RegisterClassWithLeafMatcher(PlatformTypes()->coreArrayValuesIteratorT->GetDescriptor(), nullptr);

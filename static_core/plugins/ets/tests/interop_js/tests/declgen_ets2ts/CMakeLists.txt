@@ -118,8 +118,7 @@ function(create_declgen_ets2ts_test TARGET)
         "  \"compilerOptions\": {\n"
         "    \"baseUrl\": \"${PANDA_ROOT}\",\n"
         "    \"paths\": {\n"
-        "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"],\n"
-        "      \"escompat\": [\"${PANDA_ROOT}/plugins/ets/stdlib/escompat\"]\n"
+        "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"]\n"
         "    },\n"
         "    \"dependencies\": {\n"
         "${ARKTSCONFIG_CONTENT}"
@@ -272,7 +271,7 @@ function(create_declgen_ets2ts_test TARGET)
     # Execute compiled interop project
     # PACKAGE_NAME is not necessary for declgen_ets2ts_test,
     # but it is necessary for panda_ets_interop_js_test;
-    
+
     panda_ets_interop_js_test(${TARGET}
         ABC_FILE ${LIB_LINKED_ABC}
         JS_LAUNCHER ${ARG_TS_MAIN}

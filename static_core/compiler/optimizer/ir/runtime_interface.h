@@ -468,7 +468,7 @@ public:
         return false;
     }
 
-    virtual bool IsClassEscompatArray([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassStdCoreArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }

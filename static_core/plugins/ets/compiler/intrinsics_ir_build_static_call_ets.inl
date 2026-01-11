@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,7 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_UNSAFE_MEMORY_WRITE_STRING: {
     break;
 }
 
-case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_GET_BUFFER: {
-    Builder()->BuildEscompatArrayGetBufferIntrinsic(bcInst_, ACC_READ);
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_ARRAY_GET_BUFFER: {
+    Builder()->BuildCoreArrayGetBufferIntrinsic(bcInst_, ACC_READ);
     break;
 }

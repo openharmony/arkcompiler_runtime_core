@@ -25,7 +25,7 @@ class EtsPlatformTypes;
 class EtsPlatformTypesIrtocOffsets {
 public:
     // Class entry offsets:
-    static constexpr size_t ESCOMPAT_ARRAY = MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
+    static constexpr size_t CORE_ARRAY = MEMBER_OFFSET(EtsPlatformTypes, coreArray);
     static constexpr size_t CORE_LINE_STRING = MEMBER_OFFSET(EtsPlatformTypes, coreLineString);
     static constexpr size_t CORE_SLICED_STRING = MEMBER_OFFSET(EtsPlatformTypes, coreSlicedString);
     static constexpr size_t CORE_TREE_STRING = MEMBER_OFFSET(EtsPlatformTypes, coreTreeString);

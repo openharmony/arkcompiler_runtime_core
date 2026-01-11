@@ -32,7 +32,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/intrinsics/helpers/intrinsic_await_promise_impl.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"

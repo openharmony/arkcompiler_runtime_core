@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_EXEC_RESULT_H
-#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_EXEC_RESULT_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_EXEC_RESULT_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_EXEC_RESULT_H
 
 #include <map>
 #include <string>
@@ -36,4 +36,4 @@ struct RegExpExecResult {
 
 }  // namespace ark::ets::stdlib
 
-#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_ESCOMPAT_REGEXP_REGEXP_EXEC_RESULT_H
+#endif  // PANDA_PLUGINS_ETS_STDLIB_NATIVE_STD_CORE_REGEXP_REGEXP_EXEC_RESULT_H

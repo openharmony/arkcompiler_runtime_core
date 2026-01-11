@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1335,10 +1335,10 @@ class JSONWriter {
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
-            this.writeESCompatRecord(obj)
+            this.writeStdCoreRecord(obj)
         } else if (obj instanceof JsonReplacer) {
             let temp: Record<String, Any> = obj.jsonReplacer()
-            this.writeESCompatRecord(temp)
+            this.writeStdCoreRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
         } else if (obj instanceof JsonSerializable) {
@@ -1354,8 +1354,8 @@ class JSONWriter {
         } else if (obj instanceof Date) {
             this.writeObject(obj.toJSON())
         } else if (obj instanceof Array) {
-            this.writeEscompatArray(obj)
-        } else if(obj instanceof Int8Array || obj instanceof Int16Array || obj instanceof Int32Array
+            this.writeStdCoreArray(obj)
+        } else if (obj instanceof Int8Array || obj instanceof Int16Array || obj instanceof Int32Array
                 || obj instanceof Uint8Array || obj instanceof BigInt64Array || obj instanceof Uint16Array
                 || obj instanceof Uint32Array || obj instanceof Float32Array || obj instanceof Float64Array
                 || obj instanceof BigUint64Array || obj instanceof Uint8ClampedArray) {
@@ -1479,7 +1479,7 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeESCompatRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
+    private writeStdCoreRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
         const currentBuffer = this.buffer
         this.buffer = new StringBuilder('{')
 
@@ -1957,8 +1957,8 @@ class JSONWriter {
         this.buffer.append('}')
     }
 
-    private writeEscompatArray<T>(array: Array<T>): void {
-        this.buffer.append('[')
+    private writeStdCoreArray<T>(array: Array<T>): void {
+        this.buffer.append("[")
 
         if (this.useIndent) {
             this.buffer.append('\n')

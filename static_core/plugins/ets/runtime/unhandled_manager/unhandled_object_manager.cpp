@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -151,27 +151,27 @@ static PandaVector<EtsHandle<EtsObject>> TransformToVectorOfHandles(EtsExecution
 }
 
 template <typename T>
-static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsExecutionContext *executionCtx,
-                                                                   const PandaVector<EtsHandle<EtsObject>> &handles)
+static EtsHandle<EtsStdCoreArray> CreateEtsObjectArrayFromHandles(EtsExecutionContext *executionCtx,
+                                                                  const PandaVector<EtsHandle<EtsObject>> &handles)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     ASSERT(executionCtx != nullptr);
-    EtsHandle<EtsEscompatArray> arrayH(executionCtx, EtsEscompatArray::Create(executionCtx, handles.size()));
+    EtsHandle<EtsStdCoreArray> arrayH(executionCtx, EtsStdCoreArray::Create(executionCtx, handles.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
-        return EtsHandle<EtsEscompatArray>(executionCtx, nullptr);
+        return EtsHandle<EtsStdCoreArray>(executionCtx, nullptr);
     }
     size_t i = 0;
     for (auto hobj : handles) {
-        auto *objAndReason = EtsEscompatArray::Create(executionCtx, 2U);
+        auto *objAndReason = EtsStdCoreArray::Create(executionCtx, 2U);
         if (UNLIKELY(objAndReason == nullptr)) {
             ASSERT(executionCtx->GetMT()->HasPendingException());
-            return EtsHandle<EtsEscompatArray>(executionCtx, nullptr);
+            return EtsHandle<EtsStdCoreArray>(executionCtx, nullptr);
         }
-        objAndReason->EscompatArraySetUnsafe(0, T::FromEtsObject(hobj.GetPtr())->GetValue(executionCtx));
-        objAndReason->EscompatArraySetUnsafe(1, hobj.GetPtr());
+        objAndReason->StdCoreArraySetUnsafe(0, T::FromEtsObject(hobj.GetPtr())->GetValue(executionCtx));
+        objAndReason->StdCoreArraySetUnsafe(1, hobj.GetPtr());
 
-        arrayH->EscompatArraySetUnsafe(i, objAndReason);
+        arrayH->StdCoreArraySetUnsafe(i, objAndReason);
         ++i;
     }
     return arrayH;
@@ -179,7 +179,7 @@ static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsExecutionC
 
 template <typename T>
 static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
-                                    EtsHandle<EtsEscompatArray> &hobjects, DefaultHandlerMode handlerMode)
+                                    EtsHandle<EtsStdCoreArray> &hobjects, DefaultHandlerMode handlerMode)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();

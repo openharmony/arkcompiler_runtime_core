@@ -259,7 +259,6 @@ if (with_stdlib) {
         baseUrl = "."
         paths = {
           std = [ "../lib/stdlib/std" ]
-          escompat = [ "../lib/stdlib/escompat" ]
         }
       }
     }
@@ -284,8 +283,6 @@ if (with_stdlib) {
       "    \"baseUrl\": \"$abs_ark_root\",",
       "    \"paths\": {",
       "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
-      "      \"escompat\": [\"$abs_ark_root" +
-          "/plugins/ets/stdlib/escompat\"],",
       "      \"api\": [\"$abs_ark_root" + "/plugins/ets/sdk/api\"],",
       "      \"arkts\": [\"$abs_ark_root" + "/plugins/ets/sdk/arkts\"],",
       "      \"import_tests\": [\"$abs_ark_root" +

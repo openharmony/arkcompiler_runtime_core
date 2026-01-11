@@ -5,7 +5,6 @@
         "rootDir": "${CURRENT_SOURCE_DIR}",
         "cacheDir": "${DEFAULT_CACHE_DIR}",
         "paths": {
-       	    "escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
             "std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"]
         },
         "dependencies": {

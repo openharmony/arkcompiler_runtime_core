@@ -226,9 +226,9 @@ def GenerateTypedArraySetValuesFromArray(name, etype, stype, elm_size, mode)
     end
 
     # load the source Array params
-    source_array := get_object_pointer_imm(source, EtsConstants::ESCOMPAT_ARRAY_DATA_OFFSET)
+    source_array := get_object_pointer_imm(source, EtsConstants::STD_CORE_ARRAY_DATA_OFFSET)
     source_data := AddI(source_array).Imm(Constants::ARRAY_DATA_OFFSET).ptr
-    source_length := LoadI(source).Imm(EtsConstants::ESCOMPAT_ARRAY_ACTUAL_LENGTH_OFFSET).u32
+    source_length := LoadI(source).Imm(EtsConstants::STD_CORE_ARRAY_ACTUAL_LENGTH_OFFSET).u32
 
     # source.length == 0 - exit
     If(source_length, 0).EQ.Unlikely {

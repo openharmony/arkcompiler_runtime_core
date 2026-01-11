@@ -853,7 +853,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 
     auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
 
-    // NOTE(vpukhov): fatal no-public-fields check when escompat adopt accessors
+    // NOTE(vpukhov): fatal no-public-fields check when std adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {
         INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties"
                            << ". Error code: " << std::to_string(INTEROP_BUILTIN_CLASS_CONSTRAINT_VIOLATION);

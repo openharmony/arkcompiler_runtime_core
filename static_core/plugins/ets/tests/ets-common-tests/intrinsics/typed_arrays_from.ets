@@ -596,7 +596,7 @@ function testIU64FromArrayLikeNumber() {
 
 function checkException<Arr>(creator: () => Arr, empty: Arr): void {
     arktest.expectThrow(() => {creator();}, (e: Error) => {
-        const arrayClassName: string = (Type.of(empty) as ClassType).getName().substring('escompat.'.length);
+        const arrayClassName: string = (Type.of(empty) as ClassType).getName().substring('std.core.'.length);
         return e.message == arrayClassName + '.from: not implemented';
     });
 }

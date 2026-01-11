@@ -19,7 +19,7 @@
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 
 namespace ark::ets::interop::js {
 
@@ -194,10 +194,10 @@ static ObjectHeader **DoPackRestParameters(EtsExecutionContext *executionCtx, In
 {
     INTEROP_TRACE();
     if (!protoReader.GetClass()->IsArrayClass()) {
-        ASSERT(protoReader.GetClass() == PlatformTypes(executionCtx)->escompatArray->GetRuntimeClass());
+        ASSERT(protoReader.GetClass() == PlatformTypes(executionCtx)->coreArray->GetRuntimeClass());
         const size_t numRestParams = jsargv.size();
 
-        EtsHandle<EtsEscompatArray> restArgsArray(executionCtx, EtsEscompatArray::Create(executionCtx, numRestParams));
+        EtsHandle<EtsStdCoreArray> restArgsArray(executionCtx, EtsStdCoreArray::Create(executionCtx, numRestParams));
         if (UNLIKELY(restArgsArray.GetPtr() == nullptr)) {
             ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
@@ -205,7 +205,7 @@ static ObjectHeader **DoPackRestParameters(EtsExecutionContext *executionCtx, In
         for (uint32_t restArgIdx = 0; restArgIdx < numRestParams; ++restArgIdx) {
             auto jsVal = jsargv[restArgIdx];
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
-                restArgsArray->EscompatArraySetUnsafe(restArgIdx, EtsObject::FromCoreType(val));
+                restArgsArray->StdCoreArraySetUnsafe(restArgIdx, EtsObject::FromCoreType(val));
             };
             if (UNLIKELY(!ConvertRefArgToEts(ctx, PlatformTypes(executionCtx)->coreObject->GetRuntimeClass(), store,
                                              jsVal))) {

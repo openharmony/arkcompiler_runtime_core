@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 
 namespace ark::ets::ani {
 
@@ -96,10 +96,10 @@ public:
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
     }
 
-    EtsEscompatArray *ToInternalType(ani_array array)
+    EtsStdCoreArray *ToInternalType(ani_array array)
     {
         ASSERT(!IsNullishValue(array));
-        return reinterpret_cast<EtsEscompatArray *>(GetInternalType(array));
+        return reinterpret_cast<EtsStdCoreArray *>(GetInternalType(array));
     }
 
     EtsStdCoreArrayBuffer *ToInternalType(ani_arraybuffer arraybuffer)

@@ -55,7 +55,7 @@
 #include "plugins/ets/runtime/types/ets_error.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
@@ -906,7 +906,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
                                                 EtsAbcRuntimeLinker::FromEtsObject(EtsObject::Create(klass)));
     ASSERT(linkerHandle.GetPtr() != nullptr);
 
-    EtsHandle<EtsEscompatArray> pathsHandle(executionCtx, EtsEscompatArray::Create(executionCtx, abcFiles.size()));
+    EtsHandle<EtsStdCoreArray> pathsHandle(executionCtx, EtsStdCoreArray::Create(executionCtx, abcFiles.size()));
     for (size_t idx = 0; idx < abcFiles.size(); ++idx) {
         auto utf8Data = reinterpret_cast<const uint8_t *>(abcFiles[idx].data());
         auto *str = EtsString::CreateFromMUtf8(abcFiles[idx].data(), utf::MUtf8ToUtf16Size(utf8Data));
@@ -914,7 +914,7 @@ ClassLinkerContext *PandaEtsVM::CreateApplicationRuntimeLinker(const PandaVector
             // Handle possible OOM
             exceptionHandler();
         }
-        pathsHandle->EscompatArraySetUnsafe(idx, str->AsObject());
+        pathsHandle->StdCoreArraySetUnsafe(idx, str->AsObject());
     }
     std::array args {Value(linkerHandle->GetCoreType()), Value(nullptr), Value(pathsHandle->GetCoreType())};
 

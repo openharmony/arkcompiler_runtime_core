@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding=utf-8
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1417,7 +1417,6 @@ class ArktsconfigGenerator:
     def add_optional_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument("--std-path", required=False, default=None,
                         help="Path to the standard library")
-        parser.add_argument("--escompat-path", required=False, default=None, help="Path to the escompat library")
         parser.add_argument("--ets-arkts-path", required=False, nargs='+', default=[],
                             help="Path to the ets-arkts library")
         parser.add_argument("--ets-api-path", required=False, nargs='+', default=[],
@@ -1428,7 +1427,7 @@ class ArktsconfigGenerator:
                             help="Path to file containing list of files to process")
         parser.add_argument("--cache-path", type=str, default=None, help="Path to cache directory")
         parser.add_argument("--package", required=False, default="", help="Package name for the project")
-        
+
         parser.add_argument("--paths-keys", nargs="+", required=False, default=[],
                         help="List of keys for custom paths")
         parser.add_argument("--paths-values", nargs="+", required=False, default=[],
@@ -1449,8 +1448,6 @@ class ArktsconfigGenerator:
 
         if args.std_path:
             paths["std"] = [os.path.abspath(args.std_path)]
-        if args.escompat_path:
-            paths["escompat"] = [os.path.abspath(args.escompat_path)]
 
         paths_keys = args.paths_keys
         paths_values = args.paths_values

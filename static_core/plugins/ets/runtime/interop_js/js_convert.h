@@ -387,7 +387,7 @@ JSCONVERT_UNWRAP(ESError)
     if (UNLIKELY(etsObject == nullptr)) {
         return {};
     }
-    auto res = ctx->CreateETSCoreESError(executionCtx, etsObject);
+    auto res = ctx->CreateETSStdCoreESError(executionCtx, etsObject);
     if (UNLIKELY(res == nullptr)) {
         return {};
     }

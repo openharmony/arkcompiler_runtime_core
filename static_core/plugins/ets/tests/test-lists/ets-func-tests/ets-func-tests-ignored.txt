@@ -302,12 +302,12 @@ spec/import_export/05.export_directives/03.re-export_directives/to_export_2.ets
 spec/import_export/05.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 
 #21382 - fixed array -> T[] casts
-escompat/ArrayTest1.ets
-escompat/ArrayTest2.ets
-escompat/ArrayTest3.ets
-escompat/ArrayTest4.ets
-escompat/ArrayTest5.ets
-escompat/ArrayTest6.ets
+std/core/ArrayTest1.ets
+std/core/ArrayTest2.ets
+std/core/ArrayTest3.ets
+std/core/ArrayTest4.ets
+std/core/ArrayTest5.ets
+std/core/ArrayTest6.ets
 
 #21382 - instance method on primitive
 std/core/std_core_char_instance_Char_toUpperCase.ets
@@ -331,6 +331,6 @@ regression/15278_0.ets
 std/core/EAWorker_out_of_coro_creation.ets
 
 #31475
-escompat/DateTest.ets
+std/core/DateTest.ets
 std/concurrency/message_basic_interface.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets

@@ -15,7 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_COMPILER_ETS_COMPILER_INTERFACE_H
 #define PANDA_PLUGINS_ETS_COMPILER_ETS_COMPILER_INTERFACE_H
 
-virtual ClassPtr GetEscompatArrayClass() const
+virtual ClassPtr GetStdCoreArrayClass() const
 {
     return nullptr;
 }
@@ -25,7 +25,7 @@ virtual FieldPtr GetStdCoreArrayBuffer([[maybe_unused]] ClassPtr klass) const
     return nullptr;
 }
 
-virtual FieldPtr GetEscompatArrayActualLength([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetStdCoreArrayActualLength([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }

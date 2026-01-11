@@ -17,7 +17,7 @@
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 
 namespace ark::ets::intrinsics::helpers {
 
@@ -65,15 +65,15 @@ EtsString *CreateNewStringFromCharCode(EtsObjectArray *charCodes, size_t actualL
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
-EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
+EtsString *CreateNewStringFromCharCode(EtsStdCoreArray *charCodes)
 {
     ASSERT(charCodes != nullptr);
 
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    if (LIKELY(charCodes->IsExactlyEscompatArray(executionCtx))) {
+    if (LIKELY(charCodes->IsExactlyStdCoreArray(executionCtx))) {
         // Fast path, `charCodes` is exactly `std.core.Array`
-        return CreateNewStringFromCharCode(charCodes->GetDataFromEscompatArray(),
-                                           charCodes->GetActualLengthFromEscompatArray());
+        return CreateNewStringFromCharCode(charCodes->GetDataFromStdCoreArray(),
+                                           charCodes->GetActualLengthFromStdCoreArray());
     }
 
     [[maybe_unused]] EtsHandleScope scope(executionCtx);

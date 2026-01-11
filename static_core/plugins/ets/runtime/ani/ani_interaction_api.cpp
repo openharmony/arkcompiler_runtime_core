@@ -40,7 +40,7 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
-#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/execution/coroutines/coroutine_scopes.h"
 
@@ -941,12 +941,12 @@ NO_UB_SANITIZE static ani_status Array_New(ani_env *env, ani_size length, ani_re
 
     ScopedManagedCodeFix s(env);
     auto *executionCtx = s.GetExecutionContext();
-    auto *internalArray = EtsEscompatArray::Create(executionCtx, length);
+    auto *internalArray = EtsStdCoreArray::Create(executionCtx, length);
     ANI_CHECK_RETURN_IF_EQ(internalArray, nullptr, ANI_OUT_OF_MEMORY);
     if (length != 0 && !IsUndefined(initialElement)) {
         EtsObject *obj = s.ToInternalType(initialElement);
         for (ani_size i = 0; i < length; ++i) {
-            internalArray->EscompatArraySetUnsafe(i, obj);
+            internalArray->StdCoreArraySetUnsafe(i, obj);
         }
     }
     return s.AddLocalRef(internalArray->AsObject(), reinterpret_cast<ani_ref *>(result));
@@ -961,9 +961,9 @@ NO_UB_SANITIZE static ani_status Array_Set(ani_env *env, ani_array array, ani_si
     CHECK_PTR_ARG(ref);
 
     ScopedManagedCodeFix s(env);
-    EtsEscompatArray *escompatArray = s.ToInternalType(array);
+    EtsStdCoreArray *coreArray = s.ToInternalType(array);
     EtsObject *obj = s.ToInternalType(ref);
-    bool succeeded = escompatArray->SetRef(s.GetExecutionContext(), index, obj);
+    bool succeeded = coreArray->SetRef(s.GetExecutionContext(), index, obj);
     return succeeded ? ANI_OK : ANI_PENDING_ERROR;
 }
 
@@ -976,8 +976,8 @@ NO_UB_SANITIZE static ani_status Array_Get(ani_env *env, ani_array array, ani_si
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsEscompatArray *escompatArray = s.ToInternalType(array);
-    auto optObject = escompatArray->GetRef(s.GetExecutionContext(), index);
+    EtsStdCoreArray *stdCoreArray = s.ToInternalType(array);
+    auto optObject = stdCoreArray->GetRef(s.GetExecutionContext(), index);
     ANI_CHECK_RETURN_IF_EQ(optObject.has_value(), false, ANI_PENDING_ERROR);
     return s.AddLocalRef(*optObject, result);
 }
@@ -994,7 +994,7 @@ NO_UB_SANITIZE static ani_status Array_Push(ani_env *env, ani_array array, ani_r
     ani_value arg;
     arg.r = ref;
     ani_int ignored = 0;
-    return env->Object_CallMethod_Int_A(array, cache->escompat_Array_pushOne, &ignored, &arg);
+    return env->Object_CallMethod_Int_A(array, cache->std_core_Array_pushOne, &ignored, &arg);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1006,8 +1006,8 @@ NO_UB_SANITIZE static ani_status Array_Pop(ani_env *env, ani_array array, ani_re
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsEscompatArray *escompatArray = s.ToInternalType(array);
-    EtsObject *obj = escompatArray->Pop(s.GetExecutionContext());
+    EtsStdCoreArray *stdCoreArray = s.ToInternalType(array);
+    EtsObject *obj = stdCoreArray->Pop(s.GetExecutionContext());
     if (s.HasPendingException()) {
         return ANI_PENDING_ERROR;
     }

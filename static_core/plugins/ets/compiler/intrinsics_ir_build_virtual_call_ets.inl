@@ -1,5 +1,5 @@
     /**
-     * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+     * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
      * Licensed under the Apache License, Version 2.0 (the "License");
      * you may not use this file except in compliance with the License.
      * You may obtain a copy of the License at
@@ -29,12 +29,12 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
     Builder()->BuildStringIsEmptyIntrinsic(bcInst_, ACC_READ);
     break;
 }
-case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_GET_UNSAFE: {
-    Builder()->BuildEscompatArrayGetUnsafeIntrinsic(bcInst_, ACC_READ);
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_ARRAY_GET_UNSAFE: {
+    Builder()->BuildCoreArrayGetUnsafeIntrinsic(bcInst_, ACC_READ);
     break;
 }
-case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_ARRAY_SET_UNSAFE: {
-    Builder()->BuildEscompatArraySetUnsafeIntrinsic(bcInst_, ACC_READ);
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_ARRAY_SET_UNSAFE: {
+    Builder()->BuildCoreArraySetUnsafeIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_SET_INT:

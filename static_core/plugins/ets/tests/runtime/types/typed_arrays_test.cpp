@@ -194,7 +194,7 @@ constexpr auto GetContainsNaNFunction();
 template <>
 constexpr auto GetContainsNaNFunction<EtsDouble>()
 {
-    return [](EtsCoreTypedArray<EtsDouble> *arr, EtsInt pos) {
+    return [](EtsStdCoreTypedArray<EtsDouble> *arr, EtsInt pos) {
         return intrinsics::EtsStdCoreFloat64ArrayContainsNaN(static_cast<ark::ets::EtsStdCoreFloat64Array *>(arr), pos);
     };
 }
@@ -202,7 +202,7 @@ constexpr auto GetContainsNaNFunction<EtsDouble>()
 template <>
 constexpr auto GetContainsNaNFunction<EtsFloat>()
 {
-    return [](EtsCoreTypedArray<EtsFloat> *arr, EtsInt pos) {
+    return [](EtsStdCoreTypedArray<EtsFloat> *arr, EtsInt pos) {
         return intrinsics::EtsStdCoreFloat32ArrayContainsNaN(static_cast<ark::ets::EtsStdCoreFloat32Array *>(arr), pos);
     };
 }
@@ -261,9 +261,9 @@ protected:
     }
 
     template <typename Elem>
-    [[nodiscard]] EtsCoreTypedArray<Elem> *CreateTypedArray(std::initializer_list<Elem> values) const
+    [[nodiscard]] EtsStdCoreTypedArray<Elem> *CreateTypedArray(std::initializer_list<Elem> values) const
     {
-        using TypedArray = EtsCoreTypedArray<Elem>;
+        using TypedArray = EtsStdCoreTypedArray<Elem>;
         auto *arrayKlass = GetClassInManagedCode(GetTypedArrayClassName<Elem>());
         ASSERT(arrayKlass != nullptr);
         auto *array =

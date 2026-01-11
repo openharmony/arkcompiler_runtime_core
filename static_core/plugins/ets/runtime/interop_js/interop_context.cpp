@@ -491,7 +491,7 @@ bool InteropCtx::PushOntoFinalizationRegistry(EtsExecutionContext *executionCtx,
     return !executionCtx->GetMT()->HasPendingException();
 }
 
-EtsObject *InteropCtx::CreateETSCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject)
+EtsObject *InteropCtx::CreateETSStdCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject)
 {
     ASSERT_MANAGED_CODE();
     if (LIKELY(PlatformTypes(executionCtx)
@@ -542,7 +542,7 @@ void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, napi_value val
     auto env = ctx->GetJSEnv();
     if (IsUndefined(env, val)) {
         auto etsObj = JSValue::CreateUndefined(executionCtx, ctx)->AsObject();
-        EtsObject *esObj = ctx->CreateETSCoreESError(executionCtx, etsObj);
+        EtsObject *esObj = ctx->CreateETSStdCoreESError(executionCtx, etsObj);
         executionCtx->GetMT()->SetException(esObj->GetCoreType());
         return;
     }

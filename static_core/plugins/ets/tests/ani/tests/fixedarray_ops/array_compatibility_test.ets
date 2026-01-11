@@ -21,7 +21,7 @@ function getArray(): int[] {
     return a
 }
 
-function getEscompatArray(): Array<int> {
+function getStdCoreArray(): Array<int> {
     let a: int[] = Array.create<int>(5, 0)
     return a
 }

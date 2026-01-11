@@ -27,7 +27,7 @@
 .record dump_test.Worker <ets.abstract, ets.interface, ets.extends=std.core.Object, access.record=public> {
 }
 
-.record escompat.Array <external>
+.record std.core.Array <external>
 
 .record std.core.Error <external>
 
@@ -73,19 +73,19 @@ jump_label_0:
 	starr.obj v1, v2
 	lenarr v1
 	sta v2
-	initobj.short escompat.Array._ctor_:(escompat.Array,i32), v2
+	initobj.short std.core.Array._ctor_:(std.core.Array,i32), v2
 	sta.obj v2
 jump_label_2:
 	lenarr v1
 	jle v0, jump_label_1
 	lda v0
 	ldarr.obj v1
-	call.virt.acc escompat.Array.$_set:(escompat.Array,i32,std.core.Object), v2, v0, v0, 0x2
+	call.virt.acc std.core.Array.$_set:(std.core.Array,i32,std.core.Object), v2, v0, v0, 0x2
 	inci v0, 0x1
 	jmp jump_label_2
 jump_label_1:
 	call.short dump_test.ETSGLOBAL.noisyBranch:(f64), a0
-	call.acc.short dump_test.ETSGLOBAL.runPolymorphic:(escompat.Array,f64), v2, 0x1
+	call.acc.short dump_test.ETSGLOBAL.runPolymorphic:(std.core.Array,f64), v2, 0x1
 	return.64
 }
 
@@ -109,18 +109,18 @@ handler_begin_label_0_0:
 	starr.obj v3, v4
 	lenarr v3
 	sta v0
-	initobj.short escompat.Array._ctor_:(escompat.Array,i32), v0
+	initobj.short std.core.Array._ctor_:(std.core.Array,i32), v0
 	sta.obj v0
 jump_label_5:
 	lenarr v3
 	jle v1, jump_label_4
 	lda v1
 	ldarr.obj v3
-	call.virt.acc escompat.Array.$_set:(escompat.Array,i32,std.core.Object), v0, v1, v0, 0x2
+	call.virt.acc std.core.Array.$_set:(std.core.Array,i32,std.core.Object), v0, v1, v0, 0x2
 	inci v1, 0x1
 	jmp jump_label_5
 jump_label_4:
-	call.short std.core.Console.log:(std.core.Console,escompat.Array), v2, v0
+	call.short std.core.Console.log:(std.core.Console,std.core.Array), v2, v0
 jump_label_3:
 	return.void
 
@@ -169,7 +169,7 @@ jump_label_2:
 .catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
-.function f64 dump_test.ETSGLOBAL.runPolymorphic(escompat.Array a0, f64 a1) <static, access.function=public> {
+.function f64 dump_test.ETSGLOBAL.runPolymorphic(std.core.Array a0, f64 a1) <static, access.function=public> {
 	movi v0, 0x0
 	mov v1, v0
 	mov v2, v0
@@ -180,10 +180,10 @@ jump_label_2:
 	lda.64 a1
 	fcmpl.64 v3
 	jlez jump_label_0
-	call.virt.short escompat.Array.%%get-length:(escompat.Array), a0
+	call.virt.short std.core.Array.%%get-length:(std.core.Array), a0
 	sta v3
 	mod v2, v3
-	call.virt.acc.short escompat.Array.$_get:(escompat.Array,i32), a0, 0x1
+	call.virt.acc.short std.core.Array.$_get:(std.core.Array,i32), a0, 0x1
 	sta.obj v3
 	jeqz.obj jump_label_1
 	lda.obj v3
@@ -236,16 +236,16 @@ jump_label_0:
 
 .function f64 dump_test.Worker.process(dump_test.Worker a0, f64 a1) <ets.abstract, noimpl, access.function=public>
 
-.function std.core.Object escompat.Array.$_get(escompat.Array a0, i32 a1) <native, external, access.function=public>
+.function std.core.Object std.core.Array.$_get(std.core.Array a0, i32 a1) <native, external, access.function=public>
 
-.function void escompat.Array.$_set(escompat.Array a0, i32 a1, std.core.Object a2) <native, external, access.function=public>
+.function void std.core.Array.$_set(std.core.Array a0, i32 a1, std.core.Object a2) <native, external, access.function=public>
 
-.function i32 escompat.Array.%%get-length(escompat.Array a0) <external, access.function=public>
+.function i32 std.core.Array.%%get-length(std.core.Array a0) <external, access.function=public>
 
-.function void escompat.Array._ctor_(escompat.Array a0, i32 a1) <ctor, external, access.function=public>
+.function void std.core.Array._ctor_(std.core.Array a0, i32 a1) <ctor, external, access.function=public>
 
 .function void std.core.Error._ctor_(std.core.Error a0, std.core.String a1) <ctor, external, access.function=public>
 
-.function void std.core.Console.log(std.core.Console a0, escompat.Array a1) <varargs, external, access.function=public>
+.function void std.core.Console.log(std.core.Console a0, std.core.Array a1) <varargs, external, access.function=public>
 
 .function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>

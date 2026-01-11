@@ -30,28 +30,28 @@ TEST_F(CompatibilityTest, SetShortArrayRegionErrorTests)
 
     const auto managedArray =
         static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getArray"));
-    const auto escompatArray =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getEscompatArray"));
+    const auto coreArray =
+        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getStdCoreArray"));
 
     // Compare that int[] and FixedArray which is created in FixedArray_New_Int function is the same type
     // It would fail when frontend and spec would begin to match each other
     ScopedManagedCodeFix s(env_);
     const EtsPlatformTypes *platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
-    Class *arrayClass = platformTypes->escompatArray->GetRuntimeClass();
+    Class *arrayClass = platformTypes->coreArray->GetRuntimeClass();
     EtsObject *objArray = s.ToInternalType(reinterpret_cast<ani_object>(array));
     EtsObject *managedObjArray = s.ToInternalType(reinterpret_cast<ani_object>(managedArray));
-    EtsObject *escompatObjArray = s.ToInternalType(reinterpret_cast<ani_object>(escompatArray));
+    EtsObject *coreObjArray = s.ToInternalType(reinterpret_cast<ani_object>(coreArray));
 
     ASSERT_NE(managedObjArray->GetClass()->GetRuntimeClass(), objArray->GetClass()->GetRuntimeClass());
     ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), arrayClass);
-    ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
+    ASSERT_EQ(managedObjArray->GetClass()->GetRuntimeClass(), coreObjArray->GetClass()->GetRuntimeClass());
 
     // Next asserts will not fail, but Array_New_Type implementation should be adapted and assert shoul be inversed
     ASSERT_NE(arrayClass, objArray->GetClass()->GetRuntimeClass());
-    ASSERT_NE(objArray->GetClass()->GetRuntimeClass(), escompatObjArray->GetClass()->GetRuntimeClass());
+    ASSERT_NE(objArray->GetClass()->GetRuntimeClass(), coreObjArray->GetClass()->GetRuntimeClass());
 
     // Next assert should not change
-    ASSERT_EQ(arrayClass, escompatObjArray->GetClass()->GetRuntimeClass());
+    ASSERT_EQ(arrayClass, coreObjArray->GetClass()->GetRuntimeClass());
 }
 
 }  // namespace ark::ets::ani::testing

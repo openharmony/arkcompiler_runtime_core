@@ -48,7 +48,6 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
     Chapters:
       - `all`
       - `algorithms-dir`
-      - `escompat-dir`
       - `regression-dir`
       - `spec-dir`
       - `std-containers-dir`

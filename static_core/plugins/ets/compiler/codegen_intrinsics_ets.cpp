@@ -122,9 +122,9 @@ void Codegen::CreateArrayCopyTo(IntrinsicInst *inst, [[maybe_unused]] Reg dst, S
                  srcEnd);
 }
 
-void Codegen::CreateEscompatArrayIsPlatformArray(IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateStdCoreArrayIsPlatformArray(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    CallFastPath(inst, EntrypointId::ESCOMPAT_ARRAY_IS_PLATFORM_ARRAY_FAST, dst, {}, src[FIRST_OPERAND]);
+    CallFastPath(inst, EntrypointId::STD_CORE_ARRAY_IS_PLATFORM_ARRAY_FAST, dst, {}, src[FIRST_OPERAND]);
 }
 
 static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::BarrierType barrierType)
@@ -132,15 +132,15 @@ static RuntimeInterface::EntrypointId GetArrayFastReverseEntrypointId(mem::Barri
     using EntrypointId = RuntimeInterface::EntrypointId;
     switch (barrierType) {
         case mem::BarrierType::POST_CMC_WRITE_BARRIER:  // CMC GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_HYBRID;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_HYBRID;
         case mem::BarrierType::POST_INTERREGION_BARRIER:  // G1 GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_ASYNC;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_ASYNC;
         default:  // STW GC
-            return EntrypointId::ESCOMPAT_ARRAY_REVERSE_SYNC;
+            return EntrypointId::STD_CORE_ARRAY_REVERSE_SYNC;
     }
 }
 
-void Codegen::CreateEscompatArrayReverse(IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateStdCoreArrayReverse(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
 
@@ -154,7 +154,7 @@ void Codegen::CreateEscompatArrayReverse(IntrinsicInst *inst, Reg dst, SRCREGS s
     enc_->EncodeJump(labelEnd);
 
     enc_->BindLabel(labelSlowPath);
-    static constexpr auto SLOW_PATH_ENTRYPOINT_ID = EntrypointId::ESCOMPAT_ARRAY_REVERSE;
+    static constexpr auto SLOW_PATH_ENTRYPOINT_ID = EntrypointId::STD_CORE_ARRAY_REVERSE;
     CallRuntime(inst, SLOW_PATH_ENTRYPOINT_ID, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
     enc_->BindLabel(labelEnd);
 }

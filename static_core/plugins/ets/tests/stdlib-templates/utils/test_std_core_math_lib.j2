@@ -15,8 +15,8 @@
 
 import {doubleNaN, doubleInf, doubleNegInf, doubleEpsilon, PI, E, SQRT1_2} from "std/math/consts";
 {%- for test_name, test_data in item.method_test_index_data.items() %}
-{% include 'utils/test_function_template_escompat.j2' with context %}
+{% include 'utils/test_function_template_std_core.j2' with context %}
 {%endfor %}
-{% include 'utils/test_main_function_escompat.j2' with context %}
+{% include 'utils/test_main_function_std_core.j2' with context %}
 {% include 'utils/test_check_test_float_result.j2' with context %}
-  
+

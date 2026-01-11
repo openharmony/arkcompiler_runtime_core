@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,12 @@ struct StdlibCache {
     ani_module std_core;
     ani_class std_core_String_Builder;
     ani_class std_core_Console;
-    ani_class escompat_Array;
+    ani_class std_core_Array;
     ani_method std_core_Console_error;
     ani_method std_core_String_Builder_default_ctor;
     ani_method std_core_String_Builder_append;
     ani_method std_core_String_Builder_toString;
-    ani_method escompat_Array_pushOne;
+    ani_method std_core_Array_pushOne;
     ani_variable std_core_console;
     // NOLINTEND(readability-identifier-naming)
 };

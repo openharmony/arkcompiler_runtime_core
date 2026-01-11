@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,13 +34,13 @@ function buildVal(key: KeyType, suffix: string = ""): ValType {
 function setMap(map: TestMap, from: int, to: int, suffix: string = "") {
     for (let key = from; key <= to; ++key) {
         map.set(key, buildVal(key))
-    }        
+    }
 }
 
 function setArray(arr: InitArray, from: int, to: int, suffix: string = "") {
     for (let key = from; key <= to; ++key) {
         arr.push([key, buildVal(key)])
-    }        
+    }
 }
 
 function check(key: KeyType, val: ValType): boolean {
@@ -241,10 +241,10 @@ function testMultipleDeleteForEach_0(init_qty: int, step: int, res_qty: int): vo
     map.forEach((v, k, map) => {
         ++cnt
         if (cnt <= step) {
-            arktest.assertEQ(k, cnt) 
+            arktest.assertEQ(k, cnt)
             arktest.assertEQ(v, buildVal(k))
         }
-        
+
         if (cnt === step) {
             for (let kk: int = 1; kk <= init_qty; ++kk) {
                 if (kk % 100 != 0)
@@ -253,8 +253,8 @@ function testMultipleDeleteForEach_0(init_qty: int, step: int, res_qty: int): vo
         }
 
         if (cnt > step) {
-            arktest.assertEQ(k % 100, 0) 
-            arktest.assertEQ(v, buildVal(k)) 
+            arktest.assertEQ(k % 100, 0)
+            arktest.assertEQ(v, buildVal(k))
         }
     });
     arktest.assertEQ(cnt, res_qty, "testMultipleDeleteForEach_0(" + init_qty + ", " + step + ", " + res_qty + ")")
@@ -311,29 +311,29 @@ function testSetAfterEnd() {
     map1.set(1, buildVal(1))
     let iter1 = map1.keys()
     let next1_1 = iter1.next()
-    arktest.assertEQ(next1_1.value, 1.0) 
-    arktest.assertFalse(next1_1.done) 
+    arktest.assertEQ(next1_1.value, 1.0)
+    arktest.assertFalse(next1_1.done)
     map1.set(2, buildVal(2))
     let next1_2 = iter1.next()
-    arktest.assertEQ(next1_2.value, 2.0) 
-    arktest.assertFalse(next1_2.done) 
+    arktest.assertEQ(next1_2.value, 2.0)
+    arktest.assertFalse(next1_2.done)
     let next1_3 = iter1.next()
-    arktest.assertEQ(next1_3.value, undefined) 
-    arktest.assertTrue(next1_3.done) 
+    arktest.assertEQ(next1_3.value, undefined)
+    arktest.assertTrue(next1_3.done)
 
     let map2 = new TestMap()
     map2.set(1, buildVal(1))
     let iter2 = map2.keys()
     let next2_1 = iter2.next()
-    arktest.assertEQ(next2_1.value, 1.0) 
-    arktest.assertFalse(next2_1.done) 
+    arktest.assertEQ(next2_1.value, 1.0)
+    arktest.assertFalse(next2_1.done)
     let next2_2 = iter2.next()
-    arktest.assertEQ(next2_2.value, undefined) 
-    arktest.assertTrue(next2_2.done) 
+    arktest.assertEQ(next2_2.value, undefined)
+    arktest.assertTrue(next2_2.done)
     map2.set(2, buildVal(2))
     let next2_3 = iter2.next()
-    arktest.assertEQ(next2_3.value, undefined) 
-    arktest.assertTrue(next2_3.done) 
+    arktest.assertEQ(next2_3.value, undefined)
+    arktest.assertTrue(next2_3.done)
 }
 
 ////////////////////////////////////////////////////////////////
@@ -373,7 +373,7 @@ function testHashLong_0(key: long, res_idx: int): void {
 
 function testHash() {
     // NOTE: verifies the behavior of the bucket index calculation algorithm in the
-    // scenario where Runtime.getHashCodeByValue() (EtsEscompatMap::GetHashCode())
+    // scenario where Runtime.getHashCodeByValue() (EtsStdCoreMap::GetHashCode())
     // returns a 64-bit signed hash code
     testHashInt_0( 0, 0)
     testHashInt_0( -3, 3)
