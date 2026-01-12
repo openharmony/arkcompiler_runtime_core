@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -274,7 +274,9 @@ private:
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
+    void FullPromotion(const CollectionSet &collectibleRegions);
     void FastYoungMark(const CollectionSet &collectibleRegions);
+    void EnqueueAllYoungCards(const CollectionSet &collectibleRegions);
 
     template <typename Marker, typename Predicate>
     GCRootVisitor CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker, const Predicate &refPred);

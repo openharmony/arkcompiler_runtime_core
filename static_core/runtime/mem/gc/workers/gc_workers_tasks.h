@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,16 +178,16 @@ public:
 
 class GCMarkWholeRegionTask : public GCWorkersTask {
 public:
-    using Info = std::pair<Region *, PandaDeque<ObjectHeader *> *>;
-
-    explicit GCMarkWholeRegionTask(Info *info) : GCWorkersTask(GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION, info) {}
+    explicit GCMarkWholeRegionTask(Region *region) : GCWorkersTask(GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION, region)
+    {
+    }
     DEFAULT_COPY_SEMANTIC(GCMarkWholeRegionTask);
     DEFAULT_MOVE_SEMANTIC(GCMarkWholeRegionTask);
     ~GCMarkWholeRegionTask() = default;
 
-    Info GetInfo() const
+    Region *GetRegion() const
     {
-        return *static_cast<const Info *>(storage_);
+        return static_cast<Region *>(storage_);
     }
 };
 

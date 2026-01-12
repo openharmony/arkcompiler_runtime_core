@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,14 @@ void CardTable::ClearCards(CardPtr start, size_t cardCount)
     ASSERT(err == EOK);
 }
 
+void CardTable::MarkCards(CardPtr start, size_t cardCount)
+{
+    static_assert(sizeof(Card) == sizeof(uint8_t));
+    [[maybe_unused]] auto err =
+        memset_s(reinterpret_cast<uint8_t *>(start), cardsCount_, Card::GetMarkedValue(), cardCount);
+    ASSERT(err == EOK);
+}
+
 bool CardTable::IsMarked(uintptr_t addr) const
 {
     CardPtr card = GetCardPtr(addr);
@@ -104,6 +112,14 @@ void CardTable::ClearCardRange(uintptr_t beginAddr, uintptr_t endAddr)
     size_t cardsCount = (endAddr - beginAddr) / CARD_SIZE;
     CardPtr start = GetCardPtr(beginAddr);
     ClearCards(start, cardsCount);
+}
+
+void CardTable::MarkCardRange(uintptr_t beginAddr, uintptr_t endAddr)
+{
+    ASSERT((beginAddr - minAddress_) % CARD_SIZE == 0);
+    size_t cardsCount = (endAddr - beginAddr) / CARD_SIZE;
+    CardPtr start = GetCardPtr(beginAddr);
+    MarkCards(start, cardsCount);
 }
 
 uintptr_t CardTable::GetCardStartAddress(CardPtr card) const
