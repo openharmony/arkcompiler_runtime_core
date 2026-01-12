@@ -53,7 +53,7 @@ The syntax of *ambient declaration* is presented below:
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantDeclaration
+        ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | explicitFunctionOverload
         | ambientClassDeclaration
@@ -95,35 +95,36 @@ context that is already ambient:
 
 |
 
-.. _Ambient Constant Declarations:
+.. _Ambient Constant or Variable Declarations:
 
-Ambient Constant Declarations
-*****************************
+Ambient Constant or Variable Declarations
+*****************************************
 
 .. meta:
     frontend_status: Done
 
-The syntax of *ambient constant declaration* is presented below:
+The syntax of *ambient constant or variable declaration* is presented below:
 
 .. code-block:: abnf
 
-    ambientConstantDeclaration:
-        'const' ambientConstList ';'
+    ambientConstantOrVariableDeclaration:
+        'const'|'let' ambientConstantOrVariableList ';'
         ;
 
-    ambientConstList:
-        ambientConst (',' ambientConst)*
+    ambientConstantOrVariableList:
+        ambientConstantOrVariable (',' ambientConstantOrVariable)*
         ;
 
-    ambientConst:
+    ambientConstantOrVariable:
         identifier ':' type
         ;
 
 .. index::
    ambient constant
+   ambient variable
    constant declaration
+   variable declaration
    declaration
-   ambient constant
    non-ambient declaration
 
 |
@@ -650,7 +651,7 @@ The syntax of *ambient namespace declaration* is presented below:
 
     ambientNamespaceElementDeclaration:
         'export'?
-        ( ambientConstantDeclaration
+        ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration

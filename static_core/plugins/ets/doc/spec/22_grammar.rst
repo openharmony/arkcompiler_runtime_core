@@ -849,7 +849,7 @@ Grammar Summary
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantDeclaration
+        ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
@@ -861,15 +861,15 @@ Grammar Summary
         )
         ;
 
-    ambientConstantDeclaration:
-        'const' ambientConstList ';'
+    ambientConstantOrVariableDeclaration:
+        'const'|'let' ambientConstantOrVariableList ';'
         ;
 
-    ambientConstList:
-        ambientConst (',' ambientConst)*
+    ambientConstantOrVariableList:
+        ambientConstantOrVariable (',' ambientConstantOrVariable)*
         ;
 
-    ambientConst:
+    ambientConstantOrVariable:
         identifier ':' type
         ;
 
