@@ -760,7 +760,7 @@ void G1GC<LanguageConfig>::StartGCCollection(ark::GCTask &task)
             task.collectionType = GCCollectionType::FULL;
             RunFullGC(task);
         } else {
-            fullCollectionSetPromotion_ = this->GetFastGCFlag();
+            EnableFullPromotionIfNeeded();
             TryRunMixedGC(task);
         }
 
@@ -1491,6 +1491,18 @@ void G1GC<LanguageConfig>::ResetRegionAfterMixedGC()
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::EnableFullPromotionIfNeeded()
+{
+    fullCollectionSetPromotion_ = this->GetFastGCFlag();
+    for (auto *r : this->GetG1ObjectAllocator()->GetYoungRegions()) {
+        if (r->HasPinnedObjects()) {
+            fullCollectionSetPromotion_ = true;
+            break;
+        }
+    }
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::FullPromotion(const CollectionSet &collectibleRegions)
 {
     FastYoungMark(collectibleRegions);
@@ -1548,12 +1560,6 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
 
     if (!this->GetPandaVm()->SupportGCSinglePassCompaction()) {
         return false;
-    }
-
-    for (auto *region : collectionSet_) {
-        if (region->HasPinnedObjects()) {
-            return false;
-        }
     }
 
     return true;
