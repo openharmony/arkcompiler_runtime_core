@@ -18,6 +18,8 @@ desc: >-
     A constructor body can have no more than one call to the current
     class or direct superclass constructor
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0201: Call to 'super' must be first statement in constructor
 ---*/
 
 class A {

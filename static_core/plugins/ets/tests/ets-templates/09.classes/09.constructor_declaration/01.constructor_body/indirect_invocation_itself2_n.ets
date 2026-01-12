@@ -14,19 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: If the compiler detects a circular reference, then a compile-time error occurs.
+desc: Indirect invocation itself.
+assert: >-
+    It is a compile-time error for a constructor to directly or indirectly invoke itself through a series of one or
+    more explicit constructor invocations involving this.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0309: Recursive constructor invocation
 ---*/
 
 class A {
-    public str: string
+    public x: int;
 
-    constructor() {
-        this('')
+    public constructor(a: int) {
+        this(5, 5)
     }
 
-    constructor(s: string) {
-        this()  // CTE: circular ref
-        this.str = s
+    public constructor(a: int, b : int) {
+        this(b);
     }
 }

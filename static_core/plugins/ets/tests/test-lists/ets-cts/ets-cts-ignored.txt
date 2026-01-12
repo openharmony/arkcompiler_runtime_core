@@ -825,31 +825,31 @@
 09.classes/09.constructor_declaration/01.formal_parameters/cons_parameters_gen_20.ets
 
 #28693 CTE when a call to `super` is not the first statement
-09.classes/09.constructor_declaration/02.constructor_body/spec_example1.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary02.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/primary04.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary01.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary03.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary05.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary07.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init20.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init21.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init22.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init23.ets
-09.classes/09.constructor_declaration/02.constructor_body/check_fld_init24.ets
+09.classes/09.constructor_declaration/01.constructor_body/spec_example1.ets
+09.classes/09.constructor_declaration/01.constructor_body/primary01.ets
+09.classes/09.constructor_declaration/01.constructor_body/primary02.ets
+09.classes/09.constructor_declaration/01.constructor_body/primary03.ets
+09.classes/09.constructor_declaration/01.constructor_body/primary04.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary01.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary03.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary05.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary07.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init20.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init21.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init22.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init23.ets
+09.classes/09.constructor_declaration/01.constructor_body/check_fld_init24.ets
 
 #28235 Constructor Names not yet work
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_same_class1.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary02.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary04.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary06.ets
-09.classes/09.constructor_declaration/02.constructor_body/secondary08.ets
-09.classes/09.constructor_declaration/02.constructor_body/spec_example2.ets
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass06.ets
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass08.ets
-09.classes/09.constructor_declaration/02.constructor_body/invocation_another_constructor_of_superclass10.ets
+09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_same_class1.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary02.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary04.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary06.ets
+09.classes/09.constructor_declaration/01.constructor_body/secondary08.ets
+09.classes/09.constructor_declaration/01.constructor_body/spec_example2.ets
+09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass06.ets
+09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass08.ets
+09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass10.ets
 
 #28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/03.explicit_constructor_call/this_constructor.ets
@@ -1702,6 +1702,16 @@
 15.semantic_rules/10.overloading/first_match/first_match_2c_2i_7.ets
 15.semantic_rules/10.overloading/first_match/first_match_2c_2i_8.ets
 
+#32438 es2panda aborts on unknown name in arguments
+15.semantic_rules/10.overloading/01.overload_resolution/constructor/undef_ref_n_0.ets
+15.semantic_rules/10.overloading/01.overload_resolution/constructor/undef_ref_n_1.ets
+15.semantic_rules/10.overloading/01.overload_resolution/function/undef_ref_n_0.ets
+15.semantic_rules/10.overloading/01.overload_resolution/function/undef_ref_n_1.ets
+15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_0.ets
+15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_1.ets
+15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_2.ets
+15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_3.ets
+
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 15.semantic_rules/11.type_erasure/instanceof_negative_0.ets
 15.semantic_rules/11.type_erasure/instanceof_negative_1.ets
@@ -2296,7 +2306,7 @@
 #30508
 17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_10.ets
 
-#28235
+#28235 Constructor Names not yet work
 17.experimental_features/11.classes_experimental/03.constructor_names/ConstructorNameOverload.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/ShortFormCall_0.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/ShortFormCall_1.ets
@@ -2309,6 +2319,11 @@
 17.experimental_features/11.classes_experimental/03.constructor_names/use_this_from_name.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Bad_0.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/SpecExample1_Bad_1.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/circular_reference1_n.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/circular_reference2_n.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/super_multicall_n.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/super_this_call_n.ets
+17.experimental_features/11.classes_experimental/03.constructor_names/this_multicall_n.ets
 
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets

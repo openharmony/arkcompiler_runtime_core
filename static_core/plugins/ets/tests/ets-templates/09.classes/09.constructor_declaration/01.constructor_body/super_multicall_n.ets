@@ -14,21 +14,30 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Indirect invocation itself.
-assert: >-
-    It is a compile-time error for a constructor to directly or indirectly invoke itself through a series of one or
-    more explicit constructor invocations involving this.
+desc: >-
+    A constructor body can have no more than one call to the current
+    class or direct superclass constructor
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0201: Call to 'super' must be first statement in constructor
 ---*/
 
 class A {
-    public x: int;
+    public i: int
+    public s: string
 
-    public constructor(a: int) {
-        this(5, 5)
+    public constructor (i: int) {
+        this.i = i
     }
 
-    public constructor(a: int, b : int) {
-        this(b);
+    public constructor (s: string) {
+        this.s = s
+    }
+}
+
+class B extends A {
+    public constructor() {
+        super(123)
+        super("Just a test") // CTE: second call to superconstructor
     }
 }

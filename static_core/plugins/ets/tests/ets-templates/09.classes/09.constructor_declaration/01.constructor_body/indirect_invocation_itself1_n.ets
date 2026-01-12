@@ -19,6 +19,9 @@ assert: >-
     It is a compile-time error for a constructor to directly or indirectly invoke itself through a series of one or
     more explicit constructor invocations involving this.
 tags: [compile-only, negative]
+expected_out: |-
+    Semantic error ESE0087: Property 'twoArgs' does not exist on type 'A'
+    Semantic error ESE0087: Property 'oneArg' does not exist on type 'A'
 ---*/
 
 class A {
