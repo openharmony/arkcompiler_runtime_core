@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,18 @@ function getObject(): Object {
     return "Hello World!"
 }
 
+function GetDoubleNaN(): Object { 
+    let x: double = NaN; return x; 
+}
+
+function GetFloatNaN(): Object { 
+    let x: float = Double.toFloat(NaN); return x; 
+}
+
+function GetObjectNaN(): Object { 
+    let x: object = NaN; return x; 
+}
+
 native function areReferencesStrictEqual(lhs: Object | null | undefined, rhs: Object | null | undefined): boolean
 
 export function checkNullishValuesStrictEquality(): boolean {
@@ -37,5 +49,9 @@ export function checkNullishValuesStrictEquality(): boolean {
         areReferencesStrictEqual("", "") &&
         !areReferencesStrictEqual(1, "") &&
         !areReferencesStrictEqual(1, 2) &&
-        areReferencesStrictEqual(1, 1)
+        areReferencesStrictEqual(1, 1) &&
+        !areReferencesStrictEqual(GetDoubleNaN(), GetDoubleNaN()) &&
+        !areReferencesStrictEqual(GetFloatNaN(), GetFloatNaN()) &&
+        !areReferencesStrictEqual(GetObjectNaN(), GetObjectNaN()) &&
+        !areReferencesStrictEqual(GetDoubleNaN(), undefined)
 }

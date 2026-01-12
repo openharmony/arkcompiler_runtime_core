@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,6 +214,48 @@ TEST_F(ReferenceEqualsTest, CheckEqualityWithNullishValues)
     ASSERT_EQ(hasPendingError, ANI_FALSE);
 
     ASSERT_EQ(isCorrect, ANI_TRUE);
+}
+
+TEST_F(ReferenceEqualsTest, ptr_equal_double_nan_is_false)
+{
+    auto dnan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetDoubleNaN");
+    ani_boolean isEquals = ANI_TRUE;
+    ASSERT_EQ(env_->Reference_Equals(dnan, dnan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
+}
+
+TEST_F(ReferenceEqualsTest, ptr_equal_float_nan_is_false)
+{
+    auto fnan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetFloatNaN");
+    ani_boolean isEquals = ANI_TRUE;
+    ASSERT_EQ(env_->Reference_Equals(fnan, fnan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
+}
+
+TEST_F(ReferenceEqualsTest, ptr_equal_object_nan_is_false)
+{
+    auto onan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetObjectNaN");
+    ani_boolean isEquals = ANI_TRUE;
+    ASSERT_EQ(env_->Reference_Equals(onan, onan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
+}
+
+TEST_F(ReferenceEqualsTest, ptr_equal_double_value_is_true)
+{
+    auto d42 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetDouble42");
+    ani_boolean isEquals = ANI_FALSE;
+    ASSERT_EQ(env_->Reference_Equals(d42, d42, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
+}
+
+TEST_F(ReferenceEqualsTest, non_ptr_equal_double_same_value_is_true)
+{
+    auto d1 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetDouble42");
+    auto d2 = CallEtsFunction<ani_ref>(MODULE_NAME, "GetDouble42");
+    ani_boolean isEquals = ANI_FALSE;
+    ASSERT_NE(d1, d2);
+    ASSERT_EQ(env_->Reference_Equals(d1, d2, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_TRUE);
 }
 
 }  // namespace ark::ets::ani::testing

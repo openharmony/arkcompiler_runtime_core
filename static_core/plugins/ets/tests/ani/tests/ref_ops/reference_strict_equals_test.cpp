@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,30 @@ TEST_F(ReferenceStrictEqualsTest, CheckStrictEqualityWithNullishValues)
     ASSERT_EQ(hasPendingError, ANI_FALSE);
 
     ASSERT_EQ(isCorrect, ANI_TRUE);
+}
+
+TEST_F(ReferenceStrictEqualsTest, ptr_equal_double_nan_is_false)
+{
+    auto dnan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetDoubleNaN");
+    ani_boolean isEquals;
+    ASSERT_EQ(env_->Reference_StrictEquals(dnan, dnan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
+}
+
+TEST_F(ReferenceStrictEqualsTest, ptr_equal_float_nan_is_false)
+{
+    auto fnan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetFloatNaN");
+    ani_boolean isEquals;
+    ASSERT_EQ(env_->Reference_StrictEquals(fnan, fnan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
+}
+
+TEST_F(ReferenceStrictEqualsTest, ptr_equal_object_nan_is_false)
+{
+    auto onan = CallEtsFunction<ani_ref>(MODULE_NAME, "GetObjectNaN");
+    ani_boolean isEquals;
+    ASSERT_EQ(env_->Reference_StrictEquals(onan, onan, &isEquals), ANI_OK);
+    ASSERT_EQ(isEquals, ANI_FALSE);
 }
 
 }  // namespace ark::ets::ani::testing

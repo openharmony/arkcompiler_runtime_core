@@ -113,6 +113,8 @@ public:
     bool IsBigIntClass(ClassPtr klass) const override;
     bool IsFunctionReference(ClassPtr klass) const override;
     bool IsClassBoxedBoolean(ClassPtr klass) const override;
+    bool IsClassBoxedFloat(ClassPtr klass) const override;
+    bool IsClassBoxedDouble(ClassPtr klass) const override;
     compiler::DataType::Type GetBoxedClassDataType(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,22 @@ function GetUndefined(): undefined {
 
 function getObject(): Object {
     return "Hello World!"
+}
+
+function GetDoubleNaN(): Object {
+    let x: double = NaN; return x;
+}
+
+function GetFloatNaN(): Object {
+    let x: float = Double.toFloat(NaN); return x;
+}
+
+function GetObjectNaN(): Object {
+    let x: object = NaN; return x;
+}
+
+function GetDouble42(): Object {
+    let x: double = 42.0; return x;
 }
 
 class Pack {

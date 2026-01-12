@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_STUBS_INL_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -33,11 +34,25 @@ ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetNullValue());
 }
 
+ALWAYS_INLINE inline bool IsValueNaN(EtsObject *ref)
+{
+    if (UNLIKELY(ref == nullptr || !ref->GetClass()->IsBoxed())) {
+        return false;
+    }
+    if (ref->GetClass()->IsBoxedDouble()) {
+        return std::isnan(static_cast<double>(EtsBoxPrimitive<EtsDouble>::Unbox(ref)));
+    }
+    if (ref->GetClass()->IsBoxedFloat()) {
+        return std::isnan(static_cast<float>(EtsBoxPrimitive<EtsFloat>::Unbox(ref)));
+    }
+    return false;
+}
+
 template <bool IS_STRICT>
 ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2)
 {
     if (UNLIKELY(ref1 == ref2)) {
-        return true;
+        return !IsValueNaN(ref1);
     }
 
     if (EtsReferenceNullish(coro, ref1) || EtsReferenceNullish(coro, ref2)) {
