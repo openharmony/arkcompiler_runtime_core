@@ -18,134 +18,139 @@
 namespace ark::ets::ani::verify::testing {
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-class StringGetUtf8Test : public VerifyAniTest {
+class StringGet{{ Format }}Test : public VerifyAniTest {
 public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
-        auto status = env_->String_NewUTF8("aaa", 3U, &string_);
+        {% if format == "UTF8" %}
+            auto status = env_->String_NewUTF8("aaa", 3U, &string_);
+        {% else %}
+            uint16_t str[3] = {0U};  // NOLINT(modernize-avoid-c-arrays)
+            auto status = env_->String_NewUTF16(str, 3U, &string_);
+        {% endif %}
         ASSERT_EQ(status, ANI_OK);
     }
 
 protected:
     ani_string string_;        // NOLINT(misc-non-private-member-variables-in-classes)
-    char res_[5];              // NOLINT(misc-non-private-member-variables-in-classes,modernize-avoid-c-arrays)
+    {{ type }} res_[5];        // NOLINT(misc-non-private-member-variables-in-classes,modernize-avoid-c-arrays)
     const ani_size size_ = 5;  // NOLINT(misc-non-private-member-variables-in-classes)
     ani_size cnt_;             // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-TEST_F(StringGetUtf8Test, wrong_env)
+TEST_F(StringGet{{ Format }}Test, wrong_env)
 {
-    ASSERT_EQ(env_->c_api->String_GetUTF8(nullptr, string_, res_, size_, &cnt_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(nullptr, string_, res_, size_, &cnt_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"string", "ani_string"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, wrong_input_string)
+TEST_F(StringGet{{ Format }}Test, wrong_input_string)
 {
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, nullptr, res_, size_, &cnt_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, nullptr, res_, size_, &cnt_), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"string", "ani_string", "wrong reference"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
     // clang-format on
 
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, null_input_string)
+TEST_F(StringGet{{ Format }}Test, null_input_string)
 {
     ani_string str;
     ASSERT_EQ(env_->c_api->GetNull(env_, reinterpret_cast<ani_ref *>(&str)), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, str, res_, size_, &cnt_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, str, res_, size_, &cnt_), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"string", "ani_string", "wrong reference type: null"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
     // clang-format on
 
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, undef_input_string)
+TEST_F(StringGet{{ Format }}Test, undef_input_string)
 {
     ani_string str;
     ASSERT_EQ(env_->c_api->GetUndefined(env_, reinterpret_cast<ani_ref *>(&str)), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, str, res_, size_, &cnt_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, str, res_, size_, &cnt_), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"string", "ani_string", "wrong reference type: undefined"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
     // clang-format on
 
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, wrong_res)
+TEST_F(StringGet{{ Format }}Test, wrong_res)
 {
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, string_, res_, size_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, string_, res_, size_, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"string", "ani_string"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, wrong_all_args)
+TEST_F(StringGet{{ Format }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->String_GetUTF8(nullptr, nullptr, nullptr, size_, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(nullptr, nullptr, nullptr, size_, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"string", "ani_string", "wrong reference"},
-        {"utf8Buffer", "char *", "wrong pointer to use as argument in 'char *'"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *", "wrong pointer to use as argument in '{{ type }} *'"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *", "wrong pointer for storing 'ani_size'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 }
 
-TEST_F(StringGetUtf8Test, throw_error)
+TEST_F(StringGet{{ Format }}Test, throw_error)
 {
     ThrowError();
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, string_, res_, size_, &cnt_), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, string_, res_, size_, &cnt_), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"string", "ani_string"},
-        {"utf8Buffer", "char *"},
-        {"utf8BufferSize", "ani_size"},
+        {"{{ format }}Buffer", "{{ type }} *"},
+        {"{{ format }}BufferSize", "ani_size"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("String_GetUTF8", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("String_Get{{ Format }}", testLines);
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
-TEST_F(StringGetUtf8Test, success)
+TEST_F(StringGet{{ Format }}Test, success)
 {
-    ASSERT_EQ(env_->c_api->String_GetUTF8(env_, string_, res_, size_, &cnt_), ANI_OK);
+    ASSERT_EQ(env_->c_api->String_Get{{ Format }}(env_, string_, res_, size_, &cnt_), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::verify::testing

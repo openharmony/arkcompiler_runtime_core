@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-class Parent {
-    booleanField: boolean;
+native function foo(str: {{ type }} | String): long
 
-    static staticBooleanField: boolean;
-
-    intField: int;
-
-    native bar(o: Object, m: long): void;
-    native foo(): void;
-    native baz(): void;
+function checkStackRef(): void {
+    foo({{ type }})
 }
 
-class Child extends Parent {
-}
+native function anotherFrame(str: String): long
+native function checkRefFromAnotherFrame(): long
+native function funcAddress(str: String): long
+native function badStackRef(): long
 
-class Animal {
+function getVar(): String {
+    return "var"
 }

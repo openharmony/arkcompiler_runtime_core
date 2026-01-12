@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,17 @@
  */
 
 class Parent {
-    public booleanMethod(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): boolean {
-        return true;
-    }
+    {% if type == "ref" %}
+        {{ type }}Field: {{ ret_type }} = new Object();
 
-    public static staticBooleanMethod(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): boolean {
-        return false;
-    }
+        static static{{ Type }}Field: {{ ret_type }} = new Object();
+    {% else %}
+        {{ type }}Field: {{ ret_type }};
 
-    public intMethod(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): int {
-        return 24;
-    }
+        static static{{ Type }}Field: {{ ret_type }};
+    {% endif %}
 
-    public voidParamMethod(): boolean {
-        return true;
-    }
+    {{ wrong_ret }}Field: {{ wrong_ret }};
 
     native bar(o: Object, m: long): void;
     native foo(): void;

@@ -17,20 +17,21 @@
 
 namespace ark::ets::ani::verify::testing {
 
-class ReferenceIsUndefinedTest : public VerifyAniTest {
+class ReferenceIs{{ Suff }}Test : public VerifyAniTest {
 public:
     void SetUp() override
     {
         VerifyAniTest::SetUp();
 
-        ASSERT_EQ(env_->GetUndefined(&undefRef), ANI_OK);
+        ASSERT_EQ(env_->Get{{ get_suff }}(&nullRef), ANI_OK);
 
-        ASSERT_EQ(env_->FindModule("verify_reference_is_undefined_test", &module_), ANI_OK);
+        ASSERT_EQ(env_->FindModule("ani_verify_test_reference_is_{{ suff }}", &module_), ANI_OK);
         std::array functions = {
-            ani_native_function {"foo", "C{std.core.String}:", reinterpret_cast<void *>(Foo)},
-            ani_native_function {"anotherFrame", "C{std.core.String}:l", reinterpret_cast<void *>(AnotherFrame)},
-            ani_native_function {"checkRefFromAnotherFrame", ":l", reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
-            ani_native_function {"funcAddress", "C{std.core.String}:l", reinterpret_cast<void *>(FuncAddress)},
+            ani_native_function {"foo", nullptr, reinterpret_cast<void *>(Foo)},
+            ani_native_function {"anotherFrame", nullptr, reinterpret_cast<void *>(AnotherFrame)},
+            ani_native_function {"checkRefFromAnotherFrame", nullptr,
+                                 reinterpret_cast<void *>(CheckRefFromAnotherFrame)},
+            ani_native_function {"funcAddress", nullptr, reinterpret_cast<void *>(FuncAddress)},
             ani_native_function {"badStackRef", ":l", reinterpret_cast<void *>(BadStackRef)},
         };
         ASSERT_EQ(env_->Module_BindNativeFunctions(module_, functions.data(), functions.size()), ANI_OK);
@@ -42,7 +43,7 @@ public:
     }
 
 protected:
-    ani_ref undefRef {};
+    ani_ref nullRef {};
     static ani_module module_;
     static ani_ref someRef_;
     ani_ref var_;
@@ -50,9 +51,9 @@ protected:
 private:
     static void Foo(ani_env *env, ani_ref ref)
     {
-        ani_boolean isUndef {};
-        ASSERT_EQ(env->c_api->Reference_IsUndefined(env, ref, &isUndef), ANI_OK);
-        ASSERT_EQ(isUndef, ANI_TRUE);
+        ani_boolean is{{ Suff }} {};
+        ASSERT_EQ(env->c_api->Reference_Is{{ Suff }}(env, ref, &is{{ Suff }}), ANI_OK);
+        ASSERT_EQ(is{{ Suff }}, ANI_TRUE);
     }
 
     static ani_long AnotherFrame(ani_env *env, ani_ref ref)
@@ -74,15 +75,15 @@ private:
 
     static ani_long CheckRefFromAnotherFrame(ani_env *env)
     {
-        ani_boolean isUndef = ANI_FALSE;
-        ani_status status = env->c_api->Reference_IsUndefined(env, someRef_, &isUndef);
+        ani_boolean is{{ Suff }} = ANI_FALSE;
+        ani_status status = env->c_api->Reference_Is{{ Suff }}(env, someRef_, &is{{ Suff }});
         return status;
     }
 
     static ani_long FuncAddress(ani_env *env, ani_ref ref)
     {
         ani_boolean res {};
-        auto status = env->c_api->Reference_IsUndefined(env, ref - sizeof(void *), &res);
+        auto status = env->c_api->Reference_Is{{ Suff }}(env, ref - sizeof(void *), &res);
         return status;
     }
 
@@ -91,97 +92,97 @@ private:
         ani_boolean res {};
         const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
 
-        auto status = env->c_api->Reference_IsUndefined(env, fakeRef, &res);
+        auto status = env->c_api->Reference_Is{{ Suff }}(env, fakeRef, &res);
         return status;
     }
 };
 
-ani_ref ReferenceIsUndefinedTest::someRef_ {};
-ani_module ReferenceIsUndefinedTest::module_ {};
+ani_ref ReferenceIs{{ Suff }}Test::someRef_ {};
+ani_module ReferenceIs{{ Suff }}Test::module_ {};
 
-TEST_F(ReferenceIsUndefinedTest, wrong_env)
+TEST_F(ReferenceIs{{ Suff }}Test, wrong_env)
 {
     ani_boolean res {};
 
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(nullptr, undefRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullRef, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref", "ani_ref"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, wrong_ref)
+TEST_F(ReferenceIs{{ Suff }}Test, wrong_ref)
 {
     ani_boolean res {};
 
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullptr, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, wrong_res)
+TEST_F(ReferenceIs{{ Suff }}Test, wrong_res)
 {
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, undefRef, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref"},
         {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, wrong_all_args)
+TEST_F(ReferenceIs{{ Suff }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(nullptr, nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, throw_error)
+TEST_F(ReferenceIs{{ Suff }}Test, throw_error)
 {
     ThrowError();
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, undefRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"ref", "ani_ref"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
-TEST_F(ReferenceIsUndefinedTest, global_ref)
+TEST_F(ReferenceIs{{ Suff }}Test, global_ref)
 {
     ani_ref gref {};
-    ASSERT_EQ(env_->GlobalReference_Create(undefRef, &gref), ANI_OK);
+    ASSERT_EQ(env_->GlobalReference_Create(nullRef, &gref), ANI_OK);
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, gref, &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, gref, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
     ASSERT_EQ(env_->GlobalReference_Delete(gref), ANI_OK);
 }
 
-TEST_F(ReferenceIsUndefinedTest, stack_ref)
+TEST_F(ReferenceIs{{ Suff }}Test, stack_ref)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRef", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
-TEST_F(ReferenceIsUndefinedTest, anotherFrame)
+TEST_F(ReferenceIs{{ Suff }}Test, anotherFrame)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "anotherFrame", nullptr, &fn), ANI_OK);
@@ -194,10 +195,10 @@ TEST_F(ReferenceIsUndefinedTest, anotherFrame)
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, funcAddress)
+TEST_F(ReferenceIs{{ Suff }}Test, funcAddress)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "funcAddress", nullptr, &fn), ANI_OK);
@@ -210,10 +211,10 @@ TEST_F(ReferenceIsUndefinedTest, funcAddress)
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, bad_stack_ref1)
+TEST_F(ReferenceIs{{ Suff }}Test, bad_stack_ref1)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "badStackRef", nullptr, &fn), ANI_OK);
@@ -227,50 +228,44 @@ TEST_F(ReferenceIsUndefinedTest, bad_stack_ref1)
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, bad_stack_ref2)
+TEST_F(ReferenceIs{{ Suff }}Test, bad_stack_ref2)
 {
     const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, fakeRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, fakeRef, &res), ANI_ERROR);
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, bad_local_ref)
+TEST_F(ReferenceIs{{ Suff }}Test, bad_local_ref)
 {
     const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff01));  // NOLINT(google-runtime-int)
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, fakeRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, fakeRef, &res), ANI_ERROR);
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_IsUndefined", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_Is{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceIsUndefinedTest, success)
+TEST_F(ReferenceIs{{ Suff }}Test, success)
 {
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, undefRef, &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_Is{{ Suff }}(env_, nullRef, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
-
-    ani_ref nullRef {};
-    ASSERT_EQ(env_->GetNull(&nullRef), ANI_OK);
-
-    ASSERT_EQ(env_->c_api->Reference_IsUndefined(env_, nullRef, &res), ANI_OK);
-    ASSERT_EQ(res, ANI_FALSE);
 }
 
 }  // namespace ark::ets::ani::verify::testing
