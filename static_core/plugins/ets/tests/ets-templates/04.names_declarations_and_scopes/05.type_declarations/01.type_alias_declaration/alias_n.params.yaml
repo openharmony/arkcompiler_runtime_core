@@ -209,3 +209,10 @@ cases:
         type ELP = | string  // Syntax Error: Invalid Type
       use: |-
         let xx: ELP
+
+    - defs: |-
+        type C<T> = T
+        type A = C<A>
+      use: |-
+        let aa: A  
+      

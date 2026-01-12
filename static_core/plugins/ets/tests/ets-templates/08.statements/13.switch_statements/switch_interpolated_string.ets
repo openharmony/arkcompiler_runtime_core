@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,22 @@ limitations under the License.
 ---*/
 
 /*---
-desc: First simple sample from spec
-
-files:
-- ./namespace_storage.ets
+desc: Switch statement with interpolated string.
 ---*/
 
-import {Space1 as mySpace} from "./namespace_storage"
+const foo: string = 'AbyrvalG'
+let result = 'miss'
+
+function sint() {
+    switch(`abc${foo}cba`) {
+        case 'abc': break
+        case '123': break
+        case `abc${foo}cba`: result = 'hit'
+    }
+}
 
 function main() {
-    arktest.assertEQ(mySpace.nsVar, 1234)
+    result = 'miss'
+    sint()
+    arktest.assertEQ('hit', result)
 }

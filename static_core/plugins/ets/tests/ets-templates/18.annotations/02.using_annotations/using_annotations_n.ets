@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,16 @@ tags: [compile-only, negative]
 
 let l: number = 100
 
+const bsa: string[] = ['1', '2', '3']
 const c: number = 200 + l
 
 @interface SomeAnnotation {
    field1: number {{ case.value }}
    field2: string
+}
+
+@interface ArrayFieldAnnotation {
+   field: string[]
 }
 
 {{ case.decl }}

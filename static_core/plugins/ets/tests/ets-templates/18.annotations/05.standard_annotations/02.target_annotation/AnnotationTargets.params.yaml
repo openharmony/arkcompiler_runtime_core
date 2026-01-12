@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -184,6 +184,21 @@ targets:
       let x: @MyAnnotation () => void = () => {}
     decl: |-
       TYPE
+
+  - target: |-
+      let x: @MyAnnotation (this: Dummy) => void = (this: Dummy) => {}
+    decl: |-
+      TYPE
+
+  - target: |-
+      let x: () => void = @MyAnnotation () => {}
+    decl: |-
+      LAMBDA
+
+  - target: |-
+      let x: (this: Dummy) => void = @MyAnnotation (this: Dummy) => {}
+    decl: |-
+      LAMBDA
 
 #  - target: |-
 #      // Structs are only used to define UI components, it should be translated at 'plugin after parser' phase.

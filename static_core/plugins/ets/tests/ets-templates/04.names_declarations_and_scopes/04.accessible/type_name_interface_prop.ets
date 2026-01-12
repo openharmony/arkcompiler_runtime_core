@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -22,7 +22,7 @@ desc: >-
     - Type name is used to declare interface properties
     - Function or method name is used to call the function or method
     - Variable name is used to read or change the value of the variable
-tags: [{{c.tags}}]
+
 ---*/
 
 {{c.decl}}
