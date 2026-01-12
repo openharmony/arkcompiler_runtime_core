@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -465,12 +465,16 @@ void Runtime::SetRuntimeOptions(RuntimeOptions &options)
 
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
 {
-    const std::string debugLibraryPathMode = "/system/lib64/libarkinspector.so";
-    bool enableDebugMode = OHOS::system::GetBoolParameter("persist.ark.enableDebugMode", false);
+    bool enableDebugMode = default_target_options::GetEnableDebugMode();
     if (enableDebugMode) {
         options.SetInterpreterType("cpp");
         options.SetDebuggerEnable(true);
-        options.SetDebuggerLibraryPath(debugLibraryPathMode);
+        const std::string debugLibraryPathMode = default_target_options::GetDebuggerLibraryPath();
+        if (!debugLibraryPathMode.empty()) {
+            options.SetDebuggerLibraryPath(debugLibraryPathMode);
+        } else {
+            LOG(ERROR, RUNTIME) << "Debug mode enabled but debugger library path is not set for this platform";
+        }
         options.SetDebuggerBreakOnStart(true);
     }
 }
