@@ -33,7 +33,8 @@ public:
     bool IsEtsConstructor(MethodPtr method) const
     {
         const auto methodName = GetMethodName(method);
-        return (methodName == "<ctor>" || methodName == "<cctor>" || methodName == ".ctor" || methodName == ".cctor");
+        return (methodName == ets::panda_file_items::CTOR || methodName == ets::panda_file_items::CCTOR ||
+                methodName == ets::panda_file_items::DOT_CTOR || methodName == ets::panda_file_items::DOT_CCTOR);
     }
 
     std::string GetSignature(MethodPtr method) const
@@ -74,57 +75,61 @@ public:
 
     bool IsMethodStringConcat(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == "std.core.String::concat" &&
-               GetSignature(method) == "([Lstd/core/String;)Lstd/core/String;";
+        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_CONCAT &&
+               GetSignature(method) == ets::panda_file_items::signatures::STRING_ARRAY_RET_STRING;
     }
 
     bool IsMethodStringGetLength(MethodPtr method) const override
     {
         auto methodName = GetMethodFullName(method, false);
-        return (methodName == "std.core.String::%%get-length" || methodName == "std.core.String::getLength") &&
-               GetSignature(method) == "()I";
+        return (methodName == ets::panda_file_items::getters::STRING_GET_LENGTH ||
+                methodName == ets::panda_file_items::methods::STRING_GET_LENGTH) &&
+               GetSignature(method) == ets::panda_file_items::signatures::RET_INT;
     }
 
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
-               GetSignature(method) == "(Lstd/core/String;)V";
+        return IsEtsConstructor(method) &&
+               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
+               GetSignature(method) == ets::panda_file_items::signatures::STRING_RET_VOID;
     }
 
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
-               GetSignature(method) == "([C)V";
+        return IsEtsConstructor(method) &&
+               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
+               GetSignature(method) == ets::panda_file_items::signatures::CHAR_ARRAY_RET_VOID;
     }
 
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
-               GetSignature(method) == "()V";
+        return IsEtsConstructor(method) &&
+               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
+               GetSignature(method) == ets::panda_file_items::signatures::RET_VOID;
     }
 
     bool IsMethodStringBuilderToString(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == "std.core.StringBuilder::toString" &&
-               GetSignature(method) == "()Lstd/core/String;";
+        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_BUILDER_TO_STRING &&
+               GetSignature(method) == ets::panda_file_items::signatures::RET_STRING;
     }
 
     bool IsMethodStringBuilderAppend(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
+        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_BUILDER_APPEND;
     }
 
     bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const override
     {
-        return GetClassName(klass) == "std.core.StringBuilder";
+        return GetClassName(klass) == ets::panda_file_items::classes::STRING_BUILDER;
     }
 
     bool IsMethodStringBuilderGetStringLength([[maybe_unused]] MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == "std.core.StringBuilder::%%get-stringLength";
+        return GetMethodFullName(method, false) == ets::panda_file_items::getters::STRING_BUILDER_GET_STRING_LENGTH;
     }
 
     bool IsIntrinsicStringBuilderToString([[maybe_unused]] IntrinsicId id) const override
@@ -250,7 +255,7 @@ public:
         if (classEntityId.IsValid() && !pandaFile_.IsExternal(classEntityId)) {
             panda_file::ClassDataAccessor cda(pandaFile_, classEntityId);
 
-            const uint8_t *lengthMutf8 = utf::CStringAsMutf8("length");
+            const uint8_t *lengthMutf8 = utf::CStringAsMutf8(ets::panda_file_items::fields::LENGTH.data());
             panda_file::File::StringData lengthSD = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(lengthMutf8)),
                                                      lengthMutf8};
 
@@ -307,7 +312,7 @@ public:
         return nullptr;
     }
 
-    MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const override
+    MethodPtr GetGetterStringBuilderStringLength() const override
     {
         return FindMethodByName("std.core.StringBuilder::%%get-stringLength");
     }

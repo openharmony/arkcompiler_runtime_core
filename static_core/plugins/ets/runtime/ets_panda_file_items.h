@@ -228,8 +228,62 @@ static constexpr std::string_view ANNOTATION_FUNCTIONAL_REFERENCE      =
 
 }  // namespace class_descriptors
 
+namespace classes {
+
+static constexpr std::string_view STRING_BUILDER                       = "std.core.StringBuilder";
+
+}  // namespace classes
+
+namespace methods {
+
+static constexpr std::string_view STRING_CONCAT                        = "std.core.String::concat";
+static constexpr std::string_view STRING_GET_LENGTH                    = "std.core.String::getLength";
+static constexpr std::string_view STRING_BUILDER_APPEND                = "std.core.StringBuilder::append";
+static constexpr std::string_view STRING_BUILDER_TO_STRING             = "std.core.StringBuilder::toString";
+
+}  // namespace methods
+
+namespace getters {
+
+static constexpr std::string_view STRING_GET_LENGTH                    = "std.core.String::%%get-length";
+static constexpr std::string_view STRING_BUILDER_GET_STRING_LENGTH     = "std.core.StringBuilder::%%get-stringLength";
+
+}  // namespace getters
+
+namespace fields {
+
+static constexpr std::string_view ACTUAL_LENGTH                        = "actualLength";
+static constexpr std::string_view BOOLEAN_FALSE                        = "FALSE";
+static constexpr std::string_view BOOLEAN_TRUE                         = "TRUE";
+static constexpr std::string_view BUF                                  = "buf";
+static constexpr std::string_view BUFFER                               = "buffer";
+static constexpr std::string_view BYTE_OFFSET                          = "byteOffset";
+static constexpr std::string_view BYTE_OFFSET_INT                      = "byteOffsetInt";
+static constexpr std::string_view COMPRESS                             = "compress";
+static constexpr std::string_view DATA                                 = "data";
+static constexpr std::string_view DATA_ADDRESS                         = "dataAddress";
+static constexpr std::string_view INDEX                                = "index";
+static constexpr std::string_view LENGTH                               = "length";
+static constexpr std::string_view LENGTH_INT                           = "lengthInt";
+static constexpr std::string_view VALUE                                = "value";
+
+}  // namespace fields
+
+namespace signatures {
+
+static constexpr std::string_view RET_VOID                             = "()V";
+static constexpr std::string_view RET_INT                              = "()I";
+static constexpr std::string_view CHAR_ARRAY_RET_VOID                  = "([C)V";
+static constexpr std::string_view STRING_RET_VOID                      = "(Lstd/core/String;)V";
+static constexpr std::string_view STRING_ARRAY_RET_STRING              = "([Lstd/core/String;)Lstd/core/String;";
+static constexpr std::string_view RET_STRING                           = "()Lstd/core/String;";
+
+}  // namespace signatures
+
 static constexpr std::string_view CCTOR = "<cctor>";
 static constexpr std::string_view CTOR  = "<ctor>";
+static constexpr std::string_view DOT_CCTOR = ".cctor";
+static constexpr std::string_view DOT_CTOR  = ".ctor";
 // clang-format on
 
 }  // namespace ark::ets::panda_file_items

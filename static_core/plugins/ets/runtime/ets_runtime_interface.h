@@ -67,7 +67,6 @@ public:
     bool IsClassEscompatTypedArray(ClassPtr klass) const override;
     bool IsFieldTypedArrayLengthInt(FieldPtr field) const override;
     uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
-    uint32_t GetClassOffsetObject(MethodPtr method) const override;
     ClassPtr GetStringBuilderClass() const override;
     ClassPtr GetEscompatArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
@@ -82,7 +81,7 @@ public:
     FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;
     FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
-    MethodPtr GetGetterStringBuilderStringLength(ClassPtr klass) const override;
+    MethodPtr GetGetterStringBuilderStringLength() const override;
     FieldPtr GetEscompatArrayBuffer(ClassPtr klass) const override;
     FieldPtr GetEscompatArrayActualLength(ClassPtr klass) const override;
     FieldPtr GetEscompatTypedArrayBuffer(ClassPtr klass) const override;

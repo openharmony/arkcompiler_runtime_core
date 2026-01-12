@@ -936,7 +936,7 @@ RuntimeInterface::FieldPtr SimplifyStringBuilder::GetGetterStringBuilderStringLe
 {
     if (UNLIKELY(sbStringLengthField_ == nullptr)) {
         auto runtime = GetGraph()->GetRuntime();
-        sbStringLengthField_ = runtime->GetGetterStringBuilderStringLength(runtime->GetStringBuilderClass());
+        sbStringLengthField_ = runtime->GetGetterStringBuilderStringLength();
         ASSERT(sbStringLengthField_ != nullptr);
     }
     return sbStringLengthField_;

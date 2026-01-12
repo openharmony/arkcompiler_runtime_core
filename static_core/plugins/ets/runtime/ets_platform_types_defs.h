@@ -59,6 +59,19 @@
     T("Lescompat/ErrorOptionsImpl;", escompatErrorOptionsImpl)                                                       \
     /* StringBuilder */                                                                                              \
     T("Lstd/core/StringBuilder;", coreStringBuilder)                                                                 \
+    I("Lstd/core/StringBuilder;", "<ctor>", ":V", coreStringBuilderDefaultConstructor)                               \
+    I("Lstd/core/StringBuilder;", "<ctor>", "[C:V", coreStringBuilderConstructorWithCharArrayArg)                    \
+    I("Lstd/core/StringBuilder;", "<ctor>", "Lstd/core/String;:V", coreStringBuilderConstructorWithStringArg)        \
+    I("Lstd/core/StringBuilder;", "%%get-stringLength", ":I", coreStringBuilderStringLength)                         \
+    I("Lstd/core/StringBuilder;", "append", "Lstd/core/String;:Lstd/core/StringBuilder;",                            \
+      coreStringBuilderAppendString)                                                                                 \
+    I("Lstd/core/StringBuilder;", "toString", ":Lstd/core/String;", coreStringBuilderToString)                       \
+    /* String */                                                                                                     \
+    I("Lstd/core/String;", "concat", "Lstd/core/Array;:Lstd/core/String;", coreStringConcat)                         \
+    I("Lstd/core/String;", "getLength", ":I", coreStringGetLength)                                                   \
+    I("Lstd/core/String;", "%%get-length", ":I", coreStringLength)                                                   \
+    /* Object array */                                                                                               \
+    T("[Lstd/core/Object;", coreObjectArray)                                                                         \
     /* Concurrency */                                                                                                \
     T("Lstd/core/Promise;", corePromise)                                                                             \
     T("Lstd/core/Job;", coreJob)                                                                                     \
