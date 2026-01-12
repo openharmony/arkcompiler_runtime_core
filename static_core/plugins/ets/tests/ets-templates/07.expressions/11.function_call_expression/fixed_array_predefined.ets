@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,12 +14,10 @@ limitations under the License.
 ---*/
 
 {% for t in types %}
-{% for mode in modes %}
 /*---
-desc: A compile-time error occurs if a function has at least one parameter or return type of the type FixedArray
-   parameterized with a type parameter and function call expression leads to instantiation of the type FixedArray
-   with the predefined value type
-tags: [compile-only, negative]
+desc: Verify behavior when a function has at least one parameter or return type of the type FixedArray
+   parameterized with a type parameter and function call expression leads to instantiation of the type
+   FixedArray with the predefined value type
 ---*/
 
 function foo<T>(p: FixedArray<T>): T {
@@ -37,17 +35,21 @@ function foo1_caller(): FixedArray<{{t.type}}> {
     return foo1<{{t.type}}>(p)
 }
 
-function main() {
-{% if "param" in mode %}
+function test_param() {
     let foo_var = foo<{{t.type}}>
     let param: FixedArray<{{t.type}}> = [{{t.init}}]
     let res = foo_var(param)
-    arktest.assertTrue(res instanceof {{t.type}})
-{% else %}
-    let foo_res = foo1_caller()
-    arktest.assertTrue(foo_res[0] instanceof {{t.type}})
-{% endif %}
+    arktest.assertTrue(res instanceof {{t.type}}, "expect particular instance in test param")
 }
 
-{% endfor %}
+function test_return() {
+    let foo_res = foo1_caller()
+    arktest.assertTrue(foo_res[0] instanceof {{t.type}}, "expect particular instance in test return")
+}
+
+function main() {
+    test_param()
+    test_return()
+}
+
 {% endfor %}

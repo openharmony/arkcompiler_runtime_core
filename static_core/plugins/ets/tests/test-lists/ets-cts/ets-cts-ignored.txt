@@ -229,23 +229,15 @@
 #26730
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 
-#30904 no CTE for FixedArray with the predefined value type, spec #644
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_0.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_1.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_2.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_3.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_4.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_5.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_6.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_7.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_8.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_9.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_10.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_11.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_12.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_13.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_14.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_neg_15.ets
+#26666 (cts #47 - bad array element type)
+07.expressions/11.function_call_expression/fixed_array_predefined_0.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_1.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_2.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_3.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_4.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_5.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_6.ets
+07.expressions/11.function_call_expression/fixed_array_predefined_7.ets
 
 #28679
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
