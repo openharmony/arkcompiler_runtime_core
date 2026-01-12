@@ -17,7 +17,6 @@
 /*---
 desc: Declaration context, static field declaration, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
-tags: [{{c.tags}}]
 ---*/
 {{c.defs}}
 {%- for v in c['values'] %}

@@ -17,7 +17,6 @@
 /*---
 desc: Call context, function, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
-tags: [{{c.tags}}]
 ---*/
 {{c.defs}}
 function foo(p: {{c.to_type}}): {{c.to_type}} { return p }
