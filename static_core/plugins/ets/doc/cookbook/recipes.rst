@@ -2784,8 +2784,8 @@ appropriate type before use.
 
 .. _R099:
 
-|CB_R| Only arrays, tuples or iterable objects can be spread into the rest parameter or array literals
-------------------------------------------------------------------------------------------------------
+|CB_R| Only arrays, tuples, or iterable objects can be spread into a rest parameter or array literal
+----------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-spread``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2795,12 +2795,12 @@ appropriate type before use.
 
 |CB_ERROR|
 
-The |TS| supports a wide number of scenarios where
-the *spread operator* can be used. In  |LANG|, the *spread expression* can be
-used only within an array literal or in argument passing, and the expression
-must be of  array type, tuple type, or a type with an iterator defined. When
-porting legacy |TS| code to |LANG|, you must rework such unsupported scenarios,
-for example, by unpacking data manually.
+|TS| supports a broad range of scenarios in which the *spread operator* can be
+used.
+A *spread expression* in |LANG| can be used only within an array literal,
+or in an argument passing. The expression must be of array type, tuple type, or
+a type with an iterator defined. When porting legacy |TS| code to |LANG|,
+unsupported scenarios must be reworked, e.g., by unpacking data manually.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3148,8 +3148,8 @@ extend interfaces.
 
 .. _R111:
 
-|CB_R| Enumeration members can be initialized only with compile time expressions of the same type
--------------------------------------------------------------------------------------------------
+|CB_R| Enumeration members can be initialized only with same-type compile-time expressions
+------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-enum-mixed-types``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4336,7 +4336,7 @@ not a value in the language.
 |CB_ERROR|
 
 All ``import`` directives in |LANG| must precede any other directives,
-declarations and statements in a program.
+declarations, and statements in a program.
 
 |CB_BAD|
 ~~~~~~~~
