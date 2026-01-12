@@ -686,7 +686,7 @@ including *explicitly overloaded functions* (see
     export function foo(p: number): void {} // #1
     export function foo(p: string): void {} // #2
     export function fooBoolean(p: Boolean): void {}
-    export overload foo {foo, fooBoolean)
+    export overload foo {foo, fooBoolean}
 
     function foo() {} // #3
 
