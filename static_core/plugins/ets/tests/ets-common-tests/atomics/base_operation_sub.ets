@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ let int16array = new Int16Array(abint16)
 let abint32 = new ArrayBuffer(BYTE_LENGTH)
 let int32array = new Int32Array(abint32)
 let abuint8 = new ArrayBuffer(BYTE_LENGTH)
-let uint8array = new Uint16Array(abuint8)
+let uint8array = new Uint8Array(abuint8)
 let abuint16 = new ArrayBuffer(BYTE_LENGTH)
 let uint16array = new Uint16Array(abuint16)
 let abuint32 = new ArrayBuffer(BYTE_LENGTH)
