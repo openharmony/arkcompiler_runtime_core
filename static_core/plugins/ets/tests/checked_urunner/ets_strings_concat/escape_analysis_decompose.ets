@@ -15,7 +15,7 @@
 
 //! CHECKER      JIT escape analysis decompose
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_BCO      output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO      options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN          force_jit: true, options: "--compiler-regex=.*next[0-9]* --compiler-inlining=true", entry: "escape_analysis_decompose.ETSGLOBAL::main"
 //!
 //! EVENT        /DeoptimizationReason,escape_analysis_decompose.ETSGLOBAL::__noinline__next2,IFIMM_TRY/

@@ -15,7 +15,7 @@
 
 //! CHECKER     AOT: Verify StringBuilder hoisting optimization for string concatenation in loop
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_BCO       output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 //! RUN_PAOC    options: "--compiler-regex='.*will_hoist[0-9]+'"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
@@ -103,7 +103,7 @@ function main() {
 
 //! CHECKER     BCO: Verify StringBuilder hoisting optimizations
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_BCO     output: "#{@options.test_file}", options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
