@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -446,8 +446,8 @@ Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify)
         return {UtfLength::THREE, {ch0, ch1, ch2}};
     }
     if (d1 < DECODE_TRAIL_LOW || d1 > DECODE_TRAIL_HIGH) {
-        // Bad sequence
-        UNREACHABLE();
+        // Isolated high surrogate: malformed, replace with U+FFFD
+        return {UtfLength::THREE, {0xEFU, 0xBFU, 0xBDU}};
     }
 
     uint32_t codePoint = CombineTwoU16(d0, d1);
