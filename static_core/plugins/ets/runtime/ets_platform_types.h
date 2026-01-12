@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,37 +66,10 @@ public:
     }
     Entry const *GetTypeEntry(const uint8_t *descriptor) const;
 
-    // Managed object caches:
-    static constexpr uint32_t GetAsciiCharCacheSize()
-    {
-        return ASCII_CHAR_TABLE_SIZE;
-    }
-    static constexpr size_t GetAsciiCharCacheOffset()
-    {
-        return MEMBER_OFFSET(EtsPlatformTypes, asciiCharCache_);
-    }
-
-    // Class entry offsets:
-    static constexpr size_t GetEscompatArrayClassOffset()
-    {
-        return MEMBER_OFFSET(EtsPlatformTypes, escompatArray);
-    }
-    static constexpr size_t GetCoreLineStringClassOffset()
-    {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreLineString);
-    }
-    static constexpr size_t GetCoreSlicedStringClassOffset()
-    {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreSlicedString);
-    }
-    static constexpr size_t GetCoreTreeStringClassOffset()
-    {
-        return MEMBER_OFFSET(EtsPlatformTypes, coreTreeString);
-    }
-
 private:
     friend class EtsClassLinkerExtension;
     friend class mem::Allocator;
+    friend class EtsPlatformTypesIrtocOffsets;
     // asciiCharCache_ must be allocated in a non-movable heap region; therefore, we should need to handle
     // this pointer in `ark::ets::PandaEtsVM::UpdateVmRefs`.
     EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};

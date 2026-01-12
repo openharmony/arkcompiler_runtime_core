@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -214,9 +214,9 @@ static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const Panda
 {
     [[maybe_unused]] EtsHandleScope scope(coro);
 
-    EtsClass *klass = IS_CONSTRUCTOR ? PlatformTypes(coro)->reflectConstructor
-                                     : (IS_STATIC ? PlatformTypes(coro)->reflectStaticMethod
-                                                  : PlatformTypes(coro)->reflectInstanceMethod);
+    EtsClass *klass = IS_CONSTRUCTOR ? PlatformTypes(coro)->coreReflectConstructor
+                                     : (IS_STATIC ? PlatformTypes(coro)->coreReflectStaticMethod
+                                                  : PlatformTypes(coro)->coreReflectInstanceMethod);
     ASSERT(klass != nullptr);
 
     EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(klass, methods.size()));
@@ -330,7 +330,8 @@ ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean pub
 template <bool IS_STATIC = false>
 static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaVector<EtsField *> &fields)
 {
-    EtsClass *klass = IS_STATIC ? PlatformTypes(coro)->reflectStaticField : PlatformTypes(coro)->reflectInstanceField;
+    EtsClass *klass =
+        IS_STATIC ? PlatformTypes(coro)->coreReflectStaticField : PlatformTypes(coro)->coreReflectInstanceField;
     ASSERT(klass != nullptr);
 
     [[maybe_unused]] EtsHandleScope scope(coro);

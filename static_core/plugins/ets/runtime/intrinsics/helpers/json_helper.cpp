@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -623,7 +623,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
                 isSuccessful = SerializeJSONObjectArray(value);
             }
             coro->ManagedCodeBegin();
-        } else if (value->IsInstanceOf(platformTypes->stdcoreJsonReplacer)) {
+        } else if (value->IsInstanceOf(platformTypes->coreJsonReplacer)) {
             auto *jsonReplacerMethod = valueCls->GetInstanceMethod("jsonReplacer", nullptr);
             ASSERT(jsonReplacerMethod != nullptr);
             Value selfArg(value->GetCoreType());
@@ -642,7 +642,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
             buffer_ += "undefined";
         } else if (value->IsInstanceOf(platformTypes->coreTuple)) {
             isSuccessful = false;
-        } else if (value->IsInstanceOf(platformTypes->coreBigint)) {
+        } else if (value->IsInstanceOf(platformTypes->coreBigInt)) {
             isSuccessful = false;
         } else if (valueRtCls->Implements(platformTypes->coreJsonElementSerializable->GetRuntimeClass())) {
             isSuccessful = false;

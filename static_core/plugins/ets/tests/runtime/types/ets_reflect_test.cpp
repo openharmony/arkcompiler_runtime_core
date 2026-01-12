@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,20 +93,20 @@ private:
 
 TEST_F(EtsReflectTest, ReflectFieldMemoryLayout)
 {
-    auto *reflectInstanceFieldClass = PlatformTypes(vm_)->reflectInstanceField;
-    auto *reflectStaticFieldClass = PlatformTypes(vm_)->reflectStaticField;
-    MirrorFieldInfo::CompareMemberOffsets(reflectInstanceFieldClass, GetReflectFieldClassMembers(), false);
-    MirrorFieldInfo::CompareMemberOffsets(reflectStaticFieldClass, GetReflectFieldClassMembers(), false);
+    auto *coreReflectInstanceFieldClass = PlatformTypes(vm_)->coreReflectInstanceField;
+    auto *coreReflectStaticFieldClass = PlatformTypes(vm_)->coreReflectStaticField;
+    MirrorFieldInfo::CompareMemberOffsets(coreReflectInstanceFieldClass, GetReflectFieldClassMembers(), false);
+    MirrorFieldInfo::CompareMemberOffsets(coreReflectStaticFieldClass, GetReflectFieldClassMembers(), false);
 }
 
 TEST_F(EtsReflectTest, ReflectMethodMemoryLayout)
 {
-    auto *reflectInstanceMethodClass = PlatformTypes(vm_)->reflectInstanceMethod;
-    auto *reflectStaticMethodClass = PlatformTypes(vm_)->reflectStaticMethod;
-    auto *reflectConstructorClass = PlatformTypes(vm_)->reflectConstructor;
-    MirrorFieldInfo::CompareMemberOffsets(reflectInstanceMethodClass, GetReflectMethodClassMembers(), false);
-    MirrorFieldInfo::CompareMemberOffsets(reflectStaticMethodClass, GetReflectMethodClassMembers(), false);
-    MirrorFieldInfo::CompareMemberOffsets(reflectConstructorClass, GetReflectMethodClassMembers(), false);
+    auto *coreReflectInstanceMethodClass = PlatformTypes(vm_)->coreReflectInstanceMethod;
+    auto *coreReflectStaticMethodClass = PlatformTypes(vm_)->coreReflectStaticMethod;
+    auto *coreReflectConstructorClass = PlatformTypes(vm_)->coreReflectConstructor;
+    MirrorFieldInfo::CompareMemberOffsets(coreReflectInstanceMethodClass, GetReflectMethodClassMembers(), false);
+    MirrorFieldInfo::CompareMemberOffsets(coreReflectStaticMethodClass, GetReflectMethodClassMembers(), false);
+    MirrorFieldInfo::CompareMemberOffsets(coreReflectConstructorClass, GetReflectMethodClassMembers(), false);
 }
 
 }  // namespace ark::ets::test
