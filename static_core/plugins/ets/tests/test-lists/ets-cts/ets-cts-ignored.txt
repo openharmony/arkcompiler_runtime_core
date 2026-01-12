@@ -1455,6 +1455,16 @@
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_8.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_9.ets
 
+#32075 Cannot use type 'void' as value.
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_1.ets
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_3.ets
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_5.ets
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_6.ets
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_8.ets
+
+#32038 Interface has methods
+15.semantic_rules/07.type_inference/02.return_type_inference/ret_type_gen_4.ets
+
 #30553 intersection in smart casts
 15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/case1_0.ets
 15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/case1_1.ets
