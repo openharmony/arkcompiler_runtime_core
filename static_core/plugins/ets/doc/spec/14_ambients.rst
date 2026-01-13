@@ -787,14 +787,14 @@ Ambient Accessor Declarations
     frontend_status: None
     
 *Ambient accessor declaration* is an ambient version of
-:ref:`Accessor Declarations`. The syntax of an *ambient accessor declaration*
-is presented below:
+:ref:`Accessor Declarations` or :ref:`Accessors with Receiver`. The syntax of
+an *ambient accessor declaration* is presented below:
 
 .. code-block:: abnf
 
     ambientAccessorDeclaration:
-        ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' requiredParameter ')'
+        ( 'get' identifier '(' receiverParameter? ')' returnType
+        | 'set' identifier '(' (receiverParameter ',')? requiredParameter ')'
         )
         ;
 
@@ -807,7 +807,7 @@ declaration is not specified.
     declare get name(): string // ok
     declare get age() // compile-time error, return type must be specified
 
-See :ref:`Accessor Declarations` for details.
+See :ref:`Accessor Declarations` and :ref:`Accessors with Receiver` for details.
 
 .. raw:: pdf
 
