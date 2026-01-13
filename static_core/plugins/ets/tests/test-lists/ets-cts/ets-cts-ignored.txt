@@ -192,11 +192,11 @@
 07.expressions/07.spread_expression/iterable2.ets
 07.expressions/07.spread_expression/iterable3.ets
 07.expressions/07.spread_expression/iterable4.ets
+07.expressions/07.spread_expression/spex_49.ets
 07.expressions/07.spread_expression/spex_50.ets
-07.expressions/07.spread_expression/spex_51.ets
-07.expressions/07.spread_expression/spex_func_46.ets
-07.expressions/07.spread_expression/spex_func_77.ets
-07.expressions/07.spread_expression/spex_func_78.ets
+07.expressions/07.spread_expression/spex_func_45.ets
+07.expressions/07.spread_expression/spex_func_75.ets
+07.expressions/07.spread_expression/spex_func_76.ets
 
 #32626
 07.expressions/07.spread_expression/spex_copy_values_8.ets
