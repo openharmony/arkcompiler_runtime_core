@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,59 +75,12 @@ double StdCoreDoubleParseFloat(EtsString *s)
     return ParseFloat(s, helpers::flags::IGNORE_TRAILING);
 }
 
-double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
+double StdCoreDoubleParseInt(EtsString *str, int32_t radix)
 {
-    bool isUtf16 = s->IsUtf16();
-    size_t startIndex = 0;
-    size_t length = s->GetLength();
-    const int baseDec = 10;
-    const int baseHex = 16;
-
-    Span<uint8_t> mutf8Span {};
-    Span<uint16_t> utf16Span {};
-    PandaVector<uint8_t> tree8Buf;
-    PandaVector<uint16_t> tree16Buf;
-    if (isUtf16) {
-        uint16_t *utf16SpanBegin = s->IsTreeString() ? s->GetTreeStringDataUtf16(tree16Buf) : s->GetDataUtf16();
-        utf16Span = {utf16SpanBegin, s->GetUtf16Length()};
-    } else {
-        uint8_t *mutf8SpanBegin = s->IsTreeString() ? s->GetTreeStringDataMUtf8(tree8Buf) : s->GetDataMUtf8();
-        mutf8Span = {mutf8SpanBegin, s->GetMUtf8Length()};
-    }
-
-    if (length >= 1) {
-        char firstChar = isUtf16 ? utf16Span[0] : mutf8Span[0];
-        if (firstChar == '-') {
-            startIndex = 1;
-        }
-    }
-
-    if (radix == -1 || radix == 0) {
-        radix = baseDec;
-        if (length >= 2U + startIndex) {
-            auto first = isUtf16 ? utf16Span[startIndex] : mutf8Span[startIndex];
-            auto second = isUtf16 ? utf16Span[startIndex + 1] : mutf8Span[startIndex + 1];
-            if (first == '0' && (second == 'x' || second == 'X')) {
-                radix = baseHex;
-            }
-        }
-    }
-
-    if (isUtf16) {
-        size_t utf16Length = s->GetUtf16Length();
-        size_t utf8Size = s->IsTreeString() ? utf::Utf16ToUtf8Size(tree16Buf.data(), utf16Length) - 1
-                                            : utf::Utf16ToUtf8Size(s->GetDataUtf16(), utf16Length) - 1;
-        PandaVector<uint8_t> buf(utf8Size);
-        size_t convertedSize = s->IsTreeString()
-                                   ? utf::ConvertRegionUtf16ToUtf8(tree16Buf.data(), buf.data(), length, utf8Size, 0)
-                                   : utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), length, utf8Size, 0);
-        Span<uint8_t> str = Span<uint8_t>(buf.data(), convertedSize);
-        return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
-    }
-
-    Span<uint8_t> str = s->IsTreeString() ? Span<uint8_t>(tree8Buf.data(), s->GetMUtf8Length() - 1)
-                                          : Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
-    return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
+    auto ps = str->GetMutf8();
+    auto start = reinterpret_cast<const uint8_t *>(ps.c_str());
+    auto end = start + ps.size();
+    return std::trunc(helpers::StringToDoubleWithRadix(start, end, radix));
 }
 
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)

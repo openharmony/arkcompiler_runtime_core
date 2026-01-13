@@ -244,3 +244,4 @@ std/core/ProxyExtraTest2.ets
 std/core/ProxyExtraTest3.ets
 std/core/ProxyBasicTests.ets
 std/core/json/JsonStringifyTest2.ets
+std/core/ParseIntTests.ets

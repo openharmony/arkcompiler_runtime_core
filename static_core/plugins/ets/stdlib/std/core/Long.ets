@@ -456,4 +456,14 @@ export final class Long extends Integral implements Comparable<Long> {
     public isGreaterEqualThan(other: Long): boolean {
         return this.value >= other.toLong();
     }
+
+    /**
+     * parseInt(String, int) parses from String an integer of specified radix
+     *
+     * @param s the string to convert
+     * @param r the radix of conversion; should be [2, 36]; 0 assumed to be 10
+     *
+     * @returns the result of parsing
+    */
+    public static native parseInt(s: String, r: int): long;
 }

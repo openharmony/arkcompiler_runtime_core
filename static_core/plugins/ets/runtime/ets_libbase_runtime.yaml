@@ -9611,6 +9611,16 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreByteToChar
     safe_intrinsic: true
 
+  - name: StdCoreByteParseInt
+    space: ets
+    class_name: std.core.Byte
+    method_name: parseInt
+    static: true
+    signature:
+      ret: i8
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::StdCoreByteParseInt
+
 ################
 # std.core.Short #
 ################
@@ -9680,6 +9690,16 @@ intrinsics:
       args: [ i16 ]
     impl: ark::ets::intrinsics::StdCoreShortToChar
     safe_intrinsic: true
+
+  - name: StdCoreShortParseInt
+    space: ets
+    class_name: std.core.Short
+    method_name: parseInt
+    static: true
+    signature:
+      ret: i16
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::StdCoreShortParseInt
 
 ################
 # std.core.Int #
@@ -9751,6 +9771,16 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreIntToChar
     safe_intrinsic: true
 
+  - name: StdCoreIntParseInt
+    space: ets
+    class_name: std.core.Int
+    method_name: parseInt
+    static: true
+    signature:
+      ret: i32
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::StdCoreIntParseInt
+
 ################
 # std.core.Long #
 ################
@@ -9820,6 +9850,16 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreLongToChar
     safe_intrinsic: true
+
+  - name: StdCoreLongParseInt
+    space: ets
+    class_name: std.core.Long
+    method_name: parseInt
+    static: true
+    signature:
+      ret: i64
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::StdCoreLongParseInt
 
 #####################
 # std.reflect.Proxy #

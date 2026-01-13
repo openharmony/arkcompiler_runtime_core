@@ -716,7 +716,7 @@ export final class Double extends Floating implements Comparable<Double> {
      *
     */
     public static parseInt(s: String): double {
-        return Double.parseIntCore(s, -1 as int);
+        return Double.parseIntCore(s, 0);
     }
     
     /**
