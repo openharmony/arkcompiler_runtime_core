@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,9 @@ enum ThreadFlag : uint16_t {
     ACTIVE_BARRIER = 1 << 1,
     PENDING_GC_CALLBACKS = 1 << 2,
     FULL_MARK_REQUEST = 1 << 3,
-    PENDING_SHARED_HEAP_OOM = 1 << 4,
+    PENDING_FLIP_FUNCTION = 1 << 4,
+    RUNNING_FLIP_FUNCTION = 1 << 5,
+    PENDING_SHARED_HEAP_OOM = 1 << 6,
 };
 
 constexpr uint32_t THREAD_STATE_OFFSET = 16;
