@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -106,5 +106,51 @@ class EtsGeneratorTest(TestCase):
                                'different_file_name_b',
                                'different_file_name_c']
         self.assertEqual(expected_test_names, generated_tests)
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_one_test_file(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.args['test_suite.parameters.test-file'] = 'simple_test.ets'
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_tests = ['simple_test']
+        self.assertEqual(expected_tests, generated_tests)
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_tests_by_filter(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.args['test_suite.parameters.filter'] = '*declaration*'
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_tests = ['types_declaration_0',
+                            'types_declaration_1',
+                            'types_declaration_2']
+        self.assertEqual(expected_tests, generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
