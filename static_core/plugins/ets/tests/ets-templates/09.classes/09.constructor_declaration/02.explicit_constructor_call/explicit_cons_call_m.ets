@@ -16,9 +16,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    To call a named constructor, the name of the constructor must be
-    provided while calling a superclass or another same-class constructor
-tags: []
+    There are two kinds of explicit constructor calls:
+    - Superclass constructor calls (used to call a constructor from the direct superclass) that begin with the keyword super.
+    - Other constructor calls that begin with the keyword this (used to call another same-class constructor).
 ---*/
 
 {{c.decl}}

@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,11 +20,11 @@ cases:
           class A {
               s: string
               fld: string = 'hello'
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
-              constructor() {
-                  this(this.fld)  // CTE, cannot use this.fld
+              constructor noArgs() {
+                  this.fromString(this.fld)  // CTE, cannot use this.fld
               }
           }
 
@@ -35,11 +35,11 @@ cases:
           class A {
               s: string
               readonly fld: string = 'hello'
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
               constructor() {
-                  this(this.fld)  // CTE, cannot use this.fld
+                  this.fromString(this.fld)  // CTE, cannot use this.fld
               }
           }
 
@@ -49,11 +49,11 @@ cases:
           // CTE if arguments of an explicit constructor call refer to an instance method
           class A {
               s: string
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
-              constructor() {
-                  this(this.meth())  // CTE, cannot use this.meth()
+              constructor noArgs() {
+                  this.fromString(this.meth())  // CTE, cannot use this.meth()
               }
               meth(): string {
                   return 'hello'
@@ -66,11 +66,11 @@ cases:
           // CTE if arguments of an explicit constructor call refer to an instance method
           class A {
               s: string
-              constructor(p: () => string) {
+              constructor fromFunc(p: () => string) {
                   this.s = p()
               }
               constructor() {
-                  this(this.meth)  // CTE, cannot use this.meth
+                  this.fromFunc(this.meth)  // CTE, cannot use this.meth
               }
               meth(): string {
                   return 'hello'
@@ -83,11 +83,11 @@ cases:
           // CTE if arguments of an explicit constructor call refer to this
           class A {
               s: string|undefined
-              constructor(p: A) {
+              constructor fromA(p: A) {
                   this.s = p.s ?? 'hello'
               }
               constructor() {
-                  this(this)  // CTE, cannot use this in args
+                  this.fromA(this)  // CTE, cannot use this in args
               }
           }
 
@@ -98,16 +98,16 @@ cases:
           class A {
               s: string
               readonly fld: string = 'hello'
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
           }
           class B extends A {
-              constructor(p: string) {
-                  super(p)
+              constructor fromString(p: string) {
+                  super.fromString(p)
               }
               constructor() {
-                  this(super.fld) // CTE, cannot use super field in args
+                  this.fromString(super.fld) // CTE, cannot use super field in args
               }
           }
 
@@ -118,16 +118,16 @@ cases:
           class A {
               s: string
               fld: string = 'hello'
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
           }
           class B extends A {
-              constructor(p: string) {
-                  super(p)
+              constructor fromString(p: string) {
+                  super.fromString(p)
               }
-              constructor() {
-                  this(super.fld) // CTE, cannot use super field in args
+              constructor noArgs() {
+                  this.fromString(super.fld) // CTE, cannot use super field in args
               }
           }
 
@@ -137,7 +137,7 @@ cases:
           // CTE if arguments of an explicit constructor call refer to a super method
           class A {
               s: string
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.s = p
               }
               meth(): string {
@@ -145,11 +145,11 @@ cases:
               }
           }
           class B extends A {
-              constructor(p: string) {
-                  super(p)
+              constructor fromString(p: string) {
+                  super.fromString(p)
               }
               constructor() {
-                  this(super.meth()) // CTE, cannot use super method in args
+                  this.fromString(super.meth()) // CTE, cannot use super method in args
               }
           }
 
@@ -159,7 +159,7 @@ cases:
           // CTE if arguments of an explicit constructor call refer to a super method
           class A {
               s: string
-              constructor(p: () => string) {
+              constructor fromFunc(p: () => string) {
                   this.s = p()
               }
               meth(): string {
@@ -167,11 +167,11 @@ cases:
               }
           }
           class B extends A {
-              constructor(p: () => string) {
-                  super(p)
+              constructor fromFunc(p: () => string) {
+                  super.fromFunc(p)
               }
               constructor() {
-                  this(super.meth) // CTE, cannot use super method in args
+                  this.fromFunc(super.meth) // CTE, cannot use super method in args
               }
           }
 
@@ -181,16 +181,16 @@ cases:
           // CTE if arguments of an explicit constructor call refer to super
           class A {
               s: string|undefined
-              constructor(p: A) {
+              constructor fromA(p: A) {
                   this.s = p.s ?? 'hello'
               }
           }
           class B extends A {
-              constructor(p: A) {
-                  super(p)
+              constructor fromA(p: A) {
+                  super.fromA(p)
               }
               constructor() {
-                  this(super) // CTE, cannot use super in args
+                  this.fromA(super) // CTE, cannot use super in args
               }
           }
 
@@ -200,16 +200,16 @@ cases:
           // CTE if arguments of an explicit constructor call refer to super
           class A {
               s: string|undefined
-              constructor(p: A) {
+              constructor fromA(p: A) {
                   this.s = p.s ?? 'hello'
               }
           }
           class B extends A {
               constructor(p: A) {
-                  super(p)
+                  super.fromA(p)
               }
               constructor() {
-                  super(super) // CTE, cannot use super in args
+                  super.fromA(super) // CTE, cannot use super in args
               }
           }
 
@@ -219,15 +219,15 @@ cases:
           // CTE if arguments of an explicit constructor call refer to this
           class A {
               s: string|undefined
-              constructor(p: A) {
+              constructor fromA(p: A) {
                   this.s = p.s ?? 'hello'
               }
           }
           class B extends A {
               constructor(p: A) {
-                  super(p)
+                  super.fromA(p)
               }
               constructor() {
-                  super(this) // CTE, cannot use this in args
+                  super.fromA(this) // CTE, cannot use this in args
               }
           }
