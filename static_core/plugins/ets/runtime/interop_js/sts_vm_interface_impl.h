@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,9 +37,6 @@ public:
     PANDA_PUBLIC_API STSVMInterfaceImpl();
     PANDA_PUBLIC_API ~STSVMInterfaceImpl() override = default;
 
-#if defined(ARK_HYBRID)
-    PANDA_PUBLIC_API void MarkFromObject(void *obj, const common::RefFieldVisitor &visitor) override;
-#endif
     PANDA_PUBLIC_API void MarkFromObject(void *obj) override;
 
     PANDA_PUBLIC_API void OnVMAttach() override;

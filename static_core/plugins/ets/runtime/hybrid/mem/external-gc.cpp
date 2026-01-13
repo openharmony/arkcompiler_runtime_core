@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
-#include "objects/ref_field.h"
-#include "heap/heap_visitor.h"
+#include "common_interfaces/objects/ref_field.h"
+#include "common_interfaces/heap/heap_visitor.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
@@ -105,75 +105,11 @@ void SweepStaticRoots(const WeakRefFieldVisitor &visitor)
     });
 }
 
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-void UnmarkAllXRefsImpl()
-{
-    ark::ets::interop::js::XGC::GetInstance()->UnmarkAllXRefs();
-}
-
-void SweepUnmarkedXRefsImpl()
-{
-    ark::ets::interop::js::XGC::GetInstance()->SweepUnmarkedXRefs();
-}
-
-void AddXRefToStaticRoots()
-{
-    ark::ets::interop::js::XGC::GetInstance()->AddXRefToStaticRoots();
-}
-
-void RemoveXRefFromStaticRoots()
-{
-    ark::ets::interop::js::XGC::GetInstance()->RemoveXRefFromStaticRoots();
-}
-
-bool TryTransferCurrentCoroutineToNative(common::ThreadHolder *current)
-{
-    ark::Thread *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
-        return false;
-    }
-    ark::Coroutine *co = ark::Coroutine::GetCurrent();
-    if (co == nullptr) {
-        return false;
-    }
-    common::ThreadHolder *holder = co->GetThreadHolder();
-    if (holder == current) {
-        return false;
-    }
-    return holder->TransferToNativeIfInRunning();
-}
-
-bool TryTransferCurrentCoroutineToRunning(common::ThreadHolder *current)
-{
-    ark::Thread *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
-        return false;
-    }
-    ark::Coroutine *co = ark::Coroutine::GetCurrent();
-    if (co == nullptr) {
-        return false;
-    }
-    common::ThreadHolder *holder = co->GetThreadHolder();
-    if (holder == current) {
-        return false;
-    }
-    return holder->TransferToRunningIfInNative();
-}
-#endif  // PANDA_JS_ETS_HYBRID_MODE
-
 void RegisterStaticRootsProcessFunc()
 {
     RegisterVisitStaticRootsHook(VisitStaticRoots);
     RegisterUpdateStaticRootsHook(UpdateStaticRoots);
     RegisterSweepStaticRootsHook(SweepStaticRoots);
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    RegisterUnmarkAllXRefsHook(UnmarkAllXRefsImpl);
-    RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsImpl);
-    RegisterAddXRefToStaticRootsHook(AddXRefToStaticRoots);
-    RegisterRemoveXRefFromStaticRootsHook(RemoveXRefFromStaticRoots);
-    RegisterInterOpCoroutineToNativeHook(TryTransferCurrentCoroutineToNative);
-    RegisterInterOpCoroutineToRunningHook(TryTransferCurrentCoroutineToRunning);
-#endif
 }
 
 }  // namespace common

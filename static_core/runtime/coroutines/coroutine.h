@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
 #ifdef ARK_HYBRID
-#include "thread/thread_holder.h"
+#include "common_interfaces/thread/thread_holder.h"
 #endif
 
 namespace ark {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define PANDA_ARK_NAPI_HELPER_H
 
 #include <js_native_api_types.h>
-#include "objects/base_type.h"
+#include "common_interfaces/objects/base_type.h"
 
 namespace ark::ets::interop::js {
 

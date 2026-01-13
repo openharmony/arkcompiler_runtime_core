@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
 
 #include <cmath>
-#include "objects/string/base_string-inl.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
 #include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"

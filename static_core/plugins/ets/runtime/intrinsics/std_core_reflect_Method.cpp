@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,22 +22,22 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
-#include "include/mem/panda_string.h"
-#include "include/object_header.h"
+#include "runtime/include/mem/panda_string.h"
+#include "runtime/include/object_header.h"
 #include "intrinsics.h"
-#include "mem/vm_handle.h"
-#include "types/ets_array.h"
-#include "types/ets_box_primitive.h"
-#include "types/ets_box_primitive-inl.h"
-#include "types/ets_class.h"
-#include "types/ets_escompat_array.h"
-#include "types/ets_method.h"
+#include "runtime/mem/vm_handle.h"
+#include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_typeapi.h"
-#include "types/ets_object.h"
-#include "types/ets_primitives.h"
-#include "objects/string/line_string.h"
-#include "types/ets_reflect_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_reflect_method.h"
+#include "common_interfaces/objects/string/line_string.h"
 
 namespace ark::ets::intrinsics {
 

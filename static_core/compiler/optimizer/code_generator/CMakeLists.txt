@@ -18,7 +18,7 @@ include(${PANDA_ROOT}/compiler/cmake/target.cmake)
 include_directories(
     .
     ${PANDA_ROOT}
-    ${PANDA_ROOT}/../common_interfaces
+    ${PANDA_ROOT}/../common_runtime
 )
 
 set(GENERATED_DIR ${PANDA_BINARY_ROOT}/compiler/generated)

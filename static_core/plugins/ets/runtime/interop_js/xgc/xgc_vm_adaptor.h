@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_XGC_XGC_VM_ADAPTOR_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_XGC_XGC_VM_ADAPTOR_H
 
-#if defined(ARK_HYBRID)
-#include "heap/heap_visitor.h"
-#endif
 #include "hybrid/ecma_vm_interface.h"
 #include "libarkbase/macros.h"
 #include <node_api.h>
@@ -48,14 +45,6 @@ public:
      * @returns status of `napi_delete_reference` function execution
      */
     napi_status NapiDeleteReference(napi_ref ref);
-#if defined(ARK_HYBRID)
-    /**
-     * @brief Method use internal ecma interface to start ecma gc marking from specific reference
-     * @param ref: ecma vm napi ref you want to start gc marking with
-     * @param visitor: mark object callback.
-     */
-    virtual void MarkFromObject([[maybe_unused]] napi_ref ref, [[maybe_unused]] const common::RefFieldVisitor &visitor);
-#endif
     /**
      * @brief Method use internal ecma interface to start ecma gc marking from specific reference
      * @param ref: ecma vm napi ref you want to start gc marking with

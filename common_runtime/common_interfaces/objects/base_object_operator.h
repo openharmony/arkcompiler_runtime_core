@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,12 +41,8 @@ public:
     virtual size_t GetSize(const BaseObject *object) const = 0;
     // Check is valid object.
     virtual bool IsValidObject(const BaseObject *object) const = 0;
-    // Iterate object field, and skit the weak referent, ONLY used in interop.
-    virtual void ForEachRefFieldSkipReferent(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field.
     virtual void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
-    // Iterate XRef.
-    virtual void IterateXRef(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Iterate object field And Get Object Size.
     virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor) const = 0;
     // Get forwarding pointer.

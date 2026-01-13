@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/runtime.h"
-#include "objects/base_type.h"
+#include "common_interfaces/objects/base_type.h"
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 #include "ets_vm.h"

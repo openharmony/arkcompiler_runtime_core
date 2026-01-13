@@ -221,13 +221,17 @@ ark_gen_file("ark_asm_ets_meta_gen_h") {
 config("runtime") {
   include_dirs = [
     "$ark_root/plugins/ets/runtime",
-    "$ark_root/../common_interfaces",
   ]
   configs = [
     "$ark_es2panda_root:libes2panda_public_config",
     "$ark_root/assembler:arkassembler_public_config",
     "$ark_root/libarkfile:arkfile_public_config",
   ]
+  if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
+    include_dirs += [ "$ark_root/../common_runtime" ]
+  } else {
+    configs += [ "$common_runtime_root:common_runtime_public_config" ]
+  }
 }
 
 config("runtime_interpreter_impl") {

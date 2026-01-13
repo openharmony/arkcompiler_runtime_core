@@ -55,15 +55,6 @@ config("arkruntime_public_config") {
   ]
 
   include_dirs += platform_include_dirs
-  include_dirs += [ "$ark_root/../common_interfaces" ]
-
-  if (ark_hybrid) {
-    include_dirs += [ "$ark_root/../common_interfaces" ]
-    cflags_cc = [
-      "-Wno-gnu-anonymous-struct",
-      "-Wno-nested-anon-types",
-    ]
-  }
 
   configs = [
     "$ark_root/libarkbase:arkbase_public_config",
@@ -72,6 +63,11 @@ config("arkruntime_public_config") {
     "$ark_root/compiler:arkcompiler_public_config",
   ]
   configs += plugin_runtime_configs
+  if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
+    include_dirs += [ "$ark_root/../common_runtime" ]
+  } else {
+    configs += [ "$common_runtime_root:common_runtime_public_config" ]
+  }
 }
 
 if (!ark_static_standalone_build) {
@@ -637,7 +633,7 @@ ohos_shared_library("libarkruntime") {
   deps = [ ":libarkruntime_set_static" ]
 
   if (ark_hybrid) {
-    external_deps = [ "ets_runtime:libark_jsruntime" ]
+    deps += [ "$common_runtime_root:libcommon_runtime" ]
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
@@ -657,12 +653,13 @@ ohos_shared_library("libarkruntime") {
 
 ohos_shared_library("libarkruntime_host") {
   public_configs = [ ":ark_integrate_public_config" ]
+  deps = []
   if (current_toolchain == host_toolchain) {
-    deps = [ ":libarkruntime_set_static_host" ]
+    deps += [ ":libarkruntime_set_static_host" ]
   }
 
   if (ark_hybrid) {
-    external_deps = [ "ets_runtime:libark_jsruntime" ]
+    deps += [ "$common_runtime_root:libcommon_runtime" ]
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||

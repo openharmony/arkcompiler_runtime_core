@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include "static_type_converter.h"
-#include "objects/base_type.h"
+#include "plugins/ets/runtime/static_type_converter.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
@@ -23,6 +22,7 @@
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "common_interfaces/objects/base_type.h"
 
 namespace ark::ets {
 StaticTypeConverter StaticTypeConverter::stcTypeConverter_;

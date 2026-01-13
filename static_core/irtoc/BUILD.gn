@@ -24,7 +24,6 @@ if (enable_irtoc) {
       "$root_build_dir/generated",
       "$target_gen_dir",
       "$ark_root/irtoc",
-      "$ark_root/../common_interfaces",
     ]
 
     cflags_cc = [
@@ -33,8 +32,14 @@ if (enable_irtoc) {
       "-isystem",
       rebase_path("$ark_third_party_root/elfio/elfio", root_build_dir),
     ]
+    configs = []
     if (ark_standalone_build || ark_static_standalone_build) {
-      configs = [ "$ark_third_party_root/elfio:elfio_public_config" ]
+      configs += [ "$ark_third_party_root/elfio:elfio_public_config" ]
+    }
+    if (defined(ark_static_standalone_build) && ark_static_standalone_build) {
+      include_dirs += [ "$ark_root/../common_runtime" ]
+    } else {
+      configs += [ "$common_runtime_root:common_runtime_public_config" ]
     }
   }
 

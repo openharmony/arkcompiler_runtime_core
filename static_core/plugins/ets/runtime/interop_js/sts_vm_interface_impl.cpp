@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,37 +16,10 @@
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
-#if defined(ARK_HYBRID)
-#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
-#include "native_engine/native_reference.h"
-#include "plugins/ets/runtime/interop_js/interop_context.h"
-#endif
-
 namespace ark::ets::interop::js {
 
 thread_local STSVMInterfaceImpl::XGCSyncState STSVMInterfaceImpl::xgcSyncState_ =
     STSVMInterfaceImpl::XGCSyncState::NONE;
-
-#if defined(ARK_HYBRID)
-void STSVMInterfaceImpl::MarkFromObject(void *obj, const common::RefFieldVisitor &visitor)
-{
-    if (obj == nullptr) {
-        return;
-    }
-    auto *nativeRef = static_cast<NativeReference *>(obj);
-    auto *refRef = static_cast<ets_proxy::SharedReference **>(nativeRef->GetData());
-    // Atomic with acquire order reason: load visibility after shared reference initialization in mutator thread
-    auto *sharedRef = AtomicLoad(refRef, std::memory_order_acquire);
-    // Reference is not initialized yet, will be processed on Remark phase
-    if (sharedRef == nullptr) {
-        return;
-    }
-    if (sharedRef->MarkIfNotMarked()) {
-        EtsObject *etsObj = sharedRef->GetEtsObject();
-        visitor(reinterpret_cast<common::RefField<> &>(etsObj));  // This is only mark, so could pass a stack reference
-    }
-}
-#endif
 
 void STSVMInterfaceImpl::MarkFromObject(void *obj)
 {

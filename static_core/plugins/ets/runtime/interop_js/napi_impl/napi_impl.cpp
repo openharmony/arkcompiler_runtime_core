@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#if defined(ARK_HYBRID)
-#include "heap/heap_visitor.h"
-#endif
 #include "libarkbase/macros.h"
 #include "interop_js/napi_impl/napi_impl.h"
 #include "interop_js/napi_impl/detail/enumerate_napi.h"
@@ -62,17 +59,6 @@ napi_create_xref([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value valu
                        << " is implemented in later versions of OHOS, please update." << std::endl;
     return napi_ok;
 }
-
-#if defined(ARK_HYBRID)
-napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
-napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref,
-                      [[maybe_unused]] std::function<void(uintptr_t)> &visitor)
-{
-    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
-                       << " is implemented in later versions of OHOS, please update." << std::endl;
-    return napi_ok;
-}
-#endif
 
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_mark_from_object([[maybe_unused]] napi_env env, [[maybe_unused]] napi_ref ref)
