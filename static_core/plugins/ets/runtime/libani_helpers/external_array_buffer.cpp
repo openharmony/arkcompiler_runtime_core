@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,11 +54,20 @@ private:
 
 }  // anonymous namespace
 
+static bool IsAligned(void *data)
+{
+    return reinterpret_cast<uintptr_t>(data) % alignof(uintptr_t) == 0;
+}
+
 extern "C" ani_status CreateExternalArrayBuffer(ani_env *env, void *externalData, ani_size length,
                                                 ani_arraybuffer *resultBuffer)
 {
     if (env == nullptr || externalData == nullptr || resultBuffer == nullptr ||
         length > static_cast<size_t>(std::numeric_limits<ani_int>::max())) {
+        return ANI_INVALID_ARGS;
+    }
+
+    if (!IsAligned(externalData)) {
         return ANI_INVALID_ARGS;
     }
 
@@ -89,6 +98,10 @@ extern "C" ani_status CreateFinalizableArrayBuffer(ani_env *env, void *externalD
 {
     if (env == nullptr || externalData == nullptr || finalizer == nullptr || resultBuffer == nullptr ||
         length > static_cast<size_t>(std::numeric_limits<ani_int>::max())) {
+        return ANI_INVALID_ARGS;
+    }
+
+    if (!IsAligned(externalData)) {
         return ANI_INVALID_ARGS;
     }
 
