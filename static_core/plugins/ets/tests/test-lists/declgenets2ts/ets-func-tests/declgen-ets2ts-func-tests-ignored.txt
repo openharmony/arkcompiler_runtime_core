@@ -164,6 +164,7 @@ std/containers/WeakMapGCTest.ets
 std/containers/WeakSetGCTest.ets
 std/core/ArrayTypeAllTests.ets
 std/core/ClassTypeAllTests.ets
+std/core/ClassGetInstanceMethodByNameOverriding.ets
 std/core/FunctionTypeAllTests.ets
 std/core/InterfaceTypeAllTests.ets
 std/core/NullTypeAllTests.ets
