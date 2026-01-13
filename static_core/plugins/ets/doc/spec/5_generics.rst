@@ -682,48 +682,35 @@ Different cases of type argument inference are represented in the examples below
     function bar <T> (p: number) {}
     bar (1) // Compile-time error: type argument cannot be inferred
 
-
 Implicit instantiation is only possible for generic functions and methods.
 
-In case when the generic class or interface method has its own type parameter
-with the its type parameter default (see :ref:`Type Parameter Default`) equal
-to the class or interface type parameter, the implicit generic instantiation of
-such method will use the argument types for the method type argument inference
-and class or interface type argument when the context, defined by parameter
-types, has no information how to infer the type argument.
-Example below illustartes that:
+If a method of a generic class or interface
+*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with 
+default type (see :ref:`Type Parameter Default`) that equals ``T``:sub:`i`,
+and an implicit generic instantion of this method provides no information
+to infer a type argument, then the type argument correspondent to ``T``:sub:`i`
+is used as the type argument for ``U``.
 
-.. Reversed revision of this paragraph -- PR#52, Branch 523:
-   In case a generic class or interface method has its own type parameter that
-   is default (see :ref:`Type Parameter Default`) and equals the type parameter
-   of the class or the interface, then implicit generic instantiation of such a
-   method infers method argument types by using argument types. If the context
-   defined by    parameter types has no information required to infer type
-   arguments, then    class or interface type arguments are used instead. The
-   situation is represented by the following example:
+This situation is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
     class A <T> {  // T is the class type parameter
-        foo<U = T> (p: U) {} /* Method 'foo' has its own type parameter with
-                                   the default type parameter */
-        bar<U = T> () { // No parameters - no context
-           let l: U = this.field
-        } 
-        
+        foo<U = T> (p: U) {} // U is own type paramater with default T
+        bar<V = T> () {}     // V is own type paramater with default T
     }
 
-    // T1 and T2  are two distinct types
+    // Assume that X1 and X2 are two distinct types
+    let a = new A<X1>
 
-    (new A<T1>).foo (new T2) // implicit instantiation of 'foo', type of argument is used
-    // The same as explicit instantiation
-    (new A<T1>).foo<T2> (new T2)
+    // implicit instantiation:
+    a.foo(new X2) // type argument is inferred from ``new X2``
+    a.bar()       // class type argument X1 is used as no other information is provided
 
-
-    (new A<T1>).bar()  // bar is instantiated as bar<T1>, type of class type argument is used
-    (new A<T1>).bar<T2> () // explicit instantiation
-
+    // explicit instantiation:
+    a.foo<X2> (new X2) // explicit type argument is used
+    a.bar<X2> ()       // explicit type argument is used
 
 .. index::
    instantiation
