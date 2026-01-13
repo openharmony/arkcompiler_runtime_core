@@ -36,7 +36,7 @@ The |LANG| *value types* can be represented in a binary file in **one** of the f
 - ``PrimitiveType`` in :ref:`Type Descriptor <RT Type Descriptor>`, :ref:`FieldType <RT FieldType>`, or :ref:`Shorty <RT Shorty>`; or
 - Corresponding predefined *reference type*.
 
-The :ref:`Type Descriptor <RT Type Descriptor>` of a *reference type* type is ``RefType``.
+The :ref:`Type Descriptor <RT Type Descriptor>` of a *reference type* type matches ``RefType``.
 Mapping between the |LANG| type, *primitive type* and :ref:`Fully Qualified Name <RT Fully Qualified Name>`
 of a *reference type* is presented in the table below:
 
@@ -100,7 +100,7 @@ Type ``Any``
 ============
 
 The |LANG| type ``Any`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``Y``.
 
 |
@@ -111,7 +111,7 @@ Type ``Object``
 ===============
 
 The |LANG| type ``Object`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Object``.
 
 |
@@ -122,7 +122,7 @@ Type ``never``
 ==============
 
 The |LANG| type ``never`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``N``.
 
 |
@@ -143,7 +143,7 @@ Type ``null``
 =============
 
 The |LANG| type ``null`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Null``.
 
 |
@@ -154,7 +154,7 @@ Type ``string``
 ===============
 
 The |LANG| type ``string`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.String``.
 
 |
@@ -165,33 +165,51 @@ Type ``bigint``
 ===============
 
 The |LANG| type ``bigint`` is represented in a binary file with the predefined
-:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.BigInt``.
 
 |
 
+.. _RT Array types:
+
+Array types
+===========
+
 .. _RT Resizable Array Types:
 
 Resizable Array Types
-=====================
+---------------------
 
 The |LANG| *resizable array types* are represented in a binary file by the
-predefined :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is
+predefined :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches
 ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Array``.
-
-|
 
 .. _RT Fixed-Size Array Types:
 
 Fixed-Size Array Types
-======================
+----------------------
 
 The |LANG| *fixed-size array types* are represented in a binary file by a predefined :ref:`Class <RT Class>`.
 Each distinct *fixed-size array type* has a unique correspondent predefined :ref:`Class <RT Class>`.
-The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``ArrayType``
-with :ref:`Fully Qualified Name <RT Fully Qualified Name>` of the component
-type being the :ref:`Fully Qualified Name <RT Fully Qualified Name>` of the *component type* of a
-*fixed-size array type*.
+The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``ArrayType``.
+:ref:`Fully Qualified Name <RT Fully Qualified Name>` of the component type and of the *component type* of a
+*fixed-size array type* are the same.
+
+|
+
+.. _RT Tuple Types:
+
+Tuple Types
+===========
+
+The |LANG| *tuple types* are represented in a binary file by a
+predefined :ref:`Class <RT Class>`. :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches
+``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Tuple1``,
+``std.core.Tuple2``, ..., ``std.core.Tuple16``, or ``std.core.TupleN``
+that depends on the number of constituent types of a *tuple type*.
+
+**Constraint**: As shown above, the |LANG| runtime does not distinguish between tuple
+types with a number of constituent types greater than ``16``.
 
 |
 
@@ -201,29 +219,27 @@ Functional Types
 ================
 
 The |LANG| *functional types* are represented in a binary file by a
-predefined :ref:`Class <RT Class>` that depends on the arity of the *functional type*
+predefined :ref:`Class <RT Class>` that depends on the number of parameters of the *functional type*
 and on the presence of a *rest parameter* in the signature.
 The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` for *functional types* without a
-*rest parameter* is ``RefType`` with the :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+*rest parameter* matches ``RefType`` with the :ref:`Fully Qualified Name <RT Fully Qualified Name>`
 ``std.core.Function0``, ``std.core.Function1``, ..., ``std.core.Function16``, or ``std.core.FunctionN``.
-Exact :ref:`Type Descriptor <RT Type Descriptor>` depends on the arity of the *functional type*.
+The exact :ref:`Type Descriptor <RT Type Descriptor>` depends on the number of parameters of the *functional type*.
 However, the :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` for *functional types* with a
-*rest parameter* is ``RefType`` with the :ref:`Fully Qualified Name <RT Fully Qualified Name>`
-``std.core.FunctionR0``, ``std.core.FunctionR1``, ..., ``std.core.FunctionR15`` or ``std.core.FunctionR16``.
-Exact :ref:`Type Descriptor <RT Type Descriptor>` depends on the arity of the *functional type*.
-
-|
+*rest parameter* matches ``RefType`` with the :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``std.core.FunctionR0``, ``std.core.FunctionR1``, ..., ``std.core.FunctionR15``, or ``std.core.FunctionR16``.
+The exact :ref:`Type Descriptor <RT Type Descriptor>` depends on the number of parameters of the *functional type*.
 
 .. _RT Functional Objects:
 
 Functional Objects
-==================
+------------------
 
 The |LANG| *functional objects* are represented in a binary file by a predefined
 :ref:`Class <RT Class>`. Each *functional object* has a unique correspondent predefined :ref:`Class <RT Class>`.
 ``fields`` of this :ref:`Class <RT Class>`
 contain references captured by the *functional object*. 
-``methods`` of this :ref:Class <Class> contain auxiliary functions needed to invoke the
+``methods`` of this :ref:`Class <RT Class>` contain auxiliary functions needed to invoke the
 *functional object*. The :ref:`Method <RT Method>` that contains the body of the *functional object*
 is added to the ``methods`` of the enclosing class of the
 *functional object*. It is to allow the body of the *functional object* to access private members of the enclosing class.
@@ -236,13 +252,83 @@ is added to the ``methods`` of the enclosing class of the
 
 |
 
-.. _RT Async:
+.. _RT Union Types:
 
-Async
-=====
+Union Types
+===========
 
-TBD, since the semantics will be reworked with introduction of the stackless
-coroutines.
+The |LANG| *union types* are represented in a binary file by a predefined :ref:`Class <RT Class>`.
+Each *union type* has a unique correspondent predefined :ref:`Class <RT Class>`.
+:ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``UnionType``
+with *qualified names* of the *component types*
+being the *qualified names* of the *component types* of the *union type*.
+
+|
+
+.. _RT Utility Types:
+
+Utility Types
+=============
+
+.. _RT Awaited:
+
+Awaited
+-------
+
+The |LANG| type ``Awaited`` is fully expanded at compile time, and does not appear
+at runtime.
+
+.. _RT NonNullable:
+
+NonNullable
+-----------
+
+The |LANG| type ``NonNullable`` is fully expanded at compile time, and does not
+appear at runtime.
+
+.. _RT Partial:
+
+Partial
+-------
+
+The |LANG| type ``Partial`` is represented in a binary file by a predefined :ref:`Class <RT Class>`.
+Each ``Partial`` type has a unique correspondent predefined :ref:`Class <RT Class>`.
+:ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
+the *unqualified name* ``%%partial-typeName``, where ``typeName`` is
+an *unqualified name* of the ``Partial``'s type argument.
+
+.. _RT Required:
+
+Required
+--------
+
+The |LANG| type ``Required`` is fully expanded at compile time, and does not appear
+at runtime.
+
+.. _RT Readonly:
+
+Readonly
+--------
+
+The |LANG| type ``Readonly`` is fully expanded at compile time, and does not appear
+at runtime.
+
+.. _RT Record:
+
+Record
+------
+
+The |LANG| type ``Record`` is represented in a binary file by a predefined
+:ref:`Class <RT Class>`. :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
+*qualified name* ``std.core.Record``.
+
+.. _RT ReturnType:
+
+ReturnType
+----------
+
+The |LANG| type ``ReturnType`` is fully expanded at compile time, and does not
+appear at runtime.
 
 |
 
@@ -263,7 +349,12 @@ correspond to all *class field declarations* of the *class*. ``methods`` of this
 *class accessor declarations* of the *class*. Additionally, for each
 *constructor declaration* of the *class* a method is generated with the name
 ``<ctor>`` and for all *static block* in *class* the single *static method*
-is generated with name ``<cctor>``.
+is generated with the name ``<cctor>``.
+
+A :ref:`Method <RT Method>` with the name ``<ctor>`` is generated for each
+*constructor declaration* of the *class*.
+A *static* (``access_flags | ACC_STATIC == 1``) :ref:`Method <RT Method>` with the name ``<cctor>`` is generated for each
+*static block* in the *class*.
 
 .. _RT Class Extension Clause:
 
@@ -278,8 +369,8 @@ of the :ref:`Class <RT Class>`.
 Class Implementation Clause
 ---------------------------
 
-*Direct superinterfaces* of the *class* stored in the ``class_data`` field of
-the :ref:`Class <RT Class>`. ``INTERFACES`` tag is used to store *direct superinterfaces*.
+*Direct superinterfaces* of the *class* stored in the field ``class_data`` of
+the :ref:`Class <RT Class>`. The tag ``INTERFACES`` is used to store *direct superinterfaces*.
 
 .. _RT Class Field:
 
@@ -346,10 +437,11 @@ name equal to the *method* name in the source code. Modifiers of the
 Class Accessor
 --------------
 
-Each *class accessor declaration* is lowered to a :ref:`Method <RT Method>`. For *getter*
-of property ``propName`` :ref:`Method <RT Method>` name will be ``%%get-propName``. For
-*setter* of property ``propName`` :ref:`Method <RT Method>` name will be
-``%%set-propName``.
+Each *class accessor declaration* is lowered to a :ref:`Method <RT Method>`.
+The :ref:`Method <RT Method>` name of a getter for the property ``propName``
+is ``%%get-propName``.
+The :ref:`Method <RT Method>` name of a setter for the property ``propName``
+is ``%%set-propName``.
 
 |
 
@@ -366,7 +458,7 @@ Interface Declaration
 Each *interface declaration* is lowered to a :ref:`Class <RT Class>` with
 an *unqualified name* equal to the *interface* name in the source code.
 This :ref:`Class <RT Class>` is an *interface*
-(``access_flags | ACC_INTERFACE == 1``,``access_flags | ACC_ABSTRACT == 1``).
+(``access_flags | ACC_INTERFACE == 1``, ``access_flags | ACC_ABSTRACT == 1``).
 ``fields`` of this :ref:`Class <RT Class>` must be empty. ``methods`` of this :ref:`Class <RT Class>`
 correspond to all *interface properties* and *interface method declarations* of
 the *interface*.
@@ -384,10 +476,7 @@ The representation of *direct superinterfaces* of an *interface* and of
 Interface Property
 ------------------
 
-The binary representation of an *interface property* depends on the form in which it is declared.
-The representation of a property declared as an explicit *accessor* is the same as of :ref:`Class Accessor <RT Class Accessor>`.
-The representation of a property declared as a field is a *setter* and *getter* pair. The representation of both of these accessors
-is the same as of the :ref:`Class Accessor <RT Class Accessor>`.
+The representation of an interface accessor and of the :ref:`Class Accessor <RT Class Accessor>` is the same.
 
 .. _RT Interface Method:
 
@@ -410,114 +499,10 @@ an *unqualified name* equal to the *enumeration type* name in the source code.
 ``fields`` of this :ref:`Class <RT Class>` correspond to all
 *enum constants* of the *enumeration type*.
 ``methods`` of this class correspond to the *enumeration methods* of the *enumeration type*.
-Additionally, a single *static method* with name ``<cctor>`` is generated for this
+A single *static method* with the name ``<cctor>`` is generated additionally for this
 :ref:`Class <RT Class>`. This *static method* corresponds to the *enumeration type* static constructor.
 This :ref:`Class <RT Class>` extends the :ref:`Class <RT Class>` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.BaseEnum``.
-
-|
-
-.. _RT Tuple Types:
-
-Tuple Types
-===========
-
-The |LANG| *tuple types* are represented in a binary file by a
-predefined :ref:`Class <RT Class>`. :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is
-``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Tuple1``,
-``std.core.Tuple2``, ..., ``std.core.Tuple16``, or ``std.core.TupleN``
-that depends on the arity of the *tuple type*.
-
-**Constraint**: As shown above, the |LANG| runtime does not distinguish between tuple types with an arity higher than ``16``.
-
-|
-
-.. _RT Union Types:
-
-Union Types
-===========
-
-The |LANG| *union types* are represented in a binary file by a predefined :ref:`Class <RT Class>`.
-Each *union type* has a unique correspondent predefined :ref:`Class <RT Class>`.
-:ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``UnionType``
-with *qualified names* of the *component types*
-being the *qualified names* of the *component types* of the *union type*.
-
-|
-
-.. _RT Access To Common Union Members:
-
-Access To Common Union Members
-==============================
-
-TBD, since the semantics will be reworked.
-
-|
-
-.. _RT Utility Types:
-
-Utility Types
-=============
-
-.. _RT Awaited:
-
-Awaited
--------
-
-The |LANG| type ``Awaited`` is fully expanded at compile-time and does not appear
-at runtime.
-
-.. _RT NonNullable:
-
-NonNullable
------------
-
-The |LANG| type ``NonNullable`` is fully expanded at compile-time and does not
-appear at runtime.
-
-.. _RT Partial:
-
-Partial
--------
-
-The |LANG| type ``Partial`` is represented in a binary file by a predefined :ref:`Class <RT Class>`.
-Each ``Partial`` type has a unique correspondent predefined :ref:`Class <RT Class>`.
-:ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
-the *unqualified name* ``%%partial-typeName``, where ``typeName`` is
-an *unqualified name* of the ``Partial``'s type argument.
-
-.. _RT Required:
-
-Required
---------
-
-The |LANG| type ``Required`` is fully expanded at compile-time and does not appear
-at runtime.
-
-.. _RT Readonly:
-
-Readonly
---------
-
-The |LANG| type ``Readonly`` is fully expanded at compile-time and does not appear
-at runtime.
-
-.. _RT Record:
-
-Record
-------
-
-The |LANG| type ``Record`` is represented in a binary file by a predefined
-:ref:`Class <RT Class>`. :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` is ``RefType`` with
-*qualified name* ``std.core.Record``.
-
-.. _RT ReturnType:
-
-ReturnType
-----------
-
-The |LANG| type ``ReturnType`` is fully expanded at compile-time and does not
-appear at runtime.
 
 |
 
@@ -528,7 +513,7 @@ Namespaces And Modules
 
 Each *namespace declaration* is lowered to a :ref:`Class <RT Class>` with an
 *unqualified name* equal to the *namespace* name in the source code. This
-:ref:`Class <RT Class>` is *abstract* (``access_flags | ACC_ABSTRACT == 1``), has
+:ref:`Class <RT Class>` is *abstract* (``access_flags | ACC_ABSTRACT == 1``), and has
 an :ref:`Annotation <RT Annotation>` with the :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``ets.annotation.Module``.
 ``fields`` of this :ref:`Class <RT Class>` correspond to all *variable declarations* and
 *constant declarations* of the *namespace*. ``methods`` of this :ref:`Class <RT Class>`
