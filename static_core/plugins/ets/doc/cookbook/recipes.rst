@@ -1760,10 +1760,10 @@ Do not use JSX since no alternative is provided to rewrite it.
 
 |CB_ERROR|
 
-|LANG| allows unary operators to work on numeric types only. A compile-time
-error occurs if these operators are applied to a non-numeric type. Unlike |TS|,
-|LANG| does not support implicit casting of strings. Use explicit casting for
-strings instead  in |LANG|.
+|LANG| allows unary operators to work on bigint and numeric types only. A
+compile-time error occurs if these operators are applied to other types. Unlike
+|TS|, |LANG| does not support implicit casting for strings. Use explicit casting
+for strings instead  in |LANG|.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1777,6 +1777,7 @@ strings instead  in |LANG|.
     let e = ~5        // -6 as number
     let f = ~"5"      // -6 as number
     let g = +"string" // NaN as number
+    let h:bigint = -5n // -5n as bigint
 
     function returnTen(): string {
         return "-10"
@@ -1801,6 +1802,7 @@ strings instead  in |LANG|.
     let e = ~5        // -6 as number
     let f = ~"5"      // Compile-time error
     let g = +"string" // Compile-time error
+    let h:bigint = -5n // -5n as bigint
 
     function returnTen(): string {
         return "-10"

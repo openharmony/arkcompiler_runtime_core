@@ -4374,9 +4374,9 @@ result of a *postfix increment expression* is a value, not a variable.
 If the evaluation of the operand *expression* completes normally at runtime,
 then:
 
--  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Numeric Casting Conversions`); and
--  The sum is stored back into the variable.
+-  The value *1* of the same type as variable is added to the value of the
+   variable; and
+-  The result of addition is stored back into the variable.
 
 .. index::
    postfix
@@ -4391,7 +4391,6 @@ then:
    numeric type
    value
    operand
-   numeric casting conversion
 
 Otherwise, the *postfix increment expression* completes abruptly, and no
 incrementation occurs.
@@ -4399,16 +4398,18 @@ incrementation occurs.
 The  value of the *postfix increment expression* is the value of the variable
 *before* a new value is stored.
 
-.. index::
-   variable
-   numeric types conversion
-   postfix
-   increment expression
-   abrupt completion
-   expression
-   incrementation
+The operation of postfix increment is represented in the following code example:
 
-|
+.. code-block:: typescript
+
+  let a: short  = 1
+  let b: float  = 1.5f
+  let c: bigint = 1n
+
+  a++ // result '1', 'a' becomes '2' ('1 + 1')
+  b++ // result '1.5f', 'b' becomes '2.5f'  ('1.5f + 1f')
+  c++ // result '1n', 'c' becomes '2n' ('1n + 1n')
+
 
 .. _Postfix Decrement:
 
@@ -4445,15 +4446,38 @@ If evaluation of the operand expression completes at runtime, then:
    completion
    evaluation
 
--  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Numeric Casting Conversions`); and
--  The sum is stored back into the variable.
+-  The value '*1*' of the same type as a variable is subtracted from the value
+   of the variable; and
+-  The result of the subtraction is stored back into the variable.
 
 Otherwise, the *postfix decrement expression* completes abruptly, and
 no decrementation occurs.
 
 The value of the *postfix decrement expression* is the value of the variable
 *before* a new value is stored.
+
+The operation of postfix decrement is represented in the following code example:
+
+.. code-block:: typescript
+
+  let a: short  = 1
+  let b: float  = 1.5f
+  let c: bigint = 1n
+
+  a-- // result '1', 'a' becomes '0' ('1 - 1')
+  b-- // result '1.5f', 'b' becomes '0.5f'  ('1.5f - 1f')
+  c-- // result '1n', 'c' becomes '0n' ('1n - 1n')
+
+.. index::
+   variable
+   numeric types conversion
+   postfix
+   increment expression
+   abrupt completion
+   expression
+   incrementation
+
+|
 
 .. index::
    subtraction
@@ -4502,15 +4526,28 @@ If evaluation of the operand *expression* completes normally at runtime, then:
    conversion
    convertibility
 
--  The value *1* is added to the value of the variable by using necessary
-   conversions (see :ref:`Numeric Casting Conversions`); and
--  The sum is stored back into the variable.
+-  The value *1* of the same type as a variable is added to the value of the
+   variable; and
+-  The result of the addition is stored back into the variable.
 
 Otherwise, the *prefix increment expression* completes abruptly, and no
 incrementation occurs.
 
 The  value of the *prefix increment expression* is the value of the variable
 *after* a new value is stored.
+
+The operation of prefix increment is represented in the following code example:
+
+.. code-block:: typescript
+
+  let a: short  = 1
+  let b: float  = 1.5f
+  let c: bigint = 1n
+
+  ++a // result '2', 'a' becomes '2' ('1 + 1')
+  ++b // result '2.5f', 'b' becomes '2.5f'  ('1.5f + 1f')
+  ++c // result '2n', 'c' becomes '2n' ('1n + 1n')
+
 
 .. index::
    value
@@ -4554,13 +4591,27 @@ result of a prefix decrement expression is a value, not a variable.
 
 If evaluation of the operand *expression* completes normally at runtime, then:
 
--  The value *1* is subtracted from the value of the variable by using
-   necessary conversions (see :ref:`Numeric Casting Conversions`); and
--  The sum is stored back into the variable.
+-  The value *1* of the same type as a variable is subtracted from the value of the
+   variable; and
+-  The result of the subtraction is stored back into the variable.
 
 Otherwise, the *prefix decrement expression* completes abruptly, and no
-decrementation occurs. The value of the *prefix decrement expression* remains
-the value of the variable *after* a new value is stored.
+decrementation occurs.
+
+The value of a *prefix decrement expression* is the value of the variable
+*after* a new value is stored.
+ 
+The operation of prefix decrement is represented in the following code example:
+
+.. code-block:: typescript
+
+  let a: short  = 1
+  let b: float  = 1.5f
+  let c: bigint = 1n
+
+  --a // result '0', 'a' becomes '0' ('1 - 1')
+  --b // result '0.5f', 'b' becomes '0.5f'  ('1.5f - 1f')
+  --c // result '0n', 'c' becomes '0n' ('1n - 1n')
 
 .. index::
    evaluation
@@ -4588,21 +4639,20 @@ Unary Plus
     frontend_status: Done
 
 *Unary plus expression* is an expression preceded by the operator ``'+'``.
-Type of the operand expression with the unary operator ``'+'`` must
-be convertible  (see :ref:`Implicit Conversions`) to a numeric type (see
-:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
+Type of the operand expression with the unary operator ``'+'`` must be 
+either convertible (see :ref:`Implicit Conversions`) to a numeric type (see
+:ref:`Numeric Types`) or of ``bigint`` type. Otherwise,
+a :index:`compile-time error` occurs.
 
-A numeric types conversion is performed on the operand to ensure that the
-resultant type is that of the unary plus expression. The result of a unary plus
-expression is always a value, not a variable (even if the result of the operand
-expression is a variable).
+The result of a unary plus expression is always a value, not a variable (even if
+the result of the operand expression is a variable).
 
 Numeric widening occurs on the *expression* before a *unary plus* operator
 is applied. The type of the *unary plus* is determined as follows:
 
   - Type of result is ``int`` for ``byte``, ``short``, and ``int``;
   - Type of result is the same as that of the initial *expression* for ``long``,
-    ``float``, and ``double``.
+    ``float``, ``double``, and ``bigint``.
 
 
 .. index::
@@ -4634,16 +4684,17 @@ Unary Minus
     todo: let a : Double = Double.Nan; a = -a; (assertion)
 
 *Unary minus expression* is an expression preceded by the operator ``'-'``.
-Type of the operand expression with the unary operator ``'-'`` must
-be convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
-:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
+Type of an operand expression with the unary operator ``'-'`` must
+be either convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
+:ref:`Numeric Types`) or of a ``bigint`` type. Otherwise,
+a :index:`compile-time error` occurs.
 
 Numeric widening occurs on the *expression* before a *unary minus* operator is
 applied. The type of the *unary minus* is determined as follows:
 
 - Type of result is `int` for ``byte``, ``short``, and ``int``;
 - Type of result is the same as that of the initial *expression* for ``long``,
-  ``float``, and ``double``.
+  ``float``, ``double``, and ``bigint``.
 
 The result of a unary minus expression is a value, not a variable (even if the
 result of the operand expression is a variable).
@@ -4683,6 +4734,8 @@ range of two’s-complement value is not symmetric. The same maximum negative
 number results from the negation of the maximum negative *int* or *long*.
 In that case, an overflow occurs but throws no error. For any integer value
 *x*, *-x* is equal to *(~x)+1*.
+
+The negation of bigint values and subtraction from the value `0n` are the same.
 
 The negation of floating-point values is *not* the same as subtraction from
 zero (if *x* is *+0.0*, then *0.0-x* is *+0.0*, however *-x* is *-0.0*).
@@ -4736,6 +4789,7 @@ Type of result is determined as follows:
 
 - ``int`` for ``byte``, ``short``, ``int``, and ``float``.
 - ``long`` for ``long`` and ``double``.
+- ``bigint`` for ``bigint``.
 
 The result of a unary bitwise complement expression is a value, not a variable
 (even if the result of the operand expression is a variable).
@@ -4743,6 +4797,38 @@ The result of a unary bitwise complement expression is a value, not a variable
 The value of a unary bitwise complement expression at runtime is the bitwise
 complement of the value of the operand. In all cases, *~x* equals
 *(-x)-1*.
+
+It is represented by the following example:
+
+.. code-block:: typescript
+
+  let b: byte  = 2
+  let s: short  = 2
+  let i: int = 2
+  let f: float = 2.0f
+
+  let l: long  = 2
+  let d: double  = 2.0
+
+  let B: bigint = 2n
+
+  let rb = ~b
+  console.log(rb, typeof rb) // prints '-3 int'
+  let rs = ~s
+  console.log(rs, typeof rs) // prints '-3 int'
+  let ri = ~i
+  console.log(ri, typeof ri) // prints '-3 int'
+  let rf = ~f
+  console.log(rf, typeof rf) // prints '-3 int'
+
+  let rl = ~l
+  console.log(rl, typeof rl) // prints '-3 long'
+  let rd = ~d
+  console.log(rd, typeof rd) // prints '-3 long'
+
+  let rB = ~B
+  console.log(rB, typeof rB) // prints '-3 bigint'
+
 
 .. index::
    bitwise complement
