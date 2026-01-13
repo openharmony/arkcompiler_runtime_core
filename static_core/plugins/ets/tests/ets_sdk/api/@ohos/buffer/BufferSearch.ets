@@ -31,6 +31,8 @@ function main(): int {
     suite.addTest("Test indexOf and lastIndexOf with buffers", testIndexOfPartialMatch)
     suite.addTest("Test indexOf and lastIndexOf with buffers", testLastIndexOfPartialMatch)
     suite.addTest("Test lastIndexOf with base64", testLastIndexOfBase64)
+    suite.addTest('Test Buffer from', testBufferFrom)
+    suite.addTest('Test Buffer from error', testBufferFromError)
     
     return suite.run()
 }
@@ -120,4 +122,40 @@ function testLastIndexOfBase64() {
     let value = "World"
     const index = buf.lastIndexOf(value, 1, "base64")
     arktest.assertEQ(index, -1)
+}
+
+function testBufferFrom() {
+    let sharedArr = new ArrayBuffer(20)
+    let uint8Arr = new Uint8Array(sharedArr)
+    uint8Arr[16] = 9
+    let bufObj = buffer.from(sharedArr, 0, 20)
+    uint8Arr[15] = 10
+    arktest.assertEQ(bufObj.length, 20)
+    let compareArr: Array<int> = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 9, 0, 0, 0]
+    for(let i = 0; i < 20; i++) {
+        arktest.assertEQ(bufObj[i], compareArr[i])
+    }
+    let bufObj2 = buffer.from(sharedArr, 0, 0)
+    arktest.assertEQ(bufObj2.length, 0)
+    let bufObj3 = buffer.from(sharedArr, 10, undefined)
+    arktest.assertEQ(bufObj3.length, 10)
+    let compareArr2: Array<int> = [0, 0, 0, 0, 0, 10, 9, 0, 0, 0]
+    for(let i = 0; i < 10; i++) {
+        arktest.assertEQ(bufObj3[i], compareArr2[i])
+    }
+}
+
+function testBufferFromError() {
+    let sharedArr = new ArrayBuffer(20)
+    let uint8Arr = new Uint8Array(sharedArr)
+    uint8Arr[16] = 9
+    arktest.expectError(() => {
+        let bufObj = buffer.from(sharedArr, 0, 22)
+    }, 'The value of \"length\" is out of range. It must be >= 0 and <= 20. Received value is: 22');
+    arktest.expectError(() => {
+        let bufObj = buffer.from(sharedArr, 0, -10)
+    }, 'The value of \"length\" is out of range. It must be >= 0 and <= 20. Received value is: -10');
+    arktest.expectError(() => {
+        let bufObj = buffer.from(sharedArr, 10, 11)
+    }, 'The value of \"length\" is out of range. It must be >= 0 and <= 10. Received value is: 11');
 }
