@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,27 +13,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
-desc: Inheritance private method from superinterfaces.
-assert: A class does not inherit private or static methods from its superinterfaces.
+desc: Class C inherits all non-static accessible members from
+      its direct superclass and direct superinterfaces 
 tags: [negative, compile-only]
-expected_out: "Semantic error ESE0139: Signature foo(): Int is not visible here."
+expected_out: {{c.expected}}
 ---*/
 
-interface A {
-  private foo(): int {
-    return 1;
-  }
+class A {
+  {{c.decl|indent}}
 }
 
-class B implements A {
-  fee(): int {
-    return this.foo();
-  }
-}
+class B implements A {}
 
 function main(): void {
-  let instance: B = new B();
-
-  arktest.assertEQ( instance.fee(), 1 );
+  arktest.assertEQ( {{c.use}}, 1 );
 }
+
+{% endfor %}

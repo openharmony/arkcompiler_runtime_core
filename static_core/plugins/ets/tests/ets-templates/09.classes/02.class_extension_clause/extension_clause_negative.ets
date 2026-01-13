@@ -18,6 +18,7 @@ limitations under the License.
 /*---
 desc: negative extension clause cases
 tags: [compile-only, negative]
+expected_out: {{case.expected}}
 ---*/
 
 {{ case.decl }}
