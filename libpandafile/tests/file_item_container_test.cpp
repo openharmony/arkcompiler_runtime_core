@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -407,7 +407,7 @@ HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
     class_item->SetSourceFile(source_file);
 
     MemoryWriter mem_writer;
-
+    container.DeduplicateItems();
     ASSERT_TRUE(container.Write(&mem_writer));
 
     // Read panda file from memory
@@ -1333,5 +1333,52 @@ HWTEST(ItemContainer, ThrowIfWithCheckTest, testing::ext::TestSize.Level0)
                  "F/pandafile: Invalid file offset, checksum mismatch. The abc file has been corrupted.");
 #endif
 
+}
+
+HWTEST(ItemContainer, GetStatEmpty, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+    auto stat = container.GetStat();
+
+    EXPECT_EQ(stat.at("header_item"), sizeof(File::Header));
+    EXPECT_EQ(stat.at("class_idx_item"), 0u);
+    EXPECT_EQ(stat.at("instructions_number"), 0u);
+    EXPECT_EQ(stat.at("codesize"), 0u);
+}
+
+HWTEST(ItemContainer, GetStatClassIdxIncrease, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+    auto stat0 = container.GetStat();
+
+    // add one class
+    container.GetOrCreateClassItem("LTest;");
+    auto stat1 = container.GetStat();
+
+    EXPECT_EQ(stat1.at("class_idx_item"), stat0.at("class_idx_item") + ID_SIZE);
+}
+
+HWTEST(ItemContainer, GetStatCodeMetrics, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+
+    // create a class and a method with code
+    ClassItem *class_item = container.GetOrCreateClassItem("LCodeTest;");
+    StringItem *method_name = container.GetOrCreateStringItem("m");
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params;
+    ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
+    MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
+
+    std::vector<uint8_t> instructions {1, 2, 3, 4};
+    CodeItem *code_item = container.CreateItem<CodeItem>(0, 0, instructions);
+    code_item->SetNumInstructions(instructions.size());
+    method_item->SetCode(code_item);
+    code_item->AddMethod(method_item);
+
+    auto stat = container.GetStat();
+
+    EXPECT_EQ(stat.at("instructions_number"), instructions.size());
+    EXPECT_EQ(stat.at("codesize"), code_item->GetCodeSize());
 }
 }  // namespace panda::panda_file::test

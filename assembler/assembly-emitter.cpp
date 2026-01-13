@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1369,7 +1369,7 @@ bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &
 }
 
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
-                              const EmitterConfig &emitterConfig)
+                              const EmitterConfig &emitterConfig, std::map<std::string, size_t> *stat)
 {
     ASSERT(!progs.empty());
 
@@ -1408,13 +1408,21 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
         queue_emit = nullptr;
     }
 
+    if (!emitterConfig.isDebug) {
+        items.DeduplicateItems();
+    }
+
+    if (stat != nullptr) {
+        *stat = items.GetStat();
+    }
+
     auto writer = FileWriter(filename);
     if (!writer) {
         SetLastError("Unable to open" + filename + " for writing");
         return false;
     }
 
-    return items.Write(&writer, !emitterConfig.isDebug);
+    return items.Write(&writer);
 }
 
 /* static */
@@ -1464,6 +1472,7 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
         return false;
     }
 
+    items.DeduplicateItems();
     if (stat != nullptr) {
         *stat = items.GetStat();
     }
@@ -1495,8 +1504,8 @@ std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program,
 
     size_t size = items.ComputeLayout();
     auto *buffer = new std::byte[size];
-
     auto writer = MemoryBufferWriter(reinterpret_cast<uint8_t *>(buffer), size);
+    items.DeduplicateItems();
     if (!items.Write(&writer)) {
         return nullptr;
     }

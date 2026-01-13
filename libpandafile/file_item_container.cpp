@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -718,12 +718,8 @@ bool ItemContainer::WriteItems(Writer *writer)
     return true;
 }
 
-bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
+bool ItemContainer::Write(Writer *writer)
 {
-    if (deduplicateItems) {
-        DeduplicateItems();
-    }
-
     ssize_t checksum_offset = -1;
     if (!WriteHeader(writer, &checksum_offset)) {
         return false;
@@ -779,7 +775,6 @@ std::map<std::string, size_t> ItemContainer::GetStat()
 {
     std::map<std::string, size_t> stat;
 
-    DeduplicateItems();
     ComputeLayout();
 
     stat["header_item"] = sizeof(File::Header);
