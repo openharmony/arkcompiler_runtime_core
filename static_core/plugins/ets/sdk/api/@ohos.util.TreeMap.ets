@@ -634,7 +634,7 @@ export default class TreeMap<K, V> implements ReadonlyTreeMap<K, V> {
             }
         }
         this.elementNum = this.elementNum - 1;
-        return entry.val;
+        return entry?.val;
     }
 
     /**
