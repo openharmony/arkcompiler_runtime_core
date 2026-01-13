@@ -34,6 +34,7 @@ limitations under the License.
 
 /*---
 desc: {{c.desc}}
+tags: [compile-only, negative]
 ---*/
 
 {{decl}}

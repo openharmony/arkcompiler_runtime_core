@@ -24,6 +24,7 @@ desc: >-
     - Field declaration contains the modifier static along with the modifier override.
     - Types of the overriding field and of the overridden field are different.
 tags: [compile-only, negative]
+expected_out: [{{c.expected_out or ""}}]
 ---*/
 
 {{c.decl}}
