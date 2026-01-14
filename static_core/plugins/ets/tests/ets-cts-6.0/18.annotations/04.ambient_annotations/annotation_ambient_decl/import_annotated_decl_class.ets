@@ -23,6 +23,8 @@ files: ['./annotation_ambient_declaration.ets']
 
 import * as m from "./annotation_ambient_declaration"
 
-let c = new m.SomeClass{{ idx }}
+function main(): void {
+    let c: m.SomeClass{{ idx }} = new m.SomeClass{{ idx }}
+}
 
 {% endfor %}
