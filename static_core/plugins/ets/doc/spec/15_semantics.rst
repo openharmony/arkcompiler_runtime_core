@@ -2667,18 +2667,20 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
          // or implement the private methods with default implementation
    }
 
-If an *instance method* is defined in a subclass with the same name as the
-*instance method* in a superclass, then the following semantic rules are
+If an *instance method* is defined or inherited by a subclass with the same name as the
+*instance method* in a superclass or superinterface, then the following semantic rules are
 applied:
 
 - If signatures are *override-compatible* (see
-  :ref:`Override-Compatible Signatures`), then *overriding* is used.
+  :ref:`Override-Compatible Signatures`), then the subclass method *overrides*
+  the superclass or superinterface method *in* the subclass.
 
 - If signatures formed using *effective signature types*
   of original signatures are *override-compatible*, then
   a :index:`compile-time error` occurs.
 
-- Otherwise, :ref:`Implicit Method Overloading` is used.
+- Otherwise, :ref:`Implicit Method Overloading` is used and the method is
+  inherited by the class.
 
 .. note::
    A single method in a subclass can override several methods of a superclass.
@@ -2703,6 +2705,20 @@ applied:
    class Derived extends Base {
       override method_1() {} // overriding
       method_2(p: string) {} // compile-time error
+   }
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Itf {
+      m(): void
+   }
+
+   class Base {
+      m() { }
+   }
+   class Derived extends Base implements Itf {
+      // method m inherited from Base overrides m defined in Itf
    }
 
 If more than one method of the subclass overrides the same method of the
@@ -2735,11 +2751,29 @@ the superinterface, then the following semantic rules apply:
 
 - If a method is ``private`` in  superinterface but ``public`` in subinterface,
   then a :index:`compile-time error` occurs;
-- If signatures formed by using *effective signature types* of original
-  signatures are *override-compatible*, then a
+
+- If signatures not are *override-compatible* (see
+  :ref:`Override-Compatible Signatures`) and signatures formed by using
+  *effective signature types* of original signatures are *override-compatible*, then a
   :index:`compile-time error` occurs.
 
-- Otherwise, :ref:`Implicit Method Overloading` is used.
+- If signatures are *override-compatible* (see
+  :ref:`Override-Compatible Signatures`), then the method of subinterface overrides
+  the method of superinterface *in* the subinterface.
+
+- Otherwise, if the superinterface is direct, the superinterface method is
+  inherited by the subinterface
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Base {
+      m(p: string): void  // overridden method
+      m(p: number): void  // inherited method
+   }
+   interface Derived extends Base {
+      m(p: object): void  // overriding method
+   }
 
 .. note::
    Several methods of superinterface can be overridden by a single method in
@@ -3962,6 +3996,88 @@ second calls.
 
 |
 
+.. _Dynamic resolution of method calls:
+
+Dynamic resolution of method calls
+==================================
+
+.. meta:
+    frontend_status: Done
+
+The actual method to be invoked during the :ref:`Method Call Expression` evaluation is
+determined in the runtime with respect to the method statically resolved
+during the compile time (see :ref:`Overload Set at Method Call`) and the actual
+*type* of the ``objectReference``.
+
+The resolution depends on the form of the call expression:
+
+- For *static method calls*, overriding is not used and the statically
+  determined method is the one to be invoked
+
+- For *super calls*, overriding is not used and the statically resolved
+  method of superclass is the one to be invoked
+
+- For *instance method calls*, the actual type of the ``objectReference``
+  referred to as *T* is used to determine the method to be invoked.
+
+For the statically resolved method *M* defined in the type *D*, let the type *C* be
+
+- *D* if the method *M* is found in the type *D* during the execution.
+
+- The *closest* superclass of *C* that defines the method of the signature of *M*.
+
+- The *closest* superinterface of *C* that defines the method of the signature of *M*.
+
+Note: For the set of programs compiled without source code updates *C* is always *D*
+
+Type *T* (which is always a class) and the statically
+determined method *M* defined in the type *C* (where *T* is necessarily a subtype of
+*C*) are used to perform the resolution, which is defined as follows:
+
+- If *T* is *C*, the result of the resolution is *M*.
+
+- If *T* has a superclass and the resolution of the method *M*
+  for the superclass of *T* succeeds and the resolved method is defined in
+  class, let *Ms* be the result of the resolution:
+
+  - If the type *T* defines several method declarations that override the method *Ms*
+    in *T*:
+
+    - If the set of such methods contains exactly one method, this method is the
+      result of the resolution.
+
+    - Otherwise, the method resolution fails for type *T*.
+
+  - Otherwise, *Ms* is the result of the resolution.
+
+- Otherwise, the set of the *superinterfaces* of *T* is searched for a matching method:
+  
+  - Each considered method should be declared in the superinterface of *T*
+    and should override the method *M* in *C*.
+
+  - For each considered method *Mi*, there should be no other method *Mio*
+    satisfying the previous criterion that overrides *Mi* in the interface
+    that defines *Mio*.
+
+  Note: That means, all considerered method belong to subinterfaces of
+  the declaring interface of *M*.
+
+  If the set contains exactly one default method, this method is the result of
+  the resolution. Otherwise, the set either
+
+  - has multiple default methods
+
+  - has no default methods
+
+  In these cases, the resolution fails for type *T*.
+
+If the method resolution fails, a runtime error is thrown. 
+
+Note: For the set of programs compiled without source code updates
+the resolution always results in method resolved and does never throw.
+
+|
+
 .. _Type Erasure:
 
 Type Erasure
@@ -4279,53 +4395,6 @@ runtime evaluation is performed as follows:
    default value
    value
    type
-
-|
-
-.. _Dispatch:
-
-Dispatch
-********
-
-.. meta:
-    frontend_status: Done
-
-As a result of assignment (see :ref:`Assignment`) to a variable or call (see
-:ref:`Method Call Expression` or :ref:`Function Call Expression`), the actual
-runtime type of a parameter of class or interface can become different from the
-type explicitly specified or inferred at the point of declaration.
-
-In this situation method calls are dispatched during program execution based on
-their actual type.
-
-This mechanism is called *dynamic dispatch*. Dynamic dispatch is used in
-OOP languages to provide greater flexibility and the required level of
-abstraction. Unlike *static dispatch* where the particular method to be called
-is known at compile time, *dynamic dispatch* requires additional action during
-program code execution. Compilation tools can optimize dynamic to static dispatch.
-
-.. index::
-   dispatch
-   assignment
-   variable
-   call
-   method call expression
-   method
-   method call
-   function call
-   function
-   runtime
-   runtime type
-   parameter
-   class
-   specified type
-   inferred type
-   point of declaration
-   dynamic dispatch
-   object-oriented programming (OOP)
-   static dispatch
-   compile time
-   compilation tool
 
 |
 

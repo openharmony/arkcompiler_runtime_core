@@ -2707,9 +2707,6 @@ A *method call expression* calls
 - an instance method of a class or an interface; or
 - a function with receiver (see :ref:`Functions with Receiver`).
 
-Dynamic dispatch (see :ref:`Dispatch`) is used during program
-execution to perform a call in case of an instance method.
-
 .. index::
    method call expression
    static method
@@ -2717,8 +2714,6 @@ execution to perform a call in case of an instance method.
    function with receiver
    class
    interface
-   dynamic dispatch
-   dispatch
    call
 
 The syntax of *method call expression* is presented below:
@@ -2827,6 +2822,10 @@ no entity is available to call.
 If a set contains more then one entity, then :ref:`Overload Resolution` is used
 to select the method or function to call (see :ref:`Overload Set at Method Call`
 for details).
+
+:ref:`Dynamic resolution of method calls` is used during program execution to resolve
+an actual method to be called in case of an instance method in accordance with the
+method resolved in the step.
 
 .. index::
    overload resolution
