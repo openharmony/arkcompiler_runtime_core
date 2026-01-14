@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1618,9 +1618,9 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return escapeString(elem.asString())
 
         case jsonx.JsonType.JsonNumber:
-            const intValue = elem.tryAsInteger()
-            if (intValue != undefined) {
-                return intValue.toString()
+            const longValue = elem.tryAsLong()
+            if (longValue != undefined) {
+                return longValue.toString()
             }
             const doubleValue = elem.tryAsDouble()
             if (doubleValue != undefined) {
@@ -2423,7 +2423,7 @@ class JsonElementParser
         if (token.value.includes(".")) {
             return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
         }
-        return jsonx.JsonElement.createInteger(Double.parseInt(token.value).toInt())
+        return jsonx.JsonElement.createLong(Long.parseInt(token.value, 10))
     }
 
     private parseBool(): jsonx.JsonElement

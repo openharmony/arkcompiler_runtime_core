@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,7 +124,7 @@ export namespace jsonx {
         /// where M is the following set:
         /// - maybeStringValue (ms)
         /// - maybeDoubleValue (md)
-        /// - maybeIntegerValue (mi)
+        /// - maybeLongValue (ml)
         /// - maybeBoolValue (mb)
         /// - maybeObjectValues (mo)
         /// - maybeArrayValues (ma)
@@ -141,7 +141,7 @@ export namespace jsonx {
         /// 4. Double <=> maybeDoubleValue is defined and
         ///     forall f in M: f / {md} is undefined
         ///
-        /// 5. Integer <=> maybeIntegerValue is defined and
+        /// 5. Integer/Long <=> maybeLongValue is defined and
         ///     forall f in M: f / {mi} is undefined
         ///
         /// 6. Boolean <=> maybeBoolValue is defined and
@@ -158,7 +158,7 @@ export namespace jsonx {
         private maybeNullValue?:    null
         private maybeStringValue?:  string
         private maybeDoubleValue?:  double
-        private maybeIntegerValue?: int
+        private maybeLongValue?:    long
         private maybeBoolValue?:    boolean
         private maybeObjectValues?: Map<string, JsonElement>
         private maybeArrayValues?:  Array<JsonElement>
@@ -183,7 +183,7 @@ export namespace jsonx {
             if (this.maybeDoubleValue != undefined) {
                 return JsonType.JsonNumber
             }
-            if (this.maybeIntegerValue != undefined) {
+            if (this.maybeLongValue != undefined) {
                 return JsonType.JsonNumber
             }
             if (this.maybeBoolValue != undefined) {
@@ -272,7 +272,18 @@ export namespace jsonx {
          */
         static createInteger(value: int): JsonElement {
             const element = new JsonElement()
-            element.maybeIntegerValue = value
+            element.maybeLongValue = value.toLong()
+            return element
+        }
+
+        /**
+         * Creates a new JSON element containing an long value.
+         * @param {long} value - The long value to store
+         * @returns {JsonElement} A new JsonElement containing the long value
+         */
+        static createLong(value: long): JsonElement {
+            const element = new JsonElement()
+            element.maybeLongValue = value
             return element
         }
 
@@ -478,6 +489,28 @@ export namespace jsonx {
         }
 
         /**
+         * Gets an long value from an object by key and ensures it is an long.
+         * @param {string} key - The key to look up
+         * @returns {long} The long value
+         * @throws {JsonTypeError} If the value is not an long or if this element is not an object
+         * @throws {RangeError} If the key is not found
+         */
+        getLong(key: string): long {
+            return this.getElement(key).asLong()
+        }
+
+        /**
+         * Attempts to get an long value from an object by key.
+         * Returns the fallback value if the key is not found or if the value is not an long.
+         * @param {string} key - The key to look up
+         * @param {long} [fallback=0] - The fallback value to return if the key is not found
+         * @returns {long} The long value if found, fallback value otherwise
+         */
+        tryGetLong(key: string, fallback: long = 0): long {
+            return this.tryGetElement(key)?.tryAsLong() ?? fallback
+        }
+
+        /**
          * Gets a string value from an object by key.
          * @param {string} key - The key to look up
          * @returns {string} The string value
@@ -521,6 +554,14 @@ export namespace jsonx {
             return this.tryGetElement(key)?.tryAsBoolean() ?? fallback
         }
 
+        getNull(key: string): null {
+            return this.getElement(key).asNull()
+        }
+
+        tryGetNull(key: string): null|undefined {
+            return this.tryGetElement(key)?.tryAsNull()
+        }
+
         /**
          * Gets a double value from an object by key.
          * @param {string} key - The key to look up
@@ -529,11 +570,21 @@ export namespace jsonx {
          * @throws {RangeError} If the key is not found
          */
         asDouble(): double {
-            let result = this.getNumberMaybeCast()
-            if (result == undefined) {
+            if (this.jsonType != JsonType.JsonNumber) {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
-            return result!
+            let doubleValue = this.maybeDoubleValue
+            if (doubleValue != undefined) {
+                return doubleValue
+            }
+            let longValue = this.maybeLongValue
+            if (longValue == undefined) {
+                throw new JsonTypeError("This value's ValueKind is not Number.")
+            }
+            if (longValue! > Double.MAX_SAFE_INTEGER || longValue! < Double.MIN_SAFE_INTEGER) {
+                throw new RangeError(`'${longValue!}' is not a double`)
+            }
+            return longValue!.toDouble()
         }
 
         /**
@@ -543,8 +594,23 @@ export namespace jsonx {
          * @returns {double} The double value if found, undefined otherwise
          */
         tryAsDouble(): double | undefined {
-            return this.getNumberMaybeCast()
+            if (this.jsonType != JsonType.JsonNumber) {
+                return undefined
+            }
+            let doubleValue = this.maybeDoubleValue
+            if (doubleValue != undefined) {
+                return doubleValue
+            }
+            let longValue = this.maybeLongValue
+            if (longValue == undefined) {
+                return undefined
+            }
+            if (longValue! > Double.MAX_SAFE_INTEGER || longValue! < Double.MIN_SAFE_INTEGER) {
+                return undefined
+            }
+            return longValue!.toDouble()
         }
+
 
         /**
          * Gets an integer value from an object by key.
@@ -560,7 +626,10 @@ export namespace jsonx {
             if (this.maybeDoubleValue != undefined) {
                 throw new JsonTypeError("Expected integer, but elementcontains a double value.")
             }
-            return this.maybeIntegerValue!
+            if (this.maybeLongValue! > Int.MAX_VALUE || this.maybeLongValue! < Int.MIN_VALUE) {
+                throw new RangeError(`'${this.maybeLongValue!}' is not a int`)
+            }
+            return this.maybeLongValue!.toInt()
         }
 
         /**
@@ -570,9 +639,43 @@ export namespace jsonx {
          * @returns {int} The integer value if found, undefined otherwise
          */
         tryAsInteger(): int | undefined {
-            return this.jsonType == JsonType.JsonNumber
-                ? this.maybeIntegerValue
-                : undefined
+            if (this.maybeLongValue == undefined) {
+                return undefined
+            }
+            if (this.maybeLongValue! > Int.MAX_VALUE || this.maybeLongValue! < Int.MIN_VALUE) {
+                return undefined
+            }
+            return this.maybeLongValue!.toInt()
+        }
+
+        /**
+         * Gets an integer value from an object by key.
+         * @param {string} key - The key to look up
+         * @returns {long} The integer value
+         * @throws {JsonTypeError} If the value is not an integer or if this element is not an object
+         * @throws {RangeError} If the key is not found
+         */
+        asLong(): long {
+            if (this.jsonType != JsonType.JsonNumber) {
+                throw new JsonTypeError("This value's ValueKind is not Number.")
+            }
+            if (this.maybeDoubleValue != undefined) {
+                throw new JsonTypeError("Expected long, but elementcontains a double value.")
+            }
+            return this.maybeLongValue!
+        }
+
+        /**
+         * Attempts to get an integer value from an object by key.
+         * Returns undefined if the key is not found or if the value is not an integer.
+         * @param {string} key - The key to look up
+         * @returns {long} The integer value if found, undefined otherwise
+         */
+        tryAsLong(): long | undefined {
+            if (this.jsonType != JsonType.JsonNumber) {
+                return undefined
+            }
+            return this.maybeLongValue
         }
 
         /**
@@ -653,6 +756,19 @@ export namespace jsonx {
                 : undefined
         }
 
+        asNull(): null {
+            if (this.jsonType != JsonType.JsonNull) {
+                throw new JsonTypeError("This value's ValueKind is not Null.")
+            }
+            return null
+        }
+
+        tryAsNull(): null | undefined {
+            return this.jsonType == JsonType.JsonNull
+            ? null
+            : undefined
+        }
+
         /**
          * Sets a current JsonElement to a double value.
          * @param {double} value - The double value to set
@@ -668,7 +784,16 @@ export namespace jsonx {
          */
         setInteger(value: int): void {
             this.setUndefined()
-            this.maybeIntegerValue = value
+            this.maybeLongValue = value.toLong()
+        }
+
+        /**
+         * Sets a current JsonElement to an integer value.
+         * @param {long} value - The long value to set
+         */
+        setLong(value: long): void {
+            this.setUndefined()
+            this.maybeLongValue = value
         }
 
         /**
@@ -712,26 +837,11 @@ export namespace jsonx {
         setUndefined(): void {
             this.maybeStringValue  = undefined
             this.maybeDoubleValue  = undefined
-            this.maybeIntegerValue = undefined
             this.maybeBoolValue    = undefined
             this.maybeObjectValues = undefined
             this.maybeArrayValues  = undefined
             this.maybeNullValue    = undefined
-        }
-
-        private getNumberMaybeCast(): double | undefined {
-            if (this.jsonType != JsonType.JsonNumber) {
-                return undefined
-            }
-            let doubleValue = this.maybeDoubleValue
-            if (doubleValue != undefined) {
-                return doubleValue
-            }
-            let integerValue = this.maybeIntegerValue
-            if (integerValue != undefined) {
-                return integerValue.toDouble()
-            }
-            throw new JsonError("UNREACHABLE: Illegal state.JsonElement is a number, but has no double or integer value")
+            this.maybeLongValue    = undefined
         }
 
         /**
@@ -743,7 +853,8 @@ export namespace jsonx {
             this.key = source.key
             this.maybeStringValue = source.maybeStringValue
             this.maybeDoubleValue = source.maybeDoubleValue
-            this.maybeIntegerValue = source.maybeIntegerValue
+            this.maybeLongValue = source.maybeLongValue
+            this.maybeNullValue = source.maybeNullValue
             this.maybeBoolValue = source.maybeBoolValue
 
             // Deep copy object values recursively

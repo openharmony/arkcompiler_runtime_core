@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,11 @@ function main(): int {
     suite.addTest("JsonElement type mutation", testJsonElementTypeMutation);
     suite.addTest("JsonElement factory methods", testJsonElementFactoryMethods);
 
+    suite.addTest('JsonElement parseLong test', testJsonElementParseLongAndInt);
+    suite.addTest('JsonElement createInterge asLong test', testJsonElementAsLong);
+    suite.addTest('JsonElement test long to int', testLongToInt);
+    suite.addTest('JsonElement test long to double', testLongToDouble);
+
     return suite.run();
 }
 
@@ -52,6 +57,10 @@ function testJsonElementCreation(): void {
     numberElem.setDouble(123.45);
     arktest.assertEQ(numberElem.asDouble(), 123.45, "Double value should match what was set");
 
+    const longElem = new jsonx.JsonElement();
+    longElem.setLong(123456789);
+    arktest.assertEQ(longElem.asLong(), 123456789, 'Double value should match what was set');
+
     const integerElem = new jsonx.JsonElement();
     integerElem.setInteger(42);
     arktest.assertEQ(integerElem.asInteger(), 42, "Integer value should match what was set");
@@ -67,9 +76,9 @@ function testJsonElementCreation(): void {
     // Create null element
     const nullElem = new jsonx.JsonElement();
     nullElem.setNull();
-    console.log(nullElem.jsonType)
-    console.log(nullElem)
     arktest.assertEQ(nullElem.jsonType, jsonx.JsonType.JsonNull, "Null element should have JsonNull type");
+    let testNull = nullElem.tryAsNull();
+    arktest.assertEQ(testNull,null);
 
     // Create array element
     const arrayElem = new jsonx.JsonElement();
@@ -82,12 +91,14 @@ function testJsonElementCreation(): void {
     objectElem.setElement("age", jsonx.JsonElement.createInteger(30));
     objectElem.setElement("isActive", jsonx.JsonElement.createBoolean(true));
     objectElem.setElement("height", jsonx.JsonElement.createDouble(1.85));
+    objectElem.setElement("money",jsonx.JsonElement.createLong(9223372036854775807))
 
     // Verify object properties
     arktest.assertEQ(objectElem.getString("name"), "John Doe", "Object property 'name' should be set correctly");
     arktest.assertEQ(objectElem.getInteger("age"), 30, "Object property 'age' should be set correctly");
     arktest.assertTrue(objectElem.getBoolean("isActive"), "Object property 'isActive' should be set correctly");
     arktest.assertEQ(objectElem.getDouble("height"), 1.85, "Object property 'height' should be set correctly");
+    arktest.assertEQ(objectElem.getLong("money"), 9223372036854775807, "Object property 'money' should be set correctly");
 }
 
 function testJsonElementTypeChecking(): void {
@@ -104,6 +115,10 @@ function testJsonElementTypeChecking(): void {
     integerElem.setInteger(42);
     arktest.assertEQ(integerElem.jsonType, jsonx.JsonType.JsonNumber, "Element with integer should have JsonNumber type");
 
+    const longElem = new jsonx.JsonElement();
+    longElem.setLong(-9223372036854775808);
+    arktest.assertEQ(integerElem.jsonType, jsonx.JsonType.JsonNumber, "Element with Long should have JsonNumber type");
+
     const trueElem = new jsonx.JsonElement();
     trueElem.setBoolean(true);
     arktest.assertEQ(trueElem.jsonType, jsonx.JsonType.JsonTrue, "Element with true should have JsonTrue type");
@@ -114,6 +129,8 @@ function testJsonElementTypeChecking(): void {
 
     const nullElem = new jsonx.JsonElement();
     arktest.assertEQ(nullElem.jsonType, jsonx.JsonType.JsonUndefined, "Element with no value should have JsonUndefined type");
+    nullElem.setNull();
+    arktest.assertEQ(nullElem.jsonType, jsonx.JsonType.JsonNull, "Element with no value should have JsonNull type");
 
     const arrayElem = new jsonx.JsonElement();
     arrayElem.setArray([]);
@@ -138,6 +155,10 @@ function testJsonElementTypeConversion(): void {
     integerElem.setInteger(42);
     arktest.assertEQ(integerElem.asInteger(), 42, "asInteger() should return integer value");
 
+    const longElem = new jsonx.JsonElement();
+    longElem.setLong(-9223372036854775808);
+    arktest.assertEQ(longElem.asLong(), -9223372036854775808, "asLong() should return long value");
+
     const boolElem = new jsonx.JsonElement();
     boolElem.setBoolean(true);
     arktest.assertTrue(boolElem.asBoolean(), "asBoolean() should return boolean value");
@@ -154,6 +175,12 @@ function testJsonElementTypeConversion(): void {
 
     const invalidBooleanValue = stringElem.tryAsBoolean();
     arktest.assertEQ(invalidBooleanValue, undefined, "tryAsBoolean() on string element should return undefined");
+
+    const invalidLongValue = stringElem.tryAsLong();
+    arktest.assertEQ(invalidLongValue, undefined, "tryAsLong() on string element should return undefined");
+
+    const invalidNullValue = stringElem.tryAsNull();
+    arktest.assertEQ(invalidNullValue, undefined, "tryAsNull() on string element should return undefined");
 }
 
 function testJsonElementObjectOperations(): void {
@@ -373,7 +400,8 @@ function testJsonElementCopyConstructor(): void {
     original.setElement("scores", jsonx.JsonElement.createArray([
         jsonx.JsonElement.createInteger(85),
         jsonx.JsonElement.createInteger(92),
-        jsonx.JsonElement.createInteger(78)
+        jsonx.JsonElement.createInteger(78),
+        jsonx.JsonElement.createLong(89)
     ]));
 
     // Create copy using copy constructor
@@ -383,6 +411,9 @@ function testJsonElementCopyConstructor(): void {
     arktest.assertNE(copy.getElement("name").asString(),
              original.getElement("name").asString(),
              "Copy should have different name");
+    for(let i = 0; i < 4; i++) {
+        arktest.assertNE(copy.getElement("scores").asArray()[i],original.getElement("scores").asArray()[i])
+    }
 }
 
 function testJsonElementComplexStructures(): void {
@@ -583,5 +614,98 @@ function testJsonElementNumberCasts(): void {
         (e: Error) => {
             return (e instanceof jsonx.JsonTypeError)
         }
-    );
+    )
+}
+
+function testJsonElementParseLongAndInt(): void {
+    let str = '9223372036854775807'
+    let longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 9223372036854775807)
+
+    str = '-9223372036854775808'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), -9223372036854775808)
+
+    str = '9223372036854775808'
+    arktest.expectError((): void => { JSON.parseJsonElement(str) }, new FormatError('Value exceeds integer limits'))
+
+    str = '-9223372036854775809'
+    arktest.expectError((): void => { JSON.parseJsonElement(str) }, new FormatError('Value exceeds integer limits'))
+
+    str = '0'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 0)
+    arktest.assertEQ(longElem.asInteger(), 0)
+
+    str = '1234567890123456789'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 1234567890123456789)
+
+    str = '-987654321098765432'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), -987654321098765432)
+
+    str = '1'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 1)
+    arktest.assertEQ(longElem.asInteger(), 1)
+
+    str = '42'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 42)
+    arktest.assertEQ(longElem.asInteger(), 42)
+}
+
+function testJsonElementAsLong(): void {
+    const intElem = jsonx.JsonElement.createInteger(30)
+    let longValue = intElem.asLong()
+    arktest.assertEQ(longValue, 30)
+
+    const doubleElem = jsonx.JsonElement.createDouble(1234.5)
+    let maybeLong = doubleElem.tryAsLong()
+    arktest.assertEQ(maybeLong, undefined)
+}
+
+function testLongToInt(): void {
+    let str = '2147483647'
+    let longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asInteger(), 2147483647)
+
+    str = '2147483648'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), 2147483648)
+    arktest.assertEQ(longElem.tryAsInteger(), undefined)
+    arktest.expectError((): void => { longElem.asInteger() }, new RangeError(`'2147483648' is not a int`))
+
+    str = '-2147483648'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asInteger(), -2147483648)
+
+    str = '-2147483649'
+    longElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(longElem.asLong(), -2147483649)
+    arktest.assertEQ(longElem.tryAsInteger(), undefined)
+    arktest.expectError((): void => { longElem.asInteger() }, new RangeError(`'-2147483649' is not a int`))
+}
+
+function testLongToDouble(): void {
+    let str = '9007199254740991'
+    let doubleElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(doubleElem.asDouble(), 9007199254740991)
+
+    str = '9007199254740992'
+    doubleElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(doubleElem.asLong(), 9007199254740992)
+    arktest.assertEQ(doubleElem.tryAsDouble(), undefined)
+    arktest.expectError((): void => { doubleElem.asDouble() }, new RangeError(`'9007199254740992' is not a double`))
+
+    str = '-9007199254740991'
+    doubleElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(doubleElem.asDouble(), -9007199254740991)
+
+    str = '-9007199254740992'
+    doubleElem = JSON.parseJsonElement(str)
+    arktest.assertEQ(doubleElem.asLong(), -9007199254740992)
+    arktest.assertEQ(doubleElem.tryAsDouble(), undefined)
+    arktest.expectError((): void => { doubleElem.asDouble() }, new RangeError(`'-9007199254740992' is not a double`))
 }
