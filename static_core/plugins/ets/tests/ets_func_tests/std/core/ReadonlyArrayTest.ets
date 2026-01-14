@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,268 +57,204 @@ class Arrays {
 const TEST_ARRAY: FixedArray<Number> = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 
 function main(): int {
-    let failedTestsCount = 0;
-
-    failedTestsCount += runTest("findWithFuncArg3ReadonlyArray", findWithFuncArg3ReadonlyArray);
-    failedTestsCount += runTest("findIndexFuncArg3ReadonlyArray", findIndexFuncArg3ReadonlyArray);
-    failedTestsCount += runTest("mapFuncArg3ReadonlyArray", mapFuncArg3ReadonlyArray);
-    failedTestsCount += runTest("everyFuncArg3ReadonlyArray", everyFuncArg3ReadonlyArray);
-    failedTestsCount += runTest("filterFuncArg3ReadonlyArray", filterFuncArg3ReadonlyArray);
-    failedTestsCount += runTest("reduceFuncArg4ReadonlyArray", reduceFuncArg4ReadonlyArray);
-    failedTestsCount += runTest("reduceFuncArg4ReadonlyArrayWithInitialValue", reduceFuncArg4ReadonlyArrayWithInitialValue);
-    failedTestsCount += runTest("reduceRightFuncArg4ReadonlyArray", reduceRightFuncArg4ReadonlyArray);
-    failedTestsCount += runTest("reduceRightFuncArg4ReadonlyArrayWithInitialValue", reduceRightFuncArg4ReadonlyArrayWithInitialValue);
-    failedTestsCount += runTest("forEachFuncArg3ReadonlyArray", forEachFuncArg3ReadonlyArray);
-
-    failedTestsCount += runTest("testIteratorWithEmptyReadonlyArray", testIteratorWithEmptyReadonlyArray);
-    failedTestsCount += runTest("testIteratorWithNonEmptyReadonlyArray", testIteratorWithNonEmptyReadonlyArray);
-   
-    return printReport("ReadonlyArrayTest failures: ", failedTestsCount);
+    const suite = new arktest.ArkTestsuite('ReadonlyArray tests');
+    suite.addTest('findWithFuncArg3ReadonlyArray', findWithFuncArg3ReadonlyArray);
+    suite.addTest('findIndexFuncArg3ReadonlyArray', findIndexFuncArg3ReadonlyArray);
+    suite.addTest('mapFuncArg3ReadonlyArray', mapFuncArg3ReadonlyArray);
+    suite.addTest('everyFuncArg3ReadonlyArray', everyFuncArg3ReadonlyArray);
+    suite.addTest('filterFuncArg3ReadonlyArray', filterFuncArg3ReadonlyArray);
+    suite.addTest('reduceFuncArg4ReadonlyArray', reduceFuncArg4ReadonlyArray);
+    suite.addTest('reduceFuncArg4ReadonlyArrayWithInitialValue', reduceFuncArg4ReadonlyArrayWithInitialValue);
+    suite.addTest('reduceRightFuncArg4ReadonlyArray', reduceRightFuncArg4ReadonlyArray);
+    suite.addTest('reduceRightFuncArg4ReadonlyArrayWithInitialValue', reduceRightFuncArg4ReadonlyArrayWithInitialValue);
+    suite.addTest('forEachFuncArg3ReadonlyArray', forEachFuncArg3ReadonlyArray);
+    suite.addTest('testIteratorWithEmptyReadonlyArray', testIteratorWithEmptyReadonlyArray);
+    suite.addTest('testIteratorWithNonEmptyReadonlyArray', testIteratorWithNonEmptyReadonlyArray);
+    suite.addTest('testLastIndexOf', testLastIndexOf);
+    return suite.run();
 }
 
-const RESULT_SUCCESS: int = 0;
-const RESULT_FAILURE: int = 1;
-
 function filterPositiveElement(elem: Number, index: int, arr: ReadonlyArray<Number>): boolean {
-    return arr[index.toInt()] == elem && elem.valueOf() == 12 && index > 0;
+    return arr[index] == elem && elem == 12 && index > 0;
 }
 
 function filterNegativeElement(elem: Number, index: int, arr: ReadonlyArray<Number>): boolean {
-     return arr[index.toInt()] == elem && elem.valueOf() < 0 && index > 0;
+     return arr[index] == elem && elem < 0 && index > 0;
 }
 
 function filterUndefinedElement(elem: Number, index: int, arr: ReadonlyArray<Number>): boolean {
-    return arr[index.toInt()] == elem && elem == undefined && index < 0;
+    return arr[index] == elem && elem == undefined && index < 0;
 }
 
 function filterNullElement(elem: Number, index: int, arr: ReadonlyArray<Number>) {
-    return arr[index.toInt()] == elem && elem == null && index > 0;
+    return arr[index] == elem && elem == null && index > 0;
 }
 
-function findWithFuncArg3ReadonlyArray(): int {
-    const fnNull = (elem: Number, index: int, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == null && index > 0; };
-
+function findWithFuncArg3ReadonlyArray() {
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
-    if (arr.find(filterPositiveElement) != 12) return RESULT_FAILURE;
-    if (arr.find(filterNegativeElement) != -1) return RESULT_FAILURE;
-    if (arr.find(filterUndefinedElement) != undefined) return RESULT_FAILURE;
-    if (arr.find(filterNullElement) != undefined) return RESULT_FAILURE;
-
-    return RESULT_SUCCESS;
+    arktest.assertEQ(arr.find(filterPositiveElement), 12);
+    arktest.assertEQ(arr.find(filterNegativeElement), -1);
+    arktest.assertEQ(arr.find(filterUndefinedElement), undefined);
+    arktest.assertEQ(arr.find(filterNullElement), undefined);
 }
 
-function findIndexFuncArg3ReadonlyArray(): int {
-    let fnNegative = (elem: Number, index: int, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem.valueOf() < 0 && index > 0; };
-    let fnUndefined = (elem: Number, index: int, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == undefined && index < 0; };
-    let fnNull = (elem: Number, index: int, obj: ReadonlyArray<Number>): boolean => { return obj[index.toInt()] == elem && elem == null && index > 0; };
-
+function findIndexFuncArg3ReadonlyArray() {
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
-    if (arr.findIndex(filterPositiveElement) != 9) return RESULT_FAILURE;
-    if (arr.findIndex(filterNegativeElement) != 1) return RESULT_FAILURE;
-    if (arr.findIndex(filterUndefinedElement) != -1) return RESULT_FAILURE;
-    if (arr.findIndex(filterNullElement) != -1) return RESULT_FAILURE;
-
-    return RESULT_SUCCESS;
+    arktest.assertEQ(arr.findIndex(filterPositiveElement), 9);
+    arktest.assertEQ(arr.findIndex(filterNegativeElement), 1);
+    arktest.assertEQ(arr.findIndex(filterUndefinedElement), -1);
+    arktest.assertEQ(arr.findIndex(filterNullElement), -1);
 }
 
-function mapFuncArg3ReadonlyArray(): int {
+function mapFuncArg3ReadonlyArray() {
     let mappingFunc = (v: Number, index: int, arr: ReadonlyArray<Number>): Number =>
-        (index < 4) && (index < arr.length) ? Number.valueOf(arr[index.toInt()] * arr[index.toInt()]) : Number.valueOf(0);
+        (index < 4) && (index < arr.length) ? Number.valueOf(arr[index] * arr[index]) : Number.valueOf(0);
 
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
     let res0 = arrEmpty.map<Number>(mappingFunc);
-    if (res0.length != arrEmpty.length) return RESULT_FAILURE;
-    if (res0.length != 0) return RESULT_FAILURE;
+    arktest.assertEQ(res0.length, arrEmpty.length);
+    arktest.assertEQ(res0.length, 0);
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.map<Number>(mappingFunc);
-    if (res.length != arr.length) return RESULT_FAILURE;
+    arktest.assertEQ(res.length, arr.length);
     for (let i: int = 0; i < res.length; ++i) {
         const expected = i < 4 ? Number.valueOf(arr[i] * arr[i]) : Number.valueOf(0);
-        if (res[i].valueOf() != expected.valueOf()) {
-            return RESULT_FAILURE;
-        }
+        arktest.assertEQ(res[i], expected);
     }
-    return RESULT_SUCCESS;
 }
 
-function everyFuncArg3ReadonlyArray(): int {
+function everyFuncArg3ReadonlyArray() {
     const emptyArray: ReadonlyArray<Number> = new Array<Number>;
-    if (!emptyArray.every(filterPositiveElement)) return RESULT_FAILURE;
+    arktest.assertTrue(emptyArray.every(filterPositiveElement));
 
     const testArray: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     const everyResult = testArray.every((n: Number, i: int, ns: ReadonlyArray<Number>) => n >= -5 && n <= 237);
-
-    if (!everyResult) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertTrue(everyResult);
 }
 
-function filterFuncArg3ReadonlyArray(): int {
+function filterFuncArg3ReadonlyArray() {
     let fnTrue = (v: Number, index: int, arr: ReadonlyArray<Number>): boolean => {
-        return arr[index.toInt()].valueOf() == v.valueOf() && v.valueOf() > -1000;
+        return arr[index] == v && v > -1000;
     }
     let arrEmpty = new Array<Number>;
-    if (arrEmpty.filter(fnTrue).length != 0) return RESULT_FAILURE;
+    arktest.assertEQ(arrEmpty.filter(fnTrue).length, 0);
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.filter(fnTrue);
 
-    if (!Arrays.equals(res, arr)) return RESULT_FAILURE;
+    arktest.assertTrue(Arrays.equals(res, arr));
 
     let fnFalse = (v: Number, index: int, arr: ReadonlyArray<Number>): boolean => {
         return arr.at(index) == v && v == undefined;
     }
-    if (arr.filter(fnFalse).length != 0) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(arr.filter(fnFalse).length, 0);
 }
 
 function reduceFunc(a: Number, b: Number, index: int, arr: ReadonlyArray<Number>): Number {
     if (index < 0 || index >= arr.length) {
         return Number.valueOf(-1);
     }
-    return new Number(a + b + arr[index.toInt()]);
+    return a + b + arr[index];
 }
 
-function reduceFuncArg4ReadonlyArray(): int {
+function reduceFuncArg4ReadonlyArray() {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasError: boolean = false;
-    try {
-        let res = arrEmpty.reduce(reduceFunc);
-        return RESULT_FAILURE;
-    } catch(e) {
-        hasError = true;
-    }
-    if (!hasError) return RESULT_FAILURE;
+    arktest.expectThrow(() => { arrEmpty.reduce(reduceFunc); }, (e) => { return e instanceof TypeError; });
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduce(reduceFunc);
-    if (res.valueOf() != 996) return RESULT_FAILURE;
-    if (res.valueOf() ==  -1) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(res, 996);
 }
 
 // NOTE(smirnovandrei) add 'test' prefix to all test functions
-function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
+function reduceFuncArg4ReadonlyArrayWithInitialValue() {
     let arrEmpty = new Array<Number>;
-    let initialValue = new Number(0);
+    let initialValue: number = 0;
     let res = arrEmpty.reduce(reduceFunc, initialValue);
-    if (res.valueOf() != initialValue.valueOf()) return RESULT_FAILURE;
+    arktest.assertEQ(res, initialValue);
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
-    initialValue = Number.valueOf(-arr[0].valueOf());
+    initialValue = -arr[0];
     res = arr.reduce(reduceFunc, initialValue);
-    if (res.valueOf() != 996) return RESULT_FAILURE;
-    if (res.valueOf() ==  -1) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(res, 996);
 }
 
-function reduceRightFuncArg4ReadonlyArray(): int {
+function reduceRightFuncArg4ReadonlyArray() {
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
-    let hasError: boolean = false;
-    try {
-        let res = arrEmpty.reduceRight(reduceFunc);
-        return RESULT_FAILURE;
-    } catch(e) {
-        hasError = true;
-    }
-    if (!hasError) return RESULT_FAILURE;
+    arktest.expectThrow(() => { arrEmpty.reduceRight(reduceFunc); }, (e) => { return e instanceof TypeError; });
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     let res = arr.reduceRight(reduceFunc);
-    if (res.valueOf() != 994) return RESULT_FAILURE;
-    if (res.valueOf() == -1) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(res, 994);
 }
 
-function reduceRightFuncArg4ReadonlyArrayWithInitialValue(): int {
+function reduceRightFuncArg4ReadonlyArrayWithInitialValue() {
     let arrEmpty = new Array<Number>;
-    let initialValue = new Number(0);
+    let initialValue: number = 0;
     let res = arrEmpty.reduce(reduceFunc, initialValue);
-    if (res.valueOf() != initialValue.valueOf()) return RESULT_FAILURE;
+    arktest.assertEQ(res, initialValue);
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
-    initialValue = Number.valueOf(-arr[0].valueOf());
+    initialValue = -arr[0];
     res = arr.reduce(reduceFunc, initialValue);
-    if (res.valueOf() != 996) return RESULT_FAILURE;
-    if (res.valueOf() ==  -1) return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(res, 996);
 }
 
-function forEachFuncArg3ReadonlyArray(): int {
+function forEachFuncArg3ReadonlyArray() {
     let s = new String;
     let fn = (a: Number, index: int, arr: ReadonlyArray<Number>): void => {
         if (index < 0 && index >= arr.length) {
-            s = "";
+            s = '';
         } else {
-            let tmp = new Number(arr[index.toInt()].valueOf() + a.valueOf());
-            s += tmp.toString() + ",";
+            let tmp = arr[index] + a;
+            s += tmp.toString() + ',';
         }
     }
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
     arr.forEach(fn);
-    if (s != "20,-2,474,-10,296,130,6,68,0,24,") return RESULT_FAILURE;
-    return RESULT_SUCCESS;
+    arktest.assertEQ(s, '20,-2,474,-10,296,130,6,68,0,24,');
 }
 
-function runTest(testName: string, testBody: () => int): int {
-    try {
-        const testResult = testBody();
-
-        if (testResult == RESULT_FAILURE) {
-            console.println("\nFAILED: " + testName);
-            return RESULT_FAILURE;
-        }
-
-        return RESULT_SUCCESS;
-    } catch(e) {
-        console.println("FAILED: " + testName + " => Error catched: " + e);
-        return RESULT_FAILURE;
-    }
-}
-
-function testIteratorWithEmptyReadonlyArray(): int {
+function testIteratorWithEmptyReadonlyArray() {
     const emptyArray: ReadonlyArray<Number> = new Array<Number>;
     const iterator = emptyArray.$_iterator();
     const v = iterator.next();
-    if (!v.done) {
-        return RESULT_FAILURE;
-    }
-    return RESULT_SUCCESS;
+    arktest.assertTrue(v.done);
 }
 
-function testIteratorWithNonEmptyReadonlyArray(): int {
+function testIteratorWithNonEmptyReadonlyArray() {
     const arr: ReadonlyArray<Number> = new Array<Number>(1, 2, 3);
     const iterator = arr.$_iterator();
 
     let v = iterator.next();
-    if (v.done || v.value != 1) {
-        return RESULT_FAILURE;
-    }
+    arktest.assertFalse(v.done);
+    arktest.assertEQ(v.value, 1);
 
     v = iterator.next();
-    if (v.done || v.value != 2) {
-        return RESULT_FAILURE;
-    }
+    arktest.assertFalse(v.done);
+    arktest.assertEQ(v.value, 2);
 
     v = iterator.next();
-    if (v.done || v.value != 3) {
-        return RESULT_FAILURE;
-    }
+    arktest.assertFalse(v.done);
+    arktest.assertEQ(v.value, 3);
 
     v = iterator.next();
-    if (!v.done) {
-        return RESULT_FAILURE;
-    }
-
-    return RESULT_SUCCESS;
+    arktest.assertTrue(v.done);
 }
 
-function printReport(banner: string, failedTestsCount: int): int {
-    if (failedTestsCount == 0) {
-      return RESULT_SUCCESS;
-    }
+function testLastIndexOf() {
+    let arr: readonly number[] = [1, 2, 3, 2, 4];
+    let res = arr.lastIndexOf(2);
+    arktest.assertEQ(res, 3);
 
-    console.println("\nFAILED: " + banner);
-    return RESULT_FAILURE;
+    res = arr.lastIndexOf(2, arr.length);
+    arktest.assertEQ(res, 3);
+
+    res = arr.lastIndexOf(2, 2);
+    arktest.assertEQ(res, 1);
+
+    res = arr.lastIndexOf(2, undefined);
+    arktest.assertEQ(res, -1);
 }
