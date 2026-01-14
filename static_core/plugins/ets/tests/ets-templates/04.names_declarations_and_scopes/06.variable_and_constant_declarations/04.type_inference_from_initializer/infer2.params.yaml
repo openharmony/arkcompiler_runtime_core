@@ -27,7 +27,7 @@ cases:
           let arr = [null, undefined]
           function foo(p: (null|undefined)[]): int { return 1 }
       use: |-
-          arktest.assertTrue(arr instanceof Array && arr[0] instanceof null && arr[1] instanceof undefined)
+          arktest.assertTrue(typeof arr == "object" && arr instanceof Array)
           arktest.assertEQ(foo(arr), 1)
 
     - decl: |-

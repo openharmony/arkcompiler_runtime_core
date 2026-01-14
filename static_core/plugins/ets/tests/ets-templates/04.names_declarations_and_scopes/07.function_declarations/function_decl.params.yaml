@@ -36,7 +36,7 @@ function_decls:
         function foo(): int[] { return new int[1]; }
       call: |-
         let arr: int[] = foo();
-        arktest.assertTrue( arr instanceof int[] && arr.length == 1 )
+        arktest.assertTrue( arr instanceof Array && arr.length == 1 )
 
     # no params, return function
     - decl: |-
@@ -75,7 +75,7 @@ function_decls:
         }
       call: |-
         let f: (Object|undefined)[] = foo();
-        arktest.assertTrue( f instanceof (Object|undefined)[] && f.length == 0)
+        arktest.assertTrue( f instanceof Array && f.length == 0)
 
     # no params, return enum
     - decl: |-

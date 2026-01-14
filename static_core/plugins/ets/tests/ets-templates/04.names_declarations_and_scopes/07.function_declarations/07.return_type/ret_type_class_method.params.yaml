@@ -260,7 +260,7 @@ function_decls:
           }
       call: |-
           let v = new A().foo<Boolean>()
-          arktest.assertTrue(v instanceof B<Boolean, Error>)
+          arktest.assertTrue(v instanceof B)
 
     - decl: |-
           class A {
@@ -471,4 +471,4 @@ function_decls:
           }
       call: |-
           let v = A.foo<Boolean>()
-          arktest.assertTrue(v instanceof B<Boolean, Error>)
+          arktest.assertTrue(v instanceof B)

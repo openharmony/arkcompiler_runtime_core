@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ class C<T> {
 }
 
 let x: C<int> = new C<int>(new A<int>(), new A<number>())
-arktest.assertTrue(x instanceof C<int>)
-arktest.assertTrue(x.field1 instanceof A<int>)
-arktest.assertTrue(x.field2 instanceof A<number>)
+arktest.assertTrue(x instanceof C)
+arktest.assertTrue(x.field1 instanceof A)
+arktest.assertTrue(x.field2 instanceof A)
 arktest.assertTrue(x.foo(1) instanceof int)

@@ -52,7 +52,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<string[]>
+          FixedArray<Array>
     - stype: |-
           null
       value: |-
