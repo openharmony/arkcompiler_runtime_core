@@ -561,10 +561,11 @@ export class JSON {
         }
     }
 
-    public static stringify(obj: Any, replacer: Array<double | string>, space?: int | string): string {
+    public static stringify(obj: Any, replacer: Array<double | string> | Array<string> | Array<double>, space?: int | string): string {
         const filter : FixedArray<string> = new FixedArray<string>(replacer.length)
-        for (let i = 0; i < replacer.length; i++) {
-            filter[i] = `${replacer[i]}`
+        let index: int = 0
+        for (let element of replacer) {
+            filter[index++] = `${element}`
         }
 
         if (space instanceof String || space === undefined) {
