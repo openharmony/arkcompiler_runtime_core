@@ -1807,9 +1807,9 @@ Initialization of this field can be performed in a constructor
    constructor
    constructor declaration
 
-*Field with late initialization* cannot have *field initializers* or be an
-*optional field* (see :ref:`Optional Fields`). Otherwise, a
-:index:`compile-time error` occurs.
+*Field with late initialization* cannot have *field initializers*, and can be
+neither ``readonly`` (see :ref:`Readonly Constant Fields`) nor ``optional``
+(see :ref:`Optional Fields`). Otherwise, a :index:`compile-time error` occurs.
 *Field with late initialization* must be initialized explicitly, even though
 its type has a *default value* which is ignored at the point of declaration.
 

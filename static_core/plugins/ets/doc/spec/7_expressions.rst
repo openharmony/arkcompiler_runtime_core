@@ -1452,8 +1452,6 @@ A :index:`compile-time error` occurs if:
 -  Context is a union type, and an object literal can be treated
    as the value of several union component types;
 -  New member in an *object literal* is declared;
--  Readonly member is used in *object literal*.
--  Protected or private member is used in *object literal*.
 
 
 .. index::
@@ -1482,16 +1480,8 @@ A :index:`compile-time error` occurs if:
             // compile-time error, type cannot be inferred as the literal
             // fits both A and B
 
-    class C {
-        readonly field1 = 123
-        readonly field2: number
-        constructor () {
-            this.field2 = 456
-        }
-    }
-    const c: C = { field1 = 321, field2 = 654 }
-            // compile-time error, as field1 and field2 are readonly
-
+    let u: A = { filed: 1, otherField: 2 }
+            // compile-time error, cannot declare a new member in the literal
 
 |
 
@@ -1546,12 +1536,15 @@ A :index:`compile-time error` occurs if the identifier does not name an
 
     class Friend {
       name: string = ""
+      protected soname: string = ""
       private nick: string = ""
       age: number
       sex?: "male"|"female"
     }
     // compile-time error, nick is private:
     let f: Friend = {name: "Alexander", age: 55, nick: "Alex"}
+    // compile-time error, soname is protected:
+    let g: Friend = {name: "Alexander", age: 55, soname: "Reed"}
 
 A :index:`compile-time error` occurs if type of an expression in a
 *name-value pair* is not assignable (see :ref:`Assignability`) to the
@@ -1637,6 +1630,27 @@ These situations are presented in the examples below:
     // ...
     let c: C = {} /* compile-time error - constructor is not
         accessible */
+
+A compile-time error occurs if an *object literal of class type* explicitly sets
+readonly fields of a class:
+
+.. code-block:: typescript
+   
+    class C {
+        field1 = 123
+        readonly field2: number
+        readonly field3: string
+        constructor () {
+            this.field3 = ""
+        }
+    }
+
+    // OK - type ``number`` has default value, field3 set in ctor
+    let c: C = { field1: 654 }
+
+    // Error: field2 and field3 are readonly, canot set explicitly
+    let d: C = { field1: 654, field2: 3, field3: "text" }
+
 
 If a class has accessors (see :ref:`Class Accessor Declarations`) for a property,
 and its setter is provided, then this property can be used as a part of an
