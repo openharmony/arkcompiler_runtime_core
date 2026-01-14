@@ -972,7 +972,7 @@
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/negative_type_safety_0.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/negative_type_safety_1.ets
 
-#30777 ClassCast to never
+#30779 subtype not overwriting supertype on assignment
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_19.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_20.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_21.ets
@@ -985,8 +985,6 @@
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_generic_19.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_generic_20.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_generic_21.ets
-
-#30779 subtype not overwriting supertype on assignment
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_1.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_12.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_20.ets
@@ -1029,7 +1027,6 @@
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_6.ets
 
 #30780 generic type params relation ignored
-
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_12.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_6.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_9.ets
@@ -1256,10 +1253,6 @@
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_obj_on_gen_8.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_obj_on_gen_9.ets
 
-#28484 Interface has methods
-15.semantic_rules/06.compatibility_call_args/inheritance_relationship_compatibility_case/inheritance_relationship_compatibility_case_03.ets
-15.semantic_rules/06.compatibility_call_args/interface_implementation_compatibility_case/interface_implementation_compatibility_case_01.ets
-
 #26512 regex literals not implemented
 15.semantic_rules/06.compatibility_call_args/same_type_compat_no_implicit_case/same_type_compat_no_implicit_case_13.ets
 
@@ -1269,13 +1262,13 @@
 
 #32543
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_45.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_47.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_45.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_47.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_16.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_46.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_16.ets 
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_44.ets 
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_47.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_45.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_47.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_16.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_46.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_16.ets
+15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_44.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_46.ets
 
 #31558
@@ -1553,12 +1546,10 @@
 #31018 override protected method in superclass by protected one with the same public in superinterface
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_5.ets
 
-#31232 Method in child class doesn't override method in generic parent
+#26730 implement override/overload
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_25.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
-
-#27583
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_0.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_1.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_3.ets
@@ -1619,7 +1610,7 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_8.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_9.ets
 
-#27999
+#26730 implement override/overload
 15.semantic_rules/10.overloading/legacy_overload_negative_4.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_5.ets
 15.semantic_rules/10.overloading/legacy_overload_negative_8.ets
@@ -1723,7 +1714,7 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
 
-#23050 Task for watching overrides/overloads update
+#26730 implement override/overload
 15.semantic_rules/13.dispatch/static_dispatch_0.ets
 15.semantic_rules/13.dispatch/static_dispatch_1.ets
 

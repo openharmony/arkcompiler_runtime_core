@@ -15,6 +15,8 @@
 
 /*---
 desc: Verifying that an interface type variable cannot be assigned to a class type variable.
+tags: [compile-only, negative]
+expected_out: ["Semantic error ESE0318: Type 'MyInterface' cannot be assigned to type 'MyClass'"]
 ---*/
 
 interface MyInterface {
@@ -25,15 +27,7 @@ class MyClass implements MyInterface {
   method() {}
 }
 
-function checkTypeIdentity(a: Any, b: Any): boolean {
-    return Class.of(a as Object) === Class.of(b as Object);
-}
-
 function main(): void {
   const val1: MyInterface = { method() {} };
   const val2: MyClass = val1;
-
-  const result = checkTypeIdentity(val1, val2);
-
-  arktest.assertEQ(result, false);
 }
