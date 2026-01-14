@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,10 +79,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @returns the String representation of the Char.
      */
     public override toString(): String {
-        // TODO(ivan-tyulyandin): if String(char) will be implemented, rewrite code below
-        let buf: FixedArray<char> = new char[1];
-        buf[0] = this.value;
-        return new String(buf);
+        return Char.toString(this.value)
     }
 
     /**
@@ -277,7 +274,9 @@ export final class Char extends Object implements Comparable<Char> {
      *
      * @returns casted value
      */
-    public static native toString(value: char): string;
+    public static toString(value: char): string {
+        return String.fromCharCode(value.toInt())
+    }
 
     /**
      * Returns the primitive as char value

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,11 +70,6 @@ EtsFloat StdCoreCharToFloat(EtsChar val)
 EtsDouble StdCoreCharToDouble(EtsChar val)
 {
     return static_cast<double>(val);
-}
-
-EtsString *StdCoreCharToString(EtsChar val)
-{
-    return EtsString::CreateNewStringFromCharCode(StdCoreCharToDouble(val));
 }
 
 }  // namespace ark::ets::intrinsics
