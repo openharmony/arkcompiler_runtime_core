@@ -40,7 +40,7 @@ class EtsGeneratorTest(TestCase):
     def generate_tests(self, test_source_path: Path, test_gen_path: Path) -> list[str]:
         ets_test_generator = EtsTemplatesGenerator(test_source_path, test_gen_path, self.config)
         ets_test_generator.generate()
-        generated_tests = sorted(test.stem for test in test_gen_path.glob("*"))
+        generated_tests = sorted(test.stem for test in test_gen_path.rglob("*") if test.is_file())
         return generated_tests
 
     @patch.dict(os.environ, {
@@ -81,7 +81,9 @@ class EtsGeneratorTest(TestCase):
         expected_test_names = ['types_declaration_0',
                                'types_declaration_1',
                                'types_declaration_2',
-                               'simple_test']
+                               'simple_test',
+                               'simple_types',
+                               'types_example']
         self.assertEqual(sorted(expected_test_names), sorted(generated_tests))
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
@@ -151,6 +153,79 @@ class EtsGeneratorTest(TestCase):
         expected_tests = ['types_declaration_0',
                             'types_declaration_1',
                             'types_declaration_2']
+        self.assertEqual(expected_tests, generated_tests)
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_tests_by_filter_somwhere(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.args['test_suite.parameters.filter'] = '**/*types*'
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_tests = ['simple_types',
+                          'types_declaration_0',
+                          'types_declaration_1',
+                          'types_declaration_2',
+                          'types_example']
+        self.assertEqual(expected_tests, generated_tests)
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_tests_by_filter_startswith(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.args['test_suite.parameters.filter'] = 'types*'
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_tests = ['types_declaration_0',
+                          'types_declaration_1',
+                          'types_declaration_2',
+                         ]
+        self.assertEqual(expected_tests, generated_tests)
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_generate_tests_by_filter_mix(self) -> None:
+        test_source_path: Path = Path(__file__).with_name("ets_data")
+        test_gen_path: Path = Path(__file__).with_name("gen")
+        shutil.rmtree(test_gen_path, ignore_errors=True)
+        self.args['test_suite.parameters.filter'] = 'inner*/test*/*types*'
+        self.load_config()
+
+        generated_tests = self.generate_tests(test_source_path, test_gen_path)
+        self.assertTrue(test_gen_path.exists())
+
+        expected_tests = ['simple_types']
         self.assertEqual(expected_tests, generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
