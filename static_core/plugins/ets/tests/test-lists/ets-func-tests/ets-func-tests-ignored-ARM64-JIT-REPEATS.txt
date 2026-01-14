@@ -1,6 +1,2 @@
 #20821
 std/core/JsonReplacerTest.ets
-
-#24951
-std/core/SortNotFromBeginningTest.ets
-
