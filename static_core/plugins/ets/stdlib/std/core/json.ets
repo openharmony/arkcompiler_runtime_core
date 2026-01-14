@@ -80,6 +80,7 @@ class JSONAPI {
 }
 
 export class JSON {
+
     /**
      * Converts byte to JSON format
      *
@@ -87,8 +88,22 @@ export class JSON {
      *
      * @returns String - JSON representation of byte
      */
-    public static stringifyByte(d: byte): String {
+    public static stringify(d: byte): String {
         return StringBuilder.toString(d)
+    }
+
+    /**
+     * Converts char to JSON format
+     *
+     * @param d: char - char to be converted to a JSON as a String
+     *
+     * @returns String - JSON representation of char
+     */
+    public static stringify(d: char): String {
+        let sb = new StringBuilder("\"")
+        sb.append(d)
+        sb.append("\"")
+        return sb.toString()
     }
 
     /**
@@ -98,7 +113,7 @@ export class JSON {
      *
      * @returns String - JSON representation of short
      */
-    public static stringifyShort(d: short): String {
+    public static stringify(d: short): String {
         return StringBuilder.toString(d)
     }
 
@@ -109,7 +124,7 @@ export class JSON {
      *
      * @returns String - JSON representation of int
      */
-    public static stringifyInt(d: int): String {
+    public static stringify(d: int): String {
         return StringBuilder.toString(d)
     }
 
@@ -120,7 +135,7 @@ export class JSON {
      *
      * @returns String - JSON representation of long
      */
-    public static stringifyLong(d: long): String {
+    public static stringify(d: long): String {
         return StringBuilder.toString(d)
     }
 
@@ -131,7 +146,7 @@ export class JSON {
      *
      * @returns String - JSON representation of float
      */
-    public static stringifyFloat(d: float): String {
+    public static stringify(d: float): String {
         if (Float.isFinite(d)) {
             return StringBuilder.toString(d)
         } else {
@@ -146,7 +161,7 @@ export class JSON {
      *
      * @returns String - JSON representation of double
      */
-    public static stringifyDouble(d: double): String {
+    public static stringify(d: double): String {
         if (Double.isFinite(d)) {
             return StringBuilder.toString(d)
         } else {
@@ -161,19 +176,8 @@ export class JSON {
      *
      * @returns String - JSON representation of bigint
      */
-    public static stringifyBigint(d: bigint): String {
+    public static stringify(d: bigint): String {
         return d.toString()
-    }
-
-    /**
-     * Converts char to JSON format
-     *
-     * @param d: char - char to be converted to a JSON as a String
-     *
-     * @returns String - JSON representation of char
-     */
-    public static stringifyChar(d: char): String {
-        return "\"" + StringBuilder.toString(d) + "\""
     }
 
     /**
@@ -183,7 +187,7 @@ export class JSON {
      *
      * @returns String - JSON representation of boolean
      */
-    public static stringifyBoolean(d: boolean): String {
+    public static stringify(d: boolean): String {
         if (d) {
             return "true"
         }
@@ -201,7 +205,7 @@ export class JSON {
      *
      * @returns String - JSON representation of byte
      */
-    public static stringifyString(d: String): String {
+    public static stringify(d: String): String {
         let sb = new StringBuilder([c'\"'] as FixedArray<char>)
         let len = d.getLength()
 
@@ -259,6 +263,225 @@ export class JSON {
         return buffer
     }
 
+    //--------------------------
+    //          arrays
+    //--------------------------
+
+    /**
+     * Converts bytes array to JSON format
+     *
+     * @param d: byte[] - bytes array to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of bytes array
+     */
+    public static stringify(d: FixedArray<byte>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(d[i])
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(d[last_elem])
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts chars array to JSON format
+     *
+     * @param d: FixedArray<char> - chars array  to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of chars array
+     */
+    public static stringify(d: FixedArray<char>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append("\"")
+            s.append(d[i])
+            s.append("\",")
+        }
+        if (d.length > 0) {
+            s.append("\"")
+            s.append(d[last_elem])
+            s.append("\"")
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts shorts array to JSON format
+     *
+     * @param d: FixedArray<short> - shorts array to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of shorts array
+     */
+    public static stringify(d: FixedArray<short>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(d[i])
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(d[last_elem])
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts ints array to JSON format
+     *
+     * @param d: FixedArray<int> - ints array to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of ints array
+     */
+    public static stringify(d: FixedArray<int>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(d[i])
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(d[last_elem])
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts longs array to JSON format
+     *
+     * @param d: FixedArray<long> - longs array to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of longs array
+     */
+    public static stringify(d: FixedArray<long>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(d[i])
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(d[last_elem])
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts array of bytes to JSON format
+     *
+     * @param d: FixedArray<byte> - array of byte to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of array of bytes
+     */
+    public static stringify(d: FixedArray<float>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(JSON.stringify(d[i]))
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(JSON.stringify(d[last_elem]))
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts doubles array to JSON format
+     *
+     * @param d: FixedArray<double> - doubles array to be converted to a JSON as an Array of Numbers
+     *
+     * @returns String - JSON representation of doubles array
+     */
+    public static stringify(d: FixedArray<double>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(JSON.stringify(d[i]))
+            s.append(',')
+        }
+        if (d.length > 0) {
+            s.append(JSON.stringify(d[last_elem]))
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    /**
+     * Converts booleans array to JSON format
+     *
+     * @param d: FixedArray<boolean> - booleans array to be converted to a JSON as an Array of Boolean literals
+     *
+     * @returns String - JSON representation of booleans array
+     */
+    public static stringify(d: FixedArray<boolean>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            if (d[i]) {
+                s.append("true,")
+            } else {
+                s.append("false,")
+            }
+        }
+        if (d.length > 0) {
+            s.append(d[last_elem])
+        }
+        s.append(']')
+        return s.toString()
+    }
+
+    public static stringify(d: Array<Number>): String {
+        let s = new StringBuilder("[")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append(JSON.stringify(d[i]));
+            s.append(",");
+        }
+        if (d.length > 0) {
+            s.append(JSON.stringify(d[last_elem]));
+        }
+        s.append(']');
+        return s.toString()
+    }
+
+    public static stringify(d: ArrayLike<Number>): String {
+        let s = new StringBuilder("{")
+        let last_elem = d.length - 1
+        for (let i = 0; i < last_elem; ++i) {
+            s.append("\"");
+            s.append(JSON.stringify(i));
+            s.append("\":");
+            s.append(JSON.stringify(d[i]));
+            s.append(",");
+        }
+        if (d.length > 0) {
+            s.append("\"");
+            s.append(JSON.stringify(last_elem));
+            s.append("\":");
+            s.append(JSON.stringify(d[last_elem]));
+        }
+        s.append('}');
+        return s.toString()
+    }
+
+    public static stringify(obj: JsonReplacer): String {
+        const record = obj.jsonReplacer();
+        return JSON.stringify(record);
+    }
+
+    private static native stringifyJSValue(d: JSValue): String;
+
     /**
      * Converts an object to a JavaScript Object Notation (JSON) string.
      *
@@ -266,9 +489,12 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringifyAnyObj(obj: Any): String {
+    public static stringify(obj: Any): String {
         if (obj === undefined) {
             return "undefined"
+        }
+        if (obj instanceof JSValue) {
+            return JSON.stringifyJSValue(obj as JSValue)
         }
         const json = JSON.stringifyFast(obj)
         if (json !== undefined) {
@@ -278,11 +504,6 @@ export class JSON {
     }
 
     private static native stringifyFast(obj: Any): string
-
-    public static stringifyJsonReplacer(obj: JsonReplacer): String {
-        const record = obj.jsonReplacer();
-        return JSON.stringify(record);
-    }
 
     /**
      * Converts an object to a JavaScript Object Notation (JSON) string.
@@ -296,7 +517,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringifyObjValue(
+    public static stringify(
                 obj: Any,
                 replacer: ((key: string, value: Any) => Any) | undefined | null,
                 space?: string | int): string {
@@ -322,7 +543,7 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringifyDoubleStringFixedArray(obj: Any, replacer: FixedArray<double | string>, space?: int | string): string {
+    public static stringify(obj: Any, replacer: FixedArray<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -335,20 +556,7 @@ export class JSON {
         }
     }
 
-    public static stringifyDoubleStringArray(obj: Any, replacer: Array<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new string[replacer.length]
-        for (let i = 0; i < replacer.length; i++) {
-            filter[i] = `${replacer[i]}`
-        }
-
-        if (space instanceof String || space === undefined) {
-            return new JSONWriter(filter, space).write(obj)
-        } else {
-            return new JSONWriter(filter, JSON.spaceFromNumber(space! as int)).write(obj)
-        }
-    }
-
-    public static stringifyStringArray(obj: Any, replacer: Array<string>, space?: int | string): string {
+    public static stringify(obj: Any, replacer: Array<double | string>, space?: int | string): string {
         const filter : FixedArray<string> = new string[replacer.length]
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
@@ -368,230 +576,6 @@ export class JSON {
         }
 
         return " ".repeat(spacesCount)
-    }
-
-    public static native stringifyJSValue(d: JSValue): String;
-
-    //--------------------------
-    //          arrays
-    //--------------------------
-
-    /**
-     * Converts bytes array to JSON format
-     *
-     * @param d: byte[] - bytes array to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of bytes array
-     */
-    public static stringifyByteFixedArray(d: FixedArray<byte>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(d[last_elem])
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts shorts array to JSON format
-     *
-     * @param d: FixedArray<short> - shorts array to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of shorts array
-     */
-    public static stringifyShortFixedArray(d: FixedArray<short>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(d[last_elem])
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts ints array to JSON format
-     *
-     * @param d: FixedArray<int> - ints array to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of ints array
-     */
-    public static stringifyIntFixedArray(d: FixedArray<int>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(d[last_elem])
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts longs array to JSON format
-     *
-     * @param d: FixedArray<long> - longs array to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of longs array
-     */
-    public static stringifyLongFixedArray(d: FixedArray<long>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(d[last_elem])
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts array of bytes to JSON format
-     *
-     * @param d: FixedArray<byte> - array of byte to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of array of bytes
-     */
-    public static stringifyFloatFixedArray(d: FixedArray<float>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(JSON.stringify(d[i]))
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(JSON.stringify(d[last_elem]))
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts doubles array to JSON format
-     *
-     * @param d: FixedArray<double> - doubles array to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of doubles array
-     */
-    public static stringifyDoubleFixedArray(d: FixedArray<double>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(JSON.stringify(d[i]))
-            s.append(',')
-        }
-        if (d.length > 0) {
-            s.append(JSON.stringify(d[last_elem]))
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts chars array to JSON format
-     *
-     * @param d: FixedArray<char> - chars array  to be converted to a JSON as an Array of Numbers
-     *
-     * @returns String - JSON representation of chars array
-     */
-    public static stringifyCharFixedArray(d: FixedArray<char>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append("\"")
-            s.append(d[i])
-            s.append("\",")
-        }
-        if (d.length > 0) {
-            s.append("\"")
-            s.append(d[last_elem])
-            s.append("\"")
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    /**
-     * Converts booleans array to JSON format
-     *
-     * @param d: FixedArray<boolean> - booleans array to be converted to a JSON as an Array of Boolean literals
-     *
-     * @returns String - JSON representation of booleans array
-     */
-    public static stringifyBooleanFixedArray(d: FixedArray<boolean>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            if (d[i]) {
-                s.append("true,")
-            } else {
-                s.append("false,")
-            }
-        }
-        if (d.length > 0) {
-            s.append(d[last_elem])
-        }
-        s.append(']')
-        return s.toString()
-    }
-
-    public static stringifyNumberArray(d: Array<Number>): String {
-        let s = new StringBuilder("[")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append(JSON.stringify(d[i]));
-            s.append(",");
-        }
-        if (d.length > 0) {
-            s.append(JSON.stringify(d[last_elem]));
-        }
-        s.append(']');
-        return s.toString()
-    }
-
-    public static stringifyNumberArrayLike(d: ArrayLike<Number>): String {
-        let s = new StringBuilder("{")
-        let last_elem = d.length - 1
-        for (let i = 0; i < last_elem; ++i) {
-            s.append("\"");
-            s.append(JSON.stringify(i));
-            s.append("\":");
-            s.append(JSON.stringify(d[i]));
-            s.append(",");
-        }
-        if (d.length > 0) {
-            s.append("\"");
-            s.append(JSON.stringify(last_elem));
-            s.append("\":");
-            s.append(JSON.stringify(d[last_elem]));
-        }
-        s.append('}');
-        return s.toString()
-    }
-
-    public static overload stringify {
-        stringifyByte, stringifyChar, stringifyInt, stringifyShort, stringifyLong,
-        stringifyBigint, stringifyFloat, stringifyDouble, stringifyBoolean, stringifyString,
-        stringifyByteFixedArray, stringifyCharFixedArray, stringifyShortFixedArray, stringifyIntFixedArray,
-        stringifyLongFixedArray,  stringifyFloatFixedArray, stringifyDoubleFixedArray,
-        stringifyBooleanFixedArray, stringifyDoubleStringFixedArray, stringifyNumberArray,
-        stringifyNumberArrayLike, stringifyStringArray, stringifyDoubleStringArray,
-        stringifyJSValue, stringifyAnyObj, stringifyJsonReplacer, stringifyObjValue,
     }
 
     /**
@@ -1506,7 +1490,7 @@ class JSONWriter {
         }
     }
 
-    private writeTypedArray(array: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | 
+    private writeTypedArray(array: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array |
         Uint32Array | Float32Array | Float64Array | BigInt64Array | BigUint64Array | Uint8ClampedArray): void {
         this.buffer.append("{")
 
@@ -1517,7 +1501,7 @@ class JSONWriter {
 
         if (array.length > 0) {
             this.path.add(array)
-            
+
             const lastElementIndex: int = array.length.toInt() - 1
 
             for (let idx: int = 0; idx < lastElementIndex; idx++) {
