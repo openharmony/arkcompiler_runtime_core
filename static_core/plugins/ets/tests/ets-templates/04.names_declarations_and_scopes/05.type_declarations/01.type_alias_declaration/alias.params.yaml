@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -188,10 +188,16 @@ cases:
                 ((v3 as NestedFunc[])[0] as NestedFunc[]).length == 0 &&
                 ((v3 as NestedFunc[])[1] as Foo)('abc') == 'abcabc' &&
                 ((v3 as NestedFunc[])[2] as Foo)('xyz') == 'xyzxyz'
+
     - defs: |-
           enum Color { Red, Green, Blue };
           type BaseColor = Color;
       use: |-
           let v: BaseColor = BaseColor.Red;
           let ok = true;
-    
+
+    - defs: |-
+          type Func = (p: int, q: Func) => int;
+      use: |-
+          let a:Func = (p: int, q: Func):int => {return 1};
+          let ok:boolean = a(10, a) == 1;

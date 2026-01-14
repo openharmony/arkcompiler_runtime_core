@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,10 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    The constructor overloading behaves identically to the method overloading
-    (see Class Method Overloading).
-tags: [{{c.tags}}]
+desc: A compile-time error occurs, if signatures of two overloaded constructors are overload-equivalent.
+tags: [compile-only, negative]
+expected_out: |-
+    {{c.expected_out|indent}}
 ---*/
 {{c.decl}}
-
-function main() {
-    {{c.use|indent}}
-}
 {%- endfor %}

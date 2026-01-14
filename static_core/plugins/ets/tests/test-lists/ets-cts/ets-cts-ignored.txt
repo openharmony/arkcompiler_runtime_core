@@ -71,14 +71,14 @@
 04.names_declarations_and_scopes/03.scopes/type_param_class_n_3.ets
 
 #27159
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_28.ets
 
 #30653
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_35.ets
 
 #30697
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_39.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
 
 #32380
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_0.ets
@@ -2270,25 +2270,6 @@
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/overriding2c_2.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/inheritance1c_3.ets
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/overriding1c_3.ets
-
-#24112
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_10.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_11.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_13.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_9.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_11.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_8.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_9.ets
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co3_over_1.ets
-
-#24121
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_6.ets
-
-#24114
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co1_over_7.ets
-
-#30508
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co2_over_10.ets
 
 #28235 Constructor Names not yet work
 17.experimental_features/11.classes_experimental/03.constructor_names/ConstructorNameOverload.ets
