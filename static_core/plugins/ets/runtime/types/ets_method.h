@@ -289,8 +289,6 @@ public:
         return GetPandaMethod()->GetFileId().GetOffset();
     }
 
-    PANDA_PUBLIC_API EtsMethod *GetOverriddenMethod();
-
     int32_t GetLineNumFromBytecodeOffset(uint32_t bcOffset) const
     {
         if (IsNative()) {

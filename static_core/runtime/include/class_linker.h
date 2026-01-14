@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,6 +304,10 @@ public:
                                        Span<Method> methods, Span<Field> fields, Class *baseClass,
                                        Span<Class *> interfaces, ClassLinkerContext *context, bool isInterface);
 
+    PANDA_PUBLIC_API Class *BuildProxyClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
+                                            Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
+                                            ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler);
+
     bool IsPandaFileRegistered(const panda_file::File *file)
     {
         os::memory::LockHolder lock(pandaFilesLock_);
@@ -349,6 +353,10 @@ private:
         size_t numSfields;
     };
 
+    class InterfaceProxyBuilder;
+
+    ClassInfo CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler);
+
     bool LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, ClassLinkerExtension *ext,
                                   const uint8_t *descriptor);
 
@@ -383,8 +391,6 @@ private:
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
                                                 ClassLinkerErrorHandler *errorHandler);
 
-    void FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces);
-
     [[nodiscard]] bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
 
     [[nodiscard]] bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
@@ -410,6 +416,10 @@ private:
     enum class FilterResult : uint8_t { DISABLED = 0, POSSIBLY_HAS, IMPOSSIBLY_HAS };
 
     FilterResult LookupInFilter(const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler);
+
+    Class *BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods, Span<Field> fields,
+                          Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
+                          ClassLinkerExtension *ext, ClassInfo classInfo);
 
     mem::InternalAllocatorPtr allocator_;
 

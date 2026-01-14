@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,17 @@ public:
     virtual ClassLinkerContext *CreateApplicationClassLinkerContext(const PandaVector<PandaString> &path);
 
     virtual ClassLinkerContext *GetCommonContext([[maybe_unused]] Span<Class *> classes)
+    {
+        UNREACHABLE();
+    }
+
+    virtual std::optional<Span<Method>> GenerateProxyClassMethods([[maybe_unused]] Class *proxyKlass,
+                                                                  [[maybe_unused]] Span<Method *> rawMethods)
+    {
+        UNREACHABLE();
+    }
+
+    virtual std::optional<PandaVector<Method *>> BuildProxyClassMethodsSpan([[maybe_unused]] ITable itable)
     {
         UNREACHABLE();
     }

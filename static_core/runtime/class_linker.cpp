@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -324,22 +324,13 @@ private:
     panda_file::ClassDataAccessor *dataAccessor_;
 };
 
-void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> &interfaces)
+ClassLinker::ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler)
 {
-    auto table = itable.Get();
-    if (!table.Empty()) {
-        for (size_t i = 0; i < table.Size(); i++) {
-            Span<Method *> imethods = table[i].GetMethods();
-            if (!imethods.Empty()) {
-                allocator_->Free(imethods.begin());
-            }
-            table[i].SetInterface(nullptr);
-        }
-        allocator_->Free(table.begin());
-    }
-    if (!interfaces.Empty()) {
-        allocator_->Free(interfaces.begin());
-    }
+    ClassInfo classInfo;
+    classInfo.itableBuilder = ctx.CreateITableBuilder(errorHandler);
+    classInfo.vtableBuilder = ctx.CreateVTableBuilder(errorHandler);
+    classInfo.imtableBuilder = ctx.CreateIMTableBuilder();
+    return classInfo;
 }
 
 bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
@@ -354,11 +345,12 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::Class
 
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
+        ITable::Free(allocator_, info.itableBuilder->GetITable());
         return false;
     }
     ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
-        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
+        ITable::Free(allocator_, info.itableBuilder->GetITable());
         return false;
     }
     info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
@@ -409,7 +401,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> meth
     }
     ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
-        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
+        ITable::Free(allocator_, info.itableBuilder->GetITable());
         return false;
     }
     info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
@@ -1068,6 +1060,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
 
     auto *klass = LoadClass(&classDataAccessor, descriptor, baseClass, res.value(), context, ext, errorHandler);
     if (klass == nullptr) {
+        allocator_->Free(res->Data());
         return nullptr;
     }
 
@@ -1132,6 +1125,62 @@ bool ClassLinker::LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, C
     return true;
 }
 
+Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods,
+                                   Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
+                                   ClassLinkerContext *context, ClassLinkerExtension *ext, ClassInfo classInfo)
+{
+    ASSERT(classInfo.vtableBuilder != nullptr);
+    auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
+                                   classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
+
+    if (UNLIKELY(klass == nullptr)) {
+        ITable::Free(allocator_, classInfo.itableBuilder->GetITable());
+        return nullptr;
+    }
+
+    klass->SetLoadContext(context);
+    klass->SetBase(baseClass);
+    klass->SetInterfaces(interfaces);
+    klass->SetAccessFlags(accessFlags);
+
+    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
+    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
+    klass->SetNumStaticFields(classInfo.numSfields);
+
+    size_t numSmethods = methods.size() - klass->GetNumVirtualMethods();
+    klass->SetMethods(methods, klass->GetNumVirtualMethods(), numSmethods);
+    klass->SetFields(fields, klass->GetNumStaticFields());
+
+    for (auto &method : methods) {
+        method.SetClass(klass);
+    }
+
+    for (auto &field : fields) {
+        field.SetClass(klass);
+    }
+
+    if (UNLIKELY(!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor))) {
+        ITable::Free(allocator_, classInfo.itableBuilder->GetITable());
+        return nullptr;
+    }
+
+    klass->SetState(Class::State::LOADED);
+
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
+
+    auto *otherKlass = context->InsertClass(klass);
+    if (otherKlass != nullptr) {
+        // Someone has created the class in the other thread (increase the critical section?)
+        FreeClass(klass);
+        return otherKlass;
+    }
+
+    RemoveCreatedClassInExtension(klass);
+    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(klass);
+
+    return klass;
+}
+
 Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
                                Span<Method> methods, Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
                                ClassLinkerContext *context, bool isInterface)
@@ -1151,57 +1200,173 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
         return nullptr;
     }
 
-    // Need to protect ArenaAllocator and loaded_classes_
-    ASSERT(classInfo.vtableBuilder != nullptr);
-    auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
-                                   classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
+    return BuildClassImpl(descriptor, accessFlags, methods, fields, baseClass, interfaces, context, ext,
+                          std::move(classInfo));
+}
 
-    if (UNLIKELY(klass == nullptr)) {
-        return nullptr;
+class ClassLinker::InterfaceProxyBuilder final {
+public:
+    NO_MOVE_SEMANTIC(InterfaceProxyBuilder);
+    NO_COPY_SEMANTIC(InterfaceProxyBuilder);
+
+    explicit InterfaceProxyBuilder(ClassLinkerExtension *ext, mem::InternalAllocatorPtr allocator)
+        : ext_(ext), allocator_(allocator), tempProxyClass_(nullptr, ClassDeleter(ext))
+    {
     }
 
-    klass->SetLoadContext(context);
-    klass->SetBase(baseClass);
-    klass->SetInterfaces(interfaces);
-    klass->SetAccessFlags(accessFlags);
-
-    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
-    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
-    klass->SetNumStaticFields(classInfo.numSfields);
-
-    ASSERT(klass->GetNumCopiedMethods() == 0);
-
-    size_t numSmethods = methods.size() - klass->GetNumVirtualMethods();
-    klass->SetMethods(methods, klass->GetNumVirtualMethods(), numSmethods);
-    klass->SetFields(fields, klass->GetNumStaticFields());
-
-    for (auto &method : methods) {
-        method.SetClass(klass);
+    ~InterfaceProxyBuilder()
+    {
+        if (UNLIKELY(needReleaseItable_)) {
+            ITable::Free(allocator_, itable_);
+        }
+        if (UNLIKELY(needReleaseProxyMethods_)) {
+            allocator_->Delete(proxyMethods_.Data());
+        }
     }
 
-    for (auto &field : fields) {
-        field.SetClass(klass);
+    Class *Build(LanguageContext ctx, ClassInfo classInfo, const uint8_t *descriptor, uint32_t accessFlags,
+                 Span<Field> fields, Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
+                 ClassLinkerErrorHandler *errorHandler)
+    {
+        ClassLinker *linker = ext_->GetClassLinker();
+
+        bool buildItable = !classInfo.itableBuilder->Build(linker, baseClass, interfaces, false);
+        itable_ = classInfo.itableBuilder->GetITable();
+
+        if (UNLIKELY(buildItable)) {
+            return nullptr;
+        }
+
+        // Since the creation of a target proxy class requires already built methods,
+        // but the building of methods requires an owner class to be set,
+        // it is necessary to create a temporary class with the same access flags and loading context
+        // as the target proxy will have.
+        if (UNLIKELY(!AllocateTemporaryProxyClass(descriptor, context, accessFlags))) {
+            return nullptr;
+        }
+        if (UNLIKELY(!CollectMethodsFromItable(itable_))) {
+            return nullptr;
+        }
+        if (UNLIKELY(!FilterMethods(ctx.CreateVTableBuilder(errorHandler), baseClass))) {
+            return nullptr;
+        }
+        auto proxyMethodsOpt = AllocateProxyMethods();
+        if (UNLIKELY(!proxyMethodsOpt.has_value())) {
+            return nullptr;
+        }
+        proxyMethods_ = proxyMethodsOpt.value();
+        if (UNLIKELY(!classInfo.vtableBuilder->Build(proxyMethods_, baseClass, itable_, false))) {
+            return nullptr;
+        }
+        classInfo.imtableBuilder->Build(itable_, false);
+
+        ClassDataAccessor dataAccessor(fields);
+        classInfo.size = GetClassSize(dataAccessor, classInfo.vtableBuilder->GetVTableSize(),
+                                      classInfo.imtableBuilder->GetIMTSize(), &classInfo.numSfields);
+
+        auto *klass = linker->BuildClassImpl(descriptor, accessFlags, proxyMethods_, fields, baseClass, interfaces,
+                                             context, ext_, std::move(classInfo));
+        if (UNLIKELY(klass == nullptr)) {
+            return nullptr;
+        }
+
+        needReleaseItable_ = false;
+        needReleaseProxyMethods_ = false;
+        return klass;
     }
 
-    if (!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor)) {
-        return nullptr;
+private:
+    bool AllocateTemporaryProxyClass(const uint8_t *descriptor, ClassLinkerContext *context, uint32_t accessFlags)
+    {
+        tempProxyClass_ =
+            PandaUniquePtr<Class, ClassDeleter>(ext_->CreateClass(descriptor, 0, 0, sizeof(Class)), ClassDeleter(ext_));
+        if (UNLIKELY(tempProxyClass_ == nullptr)) {
+            return false;
+        }
+        tempProxyClass_->SetLoadContext(context);
+        tempProxyClass_->SetAccessFlags(accessFlags);
+        return true;
     }
 
-    klass->SetState(Class::State::LOADED);
+    bool CollectMethodsFromItable(ITable itable)
+    {
+        auto methods = ext_->BuildProxyClassMethodsSpan(itable);
+        if (UNLIKELY(!methods.has_value())) {
+            return false;
+        }
 
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
-
-    auto *otherKlass = context->InsertClass(klass);
-    if (otherKlass != nullptr) {
-        // Someone has created the class in the other thread (increase the critical section?)
-        FreeClass(klass);
-        return otherKlass;
+        allInterfacesMethods_ = std::move(*methods);
+        return true;
     }
 
-    RemoveCreatedClassInExtension(klass);
-    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(klass);
+    bool FilterMethods(PandaUniquePtr<VTableBuilder> vtableBuilder, Class *baseClass)
+    {
+        PandaVector<Method *> candidates(allocator_->Adapter());
+        if (!vtableBuilder->FilterProxyClassMethods(Span<Method *>(allInterfacesMethods_), &candidates, baseClass)) {
+            return false;
+        }
+        filteredMethods_ = std::move(candidates);
+        return true;
+    }
 
-    return klass;
+    std::optional<Span<Method>> AllocateProxyMethods()
+    {
+        return ext_->GenerateProxyClassMethods(tempProxyClass_.get(), Span<Method *>(filteredMethods_));
+    }
+
+private:
+    class ClassDeleter {
+    public:
+        explicit ClassDeleter(ClassLinkerExtension *ext) : ext_(ext) {}
+
+        void operator()(Class *tempClassPtr) const
+        {
+            if (tempClassPtr != nullptr) {
+                ext_->FreeClass(tempClassPtr);
+            }
+        }
+
+    private:
+        ClassLinkerExtension *ext_ {nullptr};
+    };
+
+private:
+    ClassLinkerExtension *ext_ {nullptr};
+    mem::InternalAllocatorPtr allocator_;
+
+    ITable itable_;
+    bool needReleaseItable_ {true};
+
+    PandaVector<Method *> allInterfacesMethods_;
+
+    PandaVector<Method *> filteredMethods_;
+
+    Span<Method> proxyMethods_;
+    bool needReleaseProxyMethods_ {true};
+
+    PandaUniquePtr<Class, ClassDeleter> tempProxyClass_;
+};
+
+Class *ClassLinker::BuildProxyClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
+                                    Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
+                                    ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler)
+{
+    ASSERT(context != nullptr);
+    if (needCopyDescriptor) {
+        descriptor = CopyMutf8String(allocator_, descriptor);
+        os::memory::LockHolder lock(copiedNamesLock_);
+        copiedNames_.push_front(descriptor);
+    }
+
+    auto *ext = GetExtension(baseClass->GetSourceLang());
+    ASSERT(ext != nullptr);
+
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*baseClass);
+    ClassInfo classInfo = CreateClassInfo(ctx, errorHandler);
+
+    InterfaceProxyBuilder builder(ext, allocator_);
+    return builder.Build(ctx, std::move(classInfo), descriptor, accessFlags, fields, baseClass, interfaces, context,
+                         errorHandler);
 }
 
 Class *ClassLinker::CreateUnionClass(ClassLinkerExtension *ext, const uint8_t *descriptor, bool needCopyDescriptor,

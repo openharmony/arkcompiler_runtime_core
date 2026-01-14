@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,22 @@ public:
     static constexpr uint32_t GetEntrySize()
     {
         return sizeof(Entry);
+    }
+
+    // NOTE(kurnevichstanislav): #32381
+    static void Free(mem::InternalAllocatorPtr allocator, ITable itable)
+    {
+        auto table = itable.Get();
+        if (!table.Empty()) {
+            for (size_t i = 0; i < table.Size(); i++) {
+                Span<Method *> imethods = table[i].GetMethods();
+                if (!imethods.Empty()) {
+                    allocator->Free(imethods.begin());
+                }
+                table[i].SetInterface(nullptr);
+            }
+            allocator->Free(table.begin());
+        }
     }
 
 private:

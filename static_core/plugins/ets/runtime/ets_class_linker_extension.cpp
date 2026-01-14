@@ -36,6 +36,7 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/heap_manager.h"
+#include "plugins/ets/runtime/entrypoints/entrypoints.h"
 
 namespace ark::ets {
 namespace {
@@ -151,6 +152,10 @@ Class *EtsClassLinkerExtension::CreateStringSubClass(const uint8_t *descriptor, 
     Span<Class *> interfacesSpan {};
     Class *subClass = classLinker->BuildClass(descriptor, true, accessFlags, methodsSpan, fields, stringClass,
                                               interfacesSpan, context, false);
+    if (UNLIKELY(subClass == nullptr)) {
+        LOG(FATAL, CLASS_LINKER) << "Cannot build string subclass '" << descriptor << "'";
+        return nullptr;
+    }
 
     subClass->SetState(Class::State::INITIALIZING);
     subClass->SetStringClass();
@@ -826,6 +831,91 @@ ClassLinkerContext *EtsClassLinkerExtension::GetCommonContext(Span<Class *> clas
         commonCtx = GetParentContext(commonCtx);
     }
     return commonCtx;
+}
+
+std::optional<PandaVector<Method *>> EtsClassLinkerExtension::BuildProxyClassMethodsSpan(ITable itable)
+{
+    constexpr size_t PROXY_BASE_CLASS_NUM_METHODS = 2U;
+
+    size_t methodsNum = PROXY_BASE_CLASS_NUM_METHODS;
+    for (auto &entry : itable.Get()) {
+        methodsNum += entry.GetInterface()->GetMethods().Size();
+    }
+
+    auto *allocator = mem::InternalAllocator<>::GetInternalAllocatorFromRuntime();
+    PandaVector<Method *> methods(methodsNum, allocator->Adapter());
+
+    size_t idx = 0;
+    methods[idx++] = GetPlatformTypes()->coreReflectProxyConstructor->GetPandaMethod();
+    methods[idx++] = GetPlatformTypes()->coreReflectProxyGetHandler->GetPandaMethod();
+    ASSERT(idx == PROXY_BASE_CLASS_NUM_METHODS);
+
+    for (auto &entry : itable.Get()) {
+        for (auto &method : entry.GetInterface()->GetMethods()) {
+            methods[idx++] = &method;
+        }
+    }
+    ASSERT(idx == methodsNum);
+
+    return methods;
+}
+
+static void CreateProxyMethodAsCopyFromBase(Class *klass, EtsMethod *method, Method *out)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(out != nullptr);
+    ASSERT(method != nullptr);
+
+    new (out) Method(EtsMethod::ToRuntimeMethod(method));
+    out->SetClass(klass);
+
+    out->SetAccessFlags((out->GetAccessFlags() & ~ACC_PROTECTED) | ACC_PUBLIC);
+    // NOTE(kurnevichstanislav): possibly need additional support of some cases #30568.
+}
+
+static void CreateProxyMethod(Class *klass, EtsMethod *method, Method *out)
+{
+    ASSERT(klass != nullptr);
+    ASSERT(method != nullptr);
+    ASSERT(out != nullptr);
+
+    new (out) Method(method->GetPandaMethod());
+
+    constexpr uint32_t FLAGS_TO_REMOVE = ACC_ABSTRACT | ACC_DEFAULT_INTERFACE_METHOD;
+
+    ASSERT(out->IsPublic());
+    out->SetAccessFlags((out->GetAccessFlags() & ~FLAGS_TO_REMOVE) | ACC_FINAL);
+    out->SetClass(klass);
+    out->SetCompiledEntryPoint(entrypoints::GetEtsProxyEntryPoint());
+
+    // Set original method of interface for which we create proxy method.
+    // This pointer will be passed to the proxy handler invoke/set/get.
+    EtsMethod::FromRuntimeMethod(out)->SetProxyPointer(method);
+}
+
+std::optional<Span<Method>> EtsClassLinkerExtension::GenerateProxyClassMethods(Class *proxyKlass,
+                                                                               Span<Method *> rawMethods)
+{
+    ASSERT(proxyKlass != nullptr);
+
+    auto *allocator = mem::InternalAllocator<>::GetInternalAllocatorFromRuntime();
+    Span<Method> proxyMethods(allocator->AllocArray<Method>(rawMethods.Size()), rawMethods.Size());
+
+    auto *ctor = GetPlatformTypes()->coreReflectProxyConstructor;
+    auto *getHandler = GetPlatformTypes()->coreReflectProxyGetHandler;
+
+    for (size_t idx = 0; idx < rawMethods.Size(); ++idx) {
+        if (rawMethods[idx] == ctor->GetPandaMethod()) {
+            ASSERT(rawMethods[idx]->IsConstructor());
+            CreateProxyMethodAsCopyFromBase(proxyKlass, ctor, &proxyMethods[idx]);
+        } else if (rawMethods[idx] == getHandler->GetPandaMethod()) {
+            CreateProxyMethodAsCopyFromBase(proxyKlass, getHandler, &proxyMethods[idx]);
+        } else {
+            CreateProxyMethod(proxyKlass, EtsMethod::FromRuntimeMethod(rawMethods[idx]), &proxyMethods[idx]);
+        }
+    }
+
+    return proxyMethods;
 }
 
 }  // namespace ark::ets

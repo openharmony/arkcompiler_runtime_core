@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,8 +129,10 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisO
 
     // Validate that thisObj is subtype of method owner
     if (!method->GetClass()->IsAssignableFrom(thisObj->GetClass())) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
-                          "Object type is not compatible with method owner type");
+        PandaOStringStream ss;
+        ss << "Object type [" << thisObj->GetClass()->GetRuntimeClass()->GetName()
+           << "] is not compatible with method owner type [" << method->GetClass()->GetRuntimeClass()->GetName() << ']';
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, ss.str());
         return nullptr;
     }
 

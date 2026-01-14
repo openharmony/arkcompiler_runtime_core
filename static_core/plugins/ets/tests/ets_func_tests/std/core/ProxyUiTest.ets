@@ -258,7 +258,7 @@ class ProxyTestHandler implements reflect.InvocationHandler {
 
 // Test Resource
 function createResourceProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<Resource>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<Resource>() ]
     let proxy1: Resource = createProxy(ifaces, new ResourceHandler(new ResourceImpl("test1", "test2", 1))) as Resource
     createResourceProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -290,7 +290,7 @@ function createResourceProxyTestBody(proxy: Resource) {
     arktest.assertEQ(LATEST_EVENT, Event.GETTER_CALLED)
     proxy.type = 1
     arktest.assertEQ(LATEST_EVENT, Event.SETTER_CALLED)
-    //proxy.type = undefined
+    proxy.type = undefined
     arktest.assertEQ(LATEST_EVENT, Event.SETTER_CALLED)
     proxy.resource
     arktest.assertEQ(LATEST_EVENT, Event.GETTER_CALLED)
@@ -302,7 +302,7 @@ function createResourceProxyTestBody(proxy: Resource) {
 
 // Test Dimension
 function createDimensionProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<DimensionI>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<DimensionI>() ]
     let proxy1: DimensionI = createProxy(ifaces, new TestHandler1()) as DimensionI
     createDimensionProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -325,7 +325,7 @@ function createDimensionProxyTestBody(proxy: DimensionI) {
 
 // Test SymbolGlyphModifier
 function createModifiernProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<AttributeModifier<SymbolGlyphAttribute>>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<AttributeModifier<SymbolGlyphAttribute>>() ]
     let proxy1: AttributeModifier<SymbolGlyphAttribute> = createProxy(ifaces, new TestHandler2(new SymbolGlyphModifier())) as AttributeModifier<SymbolGlyphAttribute>
     createModifierProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -343,7 +343,7 @@ function createModifierProxyTestBody(proxy: AttributeModifier<SymbolGlyphAttribu
 
 // Test Base
 function createBaseProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<Base>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<Base>() ]
     let proxy1: Base = createProxy(ifaces, new BaseHandler(new BaseImpl())) as Base
     createBaseProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -362,7 +362,7 @@ function createBaseProxyTestBody(proxy: Base) {
 
 // Test ProxyTest
 function createProxyTest(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<ProxyTest<Object>>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<ProxyTest<Object>>() ]
     let proxy1: ProxyTest<Object> = createProxy(ifaces, new ProxyTestHandler(new ProxyTestImpl<Object>())) as ProxyTest<Object>
     createProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE
@@ -479,7 +479,7 @@ function createProxyTestBody(proxy: ProxyTest<Object>) {
 
 // Test ProxyTest %%get- and %%set-
 function createProxyTestOpt(){
-    let ifaces: FixedArray<Class> =  [ (Type.from<ProxyTest<Object>>() as InterfaceType).getClass() ]
+    let ifaces: FixedArray<Class> =  [ Class.from<ProxyTest<Object>>() ]
     let proxy1: ProxyTest<Object> = createProxy(ifaces, new ProxyTestHandler(new ProxyTestImpl<Object>())) as ProxyTest<Object>
     createProxyTestBody(proxy1)
     LATEST_EVENT = Event.NONE

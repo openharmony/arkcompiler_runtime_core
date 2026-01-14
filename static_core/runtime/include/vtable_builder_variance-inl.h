@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,34 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod
     if (!compatibleFound) {
         vtable_.AddEntry(info);
     }
+    return true;
+}
+
+template <class ProtoCompatibility, class OverridePred>
+bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessProxyClassMethod(const MethodInfo *info)
+{
+    auto *ctx = info->GetLoadContext();
+
+    // The following algorithm searches for the method with the most general signature
+    // among a set of methods with the same name.
+    bool compatibleExists = false;
+    for (auto it = SameNameMethodInfoIterator(vtable_.Methods(), info); !it.IsEmpty(); it.Next()) {
+        auto &[itInfo, itEntry] = it.Value();
+
+        if (IsOverriddenBy(ctx, itInfo->GetProtoId(), info->GetProtoId())) {
+            vtable_.ReplaceEntryWith(itInfo, info);
+            compatibleExists = true;
+            break;
+        } else if (IsOverriddenBy(ctx, info->GetProtoId(), itInfo->GetProtoId())) {
+            compatibleExists = true;
+            break;
+        }
+    }
+
+    if (!compatibleExists) {
+        vtable_.AddEntry(info);
+    }
+
     return true;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ public:
 private:
     [[nodiscard]] bool ProcessClassMethod(const MethodInfo *info) override;
     [[nodiscard]] bool ProcessDefaultMethod(ITable itable, size_t itableIdx, MethodInfo *methodInfo) override;
+
+    [[nodiscard]] bool ProcessProxyClassMethod(const MethodInfo *info) override;
 
     std::optional<MethodInfo const *> ScanConflictingDefaultMethods(const MethodInfo *info);
 

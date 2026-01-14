@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,6 +232,8 @@ public:
 
     void AddEntry(const MethodInfo *info);
 
+    void ReplaceEntryWith(const MethodInfo *prev, const MethodInfo *current);
+
     CopiedMethodEntry &AddCopiedEntry(const MethodInfo *info);
 
     CopiedMethodEntry &UpdateCopiedEntry(const MethodInfo *orig, const MethodInfo *repl);
@@ -323,6 +325,8 @@ public:
 
     bool Build(Span<Method> methods, Class *baseClass, ITable itable, bool isInterface) override;
 
+    bool FilterProxyClassMethods(Span<Method *> input, PandaVector<Method *> *output, Class *baseClass) override;
+
     void UpdateClass(Class *klass) const override;
 
     size_t GetNumVirtualMethods() const override
@@ -346,6 +350,13 @@ protected:
     [[nodiscard]] virtual bool ProcessClassMethod(const MethodInfo *info) = 0;
     [[nodiscard]] virtual bool ProcessDefaultMethod(ITable itable, size_t itableIdx, MethodInfo *methodInfo) = 0;
 
+    [[nodiscard]] virtual bool ProcessProxyClassMethod([[maybe_unused]] const MethodInfo *info)
+    {
+        UNREACHABLE();
+    }
+
+    [[nodiscard]] bool CollectProxyMethods(PandaVector<Method *> *output);
+
     ArenaAllocator allocator_ {SpaceType::SPACE_TYPE_INTERNAL};
     VTableInfo vtable_ {&allocator_};
     size_t numVmethods_ {0};
@@ -362,6 +373,8 @@ private:
     [[nodiscard]] bool AddClassMethods(panda_file::ClassDataAccessor *cda, ClassLinkerContext *ctx);
 
     [[nodiscard]] bool AddClassMethods(Span<Method> methods);
+
+    [[nodiscard]] bool AddProxyClassMethods(Span<Method *> methods);
 
     [[nodiscard]] bool AddDefaultInterfaceMethods(ITable itable, size_t superItableSize);
 

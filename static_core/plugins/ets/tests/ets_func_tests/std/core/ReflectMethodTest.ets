@@ -481,6 +481,10 @@ class ProtectedCtor {
     protected constructor() {}
 }
 
+function createInvokeExpectedErrorMsg(expectedType: Class, actualType: Class): string {
+    return `Object type [${actualType.getName()}] is not compatible with method owner type [${expectedType.getName()}]`
+}
+
 function invokeByBaseTester(tester: BaseInvokeTester) {
     let testerType = Class.of(tester)
 
@@ -505,10 +509,10 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
 
     arktest.assertEQ(testerType.getInstanceMethod("%%get-getter")!.invoke(tester), testerType)
     arktest.assertEQ(testerType.getInstanceMethod("%%set-setter")!.invoke(tester, [ ReferenceValueHolder.objReference ]), undefined)
-    
+
     arktest.expectError(() => {
         testerType.getInstanceMethod("funcEmpty")!.invoke(new Object())
-    }, new TypeError("Object type is not compatible with method owner type"))
+    }, new TypeError(createInvokeExpectedErrorMsg(testerType, Class.from<Object>())))
 
     let notVirtualDerived = testerType.getInstanceMethod("notVirtualDerived")
     if (notVirtualDerived == undefined) {
@@ -543,7 +547,7 @@ function invokeByBaseTester(tester: BaseInvokeTester) {
 
     arktest.expectError(() => {
         testerType.getInstanceMethod("funcEmpty")!.invoke(new Object())
-    }, new TypeError("Object type is not compatible with method owner type"))
+    }, new TypeError(createInvokeExpectedErrorMsg(testerType, Class.from<Object>())))
 
     let constructors = testerType.getConstructors()
     let constructorsNum = constructors.length
@@ -621,7 +625,7 @@ function invokeByInterface(tester: InvokeTester, ifaceType: Class) {
 
     arktest.expectError(() => {
         ifaceType.getInstanceMethod("funcEmpty")!.invoke(new Object())
-    }, new TypeError("Object type is not compatible with method owner type"))
+    }, new TypeError(createInvokeExpectedErrorMsg(ifaceType, Class.from<Object>())))
 
     arktest.expectError(() => {
         ifaceType.getInstanceMethod("funcBoolean")!.invoke(tester, [ ReferenceValueHolder.floatReference ])

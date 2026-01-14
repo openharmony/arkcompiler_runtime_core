@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,21 @@ void OnVTableConflict(ClassLinkerErrorHandler *errHandler, ClassLinker::Error er
 inline void VTableInfo::AddEntry(const MethodInfo *info)
 {
     [[maybe_unused]] auto res = vmethods_.insert({info, MethodEntry(vmethods_.size())});
+    ASSERT(res.second);
+}
+
+inline void VTableInfo::ReplaceEntryWith(const MethodInfo *prev, const MethodInfo *current)
+{
+    ASSERT(prev != current);
+
+    auto it = vmethods_.find(prev);
+    ASSERT(it != vmethods_.end());
+
+    size_t idx = it->second.GetIndex();
+
+    vmethods_.erase(it);
+
+    [[maybe_unused]] auto res = vmethods_.insert({current, MethodEntry(idx)});
     ASSERT(res.second);
 }
 
@@ -135,6 +150,24 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> methods)
 }
 
 template <bool VISIT_SUPERITABLE>
+bool VTableBuilderBase<VISIT_SUPERITABLE>::AddProxyClassMethods(Span<Method *> methods)
+{
+    auto *classMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
+    ASSERT(classMethods != nullptr);
+
+    for (auto *method : methods) {
+        classMethods->emplace_front(method, numVmethods_++);
+    }
+
+    for (auto const &info : *classMethods) {
+        if (!ProcessProxyClassMethod(&info)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <bool VISIT_SUPERITABLE>
 bool VTableBuilderBase<VISIT_SUPERITABLE>::AddDefaultInterfaceMethods(ITable itable, size_t superItableSize)
 {
     auto defaultMethods = allocator_.New<ArenaForwardList<MethodInfo>>(allocator_.Adapter());
@@ -212,6 +245,22 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::Build(Span<Method> methods, Class *ba
 }
 
 template <bool VISIT_SUPERITABLE>
+bool VTableBuilderBase<VISIT_SUPERITABLE>::FilterProxyClassMethods(Span<Method *> input, PandaVector<Method *> *output,
+                                                                   Class *baseClass)
+{
+    AddBaseMethods(baseClass);
+    if (!AddProxyClassMethods(input)) {
+        return false;
+    }
+
+    if (!CollectProxyMethods(output)) {
+        return false;
+    }
+
+    return true;
+}
+
+template <bool VISIT_SUPERITABLE>
 void VTableBuilderBase<VISIT_SUPERITABLE>::UpdateClass(Class *klass) const
 {
     if (klass->IsInterface()) {
@@ -226,6 +275,21 @@ void VTableBuilderBase<VISIT_SUPERITABLE>::UpdateClass(Class *klass) const
     }
 
     vtable_.UpdateClass(klass);
+}
+
+template <bool VISIT_SUPERITABLE>
+bool VTableBuilderBase<VISIT_SUPERITABLE>::CollectProxyMethods(PandaVector<Method *> *output)
+{
+    auto &methodsUmap = vtable_.Methods();
+    for (auto it : methodsUmap) {
+        if (!it.first->IsBase()) {
+            output->push_back(it.first->GetMethod());
+        }
+    }
+    for (auto it : orderedCopiedMethods_) {
+        output->push_back(it.GetMethod());
+    }
+    return true;
 }
 
 }  // namespace ark
