@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,6 +91,12 @@ void panda::guard::Class::CreateMethods(const pandasm::LiteralArray &literalArra
     LOG(INFO, PANDAGUARD) << TAG << "literalArray size:" << literalArray.literals_.size();
     size_t staticMethodIndexLiteralIndex = literalArray.literals_.size() - 1;
     size_t methodItemCount = literalArray.literals_.size() - LITERAL_ITEM_LEN;
+
+    if (literalArray.literals_[staticMethodIndexLiteralIndex].tag_ == panda::panda_file::LiteralTag::ETS_IMPLEMENTS) {
+        staticMethodIndexLiteralIndex -= LITERAL_ITEM_LEN;
+        methodItemCount -= LITERAL_ITEM_LEN;
+    }
+
     if (callRunTimeInst_) {
         staticMethodIndexLiteralIndex -= CALL_RUNTIME_LITERAL_ITEM_LEN;
         methodItemCount -= CALL_RUNTIME_LITERAL_ITEM_LEN;
