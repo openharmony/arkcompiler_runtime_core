@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+native function compileMethod(str: String) : int;
+
 function checkESvalueLoadRTE(): boolean {
     let res: boolean = false;
     try {
@@ -22,4 +24,10 @@ function checkESvalueLoadRTE(): boolean {
         res = e.message === "I dont know what error";
     }
     return res;
+}
+
+function checkESvalueLoadRTEMain(): boolean {
+    loadLibrary("jitinterface");
+    compileMethod(esvalue_load_rte.ETSGLOBAL::checkESvalueLoadRTE");
+    return checkESvalueLoadRTE();
 }

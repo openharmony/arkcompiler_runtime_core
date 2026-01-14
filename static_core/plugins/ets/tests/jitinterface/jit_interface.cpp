@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include <array>
 
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "plugins/ets/tests/checked/jitinterface/compile_method.h"
+#include "plugins/ets/tests/jitinterface/compile_method.h"
 
 extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -28,10 +28,27 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *moduleName = "string_tlab_allocations";
     ani_module md;
-    if (ANI_OK != env->FindModule(moduleName, &md)) {
-        auto msg = std::string("Cannot find \"") + moduleName + std::string("\" module!");
+    const char *foundName = nullptr;
+    static const std::array testModuleNames = {
+        "string_tlab_allocations",  //
+        "string_tlab_repeat",       //
+        "esvalue_load_rte",         //
+        "import_type"               //
+    };
+    for (auto moduleName : testModuleNames) {
+        if (ANI_OK != env->FindModule(moduleName, &md))
+            continue;
+        if (foundName != nullptr) {
+            auto msg = std::string("Found two suitable test modules: \"") + moduleName + std::string("\" and \"") +
+                       foundName + std::string("\".");
+            ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
+            return ANI_ERROR;
+        }
+        foundName = moduleName;
+    }
+    if (foundName == nullptr) {
+        auto msg = std::string("Cannot find suitable test module!");
         ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     }
@@ -40,7 +57,8 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
                                                             reinterpret_cast<void *>(ark::ets::ani::CompileMethod)}};
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
-        std::cerr << "Cannot bind native functions to '" << moduleName << "'" << std::endl;
+        auto msg = std::string("Cannot bind native functions to \"") + foundName + std::string("\".");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
         return ANI_ERROR;
     };
 

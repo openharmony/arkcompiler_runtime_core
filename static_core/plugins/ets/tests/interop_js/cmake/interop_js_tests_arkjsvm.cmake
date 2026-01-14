@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -97,7 +97,7 @@ function(panda_ets_interop_js_gtest TARGET)
     # Parse arguments
     cmake_parse_arguments(
         ARG
-        "COMPILATION_JS_WITH_CJS_ON"
+        "COMPILATION_JS_WITH_CJS_ON;RUN_WITH_JIT"
         "ETS_CONFIG;PACKAGE_NAME;VERIFY_SOURCES"
         "CPP_SOURCES;ETS_SOURCES;JS_SOURCES;TS_SOURCES;JS_TEST_SOURCE;ASM_SOURCE;LIBRARIES"
         ${ARGN}
@@ -112,6 +112,15 @@ function(panda_ets_interop_js_gtest TARGET)
         OUTPUT_SUFFIX ".so"
     )
 
+    if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+        panda_ets_interop_js_plugin(${TARGET}_jit
+            SOURCES ${ARG_CPP_SOURCES}
+            LIBRARIES ets_interop_js_gtest ets_interop_js_napi ${ARG_LIBRARIES}
+            LIBRARY_OUTPUT_DIRECTORY ${SO_FILES_OUTPUT}
+            OUTPUT_SUFFIX ".so"
+        )
+    endif()
+
     if(DEFINED ARG_ETS_SOURCES)
         set(TARGET_GTEST_PACKAGE ${TARGET}_gtest_package)
         panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
@@ -120,6 +129,12 @@ function(panda_ets_interop_js_gtest TARGET)
             ETS_CONFIG ${ARG_ETS_CONFIG}
         )
         add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
+        if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+            add_dependencies(${TARGET}_jit ${TARGET_GTEST_PACKAGE})
+
+            add_dependencies(${TARGET} jitinterface)
+            add_dependencies(${TARGET}_jit jitinterface)
+        endif()
     endif()
     set(COMPILED_ABCPATH ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}_gtest_package/src/classes.abc)
 
@@ -185,6 +200,8 @@ function(panda_ets_interop_js_gtest TARGET)
             "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
             "ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE=${TARGET_GTEST_PACKAGE}"
             "ARK_ETS_INTEROP_JS_COMPILED_ABC_PATH=${COMPILED_ABCPATH}"
+            "ARK_ETS_INTEROP_JS_GTEST_JIT=false"
+            "ARK_ETS_INTEROP_JS_GTEST_JIT_CANT_FAIL=false"
         LAUNCHER
             ${ARK_JS_NAPI_CLI}
             --stub-file=${ARK_JS_STUB_FILE}
@@ -197,15 +214,57 @@ function(panda_ets_interop_js_gtest TARGET)
         OUTPUT_DIRECTORY ${INTEROP_TESTS_DIR}
     )
 
+    if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+        panda_ets_add_gtest(
+            NAME ${TARGET}_jit
+            NO_EXECUTABLE
+            NO_CORES
+            CUSTOM_PRERUN_ENVIRONMENT
+                "LD_LIBRARY_PATH=${PANDA_BINARY_ROOT}/lib/interop_js/:${PANDA_BINARY_ROOT}/lib/"
+                "JS_ABC_OUTPUT_PATH=${CMAKE_CURRENT_BINARY_DIR}"
+                "INTEROP_TEST_BUILD_DIR=${PANDA_BINARY_ROOT}/tests/ets_interop_js"
+                "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+                "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ABC_PATH_PATH}"
+                "ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH=${ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH}"
+                "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
+                "ARK_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
+                "FIXED_ISSUES=${FIXED_ISSUES}"
+                "PACKAGE_NAME=${ARG_PACKAGE_NAME}"
+                "ARK_ETS_INTEROP_JS_TARGET_GTEST_PACKAGE=${TARGET_GTEST_PACKAGE}"
+                "ARK_ETS_INTEROP_JS_COMPILED_ABC_PATH=${COMPILED_ABCPATH}"
+                "ARK_ETS_INTEROP_JS_GTEST_JIT=true"
+                "ARK_ETS_INTEROP_JS_GTEST_JIT_CANT_FAIL=true"
+            LAUNCHER
+                ${ARK_JS_NAPI_CLI}
+                --stub-file=${ARK_JS_STUB_FILE}
+                --enable-force-gc=false
+                --entry-point=gtest_launcher
+                ${INTEROP_TESTS_DIR}/gtest_launcher.abc
+                ${TARGET}_jit
+            DEPS_TARGETS ${TARGET}_jit ets_interop_js_gtest_launcher
+            TEST_RUN_DIR ${INTEROP_TESTS_DIR}
+            OUTPUT_DIRECTORY ${INTEROP_TESTS_DIR}
+        )
+    endif()
+
     if(DEFINED ARG_JS_SOURCES OR ARG_TS_SOURCES)
         add_dependencies(${TARGET}_gtests ${TARGET}_dynamic_modules)
+        if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+            add_dependencies(${TARGET}_jit_gtests ${TARGET}_dynamic_modules)
+        endif()
     endif()
 
     if(DEFINED ARG_ASM_SOURCE)
         add_dependencies(${TARGET}_gtests ${TARGET}_asm_abc)
+        if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+            add_dependencies(${TARGET}_jit_gtests ${TARGET}_asm_abc)
+        endif()
     endif()
 
     add_dependencies(ets_interop_js_gtests ${TARGET}_gtests)
+    if(ARG_RUN_WITH_JIT AND PANDA_COMPILER_ENABLE)
+        add_dependencies(ets_interop_js_gtests ${TARGET}_jit_gtests)
+    endif()
 endfunction(panda_ets_interop_js_gtest)
 
 function(panda_ets_interop_js_test TARGET)

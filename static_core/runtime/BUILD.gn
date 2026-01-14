@@ -1069,7 +1069,7 @@ ark_gen("arkruntime_gen_intrinsics") {
 }
 
 ark_gen_file("core_any_intrinsics_inc") {
-  template_file = "../runtime/interpreter/templates/core_any_intrinsics.inc.erb"
+  template_file = "../runtime/templates/core_any_intrinsics.inc.erb"
   data = [ "$target_gen_dir/../plugin_options.yaml" ]
   api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$gen_include_dir/core_any_intrinsics.inc"

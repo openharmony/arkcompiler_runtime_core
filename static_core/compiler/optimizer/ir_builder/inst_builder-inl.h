@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1661,9 +1661,27 @@ template <bool IS_ACC_WRITE>
 void InstBuilder::BuildLoadFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
-    failed_ = true;
+    ASSERT(IS_ACC_WRITE);
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto stringId = bcInst->GetId(0).AsIndex();
+
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
+                                                 RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_LDBYNAME);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2U);
+    static constexpr auto ACC_READ = false;
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, ACC_READ));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
+    intrinsic->AddInputType(DataType::INT32);
+    intrinsic->SetMethodFirstInput();
+    intrinsic->SetMethod(GetMethod());
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -1671,17 +1689,37 @@ template <bool IS_ACC_WRITE>
 void InstBuilder::BuildStoreFromAnyByName([[maybe_unused]] const BytecodeInstruction *bcInst,
                                           [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
-    failed_ = true;
+    static_assert(!IS_ACC_WRITE);
+
+    auto bcAddr = GetPc(bcInst->GetAddress());
+    auto stringId = bcInst->GetId(0).AsIndex();
+
+    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
+                                                 RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2U);
+    static constexpr bool ACC_READ = false;
+    intrinsic->AppendInput(GetArgDefinition(bcInst, 0, ACC_READ));
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(graph_->FindOrCreateConstant(stringId));
+    intrinsic->AddInputType(DataType::INT32);
+    intrinsic->AppendInput(GetDefinitionAcc());
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->SetMethodFirstInput();
+    intrinsic->SetMethod(GetMethod());
+    intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    AddInstruction(saveState, intrinsic);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
                                         [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 
@@ -1689,8 +1727,8 @@ void InstBuilder::BuildLoadFromAnyByIdx([[maybe_unused]] const BytecodeInstructi
 void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 
@@ -1698,8 +1736,8 @@ void InstBuilder::BuildStoreFromAnyByIdx([[maybe_unused]] const BytecodeInstruct
 void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
                                         [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 
@@ -1707,8 +1745,8 @@ void InstBuilder::BuildLoadFromAnyByVal([[maybe_unused]] const BytecodeInstructi
 void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruction *bcInst,
                                          [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 
@@ -1716,8 +1754,8 @@ void InstBuilder::BuildStoreFromAnyByVal([[maybe_unused]] const BytecodeInstruct
 template <bool IS_ACC_WRITE>
 void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcInst)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 
@@ -1725,8 +1763,15 @@ void InstBuilder::BuildAnyCall([[maybe_unused]] const BytecodeInstruction *bcIns
 void InstBuilder::BuildIsInstanceAny([[maybe_unused]] const BytecodeInstruction *bcInst,
                                      [[maybe_unused]] DataType::Type type)
 {
-    // NOTE(zhaoziming_hw, #ICFLYC) Support any bytecode in InstBuilder
-    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function";
+    // NOTE(zavedeevdenis) Support
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
+    failed_ = true;
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+void InstBuilder::UnsupportedAnyInst([[maybe_unused]] const BytecodeInstruction *bcInst)
+{
+    COMPILER_LOG(DEBUG, IR_BUILDER) << "Any bytecode not supported yet, skip current function, inst = " << *bcInst;
     failed_ = true;
 }
 

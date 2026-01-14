@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,12 +85,17 @@ function main() {
 		}
 	}
 
+	let jit = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT') === 'true';
+	let jitCantFail = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT_CANT_FAIL') === 'true';
+
 	let createRuntimeOptions = {
 		'log-level': 'info',
 		'log-components': 'ets_interop_js',
+		'compiler-ignore-failures' : jitCantFail ? 'false' : 'true',
 		'boot-panda-files': stdlibPath,
 		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': 'false',
+		'compiler-enable-jit': jit ? 'true' : 'false',
+		'compiler-hotness-threshold': '0',
 		'interpreter-type': 'irtoc',
 		'taskpool-support-interop': 'true',
 		'verification-mode': 'disabled',
