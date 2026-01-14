@@ -18,6 +18,12 @@ import { VerificationMode } from '../../models/code';
 
 export type Theme = 'light' | 'dark';
 export type LogTab = 'compilation' | 'runtime';
+
+export interface IrDumpOptions {
+    compilerDump: boolean;
+    disasmDump: boolean;
+}
+
 interface IState {
     theme: Theme;
     primaryColor: string;
@@ -29,6 +35,8 @@ interface IState {
     clearLogsEachRun: boolean;
     verificationMode: VerificationMode;
     activeLogTab: LogTab;
+    aotMode: boolean;
+    irDump: IrDumpOptions;
 }
 
 export interface Versions {
@@ -43,6 +51,7 @@ const initialState: IState = {
     disasm: false,
     verifier: true,
     verificationMode: 'ahead-of-time',
+    aotMode: false,
     astView: false,
     primaryColor: '#e32b49',
     versions: {
@@ -54,6 +63,10 @@ const initialState: IState = {
     versionsLoading: false,
     clearLogsEachRun: localStorage.getItem('clearLogsEachRun') === 'false' ? false : true,
     activeLogTab: 'compilation',
+    irDump: {
+        compilerDump: false,
+        disasmDump: false,
+    },
 };
 
 const appStateSlice = createSlice({
@@ -78,6 +91,9 @@ const appStateSlice = createSlice({
         setVerificationMode: (state, action: PayloadAction<VerificationMode>) => {
             state.verificationMode = action.payload;
         },
+        setAotMode: (state, action: PayloadAction<boolean>) => {
+            state.aotMode = action.payload;
+        },
         setVersions(state, action: PayloadAction<Versions>) {
             state.versions = action.payload;
         },
@@ -90,6 +106,15 @@ const appStateSlice = createSlice({
         },
         setActiveLogTab(state, action: PayloadAction<LogTab>) {
             state.activeLogTab = action.payload;
+        },
+        setIrDump(state, action: PayloadAction<IrDumpOptions>) {
+            state.irDump = action.payload;
+        },
+        setIrDumpCompilerDump(state, action: PayloadAction<boolean>) {
+            state.irDump.compilerDump = action.payload;
+        },
+        setIrDumpDisasmDump(state, action: PayloadAction<boolean>) {
+            state.irDump.disasmDump = action.payload;
         },
     },
 });
@@ -105,6 +130,10 @@ export const {
     setClearLogsEachRun,
     setVerificationMode,
     setActiveLogTab,
+    setAotMode,
+    setIrDump,
+    setIrDumpCompilerDump,
+    setIrDumpDisasmDump,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

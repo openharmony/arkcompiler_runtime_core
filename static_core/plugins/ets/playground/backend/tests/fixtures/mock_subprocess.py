@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -67,6 +67,10 @@ class MockAsyncSubprocess:
             return False
         for option in command.opts:
             if option == "ETSGLOBAL::main" and args[-1].endswith(f".{option}"):
+                continue
+            if option.endswith("="):
+                if not any(str(arg).startswith(option) for arg in args):
+                    return False
                 continue
             if option not in args:
                 return False

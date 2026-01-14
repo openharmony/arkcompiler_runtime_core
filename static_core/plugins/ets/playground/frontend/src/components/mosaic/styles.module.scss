@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,14 @@
   height: 46px;
   display: flex;
   align-items: center;
+}
+.dumpHeader {
+  padding: 8px 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  font-family: 'Roboto Mono';
+  font-weight: 600;
 }
 .btn {
   background-color: transparent !important;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ export enum ELogType {
     COMPILE_ERR = 'compileErr',
     RUN_OUT = 'runOut',
     RUN_ERR = 'runErr',
+    RUN_AOT_OUT = 'runAotOut',
+    RUN_AOT_ERR = 'runAotErr',
     DISASM_OUT = 'disasmOut',
     DISASM_ERR = 'disasmErr',
     VERIFIER_OUT = 'verifierOut',
@@ -70,6 +72,7 @@ export interface IApiResponse {
     data: {
         compile?: ICompileData;
         run?: IRunData;
+        run_aot?: IRunData;
         disassembly?: IDisassemblyData;
         verifier?: IVerifierData;
     };
@@ -215,6 +218,13 @@ export const handleResponseLogs = createAsyncThunk(
             ELogType.RUN_OUT,
             ELogType.RUN_ERR,
             'Run successful!'
+        );
+
+        handleLog(
+            response.data.run_aot,
+            ELogType.RUN_AOT_OUT,
+            ELogType.RUN_AOT_ERR,
+            'AOT Run successful!'
         );
 
         handleLog(

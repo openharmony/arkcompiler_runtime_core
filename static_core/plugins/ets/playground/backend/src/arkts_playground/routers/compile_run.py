@@ -16,6 +16,7 @@
 
 from typing import Annotated
 
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from ..config import get_settings
@@ -24,6 +25,8 @@ from ..models.ast import AstRequestModel, AstResponse
 from ..models.common import VersionsResponse
 from ..models.compile import CompileRequestModel, CompileResponse, RunResponse
 from ..models.features import FeaturesResponse
+
+logger = structlog.stdlib.get_logger(__name__)
 
 router = APIRouter()
 
@@ -34,11 +37,18 @@ router = APIRouter()
              description="Compile provided code and returns the result")
 async def compile_arkts_code(body: CompileRequestModel,
                              runner: Annotated[Runner, Depends(get_runner)]) -> CompileResponse:
+    ir_dump_opts = None
+    if body.ir_dump:
+        ir_dump_opts = {
+            "compiler_dump": body.ir_dump.compiler_dump,
+            "disasm_dump": body.ir_dump.disasm_dump,
+        }
     result = await runner.compile_arkts(
         body.code,
         options=runner.parse_compile_options(body.options),
         disasm=body.disassemble,
-        verifier=body.verifier
+        verifier=body.verifier,
+        ir_dump=ir_dump_opts
     )
     return CompileResponse(**result)
 
@@ -49,12 +59,21 @@ async def compile_arkts_code(body: CompileRequestModel,
              description="Compile and run provided code")
 async def compile_run_arkts_code(body: CompileRequestModel,
                                  runner: Annotated[Runner, Depends(get_runner)]) -> RunResponse:
+    logger.info("Run endpoint called", ir_dump_request=body.ir_dump)
+    ir_dump_opts = None
+    if body.ir_dump:
+        ir_dump_opts = {
+            "compiler_dump": body.ir_dump.compiler_dump,
+            "disasm_dump": body.ir_dump.disasm_dump,
+        }
+        logger.debug("IR dump options parsed", ir_dump_opts=ir_dump_opts)
     result = await runner.compile_run_arkts(
         body.code,
         options=runner.parse_compile_options(body.options),
         disasm=body.disassemble,
         verification_mode=body.verification_mode,
-        verifier=body.verifier
+        aot_mode=body.aot_mode,
+        ir_dump=ir_dump_opts
     )
     return RunResponse(**result)
 

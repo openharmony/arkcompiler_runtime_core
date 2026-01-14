@@ -43,10 +43,15 @@ describe('handleResponseLogs thunk', () => {
             verifier: true,
             astView: false,
             verificationMode: 'disabled',
+            aotMode: false,
             versions: {},
             versionsLoading: false,
             clearLogsEachRun: false,
             activeLogTab: 'compilation',
+            irDump: {
+                compilerDump: false,
+                disasmDump: false,
+            },
         },
         options: {
             isLoading: false,

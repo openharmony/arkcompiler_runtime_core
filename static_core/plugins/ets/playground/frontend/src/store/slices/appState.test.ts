@@ -23,6 +23,7 @@ describe('appStateSlice reducer', () => {
         verifier: true,
         astView: false,
         verificationMode: 'ahead-of-time' as const,
+        aotMode: false,
         primaryColor: '#e32b49',
         versions: {
             arktsVersion: '',
@@ -32,7 +33,11 @@ describe('appStateSlice reducer', () => {
         },
         versionsLoading: false,
         clearLogsEachRun: true,
-        activeLogTab: 'compilation' as const
+        activeLogTab: 'compilation' as const,
+        irDump: {
+            compilerDump: false,
+            disasmDump: false,
+        },
     };
 
     it('should return the initial state when passed an empty action', () => {
@@ -40,30 +45,27 @@ describe('appStateSlice reducer', () => {
     });
 
     it('should handle setTheme action', () => {
-        const previousState = { ...initialState, theme: 'light' as Theme, clearLogsEachRun: true };
+        const previousState = { ...initialState, theme: 'light' as Theme };
         expect(reducer(previousState, setTheme('dark'))).toEqual({
             ...previousState,
             theme: 'dark',
-            clearLogsEachRun: true,
         });
     });
 
     it('should handle setPrimaryColor action', () => {
-        const previousState = { ...initialState, primaryColor: '#ffffff', clearLogsEachRun: true };
+        const previousState = { ...initialState, primaryColor: '#ffffff' };
         const newColor = '#ff5733';
         expect(reducer(previousState, setPrimaryColor(newColor))).toEqual({
             ...previousState,
             primaryColor: newColor,
-            clearLogsEachRun: true,
         });
     });
 
     it('should handle setDisasm action', () => {
-        const previousState = { ...initialState, disasm: false, clearLogsEachRun: true };
+        const previousState = { ...initialState, disasm: false };
         expect(reducer(previousState, setDisasm(true))).toEqual({
             ...previousState,
             disasm: true,
-            clearLogsEachRun: true,
         });
     });
 });

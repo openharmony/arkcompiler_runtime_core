@@ -87,7 +87,8 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
             "exit_code": 0
         },
         "disassembly": None,
-        "verifier": None
+        "verifier": None,
+        "ir_dump": None
     }
     if run_compile:
         result["run"] = {
@@ -95,6 +96,7 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
             "error": error_msg,
             "exit_code": 0
         }
+        result["run_aot"] = None
     if disasm:
         result["disassembly"] = {
             "output": output_msg,
@@ -198,7 +200,7 @@ def test_run_api_with_verification_modes(playground_client, verification_mode):
     assert resp.status_code == 200
     result = resp.json()
 
-    expected_top_level_keys = {"compile", "run", "disassembly", "verifier"}
+    expected_top_level_keys = {"compile", "run", "run_aot", "disassembly", "verifier", "ir_dump"}
     expected_compile_keys = {"exit_code", "output", "error"}
     expected_run_keys = {"exit_code", "output", "error"}
 
@@ -223,6 +225,8 @@ def test_run_api_with_verification_modes(playground_client, verification_mode):
 
     assert result["disassembly"] is None
     assert result["verifier"] is None
+    assert result["run_aot"] is None
+    assert result["ir_dump"] is None
 
 
 def test_run_api_full_json_schema_validation(playground_client):
@@ -248,8 +252,10 @@ def test_run_api_full_json_schema_validation(playground_client):
             "output": str,
             "error": str,
         },
+        "run_aot": type(None),
         "disassembly": type(None),
         "verifier": type(None),
+        "ir_dump": type(None),
     }
 
     assert set(result.keys()) == set(expected_structure.keys()), \
@@ -273,8 +279,8 @@ def test_run_api_full_json_schema_validation(playground_client):
 
     assert result["disassembly"] is None
     assert result["verifier"] is None
-    assert isinstance(result["disassembly"], expected_structure["disassembly"])
-    assert isinstance(result["verifier"], expected_structure["verifier"])
+    assert result["run_aot"] is None
+    assert result["ir_dump"] is None
 
 
 def test_run_api_invalid_verification_mode(playground_client):

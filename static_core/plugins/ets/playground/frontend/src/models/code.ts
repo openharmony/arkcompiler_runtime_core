@@ -17,11 +17,18 @@ import { IObj } from '../store/slices/options';
 
 export type VerificationMode = 'disabled' | 'ahead-of-time' | 'on-the-fly';
 
+export interface IIrDumpOptions {
+    compiler_dump: boolean;
+    disasm_dump: boolean;
+}
+
 export interface ICodeFetch {
     code: string
     disassemble: boolean
     verifier: boolean
     verification_mode?: VerificationMode
+    aot_mode?: boolean
+    ir_dump?: IIrDumpOptions | null
     options: IObj | null
 }
 export interface ICodeShare {
@@ -31,6 +38,14 @@ export interface ICodeShare {
 export interface IShareReq {
     uuid: string
 }
+export interface IIrDumpResponse {
+    output: string,
+    compiler_dump: string | null,
+    disasm_dump: string | null,
+    error: string,
+    exit_code?: number
+}
+
 export interface ICodeReq {
     compile: {
         output: string,
@@ -47,7 +62,8 @@ export interface ICodeReq {
         output: string,
         error: string,
         exit_code?: number
-    }
+    },
+    ir_dump?: IIrDumpResponse
 }
 export interface IRunReq {
     compile: {
@@ -66,11 +82,17 @@ export interface IRunReq {
         error: string,
         exit_code?: number
     },
+    run_aot?: {
+        output: string,
+        error: string,
+        exit_code?: number
+    },
     verifier: {
         output: string,
         error: string,
         exit_code?: number
-    }
+    },
+    ir_dump?: IIrDumpResponse
 }
 
 export const codeModel = {
@@ -84,15 +106,25 @@ export const codeModel = {
             return acc;
         }, { ...defaults });
     },
+    fillIrDumpDefaults: (data: IIrDumpResponse): IIrDumpResponse => ({
+        output: data.output ?? '',
+        compiler_dump: data.compiler_dump ?? null,
+        disasm_dump: data.disasm_dump ?? null,
+        error: data.error ?? '',
+        exit_code: data.exit_code,
+    }),
     fromApiCompile: (data: ICodeReq): ICodeReq => ({
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
         verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
+        ir_dump: data.ir_dump ? codeModel.fillIrDumpDefaults(data.ir_dump) : undefined,
     }),
     fromApiRun: (data: IRunReq): IRunReq => ({
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
         run: codeModel.fillDefaults(data.run || {}, { output: '', error: '' }),
+        run_aot: data.run_aot ? codeModel.fillDefaults(data.run_aot, { output: '', error: '' }) : undefined,
         verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
+        ir_dump: data.ir_dump ? codeModel.fillIrDumpDefaults(data.ir_dump) : undefined,
     }),
 };

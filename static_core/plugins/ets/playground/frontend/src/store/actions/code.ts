@@ -43,7 +43,11 @@ export const fetchCompileCode = createAsyncThunk(
             code: codeState?.code,
             options: optionsState?.pickedOptions,
             disassemble: appState.disasm,
-            verifier: appState.verifier
+            verifier: appState.verifier,
+            ir_dump: (appState.irDump.compilerDump || appState.irDump.disasmDump) ? {
+                compiler_dump: appState.irDump.compilerDump,
+                disasm_dump: appState.irDump.disasmDump,
+            } : null,
         });
         if (response.error) {
             console.error(response.error);
@@ -76,6 +80,11 @@ export const fetchRunCode = createAsyncThunk(
             disassemble: appState.disasm,
             verifier: appState.verifier,
             verification_mode: appState.verificationMode,
+            aot_mode: appState.aotMode,
+            ir_dump: (appState.irDump.compilerDump || appState.irDump.disasmDump) ? {
+                compiler_dump: appState.irDump.compilerDump,
+                disasm_dump: appState.irDump.disasmDump,
+            } : null,
         });
         if (response.error) {
             console.error(response.error);

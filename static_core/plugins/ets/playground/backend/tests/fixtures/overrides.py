@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,7 +36,9 @@ class FakeRunner:
                 "exit_code": 0
             },
             "disassembly": None,
-            "verifier": None
+            "verifier": None,
+            "ir_dump": None,
+            "run_aot": None
         }
         if disasm:
             res["disassembly"] = {
@@ -54,7 +56,9 @@ class FakeRunner:
         return res
 
     @staticmethod
-    async def compile_arkts(code: str, options: list, disasm: bool = False, verifier: bool = False):
+    async def compile_arkts(code: str, options: list, **kwargs):
+        disasm = kwargs.get("disasm", False)
+        verifier = kwargs.get("verifier", False)
         res = {
             "compile": {
                 "output": f"testing output: {code}, {options}",
@@ -62,7 +66,8 @@ class FakeRunner:
                 "exit_code": 0
             },
             "disassembly": None,
-            "verifier": None
+            "verifier": None,
+            "ir_dump": None
         }
         if disasm:
             res["disassembly"] = {
