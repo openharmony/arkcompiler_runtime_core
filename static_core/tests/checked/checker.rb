@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -94,7 +94,7 @@ OptionParser.new do |opts|
 end.parse!(into: options)
 $LOG_LEVEL = options.verbose ? Logger::DEBUG : Logger::ERROR
 $curr_cmd = nil
-$frontend_idx = 0
+$checker_counter = 0
 
 def log
   @log ||= Logger.new($stdout, level: $LOG_LEVEL)
@@ -122,6 +122,18 @@ def contains?(str, match)
 
   raise_error "Wrong type for search: #{match.class}" unless match.is_a? String
   str.include? match
+end
+
+# Contains info about frontend usage
+module FrontendData
+  class << self
+    attr_accessor :frontendelements, :checker_frontend
+    
+    def reset
+      @frontendelements = {}
+      @checker_frontend = {}
+    end
+  end
 end
 
 # Provides methods to search lines in a given array
@@ -481,10 +493,75 @@ class Checker
     RUN_PAOC(pgo_use_profdata: true, **args)
   end
 
+  def RUN_FRONTEND(**args)
+    frontend = @options.frontend
+    if frontend.include? "es2panda"
+      RUN_FRONTEND_ETS(**args)
+    elsif frontend.include? "ark_asm"
+      RUN_FRONTEND_PA(**args)
+    end
+  end
+
+  def RUN_FRONTEND_ETS(**args)
+    inputs = @options.source
+    output = prepare_frontend_out
+    @args = ''
+    # handles evaluation of expressions in arguments such as #{@options.test_file}
+    # specifically to use them in ets test annotations
+    args.each do |name, value|
+      case name
+      when :options
+        @args << eval("\"" + value + "\"")
+      when :inputs
+        # assume inputs provides a path to dependency files relative to source file
+        dir_path = File.dirname(@options.source)
+        inputs = dir_path + "/" + eval("\"" + value + "\"")
+      when :output
+        dir_path = File.dirname(@options.test_file)
+        output = dir_path + "/" + eval("\"" + value + "\"")
+      end
+    end
+
+    if !@args.include? "--opt-level"
+      @args << " --opt-level=2"
+    end
+    if !@args.include? "--ets-strings-concat"
+      @args << " --ets-strings-concat=true"
+    end
+
+    clear_data
+    $curr_cmd = "#{@options.frontend} #{@options.frontend_options} #{@args} --output=#{output} #{inputs}"
+    log.debug "Frontend command: #{$curr_cmd}"
+
+    exec_cmd
+  end
+
+  def RUN_FRONTEND_PA(**args)
+    inputs = @options.source
+    output = prepare_frontend_out
+    @args = ''
+
+    args.each do |name, value|
+      case name
+      when :options
+        @args << eval("\"" + value + "\"")
+      when :inputs
+        inputs = eval("\"" + value + "\"")
+      when :output
+        output = eval("\"" + value + "\"")
+      end
+    end
+
+    clear_data
+    $curr_cmd = "#{@options.run_prefix} #{@options.frontend} #{@options.frontend_options} #{inputs} #{output}"
+    log.debug "Frontend command: #{$curr_cmd}"
+
+    exec_cmd
+  end
+
   def RUN_BCO(**args)
     inputs = @options.source
     output = prepare_frontend_out
-    @options.test_file = output
     @args = ''
     # handles evaluation of expressions in arguments such as #{@options.test_file}
     # specifically to use them in ets test annotations
@@ -497,7 +574,7 @@ class Checker
       when :output
         output = eval("\"" + value + "\"")
       when :method
-        @args << "--bco-optimizer --method-regex=#{value}:.*"
+        @args << " --bco-optimizer --method-regex=#{value}:.*"
       end
     end
 
@@ -506,26 +583,7 @@ class Checker
             #{@options.frontend_options} #{@args} --output=#{output} #{inputs}"
     log.debug "Frontend command: #{$curr_cmd}"
 
-    # See note on exec in RUN_PAOC
-    output, err_output, status = Open3.capture3("exec #{$curr_cmd}", chdir: @cwd.to_s)
-    if status.signaled?
-      if status.termsig != 0
-        puts output
-        log.error "#{@options.frontend} aborted with signal #{status.termsig}, but expected 0"
-        raise_error "Test '#{@name}' failed"
-      end
-    elsif status.exitstatus != 0
-      puts output
-      log.error "#{@options.frontend} returns code #{status.exitstatus}, but expected 0"
-      raise_error "Test '#{@name}' failed"
-    elsif !err_output.empty?
-      log.error "Bytecode optimizer failed, logs:"
-      puts err_output
-      raise_error "Test '#{@name}' failed"
-    end
-    File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
-    Open3.capture2e("cat #{@cwd}/console.out")
-    FileUtils.touch("#{@cwd}/events.csv")
+    exec_cmd
   end
 
   def RUN_LLVM(**args)
@@ -815,7 +873,20 @@ class Checker
     init_run
     $checker_name = @name
     begin
+      $checker_counter += 1
+      # This block processes checkers that have //! DEFINE_FRONTEND_OPTIONS blocks. If used block already compiled .abc we use its path. Otherwise we add compilation steps to checker and afterwards save path to .abc
+      if FrontendData.checker_frontend.key?(@name)
+        frontend_name = FrontendData.checker_frontend[@name]
+        frontendelement = FrontendData.frontendelements[frontend_name]
+        if frontendelement["path"]
+          @options.test_file = frontendelement["path"]
+          @code.source.sub! frontend_name, ""
+        else
+          @code.source.sub! frontend_name, frontendelement["exec"]
+        end
+      end
       self.instance_eval(@code.source, @code.filename, @code.line_no)
+      frontendelement["path"] = @options.test_file if frontendelement and !frontendelement["path"]
     rescue SkipException
       log.info "Skipped: \"#{@name}\""
     else
@@ -824,9 +895,32 @@ class Checker
     clear_data
   end
 
+  def exec_cmd
+    # See note on exec in RUN_PAOC
+    output, err_output, status = Open3.capture3("exec #{$curr_cmd}", chdir: @cwd.to_s)
+    if status.signaled?
+      if status.termsig != 0
+        puts output
+        log.error "#{@options.frontend} aborted with signal #{status.termsig}, but expected 0"
+        raise_error "Test '#{@name}' failed"
+      end
+    elsif status.exitstatus != 0
+      puts output
+      log.error "#{@options.frontend} returns code #{status.exitstatus}, but expected 0"
+      raise_error "Test '#{@name}' failed"
+    elsif !err_output.empty?
+      log.error "Bytecode optimizer failed, logs:"
+      puts err_output
+      raise_error "Test '#{@name}' failed"
+    end
+    File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
+    Open3.capture2e("cat #{@cwd}/console.out")
+    FileUtils.touch("#{@cwd}/events.csv")
+  end
+
   def prepare_frontend_out
-   output = File.join(@options.test_dir,"#{File.basename(@options.test_file).split('.')[0]}.#{$frontend_idx}.abc")
-   $frontend_idx += 1
+   output = File.join(@options.test_dir,"#{File.basename(@options.test_file).split('.')[0]}.#{$checker_counter}.abc")
+   @options.test_file = output
    output
   end
 
@@ -847,23 +941,29 @@ class Checker
 end
 
 def read_checks(options)
+  FrontendData.reset
   checks = []
   checks_recheck = {}
   check = nil
   checkgroups = {}
   checkgroup = nil
+  frontendelement_name = nil
+  frontendelements = {}
+  checker_frontend = {}  # Hash of "name of checker": "name of his frontendelement"
   command_token = /[ ]*#{options.command_token}(.*)/
   checker_start = /[ ]*#{options.command_token} CHECKER[ ]*(.*)/
   disabled_checker_start = /[ ]*#{options.command_token} DISABLED_CHECKER[ ]*(.*)/
   checkgroup_start = /[ ]*#{options.command_token} CHECK_GROUP[ ]*(.*)/
+  frontend_start = /[ ]*#{options.command_token} DEFINE_FRONTEND_OPTIONS[ ]*(.*)/
   File.readlines(options.source).each_with_index do |line, line_no|
-    if check || checkgroup
+    if check || checkgroup || frontendelement_name
       unless line.start_with? command_token
         check = nil
         checkgroup = nil
+        frontendelement_name = nil
         next
       end
-      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start or (checkgroup and line.start_with? checkgroup_start)
+      raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start or (checkgroup and line.start_with? checkgroup_start) or (frontendelement_name and line.start_with? frontend_start)
       command_text = command_token.match(line)[1]
       if check
         if line.start_with? checkgroup_start
@@ -877,10 +977,18 @@ def read_checks(options)
             checks_recheck[check.name].append(command_text)
           end
         end
+        if line.start_with? frontend_start
+            unless checker_frontend.key?(command_text)
+              checker_frontend[check.name] = command_text
+            end
+        end
         check.append_line(command_text) unless check == :disabled_check
       elsif checkgroup
         checkgroups[checkgroup] += command_text
         checkgroups[checkgroup] += "\n"
+      elsif frontendelement_name
+        frontendelements[frontendelement_name]["exec"] += command_text
+        frontendelements[frontendelement_name]["exec"] += "\n"
       end
     else
       next unless line.start_with? command_token
@@ -897,6 +1005,12 @@ def read_checks(options)
         raise "CheckGroup with name '#{checkgroup}'' already exists" if checkgroups.key?(checkgroup)
 
         checkgroups[checkgroup] = ""
+      elsif line.start_with? frontend_start
+        frontendelement_name = command_token.match(line)[1]
+        raise "FRONTEND  with name '#{frontendelement_name}' already exists" if frontendelements.key?(frontendelement_name)
+        frontendelements[frontendelement_name] = Hash.new()
+        frontendelements[frontendelement_name]["exec"] = ""
+        frontendelements[frontendelement_name]["path"] = nil
       else
         raise "Line '#{line.strip}' does not belong to any checker" unless line.start_with? disabled_checker_start
         check = :disabled_check
@@ -915,11 +1029,47 @@ def read_checks(options)
       end
     end
   end
+
+  if options.test_dir  # meaning it is a urunner test that needs to be compiled by this script
+    run_frontend_str = "RUN_FRONTEND"
+    def_frontend_str = "DEFINE_FRONTEND_OPTIONS"
+    default_args_str = "DEFAULT ARGS"
+    checks.each do |check|
+      if ![run_frontend_str, def_frontend_str, "RUN_BCO"].any? { |frontend_mark| check.code.source.include?(frontend_mark) }
+        frontend_default_names = frontendelements.keys.select do |frontend_name|
+          tmp = frontend_name.dup
+          tmp.sub! def_frontend_str, ""
+          tmp = tmp.strip
+          tmp == default_args_str
+        end
+        raise "'#{check.name}' has more than 1 '#{def_frontend_str} #{default_args_str}' blocks" if frontend_default_names.length > 1
+
+        if frontend_default_names.length == 1
+          frontend_default_name = frontend_default_names[0]
+        else
+          frontend_default_name = " #{def_frontend_str}            #{default_args_str}"
+          frontendelements[frontend_default_name] = Hash.new()
+          frontendelements[frontend_default_name]["exec"] = " #{run_frontend_str}            options: \"--opt-level=2 --ets-strings-concat=true\"\n"
+          frontendelements[frontend_default_name]["path"] = nil
+        end
+        check.code.source.prepend("#{frontend_default_name}\n")
+        checker_frontend[check.name] = frontend_default_name
+      end
+    end
+
+    checker_frontend.each do |ch_name, frontend_name|
+      raise "'#{frontend_name}' is not defined for checker '#{ch_name}'" if !frontendelements.key?(frontend_name)
+    end
+  end
+
+  FrontendData.frontendelements = frontendelements
+  FrontendData.checker_frontend = checker_frontend
   checks
 end
 
 def main(options)
   if options.test_dir
+    FileUtils.rm_rf(options.test_dir)
     FileUtils.mkdir_p options.test_dir
     Dir.chdir options.test_dir
   end

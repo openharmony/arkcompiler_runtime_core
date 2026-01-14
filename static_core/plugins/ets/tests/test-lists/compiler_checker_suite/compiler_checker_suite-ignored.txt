@@ -1,11 +1,11 @@
 #31608
-simple_run/codegen_new_obj_call.ets
+ets_tests/codegen_new_obj_call.ets
 
 #24986
-simple_run/optimize_load_object_boxed.ets
+ets_tests/optimize_load_object_boxed.ets
 
 #271
-simple_run/multiarray.ets
+ets_tests/multiarray.ets
 
 #27260
-simple_run/lse_parameter_aliasing.ets
+ets_tests/lse_parameter_aliasing.ets
