@@ -17,6 +17,7 @@
 /*---
 desc: 
     Constant expression with number conversion as annotation initializer.
+tags: [compile-only]
 ---*/
 
 @interface MyAnno {

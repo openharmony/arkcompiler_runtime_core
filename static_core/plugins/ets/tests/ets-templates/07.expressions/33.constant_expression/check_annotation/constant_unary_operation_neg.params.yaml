@@ -12,8 +12,8 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte,   value: 16,     sign: '-'  }
-  - { type: short,  value: 300,    sign: '-'  }
+  - { type: byte,   value: 16,     sign: '-', negative: ',negative'  }
+  - { type: short,  value: 300,    sign: '-', negative: ',negative'  }
 
-  - { type: byte,   value: 16,     sign: '~'  }
-  - { type: short,  value: 300,    sign: '~'  }
+  - { type: byte,   value: 16,     sign: '~', negative: ',negative'  }
+  - { type: short,  value: 300,    sign: '~', negative: ',negative'  }
