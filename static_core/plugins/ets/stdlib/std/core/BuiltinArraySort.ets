@@ -21,14 +21,14 @@ package std.core;
 function insertion_sort(arr: FixedArray<Byte>, startIndex: int, endIndex: int, comp: (lhs: byte, rhs: byte) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -102,14 +102,14 @@ export function arr_sort_stable(arr: FixedArray<Byte>, startIndex: int, endIndex
 function insertion_sort(arr: FixedArray<Short>, startIndex: int, endIndex: int, comp: (lhs: short, rhs: short) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -183,14 +183,14 @@ export function arr_sort_stable(arr: FixedArray<Short>, startIndex: int, endInde
 function insertion_sort(arr: FixedArray<Int>, startIndex: int, endIndex: int, comp: (lhs: int, rhs: int) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -264,14 +264,14 @@ export function arr_sort_stable(arr: FixedArray<Int>, startIndex: int, endIndex:
 function insertion_sort(arr: FixedArray<Long>, startIndex: int, endIndex: int, comp: (lhs: long, rhs: long) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -345,14 +345,14 @@ export function arr_sort_stable(arr: FixedArray<Long>, startIndex: int, endIndex
 function insertion_sort(arr: FixedArray<Float>, startIndex: int, endIndex: int, comp: (lhs: float, rhs: float) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
@@ -426,14 +426,14 @@ export function arr_sort_stable(arr: FixedArray<Float>, startIndex: int, endInde
 function insertion_sort(arr: FixedArray<Double>, startIndex: int, endIndex: int, comp: (lhs: double, rhs: double) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }

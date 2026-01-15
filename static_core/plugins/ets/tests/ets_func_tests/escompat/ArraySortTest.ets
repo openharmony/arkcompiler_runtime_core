@@ -17,6 +17,7 @@ function main(): int {
     let arrayTestsuite = new arktest.ArkTestsuite("arrayTestsuite")
     arrayTestsuite.addTest("SortWithUndefined", SortWithUndefined)
     arrayTestsuite.addTest("SortWithUndefinedAndNull", SortWithUndefinedAndNull)
+    arrayTestsuite.addTest("SortWithFloat", SortWithFloat)
     return arrayTestsuite.run()
 }
 
@@ -71,4 +72,20 @@ function SortWithUndefinedAndNull() {
     arktest.assertEQ(arr[5], null)
     arktest.assertEQ(arr[6], undefined)
     arktest.assertEQ(arr[7], undefined)
+}
+
+function SortWithFloat() {
+    const arr1 = new Float64Array([2.2, 3.1, 1.0]);
+    const result1 = arr1.sort((a, b) => {
+        return a-b
+    })
+    arktest.assertEQ(result1.toString(), [1,2.2,3.1].toString())
+
+    const arr2 = [1.1, 3.2, -0.2];
+    const combined = arr2.concat(Array.from(arr1));
+
+    const result2 = combined.sort((a, b) => {
+        return a-b
+    })
+    arktest.assertEQ(result2.toString(), [-0.2,1,1.1,2.2,3.1,3.2].toString())
 }

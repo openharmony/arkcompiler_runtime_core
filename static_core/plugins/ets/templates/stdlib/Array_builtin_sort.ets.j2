@@ -29,14 +29,14 @@ package std.core;
 function insertion_sort(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
-        if (comp(tmp, arr[startIndex]).toInt() < 0) {
+        if (comp(tmp, arr[startIndex]) < 0) {
             for (let j = i; j > startIndex; j--) {
                 arr[j] = arr[j - 1]
             }
             arr[startIndex] = tmp
         } else {
             let j = i - 1;
-            while (comp(tmp, arr[j]).toInt() < 0) {
+            while (comp(tmp, arr[j]) < 0) {
                 arr[j + 1] = arr[j];
                 j--;
             }
