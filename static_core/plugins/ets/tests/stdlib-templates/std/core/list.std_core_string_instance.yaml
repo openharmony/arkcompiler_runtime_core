@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1702,74 +1702,45 @@
     object_type: String,
 
     init_object_data_type: "FixedArray<String>",
-    init_object_data: '["Normalize me", "祝福世界和平", "\u1E9B\u0323", "\u1E9B\u0323", "𝒉𝒆𝒍𝒍𝒐", "𝒉𝒆𝒍𝒍𝒐", "①", "①"]',
+    init_object_data: '["祝福世界和平", "\u1E9B\u0323", "\u1E9B\u0323", "𝒉𝒆𝒍𝒍𝒐", "𝒉𝒆𝒍𝒍𝒐", "①", "①"]',
 
     param_types: { formStr: String},
     param_nature: {formStr: primitive},
     param_init_data_types: {formStr: "FixedArray<string>"},
-    param_list: {formStr: '["NFC", "NFD", "NFKC", "NFKD", "NFD", "NFKD", "NFC", "NFKC"]'},
+    param_list: {formStr: '["NFD", "NFKC", "NFKD", "NFD", "NFKD", "NFC", "NFKC"]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
     expected_data_type: "FixedArray<String>",
-    expected_test_data: '["Normalize me", "祝福世界和平", "\u1E69", "\u0073\u0323\u0307", "𝒉𝒆𝒍𝒍𝒐", "hello", "①", "1"]',
+    expected_test_data: '["祝福世界和平", "\u1E69", "\u0073\u0323\u0307", "𝒉𝒆𝒍𝒍𝒐", "hello", "①", "1"]',
     verify_test_result_function: compareStringTrivial
   }
 
 - {
-    method_name: normalizeNFD,
+    method_name: normalize,
     object_type: String,
 
     init_object_data_type: "FixedArray<String>",
-    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
+    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie",
+                        "Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie",
+                        "Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie",
+                        "Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
 
-    param_types: {},
-    param_nature: {},
-    param_init_data_types: {},
-    param_list: {},
+    param_types: { formStr: String},
+    param_nature: {formStr: primitive},
+    param_init_data_types: {formStr: "FixedArray<string>"},
+    param_list: {formStr: '["NFC", "NFC", "NFC", "NFC",
+                            "NFD", "NFD", "NFD", "NFD",
+                            "NFKC", "NFKC", "NFKC", "NFKC",
+                            "NFKD", "NFKD", "NFKD", "NFKD"]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
     expected_data_type: "FixedArray<String>",
-    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie"]',
-    verify_test_result_function: compareStringTrivial
-  }
-
-- {
-    method_name: normalizeNFKC,
-    object_type: String,
-
-    init_object_data_type: "FixedArray<String>",
-    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
-
-    param_types: {},
-    param_nature: {},
-    param_init_data_types: {},
-    param_list: {},
-
-    method_return_type: "String",
-    expected_test_data_item_type: "String",
-    expected_data_type: "FixedArray<String>",
-    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie"]',
-    verify_test_result_function: compareStringTrivial
-  }
-
-- {
-    method_name: normalizeNFKD,
-    object_type: String,
-
-    init_object_data_type: "FixedArray<String>",
-    init_object_data: '["Normalize me", "\u0041\u006d\u00e9\u006c\u0069\u0065", "\u0041\u006d\u0065\u0301\u006c\u0069\u0065", "Amélie"]',
-
-    param_types: {},
-    param_nature: {},
-    param_init_data_types: {},
-    param_list: {},
-
-    method_return_type: "String",
-    expected_test_data_item_type: "String",
-    expected_data_type: "FixedArray<String>",
-    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie"]',
+    expected_test_data: '["Normalize me", "Amélie", "Amélie", "Amélie",
+                          "Normalize me", "Amélie", "Amélie", "Amélie",
+                          "Normalize me", "Amélie", "Amélie", "Amélie",
+                          "Normalize me", "Amélie", "Amélie", "Amélie"]',
     verify_test_result_function: compareStringTrivial
   }
 
