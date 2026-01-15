@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -583,12 +583,11 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_MARK_WHOLE_REGION: {
-            auto [region, markedObjDeque] = task->Cast<GCMarkWholeRegionTask>()->GetInfo();
-            auto processor = [region = region, markedObjDeque = markedObjDeque](ObjectHeader *obj) {
+            auto *region = task->Cast<GCMarkWholeRegionTask>()->GetRegion();
+            auto processor = [region](ObjectHeader *obj) {
                 auto *objClass = obj->template ClassAddr<BaseClass>();
                 CalcLiveBytesMarkPreprocess<false>(obj, objClass);
                 region->GetMarkBitmap()->Set(obj);
-                markedObjDeque->emplace_back(obj);
             };
             region->IterateOverObjects(processor);
             break;
@@ -860,6 +859,10 @@ void G1GC<LanguageConfig>::TryRunMixedGC(ark::GCTask &task)
         // marking and than set isMixedGcRequired_) in mutator thread which waits for the end of
         // concurrent marking.
         isMixed = isMixedGcRequired_.load(std::memory_order_acquire);
+    }
+    if (fullCollectionSetPromotion_) {
+        // Don't collect tenured regions in case of full young promotion
+        isMixed = false;
     }
     task.collectionType = isMixed ? GCCollectionType::MIXED : GCCollectionType::YOUNG;
     // Handle pending dirty cards here to be able to estimate scanning time while adding old regions to
@@ -1488,6 +1491,25 @@ void G1GC<LanguageConfig>::ResetRegionAfterMixedGC()
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::FullPromotion(const CollectionSet &collectibleRegions)
+{
+    FastYoungMark(collectibleRegions);
+
+    auto movedObjectSaver = []([[maybe_unused]] const ObjectHeader *object) {};
+    for (auto r : collectibleRegions.Young()) {
+        RegionPromotionImpl<false, false>(r, movedObjectSaver);
+    }
+
+    EnqueueAllYoungCards(collectibleRegions);
+
+    ActualizeRemSets();
+    if (!collectibleRegions.Young().empty()) {
+        auto objectAllocator = this->GetG1ObjectAllocator();
+        objectAllocator->ResetYoungAllocator();
+    }
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleRegions)
 {
     ASSERT(!this->IsFullGC());
@@ -1497,14 +1519,12 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     {
         time::Timer timer(&youngPauseTime, true);
         singlePassCompactionEnabled_ = SinglePassCompactionAvailable();
-        if (singlePassCompactionEnabled_) {
+        if (fullCollectionSetPromotion_) {
+            FullPromotion(collectibleRegions);
+        } else if (singlePassCompactionEnabled_) {
             CollectInSinglePass(task);
         } else {
-            if (fullCollectionSetPromotion_) {
-                FastYoungMark(collectibleRegions);
-            } else {
-                MixedMarkAndCacheRefs(task, collectibleRegions);
-            }
+            MixedMarkAndCacheRefs(task, collectibleRegions);
             ClearYoungCards(collectibleRegions);
             ClearTenuredCards(collectibleRegions);
             CollectAndMove<false>(collectibleRegions);
@@ -1527,14 +1547,6 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
     }
 
     if (!this->GetPandaVm()->SupportGCSinglePassCompaction()) {
-        return false;
-    }
-
-    if (g1PromotionRegionAliveRate_ <= 0) {
-        return false;
-    }
-
-    if (fullCollectionSetPromotion_) {
         return false;
     }
 
@@ -1621,19 +1633,12 @@ void G1GC<LanguageConfig>::FastYoungMark(const CollectionSet &collectibleRegions
 {
     // There should be only young regions in the collection set
     ASSERT(collectibleRegions.Tenured().empty());
-    auto allocator = this->GetInternalAllocator();
     PandaVector<Region *> youngRegions(collectibleRegions.Young().begin(), collectibleRegions.Young().end());
-    GCMarkingStackType::MarkedObjects markedObjects(youngRegions.size(), nullptr);
-    PandaVector<std::pair<Region *, PandaDeque<ObjectHeader *> *>> tasks(youngRegions.size());
     bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
     for (size_t idx = 0; idx < youngRegions.size(); ++idx) {
         auto *region = youngRegions[idx];
         region->SetLiveBytes(0U);
-        markedObjects[idx] = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
-        auto *markedObjDeque = markedObjects[idx];
-        ASSERT(markedObjDeque != nullptr);
-        tasks[idx] = std::make_pair(region, markedObjDeque);
-        GCMarkWholeRegionTask gcWorkerTask(&tasks[idx]);
+        GCMarkWholeRegionTask gcWorkerTask(region);
         if (useGcWorkers && this->GetWorkersTaskPool()->AddTask(GCMarkWholeRegionTask(gcWorkerTask))) {
             continue;
         }
@@ -1643,19 +1648,20 @@ void G1GC<LanguageConfig>::FastYoungMark(const CollectionSet &collectibleRegions
     if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
-    tasks.clear();
+}
 
-    RefCacheBuilder<LanguageConfig, true> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, nullptr);
-    auto refsChecker = [this, &builder](Region *region, const MemRange &memRange) {
-        IterateOverRefsInMemRange(memRange, region, builder);
-        return false;
-    };
-    CacheRefsFromRemsets(refsChecker);
-
-    if (mixedMarkedObjects_.empty()) {
-        mixedMarkedObjects_ = std::move(markedObjects);
-    } else {
-        mixedMarkedObjects_.insert(mixedMarkedObjects_.end(), markedObjects.begin(), markedObjects.end());
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::EnqueueAllYoungCards(const CollectionSet &collectibleRegions)
+{
+    auto *cardTable = this->GetCardTable();
+    for (Region *region : collectibleRegions.Young()) {
+        auto regionPtr = ToUintPtr(region);
+        cardTable->MarkCardRange(regionPtr, regionPtr + DEFAULT_REGION_SIZE);
+        auto begin = cardTable->GetCardPtr(regionPtr);
+        auto end = cardTable->GetCardPtr(regionPtr + DEFAULT_REGION_SIZE);
+        for (auto cardPtr = begin; cardPtr < end; ++cardPtr) {
+            updatedRefsQueue_->push_back(cardPtr);
+        }
     }
 }
 
@@ -2186,7 +2192,7 @@ CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(ark::GCTask const &tas
     auto g1Allocator = this->GetG1ObjectAllocator();
     LOG_DEBUG_GC << "Start GetCollectibleRegions isMixed: " << isMixed << " reason: " << task.reason;
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
-    if (isMixed && !fullCollectionSetPromotion_) {
+    if (isMixed) {
         if (!this->GetSettings()->G1EnablePauseTimeGoal()) {
             AddOldRegionsMaxAllowed(collectionSet);
         } else {
@@ -2726,16 +2732,16 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCStart()
 {
     regionGarbageRateThreshold_ = 0;
-    g1PromotionRegionAliveRate_ = 0;
+    this->SetFastGCFlag(true);
     GC::PostponeGCStart();
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::PostponeGCEnd()
 {
-    ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && g1PromotionRegionAliveRate_ == 0));
+    ASSERT(!this->IsPostponeEnabled() || (regionGarbageRateThreshold_ == 0 && this->GetFastGCFlag()));
     regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
-    g1PromotionRegionAliveRate_ = this->GetSettings()->G1PromotionRegionAliveRate();
+    this->SetFastGCFlag(false);
     GC::PostponeGCEnd();
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,6 +114,35 @@ public:
         gc->EndConcurrentScopeRoutine();
         gc->ProcessDirtyCards();
         gc->StartConcurrentScopeRoutine();
+    }
+
+    template <class T>
+    size_t GetYoungRegionsCount(G1GC<T> *gc)
+    {
+        return gc->GetG1ObjectAllocator()->GetYoungRegions().size();
+    }
+
+    auto GetMemStats(G1GC<PandaAssemblyLanguageConfig> *gc)
+    {
+        return gc->memStats_;
+    }
+
+    template <class T>
+    size_t GetPromotedRegions(G1GC<T> *gc)
+    {
+        return gc->analytics_.GetPromotedRegions();
+    }
+
+    template <class T>
+    size_t GetLiveObjects(G1GC<T> *gc)
+    {
+        return gc->analytics_.liveObjects_;
+    }
+
+    template <class T>
+    size_t GetEvacuatedBytes(G1GC<T> *gc)
+    {
+        return gc->analytics_.GetEvacuatedBytes();
     }
 };
 
@@ -1023,6 +1052,84 @@ TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionObjects)
         aliveBytesSumToCheck += region->GetAllocatedBytes();
     }
     ASSERT_EQ(aliveBytesSum, aliveBytesSumToCheck);
+}
+
+static coretypes::String *CreateStringFromNumber(size_t value)
+{
+    Runtime *runtime = Runtime::GetCurrent();
+    LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto s = std::to_string(value);
+    coretypes::String *strObj = coretypes::String::CreateFromMUtf8(
+        utf::CStringAsMutf8(s.data()), s.size(), s.size(), true, ctx, Runtime::GetCurrent()->GetPandaVM(), true, false);
+
+    auto youngRegion = ObjectToRegion(strObj);
+    EXPECT_TRUE(youngRegion->HasFlag(RegionFlag::IS_EDEN));
+    return strObj;
+}
+
+TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionRemsets)
+{
+    // Compute array length so it will fill almost whole young region
+    Runtime *runtime = Runtime::GetCurrent();
+    LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto *arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
+    size_t youngLength = ((DEFAULT_REGION_SIZE - sizeof(coretypes::Array)) / arrayClass->GetComponentSize()) - 32;
+
+    // Setting FastGC flag = true - means that G1-GC should only promote all young regions
+    auto *gc = static_cast<G1GC<PandaAssemblyLanguageConfig> *>(runtime->GetPandaVM()->GetGC());
+    gc->SetFastGCFlag(true);
+    ASSERT_TRUE(gc->GetFastGCFlag());
+
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+
+    auto runGC = [thread, gc](GCTaskCause reason) {
+        ScopedNativeCodeThread sn(thread);
+        GCTask task0(reason);
+        task0.Run(*gc);
+    };
+    // Run Full GC to compact all existed young regions
+    runGC(GCTaskCause::OOM_CAUSE);
+
+    // To test remsets correctness - create array which occupies whole young region and fill it with strings which
+    // located in another young regions
+    auto youngHolder =
+        VMHandle<coretypes::Array>(thread, ObjectAllocator::AllocArray(youngLength, ClassRoot::ARRAY_STRING, false));
+    auto youngRegion = ObjectToRegion(youngHolder.GetPtr());
+    ASSERT_TRUE(youngRegion->HasFlag(RegionFlag::IS_EDEN));
+    for (size_t idx = 0; idx < youngLength; ++idx) {
+        youngHolder->Set(thread, idx, CreateStringFromNumber(idx));
+    }
+    auto youngRegionsCount = GetYoungRegionsCount(gc);
+
+    auto verifyArray = [&youngHolder, youngLength, thread]() {
+        for (size_t idx = 0; idx < youngLength; ++idx) {
+            auto elem = static_cast<coretypes::String *>(youngHolder->Get<ObjectHeader *>(thread, idx));
+            std::string elemStr(utf::Mutf8AsCString(elem->GetDataMUtf8()), elem->GetUtf8Length());
+            ASSERT_EQ(elemStr, std::to_string(idx));
+        }
+    };
+
+    ASSERT_EQ(GetPromotedRegions(gc), 0);
+    ASSERT_EQ(GetLiveObjects(gc), 0);
+    ASSERT_EQ(GetEvacuatedBytes(gc), 0);
+    ASSERT_EQ(GetMemStats(gc).GetCountMovedYoung(), 0);
+
+    runGC(GCTaskCause::MIXED);
+
+    ASSERT_EQ(GetPromotedRegions(gc), youngRegionsCount);
+    ASSERT_EQ(GetLiveObjects(gc), youngLength + 1);
+    ASSERT_EQ(GetEvacuatedBytes(gc), 0);
+    ASSERT_EQ(GetMemStats(gc).GetCountMovedYoung(), youngLength + 1);
+    verifyArray();
+
+    // Trigger GC several times to ensure remsets were built correctly
+    gc->SetFastGCFlag(false);
+    for (size_t iter = 0; iter < 4U; iter++) {
+        runGC(GCTaskCause::OOM_CAUSE);
+        verifyArray();
+    }
 }
 
 TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionBitmaps)

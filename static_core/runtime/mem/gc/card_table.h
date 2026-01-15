@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,6 +118,7 @@ public:
     void ClearCard(uintptr_t addr);       // set card state to the cleared
     void ClearAll();                      // set card state to the cleared for the all cards
     void ClearCardRange(uintptr_t beginAddr, uintptr_t endAddr);
+    void MarkCardRange(uintptr_t beginAddr, uintptr_t endAddr);
     static constexpr uint32_t GetCardSize()
     {
         return CARD_SIZE;
@@ -284,6 +285,7 @@ public:
 
 private:
     void ClearCards(CardPtr start, size_t cardCount);
+    void MarkCards(CardPtr start, size_t cardCount);
     size_t GetSize() const;  // returns size of card table array
     inline void FillRanges(PandaVector<MemRange> *ranges, const Card *startCard, const Card *endCard);
 
