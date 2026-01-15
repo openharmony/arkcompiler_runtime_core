@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -83,16 +83,14 @@ class BenchGenerator:
                 files += x
         return files
 
-    @staticmethod
-    def search_test_files(paths: List[Path],
-                          ext: Iterable[str] = ()) -> List[SrcPath]:
+    def search_test_files(self, ext: Iterable[str] = ()) -> List[SrcPath]:
         """Collect all src files to gen process.
 
-        Returns flat list of (Full, Relative) paths
+        Returns flat list of (Full, Relative) from self.paths
         """
         log.debug('Searching sources: **/*%r', ext)
         files = []
-        for d in paths:
+        for d in self.paths:
             root = d.resolve()
             # if file name provided add it if suffix matches
             if root.is_file():
@@ -318,27 +316,36 @@ class BenchGenerator:
             log.error(e)
             die(self.abort, 'Aborting on first fail...')
 
+    def select_variants(self, lang_impl: LangBase,
+                        settings: Optional[GenSettings] = None) -> dict[SrcPath, list[TemplateVars]]:
+        src_ext = lang_impl.src
+        if settings:  # override if set in platform (only non empty options)
+            src_ext = settings.src if settings.src else src_ext
+        if self.override_src_ext:  # override if set in cmdline
+            src_ext = self.override_src_ext
+        variants = {
+            src: list(self.process_source_file(src.full, lang_impl))
+            for src in self.search_test_files(ext=src_ext)
+        }
+        return variants
+
     def generate(self, lang: str,
                  settings: Optional[GenSettings] = None) -> List[BenchUnit]:
         """Generate benchmark sources for requested language."""
         bus: List[BenchUnit] = []
         lang_impl = self.get_lang(lang)
-        src_ext = lang_impl.src
         out_ext = lang_impl.ext
         template_name = f'{lang}.j2'  # default name for lang
         if settings:  # override if set in platform (only non empty options)
-            src_ext = settings.src if settings.src else src_ext
             out_ext = settings.out if settings.out else out_ext
             template_name = settings.template if settings.template else template_name
-        if self.override_src_ext:  # override if set in cmdline
-            src_ext = self.override_src_ext
         if self.override_template:
             template_name = self.override_template
         template = self.get_template(template_name)
-        for src in BenchGenerator.search_test_files(self.paths, ext=src_ext):
-            for variant in self.process_source_file(src.full, lang_impl):
-                self.add_bu(bus, template, lang_impl, src,
-                            variant, settings, out_ext)
+
+        for src, variants in self.select_variants(lang_impl=lang_impl, settings=settings).items():
+            for variant in variants:
+                self.add_bu(bus, template, lang_impl, src, variant, settings, out_ext)
         return bus
 
 

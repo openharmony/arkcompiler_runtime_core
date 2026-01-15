@@ -2,6 +2,7 @@
 
 VMB = ./run-vmb.sh
 OUTDIR ?= $(HOME)/vmb-build
+BIN_PY = python3
 
 clean:
 	rm -rf dist generated src/generated examples/benchmarks/generated
@@ -13,16 +14,16 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 
 uninstall:
-	python3 -m pip uninstall -y vmb || true
+	$(BIN_PY)  -m pip uninstall -y vmb || true
 
 dir:
 	mkdir -p $(OUTDIR)
 
 vmb-build: dir uninstall
 	rm -rf $(OUTDIR) || true
-	python3 -c 'import build' || python3 -m pip install build
-	python3 -m build --outdir=$(OUTDIR)
-	python3 -m pip install $(OUTDIR)/vmb-*-py3-none-any.whl
+	$(BIN_PY)  -c 'import build' || $(BIN_PY)  -m pip install build
+	$(BIN_PY)  -m build --outdir=$(OUTDIR)
+	$(BIN_PY)  -m pip install $(OUTDIR)/vmb-*-py3-none-any.whl
 
 vmb: vmb-build clean
 
@@ -32,6 +33,6 @@ help:
 	$(VMB) list
 
 tox: dir
-	python3 -m tox --workdir=$(OUTDIR)
+	$(BIN_PY)  -m tox --workdir=$(OUTDIR)
 	rm -rf src/vmb.egg-info/
 

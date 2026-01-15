@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 from vmb.cli import Args, Command
+from vmb.generate import generate_main
 from vmb.target import Target
 from vmb.tool import OptFlags, ToolBase
 from vmb.unit import BenchUnit
@@ -153,3 +154,33 @@ def test_no_run_option():
         runner = VmbRunner(arg)
         bus = PlatformBase.search_units(arg.paths)
         runner.run(bus)
+
+
+def test_bench_by_tests_names():
+    """Assert that bench generation by names of tests is case insentive"""
+    test = TestCase()
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tests=ArraySort_baseline'):
+        bus1 = {bu.name for bu in generate_main(args=Args())}
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tests=arraysort_Baseline'):
+        bus2 = {bu.name for bu in generate_main(args=Args())}
+    test.assertEqual(bus1, bus2)
+
+
+def test_bench_by_tests_regexes():
+    """Assert that bench generation by regex of tests names is case insentive"""
+    test = TestCase()
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tests="^ArraySort_.*"'):
+        bus1 = {bu.name for bu in generate_main(args=Args())}
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tests="^arraysort_.*"'):
+        bus2 = {bu.name for bu in generate_main(args=Args())}
+    test.assertEqual(bus1, bus2)
+
+
+def test_bench_by_tags():
+    """Assert that bench generation by tag is case insentive"""
+    test = TestCase()
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tags=interop'):
+        bus1 = {bu.name for bu in generate_main(args=Args())}
+    with cmdline('all --lang=ets --platform=arkts_host --log-level=debug --mode=int --tags=Interop'):
+        bus2 = {bu.name for bu in generate_main(args=Args())}
+    test.assertEqual(bus1, bus2)
