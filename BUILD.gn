@@ -26,14 +26,12 @@ group("ark_device_packages") {
 }
 
 group("ark_packages") {
-  deps = []
-  if (host_os != "mac") {
-    deps += [
-      "$ark_root/libpandabase:libarkbase",
-      "$ark_root/libpandafile:libarkfile",
-      "$ark_root/libziparchive:libarkziparchive",
-    ]
-  }
+  deps = [
+    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libpandafile:libarkfile",
+    "$ark_root/libziparchive:libarkziparchive",
+  ]
+
 
   foreach(plugin, enabled_plugins) {
     deps += [ "$ark_root/plugins/$plugin:ark_packages" ]
@@ -41,9 +39,7 @@ group("ark_packages") {
 }
 
 group("ark_host_linux_tools_packages") {
-  deps = []
-  if (host_os != "mac") {
-    deps += [
+    deps = [
       "$ark_root/abc2program:abc2prog(${host_toolchain})",
       "$ark_root/ark_guard:ark_guard(${host_toolchain})",
       "$ark_root/disassembler:ark_disasm(${host_toolchain})",
@@ -54,7 +50,6 @@ group("ark_host_linux_tools_packages") {
       "$ark_root/panda_guard:panda_guard(${host_toolchain})",
       "$ark_root/verifier:ark_verifier(${host_toolchain})",
     ]
-  }
   foreach(plugin, enabled_plugins) {
     deps += [ "$ark_root/plugins/$plugin:ark_host_linux_tools_packages" ]
   }
