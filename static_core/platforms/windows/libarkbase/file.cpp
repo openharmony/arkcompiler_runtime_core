@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,38 @@ bool File::HasStatMode(const std::string &path, uint16_t mode)
     // NOTE: check for _S_IFMT, _S_IFCHR, _S_IEXEC, are not implemented. Not required for current use cases.
     // If requested something unknown like _S_IFBLK, ignore it. On Windows these modes are not applicable.
     return true;
+}
+
+bool File::HasStatModeCaseSensitive(const std::string &path, uint16_t mode)
+{
+    std::filesystem::path p(path);
+    std::wstring fileName = p.filename().wstring();
+    std::filesystem::path dir = p.parent_path();
+
+    WIN32_FIND_DATAW findFileData;
+    HANDLE hFind = FindFirstFileW((dir / L"*").c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    bool result = false;
+
+    do {
+        std::wstring currentFileName = findFileData.cFileName;
+
+        if (currentFileName == fileName) {
+            bool isDir = (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+            if ((mode & _S_IFDIR) && isDir) {
+                result = true;
+            } else if ((mode & _S_IFREG) && !isDir) {
+                result = true;
+            }
+            break;
+        }
+    } while (FindNextFileW(hFind, &findFileData));
+
+    FindClose(hFind);
+    return result;
 }
 
 }  // namespace ark::os::windows::file
