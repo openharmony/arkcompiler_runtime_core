@@ -1774,24 +1774,52 @@ despite some property types having default values (see
 :ref:`Default Values for Types`). If a non-optional property (e.g., *age* in
 the example above) is skipped, then a :index:`compile-time error` occurs.
 
-An object literal of interface type can contain method implementations unlike
-an :ref:`Object Literal of Class Type`. All methods in an object literal of
-interface type are public.
+An object literal of interface type must provide an implementation for all
+interface methods with no default implementation. All such methods are
+public as in the interface.
+
 
 .. code-block:: typescript
    :linenos:
 
     interface I {
       print_name (name: string): void
+      print_something() { console.log ("Something") }
     }
-    let p: I = {
+    let i: I = {
       print_name (name: string) { console.log(name) }
+      // No need to implement print_something()
     }
-    p.print_name ("Alice")
+    i.print_name ("Alice")
+    i.print_something()
+
 
 Any reference to ``this`` in an object literal method is a reference to
 an anonymous class (which is a subtype of the interface) created for the
 inferred interface type:
+
+*Object literal* can provide a method with an override-compatible signature
+(see :ref:`Override-Compatible Signatures`):
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Drv1 extends Base {}
+    class Drv2 extends Base {}
+
+    interface A {
+        foo (p: Drv1): Base
+        foo (p: Drv2): Base
+    }
+    const a1: A = { foo(p: Base): Drv1 {} } 
+       /* OK, foo(p: Base) implements both foo (p: Drv1): base and foo (p: Drv2): Base */
+
+    const a2: A = { // OK
+       foo(p: Drv1): Drv1 { return new Drv1 } // implements foo (p: Drv1): Base
+       foo(p: Drv2): Drv2 { return new Drv2 } // implements foo (p: Drv2): Base
+    }
 
 .. index::
    inferred interface type
