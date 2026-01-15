@@ -14,6 +14,13 @@
  */
 
 function main(): int {
+    const suite = new arktest.ArkTestsuite("RegExp.MatchAllTest")
+    suite.addTest("Test the results of match", matchResultTest)
+    suite.addTest("Test the return results of matchAll and match", matchTest)
+    return suite.run()
+}
+
+function matchResultTest(): void {
     let failure = 0
     let emptyArray : FixedArray<RegExpMatchArray> = []
     failure += test(new RegExp("c", "g"), "c", [new RegExpMatchArray(0, "c", ["c"])])
@@ -43,8 +50,7 @@ function main(): int {
     let regexplastIndextest = new RegExp("(?:ab|cd)\\d?","g");
     regexplastIndextest.lastIndex = -1;
     failure += checkTestResult(regexplastIndextest.test("aacd22"), true);
-
-    return failure
+    arktest.assertEQ(failure, 0)
 }
 
 function test(r: RegExp, str: String, expected: FixedArray<RegExpMatchArray>) {
@@ -59,6 +65,25 @@ function test(r: RegExp, str: String, expected: FixedArray<RegExpMatchArray>) {
     return failure
 }
 
+function matchTest(): void {
+    const regexp1 = new RegExp('n', 'g')
+    const str1 = 'nn'
+    let matchres1 = str1.matchAll(regexp1)
+    arktest.assertEQ(Array.from(matchres1).length, 2)
+    arktest.assertEQ(Array.from(matchres1).length, 0)
+
+    const regexp2 = new RegExp('t', 'g')
+    const str2 = 'ttt'
+    let matchres2 = str2.match(regexp2)
+    arktest.assertEQ(matchres2?.index, undefined)
+    arktest.assertEQ(matchres2?.input, undefined)
+
+    const regexp3 = new RegExp('t')
+    let matchres3 = str2.match(regexp3)
+    arktest.assertEQ(matchres3?.index, 0)
+    arktest.assertEQ(matchres3?.input, 'ttt')
+}
+
 function checkTestResult(actual: boolean, expected: boolean) : int {
     if (actual != expected) return 1;
     return 0;
@@ -68,7 +93,6 @@ function checkTestResult(actual: int, expected: int) : int {
     if (actual != expected) return 1;
     return 0;
 }
-
 
 
 function checkTestResult(actual : RegExpMatchArray | null, expected : RegExpMatchArray | null) : int {

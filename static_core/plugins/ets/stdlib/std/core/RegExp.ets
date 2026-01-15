@@ -331,15 +331,21 @@ export class RegExpExecArray extends RegExpResultArray {
 class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
     private regexp: RegExp
     private string: String
+    private returned: boolean
 
     constructor(regexp: RegExp, string: String) {
         this.regexp = regexp
         this.string = string
+        this.returned = false
     }
 
     override next(): IteratorResult<RegExpMatchArray> {
+        if (this.returned) {
+            return new IteratorResult<RegExpMatchArray>();
+        }
         let match = this.regexp.matchInternal(this.string)
         if (match == null) {
+            this.returned = true;
             return new IteratorResult<RegExpMatchArray>()
         }
         let matchStr = match.$_get(0)
@@ -881,7 +887,10 @@ export class RegExp extends Object {
                 if (n == 0) {
                     return null
                 }
-                return new RegExpMatchArray(-1, "", matches.toUndefinableArray(), indices)
+                let matchArray = new RegExpMatchArray(-1, "", matches.toUndefinableArray(), indices)
+                matchArray.index = undefined
+                matchArray.input = undefined
+                return matchArray
             }
             else {
                 let matchStr = result.$_get(0)

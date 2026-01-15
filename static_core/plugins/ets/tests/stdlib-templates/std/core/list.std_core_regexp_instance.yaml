@@ -507,14 +507,22 @@
     },
     method_expected_data:
     {
-      test1: 'new RegExpMatchArray(-1, "", ["a", "b", "c"])',
-      test2: 'new RegExpMatchArray(-1, "", ["bcdef"])',
-      test3: 'new RegExpMatchArray(-1, "", ["a"], [[1,2],[1,2]])',
-      test4: 'new RegExpMatchArray(-1, "", ["bab"], [[0,3],[1,2]])',
-      test5: 'new RegExpMatchArray(-1, "", ["bab"], [[0,3], [1,2], [2,3]])',
-      test6: 'new RegExpMatchArray(-1, "", ["bab"], [[0,3],[1,3]])',
-      test7: 'new RegExpMatchArray(-1, "", ["bab"], [[0,3],[0,3]])',
-      test8: 'new RegExpMatchArray(-1, "", ["bab"], [[0,3], [0,2], [2,3]])',
+      test1: '(() => { let res = new RegExpMatchArray(-1, "", ["a", "b", "c"]); res.index = undefined;
+              res.input = undefined; return res; })()',
+      test2: '(() => { let res = new RegExpMatchArray(-1, "", ["bcdef"]); res.index = undefined;
+              res.input = undefined; return res; })()',
+      test3: '(() => { let res = new RegExpMatchArray(-1, "", ["a"], [[1,2],[1,2]]); res.index = undefined;
+              res.input = undefined; return res; })()',
+      test4: '(() => { let res = new RegExpMatchArray(-1, "", ["bab"], [[0,3],[1,2]]); res.index = undefined;
+              res.input = undefined; return res })()',
+      test5: '(() => { let res = new RegExpMatchArray(-1, "", ["bab"], [[0,3], [1,2], [2,3]]); res.index = undefined;
+              res.input = undefined; return res; })()',
+      test6: '(() => { let res = new RegExpMatchArray(-1, "", ["bab"], [[0,3],[1,3]]); res.index = undefined;
+              res.input = undefined; return res })()',
+      test7: '(() => { let res = new RegExpMatchArray(-1, "", ["bab"], [[0,3],[0,3]]); res.index = undefined;
+              res.input = undefined; return res })()',
+      test8: '(() => { let res = new RegExpMatchArray(-1, "", ["bab"], [[0,3], [0,2], [2,3]]); res.index = undefined;
+              res.input = undefined; return res; })()',
       test9: 'null as RegExpMatchArray | null',
     }
 }
