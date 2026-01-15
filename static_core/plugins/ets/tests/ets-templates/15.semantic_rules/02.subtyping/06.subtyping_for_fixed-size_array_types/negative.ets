@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,14 @@ desc: >-
 tags: [negative, compile-only]
 ---*/
 
+interface I {}
+interface J extends I { j: int }
 class Base {}
 class Derived extends Base {}
 type CustomArr<T extends Base> = FixedArray<T>
 
-let x: {{'CustomArr' if c.customtype else 'FixedArray'}}<{{c.stype}}> = {{c.value}}
-let y: FixedArray<{{c.dtype}}> = x
+let x: {{'CustomArr' if c.customtype else 'FixedArray'}}<{{c.dtype}}> = {{c.value}}
+let y: FixedArray<{{c.stype}}> = x
+x = y
 
 {%- endfor %}

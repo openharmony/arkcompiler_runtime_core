@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,30 @@ cases:
           Object
       check: |-
           FixedArray<Boolean>
+    - stype: |-
+          J
+      value: |-
+          [{j: 1}, {j: 2}]
+      dtype: |-
+          I
+      check: |-
+          FixedArray<J>
+    - stype: |-
+          bigint
+      value: |-
+          [123n, 1_123n, -123n]
+      dtype: |-
+          Object
+      check: |-
+          FixedArray<BigInt>
+    - stype: |-
+          string[]
+      value: |-
+          [["a", "b"],["a", "b"]]
+      dtype: |-
+          Object
+      check: |-
+          FixedArray<string[]>
     - stype: |-
           null
       value: |-
@@ -70,6 +94,14 @@ cases:
       check: |-
           FixedArray<String>
     - stype: |-
+          '1'|'2'|'3'
+      value: |-
+          ['1','2','3']
+      dtype: |-
+          '1'|'2'|'3'|'4'
+      check: |-
+          FixedArray<'1'|'2'|'3'>
+    - stype: |-
           Base | Derived
       value: |-
           [new Base(), new Derived()]
@@ -85,6 +117,14 @@ cases:
           Object
       check: |-
           FixedArray<Object>
+    - stype: |-
+          [Base, J, string]
+      value: |-
+          [[new Base(), {j: 1}, 'a'], [new Derived(), {j: 2}, 'b']]
+      dtype: |-
+          Object
+      check: |-
+          FixedArray<[Base, J, string]>
     - stype: |-
           Derived
       value: |-

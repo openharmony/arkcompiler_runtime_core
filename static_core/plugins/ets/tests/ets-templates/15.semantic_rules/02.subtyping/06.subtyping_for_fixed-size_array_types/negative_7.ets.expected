@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-Semantic error ESE0318: Type 'FixedArray<Object>' cannot be assigned to type 'FixedArray<(Base|Derived)>'
+Semantic error ESE0318: Type 'FixedArray<("1"|"2"|"3"|"4")>' cannot be assigned to type 'FixedArray<("1"|"2"|"3")>'
