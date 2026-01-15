@@ -1,7 +1,5 @@
 
-#24986 (16 tests)
-std/core/Object.ets
-std/core/TypedArrayConstructorNumbersInts.ets
+#24986 (still failing tests)
 std/math/std_math_sign_double.ets
 std/core/IntlPluralRulesTest.ets
 std/core/TypeAssignableFromTest.ets
@@ -12,19 +10,10 @@ spec/05.Generics/callFromAsyncLambda.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
-std/containers/concurrent_set/ConcurrentSet_ConstructorTest.ets
-std/containers/linked_blocking_queue/LinkedBlockingQueue_ConstructorTest.ets
-std/core/NumberTest.ets
-std/core/json/JsonStringifyTest1.ets
 # extended
 escompat/ArrayProxyTest.ets
-escompat/ArrayTest7.ets
-std/core/IteratorArrayTest.ets
-escompat/escompat_Array_modifications_Test_escompat_Array_modifications.ets
-escompat/escompat_Array_modifications_Test_escompat_Array_modifications_001.ets
-escompat/escompat_Array_modifications_Test_escompat_Array_modifications_002.ets
-escompat/escompat_Array_modifications_Test_escompat_Array_modifications_003.ets
 std/containers/ArrayTestChecked.ets
+std/core/NumberTest.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
 std/core/std_core_boolean_instance_Boolean_negate.ets
@@ -82,34 +71,10 @@ std/math/TestClz64Function.ets
 # temporary place for the tests related to primitive types refactoring
 ############
 
-# 1.
-# TypeError: Property 'toBigInt' does not exist on type 'BigInt'
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
-
 # 2.
 # TypeError: Value is possibly nullish
-std/containers/concurrent_hash_map/ConcurrentHashMap_ForEachTest.ets
-std/containers/concurrent_hash_map/ConcurrentHashMap_PressureTest_Remove.ets
 std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeMethodInvoke.ets
-std/core/std_core_string_String_repeat_int.ets
-std/core/std_core_string_String_repeat_number.ets
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
-std/core/std_core_string_String_codePointCount_number_number.ets
 
 # 3.
 # TypeError: Type '(resolve: () => void) => void' is not compatible with type '(resolve: (value: void|PromiseLike<void>) => void, reject: (error: Error) => void) => void'
@@ -117,11 +82,7 @@ std/concurrency/AsyncLockTest.ets
 
 # 4.
 # runtime failures:
-std/core/std_core_value_array_value_all_006.ets
 std/serialization/std_serialization_json_stringify_float_array.ets
-
-# 27962 Fails test
-std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 
 # Deprecated operations on char #27402
 std/core/std_core_array_map_char_array_func_char.ets
