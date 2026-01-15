@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,7 +65,7 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heapManager)
     auto totalObjects = memStats_->GetTotalObjectsAllocated();
 
     auto currentMemory = memStats_->GetFootprintHeap();
-    auto totalMemory = heapManager->GetTotalMemory();
+    auto consumedMemory = heapManager->GetConsumedHeapMemory();
     auto maxMemory = heapManager->GetMaxMemory();
 
     Histogram<uint64_t> durationInfo(allNumberDurations_->begin(), allNumberDurations_->end());
@@ -90,12 +90,13 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heapManager)
     statistic << "Total bytes allocated " << helpers::MemoryConverter(totalAllocated) << "\n";
     statistic << "Total bytes freed " << helpers::MemoryConverter(totalFreed) << "\n\n";
 
-    statistic << "Free memory " << helpers::MemoryConverter(helpers::UnsignedDifference(totalMemory, currentMemory))
-              << "\n";
-    statistic << "Free memory until GC " << helpers::MemoryConverter(heapManager->GetFreeMemory()) << "\n";
+    // Calculate manually to do less work
+    auto freeMemBeforeHeapGrow = helpers::UnsignedDifference(consumedMemory, currentMemory);
+    ASSERT(freeMemBeforeHeapGrow == heapManager->GetFreeMemoryBeforeHeapGrow());
+    statistic << "Free memory before heap grow " << helpers::MemoryConverter(freeMemBeforeHeapGrow) << "\n";
     statistic << "Free memory until OOME "
               << helpers::MemoryConverter(helpers::UnsignedDifference(maxMemory, currentMemory)) << "\n";
-    statistic << "Total memory " << helpers::MemoryConverter(totalMemory) << "\n";
+    statistic << "Consumed memory " << helpers::MemoryConverter(consumedMemory) << "\n";
 
     {
         os::memory::LockHolder lock(mutatorStatsLock_);

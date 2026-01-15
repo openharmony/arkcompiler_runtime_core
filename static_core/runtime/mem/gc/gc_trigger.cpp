@@ -319,7 +319,7 @@ void GCTriggerHeapOccupancy::GCFinished([[maybe_unused]] const GCTask &task, [[m
 
 void GCTriggerHeapOccupancy::TriggerGcIfNeeded(GC *gc)
 {
-    size_t currentHeapSize = heapSpace_->GetHeapSize();
+    size_t currentHeapSize = heapSpace_->GetCurrentHeapSize();
     size_t minHeapSize = MemConfig::GetInitialHeapSizeLimit();
     size_t maxHeapSize = MemConfig::GetHeapSizeLimit();
     size_t threshold = std::min(minHeapSize, static_cast<size_t>(maxTriggerPercent_ * maxHeapSize));

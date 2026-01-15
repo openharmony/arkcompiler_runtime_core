@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,7 +108,12 @@ void HeapSpace::ComputeNewSize()
     SetIsWorkGC(false);
 }
 
-size_t HeapSpace::GetHeapSize() const
+size_t HeapSpace::GetMaxHeapSize() const
+{
+    return PoolManager::GetMmapMemPool()->GetTotalObjectSize();
+}
+
+size_t HeapSpace::GetCurrentHeapSize() const
 {
     return PoolManager::GetMmapMemPool()->GetObjectUsedBytes();
 }
@@ -337,7 +342,15 @@ void GenerationalSpaces::ComputeNewTenured()
     }
 }
 
-size_t GenerationalSpaces::GetHeapSize() const
+size_t GenerationalSpaces::GetMaxHeapSize() const
+{
+    os::memory::ReadLockHolder lock(heapLock_);
+    size_t usedBytesInSeparatePools = PoolManager::GetMmapMemPool()->GetTotalObjectSize() - sharedPoolsSize_;
+    size_t usedBytesInSharedPool = youngSizeInSharedPools_ + tenuredSizeInSharedPools_;
+    return usedBytesInSeparatePools + usedBytesInSharedPool;
+}
+
+size_t GenerationalSpaces::GetCurrentHeapSize() const
 {
     os::memory::ReadLockHolder lock(heapLock_);
     size_t usedBytesInSeparatePools = PoolManager::GetMmapMemPool()->GetObjectUsedBytes() - sharedPoolsSize_;

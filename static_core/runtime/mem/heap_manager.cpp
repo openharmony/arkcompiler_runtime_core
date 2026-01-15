@@ -355,14 +355,19 @@ void HeapManager::SetTargetHeapUtilization(float target)
     targetUtilization_ = target;
 }
 
-size_t HeapManager::GetTotalMemory() const
+size_t HeapManager::GetConsumedHeapMemory() const
 {
-    return GetObjectAllocator().AsObjectAllocator()->GetHeapSpace()->GetHeapSize();
+    return GetObjectAllocator().AsObjectAllocator()->GetHeapSpace()->GetCurrentHeapSize();
+}
+
+size_t HeapManager::GetFreeMemoryBeforeHeapGrow() const
+{
+    return helpers::UnsignedDifference(GetConsumedHeapMemory(), vm_->GetMemStats()->GetFootprintHeap());
 }
 
 size_t HeapManager::GetFreeMemory() const
 {
-    return helpers::UnsignedDifference(GetTotalMemory(), vm_->GetMemStats()->GetFootprintHeap());
+    return helpers::UnsignedDifference(GetMaxMemory(), vm_->GetMemStats()->GetFootprintHeap());
 }
 
 void HeapManager::ClampNewMaxHeapSize()

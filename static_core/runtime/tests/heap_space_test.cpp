@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,18 +123,18 @@ TEST_F(HeapSpaceTest, AllocFreeAndCheckSizesTest)
         heapSpace_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
     ASSERT_NE(pool2, NULLPOOL);
 
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 10_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 10_MB);
 
     heapSpace_->FreePool(pool1.GetMem(), pool1.GetSize());
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 6_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 6_MB);
     auto *arena1 =
         heapSpace_->TryAllocArena(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
     ASSERT_NE(arena1, nullptr);
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 12_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 12_MB);
     heapSpace_->FreePool(pool2.GetMem(), pool2.GetSize());
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 6_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 6_MB);
     heapSpace_->FreeArena(arena1);
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 0_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 0_MB);
 }
 
 TEST_F(HeapSpaceTest, EmulateAllocBeforeAndAfterSTWGCTest)
@@ -260,7 +260,7 @@ TEST_F(HeapSpaceTest, ClampNewMaxSizeTest)
         heapSpace_->TryAllocPool(6_MB, SpaceType::SPACE_TYPE_OBJECT, AllocatorType::FREELIST_ALLOCATOR, nullptr);
     ASSERT_NE(pool2, NULLPOOL);
 
-    ASSERT_EQ(heapSpace_->GetHeapSize(), 10_MB);
+    ASSERT_EQ(heapSpace_->GetCurrentHeapSize(), 10_MB);
 
     heapSpace_->ClampCurrentMaxHeapSize();
     heapSpace_->SetIsWorkGC(true);

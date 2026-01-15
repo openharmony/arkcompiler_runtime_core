@@ -127,8 +127,7 @@ endif()
 if (NOT PANDA_ENABLE_THREAD_SANITIZER)
     add_ets_gc_test(FILE heap_info_test.ets OPTIONS MODE "INT")
 endif()
-#NOTE (chikunov-danila) #32149 - enable after fix
-# add_ets_gc_test(FILE free_heap_size_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--gc-workers-count=1" MODE "INT")
+add_ets_gc_test(FILE free_heap_size_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--gc-workers-count=1" MODE "INT")
 add_ets_gc_test(FILE alloc_pinned.ets OPTIONS "--gc-type=g1-gc" "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post" MODE "INT")
 # Running tests via API calls
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
