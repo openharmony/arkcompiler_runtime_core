@@ -426,10 +426,6 @@
 #30813 No CTE for lambda body without return statement
 07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
 
-#31616 Use only available types for Annotation Fields (tests should be updated)
-07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
-07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
-
 #29160
 07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
 

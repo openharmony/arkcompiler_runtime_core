@@ -14,7 +14,6 @@
 cases:
   - { type: byte,   value: 16,     sign: '+'  }
   - { type: short,  value: 300,    sign: '+'  }
-  - { type: char,   value: c'p',   sign: '+'  }
   - { type: int,    value: 3000,   sign: '+'  }
   - { type: long,   value: 50000,  sign: '+'  }
   - { type: float,  value: 120.2f, sign: '+'  }
