@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -322,6 +322,12 @@ extern "C" void EscompatObjectFastCopyToUnchecked(EtsCharArray *src, EtsCharArra
                                                   int32_t srcStart, int32_t srcEnd)
 {
     StdCoreCopyToForObjects<false, false>(src, dst, dstStart, srcStart, srcEnd);
+}
+
+extern "C" void EscompatObjectFastCopyToUncheckedWithBarriers(EtsCharArray *src, EtsCharArray *dst, int32_t dstStart,
+                                                              int32_t srcStart, int32_t srcEnd)
+{
+    StdCoreCopyToForObjects<true, false>(src, dst, dstStart, srcStart, srcEnd);
 }
 
 extern "C" void CompilerMemmoveUnchecked(ark::ObjectHeader *src, ark::ObjectHeader *dst, int32_t dstStart,

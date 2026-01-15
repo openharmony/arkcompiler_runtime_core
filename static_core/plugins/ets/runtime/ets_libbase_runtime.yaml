@@ -5303,6 +5303,25 @@ intrinsics:
     llvm_codegen_func: EmitArrayFastCopyToRef
     need_param_locations: true
 
+  - name: EscompatObjectFastCopyToUncheckedWithBarriers
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: copyToFastWithBarriers
+    static: true
+    signature:
+      ret: void
+      args:
+        - std.core.Object\[
+        - std.core.Object\[
+        - i32
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::EscompatObjectFastCopyToUncheckedWithBarriers
+    codegen_arch: [ arm64, amd64 ]
+    codegen_func: CreateArrayFastCopyToRef
+    llvm_codegen_func: EmitArrayFastCopyToRef
+    need_param_locations: true
+
   - name: StdCoreFloatCopyTo
     space: ets
     class_name: std.core.ETSGLOBAL

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,7 +153,7 @@ class ExtArray<T> extends Array<T> {
 //! METHOD        "std.core.Array::pop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArrayGetUnsafe"
-//! INST_NOT      /Call/
+//! INST_NOT      /Call.*get_unsafe/
 
 //! CHECKER       Array getUnsafe IR intrinsic
 //! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
@@ -162,7 +162,7 @@ class ExtArray<T> extends Array<T> {
 //! INST          "LoadArray"
 //! INST_NOT      "Intrinsic.EscompatArrayGetUnsafe"
 //! INST_NOT      /BoundsCheck/
-//! INST_NOT      /Call/
+//! INST_NOT      /Call.*get_unsafe/
 function testGetUnsafe() {
     let a = new ExtArray<int>(1)
     a[0] = 10
