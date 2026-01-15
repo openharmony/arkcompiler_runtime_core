@@ -381,10 +381,8 @@ config("ark_common_config") {
   }
 
   if (is_gcov_tools) {
-    cflags = [
-      "-fprofile-instr-generate",
-      "-fcoverage-mapping",
-    ]
+    cflags = coverage_cflags
+    ldflags = coverage_ldflags
   }
 }
 

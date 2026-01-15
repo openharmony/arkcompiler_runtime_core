@@ -59,6 +59,29 @@ declare_args() {
   is_gcov_tools = false
 }
 
+if (is_gcov_tools) {
+  if (is_linux) {
+    if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64" || current_cpu == "x86") {
+      clang_runtime_dir = exec_script("/usr/bin/clang", ["-print-runtime-dir"], "trim string")
+      libclang_rt_path = clang_runtime_dir + "/libclang_rt.profile-x86_64.a"
+    } else {
+      assert(false, "Currently, only x86_64 is supported. Do not use the is_gcov_tools flag.")
+    }
+  } else {
+    assert(false, "Currently, only Linux is supported. Do not use the is_gcov_tools flag.")
+  }
+  coverage_cflags = [
+    "-fprofile-arcs",
+    "-ftest-coverage",
+  ]
+  coverage_ldflags = [
+    "-fprofile-arcs",
+    "-ftest-coverage",
+    "-Wl,-rpath,",
+    libclang_rt_path,
+  ]
+}
+
 declare_args() {
   runtime_core_enable_ffrt = true
 }

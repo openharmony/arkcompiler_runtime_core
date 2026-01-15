@@ -635,6 +635,12 @@ ohos_shared_library("libarkruntime") {
   cflags_cc = [ "-fno-emulated-tls" ]
   ldflags = [ "-fno-emulated-tls" ]
   deps = [ ":libarkruntime_set_static" ]
+  cflags = []
+
+  if (is_gcov_tools) {
+    cflags += coverage_cflags
+    ldflags += coverage_ldflags
+  }
 
   if (ark_hybrid) {
     external_deps = [ "ets_runtime:libark_jsruntime" ]

@@ -41,4 +41,8 @@ ohos_shared_library("arktarget_options") {
   deps = [ ":arktarget_options_static" ]
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
+  if (is_gcov_tools) {
+    cflags = coverage_cflags
+    ldflags = coverage_ldflags
+  }
 }
