@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
 
 #include "abs_int_inl_compat_checks.h"
+#include "libarkbase/utils/small_vector.h"
+#include "libarkbase/utils/span.h"
 #include "libarkfile/file_items.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
@@ -27,6 +29,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "type/type_system.h"
 #include "libarkbase/utils/logger.h"
+#include "type/type_type.h"
 #include "util/str.h"
 #include "verification/config/debug_breakpoint/breakpoint.h"
 #include "verification_context.h"
@@ -1729,7 +1732,8 @@ public:
 
         auto ctorNameGetter = [&ctor]() { return ctor->GetFullName(); };
 
-        bool check = CheckMethodArgs(ctorNameGetter, ctor, regs, objType);
+        auto const &formalArgs = GetTypeSystem()->GetMethodSignature(ctor)->args;
+        bool check = CheckMethodArgs(ctorNameGetter, formalArgs, regs, objType);
         if (check) {
             SetAcc(objType);
             MoveToNextInst<FORMAT>();
@@ -2721,13 +2725,57 @@ public:
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
+    bool CheckEtsCall(Method const *method, Span<int> regs)
+    {
+        if (method == nullptr) {
+            SET_STATUS_FOR_MSG(CannotResolveMethodId, OK);
+            return false;
+        }
+
+        if (!CheckMethodAccessViolation(method)) {
+            return false;
+        }
+
+        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId())) {
+            auto methodNameGetter = [method]() { return method->GetFullName(); };
+            auto formalArgs = GetTypeSystem()->GetMethodSignature(method)->args;
+
+            // Verifier checks only if 1st elem is Subtype of `reference type`
+            // as it is supposed to be `this`. All other checks related to ets.call.name instructions
+            // should be done in interpreter.
+            if (!IsSubtype(GetRegType(regs[0]), refType_, GetTypeSystem())) {
+                LOG_VERIFIER_BAD_REGISTER_TYPE(regs[0], ToString(GetRegType(regs[0])), ToString(refType_));
+                status_ = VerificationStatus::ERROR;
+                return false;
+            }
+            formalArgs.erase(formalArgs.begin());
+            regs = regs.SubSpan(1, regs.Size() - 1);
+            if (!CheckMethodArgs(methodNameGetter, formalArgs, regs, {})) {
+                return false;
+            }
+        }
+
+        SetAcc(GetTypeSystem()->GetMethodSignature(method)->result);
+
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
+    template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsCallNameShort()
     {
         LOG_INST();
         DBGBRK();
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        return false;
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        Sync();
+        std::array<int, 2UL> regs {vs1, vs2};
+        return CheckEtsCall<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2735,9 +2783,18 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        return false;
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
+        uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        Sync();
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
+        return CheckEtsCall<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2745,9 +2802,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
-        // NOTE issue(21892) support callbyname
-        // This stub should be replaced with appropriate handler
-        return false;
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        Sync();
+        constexpr size_t initSize = 5;
+        SmallVector<int, initSize> regs;
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
+        }
+        return CheckEtsCall<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -3076,9 +3143,9 @@ public:
     }
 
     template <typename NameGetter>
-    bool CheckMethodArgs(NameGetter nameGetter, Method const *method, Span<int> regs, Type constructedType = Type {})
+    bool CheckMethodArgs(NameGetter nameGetter, const PandaVector<Type> &formalArgs, Span<int> regs,
+                         Type constructedType = Type {})
     {
-        auto const &formalArgs = GetTypeSystem()->GetMethodSignature(method)->args;
         if (formalArgs.empty()) {
             return true;
         }
@@ -3089,6 +3156,7 @@ public:
         }
         auto sigIter = formalArgs.cbegin();
         auto regsIter = regs.cbegin();
+
         for (size_t argnum = 0; argnum < formalArgs.size(); argnum++) {
             auto regNum = (!constructedType.IsNone() && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
             auto formalType = *(sigIter++);
@@ -3131,14 +3199,8 @@ public:
         return true;
     }
 
-    template <BytecodeInstructionSafe::Format FORMAT>
-    bool CheckCall(Method const *method, Span<int> regs)
+    bool CheckMethodAccessViolation(Method const *method)
     {
-        if (method == nullptr) {
-            SET_STATUS_FOR_MSG(CannotResolveMethodId, OK);
-            return false;
-        }
-
         auto *plugin = job_->JobPlugin();
         auto const *jobMethod = job_->JobMethod();
         auto result = plugin->CheckMethodAccessViolation(method, jobMethod, GetTypeSystem());
@@ -3154,16 +3216,31 @@ public:
                 return false;
             }
         }
+        return true;
+    }
 
-        const auto *methodSig = GetTypeSystem()->GetMethodSignature(method);
-        auto methodNameGetter = [method]() { return method->GetFullName(); };
-        Type resultType = methodSig->result;
-
-        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId()) &&
-            !CheckMethodArgs(methodNameGetter, method, regs)) {
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool CheckCall(Method const *method, Span<int> regs)
+    {
+        if (method == nullptr) {
+            SET_STATUS_FOR_MSG(CannotResolveMethodId, OK);
             return false;
         }
-        SetAcc(resultType);
+
+        if (!CheckMethodAccessViolation(method)) {
+            return false;
+        }
+
+        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId())) {
+            auto methodNameGetter = [method]() { return method->GetFullName(); };
+            auto formalArgs = GetTypeSystem()->GetMethodSignature(method)->args;
+            if (!CheckMethodArgs(methodNameGetter, formalArgs, regs, {})) {
+                return false;
+            }
+        }
+
+        SetAcc(GetTypeSystem()->GetMethodSignature(method)->result);
+
         MoveToNextInst<FORMAT>();
         return true;
     }
