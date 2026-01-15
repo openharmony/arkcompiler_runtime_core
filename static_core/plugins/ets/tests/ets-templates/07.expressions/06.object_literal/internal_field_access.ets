@@ -18,7 +18,7 @@ desc: Checking a internal field in class composite
 ---*/
 
 class Person {
-  internal name: String = "";
+  name: String = "";
   age: int;
 }
 

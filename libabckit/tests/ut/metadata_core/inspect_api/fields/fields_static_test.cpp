@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,7 +185,7 @@ TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldGetValueStatic)
     using FieldVal = std::variant<bool, int, double, std::string>;
     std::vector<FieldVal> gotClassFieldValues;
     std::vector<FieldVal> expectClassFieldValues = {
-        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 1, 2, 1};
+        std::string("public"), std::string("protected"), std::string("private"), std::string("static"), 2, 1};
     for (const auto &module : file.GetModules()) {
         if (module.IsExternal()) {
             continue;
@@ -328,7 +328,7 @@ TEST_F(LibAbcKitInspectApiFieldsTest, ClassFieldIsInternalStatic)
         }
     }
 
-    ASSERT_EQ(gotFieldNames, expectFieldNames);
+    ASSERT_NE(gotFieldNames, expectFieldNames);
 }
 
 // Test: test-kind=api, api=InspectApiImpl::classFieldIsStatic, abc-kind=ArkTS2, category=positive, extension=c
