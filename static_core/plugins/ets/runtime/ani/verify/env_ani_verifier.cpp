@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,13 +133,25 @@ VMethod *EnvANIVerifier::GetVerifiedMethod(ani_method method)
 {
     return static_cast<VMethod *>(verifier_->AddMethod(ToInternalMethod(method)));
 }
+
 VStaticMethod *EnvANIVerifier::GetVerifiedStaticMethod(ani_static_method staticMethod)
 {
     return static_cast<VStaticMethod *>(verifier_->AddMethod(ToInternalMethod(staticMethod)));
 }
+
 VFunction *EnvANIVerifier::GetVerifiedFunction(ani_function function)
 {
     return static_cast<VFunction *>(verifier_->AddMethod(ToInternalMethod(function)));
+}
+
+VField *EnvANIVerifier::GetVerifiedField(ani_field field)
+{
+    return static_cast<VField *>(verifier_->AddField(ToInternalField(field)));
+}
+
+VStaticField *EnvANIVerifier::GetVerifiedStaticField(ani_static_field staticField)
+{
+    return static_cast<VStaticField *>(verifier_->AddField(ToInternalField(staticField)));
 }
 
 void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
@@ -152,7 +164,7 @@ void EnvANIVerifier::DeleteLocalVerifiedRef(VRef *vref)
     frame.refs.erase(it);
 }
 
-bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref)
+bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref) const
 {
     ASSERT(!frames_.empty());
     for (auto it = frames_.crbegin(); it != frames_.crend(); ++it) {
@@ -169,14 +181,19 @@ bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref)
     return false;
 }
 
-bool EnvANIVerifier::IsGlobalRef(VRef *vref)
+bool EnvANIVerifier::IsGlobalRef(VRef *vref) const
 {
     return verifier_->IsValidGlobalVerifiedRef(vref);
 }
 
-bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod)
+bool EnvANIVerifier::IsValidMethod(impl::VMethod *vmethod) const
 {
     return verifier_->IsValidVerifiedMethod(vmethod);
+}
+
+bool EnvANIVerifier::IsValidField(impl::VField *vfield) const
+{
+    return verifier_->IsValidVerifiedField(vfield);
 }
 
 bool EnvANIVerifier::CanBeDeletedFromCurrentScope(VRef *vref)
@@ -202,12 +219,12 @@ void EnvANIVerifier::DeleteGlobalVerifiedRef(VRef *vgref)
     verifier_->DeleteGlobalVerifiedRef(vgref);
 }
 
-bool EnvANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref)
+bool EnvANIVerifier::IsValidGlobalVerifiedRef(VRef *vgref) const
 {
     return verifier_->IsValidGlobalVerifiedRef(vgref);
 }
 
-bool EnvANIVerifier::IsValidStackRef(VRef *vref)
+bool EnvANIVerifier::IsValidStackRef(VRef *vref) const
 {
     return verifier_->IsValidStackRef(vref);
 }
@@ -222,7 +239,7 @@ void EnvANIVerifier::DeleteGlobalVerifiedResolver(VResolver *vresolver)
     return verifier_->DeleteGlobalVerifiedResolver(vresolver);
 }
 
-bool EnvANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver)
+bool EnvANIVerifier::IsValidGlobalVerifiedResolver(VResolver *vresolver) const
 {
     return verifier_->IsValidGlobalVerifiedResolver(vresolver);
 }

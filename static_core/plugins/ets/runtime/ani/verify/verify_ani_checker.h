@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
     X(VERIFY_FUNCTION,                      VerifyFunction)                       \
+    X(VERIFY_FIELD,                         VerifyField)                          \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
     X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
     X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
@@ -57,6 +58,7 @@
     X(VERIFY_OBJECT_STORAGE,                VerifyObjectStorage)                  \
     X(VERIFY_STRING_STORAGE,                VerifyStringStorage)                  \
     X(VERIFY_SIZE_STORAGE,                  VerifySizeStorage)                    \
+    X(VERIFY_BOOLEAN,                       VerifyBoolean)                        \
     X(VERIFY_UTF16_BUFFER,                  VerifyUTF16Buffer)                    \
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
@@ -94,6 +96,7 @@
     X(ANI_METHOD,                       Method,                    VMethod *)                \
     X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
     X(ANI_FUNCTION,                     Function,                  VFunction *)              \
+    X(ANI_FIELD,                        Field,                     VField *)                 \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
@@ -147,6 +150,7 @@ class VClass;
 class VMethod;
 class VStaticMethod;
 class VFunction;
+class VField;
 class VString;
 class VError;
 class VFixedArrayBoolean;
@@ -286,6 +290,11 @@ public:
         return ANIArg(ArgValueByFunction(vfunction), name, Action::VERIFY_FUNCTION, returnType);
     }
 
+    static ANIArg MakeForField(VField *vfield, std::string_view name, EtsType returnType)
+    {
+        return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_FIELD, returnType);
+    }
+
     static ANIArg MakeForMethodArgs(AniMethodArgs *aniMethodArgs, std::string_view name)
     {
         return ANIArg(ArgValueByMethodArgs(aniMethodArgs), name, Action::VERIFY_METHOD_V_ARGS);
@@ -362,6 +371,11 @@ public:
     static ANIArg MakeForSizeStorage(ani_size *sizeStorage, std::string_view name)
     {
         return ANIArg(ArgValueBySizeStorage(sizeStorage), name, Action::VERIFY_SIZE_STORAGE);
+    }
+
+    static ANIArg MakeForBoolean(ani_boolean booleanValue, std::string_view name)
+    {
+        return ANIArg(ArgValueByBoolean(booleanValue), name, Action::VERIFY_BOOLEAN);
     }
 
     static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)

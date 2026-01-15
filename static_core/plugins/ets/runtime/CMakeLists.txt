@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ani/verify/types/internal_ref.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/venv.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/vmethod.cpp
+    ${ETS_EXT_SOURCES}/ani/verify/types/vfield.cpp
     ${ETS_EXT_SOURCES}/ani/verify/types/vref.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_checker.cpp
     ${ETS_EXT_SOURCES}/ani/verify/verify_ani_interaction_api.cpp

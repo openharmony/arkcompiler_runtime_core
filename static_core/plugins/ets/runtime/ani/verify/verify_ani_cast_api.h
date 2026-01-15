@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@ class VString;
 class VMethod;
 class VStaticMethod;
 class VFunction;
+class VField;
+class VStaticField;
 class VError;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
@@ -130,6 +132,11 @@ struct TypeMapping<VFunction *> {
 };
 
 template <>
+struct TypeMapping<VField *> {
+    using Type = ani_field;
+};
+
+template <>
 struct TypeMapping<VMethod **> {
     using Type = ani_method *;
 };
@@ -142,6 +149,16 @@ struct TypeMapping<VStaticMethod **> {
 template <>
 struct TypeMapping<VFunction **> {
     using Type = ani_function *;
+};
+
+template <>
+struct TypeMapping<VField **> {
+    using Type = ani_field *;
+};
+
+template <>
+struct TypeMapping<VStaticField **> {
+    using Type = ani_static_field *;
 };
 
 template <>

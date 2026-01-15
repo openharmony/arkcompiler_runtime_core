@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "verify_ani_gtest.h"
+#include "plugins/ets/tests/ani/ani_gtest/verify_ani_gtest.h"
 
 namespace ark::ets::ani::verify::testing {
 
@@ -598,7 +598,7 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
         ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanTest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
-    std::thread([&]() {
+    std::thread([this]() {
         ani_env *env {};
         ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
 
@@ -651,7 +651,7 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call)
 {
     ani_method method;
 
-    std::thread([&]() {
+    std::thread([this, &method]() {
         ani_env *env {};
         ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
 
@@ -1083,7 +1083,7 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method
         ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
-    std::thread([&]() {
+    std::thread([this]() {
         ani_env *env {};
         ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
 
@@ -1132,7 +1132,7 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call)
 {
     ani_method method;
 
-    std::thread([&]() {
+    std::thread([this, &method]() {
         ani_env *env {};
         ASSERT_EQ(vm_->AttachCurrentThread(nullptr, ANI_VERSION_1, &env), ANI_OK);
 
