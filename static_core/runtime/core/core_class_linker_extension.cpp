@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -181,6 +181,7 @@ bool CoreClassLinkerExtension::InitializeStringClass()
         FillStringClass(subStrCls, flag);
         GetClassLinker()->AddClassRoot(flag, subStrCls);
     }
+    strCls->CalcHaveNoRefsInParents();
     return true;
 }
 
@@ -199,6 +200,7 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     if (objClass == nullptr) {  // Happens when we work without pandastdlib
         objClass = CreateClass(ctx.GetObjectClassDescriptor(), GetClassVTableSize(ClassRoot::OBJECT),
                                GetClassIMTSize(ClassRoot::OBJECT), GetClassSize(ClassRoot::OBJECT));
+        objClass->CalcHaveNoRefsInParents();
         objClass->SetObjectSize(ObjectHeader::ObjectHeaderSize());
         objClass->SetState(Class::State::LOADED);
         objClass->SetLoadContext(GetBootContext());
@@ -207,6 +209,7 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         SetClassRoot(ClassRoot::OBJECT, objClass);
     }
     classClass->SetBase(objClass);
+    classClass->CalcHaveNoRefsInParents();
 
     coretypes::String::SetCompressedStringsEnabled(compressedStringEnabled);
     if (!InitializeStringClass()) {

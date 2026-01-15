@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -314,7 +314,7 @@ Type ArkHotreloadBase::FlagsChangesCheck(ClassContainment *hCls)
     Class *runtimeClass = hCls->loadedClass;
 
     // NOTE(m.strizhak) research that maybe there are flags that can be changed keeping normal type
-    if (tmpClass->GetFlags() != runtimeClass->GetFlags()) {
+    if (tmpClass->GetRuntimeFlags() != runtimeClass->GetRuntimeFlags()) {
         hCls->fChanges |= ChangesFlags::F_ACCESS_FLAGS;
         return Type::STRUCTURAL;
     }

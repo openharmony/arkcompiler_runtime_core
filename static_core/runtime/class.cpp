@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,6 +152,15 @@ void Class::DumpClass(std::ostream &os, size_t flags)
         if (this->numFields_ - this->numSfields_ > 0) {
             os << "  instance fields (" << this->numFields_ - this->numSfields_ << " entries)\n";
         }
+    }
+}
+
+void Class::CalcHaveNoRefsInParents()
+{
+    if (base_ == nullptr || base_->HaveNoRefClass()) {
+        SetFlags(GetFlags() | NO_REFS_IN_PARENTS);
+    } else {
+        ASSERT(!HaveNoRefsInParents());
     }
 }
 

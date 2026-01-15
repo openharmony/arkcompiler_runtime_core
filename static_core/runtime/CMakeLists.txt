@@ -1048,6 +1048,7 @@ if (TARGET arkruntime_test_interpreter_impl)
         tests/c2i_bridge_test.cpp
         tests/class_linker_test.cpp
         tests/class_linker_test_extension.cpp
+        tests/class_refflag_test.cpp
         tests/interpreter/test_interpreter.cpp
         tests/interpreter/test_runtime_interface.cpp
         tests/interpreter_test.cpp

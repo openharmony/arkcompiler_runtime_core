@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,9 +197,13 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
     ASSERT(objClass != nullptr);
     ASSERT(!objClass->IsDynamicClass());
     auto *cls = objClass;
-    while (cls != nullptr) {
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
         auto refNum = cls->GetRefFieldsNum<false>();
         if (refNum == 0) {
+            if (cls->HaveNoRefsInParents()) {
+                break;
+            }
             cls = cls->GetBase();
             continue;
         }
@@ -219,6 +223,9 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
             }
         }
 
+        if (cls->HaveNoRefsInParents()) {
+            break;
+        }
         cls = cls->GetBase();
     }
     return true;
@@ -230,9 +237,13 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
 {
     ASSERT(cls != nullptr);
     ASSERT(!cls->IsDynamicClass());
-    while (cls != nullptr) {
+    // CC-OFFNXT(G.CTL.03): false positive
+    while (true) {
         auto refNum = cls->GetRefFieldsNum<false>();
         if (refNum == 0) {
+            if (cls->HaveNoRefsInParents()) {
+                break;
+            }
             cls = cls->GetBase();
             continue;
         }
@@ -249,6 +260,9 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
             }
         }
 
+        if (cls->HaveNoRefsInParents()) {
+            break;
+        }
         cls = cls->GetBase();
     }
     return true;

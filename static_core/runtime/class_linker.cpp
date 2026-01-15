@@ -947,6 +947,7 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
     if (!LinkFields(klass, errorHandler)) {
         return onFail("Cannot link fields of class");
     }
+    klass->CalcHaveNoRefsInParents();
     return klass;
 }
 
@@ -1125,6 +1126,7 @@ bool ClassLinker::LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, C
     return true;
 }
 
+// CC-OFFNXT(huge_method) solid logic
 Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods,
                                    Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
                                    ClassLinkerContext *context, ClassLinkerExtension *ext, ClassInfo classInfo)
@@ -1159,6 +1161,7 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
         field.SetClass(klass);
     }
 
+    klass->CalcHaveNoRefsInParents();
     if (UNLIKELY(!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor))) {
         ITable::Free(allocator_, classInfo.itableBuilder->GetITable());
         return nullptr;
@@ -1460,6 +1463,7 @@ Class *ClassLinker::LoadUnionClass(const uint8_t *descriptor, bool needCopyDescr
     }
 
     auto *unionClass = CreateUnionClass(ext, descriptor, needCopyDescriptor, constituentClasses.value(), commonContext);
+    unionClass->CalcHaveNoRefsInParents();
 
     if (UNLIKELY(unionClass == nullptr)) {
         ASSERT(!constituentClasses.value().Empty());
@@ -1535,6 +1539,7 @@ Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescr
     }
 
     auto *arrayClass = CreateArrayClass(ext, descriptor, needCopyDescriptor, componentClass);
+    arrayClass->CalcHaveNoRefsInParents();
 
     if (UNLIKELY(arrayClass == nullptr)) {
         return nullptr;
