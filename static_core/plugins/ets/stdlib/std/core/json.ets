@@ -513,11 +513,14 @@ export class JSON {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append("\"" + d[i] + "\"")
-            s.append(',')
+            s.append("\"")
+            s.append(d[i])
+            s.append("\",")
         }
         if (d.length > 0) {
-            s.append("\"" + d[last_elem] + "\"")
+            s.append("\"")
+            s.append(d[last_elem])
+            s.append("\"")
         }
         s.append(']')
         return s.toString()
@@ -565,14 +568,16 @@ export class JSON {
         let s = new StringBuilder("{")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append("\""+JSON.stringify(i)+"\"");
-            s.append(":");
+            s.append("\"");
+            s.append(JSON.stringify(i));
+            s.append("\":");
             s.append(JSON.stringify(d[i]));
             s.append(",");
         }
         if (d.length > 0) {
-            s.append("\""+JSON.stringify(last_elem)+"\"");
-            s.append(":");
+            s.append("\"");
+            s.append(JSON.stringify(last_elem));
+            s.append("\":");
             s.append(JSON.stringify(d[last_elem]));
         }
         s.append('}');
@@ -629,17 +634,6 @@ export class JSON {
         return stringifyElementRecursively(elem, replacer, space, 0)
     }
 
-    private static IsBoxedType(typ : Type) : boolean {
-        return typ instanceof BooleanType
-                || typ instanceof ByteType
-                || typ instanceof CharType
-                || typ instanceof ShortType
-                || typ instanceof IntType
-                || typ instanceof LongType
-                || typ instanceof FloatType
-                || typ instanceof DoubleType
-    }
-
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
     private static checkType(type: Class, used: Map<Class, TypeColor>): void {
         const tc = used.get(type)
@@ -691,16 +685,6 @@ export class JSON {
             }
         }
         return false
-    }
-
-    // TODO(kirill-mitkin): For testing purpose only, shpuld be replaced by error checking
-    public static isCorrectForParsing(type: Class): boolean {
-        try {
-            JSON.checkType(type, new Map<Class, TypeColor>())
-            return true
-        } catch (e) {
-            return false
-        }
     }
 
     public static parse<T>(text: String, type: Type): T | null | undefined {
@@ -1633,31 +1617,31 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             if (array.length == 0) {
                 return "[]"
             }
-            let arrayResult = "["
+            let arrayResult = new StringBuilder("[")
             if (hasIndentation) {
-                arrayResult += "\n"
+                arrayResult.append("\n")
             }
             for (let i = 0; i < array.length; i++) {
                 if (hasIndentation) {
-                    arrayResult += nextIndentStr
+                    arrayResult.append(nextIndentStr)
                 }
                 if (array[i].jsonType == jsonx.JsonType.JsonUndefined) {
-                    arrayResult += "null"
+                    arrayResult.append("null")
                 } else {
-                    arrayResult += stringifyElementRecursively(array[i], replacer, space, depth + 1)
+                    arrayResult.append(stringifyElementRecursively(array[i], replacer, space, depth + 1))
                 }
                 if (i < array.length - 1) {
-                    arrayResult += ","
+                    arrayResult.append(",")
                 }
                 if (hasIndentation) {
-                    arrayResult += "\n"
+                    arrayResult.append("\n")
                 }
             }
             if (hasIndentation) {
-                arrayResult += indentStr
+                arrayResult.append(indentStr)
             }
-            arrayResult += "]"
-            return arrayResult
+            arrayResult.append("]")
+            return arrayResult.toString()
 
         case jsonx.JsonType.JsonObject:
             const it = elem.$_iterator()
@@ -1665,9 +1649,9 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             if (entries.length == 0) {
                 return "{}"
             }
-            let objectResult = "{"
+            let objectResult = new StringBuilder("{")
             if (hasIndentation) {
-                objectResult += "\n"
+                objectResult.append("\n")
             }
             for (let i = 0; i < entries.length; i++) {
                 const key = entries[i][0]
@@ -1676,26 +1660,26 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
                     continue
                 }
                 if (hasIndentation) {
-                    objectResult += nextIndentStr
+                    objectResult.append(nextIndentStr)
                 }
-                objectResult += escapeString(key)
-                objectResult += ":"
+                objectResult.append(escapeString(key))
+                objectResult.append(":")
                 if (hasIndentation) {
-                    objectResult += " "
+                    objectResult.append(" ")
                 }
-                objectResult += stringifyElementRecursively(value, replacer, space, depth + 1)
+                objectResult.append(stringifyElementRecursively(value, replacer, space, depth + 1))
                 if (i < entries.length - 1) {
-                    objectResult += ","
+                    objectResult.append(",")
                 }
                 if (hasIndentation) {
-                    objectResult += "\n"
+                    objectResult.append("\n")
                 }
             }
             if (hasIndentation) {
-                objectResult += indentStr
+                objectResult.append(indentStr)
             }
-            objectResult += "}"
-            return objectResult
+            objectResult.append("}")
+            return objectResult.toString()
 
         default:
             return "null"
@@ -2053,13 +2037,13 @@ class JSONValueParser {
             return new Double(value.value)
         } else if ((Types.isIntType(type) || type.isEnum()) && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value).toInt()
-        } else if ((Types.isLongType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isLongType(type) || type.isEnum()) && this.bigIntMode < 2) {
             return new Long().createFromJSONValue(value)
-        } else if ((Types.isShortType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isShortType(type) || type.isEnum()) && this.bigIntMode < 2) {
             return new Short().createFromJSONValue(value)
-        } else if ((Types.isFloatType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isFloatType(type) || type.isEnum()) && this.bigIntMode < 2) {
             return new Float().createFromJSONValue(value)
-        } else if ((Types.isByteType(type) || type.isEnum()) && (this.bigIntMode === 0 || this.bigIntMode === 1)) {
+        } else if ((Types.isByteType(type) || type.isEnum()) && this.bigIntMode < 2) {
             return new Byte().createFromJSONValue(value)
         } else {
             throw new Error(type.getName() + " is expected, but get " + Class.of(value.value).getName() + " with bigIntMode=" + this.bigIntMode)
@@ -2072,16 +2056,7 @@ class JSONValueParser {
             throw new Error("UnionType is not supported yet")
         } else if (value instanceof JSONArray && type.isFixedArray()) {
             return this.parseArray(value as JSONArray, type)
-        } else if (
-                value instanceof JSONNumber && (
-                    Types.isDoubleType(type) ||
-                    type === BigIntType ||
-                    Types.isIntType(type) ||
-                    Types.isLongType(type) ||
-                    Types.isByteType(type) ||
-                    Types.isShortType(type) ||
-                    Types.isFloatType(type) ||
-                    type.isEnum())) {
+        } else if (value instanceof JSONNumber) {
             const num = this.createNumber(value as JSONNumber, type)
             if (type.isEnum()) {
                 let valArray = type.getStaticMethod('values')!.invoke() as FixedArray<Any>

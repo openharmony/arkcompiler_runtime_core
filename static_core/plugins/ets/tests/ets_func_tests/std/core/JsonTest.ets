@@ -187,15 +187,6 @@ class CycleB {
     x : CycleA | null = null
 }
 
-function testCheckParse(): int {
-    let errors = 0
-    errors += test(!JSON.isCorrectForParsing(Class.from<NoConstructor>()), "No constructor")
-    errors += test(JSON.isCorrectForParsing(Class.from<ForbiddenPrimitives>()), "Forbidden primitives")
-    // #21831: CycleA is nullable
-    // errors += test(!JSON.isCorrectForParsing(Type.of(new CycleA() as Object)), "Cycle") // NOTE(pantos) StackOverflowError
-    return errors
-}
-
 class ManyFields {
     undef1 = undefined
 
@@ -497,7 +488,6 @@ function main(): int {
     failures += testArrayString()
     failures += testObject()
     failures += testStringifyParse()
-    failures += testCheckParse()
     failures += testObjectFieldsStringify()
     failures += testStringifyArray()
     failures += testStringifyObjectOfDerivedClass()
