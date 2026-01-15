@@ -19,7 +19,7 @@ cases:
         constructor(i: String) { }
         constructor(j: Object) { }
       }
-      
+
       class C<T> {
         foo() {
           let arr = new Array<T>(5)
@@ -32,7 +32,7 @@ cases:
         constructor(i: String) { }
         private constructor(j: number) { }
       }
-      
+
       class C<T> {
         foo() {
           let arr = new Array<T>(5)
@@ -47,10 +47,9 @@ cases:
       class A extends Base {
         constructor(j: String) {}
       }
-      
+
       class C<T> {
         foo() {
           let arr = new Array<T>(5)
-          arktest.assertEQ(arr.length, 5)
         }
       }

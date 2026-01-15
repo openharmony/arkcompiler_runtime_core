@@ -29,10 +29,7 @@ type foo = () => Object|undefined
 
 class C {
   i: Object|undefined
-  constructor(i: foo|undefined = undefined) {
-    if(i==undefined)
-      i = undefined
-    else
+  constructor(i: foo) {
       this.i = i()
   }
 }

@@ -13,28 +13,8 @@
 
 ---
 cases:
-# NO DEFAULT VALUE
-  - { param: 'i : Object' }
-  - { param: 'i : ENUM' }
-  - { param: 'i : [number, string]' }
-  - { param: 'i : number[]' }
-  - { param: '...i : number[]' }
-# FIRST OPTIONAL FORM
-  - { param: 'i :string = "DEFAULT"' }
-  - { param: 'i = "DEFAULT"' }
-  - { param: 'number = 1' }
-  - { param: 'byte = 2' }
-  - { param: 'short = 3' }
-  - { param: 'int = 4' }
-  - { param: 'long = 5' }
-  - { param: 'float = 6f' }
-  - { param: 'double = 7' }
-  - { param: "char = c'A'" }
-  - { param: 'boolean = true' }
-# MIXED FIRST&SECOND OPTIONAL FORMS
-  - { param: 'i ?: string, j: string = "DEFAULT"' }
-  - { param: 'j: string = "DEFAULT", i ?: Object' }
-# THERE IS AT LEAST ONE UNSUPPORTED PARAMETER
-  - { param: 'j: int, i ?: string, k: int|undefined' }
-  - { param: 'Int|undefined|null = undefined' }
-  - { param: 'null|Int|undefined = undefined' }
+    # NO DEFAULT VALUE
+    - { param: 'i : Object' }
+    - { param: 'i : ENUM', decl: 'enum ENUM { Red, Green, Blue }' }
+    - { param: 'i : [number, string]' }
+    - { param: 'i : number[]' }

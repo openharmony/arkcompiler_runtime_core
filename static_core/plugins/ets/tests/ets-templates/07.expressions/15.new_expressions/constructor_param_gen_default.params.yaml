@@ -13,13 +13,13 @@
 
 ---
 cases:
-# TYPES HAVING DEFAULT VALUE
-  - number
-  - byte
-  - short
-  - int
-  - long
-  - float
-  - double
-  - char
-  - boolean
+    # TYPES HAVING DEFAULT VALUE
+    - { type: number }
+    - { type: byte }
+    - { type: short }
+    - { type: int }
+    - { type: long }
+    - { type: float }
+    - { type: double }
+    - { type: char }
+    - { type: boolean }
