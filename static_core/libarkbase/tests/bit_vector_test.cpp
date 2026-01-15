@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,7 +169,7 @@ void TestIteration(T &vector, size_t bits)
     ASSERT_EQ(vector.size(), bits);
 
     std::fill(vector.begin(), vector.end(), true);
-    for (uint32_t i : vector.GetZeroBitsIndices()) {
+    for ([[maybe_unused]] uint32_t i : vector.GetZeroBitsIndices()) {
         ADD_FAILURE();
     }
     index = 0;
@@ -178,7 +178,7 @@ void TestIteration(T &vector, size_t bits)
     }
 
     std::fill(vector.begin(), vector.end(), false);
-    for (uint32_t i : vector.GetSetBitsIndices()) {
+    for ([[maybe_unused]] uint32_t i : vector.GetSetBitsIndices()) {
         ADD_FAILURE();
     }
     index = 0;

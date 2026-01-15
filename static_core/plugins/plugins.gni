@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,6 +60,9 @@ plugin_clear_profile_paths = []
 plugin_profiling_includes_paths = []
 plugin_profiling_includes_disasm_paths = []
 plugin_get_profiling_any_type_paths = []
+
+# Plugin tests list
+plugin_unittests = []
 
 plugin_enable_bytecode_optimizer = false
 
@@ -239,5 +242,10 @@ foreach(plugin, ark_enabled_plugins) {
   if (defined(_plugin_vars.get_profiling_any_type)) {
     plugin_get_profiling_any_type_paths +=
         [ rebase_path(_plugin_vars.get_profiling_any_type, "", _plugin_dir) ]
+  }
+  if (defined(_plugin_vars.unittests_list)) {
+    foreach(plugin_unittest, _plugin_vars.unittests_list) {
+      plugin_unittests += [ "${_plugin_dir}/${plugin_unittest}" ]
+    }
   }
 }

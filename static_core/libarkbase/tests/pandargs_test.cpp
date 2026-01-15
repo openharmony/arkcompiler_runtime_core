@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -477,8 +477,6 @@ static void TestSignedIntWihRange(PandArgParser &paParser, TestPandArgs &pandArg
 
     // expect wrong positive and negative integer values with range processed right
     {
-        static constexpr const int REF_INT_POS = 101;
-        static constexpr const int REF_INT_NEG = -101;
         static constexpr const int ARGC_INT_ONLY = 3;
         static const char *argvIntOnly[ARGC_INT_ONLY];
         argvIntOnly[0U] = "gtest_app";
@@ -512,8 +510,6 @@ static void TestUInt32WihRange(PandArgParser &paParser, TestPandArgs &pandArgs)
 
     // expect wrong uint32_t values with range processed right
     {
-        static constexpr const uint32_t REF_INT_MIN = -1;
-        static constexpr const uint32_t REF_INT_MAX = 1000000001;
         static constexpr const int ARGC_INT_ONLY = 3;
         static const char *argvIntOnly[ARGC_INT_ONLY];
         argvIntOnly[0U] = "gtest_app";
@@ -614,8 +610,6 @@ static void TestUInt64WihRange(PandArgParser &paParser, TestPandArgs &pandArgs)
 
     // expect wrong uint64_t values with range processed right
     {
-        static constexpr const uint64_t REF_INT_MIN = -1;
-        static constexpr const uint64_t REF_INT_MAX = 100000000001;
         static constexpr const int ARGC_INT_ONLY = 3;
         static const char *argvIntOnly[ARGC_INT_ONLY];
         argvIntOnly[0U] = "gtest_app";

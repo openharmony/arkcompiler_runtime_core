@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("$ark_root/plugins/plugins.gni")
+import("${ark_root}/tests/unittest_helper.gni")
 
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
@@ -133,6 +134,14 @@ group("ark_host_tests") {
       deps += [ "${ext}:host_tests" ]
     }
   }
+}
+
+ark_unittest_group("static_core_tests") {
+  deps = [
+    "${ark_root}/libarkbase/tests:arkbase_tests",
+    "${ark_root}/runtime/tests:runtime_tests",
+  ]
+  deps += plugin_unittests
 }
 
 config("ark_common_config") {

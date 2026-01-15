@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -742,6 +742,8 @@ function(add_gtests test_name)
             ${PANDA_SANITIZERS_LIST}
         DEPS_TARGETS
             arkstdlib
+        PANDA_STD_LIB
+            $<TARGET_PROPERTY:arkstdlib,FILE>
         TEST_GROUP
             ${ARG_TEST_GROUP}
         STASH_LIST

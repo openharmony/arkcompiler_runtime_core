@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -351,7 +351,7 @@ TEST_F(ArenaAllocatorTest, AllocateDequeWithComplexTypeTest)
 
     // Allocations and assignment checking
     i = SIZE_2 - 1L;
-    for (auto it = deq.crbegin(); it != deq.crend(); ++it, - -i) {
+    for (auto it = deq.crbegin(); it != deq.crend(); ++it, --i) {
         ASSERT_EQ(it->GetValue(), 1U) << "value of i: " << i;
         ASSERT_EQ(it->GetString(), "1") << "value of i: " << i;
     }

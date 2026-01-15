@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,6 @@ TEST_F(BitTableTest, EmptyTable)
     data.reserve(1_KB);
 
     BitTableBuilder<BitTableDefault<1U>> builder(GetAllocator());
-    using Builder = decltype(builder);
     BitMemoryStreamOut out(&data);
     builder.Encode(out);
 
@@ -353,7 +352,7 @@ TEST_F(BitTableTest, GetRanges)
         ASSERT_EQ(range.begin(), range.end());
 
         size_t i = 0;
-        for (auto &v : range) {
+        for ([[maybe_unused]] auto &v : range) {
             i++;
         }
         ASSERT_EQ(i, 0U);
@@ -364,7 +363,7 @@ TEST_F(BitTableTest, GetRanges)
         ASSERT_EQ(range.begin(), range.end());
 
         size_t i = 0;
-        for (auto &v : range) {
+        for ([[maybe_unused]] auto &v : range) {
             i++;
         }
         ASSERT_EQ(i, 0U);

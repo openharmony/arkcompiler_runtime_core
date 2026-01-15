@@ -23,18 +23,6 @@
 
 namespace ark::utf::test {
 
-static uint16_t U16Lead(uint32_t codepoint)
-{
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    return ((codepoint >> 10U) + 0xd7c0U) & 0xffffU;
-}
-
-static uint16_t U16Tail(uint32_t codepoint)
-{
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    return (codepoint & 0x3ffU) | 0xdc00U;
-}
-
 TEST(Utf, ConvertMUtf8ToUtf16Double)
 {
     // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
