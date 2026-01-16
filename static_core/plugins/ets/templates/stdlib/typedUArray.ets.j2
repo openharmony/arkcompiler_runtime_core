@@ -111,6 +111,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
     private readonly byteOffsetInt: int
     private readonly byteLengthInt: int
+    {%- if element['name'] == 'BigUint64' %}
+    private static readonly unsignedLongMax: bigint = 18446744073709551615n;
+    {%- endif %}
     protected readonly lengthInt: int
 
     /**
@@ -926,7 +929,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns true if searchElement is in {{element['name']}}Array, false otherwise
      */
     public includes(searchElement: {{element['primitiveType']}}, fromIndex: int): boolean {
+        {%- if element['name'] == 'BigUint64' %}
+        if (searchElement < 0) {
+            return false;
+        }
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
+        {%- else %}
+        return this.indexOf(searchElement.toInt(), fromIndex) != -1
+        {%- endif %}
     }
 
     /**
@@ -939,7 +949,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns true if searchElement is in {{element['name']}}Array, false otherwise
      */
     public includes(searchElement: {{element['primitiveType']}}): boolean {
+        {%- if element['name'] == 'BigUint64' %}
+        if (searchElement < 0) {
+            return false;
+        }
         return this.indexOf(searchElement.toInt(), 0) != -1
+        {%- else %}
+        return this.indexOf(searchElement.toInt(), 0) != -1
+        {%- endif %}
     }
 
     /**
@@ -952,7 +969,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns true if searchElement is in {{element['name']}}Array, false otherwise
      */
     public includes(searchElement: {{element['subsetType']}}, fromIndex?: int): boolean {
+        {%- if element['name'] == 'BigUint64' %}
+        if (searchElement < 0 || searchElement > BigUint64Array.unsignedLongMax) {
+            return false;
+        }
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+        {%- else %}
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
+        {%- endif %}
     }
 
     /**

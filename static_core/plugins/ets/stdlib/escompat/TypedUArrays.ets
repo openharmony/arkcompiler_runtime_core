@@ -6079,6 +6079,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
 
     private readonly byteOffsetInt: int
     private readonly byteLengthInt: int
+    private static readonly unsignedLongMax: bigint = 18446744073709551615n;
     protected readonly lengthInt: int
 
     /**
@@ -6770,6 +6771,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns true if searchElement is in BigUint64Array, false otherwise
      */
     public includes(searchElement: long, fromIndex: int): boolean {
+        if (searchElement < 0) {
+            return false;
+        }
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
     }
 
@@ -6783,6 +6787,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns true if searchElement is in BigUint64Array, false otherwise
      */
     public includes(searchElement: long): boolean {
+        if (searchElement < 0) {
+            return false;
+        }
         return this.indexOf(searchElement.toInt(), 0) != -1
     }
 
@@ -6796,6 +6803,9 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @returns true if searchElement is in BigUint64Array, false otherwise
      */
     public includes(searchElement: BigInt, fromIndex?: int): boolean {
+        if (searchElement < 0 || searchElement > BigUint64Array.unsignedLongMax) {
+            return false;
+        }
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
     }
 
