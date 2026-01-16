@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,15 +41,13 @@ export class ArrayBuffer
     toString(): String {
         return "[object ArrayBuffer]";
     }
-    
-    public overload constructor { fromInt, fromNumber }
 
     /**
      * Creates ArrayBuffer with size equal to length parameter
      *
      * @param length size of ArrayBuffer
      */
-    public constructor fromInt(length: int, maxByteLength?: int)
+    public constructor(length: int, maxByteLength?: int)
     {
         super()
         if (length < 0) {
@@ -74,7 +72,7 @@ export class ArrayBuffer
      *
      * @param length size of ArrayBuffer
      */
-    public constructor fromNumber(length: number, maxByteLength?: number)
+    public constructor(length: number, maxByteLength?: number)
     {
         this(length.toInt(), (maxByteLength !== undefined) ? maxByteLength.toInt() : undefined)
     }

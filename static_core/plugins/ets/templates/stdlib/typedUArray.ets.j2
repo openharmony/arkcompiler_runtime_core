@@ -709,28 +709,20 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<{{updatedSubsetType}}>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new {{element['name']}}Array
      */
-    public static fromArrayLike{{element['subsetType']}}(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
-        {%- if element.name == 'Uint8Clamped' %}
-        const len = arr.length;
-        const result = new Uint8ClampedArray(len);
-        for (let i: int = 0; i < len; ++i) {
-            result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr[i]))
-        }
-        return result;
-        {%- elif element.name != 'BigUint64' %}
-        return {{element.name}}Array.from<{{element.subsetType}}>(
-            arr,
-            (x: {{element.subsetType}}, _k: number): {{element.subsetType}} => x
-        );
+    public static from(arr: FixedArray<{{updatedSubsetType}}>): {{element['name']}}Array {
+        let result = new {{element['name']}}Array(arr.length)
+        {%- if updatedSubsetType == 'BigInt' %}
+        result.ofBigInt(arr)
         {%- else %}
-        throw new Error("{{element.name}}Array.from: not implemented");
+        result.ofInt(arr)
         {%- endif %}
+        return result
     }
 
     /**
@@ -740,7 +732,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static fromSet{{updatedSubsetType}}(set: Set<{{updatedSubsetType}}>): {{element['name']}}Array {
+    public static from(set: Set<{{updatedSubsetType}}>): {{element['name']}}Array {
         const length = set.size;
         const result = new {{element['name']}}Array(length)
         let iter = set.$_iterator()
@@ -765,7 +757,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static from{{element['name']}}Array(arr: {{element['name']}}Array): {{element['name']}}Array {
+    public static from(arr: {{element['name']}}Array): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
         result.set(arr)
         return result
@@ -779,29 +771,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static from{{element['signed']}}Array(arr: {{element['signed']}}Array): {{element['name']}}Array {
+    public static from(arr: {{element['signed']}}Array): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
         result.set(arr)
         return result
     }
     {%- endif %}
-
-    /**
-     * Creates an array from an object of FixedArray<{{updatedSubsetType}}>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new {{element['name']}}Array
-     */
-    public static fromFixedArray{{updatedSubsetType}}(arr: FixedArray<{{updatedSubsetType}}>): {{element['name']}}Array {
-        let result = new {{element['name']}}Array(arr.length)
-        {%- if updatedSubsetType == 'BigInt' %}
-        result.ofBigInt(arr)
-        {%- else %}
-        result.ofInt(arr)
-        {%- endif %}
-        return result
-    }
 
     /**
      * Creates an array from an object of std.core.Array<{{updatedSubsetType}}>.
@@ -810,10 +785,35 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static fromArray{{updatedSubsetType}}(arr: Array<{{updatedSubsetType}}>): {{element['name']}}Array {
+    public static from(arr: Array<{{updatedSubsetType}}>): {{element['name']}}Array {
         let result = new {{element['name']}}Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static from(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
+        {%- if element.name == 'Uint8Clamped' %}
+        const len = arr.length;
+        const result = new Uint8ClampedArray(len);
+        for (let i: int = 0; i < len; ++i) {
+            result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr[i]))
+        }
+        return result;
+        {%- elif element.name != 'BigUint64' %}
+        return {{element.name}}Array.from<{{element.subsetType}}>(
+            arr,
+            (x: {{element.subsetType}}, _k: number): {{element.subsetType}} => x
+        );
+        {%- else %}
+        throw new Error("{{element.name}}Array.from: not implemented");
+        {%- endif %}
     }
 
     /**
@@ -825,7 +825,35 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @returns new {{element['name']}}Array
      */
-    public static fromIterable(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
+        let res = new {{element['name']}}Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0].toDouble())
+            {%- if element.get('name') == 'BigUint64' %}
+            res.setUnsafe(idx[0], mapped.getULong())
+            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
+            res.setUnsafe(idx[0], {{element.get('name')}}Array.doubleToInt(mapped))
+            {%- else %}
+            res.setUnsafeClamp(idx[0], Uint8ClampedArray.toUint8Clamped(mapped))
+            {%- endif %}
+            idx[0] += 1
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new {{element['name']}}Array
+     */
+    public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
         if (mapfn == undefined) {
             mapfn = (v: {{element['subsetType']}}, k: number): {{element['subsetType']}} => { return v }
         }
@@ -883,41 +911,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
 
         return new {{element['name']}}Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new {{element['name']}}Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
-        let res = new {{element['name']}}Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0].toDouble())
-            {%- if element.get('name') == 'BigUint64' %}
-            res.setUnsafe(idx[0], mapped.getULong())
-            {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
-            res.setUnsafe(idx[0], {{element.get('name')}}Array.doubleToInt(mapped))
-            {%- else %}
-            res.setUnsafeClamp(idx[0], Uint8ClampedArray.toUint8Clamped(mapped))
-            {%- endif %}
-            idx[0] += 1
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSet{{updatedSubsetType}}, from{{element['name']}}Array
-        {%- if element['signed'] is defined and element['signed']|length %} ,from{{element['signed']}}Array{%- endif %}
-        ,fromFixedArray{{updatedSubsetType}}, fromArray{{updatedSubsetType}}, fromArrayLike{{element['subsetType']}},
-        fromArrayLike, fromIterable
-    };
 
     /**
      * Determines whether {{element['name']}}Array includes a certain element, returning true or false as appropriate

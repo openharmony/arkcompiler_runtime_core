@@ -446,7 +446,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int8Array.doubleToInt(value), start, end)
         return this
-    } 
+    }
 
     private final native fillInternal(value: byte, start: int, end: int): void
 
@@ -609,14 +609,16 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<int>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new Int8Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int8Array {
-        return Int8Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    public static from(arr: FixedArray<int>): Int8Array {
+        let result = new Int8Array(arr.length)
+        result.ofInt(arr)
+        return result
     }
 
     /**
@@ -626,7 +628,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static fromSetint(set: Set<int>): Int8Array {
+    public static from(set: Set<int>): Int8Array {
         const length = set.size;
         const result = new Int8Array(length)
         let iter = set.$_iterator()
@@ -647,7 +649,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static fromInt8Array(arr: Int8Array): Int8Array {
+    public static from(arr: Int8Array): Int8Array {
         let result = new Int8Array(arr.length)
         result.set(arr)
         return result
@@ -659,22 +661,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static fromUint8Array(arr: Uint8Array): Int8Array {
+    public static from(arr: Uint8Array): Int8Array {
         let result = new Int8Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<int>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new Int8Array
-     */
-    public static fromFixedArrayint(arr: FixedArray<int>): Int8Array {
-        let result = new Int8Array(arr.length)
-        result.ofInt(arr)
         return result
     }
 
@@ -685,10 +674,21 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static fromArrayint(arr: Array<int>): Int8Array {
+    public static from(arr: Array<int>): Int8Array {
         let result = new Int8Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new Int8Array
+     */
+    public static from(arrayLike: ArrayLike<number>): Int8Array {
+        return Int8Array.from<number>(arrayLike, (x: number, k: number): number => x)
     }
 
     /**
@@ -700,7 +700,29 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
+        let res = new Int8Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], Int8Array.doubleToInt(mapped))
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new Int8Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -745,34 +767,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return new Int8Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new Int8Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
-        let res = new Int8Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], Int8Array.doubleToInt(mapped))
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetint, fromInt8Array ,fromUint8Array,
-        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
 
     /**
      * Determines whether Int8Array includes a certain element, returning true or false as appropriate
@@ -1938,7 +1932,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int16Array.doubleToInt(value), start, end)
         return this
-    } 
+    }
 
     private final native fillInternal(value: short, start: int, end: int): void
 
@@ -2101,14 +2095,16 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<int>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new Int16Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int16Array {
-        return Int16Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    public static from(arr: FixedArray<int>): Int16Array {
+        let result = new Int16Array(arr.length)
+        result.ofInt(arr)
+        return result
     }
 
     /**
@@ -2118,7 +2114,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static fromSetint(set: Set<int>): Int16Array {
+    public static from(set: Set<int>): Int16Array {
         const length = set.size;
         const result = new Int16Array(length)
         let iter = set.$_iterator()
@@ -2139,7 +2135,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static fromInt16Array(arr: Int16Array): Int16Array {
+    public static from(arr: Int16Array): Int16Array {
         let result = new Int16Array(arr.length)
         result.set(arr)
         return result
@@ -2151,22 +2147,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static fromUint16Array(arr: Uint16Array): Int16Array {
+    public static from(arr: Uint16Array): Int16Array {
         let result = new Int16Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<int>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new Int16Array
-     */
-    public static fromFixedArrayint(arr: FixedArray<int>): Int16Array {
-        let result = new Int16Array(arr.length)
-        result.ofInt(arr)
         return result
     }
 
@@ -2177,10 +2160,21 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static fromArrayint(arr: Array<int>): Int16Array {
+    public static from(arr: Array<int>): Int16Array {
         let result = new Int16Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new Int16Array
+     */
+    public static from(arrayLike: ArrayLike<number>): Int16Array {
+        return Int16Array.from<number>(arrayLike, (x: number, k: number): number => x)
     }
 
     /**
@@ -2192,7 +2186,29 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
+        let res = new Int16Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], Int16Array.doubleToInt(mapped))
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new Int16Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -2237,34 +2253,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return new Int16Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new Int16Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
-        let res = new Int16Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], Int16Array.doubleToInt(mapped))
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetint, fromInt16Array ,fromUint16Array,
-        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
 
     /**
      * Determines whether Int16Array includes a certain element, returning true or false as appropriate
@@ -3434,7 +3422,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: number, start?: int, end?: int): this {
         this.fill(Int32Array.doubleToInt(value), start, end)
         return this
-    } 
+    }
 
     private final native fillInternal(value: int, start: int, end: int): void
 
@@ -3582,14 +3570,16 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<int>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new Int32Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Int32Array {
-        return Int32Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    public static from(arr: FixedArray<int>): Int32Array {
+        let result = new Int32Array(arr.length)
+        result.ofInt(arr)
+        return result
     }
 
     /**
@@ -3599,7 +3589,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static fromSetint(set: Set<int>): Int32Array {
+    public static from(set: Set<int>): Int32Array {
         const length = set.size;
         const result = new Int32Array(length)
         let iter = set.$_iterator()
@@ -3620,22 +3610,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static fromInt32Array(arr: Int32Array): Int32Array {
+    public static from(arr: Int32Array): Int32Array {
         let result = new Int32Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<int>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new Int32Array
-     */
-    public static fromFixedArrayint(arr: FixedArray<int>): Int32Array {
-        let result = new Int32Array(arr.length)
-        result.ofInt(arr)
         return result
     }
 
@@ -3646,10 +3623,21 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static fromArrayint(arr: Array<int>): Int32Array {
+    public static from(arr: Array<int>): Int32Array {
         let result = new Int32Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new Int32Array
+     */
+    public static from(arrayLike: ArrayLike<number>): Int32Array {
+        return Int32Array.from<number>(arrayLike, (x: number, k: number): number => x)
     }
 
     /**
@@ -3661,7 +3649,29 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
+        let res = new Int32Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], Int32Array.doubleToInt(mapped))
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new Int32Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -3706,34 +3716,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return new Int32Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new Int32Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
-        let res = new Int32Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], Int32Array.doubleToInt(mapped))
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetint, fromInt32Array,
-        fromFixedArrayint, fromArrayint, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
 
     /**
      * Determines whether Int32Array includes a certain element, returning true or false as appropriate
@@ -4916,7 +4898,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     public fill(value: BigInt, start?: int, end?: int): this {
         this.fill(value.getLong(), start, end)
         return this
-    } 
+    }
 
     private final native fillInternal(value: long, start: int, end: int): void
 
@@ -5092,14 +5074,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<BigInt>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new BigInt64Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): BigInt64Array {
-        throw new Error("BigInt64Array.from: not implemented")
+    public static from(arr: FixedArray<BigInt>): BigInt64Array {
+        let result = new BigInt64Array(arr.length)
+        result.ofBigInt(arr)
+        return result
     }
 
     /**
@@ -5109,7 +5093,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static fromSetBigInt(set: Set<BigInt>): BigInt64Array {
+    public static from(set: Set<BigInt>): BigInt64Array {
         const length = set.size;
         const result = new BigInt64Array(length)
         let iter = set.$_iterator()
@@ -5130,22 +5114,9 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static fromBigInt64Array(arr: BigInt64Array): BigInt64Array {
+    public static from(arr: BigInt64Array): BigInt64Array {
         let result = new BigInt64Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<BigInt>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new BigInt64Array
-     */
-    public static fromFixedArrayBigInt(arr: FixedArray<BigInt>): BigInt64Array {
-        let result = new BigInt64Array(arr.length)
-        result.ofBigInt(arr)
         return result
     }
 
@@ -5156,10 +5127,21 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static fromArrayBigInt(arr: Array<BigInt>): BigInt64Array {
+    public static from(arr: Array<BigInt>): BigInt64Array {
         let result = new BigInt64Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static from(arrayLike: ArrayLike<number>): BigInt64Array {
+        throw new Error("BigInt64Array.from: not implemented")
     }
 
     /**
@@ -5171,7 +5153,29 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static fromIterable(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
+        let res = new BigInt64Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], mapped.getLong())
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new BigInt64Array
+     */
+    public static from(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
         if (mapfn == undefined) {
             mapfn = (v: BigInt, k: number): BigInt => { return v }
         }
@@ -5216,34 +5220,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         })
         return new BigInt64Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new BigInt64Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
-        let res = new BigInt64Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], mapped.getLong())
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetBigInt, fromBigInt64Array,
-        fromFixedArrayBigInt, fromArrayBigInt, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
 
     /**
      * Determines whether BigInt64Array includes a certain element, returning true or false as appropriate
@@ -6413,7 +6389,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public fill(value: number, start?: int, end?: int): this {
         this.fill(value.toFloat(), start, end)
         return this
-    } 
+    }
 
     private final native fillInternal(value: float, start: int, end: int): void
 
@@ -6575,14 +6551,16 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<number>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new Float32Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Float32Array {
-        return Float32Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    public static from(arr: FixedArray<number>): Float32Array {
+        let result = new Float32Array(arr.length)
+        result.ofNumber(arr)
+        return result
     }
 
     /**
@@ -6592,7 +6570,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static fromSetnumber(set: Set<number>): Float32Array {
+    public static from(set: Set<number>): Float32Array {
         const length = set.size;
         const result = new Float32Array(length)
         let iter = set.$_iterator()
@@ -6613,22 +6591,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static fromFloat32Array(arr: Float32Array): Float32Array {
+    public static from(arr: Float32Array): Float32Array {
         let result = new Float32Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<number>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new Float32Array
-     */
-    public static fromFixedArraynumber(arr: FixedArray<number>): Float32Array {
-        let result = new Float32Array(arr.length)
-        result.ofNumber(arr)
         return result
     }
 
@@ -6639,10 +6604,21 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static fromArraynumber(arr: Array<number>): Float32Array {
+    public static from(arr: Array<number>): Float32Array {
         let result = new Float32Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new Float32Array
+     */
+    public static from(arrayLike: ArrayLike<number>): Float32Array {
+        return Float32Array.from<number>(arrayLike, (x: number, k: number): number => x)
     }
 
     /**
@@ -6654,7 +6630,29 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
+        let res = new Float32Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], mapped.toFloat())
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new Float32Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -6699,34 +6697,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return new Float32Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new Float32Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
-        let res = new Float32Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], mapped.toFloat())
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetnumber, fromFloat32Array,
-        fromFixedArraynumber, fromArraynumber, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
     private final native containsNaN(fromIndex: int): boolean;
 
     /**
@@ -7890,7 +7860,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         const finalPos = normalizeIndex(end ?? this.lengthInt, this.lengthInt)
         this.fillInternal(value.toDouble(), k, finalPos)
         return this
-    } 
+    }
 
     private final native fillInternal(value: double, start: int, end: int): void
 
@@ -7998,14 +7968,16 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<number>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new Float64Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): Float64Array {
-        return Float64Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    public static from(arr: FixedArray<number>): Float64Array {
+        let result = new Float64Array(arr.length)
+        result.ofNumber(arr)
+        return result
     }
 
     /**
@@ -8015,7 +7987,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static fromSetnumber(set: Set<number>): Float64Array {
+    public static from(set: Set<number>): Float64Array {
         const length = set.size;
         const result = new Float64Array(length)
         let iter = set.$_iterator()
@@ -8036,22 +8008,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static fromFloat64Array(arr: Float64Array): Float64Array {
+    public static from(arr: Float64Array): Float64Array {
         let result = new Float64Array(arr.length)
         result.set(arr)
-        return result
-    }
-
-    /**
-     * Creates an array from an object of FixedArray<number>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new Float64Array
-     */
-    public static fromFixedArraynumber(arr: FixedArray<number>): Float64Array {
-        let result = new Float64Array(arr.length)
-        result.ofNumber(arr)
         return result
     }
 
@@ -8062,10 +8021,21 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static fromArraynumber(arr: Array<number>): Float64Array {
+    public static from(arr: Array<number>): Float64Array {
         let result = new Float64Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new Float64Array
+     */
+    public static from(arrayLike: ArrayLike<number>): Float64Array {
+        return Float64Array.from<number>(arrayLike, (x: number, k: number): number => x)
     }
 
     /**
@@ -8077,7 +8047,29 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static fromIterable(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
+        let res = new Float64Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            res.setUnsafe(idx[0], mapped)
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new Float64Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -8122,34 +8114,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         })
         return new Float64Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new Float64Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
-        let res = new Float64Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            res.setUnsafe(idx[0], mapped)
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSetnumber, fromFloat64Array,
-        fromFixedArraynumber, fromArraynumber, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
     private final native containsNaN(fromIndex: int): boolean;
 
     /**

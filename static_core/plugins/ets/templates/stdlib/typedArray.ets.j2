@@ -593,7 +593,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         return this
     }
 
-    {%- endif %} 
+    {%- endif %}
 
     private final native fillInternal(value: {{T}}, start: int, end: int): void
 
@@ -786,18 +786,22 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     /**
-     * Creates an array from an array-like or iterable object.
+     * Creates an array from an object of FixedArray<{{updatedElementCompat}}>.
      *
-     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param arr An instance of the FixedArray type to convert to an array.
      *
      * @returns new {{N}}Array
      */
-    public static fromArrayLikeNumber(arrayLike: ArrayLike<number>): {{N}}Array {
-    {%- if N != 'BigInt64' %}
-        return {{N}}Array.from<number>(arrayLike, (x: number, k: number): number => x)
-    {%- else %}
-        throw new Error("{{N}}Array.from: not implemented")
-    {%- endif %}
+    public static from(arr: FixedArray<{{updatedElementCompat}}>): {{N}}Array {
+        let result = new {{N}}Array(arr.length)
+        {%- if updatedElementCompat == 'number' %}
+        result.ofNumber(arr)
+        {%- elif updatedElementCompat == 'BigInt' %}
+        result.ofBigInt(arr)
+        {%- else %}
+        result.ofInt(arr)
+        {%- endif %}
+        return result
     }
 
     /**
@@ -807,7 +811,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static fromSet{{updatedElementCompat}}(set: Set<{{updatedElementCompat}}>): {{N}}Array {
+    public static from(set: Set<{{updatedElementCompat}}>): {{N}}Array {
         const length = set.size;
         const result = new {{N}}Array(length)
         let iter = set.$_iterator()
@@ -828,7 +832,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from{{N}}Array(arr: {{N}}Array): {{N}}Array {
+    public static from(arr: {{N}}Array): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         result.set(arr)
         return result
@@ -842,31 +846,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from{{U}}Array(arr: {{U}}Array): {{N}}Array {
+    public static from(arr: {{U}}Array): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         result.set(arr)
         return result
     }
     {%- endif %}
-
-    /**
-     * Creates an array from an object of FixedArray<{{updatedElementCompat}}>.
-     *
-     * @param arr An instance of the FixedArray type to convert to an array.
-     *
-     * @returns new {{N}}Array
-     */
-    public static fromFixedArray{{updatedElementCompat}}(arr: FixedArray<{{updatedElementCompat}}>): {{N}}Array {
-        let result = new {{N}}Array(arr.length)
-        {%- if updatedElementCompat == 'number' %}
-        result.ofNumber(arr)
-        {%- elif updatedElementCompat == 'BigInt' %}
-        result.ofBigInt(arr)
-        {%- else %}
-        result.ofInt(arr)
-        {%- endif %}
-        return result
-    }
 
     /**
      * Creates an array from an object of std.core.Array<{{updatedElementCompat}}>.
@@ -875,10 +860,25 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static fromArray{{updatedElementCompat}}(arr: Array<{{updatedElementCompat}}>): {{N}}Array {
+    public static from(arr: Array<{{updatedElementCompat}}>): {{N}}Array {
         let result = new {{N}}Array(arr.length)
         result.set(arr)
         return result
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static from(arrayLike: ArrayLike<number>): {{N}}Array {
+    {%- if N != 'BigInt64' %}
+        return {{N}}Array.from<number>(arrayLike, (x: number, k: number): number => x)
+    {%- else %}
+        throw new Error("{{N}}Array.from: not implemented")
+    {%- endif %}
     }
 
     /**
@@ -890,7 +890,37 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static fromIterable(arrayLike: Iterable<{{elementCompat}}>, mapfn?: (v: {{elementCompat}}, k: number) => {{elementCompat}}): {{N}}Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
+        let res = new {{N}}Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx : FixedArray<int> = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            const mapped = mapfn(x as T, idx[0])
+            {%- if N == 'BigInt64' %}
+            res.setUnsafe(idx[0], mapped.getLong())
+            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
+            res.setUnsafe(idx[0], {{N}}Array.doubleToInt(mapped))
+            {%- elif N == 'Float32' %}
+            res.setUnsafe(idx[0], mapped.toFloat())
+            {%- else %}
+            res.setUnsafe(idx[0], mapped)
+            {%- endif %}
+            idx[0]++
+        })
+        return res
+    }
+
+    /**
+     * Creates an array from an array-like or iterable object.
+     *
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     *
+     * @param mapfn A mapping function to call on every element of the array.
+     *
+     * @returns new {{N}}Array
+     */
+    public static from(arrayLike: Iterable<{{elementCompat}}>, mapfn?: (v: {{elementCompat}}, k: number) => {{elementCompat}}): {{N}}Array {
         if (mapfn == undefined) {
             mapfn = (v: {{elementCompat}}, k: number): {{elementCompat}} => { return v }
         }
@@ -951,42 +981,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         })
         return new {{N}}Array(temp.buffer, 0, index[0])
     }
-
-    /**
-     * Creates an array from an array-like or iterable object.
-     *
-     * @param arrayLike An array-like or iterable object to convert to an array.
-     *
-     * @param mapfn A mapping function to call on every element of the array.
-     *
-     * @returns new {{N}}Array
-     */
-    public static fromArrayLike<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
-        let res = new {{N}}Array(arrayLike.length)
-        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new int[1]
-        idx[0] = 0
-        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            const mapped = mapfn(x as T, idx[0])
-            {%- if N == 'BigInt64' %}
-            res.setUnsafe(idx[0], mapped.getLong())
-            {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-            res.setUnsafe(idx[0], {{N}}Array.doubleToInt(mapped))
-            {%- elif N == 'Float32' %}
-            res.setUnsafe(idx[0], mapped.toFloat())
-            {%- else %}
-            res.setUnsafe(idx[0], mapped)
-            {%- endif %}
-            idx[0]++
-        })
-        return res
-    }
-
-    public static overload from {
-        fromSet{{updatedElementCompat}}, from{{N}}Array{%- if U|length %} ,from{{U}}Array{%- endif %},
-        fromFixedArray{{updatedElementCompat}}, fromArray{{updatedElementCompat}}, fromArrayLikeNumber,
-        fromArrayLike, fromIterable
-    };
 
     {%- if (N == 'Float32') or (N == 'Float64') %}
     private final native containsNaN(fromIndex: int): boolean;
