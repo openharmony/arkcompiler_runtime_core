@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,26 +14,22 @@ limitations under the License.
 ---*/
 
 {% for c in cases %}
+
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
+desc: >-
+    A method is defined in a subinterface with the same name as the method in
+    the superinterface. If signatures are override-compatible, then overriding
+    is used. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method."
+expected_out: "Semantic error ESE0187: Method 'foo' is declared in I and J interfaces."
 ---*/
 
-function foo1 (i: int): string {
-  return 'foo1';
-}
+let res: number = 0;
 
-function foo2 (n: number): string {
-  return 'foo2';
-}
-
-overload foo { foo1, foo2 }
-
-overload test { {{c.list}} }
+{{c.decl}}
 
 function main(): void {
-  test(1);
+    {{c.call}}
 }
 
 {% endfor %}

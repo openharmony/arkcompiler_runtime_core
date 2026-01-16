@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,25 +15,35 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
+desc: All overloaded functions must be in the same module or namespace scope. Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0384: overloaded name must refer to an accessible method."
+expected_out: "{{c.expected_out}}"
 ---*/
 
-function foo1 (i: int): string {
-  return 'foo1';
+import {foo1} from "./module.ets"
+
+function foo2(a: int): int {
+    return 2;
 }
 
-function foo2 (n: number): string {
-  return 'foo2';
+namespace N {
+    export function fooN(a: long): int {
+        return 3;
+    }
+
+    namespace M {
+        export function fooM(a: number): int {
+            return 4;
+        }
+    }
+
+    overload goo { {{c.nlist}} };
 }
 
-overload foo { foo1, foo2 }
-
-overload test { {{c.list}} }
+overload foo { {{c.list}} };
 
 function main(): void {
-  test(1);
+    foo(1);
 }
 
 {% endfor %}

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,38 +15,31 @@
 cases:
   - decl: |-
       interface I {
-          foo1(i: number) {
+          foo(i: number) {
               return 1;
           }
       }
       interface J extends I {
-          foo2(j: string) {
+          foo(j: number) {  
               return 2;
           }
       }
-      class A implements I, J {
-          overload foo { foo1, foo2 }
-      }
+      class A implements I, J {}
     call: |-
       let a = new A();
-      arktest.assertTrue(a.foo(1.1 as number) == 1);
-      arktest.assertTrue(a.foo("some string") == 2);
+      arktest.assertTrue(a.foo(1.1 as number) == 2);
 
   - decl: |-
       interface I {
-          foo1(i: number) {
+          foo(i: number) {
               return 1;
           }
       }
       interface J {
-          foo2(j: string) {
+          foo(j: number) {
               return 2;
           }
       }
-      class A implements I, J {
-          overload foo { foo1, foo2 }
-      }
+      class A implements I, J {} // CTE: ambiguous foo
     call: |-
       let a = new A();
-      arktest.assertTrue(a.foo(1.1 as number) == 1);
-      arktest.assertTrue(a.foo("some string") == 2);

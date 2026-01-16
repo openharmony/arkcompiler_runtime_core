@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,14 +13,4 @@
 
 ---
 cases:
-  - { nlist: 'fooN',           list: 'foo2',           tags: ''         }
-  - { nlist: 'fooN, Math.abs', list: 'foo2',           tags: 'compile-only, negative' }
-  - { nlist: 'M.fooM, fooN',   list: 'foo2',           tags: 'compile-only, negative' }
-  - { nlist: 'foo1, fooN',     list: 'foo2',           tags: 'compile-only, negative' }
-  - { nlist: 'foo2, fooN',     list: 'foo2',           tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'foo1, foo2',     tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'foo2, N.fooN',   tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'foo1',           tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'N.fooN',         tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'Math.abs',       tags: 'compile-only, negative' }
-  - { nlist: 'fooN',           list: 'Math.abs, foo2', tags: 'compile-only, negative' }
+  - { nlist: 'fooN',           list: 'foo2' }
