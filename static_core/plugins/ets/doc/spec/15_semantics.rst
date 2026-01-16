@@ -892,9 +892,9 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
        let u: "abc" | "cde" | string // type of 'u' is string
 
 .. note::
-   A case of two union types is clarified as follows: union type
-   ``U2``(``U2``:sub:`1` ``| ... | U2``:sub:`n`) is a subtype of union type
-   ``U1`` (``U1``:sub:`1` ``| ... | U1``:sub:`m`) if Step 1 applies first,
+   A case of two union types is clarified as follows: union type ``U2``
+   (``U2``:sub:`1` ``| ... | U2``:sub:`n`) is a subtype of union type ``U1``
+   (``U1``:sub:`1` ``| ... | U1``:sub:`m`) if Step 1 applies first,
    followed by Step 2 applied to every type of ``U2``.
 
 
@@ -3848,7 +3848,7 @@ with receiver* (not ordinary functions) are considered for *overload resolution*
     function foo(c: C, n: number) {}    // #3
 
     let c = new C()
-    c.foo() // only function #1, #2 are considered here, but not #1
+    c.foo() // only function #1, #2, but not #3 are considered here
 
     foo(c) // all three functions are considered here
 
@@ -4042,7 +4042,7 @@ member is excluded in the right-hand-side column for brevity):
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
-     - Union of effective types of each member type of ``T1 ... Tn``.
+     - Union of effective types of each constituent type of ``T1 ... Tn``.
    * - :ref:`Array Types` in the form ``T[]``
      - Same as for a generic type ``Array<T>``.
    * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)

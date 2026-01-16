@@ -1998,7 +1998,7 @@ accessors can be implemented as a field in a class.
         get num(): number
         set num(x: number)
     }
-    class D extends C {
+    class D implements C {
         num: number = 2 // OK!
     }
 

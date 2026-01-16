@@ -3643,7 +3643,7 @@ The syntax of *new class instance expression* is presented below:
 .. code-block:: abnf
 
     newClassInstance:
-        'new' typeArguments? typeReference arguments?
+        'new' typeReference typeArguments? arguments?
         ;
 
 *Class instance creation expression* specifies a class to be instantiated.
