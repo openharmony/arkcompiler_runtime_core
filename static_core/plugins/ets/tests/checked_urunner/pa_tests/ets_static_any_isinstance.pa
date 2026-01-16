@@ -65,7 +65,7 @@
     initobj.short A._ctor_:(A)
     sta.obj v1          # v1 = new A() (used as "class" operand)
     lda.obj v0
-    any.isinstance v1   # acc = v0 instanceof v1
+    any.isinstance v1, 0x0   # acc = v0 instanceof v1
     return
 }
 
@@ -75,7 +75,7 @@
     initobj.short B._ctor_:(B)
     sta.obj v1          # v1 = new B()
     lda.obj v0
-    any.isinstance v1   # acc = v0 instanceof v1
+    any.isinstance v1, 0x0   # acc = v0 instanceof v1
     return
 }
 

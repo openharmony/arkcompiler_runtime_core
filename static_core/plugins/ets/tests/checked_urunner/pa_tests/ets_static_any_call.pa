@@ -127,7 +127,7 @@ jump_2:
 .function i32 testCall0() {
     initobj.short TestCall._ctor_:(TestCall)
     sta.obj v0
-    any.call.0 v0
+    any.call.0 v0, 0x0
     sta.obj v2
     ldai 42
     sta v1
@@ -148,7 +148,7 @@ jump_2:
     sta v2
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
     sta.obj v2
-    any.call.range v0, v1, 2
+    any.call.range v0, v1, 2, 0x0
     sta.obj v2
     ldai -30
     sta v1
@@ -165,7 +165,7 @@ jump_2:
     sta v1
     initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
     sta.obj v1
-    any.call.short v0, v1
+    any.call.short v0, v1, 0x0
     sta.obj v2
     ldai 42
     sta v1

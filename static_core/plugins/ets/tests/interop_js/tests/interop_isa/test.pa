@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -89,7 +89,7 @@
 
 .function u1 test-static.ETSGLOBAL.testIsInstance(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
     lda.obj a0
-    any.isinstance a1
+    any.isinstance a1, 0x11
     return
 }
 
@@ -98,31 +98,40 @@
   sta.obj v1
   lda.obj a2
   sta.obj v2
-  any.call.range a0, v1, 0x2
+  any.call.range a0, v1, 0x2, 0x22
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestCallShort(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
   lda.obj a1
   sta.obj v1
-  any.call.short a0, v1
+  any.call.short a0, v1, 0x33
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestCallThisShort(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
   lda.obj a1
   sta.obj v1
-  any.call.this.short "bar", a0, v1
+  any.call.this.short "bar", a0, v1, 0x44
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestCall0(std.core.Object a0) <static, access.function=public> {
-  any.call.0 a0
+  any.call.0 a0, 0x55
   return.obj
 }
 
+.function std.core.Object test-static.ETSGLOBAL.doTestSequenceIntegrity(std.core.Object a0) <static, access.function=public> {
+    any.ldbyname a0, "a", 0x11
+    sta.obj v1
+    any.ldbyname a0, "a", 0x22
+    sta.obj v2
+    any.ldbyname a0, "a", 0x33
+    return.obj
+}
+
 .function std.core.Object test-static.ETSGLOBAL.doTestNew0(std.core.Object a0) <static, access.function=public> {
-  any.call.new.0 a0
+  any.call.new.0 a0, 0x66
   return.obj
 }
 
@@ -131,19 +140,19 @@
   sta.obj v1
   lda.obj a2
   sta.obj v2
-  any.call.new.range a0, v1, 0x2
+  any.call.new.range a0, v1, 0x2, 0x77
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestNewShort(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
   lda.obj a1
   sta.obj v1
-  any.call.new.short a0, v1
+  any.call.new.short a0, v1, 0x88
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestCallThis0(std.core.Object a0) <static, access.function=public> {
-  any.call.this.0 "baz", a0
+  any.call.this.0 "baz", a0, 0x99
   return.obj
 }
 
@@ -152,46 +161,46 @@
   sta.obj v1
   lda.obj a2
   sta.obj v2
-  any.call.this.range "foo", a0, v1, 0x2
+  any.call.this.range "foo", a0, v1, 0x2, 0xAA
   return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestVal(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
-    any.ldbyval a0, a1
+    any.ldbyval a0, a1, 0xBB
     return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestValName(std.core.Object a0) <static, access.function=public> {
-    any.ldbyname a0, "a"
+    any.ldbyname a0, "a", 0xFF
     return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestValNameV(std.core.Object a0) <static, access.function=public> {
-    any.ldbyname.v v1, a0, "a"
+    any.ldbyname.v v1, a0, "a", 0xCC
     lda.obj v1
     return.obj
 }
 
 .function std.core.Object test-static.ETSGLOBAL.doTestValIdx(std.core.Object a0) <static, access.function=public> {
     fldai.64 0x3ff0000000000000
-    any.ldbyidx a0
+    any.ldbyidx a0, 0xDD
     return.obj
 }
 
 .function void test-static.ETSGLOBAL.doTestStVal(std.core.Object a0, std.core.Object a1, std.core.Object a2) <static, access.function=public> {
     lda.obj a2
-    any.stbyval a0, a1
+    any.stbyval a0, a1, 0xEE
     return.void
 }
 
 .function void test-static.ETSGLOBAL.doTestStValName(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
     lda.obj a1
-    any.stbyname a0, "a"
+    any.stbyname a0, "a", 0x1F
     return.void
 }
 
 .function void test-static.ETSGLOBAL.doTestStValNameV(std.core.Object a0, std.core.Object a1) <static, access.function=public> {
-    any.stbyname.v a1, a0, "a"
+    any.stbyname.v a1, a0, "a", 0x2F
     return.void
 }
 
@@ -199,7 +208,7 @@
     fldai.64 0x3ff0000000000000
     sta.64 v0
     lda.obj a1
-    any.stbyidx a0, v0
+    any.stbyidx a0, v0, 0x3F
     return.void
 }
 
@@ -227,7 +236,7 @@ jump_label_1:
     sta.obj v0
     lda.str "bar"
     sta.obj v1
-    any.ldbyval v0, v1
+    any.ldbyval v0, v1, 0x4F
     return.obj
 }
 
@@ -248,7 +257,7 @@ jump_label_1:
     newobj v1, std.core.Int
     movi v2, 0x1
     call.short std.core.Int._ctor_:(std.core.Int,i32), v1, v2
-    any.ldbyval v0, v1
+    any.ldbyval v0, v1, 0x5F
     return.obj
 }
 
@@ -267,7 +276,7 @@ jump_label_1:
     checkcast std.core.Array
     sta.obj v0
     fldai.64 0x3ff0000000000000
-    any.ldbyidx v0
+    any.ldbyidx v0, 0x6F
     return.obj
 }
 
@@ -294,10 +303,10 @@ jump_label_1:
     fldai.64 0x40e95fc000000000
     call.acc.short std.core.Double._ctor_:(std.core.Double,f64), v2, 0x1
     lda.obj v2
-    any.stbyval v0, v1
+    any.stbyval v0, v1, 0x7F
 
     fldai.64 0x3ff0000000000000
-    any.ldbyidx v0
+    any.ldbyidx v0, 0x8F
 
     return.obj
 }
@@ -311,11 +320,11 @@ jump_label_1:
     fldai.64 0x40e95fc000000000
     call.acc.short std.core.Double._ctor_:(std.core.Double,f64), v2, 0x1
     lda.obj v2
-    any.stbyval v0, v1
+    any.stbyval v0, v1, 0x9F
 
     lda.str "bar"
     sta.obj v1
-    any.ldbyval v0, v1
+    any.ldbyval v0, v1, 0xAF
 
     return.obj
 }
@@ -339,9 +348,9 @@ jump_label_1:
     fldai.64 0x40e95fc000000000
     call.acc.short std.core.Double._ctor_:(std.core.Double,f64), v2, 0x1
     lda.obj v2
-    any.stbyidx v0, v1
+    any.stbyidx v0, v1, 0xBF
     fldai.64 0x3ff0000000000000
-    any.ldbyidx v0
+    any.ldbyidx v0, 0xCF
     return.obj
 }
 
@@ -400,9 +409,16 @@ jump_label_1:
 	return
 }
 
+.function std.core.Object test-static.ETSGLOBAL.doTestZeroICSlot(std.core.Object a0) <static, access.function=public> {
+    any.ldbyname a0, "a", 0x0
+    sta.obj v0
+    any.call.0 v0, 0x0
+    return.obj
+}
+
 .function std.core.Object test-static.ETSGLOBAL.doTestCallStatic() <static, access.function=public> {
     initobj.short test-static.%%lambda-lambda_invoke-0._ctor_:(test-static.%%lambda-lambda_invoke-0)
     sta.obj v0
-    any.call.0 v0
+    any.call.0 v0, 0xDF
     return.obj
 }

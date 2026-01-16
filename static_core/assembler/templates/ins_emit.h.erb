@@ -76,10 +76,12 @@ bool Ins::Emit(BytecodeEmitter& emitter, panda_file::MethodItem *method,
 %       if insn.jump?
 %         ops << 'labels.find(GetID(0))->second'
 %       else
-%         from_type, to_type = op_size(insn) == 64 ? ['double', 'int64_t'] : ['float', 'int32_t']
-%         if insn.float?
+%         if op.type == 'f32' || op.type == 'f64'
+%           from_type = op.type == 'f64' ? 'double' : 'float'
+%           to_type = op.type == 'f64' ? 'int64_t' : 'int32_t'
 %           ops << "std::holds_alternative<double>(GetImm(#{ni})) ? #{bit_cast("GetImm(#{ni})", to_type, from_type)} : bit_cast<#{to_type}, #{from_type}>(static_cast<#{from_type}>(GetImm<int64_t>(#{ni})))"
 %         elsif type(insn).start_with? 'u' # can hold both float and integer literals
+%           from_type, to_type = op_size(insn) == 64 ? ['double', 'int64_t'] : ['float', 'int32_t']
 %           ops << "std::holds_alternative<double>(GetImm(#{ni})) ? #{bit_cast("GetImm(#{ni})", to_type, from_type)} : GetImm<int64_t>(#{ni})"
 %         else
 %           ops << "GetImm<int64_t>(#{ni})"
