@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ desc: Test cases for various usage scenarios of asynchronous method.
 ---*/
 
 class MethodWithAllSettled {
-    async methodWithAllSettled(): Promise<Array<PromiseFulfilledResult<Promise<"Resolved!">>|PromiseRejectedResult>>{
+    async methodWithAllSettled(): Promise<Array<PromiseFulfilledResult<'Resolved!'>|PromiseRejectedResult>>{
         const results = await Promise.allSettled([
             Promise.resolve("Resolved!"),
             Promise.reject(new Error("Rejected!")),

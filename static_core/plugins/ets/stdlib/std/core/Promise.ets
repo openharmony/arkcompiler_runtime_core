@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -369,11 +369,55 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param promises array of promise-like objects
      * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
      */
-    static allSettled<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<PromiseSettledResult<U>[]> {
-        return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: Error) => void): void => {
-            // This temp object is needed because es2panda cannot change captured primitives
-            new AllSettledPromiseConcurrency<U>(resolve, reject).allSettled(promises);
-        });
+    static allSettled<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<PromiseSettledResult<Awaited<U>>[]> {
+        return new Promise<PromiseSettledResult<Awaited<U>>[]>(
+            (resolve: (value: PromiseSettledResult<Awaited<U>>[]) => void, _reject: (error: Error) => void): void => {
+                let settledCnt = 0;
+                const results: PromiseSettledResultBase[] = new PromiseSettledResultBase[promises.length];
+
+                const getResults = (): PromiseSettledResult<Awaited<U>>[] => {
+                    return (results as Object) as PromiseSettledResult<Awaited<U>>[];
+                };
+
+                if (promises.length === 0) {
+                    resolve(getResults());
+                    return;
+                }
+
+                const settle = (): void => {
+                    ++settledCnt;
+                    if (settledCnt === promises.length) {
+                        resolve(getResults());
+                    }
+                };
+
+                const fulfill = (value: Awaited<U>, idx: int): void => {
+                    results[idx] = new PromiseFulfilledResult<Awaited<U>>(value);
+                    settle();
+                };
+
+                const rejectOne = (error: Error, idx: int): void => {
+                    results[idx] = new PromiseRejectedResult(error);
+                    settle();
+                };
+
+                for (let i = 0; i < promises.length; ++i) {
+                    const idx = i;
+                    try {
+                        Promise.toPromiseLike<U>(promises[idx]!).then<void, void>(
+                            (value: Awaited<U>): void => {
+                                fulfill(value, idx);
+                            },
+                            (error: Error): void => {
+                                rejectOne(error, idx);
+                            }
+                        );
+                    } catch (e) {
+                        rejectOne(e as Error, idx);
+                    }
+                }
+            }
+        );
     }
 
     /**
@@ -382,12 +426,12 @@ export final class Promise<out T> implements PromiseLike<T> {
      * @param promises iterable object of promise-like objects
      * @returns { Promise } promise that will be resolved after all promises are completed with an array of results
      */
-    static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<U>[]> {
+    static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<Awaited<U>>[]> {
         try {
             return Promise.allSettled<U>(Promise.toArray(promises));
         } catch (e) {
             // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-            return Promise.reject<PromiseSettledResult<U>[]>(e as Error);
+            return Promise.reject<PromiseSettledResult<Awaited<U>>[]>(e as Error);
         }
     }
 
@@ -624,69 +668,6 @@ export final class Promise<out T> implements PromiseLike<T> {
     private linkedPromise?: Object;
     private queueSize: int = 0;
     private state: int = Promise.STATE_PENDING;
-}
-
-// To remove #31990
-class PromiseConcurrencyBase<T> {
-    toPromiseLike(value: T|PromiseLike<T>): PromiseLike<Awaited<T>> {
-        if (value instanceof Promise) {
-            let p = value as Promise<Awaited<T>>;
-            return p;
-        } else {
-            let p = Promise.resolve<T>(value as T);
-            return p;
-        }
-    }
-}
-
-// To remove #31990
-class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
-    constructor(resolve: (value: PromiseSettledResult<T>[]) => void, reject: (error: Error) => void) {
-        this.resolve = resolve;
-        this.reject = reject;
-    }
-
-    allSettled(promises: FixedArray<T|PromiseLike<T>|undefined>): void {
-        this.values = new PromiseSettledResultBase[promises.length];
-        if (promises.length == 0) {
-            this.resolve(this.getValues());
-            return;
-        }
-        for (let i = 0; i < promises.length; ++i) {
-            let idx = i;
-            this.toPromiseLike(promises[idx]!).then<void, void>((value: Awaited<T>): void => {
-                this.resolveImpl(value as T, idx);
-            }, (error: Error): void => {
-                this.rejectImpl(error as Error, idx);
-            });
-        }
-    }
-
-    private resolveImpl(value: T, idx: int): void {
-        this.values![idx] = new PromiseFulfilledResult<T>(value);
-        ++this.resolvedCnt;
-        if (this.resolvedCnt == this.values!.length) {
-            this.resolve(this.getValues());
-        }
-    }
-
-    private rejectImpl(error: Error, idx: int): void {
-        this.values![idx] = new PromiseRejectedResult(error);
-        ++this.resolvedCnt;
-        if (this.resolvedCnt == this.values!.length) {
-            this.resolve(this.getValues());
-        }
-    }
-
-    private getValues(): PromiseSettledResult<T>[] {
-        return (this.values as Object) as PromiseSettledResult<T>[];
-    }
-
-    private resolvedCnt = 0;
-    private rejectedCnt = 0;
-    private values?: PromiseSettledResultBase[];
-    private resolve: (value: PromiseSettledResult<T>[]) => void;
-    private reject: (error: Error) => void;
 }
 
 export type NullablePromise<out T> = Promise<T> | undefined;
