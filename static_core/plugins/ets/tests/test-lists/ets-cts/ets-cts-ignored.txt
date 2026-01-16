@@ -632,18 +632,8 @@
 09.classes/06.field_declarations/04.field_initialization/non_static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_self_initialization_reference.ets
 
-#31341
-09.classes/06.field_declarations/04.field_initialization/class_fields_cte_49.ets
-09.classes/06.field_declarations/04.field_initialization/class_fields_cte_50.ets
-09.classes/06.field_declarations/04.field_initialization/class_fields_cte_51.ets
-09.classes/06.field_declarations/04.field_initialization/class_fields_cte_52.ets
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_11.ets
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_12.ets
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_13.ets
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_14.ets
-
 #29937
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_15.ets
+09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_11.ets
 
 #23050
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_252.ets
