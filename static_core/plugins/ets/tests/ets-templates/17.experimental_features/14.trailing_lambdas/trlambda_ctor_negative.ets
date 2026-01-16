@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,17 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A function with receiver declaration is a top-level declaration (see Top-Level Declarations) that looks almost the same
-    as Function Declarations, except that the first parameter is mandatory, and the keyword this is used as its name
+    The trailing lambda mechanism allows using a special form of function
+    or method call when the last parameter of a function or a method is
+    of function type, and the argument is passed as a lambda using the {} notation.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0082: Extension function can only defined for class, interface or array."
+expected_out: "{{c.expected_out}}"
 ---*/
 
 {{c.decl}}
+
+function main() {
+    {{c.use|indent}}
+}
 
 {%- endfor %}

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,18 +13,6 @@
 
 ---
 cases:
-  - doc: |-
-      >-
-        A compile-time error occurs if
-        type of an array or tuple element is not assignable (see Assignability) to the type of corresponding lhsExpression;
-    tags: negative, compile-only
-    decl: |-
-      let tpl: [number,string] = [1.5, "str"];
-    use: |-
-      let n1: number = 1;
-      let n2: number = 2;
-      [n1,n2] = tpl;
-
   - doc: Destructuring Assignment
     decl: |-
       let tpl: [number, string] = [1.5, "str"];

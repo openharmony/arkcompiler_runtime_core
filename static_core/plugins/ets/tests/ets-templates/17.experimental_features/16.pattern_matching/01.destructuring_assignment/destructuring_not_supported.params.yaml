@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,7 @@ cases:
       function foo([arg1, arg2]: number[]) {}
     use: |-
       foo([1,2,3,4]);
+    expected_out: "Semantic error ESE0017: Only abstract or native methods can't have body."
 
   - doc: in for-of loop
     decl: |-
@@ -26,6 +27,7 @@ cases:
       let a: number = 0;
       let b: string = "";
       for ([a,b] of arr) {}
+    expected_out: "Semantic error ESE0099: Cannot obtain iterator type in 'for-of' statement."
 
   - doc: rest arguments
     use: |-
@@ -33,6 +35,7 @@ cases:
       let b: number = 0;
       let rest: number[];
       [a,b,...rest] = [1,2,3,4,5]
+    expected_out: "Syntax error ESY165518: Rest is not supported in destructuring."
 
   - doc: default argument
     use: |-
@@ -41,3 +44,4 @@ cases:
       let b: number = 0;
       let c: number|undefined = 0;
       [a, b=42, c] = arr;
+    expected_out: "Syntax error ESY125256: Default is not supported in destructuring."
