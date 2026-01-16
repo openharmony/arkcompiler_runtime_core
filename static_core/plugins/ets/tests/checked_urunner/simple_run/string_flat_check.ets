@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,10 @@
 //! INST_NEXT    "Intrinsic.StdCoreStringRepeat"
 function saveStateNotBroken(): void {
     let thrown = false
+    let i = 1
+    let s = '' + i  // avoid method call for LoadString result
     try {
-        "".repeat(-1)
+        s.repeat(-1)
     } catch (e) {
         thrown = true
     }
@@ -83,8 +85,21 @@ function compare(s1: string, s2: string): int {
 //! INST_NOT     "StringFlatCheck"
 //! INST         "Intrinsic.StdCoreStringRepeat"
 function stringFlatCheckDisabled(): void {
-    let s = "a".repeat(2)
-    arktest.assertEQ(2, s.length)
+    let i = 1
+    let s = '' + i  // avoid method call for LoadString result
+    let r = s.repeat(2)
+    arktest.assertEQ(2, r.length)
+}
+
+//! CHECKER      Check StringFlatCheck is not inserted for instruction which returns flat string
+//! RUN          force_jit: true, options: "--compiler-regex=string_flat_check.* --use-all-strings=true", entry: "string_flat_check.ETSGLOBAL::stringFlatCheckForLoadString"
+//! METHOD       "string_flat_check.ETSGLOBAL::stringFlatCheckForLoadString"
+//! PASS_AFTER   "Codegen"
+//! INST_NOT     "StringFlatCheck"
+//! INST         "Intrinsic.StdCoreStringRepeat"
+function stringFlatCheckForLoadString(): void {
+    let r = "a".repeat(2)
+    arktest.assertEQ(2, r.length)
 }
 
 //! CHECKER      Check StringFlatCheck does not break OSR
