@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 namespace panda::guard {
 
 constexpr std::string_view ARK_GUARD_DYNAMIC_VERSION = "ArkGuardDynamicVersion";
-constexpr std::string_view OBFUSCATION_TOOL_VERSION = "1.0.0.310";
+constexpr std::string_view OBFUSCATION_TOOL_VERSION = "1.0.0.320";
 
 }  // namespace panda::guard
 
