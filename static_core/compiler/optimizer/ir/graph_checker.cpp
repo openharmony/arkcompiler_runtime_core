@@ -1833,9 +1833,10 @@ void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unus
         auto argsCount = inst->RequireState() ? inst->GetInputsCount() - 1 : inst->GetInputsCount();
         for (size_t i = 0; i < argsCount; i++) {
             if ((stringFlatCheckArgMask & (1 << i)) != 0) {
+                [[maybe_unused]] auto *inputInst = Inst::GetDataFlowInput(inst->GetInput(i).GetInst());
                 CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                    v, inst->GetInput(i).GetInst()->Is(Opcode::StringFlatCheck),
-                    (std::cerr << "\nInput must be StringFlatCheck instruction\n", inst->Dump(&std::cerr)));
+                    v, inputInst->GetFlag(inst_flags::FLAT_STRING),
+                    (std::cerr << "\nInput must be a flat string\n", inst->Dump(&std::cerr)));
             }
         }
     }

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,11 +173,11 @@ enum Flags : uint64_t {
     NONE = 0
 };
 
-inline constexpr uintptr_t GetFlagsMask(Opcode opcode)
+inline constexpr uint64_t GetFlagsMask(Opcode opcode)
 {
 #define INST_DEF(OPCODE, BASE, FLAGS) (FLAGS),  // NOLINT(cppcoreguidelines-macro-usage)
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    constexpr std::array<uintptr_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
+    constexpr std::array<uint64_t, static_cast<int>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {OPCODE_LIST(INST_DEF)};
 #undef INST_DEF
     return INST_FLAGS_TABLE[static_cast<size_t>(opcode)];
 }
@@ -1227,7 +1227,7 @@ public:
     /// Return instruction clone
     PANDA_PUBLIC_API virtual Inst *Clone(const Graph *targetGraph) const;
 
-    uintptr_t GetFlagsMask() const
+    uint64_t GetFlagsMask() const
     {
         return GetField<FieldFlags>();
     }

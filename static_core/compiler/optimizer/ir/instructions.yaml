@@ -490,7 +490,7 @@ instructions:
   - opcode: LoadString
     base: LoadFromPool
     signature: [d-ref, save_state]
-    flags: [load, can_throw, no_hoist, no_cse, require_state, runtime_call, acc_write]
+    flags: [load, can_throw, no_hoist, no_cse, require_state, runtime_call, acc_write, flat_string]
     description: Load string from pool.
 
   - opcode: LoadFromConstantPool
@@ -695,7 +695,7 @@ instructions:
   - opcode: StringFlatCheck
     base: FixedInputsInst<2>
     signature: [d-ref, ref, save_state]
-    flags: [can_throw, no_hoist, no_cse, require_state, runtime_call]
+    flags: [can_throw, no_hoist, no_cse, require_state, runtime_call, flat_string]
     description: Make sure result string is flat
 
   - opcode: Deoptimize
@@ -1433,6 +1433,7 @@ flags:
   can_deoptimize: deoptimization may occur with jump to the interpreter
   catch_input: Instruction is used in some catch block
   require_tmp: Instruction requires additional general register
+  flat_string: Instruction creates flat string
 
 modes:
   jit_aot: JIT or AOT compiler

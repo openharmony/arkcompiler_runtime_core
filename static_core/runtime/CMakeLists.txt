@@ -742,6 +742,7 @@ function(add_gtests test_name)
             ${PANDA_SANITIZERS_LIST}
         DEPS_TARGETS
             arkstdlib
+            ark_aot
         PANDA_STD_LIB
             $<TARGET_PROPERTY:arkstdlib,FILE>
         TEST_GROUP

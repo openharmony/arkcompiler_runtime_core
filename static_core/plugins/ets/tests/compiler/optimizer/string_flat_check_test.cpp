@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,28 @@ TEST_F(StringFlatCheckTest, NotRequired)
                 .IntrinsicId(RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY)
                 .Inputs({{DataType::REFERENCE, 9U}})
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ref();
+            INST(11U, Opcode::Return).Inputs(10U).ref();
+        }
+    }
+    ASSERT_FALSE(GetGraph()->RunPass<StringFlatCheck>());
+}
+
+TEST_F(StringFlatCheckTest, NotRequiredForLoadString)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).i32();
+        PARAMETER(2U, 2U).i32();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(8U, Opcode::SaveState).Inputs(0U).SrcVregs({2U});
+            INST(9U, Opcode::LoadString).Inputs(8U).ref();
+            INST(10U, Opcode::Intrinsic)
+                .IntrinsicId(RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_REPEAT)
+                .Inputs({{DataType::REFERENCE, 9U}, {DataType::INT32, 1U}, {DataType::NO_TYPE, 8U}})
                 .ref();
             INST(11U, Opcode::Return).Inputs(10U).ref();
         }
