@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,8 @@ cases:
       set m(this: myNamespace.A, param: int) {
         this.member = param
       }
-    use: ""
+    expected_out: "Semantic error ESE0206: 'A' is not exported in 'myNamespace'"
+
   - desc: "Non-exported interface in namespace"
     decl: |
       namespace myNamespace {
@@ -36,4 +37,4 @@ cases:
       }
       get _x(this: myNamespace.I): long {return this.x}
       set _x(this: myNamespace.I, param: long) {this.x = param.toInt()}
-    use: ""
+    expected_out: "Semantic error ESE0206: 'I' is not exported in 'myNamespace'"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 desc: >-
     An rhsExpression must be of array or tuple type, a compile-time error occurs otherwise.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0049: Invalid destructuring assignment target."
 ---*/
 
 enum Color {Red, Green, Blue}
