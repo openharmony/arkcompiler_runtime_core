@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ function main() {
         testEntriesIteratorAndForOfIterationBehavior);
     suite.addTest("Test LightWeightSet entries() iterator, verifying key equals value for each entry.",
         testEntriesVerifyingKeyEqualsValueForEachEntry);
+    suite.addTest('Test LightWeightSet increaseCapacityTo() Error.',
+        testLightweightincreaseCapacityToError);
 
     return suite.run();
 }
@@ -144,4 +146,21 @@ function testEntriesVerifyingKeyEqualsValueForEachEntry() {
         arktest.assertEQ(temp.value![0], temp.value![1]);
         temp = iter.next();
     }
+}
+function testLightweightincreaseCapacityToError() {
+    let lightWeightSet = new LightWeightSet<number>();
+    lightWeightSet.add(1);
+    lightWeightSet.add(2);
+    lightWeightSet.add(3);
+    lightWeightSet.add(4);
+    lightWeightSet.add(5);
+    arktest.expectThrow(
+        () => lightWeightSet.increaseCapacityTo(3),
+        (err: Error) => {
+            arktest.assertEQ(err.name, 'BusinessError')
+            arktest.assertEQ(err.code, 10200001)
+            arktest.assertEQ(err.message, `The value of "minimumCapacity" is out of range. It must be > 8. Received value is: 3`)
+            return (err instanceof Error)
+        }
+    );
 }

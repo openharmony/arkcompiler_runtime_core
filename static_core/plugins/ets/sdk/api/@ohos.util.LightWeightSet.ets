@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -289,7 +289,7 @@ export class LightWeightSet<T> implements ReadonlyLightWeightSet<T>, JsonReplace
         }
         if (minimumCapacity <= 0 || this.capacity >= minimumCapacity) {
             throw new BusinessError(outOfBoundsErrorCodeId,
-                new Error(`The value of "minimumCapacity" is out of range. It must be > ${this.capacity}. Received value is: ${minimumCapacity}`));
+                new Error('BusinessError',`The value of "minimumCapacity" is out of range. It must be > ${this.capacity}. Received value is: ${minimumCapacity}`));
         }
         this.capacity = minimumCapacity;
         this.buckets.increaseCapacityTo(minimumCapacity);
