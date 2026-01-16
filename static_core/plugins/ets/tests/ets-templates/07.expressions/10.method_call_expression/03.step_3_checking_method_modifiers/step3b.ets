@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,8 +16,8 @@ limitations under the License.
 {%- for c in cases %}
 /*---
 desc: >-
-    If the method call has the form expression.identifier, then
-    the method must not be declared static; a compile-time error occurs otherwise.
+    Method call: expression.identifier
+    The method must not be declared static. Otherwise, a compile-time error occurs.
 ---*/
 
 {{c.decl}}

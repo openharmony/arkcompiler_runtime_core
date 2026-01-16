@@ -229,6 +229,10 @@
 #26730
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 
+#32421 Support Parametrized FixedArray in class method return type
+07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_0.ets
+07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_1.ets
+
 #26666 (cts #47 - bad array element type)
 07.expressions/11.function_call_expression/fixed_array_predefined_0.ets
 07.expressions/11.function_call_expression/fixed_array_predefined_1.ets
