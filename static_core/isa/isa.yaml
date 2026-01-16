@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -199,12 +199,16 @@ verification:
     description: First operand contains a reference to an object or null.
   - tag: v2_i32
     description: Second operand contains a value of i32 type.
+  - tag: v2_f64
+    description: Second operand contains a value of f64 type.
   - tag: v2_object
     description: Second operand contains a reference to an object (other than array).
   - tag: v2_type
     description: Second operand contains a value of type corresponding to bytecode.
   - tag: acc_i32
     description: Accumulator contains a value of i32 type.
+  - tag: acc_f64
+    description: Accumulator contains a value of f64 type.
   - tag: acc_type
     description: Accumulator contains a value of type corresponding to bytecode.  # TODO: specify
   - tag: acc_return_type
@@ -3097,7 +3101,7 @@ groups:
       Load content from reference of any type by index and put it into accumulator
     verification:
       - v1_object
-      - acc_i32
+      - acc_f64
     exceptions:
       - x_null
     pseudo: |
@@ -3119,7 +3123,7 @@ groups:
     verification:
       - acc_obj_or_null
       - v1_object
-      - v2_i32
+      - v2_f64
     exceptions:
       - x_null
     pseudo: |
@@ -3385,7 +3389,7 @@ groups:
       acc = acc instanceof v1
     instructions:
       - sig: any.isinstance v1:in:ref
-        acc: inout:ref->u1
+        acc: inout:ref->i32
         prefix: any
         format: [pref_op_v1_8]
         opcode_idx: [0x11]

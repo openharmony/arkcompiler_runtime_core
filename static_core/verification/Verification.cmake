@@ -14,6 +14,7 @@
 set(VERIFICATION_SOURCES_DIR ${PANDA_ROOT}/verification)
 
 include(${VERIFICATION_SOURCES_DIR}/type/Type.cmake)
+include(${VERIFICATION_SOURCES_DIR}/tests/Tests.cmake)
 include(${VERIFICATION_SOURCES_DIR}/value/Value.cmake)
 include(${VERIFICATION_SOURCES_DIR}/cflow/Cflow.cmake)
 include(${VERIFICATION_SOURCES_DIR}/util/Util.cmake)
@@ -40,6 +41,7 @@ set(VERIFIER_SOURCES
 
 set(VERIFIER_TESTS_SOURCES
     ${TYPE_TESTS_SOURCES}
+    ${INSTRUCTIONS_TESTS_SOURCES}
     ${VALUE_TESTS_SOURCES}
     ${CFLOW_TESTS_SOURCES}
     ${UTIL_TESTS_SOURCES}
