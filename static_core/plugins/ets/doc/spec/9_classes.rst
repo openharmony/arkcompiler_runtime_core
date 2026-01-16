@@ -1565,6 +1565,9 @@ There are two categories of class fields as follows:
   Static fields are always accessed by using a qualified name notation
   wherever the class name is accessible (see :ref:`Accessible`).
 
+  A :index:`compile-time error` occurs if the name of a type parameter of the
+  surrounding declaration is used as the type of a static field.
+
 - Instance, or non-static fields
 
   Instance fields belong to each instance of the class. An instance field
