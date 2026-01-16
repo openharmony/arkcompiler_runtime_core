@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,20 +189,18 @@
 // +--------------+
 // |  stack argN  |
 // +--------------+
-// |      r4      |
+// |   padding    |
 // +--------------+
-// |     ...      |
+// | prev r4~r10  | Callee-saved registers of this bridge
 // +--------------+
-// |     r11      |
-// +--------------+
-// |      fp      |
+// |    iframe    | (or prev FP for StackWalker if current bridge is bypass)
 // +--------------+
 // | INTERPRETER_ |
 // | TO_COMPILED_ |
 // | CODE_BRIDGE  |
-// +--------------+
-// |    iframe    |
 // +--------------+ <- fp
+// |   prev fp    |
+// +--------------+
 // |      lr      |
 // +--------------+
 // Input:
@@ -284,25 +282,32 @@ PrepareArgStack:
 .type InterpreterToCompiledCodeBridge, %function
 InterpreterToCompiledCodeBridge:
     CFI_STARTPROC
-    CFI_DEF_CFA(sp, 0)
-    push {r1, lr}
+
+    push {fp, lr}
     CFI_ADJUST_CFA_OFFSET(8)
+    CFI_REL_OFFSET(fp, 0)
     CFI_REL_OFFSET(lr, 4)
-    sub sp, sp, #8
-    CFI_ADJUST_CFA_OFFSET(8)
+    mov fp, sp
+    CFI_DEF_CFA_REGISTER(fp)
 
     // According to the current frame kind set the bridge type
     ldrb ip, [r3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cmp ip, #0
     moveq ip, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
     movne ip, #BYPASS_BRIDGE
+    str ip, [sp, #-4]!
 
-    str fp, [sp]
-    CFI_REL_OFFSET(fp, 0)
-    str ip, [sp, #4]
-    add fp, sp, #8
-    CFI_DEF_CFA(fp, 8)
+    // iframe (or prev FP for StackWalker if current bridge is bypass)
+    str r1, [sp, #-4]!
+
     push {r4 - r10}
+    CFI_REL_OFFSET(r10, -((2 + 1) * 4))
+    CFI_REL_OFFSET(r9, -((2 + 2) * 4))
+    CFI_REL_OFFSET(r8, -((2 + 3) * 4))
+    CFI_REL_OFFSET(r7, -((2 + 4) * 4))
+    CFI_REL_OFFSET(r6, -((2 + 5) * 4))
+    CFI_REL_OFFSET(r5, -((2 + 6) * 4))
+    CFI_REL_OFFSET(r4, -((2 + 7) * 4))
     sub sp, sp, #4
     // sp should be 8 byte aligned
 
@@ -393,7 +398,7 @@ InterpreterToCompiledCodeBridge:
     cmp r2, #SHORTY_VOID
     cmpne r2, #SHORTY_TAGGED
     beq .Lreturn
-    ldr r3, [fp]
+    ldr r3, [fp, #-8]  // load iframe from the stack
     add r3, r3, #FRAME_ACC_OFFSET
     // store tag
     cmp r2, #SHORTY_REFERENCE
@@ -436,8 +441,7 @@ InterpreterToCompiledCodeBridge:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
     sub sp, fp, #36
-    pop {r4 - r10, fp}
-    CFI_RESTORE(fp)
+    pop {r4 - r10}
     CFI_RESTORE(r10)
     CFI_RESTORE(r9)
     CFI_RESTORE(r8)
@@ -445,11 +449,11 @@ InterpreterToCompiledCodeBridge:
     CFI_RESTORE(r6)
     CFI_RESTORE(r5)
     CFI_RESTORE(r4)
-    CFI_DEF_CFA(sp,12)
-    ldr lr, [sp, #8]
+    add sp, sp, 8
+    pop {fp, lr}
+    CFI_RESTORE(fp)
     CFI_RESTORE(lr)
-    add sp, sp, #12
-    CFI_ADJUST_CFA_OFFSET(-12)
+    CFI_DEF_CFA(sp, 0)
     bx lr
     CFI_ENDPROC
 
@@ -458,29 +462,35 @@ InterpreterToCompiledCodeBridge:
 .type InvokeCompiledCodeWithArgArray, %function
 InvokeCompiledCodeWithArgArray:
     CFI_STARTPROC
-    CFI_DEF_CFA(sp, 0)
     // r0 - args, r1 - iframe, r2 - method, r3 - thread
-    push {r1, lr}
-    CFI_ADJUST_CFA_OFFSET(8)
-    CFI_REL_OFFSET(lr, 4)
-    sub sp, sp, #12
-    CFI_ADJUST_CFA_OFFSET(12)
 
-    stm sp, {THREAD_REG, fp}
-    CFI_REL_OFFSET(fp, 4)
-    CFI_REL_OFFSET(THREAD_REG, 0)
-    add fp, sp, #12
-    CFI_DEF_CFA(fp, 8)
-    mov THREAD_REG, r3
+    push {fp, lr}
+    CFI_ADJUST_CFA_OFFSET(8)
+    CFI_REL_OFFSET(fp, 0)
+    CFI_REL_OFFSET(lr, 4)
+    mov fp, sp
+    CFI_DEF_CFA_REGISTER(fp)
 
     // According to the current frame kind set the bridge type
-    ldrb r1, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    cmp r1, #0
-    moveq r1, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    movne r1, #BYPASS_BRIDGE
-    str r1, [sp, #8]
-    push {r4 - r8}
-    // sp should be 8 bytes aligned
+    ldrb r12, [r3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    cmp r12, #0
+    moveq r12, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    movne r12, #BYPASS_BRIDGE
+    str r12, [sp, #-4]!
+
+    // iframe (or prev FP for StackWalker if current bridge is bypass)
+    str r1, [sp, #-4]!
+
+    push {r4 - r8, THREAD_REG}
+    CFI_REL_OFFSET(THREAD_REG, -((2 + 1) * 4))
+    CFI_REL_OFFSET(r8, -((2 + 2) * 4))
+    CFI_REL_OFFSET(r7, -((2 + 3) * 4))
+    CFI_REL_OFFSET(r6, -((2 + 4) * 4))
+    CFI_REL_OFFSET(r5, -((2 + 5) * 4))
+    CFI_REL_OFFSET(r4, -((2 + 6) * 4))
+    // sp should be 8 byte aligned
+
+    mov THREAD_REG, r3
 
     // save regs to survive call of PrepareArgStack
     // r6 - method, r7 - method.shorty, r8 - args, ip - pointer to memory where to store the result
@@ -582,19 +592,18 @@ InvokeCompiledCodeWithArgArray:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
     sub sp, fp, #32
-    pop {r4 - r8, THREAD_REG, fp}
-    CFI_DEF_CFA(sp, 12)
-    CFI_RESTORE(fp)
+    pop {r4 - r8, THREAD_REG}
     CFI_RESTORE(THREAD_REG)
     CFI_RESTORE(r8)
     CFI_RESTORE(r7)
     CFI_RESTORE(r6)
     CFI_RESTORE(r5)
     CFI_RESTORE(r4)
-    ldr lr, [sp, #8]
+
+    add sp, sp, 8
+    pop {fp, lr}
+    CFI_RESTORE(fp)
     CFI_RESTORE(lr)
-    add sp, sp, #12
-    CFI_ADJUST_CFA_OFFSET(-12)
+    CFI_DEF_CFA(sp, 0)
     bx lr
     CFI_ENDPROC
-

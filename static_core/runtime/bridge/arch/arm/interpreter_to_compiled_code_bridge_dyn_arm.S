@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,32 +22,35 @@
 .type InterpreterToCompiledCodeBridgeDyn, %function
 InterpreterToCompiledCodeBridgeDyn:
     CFI_STARTPROC
-    CFI_DEF_CFA(sp, 0)
-    push {r1, lr}
+    // r0 - args, r1 - iframe, r2 - method, r3 - thread
+
+    push {fp, lr}
     CFI_ADJUST_CFA_OFFSET(8)
+    CFI_REL_OFFSET(fp, 0)
     CFI_REL_OFFSET(lr, 4)
-
-    sub sp, sp, #12
-    CFI_ADJUST_CFA_OFFSET(12)
-
-    stm sp, {THREAD_REG, fp}
-    CFI_REL_OFFSET(fp, 4)
-    CFI_REL_OFFSET(THREAD_REG, 0)
-
-    add fp, sp, #12
+    mov fp, sp
     CFI_DEF_CFA_REGISTER(fp)
-    CFI_ADJUST_CFA_OFFSET(-12)
+
+    // According to the current frame kind set the bridge type
+    ldrb r12, [r3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    cmp r12, #0
+    moveq r12, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    movne r12, #BYPASS_BRIDGE
+    str r12, [sp, #-4]!
+
+    // iframe (or prev FP for StackWalker if current bridge is bypass)
+    str r1, [sp, #-4]!
+
+    push {r4 - r8, THREAD_REG}
+    CFI_REL_OFFSET(THREAD_REG, -((2 + 1) * 4))
+    CFI_REL_OFFSET(r8, -((2 + 2) * 4))
+    CFI_REL_OFFSET(r7, -((2 + 3) * 4))
+    CFI_REL_OFFSET(r6, -((2 + 4) * 4))
+    CFI_REL_OFFSET(r5, -((2 + 5) * 4))
+    CFI_REL_OFFSET(r4, -((2 + 6) * 4))
+    // sp should be 8 byte aligned
 
     mov THREAD_REG, r3
-    mov r3, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    str r3, [sp, #8]
-    push {r4, r5, r6, r7, r8}
-    // sp must be 8 byte aligned
-    CFI_REL_OFFSET(r8,  -((3 + 1) * 4))
-    CFI_REL_OFFSET(r7,  -((3 + 2) * 4))
-    CFI_REL_OFFSET(r6,  -((3 + 3) * 4))
-    CFI_REL_OFFSET(r5,  -((3 + 4) * 4))
-    CFI_REL_OFFSET(r4,  -((3 + 5) * 4))
 
     // setup regs as follow
     // r0 - acc, r1 - num args, r2-r3 - function object as int64_t
@@ -75,19 +78,19 @@ InterpreterToCompiledCodeBridgeDyn:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
     sub sp, fp, #32
-    pop {r4, r5, r6, r7, r8, THREAD_REG, fp}
-    CFI_RESTORE(r4)
-    CFI_RESTORE(r5)
-    CFI_RESTORE(r6)
-    CFI_RESTORE(r7)
-    CFI_RESTORE(r8)
+    pop {r4 - r8, THREAD_REG}
     CFI_RESTORE(THREAD_REG)
-    CFI_RESTORE(r11)
-    CFI_DEF_CFA(sp, 12)
-    ldr lr, [sp, #8]
+    CFI_RESTORE(r8)
+    CFI_RESTORE(r7)
+    CFI_RESTORE(r6)
+    CFI_RESTORE(r5)
+    CFI_RESTORE(r4)
+
+    add sp, sp, 8
+    pop {fp, lr}
+    CFI_RESTORE(fp)
     CFI_RESTORE(lr)
-    add sp, sp, #12
-    CFI_ADJUST_CFA_OFFSET(-12)
+    CFI_DEF_CFA(sp, 0)
     bx lr
     CFI_ENDPROC
 

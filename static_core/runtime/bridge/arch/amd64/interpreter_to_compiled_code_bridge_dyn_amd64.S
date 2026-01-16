@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,13 @@
 TYPE_FUNCTION(InterpreterToCompiledCodeBridgeDyn)
 InterpreterToCompiledCodeBridgeDyn:
     CFI_STARTPROC
-    CFI_DEF_CFA(rsp, 8)
 
-    pushq %rsi // iframe*
+    pushq %rbp
     CFI_ADJUST_CFA_OFFSET(8)
+    CFI_REL_OFFSET(rbp, 0)
 
-    movq %rsp, %rax
-    CFI_DEF_CFA_REGISTER(rax)
+    movq %rsp, %rbp
+    CFI_DEF_CFA_REGISTER(rbp)
 
     // According to the current frame kind set the bridge type
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
@@ -40,14 +40,10 @@ InterpreterToCompiledCodeBridgeDyn:
     cmovne %r10, %r11
     pushq %r11
 
-    pushq %rbp
-    CFI_REL_OFFSET(rbp, -(2 * 8))
-
-    movq %rax, %rbp // set frame pointer
-    CFI_DEF_CFA_REGISTER(rbp)
+    pushq %rsi  // iframe
 
     pushq %THREAD_REG
-    CFI_REL_OFFSET(r15, -(3 * 8))
+    CFI_REL_OFFSET(THREAD_REG, -(3 * 8))
     pushq %r14
     CFI_REL_OFFSET(r14, -(4 * 8))
     pushq %r13
@@ -100,7 +96,7 @@ InterpreterToCompiledCodeBridgeDyn:
     // handle the result
     // setup registers as follow
     // %rax, %rdx - result, %r12 - frame.acc, %rcx - temp
-    movq (%rbp), %r12 // load iframe from the stack
+    movq -16(%rbp), %r12 // load iframe from the stack
     addq $FRAME_ACC_OFFSET, %r12
 
     // store value to frame.acc
@@ -117,17 +113,18 @@ InterpreterToCompiledCodeBridgeDyn:
     popq %r14
     CFI_RESTORE(r14)
     popq %THREAD_REG
-    CFI_RESTORE(r15)
-    popq %rbp
-    CFI_RESTORE(rbp)
-    CFI_DEF_CFA(rsp, (3 * 8))
+    CFI_RESTORE(THREAD_REG)
+
+    // iframe and tag slots
     addq $16, %rsp
-    CFI_ADJUST_CFA_OFFSET(-(2 * 8))
+    popq %rbp
+    CFI_DEF_CFA(rsp, 8)
+    CFI_RESTORE(rbp)
     retq
     CFI_ENDPROC
 
 // void InvokeCompiledCodeWithArgArrayDyn(
-//       const coretypes::TaggedValue* values,      %rdi
+//       const coretypes::TaggedValue* values,  %rdi
 //       uint32_t num_args,                     %rsi
 //       const Frame *iframe,                   %rdx
 //       const Method*,                         %rcx
@@ -136,13 +133,13 @@ InterpreterToCompiledCodeBridgeDyn:
 TYPE_FUNCTION(InvokeCompiledCodeWithArgArrayDyn)
 InvokeCompiledCodeWithArgArrayDyn:
     CFI_STARTPROC
-    CFI_DEF_CFA(rsp, 8)
 
-    pushq %rdx // iframe*
+    pushq %rbp
     CFI_ADJUST_CFA_OFFSET(8)
+    CFI_REL_OFFSET(rbp, 0)
 
-    movq %rsp, %rax
-    CFI_DEF_CFA_REGISTER(rax)
+    movq %rsp, %rbp
+    CFI_DEF_CFA_REGISTER(rbp)
 
     // According to the current frame kind set the bridge type
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%r8), %r10b
@@ -152,14 +149,10 @@ InvokeCompiledCodeWithArgArrayDyn:
     cmovne %r10, %r11
     pushq %r11
 
-    pushq %rbp
-    CFI_REL_OFFSET(rbp, -(2 * 8))
-
-    movq %rax, %rbp // set frame pointer
-    CFI_DEF_CFA_REGISTER(rbp)
+    pushq %rdx // iframe*
 
     pushq %THREAD_REG
-    CFI_REL_OFFSET(r15, -(3 * 8))
+    CFI_REL_OFFSET(THREAD_REG, -(3 * 8))
 
     pushq %r12
     CFI_REL_OFFSET(r12, -(4 * 8))
@@ -168,7 +161,7 @@ InvokeCompiledCodeWithArgArrayDyn:
     subq $8, %rsp
     // %rsp should be 16-byte aligned here
 
-    //  const coretypes::TaggedValue* values,      %rdi
+    //  const coretypes::TaggedValue* values,  %rdi
     //  uint32_t num_args,                     %rsi
     //  const Frame *iframe,                   %rdx
     //  const Method*,                         %rcx
@@ -215,10 +208,10 @@ InvokeCompiledCodeWithArgArrayDyn:
     CFI_RESTORE(r12)
     popq %THREAD_REG
     CFI_RESTORE(r15)
-    popq %rbp
-    CFI_RESTORE(rbp)
-    CFI_DEF_CFA(rsp, (3 * 8))
+
     addq $16, %rsp
-    CFI_ADJUST_CFA_OFFSET(-(2 * 8))
+    popq %rbp
+    CFI_DEF_CFA(rsp, 8)
+    CFI_RESTORE(rbp)
     retq
     CFI_ENDPROC

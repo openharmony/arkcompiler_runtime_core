@@ -236,23 +236,26 @@ the call instruction, the interpreter's frame and the pointer to `ark::ManagedTh
 Its structure is depicted below:  
 ```
 ---- +----------------+ <- stack pointer
-b s  | INTERPRETER_   |
-o t  | TO_COMPILED_   |
-u a  | CODE_BRIDGE    |
-n c  +----------------+ <- frame pointer
-d k  | pointer to the |
-a    | interpreter    |
-r f  | frame          |
-y r  |                |
-  a  +----------------+
-  m  | return address |
-  e  |                |
+     | other contents |
+     | (callee-saved  |
+  s  |  regs, etc.)   |
+b t  +----------------+
+o a  | pointer to the |
+u c  |  interpreter   |
+n k  |     frame      |
+d    +----------------+
+a f  | INTERPRETER_   |
+r r  | TO_COMPILED_   |
+y a  | CODE_BRIDGE    |
+  m  +----------------+ <- frame pointer
+  e  |    prev FP     |
+     +----------------+
+     | return address |
 ---- +----------------+
 ```
 
-The structure of boundary frame is the same as a stack frame of compiled code.
+The structure of boundary frame is consistent with stack frame of compiled code.
 Instead of pointer to `ark::Method` the frame contains constant `INTERPRETER_TO_COMPILED_CODE_BRIDGE`.
-Frame pointer points to the previous interpreter frame.
 
 ## Transition from compiled code to the interpreter
 If a function should be executed by the interpreter it must have `CompiledCodeToInterpreterBridge` as an entrypoint.
