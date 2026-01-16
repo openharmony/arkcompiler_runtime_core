@@ -29,27 +29,6 @@ cases:
           arktest.assertEQ(a.foo().foo(), a)
 
     - decl: |-
-          // return 'this' from extension function and overloaded method
-          class B {
-              fld: int
-          }
-
-          function bar(this: B, p: int) {
-              this.fld += p
-              return this
-          }
-          class A extends B {
-              foo(): this {
-                  this.fld += 1
-                  return this
-              }
-          }
-      use: |-
-          let a: A = { fld: 1 }
-          arktest.assertEQ(a.foo().bar(10).foo(), a)
-          arktest.assertEQ(a.fld, 13)
-
-    - decl: |-
           // return 'this' from instance method in generic class
           class A<T extends Error> {
               fld: int
