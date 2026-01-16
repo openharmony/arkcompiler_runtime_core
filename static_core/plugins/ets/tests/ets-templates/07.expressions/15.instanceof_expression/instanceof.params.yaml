@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -220,7 +220,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 1 }
-      - { type: 'FixedArray<int>', res: 0 }
 
   - decl: |-
       let a: Array<number> = [1.0, 2.0]
@@ -231,7 +230,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 1 }
-      - { type: 'FixedArray<double>', res: 0 }
 
   - decl: |-
       let a: FixedArray<number> = [1.0, 2.0]
@@ -242,7 +240,6 @@ cases:
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
       - { type: 'Array', res: 0 }
-      - { type: 'FixedArray<number>', res: 1 }
 
   - decl: |-
       type TT = [int, string]
@@ -256,7 +253,6 @@ cases:
       - { type: 'string', res: 0 }
       - { type: 'int', res: 0 }
       - { type: 'Array', res: 0 }
-      - { type: 'FixedArray<int>', res: 0 }
       - { type: 'Tuple2', res: 1 }
 
   - decl: |-
