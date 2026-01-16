@@ -104,7 +104,7 @@ add_ets_gc_test(FILE space_type_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger
 add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--max-free=1" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
-add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
+add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 1m FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(TIMEOUT_CMD timeout TIMEOUT_TIME 1m FILE test_finreg_coros.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_coro_test.ets OPTIONS  "--coroutine-workers-count=10" "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE weakref_test.ets OPTIONS  "--gc-type=g1-gc" "--run-gc-in-place"  "--gc-trigger-type=debug-never" MODE "INT")

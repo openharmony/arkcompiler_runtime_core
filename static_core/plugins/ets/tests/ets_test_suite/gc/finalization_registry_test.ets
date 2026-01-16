@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,6 +300,55 @@ function unregisterTests() {
 
 }
 
+// If weak reference is dead, it's finalization registry will be placed to finalization queue
+// This test tests such case:
+// 1) Queue during first GC: finReg1->finReg2
+// 2) Queue during second GC: finReg2->finReg1
+function FinRegReenqueueTest(): void {
+    const registerGarbage = (finReg1: FinalizationRegistry<int>, finReg2: FinalizationRegistry<int>, count: int, tokens: Array<Object>) => {
+        for (let i = 1; i < count; i++) {
+            finReg1.register({}, i, tokens[i]);
+        }
+        finReg2.register({}, 0, tokens[0]);
+    }
+
+    const COUNT: int = 1000;
+    let tokens = new Array<Object>();
+    for (let i = 0; i < COUNT; ++i) {
+        tokens.push({});
+    }
+
+    let jobs = new Array<CompletableJob<void>>();
+    let finReg1 = new FinalizationRegistry<int>((i: int) => {
+        jobs[i]!.finish();
+    });
+    let finReg2 = new FinalizationRegistry<int>((i: int) => {
+        jobs[i]!.finish();
+    });
+
+    for (let i = 0; i < COUNT; ++i) {
+        jobs.push(new CompletableJob<void>());
+    }
+
+    // Register a lot of garbage in finReg1 and one garbage in finReg2
+    registerGarbage(finReg1, finReg2, COUNT, tokens);
+    doFullGC();
+    for (let i = 0; i < COUNT; ++i) {
+        jobs[i]!.Await()
+    }
+
+    for (let i = 0; i < COUNT; ++i) {
+        jobs[i] = new CompletableJob<void>();
+    }
+
+    // Register a lot of garbage in finReg2 and one garbage in finReg1
+    registerGarbage(finReg2, finReg1, COUNT, tokens);
+    doFullGC();
+    for (let i = 0; i < COUNT; ++i) {
+        jobs[i]!.Await()
+    }
+}
+
 function main(): void {
     for (let i = 0; i < removed_object_callbacks.length; i++) {
         removed_object_callbacks[i] = false;
@@ -326,4 +375,5 @@ function main(): void {
     unregisterTests();
 
     registerNoTokenTest();
+    FinRegReenqueueTest();
 }
