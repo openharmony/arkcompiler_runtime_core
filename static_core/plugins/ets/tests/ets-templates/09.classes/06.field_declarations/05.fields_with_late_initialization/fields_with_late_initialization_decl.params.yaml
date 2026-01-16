@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -300,11 +300,13 @@ cases:
         }
         class Dog extends Animal {
           constructor () {
+            super()
             this.name = "dog"
           }
         }
         class Cat extends Animal {
           constructor () {
+            super()
             this.name = "cat"
           }
         }
@@ -530,7 +532,7 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 
@@ -556,7 +558,7 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -590,7 +592,7 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 
@@ -614,7 +616,7 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -645,12 +647,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -673,13 +675,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -720,12 +722,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -755,13 +757,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -941,6 +943,7 @@ cases:
         }
         class A extends Base {
           constructor () {
+            super()
             this._field = [check_value]
           }
         }
@@ -953,6 +956,7 @@ cases:
         }
         class A extends Base {
           constructor (arg: [check_type] = [check_value]) {
+            super()
             this._field = arg
           }
         }
@@ -965,6 +969,7 @@ cases:
         }
         class A extends Base {
           constructor (...args: Any[]) {
+            super()
             this._field = [check_value]
           }
         }

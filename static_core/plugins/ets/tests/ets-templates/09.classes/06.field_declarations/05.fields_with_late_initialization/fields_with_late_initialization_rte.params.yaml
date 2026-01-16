@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -240,7 +240,43 @@ cases:
             return (e instanceof Error)
         }
         arktest.expectThrow(() => {
-          await a.field
+          waitForCompletion(async () => a.field)
+        }, expectedError)
+
+  - desc: |-
+      >-
+        As all other fields, a field with late initialization
+        must be initialized before it is used for the first time.
+    check_variants:
+      - {check_type: "long", cv_decl_data: ""}
+      - {check_type: "int", cv_decl_data: ""}
+      - {check_type: "byte", cv_decl_data: ""}
+      - {check_type: "short", cv_decl_data: ""}
+      - {check_type: "double", cv_decl_data: ""}
+      - {check_type: "number", cv_decl_data: ""}
+      - {check_type: "float", cv_decl_data: ""}
+      - {check_type: "bigint", cv_decl_data: ""}
+      - {check_type: "string", cv_decl_data: ""}
+      - {check_type: "char", cv_decl_data: ""}
+      - {check_type: "boolean", cv_decl_data: ""}
+      - {check_type: "Object", cv_decl_data: ""}
+      - {check_type: "C", cv_decl_data: "class C {}"}
+    decl_variants:
+      - |-
+        [cv_decl_data]
+        class A {
+          field!: Promise<[check_type]>
+          constructor() {
+            waitForCompletion(async () => this.field)
+          }
+        }
+    sub_cases_logic:
+      - |-
+        let expectedError = (e: Error): boolean => {
+            return (e instanceof Error)
+        }
+        arktest.expectThrow(() => {
+          let a: A = new A()
         }, expectedError)
 
   - desc: |-
@@ -286,7 +322,7 @@ cases:
             return (e instanceof Error)
         }
         arktest.expectThrow(() => {
-          await a.foo()
+          waitForCompletion(a.foo)
         }, expectedError)
 
   - desc: |-
@@ -337,7 +373,7 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertFalse(a.res)
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.res)
 
   - desc: |-
@@ -380,7 +416,7 @@ cases:
             return (e instanceof Error)
         }
         arktest.expectThrow(() => {
-          await a.foo().then((): [check_type] => a.field)
+          waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         }, expectedError)
 
   - desc: |-
