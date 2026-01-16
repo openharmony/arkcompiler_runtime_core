@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,20 @@ function main(): int {
     suite.addTest("Stringify Date with negative number in constructor", stringifyNegativeDate)
     suite.addTest("Stringify object literal - simple cases", stringifyObjectLiteralSimpleCases)
     suite.addTest("Stringify object literal - corner cases", stringifyObjectLiteralCornerCases)
+
+    // Typed array tests
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray1);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray2);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray3);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray4);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray5);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray6);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray7);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray8);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray9);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray10);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray11);
+    suite.addTest("Stringify typed arrays", testStringifyTypedArray12);
 
     return suite.run()
 }
@@ -155,4 +169,219 @@ function stringifyObjectLiteralCornerCases(): void {
     fixedArray = [objLit, obj]
     jsonStr = JSON.stringify(fixedArray)
     checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, [expected, new Map<string, string>()])
+}
+
+interface GeneratedObjectLiteralInterface_1 {
+    id: number;
+    values: Uint32Array
+}
+
+interface GeneratedObjectLiteralInterface_2 {
+    name: string;
+    buffer: Int8Array;
+}
+
+interface GeneratedObjectLiteralInterface_3 {
+    count: number;
+    data: Uint8Array;
+}
+
+interface GeneratedObjectLiteralInterface_4 {
+    flags: boolean;
+    values: Int16Array;
+}
+
+interface GeneratedObjectLiteralInterface_5 {
+    flags: boolean;
+    values: Float32Array;
+}
+
+interface GeneratedObjectLiteralInterface_6 {
+    flags: boolean;
+    values: Float64Array;
+}
+
+interface GeneratedObjectLiteralInterface_7 {
+    name: string;
+    buffer: Uint16Array;
+}
+
+interface GeneratedObjectLiteralInterface_8 {
+    count: number;
+    data: Int32Array;
+}
+
+interface GeneratedObjectLiteralInterface_9 {
+    flags: boolean;
+    values: Uint8ClampedArray;
+}
+
+interface GeneratedObjectLiteralInterface_10 {
+    flags: boolean;
+    values: BigInt64Array;
+}
+
+interface GeneratedObjectLiteralInterface_11 {
+    flags: boolean;
+    values: BigUint64Array;
+}
+
+interface GeneratedObjectLiteralInterface_12 {
+    flags: boolean;
+    values: ArrayLike<Object>;
+}
+
+function testStringifyTypedArray1(): void {
+    let a = new Uint32Array([10]);
+    let data: GeneratedObjectLiteralInterface_1 = {
+        id: 1,
+        values: a
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getInteger("id"),  1);
+    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  10);
+}
+
+function testStringifyTypedArray2(): void {
+    let buffer = new Int8Array([-10]);
+    let data: GeneratedObjectLiteralInterface_2 = {
+        name: "test",
+        buffer: buffer
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getString("name"),  "test");
+    arktest.assertEQ(jsonElement.getElement("buffer").getInteger("0"),  -10);
+}
+
+function testStringifyTypedArray3(): void {
+    let dataArr = new Uint8Array([255]);
+    let data: GeneratedObjectLiteralInterface_3 = {
+        count: 5,
+        data: dataArr,
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getInteger("count"),  5);
+    arktest.assertEQ(jsonElement.getElement("data").getInteger("0"),  255);
+}
+
+function testStringifyTypedArray4(): void {
+    let values = new Int16Array([1000]);
+    let data: GeneratedObjectLiteralInterface_4 = {
+        flags: true,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  1000);
+}
+
+function testStringifyTypedArray5(): void {
+    let values = new Float32Array([1.0]);
+    let data: GeneratedObjectLiteralInterface_5 = {
+        flags: true,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getElement("values").getDouble("0"),  1.0);
+}
+
+function testStringifyTypedArray6(): void {
+    let values = new Float64Array([3.14159]);
+    let data: GeneratedObjectLiteralInterface_6 = {
+        flags: true,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getElement("values").getDouble("0"),  3.14159);
+}
+
+function testStringifyTypedArray7(): void {
+    let buffer = new Uint16Array([0]);
+    let data: GeneratedObjectLiteralInterface_7 = {
+        name: "test",
+        buffer: buffer
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getString("name"),  "test");
+    arktest.assertEQ(jsonElement.getElement("buffer").getInteger("0"),  0);
+}
+
+function testStringifyTypedArray8(): void {
+    let dataArr = new Int32Array([255]);
+    let data: GeneratedObjectLiteralInterface_8 = {
+        count: 5,
+        data: dataArr
+    };
+    let jsonStr = JSON.stringify(data)
+
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getInteger("count"),  5);
+    arktest.assertEQ(jsonElement.getElement("data").getInteger("0"),  255);
+}
+
+function testStringifyTypedArray9(): void {
+    let values = new Uint8ClampedArray([1]);
+    let data: GeneratedObjectLiteralInterface_9 = {
+        flags: true,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  1);
+}
+
+function testStringifyTypedArray10(): void {
+    let values = new BigInt64Array([200000]);
+    let data: GeneratedObjectLiteralInterface_10 = {
+        flags: false,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  false);
+    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  200000);
+}
+
+function testStringifyTypedArray11(): void {
+    let values = new BigUint64Array([100000]);
+    let data: GeneratedObjectLiteralInterface_11 = {
+        flags: true,
+        values: values
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  100000);
+}
+function checkArray(): void {
+    
+}
+
+class A{
+    public num1: int
+    constructor(num1: int){
+        this.num1 = num1
+    }
+};
+function testStringifyTypedArray12(): void {
+    let a = new A(1);
+    let objArray: ArrayLike<Object> = [a];
+    let data: GeneratedObjectLiteralInterface_12 = {
+        flags: true,
+        values: objArray
+    };
+    let jsonStr = JSON.stringify(data)
+    let jsonElement = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
+    arktest.assertEQ(jsonElement.getArray("values")[0].getInteger("num1"), 1);
 }

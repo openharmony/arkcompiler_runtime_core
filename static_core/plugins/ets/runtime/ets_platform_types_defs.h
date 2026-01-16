@@ -99,6 +99,7 @@
     T("Lescompat/BigUint64Array;", escompatBigUint64Array)                                                           \
     /* Containers */                                                                                                 \
     T("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                        \
+    T("Lstd/core/ArrayLike;", coreArrayLike)                                                                         \
     T("Lstd/core/Record;", coreRecord)                                                                               \
     I("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:Lstd/core/Object;",   \
       coreRecordGet)                                                                                                 \
