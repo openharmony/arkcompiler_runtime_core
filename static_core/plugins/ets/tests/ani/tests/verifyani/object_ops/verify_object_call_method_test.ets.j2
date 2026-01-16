@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,21 @@
  */
 
 class Parent {
-    booleanField: boolean;
+    public {{ type }}Method(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ ret_type }} {
+        return {{ value }};
+    }
 
-    static staticBooleanField: boolean;
+    public static static{{ Type }}Method(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ ret_type }} {
+        return {{ value }};
+    }
 
-    intField: int;
+    public {{ wrong_ret }}Method(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ wrong_ret }} {
+        return 1;
+    }
+
+    public voidParamMethod(): {{ ret_type }} {
+        return {{ value }};
+    }
 
     native bar(o: Object, m: long): void;
     native foo(): void;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,26 @@
  * limitations under the License.
  */
 
-native function foo(str: null | String): void
+class Parent {
+    {% if type == "ref" %}
+        {{ type }}Field: {{ ret_type }} = new Object();
 
-function checkStackRef(): void {
-    foo(null)
+        static static{{ Type }}Field: {{ ret_type }} = new Object();
+    {% else %}
+        {{ type }}Field: {{ ret_type }};
+
+        static static{{ Type }}Field: {{ ret_type }};
+    {% endif %}
+
+    {{ wrong_ret }}Field: {{ wrong_ret }};
+
+    native bar(o: Object, m: long): void;
+    native foo(): void;
+    native baz(): void;
 }
 
-native function anotherFrame(str: String): long
-native function checkRefFromAnotherFrame(): long
-native function funcAddress(str: String): long
-native function badStackRef(): long
+class Child extends Parent {
+}
 
-function getVar(): String {
-    return "var"
+class Animal {
 }

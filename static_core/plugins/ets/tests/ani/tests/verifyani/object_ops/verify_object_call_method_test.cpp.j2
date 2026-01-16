@@ -17,7 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
-class ObjectCallMethodBooleanTest : public VerifyAniTest {
+class ObjectCallMethod{{ Type }}Test : public VerifyAniTest {
 public:
     static void GetClassAndObject(ani_env *env, ani_class *cls, const char *className, ani_object *object)
     {
@@ -56,12 +56,12 @@ protected:
     ani_string r_ {};                 // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-class ObjectCallMethodBooleanATest : public ObjectCallMethodBooleanTest {
+class ObjectCallMethod{{ Type }}ATest : public ObjectCallMethod{{ Type }}Test {
 public:
     // CC-OFFNXT(G.CLS.13) false positive
     void SetUp() override
     {
-        ObjectCallMethodBooleanTest::SetUp();
+        ObjectCallMethod{{ Type }}Test::SetUp();
 
         const int nr0 = 0;
         const int nr1 = 1;
@@ -96,9 +96,9 @@ public:
     static void NativeFoo(ani_env *env, ani_object /*unused*/)
     {
         ani_class cls {};
-        ASSERT_EQ(env->FindClass("verify_object_call_method_boolean_test.Parent", &cls), ANI_OK);
+        ASSERT_EQ(env->FindClass("ani_verify_test_object_call_method_{{ type }}.Parent", &cls), ANI_OK);
 
-        ASSERT_EQ(env->Class_FindMethod(cls, "voidParamMethod", ":z", &g_method), ANI_OK);
+        ASSERT_EQ(env->Class_FindMethod(cls, "voidParamMethod", ":{{ ret }}", &g_method), ANI_OK);
     }
 
     template <typename TestType>
@@ -106,15 +106,15 @@ public:
     {
         ani_class cls {};
         ani_object obj {};
-        ObjectCallMethodBooleanTest::GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent",
+        ObjectCallMethod{{ Type }}Test::GetClassAndObject(env, &cls, "ani_verify_test_object_call_method_{{ type }}.Parent",
                                                        &obj);
 
-        ani_boolean result;
-        if constexpr (std::is_same_v<TestType, ObjectCallMethodBooleanATest>) {
-            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
-            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean_A(env, obj, g_method, &result, args), ANI_OK);
+        ani_{{ type }} result;
+        if constexpr (std::is_same_v<TestType, ObjectCallMethod{{ Type }}ATest>) {
+            ani_value args[2U] = {};  // NOLINT(modernize-avoid-c-arrays)
+            ASSERT_EQ(env->c_api->Object_CallMethod_{{ Type }}_A(env, obj, g_method, &result, args), ANI_OK);
         } else {
-            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, obj, g_method, &result), ANI_OK);
+            ASSERT_EQ(env->c_api->Object_CallMethod_{{ Type }}(env, obj, g_method, &result), ANI_OK);
         }
     }
 
@@ -124,33 +124,33 @@ public:
         auto object = static_cast<ani_object>(o);
         auto method = reinterpret_cast<ani_method>(m);
 
-        ani_boolean result;
-        if constexpr (std::is_same_v<TestType, ObjectCallMethodBooleanATest>) {
-            ani_value args[2U];  // NOLINT(modernize-avoid-c-arrays)
-            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean_A(env, object, method, &result, args), ANI_OK);
+        ani_{{ type }} result;
+        if constexpr (std::is_same_v<TestType, ObjectCallMethod{{ Type }}ATest>) {
+            ani_value args[2U] = {};  // NOLINT(modernize-avoid-c-arrays)
+            ASSERT_EQ(env->c_api->Object_CallMethod_{{ Type }}_A(env, object, method, &result, args), ANI_OK);
         } else {
-            ASSERT_EQ(env->c_api->Object_CallMethod_Boolean(env, object, method, &result), ANI_OK);
+            ASSERT_EQ(env->c_api->Object_CallMethod_{{ Type }}(env, object, method, &result), ANI_OK);
         }
     }
 };
 
 ani_method A::g_method = nullptr;
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_env)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_env)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(nullptr, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(nullptr, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -163,24 +163,24 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_env)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_object_0)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_0)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, nullptr, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, nullptr, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -193,26 +193,26 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_object_0)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_object_1)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -225,19 +225,19 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_object_1)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_method_0)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_0)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(class_, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method),
               ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object_, reinterpret_cast<ani_method>(method), &result, z_,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, reinterpret_cast<ani_method>(method), &result, z_,
                                                      c_, b_, s_, i_, l_, f_, d_, r_),
               ANI_ERROR);
     // clang-format off
@@ -245,7 +245,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_method_0)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -258,64 +258,64 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_method_0)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_method_1)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     const auto fakeMethod = reinterpret_cast<ani_method>(static_cast<long>(0x0ff0f0f));  // NOLINT(google-runtime-int)
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, fakeMethod, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, fakeMethod, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_method_2)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_method_2)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, nullptr, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, nullptr, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_result)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_result)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, nullptr, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -328,24 +328,24 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_result)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_boolean_arg)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_boolean_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, 0xb1ba, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, 0xb1ba, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean", "wrong value"},
         {"[1]", "ani_char"},
@@ -358,16 +358,16 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_boolean_arg)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_char_arg)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_char_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, 0xb1bab0ba, b_, s_, i_, l_,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, 0xb1bab0ba, b_, s_, i_, l_,
                                                      f_, d_, r_),
               ANI_ERROR);
     // clang-format off
@@ -375,7 +375,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_char_arg)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char", "wrong value"},
@@ -388,16 +388,16 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_char_arg)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_byte_arg)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_byte_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, 0xb1bab0ba, s_, i_, l_,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, 0xb1bab0ba, s_, i_, l_,
                                                      f_, d_, r_),
               ANI_ERROR);
     // clang-format off
@@ -405,7 +405,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_byte_arg)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -418,16 +418,16 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_byte_arg)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_short_arg)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_short_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, 0xb1bab0ba, i_, l_,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, 0xb1bab0ba, i_, l_,
                                                      f_, d_, r_),
               ANI_ERROR);
     // clang-format off
@@ -435,7 +435,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_short_arg)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -448,16 +448,16 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_short_arg)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_ref_arg)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_ref_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_,
                                                      nullptr),
               ANI_ERROR);
     // clang-format off
@@ -465,7 +465,7 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_ref_arg)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       ", "wrong method arguments"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -478,39 +478,39 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_ref_arg)
         {"[8]", "ani_ref", "wrong value"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_all_args)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
         {"...", "       ", "wrong method"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_return_type)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_return_type)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "intMethod", "zcbsilfdC{std.core.String}:i", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ wrong_ret }}Method", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong return type"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -523,25 +523,25 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_return_type)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, wrong_object_type)
+TEST_F(ObjectCallMethod{{ Type }}Test, wrong_object_type)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Animal", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Animal", &object_);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -554,27 +554,27 @@ TEST_F(ObjectCallMethodBooleanTest, wrong_object_type)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, object_from_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}Test, object_from_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
-    ani_boolean result;
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"...", "       "},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -587,15 +587,15 @@ TEST_F(ObjectCallMethodBooleanTest, object_from_local_scope)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
+TEST_F(ObjectCallMethod{{ Type }}Test, cross_thread_method_call_from_native_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanTest>)}};
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethod{{ Type }}Test>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     std::thread([this]() {
@@ -604,7 +604,7 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
 
         ani_class cls {};
         ani_object object {};
-        GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
+        GetClassAndObject(env, &cls, "ani_verify_test_object_call_method_{{ type }}.Parent", &object);
 
         // In the native "foo" method, the "voidParamMethod" method is found
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -618,36 +618,36 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call_from_native_method)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, object_from_escape_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}Test, object_from_escape_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object);
     ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, call_method_on_global_ref)
+TEST_F(ObjectCallMethod{{ Type }}Test, call_method_on_global_ref)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ani_object gobject {};
     ASSERT_EQ(env_->GlobalReference_Create(object_, reinterpret_cast<ani_ref *>(&gobject)), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, gobject, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, gobject, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call)
+TEST_F(ObjectCallMethod{{ Type }}Test, cross_thread_method_call)
 {
     ani_method method;
 
@@ -657,44 +657,44 @@ TEST_F(ObjectCallMethodBooleanTest, cross_thread_method_call)
 
         ani_class cls {};
         ani_object object {};
-        GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
-        ASSERT_EQ(env->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method), ANI_OK);
+        GetClassAndObject(env, &cls, "ani_verify_test_object_call_method_{{ type }}.Parent", &object);
+        ASSERT_EQ(env->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method), ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     }).join();
 
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
 }
 
 // Issue 28700
-TEST_F(ObjectCallMethodBooleanTest, DISABLED_method_call_from_native_method)
+TEST_F(ObjectCallMethod{{ Type }}Test, DISABLED_method_call_from_native_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     std::array methods = {ani_native_function {
-        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ObjectCallMethodBooleanTest>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ObjectCallMethod{{ Type }}Test>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_FindMethod(class_, "voidParamMethod", ":z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "voidParamMethod", ":{{ ret }}", &method), ANI_OK);
 
     // In the native "bar" method, the "voidParamMethod" method is called
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object_, "bar", "C{std.core.Object}l:", object_, method),
               ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, method_call_from_native_method_1)
+TEST_F(ObjectCallMethod{{ Type }}Test, method_call_from_native_method_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanTest>)}};
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethod{{ Type }}Test>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     // In the native "foo" method, the "voidParamMethod" method is found
@@ -705,55 +705,55 @@ TEST_F(ObjectCallMethodBooleanTest, method_call_from_native_method_1)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, method_call_in_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}Test, method_call_in_local_scope)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, call_parent_method)
+TEST_F(ObjectCallMethod{{ Type }}Test, call_parent_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanTest, success)
+TEST_F(ObjectCallMethod{{ Type }}Test, success)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
+    ani_{{ type }} result;
     ASSERT_EQ(
-        env_->c_api->Object_CallMethod_Boolean(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
+        env_->c_api->Object_CallMethod_{{ Type }}(env_, object_, method_, &result, z_, c_, b_, s_, i_, l_, f_, d_, r_),
         ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_env)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_env)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(nullptr, object_, method_, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -766,22 +766,22 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_env)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_object_0)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_object_0)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, nullptr, method_, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, nullptr, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -794,24 +794,24 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_object_0)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, cls_1)
+TEST_F(ObjectCallMethod{{ Type }}ATest, cls_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ASSERT_EQ(env_->GetNull(reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference type: null"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -824,18 +824,18 @@ TEST_F(ObjectCallMethodBooleanATest, cls_1)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_method_0)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_0)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     ani_static_method method {};
-    ASSERT_EQ(env_->Class_FindStaticMethod(class_, "staticBooleanMethod", "zcbsilfdC{std.core.String}:z", &method),
+    ASSERT_EQ(env_->Class_FindStaticMethod(class_, "static{{ Type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method),
               ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, reinterpret_cast<ani_method>(method), &result,
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, reinterpret_cast<ani_method>(method), &result,
                                                        args_.data()),
               ANI_ERROR);
     // clang-format off
@@ -843,7 +843,7 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_method_0)
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong type: ani_static_method, expected: ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -856,58 +856,58 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_method_0)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_method_1)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     const auto fakeMethod = reinterpret_cast<ani_method>(static_cast<long>(0x0ff0f0f));  // NOLINT(google-runtime-int)
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, fakeMethod, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, fakeMethod, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *", "wrong method"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_method_2)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_method_2)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, nullptr, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, nullptr, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *", "wrong method"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_result)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_result)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, nullptr, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, nullptr, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -920,58 +920,58 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_result)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_args)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_args)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, nullptr), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, nullptr), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_all_args)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(nullptr, nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong method"},
-        {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
         {"args", "ani_value *", "wrong arguments value"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_boolean_arg)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_{{ type }}_arg)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    const int fakeBoolean = 0xb1ba;
-    args_[0].i = fakeBoolean;
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    const int fake{{ Type }} = 0xb1ba;
+    args_[0].i = fake{{ Type }};
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *", "wrong method arguments"},
         {"[0]", "ani_boolean", "wrong value"},
         {"[1]", "ani_char"},
@@ -984,22 +984,22 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_boolean_arg)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_return_type)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_return_type)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "intMethod", "zcbsilfdC{std.core.String}:i", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ wrong_ret }}Method", "zcbsilfdC{std.core.String}:{{ wrong_ret_short }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong return type"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -1012,23 +1012,23 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_return_type)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, wrong_object_type)
+TEST_F(ObjectCallMethod{{ Type }}ATest, wrong_object_type)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Animal", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Animal", &object_);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -1041,25 +1041,25 @@ TEST_F(ObjectCallMethodBooleanATest, wrong_object_type)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, object_from_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}ATest, object_from_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_ERROR);
     // clang-format off
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"object", "ani_object", "wrong reference"},
         {"method", "ani_method", "wrong object for method"},
-        {"result", "ani_boolean *"},
+        {"result", "ani_{{ type }} *"},
         {"args", "ani_value *"},
         {"[0]", "ani_boolean"},
         {"[1]", "ani_char"},
@@ -1072,15 +1072,15 @@ TEST_F(ObjectCallMethodBooleanATest, object_from_local_scope)
         {"[8]", "ani_ref"},
     };
     // clang-format on
-    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_Boolean_A", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Object_CallMethod_{{ Type }}_A", testLines);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method)
+TEST_F(ObjectCallMethod{{ Type }}ATest, cross_thread_method_call_from_native_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanATest>)}};
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethod{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     std::thread([this]() {
@@ -1089,7 +1089,7 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method
 
         ani_class cls {};
         ani_object object {};
-        GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
+        GetClassAndObject(env, &cls, "ani_verify_test_object_call_method_{{ type }}.Parent", &object);
 
         // In the native "foo" method, the "voidParamMethod" method is found
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -1103,32 +1103,32 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call_from_native_method
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, object_from_escape_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}ATest, object_from_escape_local_scope)
 {
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateEscapeLocalScope(nr3), ANI_OK);
     ani_object object {};
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object);
     ASSERT_EQ(env_->DestroyEscapeLocalScope(object, reinterpret_cast<ani_ref *>(&object_)), ANI_OK);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, call_method_on_global_ref)
+TEST_F(ObjectCallMethod{{ Type }}ATest, call_method_on_global_ref)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     ani_object gobject {};
     ASSERT_EQ(env_->GlobalReference_Create(object_, reinterpret_cast<ani_ref *>(&gobject)), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, gobject, method_, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, gobject, method_, &result, args_.data()), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call)
+TEST_F(ObjectCallMethod{{ Type }}ATest, cross_thread_method_call)
 {
     ani_method method;
 
@@ -1138,42 +1138,42 @@ TEST_F(ObjectCallMethodBooleanATest, cross_thread_method_call)
 
         ani_class cls {};
         ani_object object {};
-        GetClassAndObject(env, &cls, "verify_object_call_method_boolean_test.Parent", &object);
-        ASSERT_EQ(env->Class_FindMethod(cls, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method), ANI_OK);
+        GetClassAndObject(env, &cls, "ani_verify_test_object_call_method_{{ type }}.Parent", &object);
+        ASSERT_EQ(env->Class_FindMethod(cls, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method), ANI_OK);
 
         ASSERT_EQ(vm_->DetachCurrentThread(), ANI_OK);
     }).join();
 
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method, &result, args_.data()), ANI_OK);
 }
 
 // Issue 28700
-TEST_F(ObjectCallMethodBooleanATest, DISABLED_method_call_from_native_method)
+TEST_F(ObjectCallMethod{{ Type }}ATest, DISABLED_method_call_from_native_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     std::array methods = {ani_native_function {
-        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ObjectCallMethodBooleanATest>)}};
+        "bar", "C{std.core.Object}l:", reinterpret_cast<void *>(A::NativeBar<ObjectCallMethod{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     ani_method method;
-    ASSERT_EQ(env_->Class_FindMethod(class_, "voidParamMethod", ":z", &method), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "voidParamMethod", ":{{ ret }}", &method), ANI_OK);
 
     // In the native "bar" method, the "voidParamMethod" method is called
     ASSERT_EQ(env_->c_api->Object_CallMethodByName_Void(env_, object_, "bar", "C{std.core.Object}l:", object_, method),
               ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, method_call_from_native_method_1)
+TEST_F(ObjectCallMethod{{ Type }}ATest, method_call_from_native_method_1)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
 
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
-        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethodBooleanATest>)}};
+        ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ObjectCallMethod{{ Type }}ATest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(class_, methods.data(), methods.size()), ANI_OK);
 
     // In the native "foo" method, the "voidParamMethod" method is found
@@ -1184,34 +1184,34 @@ TEST_F(ObjectCallMethodBooleanATest, method_call_from_native_method_1)
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object_, "baz", ":"), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, method_call_in_local_scope)
+TEST_F(ObjectCallMethod{{ Type }}ATest, method_call_in_local_scope)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
     const int nr3 = 3;
     ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_OK);
     ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, call_parent_method)
+TEST_F(ObjectCallMethod{{ Type }}ATest, call_parent_method)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Child", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Child", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_OK);
 }
 
-TEST_F(ObjectCallMethodBooleanATest, success)
+TEST_F(ObjectCallMethod{{ Type }}ATest, success)
 {
-    GetClassAndObject(env_, &class_, "verify_object_call_method_boolean_test.Parent", &object_);
-    ASSERT_EQ(env_->Class_FindMethod(class_, "booleanMethod", "zcbsilfdC{std.core.String}:z", &method_), ANI_OK);
+    GetClassAndObject(env_, &class_, "ani_verify_test_object_call_method_{{ type }}.Parent", &object_);
+    ASSERT_EQ(env_->Class_FindMethod(class_, "{{ type }}Method", "zcbsilfdC{std.core.String}:{{ ret }}", &method_), ANI_OK);
 
-    ani_boolean result;
-    ASSERT_EQ(env_->c_api->Object_CallMethod_Boolean_A(env_, object_, method_, &result, args_.data()), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Object_CallMethod_{{ Type }}_A(env_, object_, method_, &result, args_.data()), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::verify::testing

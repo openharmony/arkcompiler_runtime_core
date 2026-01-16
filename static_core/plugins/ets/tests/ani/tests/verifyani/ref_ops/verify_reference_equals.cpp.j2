@@ -17,7 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
-class ReferenceStrictEqualsTest : public VerifyAniTest {
+class Reference{{ Suff }}Test : public VerifyAniTest {
 public:
     void SetUp() override
     {
@@ -27,7 +27,7 @@ public:
 
         ASSERT_EQ(env_->String_NewUTF8("abc", 3U, &str), ANI_OK);
 
-        ASSERT_EQ(env_->FindModule("verify_reference_strict_equals_test", &module_), ANI_OK);
+        ASSERT_EQ(env_->FindModule("ani_verify_test_reference_{{ suff }}", &module_), ANI_OK);
         std::array functions = {
             ani_native_function {"stackRefWithLocal",
                                  "X{C{std.core.Null}C{std.core.String}}:", reinterpret_cast<void *>(StackRefWithLocal)},
@@ -61,7 +61,7 @@ private:
         ani_ref nullRef {};
         ASSERT_EQ(env->GetNull(&nullRef), ANI_OK);
 
-        ASSERT_EQ(env->c_api->Reference_StrictEquals(env, ref, nullRef, &res), ANI_OK);
+        ASSERT_EQ(env->c_api->Reference_{{ Suff }}(env, ref, nullRef, &res), ANI_OK);
         ASSERT_EQ(res, ANI_TRUE);
     }
 
@@ -74,7 +74,7 @@ private:
 
         ani_ref gref {};
         ASSERT_EQ(env->GlobalReference_Create(nullRef, &gref), ANI_OK);
-        ASSERT_EQ(env->c_api->Reference_StrictEquals(env, ref, gref, &res), ANI_OK);
+        ASSERT_EQ(env->c_api->Reference_{{ Suff }}(env, ref, gref, &res), ANI_OK);
         ASSERT_EQ(env->GlobalReference_Delete(gref), ANI_OK);
 
         ASSERT_EQ(res, ANI_TRUE);
@@ -99,15 +99,15 @@ private:
 
     static ani_long CheckRefFromAnotherFrame(ani_env *env)
     {
-        ani_boolean isEquals = ANI_FALSE;
-        ani_status status = env->c_api->Reference_StrictEquals(env, someRef_, someRef_, &isEquals);
+        ani_boolean is{{ Suff }} = ANI_FALSE;
+        ani_status status = env->c_api->Reference_{{ Suff }}(env, someRef_, someRef_, &is{{ Suff }});
         return status;
     }
 
     static ani_long FuncAddress(ani_env *env, ani_ref ref)
     {
         ani_boolean res {};
-        auto status = env->c_api->Reference_StrictEquals(env, ref - sizeof(void *), ref - sizeof(void *), &res);
+        auto status = env->c_api->Reference_{{ Suff }}(env, ref - sizeof(void *), ref - sizeof(void *), &res);
         return status;
     }
 
@@ -116,126 +116,126 @@ private:
         ani_boolean res {};
         const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
 
-        auto status = env->c_api->Reference_StrictEquals(env, fakeRef, fakeRef, &res);
+        auto status = env->c_api->Reference_{{ Suff }}(env, fakeRef, fakeRef, &res);
         return status;
     }
 };
 
-ani_ref ReferenceStrictEqualsTest::someRef_ {};
-ani_module ReferenceStrictEqualsTest::module_ {};
+ani_ref Reference{{ Suff }}Test::someRef_ {};
+ani_module Reference{{ Suff }}Test::module_ {};
 
-TEST_F(ReferenceStrictEqualsTest, wrong_env)
+TEST_F(Reference{{ Suff }}Test, wrong_env)
 {
     ani_boolean res = ANI_FALSE;
 
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(nullptr, nullRef, nullRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(nullptr, nullRef, nullRef, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref0", "ani_ref"},
         {"ref1", "ani_ref"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, wrong_ref0)
+TEST_F(Reference{{ Suff }}Test, wrong_ref0)
 {
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullptr, nullRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullptr, nullRef, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref0", "ani_ref", "wrong reference"},
         {"ref1", "ani_ref"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, wrong_ref1)
+TEST_F(Reference{{ Suff }}Test, wrong_ref1)
 {
     ani_boolean res = ANI_FALSE;
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, nullptr, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, nullptr, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref0", "ani_ref"},
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, wrong_res)
+TEST_F(Reference{{ Suff }}Test, wrong_res)
 {
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, nullRef, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, nullRef, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
         {"ref0", "ani_ref"},
         {"ref1", "ani_ref"},
         {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, wrong_all_args)
+TEST_F(Reference{{ Suff }}Test, wrong_all_args)
 {
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(nullptr, nullptr, nullptr, nullptr), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "called from incorrect the native scope"},
         {"ref0", "ani_ref", "wrong reference"},
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *", "wrong pointer for storing 'ani_boolean'"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, throw_error)
+TEST_F(Reference{{ Suff }}Test, throw_error)
 {
     ThrowError();
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, nullRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, nullRef, &res), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has unhandled an error"},
         {"ref0", "ani_ref"},
         {"ref1", "ani_ref"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
 }
 
-TEST_F(ReferenceStrictEqualsTest, global_ref)
+TEST_F(Reference{{ Suff }}Test, global_ref)
 {
     ani_ref gref1 {};
     ani_ref gref2 {};
     ASSERT_EQ(env_->GlobalReference_Create(nullRef, &gref1), ANI_OK);
     ASSERT_EQ(env_->GlobalReference_Create(nullRef, &gref2), ANI_OK);
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, gref1, gref2, &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, gref1, gref2, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, gref2, &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, gref2, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
-    ASSERT_EQ(env_->GlobalReference_Delete(gref1), ANI_OK);
     ASSERT_EQ(env_->GlobalReference_Delete(gref2), ANI_OK);
+    ASSERT_EQ(env_->GlobalReference_Delete(gref1), ANI_OK);
 }
 
-TEST_F(ReferenceStrictEqualsTest, stack_ref_local)
+TEST_F(Reference{{ Suff }}Test, stack_ref_local)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRefWithLocal", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
-TEST_F(ReferenceStrictEqualsTest, stack_ref_global)
+TEST_F(Reference{{ Suff }}Test, stack_ref_global)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "checkStackRefWithGlobal", ":", &fn), ANI_OK);
     ASSERT_EQ(env_->Function_Call_Void(fn), ANI_OK);
 }
 
-TEST_F(ReferenceStrictEqualsTest, anotherFrame)
+TEST_F(Reference{{ Suff }}Test, anotherFrame)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "anotherFrame", nullptr, &fn), ANI_OK);
@@ -249,10 +249,10 @@ TEST_F(ReferenceStrictEqualsTest, anotherFrame)
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, funcAddress)
+TEST_F(Reference{{ Suff }}Test, funcAddress)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "funcAddress", nullptr, &fn), ANI_OK);
@@ -266,10 +266,10 @@ TEST_F(ReferenceStrictEqualsTest, funcAddress)
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, bad_stack_ref1)
+TEST_F(Reference{{ Suff }}Test, bad_stack_ref1)
 {
     ani_function fn {};
     ASSERT_EQ(env_->Module_FindFunction(module_, "badStackRef", nullptr, &fn), ANI_OK);
@@ -284,15 +284,15 @@ TEST_F(ReferenceStrictEqualsTest, bad_stack_ref1)
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, bad_stack_ref2)
+TEST_F(Reference{{ Suff }}Test, bad_stack_ref2)
 {
     const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff00));  // NOLINT(google-runtime-int)
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, fakeRef, fakeRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, fakeRef, fakeRef, &res), ANI_ERROR);
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -300,15 +300,15 @@ TEST_F(ReferenceStrictEqualsTest, bad_stack_ref2)
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, bad_local_ref)
+TEST_F(Reference{{ Suff }}Test, bad_local_ref)
 {
     const auto fakeRef = reinterpret_cast<ani_ref>(static_cast<long>(0x0ff01));  // NOLINT(google-runtime-int)
 
     ani_boolean res {};
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, fakeRef, fakeRef, &res), ANI_ERROR);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, fakeRef, fakeRef, &res), ANI_ERROR);
 
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
@@ -316,17 +316,17 @@ TEST_F(ReferenceStrictEqualsTest, bad_local_ref)
         {"ref1", "ani_ref", "wrong reference"},
         {"result", "ani_boolean"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("Reference_StrictEquals", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("Reference_{{ Suff }}", testLines);
 }
 
-TEST_F(ReferenceStrictEqualsTest, success)
+TEST_F(Reference{{ Suff }}Test, success)
 {
     ani_boolean res = ANI_FALSE;
 
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, nullRef, &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, nullRef, &res), ANI_OK);
     ASSERT_EQ(res, ANI_TRUE);
 
-    ASSERT_EQ(env_->c_api->Reference_StrictEquals(env_, nullRef, static_cast<ani_ref>(str), &res), ANI_OK);
+    ASSERT_EQ(env_->c_api->Reference_{{ Suff }}(env_, nullRef, static_cast<ani_ref>(str), &res), ANI_OK);
     ASSERT_EQ(res, ANI_FALSE);
 }
 

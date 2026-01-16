@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,21 @@
  */
 
 class Parent {
-    public booleanMethod(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): boolean {
-        return true;
+    public {{ type }}Method(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ ret_type }} {
+        return {{ value }};
     }
 }
 
-function booleanFunction(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): boolean {
-    return false;
+function {{ type }}Function(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ ret_type }} {
+    return {{ value }};
 }
 
-function intFunction(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): int {
-    return 24;
+function {{ wrong_ret }}Function(z: boolean, c: char, b: byte, s: short, i: int, l: long, f: float, d: double, r: string): {{ wrong_ret }} {
+    return 1;
 }
 
-function voidParamFunction(): boolean {
-    return true;
+function voidParamFunction(): {{ ret_type }} {
+    return {{ value }};
 }
 
 native function bar(m: long): void;
