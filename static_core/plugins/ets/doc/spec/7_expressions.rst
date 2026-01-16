@@ -761,7 +761,13 @@ it is called a *simple name*.
 
 *Simple name* refers to the following:
 
--  Entity declared in the current module;
+-  Entity declared in the current module
+
+   - Variable name
+   - Constant name
+   - Function name
+   - Accessor name
+
 -  Local variable or parameter of the surrounding function or method.
 
 If not a *simple name*, *qualifiedName* refers to the following:
