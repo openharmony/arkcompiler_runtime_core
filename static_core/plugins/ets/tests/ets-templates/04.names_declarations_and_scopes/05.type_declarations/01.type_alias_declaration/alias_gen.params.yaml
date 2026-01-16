@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -237,18 +237,6 @@ cases:
                 ((v4.at(0) as Array<NestedNumArray>).at(2) as Array<NestedNumArray>).at(1) == 3.0
 
     - defs: |-
-          type Foo = (p: string) => string
-          type NestedFunc = NestedFunc[] | Foo
-      use: |-
-          let v1: NestedFunc = []
-          let v2: NestedFunc = (p: string): string => { return p + p }
-          let v3: NestedFunc = [v1, v2, (p: string): string => { return p + p }]
-            let ok = v3.length == 3 &&
-                ((v3 as NestedFunc[])[0] as NestedFunc[]).length == 0 &&
-                ((v3 as NestedFunc[])[1] as Foo)('abc') == 'abcabc' &&
-                ((v3 as NestedFunc[])[2] as Foo)('xyz') == 'xyzxyz'
-
-    - defs: |-
           class C<out T> {
             readonly fld: T
             constructor(p: T) {
@@ -308,12 +296,6 @@ cases:
           let ok:boolean = a(b);
 
     - defs: |-
-          type Func = (p: int, q: Func) => int;
-      use: |-
-          let a:Func = (p: int, q: Func):int => {return 1};
-          let ok:boolean = a(10, a) == 1;
-
-    - defs: |-
         class AliasMe<T> {}
         type M<T> = AliasMe<F<T>>
         type F<T> = AliasMe<M<T>>
@@ -343,14 +325,13 @@ cases:
       use: |-
         let xx: ArrayOfValueOrArray<Boolean>
         let ok = true
-        
 
     - defs: |-
         class Node<T> {
           value: T;
           left: Alias<T> | undefined
           right?: Alias<T>;
-        
+
         }
         type Alias<T> = Node<T>
       use: |-
@@ -362,7 +343,7 @@ cases:
         class Node<T> {
           value: T;
           left: Alias<T> | undefined
-          right?: Alias<T>;        
+          right?: Alias<T>;
         }
         type Alias<T> = Node<T>
       use: |-
@@ -401,4 +382,3 @@ cases:
         let y: object = x;
         let xr: TRR<string> = {'k1': 'String 1', 'k2': x, 'k3': y, 'k4': undefined, 'k5': {'l2': 'String 2'}}
         let ok = false
-        

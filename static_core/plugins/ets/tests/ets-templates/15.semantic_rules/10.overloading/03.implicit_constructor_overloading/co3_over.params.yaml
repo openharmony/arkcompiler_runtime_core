@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,23 +68,25 @@ cases:
               fld: int
               constructor(a: Object) { this.fld = 1}
               constructor(p: int, a: Object) { this.fld = 2 }
-              constructor(p: int, a: Object, b?: Object) { this.fld = 3 }
-              constructor(p: int, a?: Object, b?: Object, c: Object = new Error()) { this.fld = 4 }
+              constructor(p: int, a: int, b?: Object) { this.fld = 3 }
+              constructor(p: int, a: int, b: int, c: Object = new Error()) { this.fld = 4 }
           }
       use: |-
           let a: A = new A(new Error())
           arktest.assertEQ(a.fld, 1)
-          a = new A(1)
-          arktest.assertEQ(a.fld, 4)
           a = new A(1, a)
           arktest.assertEQ(a.fld, 2)
-          a = new A(1, a, a)
+          a = new A(1, 1)
+          arktest.assertEQ(a.fld, 2)
+          a = new A(1, 1, a)
           arktest.assertEQ(a.fld, 3)
-          a = new A(1, a, a, a)
+          a = new A(1, 1, 1)
+          arktest.assertEQ(a.fld, 3)
+          a = new A(1, 1, 1, a)
           arktest.assertEQ(a.fld, 4)
 
     - decl: |-
-          // constructor overloaded with boxing/unboxing parameters
+          // constructor overloaded with value types
           class A {
               fld: number
               constructor(a: boolean) { this.fld = 1.0 }
@@ -106,21 +108,16 @@ cases:
           // constructor overloaded with rest parameters
           class A {
               fld: int
-              constructor(a: Error, b: Object[]) { this.fld = 1 }
-              constructor(a: Error, ...b: Object[]) { this.fld = 2 }
-              constructor(a: Error, b: Error, ...c: Object[]) { this.fld = 3 }
+              constructor(a: Error, b: FixedArray<int>) { this.fld = 1 }
+              constructor(a: Error, b: int, ...c: FixedArray<int>) { this.fld = 2 }
+              constructor(a: Error, b: Error, ...c: int[]) { this.fld = 3 }
               constructor(a: Error, b: Object, c: Object, d: Object) { this.fld = 4 }
           }
       use: |-
-          let a: A = new A(new Error(), new Object[1])
-          arktest.assertEQ(a.fld, 1)
-          a = new A(new Error(), new Long(), new Error())
-          arktest.assertEQ(a.fld, 2)
-          a = new A(new Error(), new Error())
-          arktest.assertEQ(a.fld, 3)
-          a = new A(new Error(), new Object(), new Object(), new Object())
-          arktest.assertEQ(a.fld, 4)
-      tags: negative, compile-only
+          arktest.assertEQ(new A(new Error(), [1]).fld, 1)
+          arktest.assertEQ(new A(new Error(), 1, 2, 3, 4).fld, 2)
+          arktest.assertEQ(new A(new Error(), new Error()).fld, 3)
+          arktest.assertEQ(new A(new Error(), new Object(), new Object(), new Object()).fld, 4)
 
     - decl: |-
           // constructor overloaded with type variables

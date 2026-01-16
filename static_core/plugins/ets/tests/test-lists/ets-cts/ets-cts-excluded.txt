@@ -1,6 +1,4 @@
 # move from exclude to ignore list on 4/12
-#24840
-17.experimental_features/09.overload_declarations/04.constructor_overload_declarations/co3_over_3.ets
 
 ################################################
 # primitive types refactoring. Need to rework the following tests, because they're incorrect:

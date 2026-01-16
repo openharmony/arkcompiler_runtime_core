@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,7 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    If the signatures of two methods with the same name are not
-    override-equivalent, then the return types of those
-    methods can have any kind of relationship.
-tags: [{{c.tags}}]
+desc: Two or more unnamed constructors within a class are implicitly overloaded.
 ---*/
 {{c.decl}}
 
