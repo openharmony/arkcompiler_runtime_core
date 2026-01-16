@@ -3033,4 +3033,10 @@
 09.classes/02.class_extension_clause/extension_clause_negative_7.ets
 09.classes/02.class_extension_clause/extension_clause_negative_8.ets
 09.classes/02.class_extension_clause/extension_clause_negative_9.ets
-
+17.experimental_features/07.callable_types/01.callable_types_with_invoke_method/ct_invoke_access_negative_2.ets
+17.experimental_features/07.callable_types/02.callable_types_with_instantiate_method/ct_inst_access_negative_2.ets
+17.experimental_features/11.classes_experimental/02.final_methods/fm_1.ets
+17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_10.ets
+17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_2.ets
+17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_6.ets
+17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_7.ets

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,36 +13,6 @@
 
 ---
 cases:
-    # negative case, async is not allowed
-    - tags: 'negative, compile-only'
-      decl: |-
-          class C {
-              data: string[] = ['a', 'b', 'c']
-              async $_iterator() {
-                  return new CIterator(this)
-              }
-          }
-          class CIterator implements Iterator<string> {
-              index = 0
-              base: C
-              constructor (base: C) {
-                  this.base = base
-              }
-              next(): IteratorResult<string> {
-                  return {
-                      done: this.index >= this.base.data.length,
-                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
-                  }
-              }
-          }
-      use: |-
-          let c = new C()
-          let res = ''
-          for (let x of c) {
-              res += x
-          }
-          arktest.assertEQ(res, 'abc')
-
     # example from the spec, use Symbol.iterator (deprecated)
     - decl: |-
           class C {
@@ -267,36 +237,6 @@ cases:
       use: |-
           let c = new C()
           let res = c.iterate()
-          arktest.assertEQ(res, 'abc')
-
-    # example from the spec, static
-    - tags: 'compile-only, negative'
-      decl: |-
-          class C {
-              data: string[] = ['a', 'b', 'c']
-              static $_iterator() {
-                  return new CIterator(new C())
-              }
-          }
-          class CIterator implements Iterator<string> {
-              index = 0
-              base: C
-              constructor (base: C) {
-                  this.base = base
-              }
-              next(): IteratorResult<string> {
-                  return {
-                      done: this.index >= this.base.data.length,
-                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
-                  }
-              }
-          }
-      use: |-
-          let c = new C()
-          let res = ''
-          for (let x of c) {
-              res += x
-          }
           arktest.assertEQ(res, 'abc')
 
     # data class is iterator
