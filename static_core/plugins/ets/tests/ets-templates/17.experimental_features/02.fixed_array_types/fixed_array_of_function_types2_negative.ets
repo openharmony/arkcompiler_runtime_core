@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,28 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
+
 /*---
-desc: >-
-    The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
-    to an integer type. A compile-time error occurs otherwise.
-tags: [negative, compile-only]
-expected_out: "{{c.expected_out}}"
+desc: Not covariant fixed array assignment.
+tags: [compile-only, negative]
+expected_out: {{c.expected_out}}
 ---*/
 
-{{c.defs}}
-
-function main() {
-    {{c.use|indent}}
+class A {}
+class B extends A {}
+type HandlerReq = (a: B) => B
+type HandlerB = (a: B) => A
+const handlerB: HandlerB = (a: B): A => {
+  return new B()
 }
-{%- endfor %}
+type HandlerNothing = () => A
+const handlerNothing: HandlerNothing = (): A => {
+  return new B()
+}
+
+function main(): void {
+  {{c.logic|indent}}
+}
+
+{% endfor %}

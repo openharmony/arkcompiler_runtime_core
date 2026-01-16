@@ -152,7 +152,6 @@
 15.semantic_rules/06.compatibility_call_args/single_params_22.ets
 15.semantic_rules/06.compatibility_call_args/single_params_23.ets
 15.semantic_rules/06.compatibility_call_args/single_params_6.ets
-17.experimental_features/02.fixed_array_types/fixed_array_types_ext_17.ets
 18.annotations/01.declaring_annotations/declaration_default_values_0.ets
 18.annotations/01.declaring_annotations/declaration_default_values_1.ets
 18.annotations/01.declaring_annotations/declaration_default_values_2.ets

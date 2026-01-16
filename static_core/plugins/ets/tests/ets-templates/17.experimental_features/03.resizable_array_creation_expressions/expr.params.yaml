@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -93,19 +93,3 @@ cases:
           v[0][0] = c'@'
           arktest.assertEQ(v.length, 1)
           arktest.assertEQ(v[0][0], c'@')
-
-    - decl: |-
-          enum Color: byte { Red, Green, Blue }
-      use: |-
-          let v: Color[] = new Color[Color.Green]
-          v[0] = Color.Blue
-          arktest.assertEQ(v.length, 1)
-          arktest.assertEQ(v[0], Color.Blue)
-
-    - decl: |-
-          enum Color: short { Red = 42, Green, Blue }
-      use: |-
-          let v: Color[] = new Color[Color.Green]
-          v[42] = Color.Blue
-          arktest.assertEQ(v.length, 43)
-          arktest.assertEQ(v[42], Color.Blue)

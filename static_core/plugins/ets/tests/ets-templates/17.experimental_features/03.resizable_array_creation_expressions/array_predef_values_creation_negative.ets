@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for logic in logics %}
+{% for c in cases %}
+
 /*---
-desc: >-
-    The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
-    to an integer type. A compile-time error occurs otherwise.
+desc: Create FixedArray with wrong predefined values
 tags: [negative, compile-only]
-expected_out: "{{c.expected_out}}"
+expected_out: " Semantic error ESE0002: Type 'Array<{{c.expected_out_type}}>' has no call signatures."
 ---*/
 
-{{c.defs}}
+{% set logic_data = logic|replace("check_type", c.type)|replace("check_value", c.value) %}
 
-function main() {
-    {{c.use|indent}}
+
+function main(): void {
+  {{logic_data}}
 }
-{%- endfor %}
+
+{% endfor %}
+{% endfor %}
