@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 /*---
 desc: A default method can be explicitly declared private in an interface body.
+tags: [compile-only, negative]
 ---*/
 interface Vehicle {
     private getHorsePower3(rpm: int, torque: int): int {
@@ -30,8 +31,4 @@ class Car implements Vehicle {
     private getHorsePower3(rpm: int, torque: int): int {
         return (rpm * torque) / 2626;
     }
-}
-
-function main(): void {
-    arktest.assertEQ( new Car().getPwrIndex(1), 2 )
 }

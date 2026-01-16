@@ -2064,14 +2064,17 @@
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_rte_13.ets
 
 #18763 es2panda aborts on for-of over a union type array
-17.experimental_features/06.iterable_types/it_11.ets
-17.experimental_features/06.iterable_types/it_12.ets
+17.experimental_features/06.iterable_types/it_9.ets
+17.experimental_features/06.iterable_types/it_10.ets
+
+#18767 Cannot use $_iterator from superclass
+17.experimental_features/06.iterable_types/it_3.ets
 
 #18767 Cannot use $_iterator from superclass
 17.experimental_features/06.iterable_types/it_4.ets
 
 #31022
-17.experimental_features/06.iterable_types/it_20.ets
+17.experimental_features/06.iterable_types/it_18.ets
 
 #27999
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_1.ets
@@ -2166,7 +2169,6 @@
 
 #24129
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/im_over2_3.ets
-17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
 
 #32036  No CTE when no new overload defined in the class or subinterface
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/cte_int_cls_n_0.ets
@@ -2277,6 +2279,9 @@
 17.experimental_features/11.classes_experimental/03.constructor_names/super_multicall_n.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/super_this_call_n.ets
 17.experimental_features/11.classes_experimental/03.constructor_names/this_multicall_n.ets
+
+#32096 no CTE class declares method with the same name as that of a private method in superinterface
+17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
 
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets

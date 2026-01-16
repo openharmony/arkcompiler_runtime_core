@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,8 @@
 {%- for c in cases %}
 
 /*---
-desc: >-
-    The method instantiate can have an arbitrary signature by itself.
-    If it is to be used in a type call expression, then its first parameter
-    must be a factory. The method can have or not have other parameters,
-    and those parameters can be arbitrary.
+desc: A type is callable if the name of the type can be used in a call expression.
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}

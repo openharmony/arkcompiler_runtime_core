@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 
 /*---
 desc: >-
-    Only a constructor - not the methods invoke or instantiate -
-    is called in a new expression.
-tags: [{{c.tags}}]
+    The method invoke can have an arbitrary signature. The method can be used
+    in a type call expression in either case above. If the signature has
+    parameters, then the call must contain corresponding arguments.
+tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
