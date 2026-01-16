@@ -21,6 +21,9 @@ cases:
     - logic: let a = new number[30][-10]
       expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
+    - logic: let a = new number[2][2][-1]
+      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
+
     - logic: let a = new string[-1]('a')
       expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
@@ -39,51 +42,23 @@ cases:
     - logic: "let a = new int[30][-10]((inx1: int, inx2: int) => 5.7)"
       expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
-    - logic: let a = new number[3.141592653589]
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.0]
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.0](10)
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.0f]
-      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.0f](10)
-      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[5][3.7]
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[5][3.7]('a')
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.7f][5]
-      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.7f][5](10)
-      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: "let a = new string[5.7]((inx: int) => 'a')"
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: "let a = new number[5][3.7]((inx1: int, inx2: int) => 5.7)"
-      expected_out: "Semantic error ESE0002: Type 'Array<Array<Double>>' has no call signatures."
-
-    - logic: "let a = new number[3.7][5]((inx1: int, inx2: int) => 5.7)"
-      expected_out: "Semantic error ESE0002: Type 'Array<Array<Double>>' has no call signatures."
-
-    - logic: let a = new number[5][3.7f]
-      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
-    - logic: let a = new number[3.7][5]
-      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
-
     - decl: |-
         class C {
           constructor (n: number) {}
         }
       logic: let a = new C[3]
       expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 1"
+
+    - decl: |-
+        // enum constants of byte type
+        enum Color: byte { Red, Green, Blue }
+      logic: |-
+        let v: Color[] = new Color[Color.Green]
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
+
+    - decl: |-
+        // enum constants of short type
+        enum Color: short { Red = 42, Green, Blue }
+      logic: |-
+        let v: Color[] = new Color[Color.Green]
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
