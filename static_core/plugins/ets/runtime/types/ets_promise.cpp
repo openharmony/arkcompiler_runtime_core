@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,9 +76,11 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const C
     auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
     ASSERT(method != nullptr);
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
-    [[maybe_unused]] LaunchResult launchResult =
+    auto launchResult =
         coroManager->Launch(event, method, std::move(args), groupId, EtsCoroutine::PROMISE_CALLBACK, false);
-    ASSERT(launchResult == LaunchResult::OK);
+    if (UNLIKELY(launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED)) {
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(event);
+    }
 }
 
 }  // namespace ark::ets

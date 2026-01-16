@@ -473,7 +473,10 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        }
+        vm->GetGlobalObjectStorage()->Remove(promiseRef);
         return 0;
     }
     return ToObjPtr(promiseHandle.GetPtr());
