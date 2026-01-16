@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from runner import utils
-from runner.common_exceptions import FileNotFoundException, IncorrectEnumValue, MalformedStepConfigurationException
+from runner.common_exceptions import IncorrectEnumValue, MalformedStepConfigurationException
 from runner.enum_types.base_enum import BaseEnum
 from runner.logger import Log
 from runner.options.options import IOptions
@@ -142,8 +142,6 @@ class Step(IOptions):
         if value == "":
             return None
         value_path = Path(value)
-        if not value_path.exists():
-            raise FileNotFoundException(f"Cannot find {value_path}. Check value of 'executable-path'")
         return value_path
 
     @staticmethod
@@ -170,6 +168,11 @@ class Step(IOptions):
         else:
             raise MalformedStepConfigurationException(f"missed required field '{name}'")
         return value
+
+    def executable_path_exists(self) -> bool:
+        if self.executable_path is None:
+            return False
+        return bool(self.executable_path.exists() and self.executable_path.is_file())
 
     def pretty_str(self) -> str:
         if not str(self.executable_path):
