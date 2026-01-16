@@ -171,6 +171,10 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
 
 void StackfulCoroutineWorker::RequestSchedule()
 {
+    auto *current = Coroutine::GetCurrent();
+    if (!IsIdle()) {
+        TriggerSchedulerExternally(current);
+    }
     RequestScheduleImpl();
 }
 
