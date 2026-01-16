@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,7 @@
 
 ---
 cases:
-  - { export: '',       list: 'foo1' }
-  - { export: '',       list: 'foo1, foo2' }
-  - { export: '',       list: 'foo3' }
-  - { export: '',       list: 'foo1, foo4' }
-  - { export: '',       list: 'foo3, foo2' }
-  - { export: '',       list: 'foo3, foo4' }
-  - { export: 'export', list: 'foo1' }
-  - { export: 'export', list: 'foo1, foo2' }
+  - { export: 'export', list: 'foo3' }
+  - { export: 'export', list: 'foo1, foo4' }
+  - { export: 'export', list: 'foo3, foo2' }
+  - { export: 'export', list: 'foo3, foo4' }

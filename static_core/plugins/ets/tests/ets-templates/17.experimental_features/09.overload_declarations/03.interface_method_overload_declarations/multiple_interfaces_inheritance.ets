@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,7 +20,6 @@ desc: >-
     A method is defined in a subinterface with the same name as the method in
     the superinterface. If signatures are override-compatible, then overriding
     is used. Otherwise, a compile-time error occurs.
-tags: [{{c.tags}}]
 ---*/
 
 let res: number = 0;
