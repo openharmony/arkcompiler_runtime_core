@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +32,48 @@ function testReadonlyArrayProxyOps(): void {
     arktest.assertTrue(handler.getTrapped)
 }
 
-function main(): int {
-    const suite = new arktest.ArkTestsuite("Proxy API")
+class ReadonlyArrayProxyHandler extends proxy.DefaultReadonlyArrayProxyHandler<number> {}
 
-    suite.addTest("ReadonlyArray proxy operations", testReadonlyArrayProxyOps)
+function testReadonlyArrayProxyLastIndexOf(): void {
+    let array: ReadonlyArray<number> = [1, 2, 3, 2, 4];
+    const arrayProxy = proxy.Proxy.create(array, new ReadonlyArrayProxyHandler());
+    let res = arrayProxy.lastIndexOf(2);
+    arktest.assertEQ(res, 3);
 
-    return suite.run()
+    res = arrayProxy.lastIndexOf(2, arrayProxy.length);
+    arktest.assertEQ(res, 3);
+
+    res = arrayProxy.lastIndexOf(2, 2);
+    arktest.assertEQ(res, 1);
+
+    res = arrayProxy.lastIndexOf(2, undefined);
+    arktest.assertEQ(res, -1);
 }
 
+class ArrayProxyHandler extends proxy.DefaultArrayProxyHandler<number> {}
+
+function testArrayProxyLastIndexOf(): void {
+    let array: number[] = [1, 2, 3, 2, 4];
+    const arrayProxy = proxy.Proxy.create(array, new ArrayProxyHandler());
+    let res = arrayProxy.lastIndexOf(2);
+    arktest.assertEQ(res, 3);
+
+    res = arrayProxy.lastIndexOf(2, arrayProxy.length);
+    arktest.assertEQ(res, 3);
+
+    res = arrayProxy.lastIndexOf(2, 2);
+    arktest.assertEQ(res, 1);
+
+    res = arrayProxy.lastIndexOf(2, undefined);
+    arktest.assertEQ(res, -1);
+}
+
+function main(): int {
+    const suite = new arktest.ArkTestsuite("Proxy API");
+
+    suite.addTest("ReadonlyArray proxy operations", testReadonlyArrayProxyOps);
+    suite.addTest("ReadonlyArray Proxy lastIndexOf", testReadonlyArrayProxyLastIndexOf);
+    suite.addTest("Array Proxy lastIndexOf", testArrayProxyLastIndexOf);
+
+    return suite.run();
+}
