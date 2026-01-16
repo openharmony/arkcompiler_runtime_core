@@ -871,9 +871,15 @@ private:
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
     FIELD_UNUSED ObjectPointer<EtsRuntimeLinker> linker_;
+#if defined(PANDA_32_BIT_MANAGED_POINTER)
     FIELD_UNUSED uint32_t flags_;
     FIELD_UNUSED EtsLong typeMetaData_;
     FIELD_UNUSED EtsLong overloadMap_;
+#else
+    FIELD_UNUSED EtsLong typeMetaData_;
+    FIELD_UNUSED EtsLong overloadMap_;
+    FIELD_UNUSED uint32_t flags_;
+#endif
     // NOTE(zhushihao8, #20712) remove this field after removal of `GetMethodsNum`
     std::atomic_uint32_t methodsNum_ {0};
     // ets.Class fields END

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,8 @@ public:
     static constexpr size_t MAX_STRING_LENGTH = 0x40000000U;  // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+// only support hwasan in arm64 now
+#if defined(ARK_HYBRID) || defined(USE_CMC_GC) || (defined(USE_HWASAN) && defined(PANDA_TARGET_ARM64))
     static constexpr size_t PADDING_OFFSET = BaseObjectSize();
 #else
     static constexpr size_t LENGTH_AND_FLAGS_OFFSET = BaseObjectSize();
@@ -113,7 +114,8 @@ public:
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "LengthBits does not match the field size");
 
-#if defined(ARK_HYBRID) || defined(USE_CMC_GC)
+// only support hwasan in arm64 now
+#if defined(ARK_HYBRID) || defined(USE_CMC_GC) || (defined(USE_HWASAN) && defined(PANDA_TARGET_ARM64))
     // When enable cmcgc, the ObjectHeader in 1.2 is 128 bits, to align with it, a 64bits padding is needed.
     PRIMITIVE_FIELD(padding, uint64_t, PADDING_OFFSET, LENGTH_AND_FLAGS_OFFSET)
 #endif
