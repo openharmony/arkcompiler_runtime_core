@@ -59,8 +59,21 @@ void UnhandledObjectManager::UpdateObjects(const GCRootUpdater &gcRootUpdater)
 
 static void VisitObjectsImpl(PandaUnorderedSet<EtsObject *> &objects, const GCRootVisitor &visitor)
 {
-    for (auto *obj : objects) {
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, obj->GetCoreType()));
+    PandaVector<EtsObject *> toInsert;
+    for (auto it = objects.begin(); it != objects.end();) {
+        ObjectHeader *obj = (*it)->GetCoreType();
+        ObjectPointerType pointer = ToObjPtr(obj);
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, &pointer));
+        if (pointer != ToObjPtr(obj)) {
+            toInsert.push_back(reinterpret_cast<EtsObject *>(pointer));
+            auto del_it = it++;
+            objects.erase(del_it);
+        } else {
+            ++it;
+        }
+    }
+    for (auto pointer : toInsert) {
+        objects.insert(pointer);
     }
 }
 

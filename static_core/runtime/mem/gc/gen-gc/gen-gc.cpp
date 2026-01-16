@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -506,7 +506,8 @@ void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objectsStack, const GCTas
         {
             ScopedTiming t1("VisitInternalStringTable", *this->GetTiming());
             this->GetPandaVm()->VisitStringTable(
-                [this, &objectsStack](ObjectHeader *str) {
+                [this, &objectsStack](GCRoot root) {
+                    auto str = root.GetObjectHeader();
                     if (this->MarkObjectIfNotMarked(str)) {
                         ASSERT(str != nullptr);
                         objectsStack->PushToStack(RootType::STRING_TABLE, str);
@@ -534,7 +535,8 @@ void GenGC<LanguageConfig>::FullMark(const GCTask &task)
     // Mark all reachable objects
     MarkRoots(&objectsStack, CardTableVisitFlag::VISIT_DISABLED, refPred, flags);
     this->GetPandaVm()->VisitStringTable(
-        [this, &objectsStack](ObjectHeader *str) {
+        [this, &objectsStack](GCRoot root) {
+            auto str = root.GetObjectHeader();
             if (this->MarkObjectIfNotMarked(str)) {
                 ASSERT(str != nullptr);
                 objectsStack.PushToStack(RootType::STRING_TABLE, str);

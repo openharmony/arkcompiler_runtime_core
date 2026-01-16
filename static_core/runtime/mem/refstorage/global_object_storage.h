@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -298,12 +298,12 @@ private:
         {
             os::memory::ReadLockHolder lk(mutex_);
 
-            for (const auto &ref : storage_) {
+            for (auto &ref : storage_) {
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
                     if (obj != nullptr) {
                         LOG(DEBUG, GC) << " Found root from global storage: " << mem::GetDebugInfoAboutObject(obj);
-                        gcRootVisitor({rootType, obj});
+                        gcRootVisitor({rootType, reinterpret_cast<ObjectHeader **>(&ref)});
                     }
                 }
             }

@@ -152,6 +152,8 @@ public:
         return MEMBER_OFFSET(BaseClass, bitField_);
     }
 
+    mem::GCRoot GetGCRoot();
+
 protected:
     void SetBitField(StringType bitField)
     {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_RUNTIME_MEM_GC_G1_G1_EVACUATE_REGIONS_WORKER_STATE_INL_H
 #define PANDA_RUNTIME_MEM_GC_G1_G1_EVACUATE_REGIONS_WORKER_STATE_INL_H
 
+#include <atomic>
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/region_space.h"
@@ -78,12 +79,27 @@ ObjectHeader *G1EvacuateRegionsWorkerState<LanguageConfig>::Evacuate(ObjectHeade
     }
     // Don't initialize memory for an object here because we will use memcpy anyway
     ASSERT(dst != nullptr);
+// This memcpy is read of ObjectHeader, which can be false positive data race with write of new forwarding address
+// It is false positive, because if other thread invokes SetForwardAddress on ObjectHeader, then this copy will be
+// aborted
+#ifdef PANDA_TSAN_ON
+    std::size_t ohsize = sizeof(ObjectHeader);
+    if (objectSize > ohsize) {
+        [[maybe_unused]] auto copyResult = memcpy_s(ToVoidPtr(ToUintPtr(dst) + ohsize), objectSize - ohsize,
+                                                    ToVoidPtr(ToUintPtr(obj) + ohsize), objectSize - ohsize);
+        ASSERT(copyResult == 0);
+    }
+    auto *newObj = static_cast<ObjectHeader *>(dst);
+    newObj->SetMark(markWord);
+    newObj->SetClass(obj->ClassAddr<Class>());
+#else
     [[maybe_unused]] auto copyResult = memcpy_s(dst, objectSize, obj, objectSize);
     ASSERT(copyResult == 0);
+    auto *newObj = static_cast<ObjectHeader *>(dst);
+#endif
     // need to mark as alive moved object
     ASSERT(regionTo_->GetLiveBitmap() != nullptr);
 
-    auto *newObj = static_cast<ObjectHeader *>(dst);
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     // Since we forward with relaxed memory order there are no ordering with above CopyObject and other threads should
     // not examine forwardee content without synchronization
@@ -169,19 +185,22 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
 {
     GCRootVisitor gcMarkCollectionSet = [this](const GCRoot &gcRoot) {
         ASSERT(gcRoot.GetFromObjectHeader() == nullptr);
-        auto *rootObject = gcRoot.GetObjectHeader();
-        ASSERT(rootObject != nullptr);
-        LOG(DEBUG, GC) << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
-        if (!gc_->InGCSweepRange(rootObject)) {
+        auto *rootPointer = gcRoot.GetObjectPointer();
+        auto object = gcRoot.GetObjectHeader();
+        ASSERT(object != nullptr);
+        LOG(DEBUG, GC) << "Handle root " << GetDebugInfoAboutObject(object) << " from: " << gcRoot.GetType();
+        if (!gc_->InGCSweepRange(object)) {
             // Skip non-collection-set roots
             return;
         }
-        MarkWord markWord = rootObject->AtomicGetMark(std::memory_order_relaxed);
+        // Atomic with relaxed order reason: memory order is not required
+        MarkWord markWord = object->AtomicGetMark(std::memory_order_relaxed);
         if (markWord.IsForwarded()) {
+            *rootPointer = markWord.GetForwardingAddress();
             return;
         }
-        LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(rootObject);
-        Evacuate(rootObject, markWord);
+        LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(object);
+        *rootPointer = ToObjPtrType(Evacuate(object, markWord));
     };
 
     gc_->VisitRoots(gcMarkCollectionSet, VisitGCRootFlags::ACCESS_ROOT_NONE);

@@ -72,7 +72,7 @@ private:
     friend class EtsPlatformTypesIrtocOffsets;
     // asciiCharCache_ must be allocated in a non-movable heap region; therefore, we should need to handle
     // this pointer in `ark::ets::PandaEtsVM::UpdateVmRefs`.
-    EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
+    mutable EtsTypedObjectArray<EtsString> *asciiCharCache_ {nullptr};
     void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 

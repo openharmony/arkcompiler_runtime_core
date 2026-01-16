@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -285,7 +285,7 @@ using ObjectVisitor = std::function<void(ObjectHeader *)>;
 /// from_object is object from which we found to_object by reference.
 using ObjectVisitorEx = std::function<void(ObjectHeader *fromObject, ObjectHeader *toObject)>;
 using ObjectChecker = std::function<bool(const ObjectHeader *)>;
-using GCRootVisitor = std::function<void(const mem::GCRoot &)>;
+using GCRootVisitor = std::function<void(mem::GCRoot)>;
 using GCRootUpdater = std::function<bool(ObjectHeader **)>;
 using MemRangeChecker = std::function<bool(mem::MemRange &)>;
 

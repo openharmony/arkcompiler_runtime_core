@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ private:
     inline void UpdateHeapObject([[maybe_unused]] const GCRootUpdater &gcRootUpdater) {}
 
     // TaggedType has been specialized for js, Other types are empty implementation
-    inline void VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb) {}
+    inline void VisitGCRoots([[maybe_unused]] const GCRootVisitor &cb) {}
 
     // TaggedType has been specialized for js, Other types are empty implementation
     inline void DealUpdateObject([[maybe_unused]] std::array<Node, GLOBAL_BLOCK_SIZE> *block,
@@ -106,13 +106,13 @@ private:
     }
     // TaggedType has been specialized for js, Other types are empty implementation
     inline void DealVisitGCRoots([[maybe_unused]] std::array<Node, GLOBAL_BLOCK_SIZE> *block,
-                                 [[maybe_unused]] size_t index, [[maybe_unused]] const ObjectVisitor &cb)
+                                 [[maybe_unused]] size_t index, [[maybe_unused]] const GCRootVisitor &cb)
     {
     }
 
     inline void UpdateGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block, size_t size,
                                      const GCRootUpdater &gcRootUpdater);
-    inline void VisitGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block, size_t size, const ObjectVisitor &cb);
+    inline void VisitGCRootsInBlock(std::array<Node, GLOBAL_BLOCK_SIZE> *block, size_t size, const GCRootVisitor &cb);
 
     inline void FreeGlobalNodes()
     {

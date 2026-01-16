@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_HANDLE_STORAGE_INL_H
 #define PANDA_RUNTIME_HANDLE_STORAGE_INL_H
 
+#include "libarkbase/mem/mem.h"
 #include "runtime/handle_storage.h"
 #include "runtime/mem/object_helpers.h"
 
@@ -128,19 +129,21 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject(const GCRootU
 
 template <>
 inline void HandleStorage<coretypes::TaggedType>::VisitGCRootsForNode(
-    std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size, const ObjectVisitor &cb)
+    std::array<coretypes::TaggedType, NODE_BLOCK_SIZE> *node, uint32_t size, const GCRootVisitor &cb)
 {
     for (uint32_t j = 0; j < size; ++j) {
         coretypes::TaggedValue obj(node->at(j));
         if (obj.IsHeapObject()) {
-            cb(obj.GetHeapObject());
+            ObjectHeader *objH = obj.GetHeapObject();
+            cb({mem::RootType::ROOT_THREAD, reinterpret_cast<ObjectPointerType *>(&obj)});
+            (*node)[j] = coretypes::TaggedValue(objH).GetRawData();
         }
     }
 }
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
+inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const GCRootVisitor &cb)
 {
     if (lastIndex_ == 0) {
         return;
@@ -189,17 +192,16 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject(const GCRootUpdater 
 
 template <>
 inline void HandleStorage<ObjectHeader *>::VisitGCRootsForNode(std::array<ObjectHeader *, NODE_BLOCK_SIZE> *node,
-                                                               uint32_t size, const ObjectVisitor &cb)
+                                                               uint32_t size, const GCRootVisitor &cb)
 {
     for (uint32_t j = 0; j < size; ++j) {
-        auto obj = reinterpret_cast<ObjectHeader *>(node->at(j));
-        cb(obj);
+        cb({mem::RootType::ROOT_THREAD, &(node->at(j))});
     }
 }
 
 template <>
 // CC-OFFNXT(G.FUD.06) solid logic
-inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
+inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const GCRootVisitor &cb)
 {
     if (lastIndex_ == 0) {
         return;

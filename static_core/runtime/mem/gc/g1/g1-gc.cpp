@@ -1682,13 +1682,12 @@ GCRootVisitor G1GC<LanguageConfig>::CreateGCRootVisitor(GCMarkingStackType &obje
                                    GC::EmptyReferenceProcessPredicate);
         } else {
             // Skip non-collection-set roots
-            auto rootObjectPtr = gcRoot.GetObjectHeader();
-            ASSERT(rootObjectPtr != nullptr);
-            if (marker.MarkIfNotMarked(rootObjectPtr)) {
-                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObjectPtr);
-                objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
+            ASSERT(rootObject != nullptr);
+            if (marker.MarkIfNotMarked(rootObject)) {
+                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObject);
+                objectsStack.PushToStack(gcRoot.GetType(), rootObject);
             } else {
-                LOG_DEBUG_GC << "Skip root: " << std::hex << rootObjectPtr;
+                LOG_DEBUG_GC << "Skip root: " << std::hex << rootObject;
             }
         }
     };
@@ -2035,9 +2034,10 @@ void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack, Marker 
         // InitialMark. STW
         if constexpr (!PROCESS_WEAK_REFS) {
             GCRootVisitor gcMarkRoots = [&markingStack, &marker](const GCRoot &gcRoot) {
-                ValidateObject(gcRoot.GetType(), gcRoot.GetObjectHeader());
-                if (marker.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                    markingStack.PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
+                ObjectHeader *object = gcRoot.GetObjectHeader();
+                ValidateObject(gcRoot.GetType(), object);
+                if (marker.MarkIfNotMarked(object)) {
+                    markingStack.PushToStack(gcRoot.GetType(), object);
                 }
             };
             this->VisitRoots(gcMarkRoots, VisitGCRootFlags::ACCESS_ROOT_ALL);
@@ -2884,18 +2884,20 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
     {
         ScopedTiming t("VisitClassRoots", *this->GetTiming());
         this->VisitClassRoots([this, objectsStack, marker](const GCRoot &gcRoot) {
-            if (marker.MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                ASSERT(gcRoot.GetObjectHeader() != nullptr);
-                objectsStack->PushToStack(RootType::ROOT_CLASS, gcRoot.GetObjectHeader());
+            ObjectHeader *object = gcRoot.GetObjectHeader();
+            ASSERT(object != nullptr);
+            if (marker.MarkIfNotMarked(object)) {
+                objectsStack->PushToStack(RootType::ROOT_CLASS, object);
             } else {
-                LOG_DEBUG_GC << "Skip root: " << gcRoot.GetObjectHeader();
+                LOG_DEBUG_GC << "Skip root: " << object;
             }
         });
     }
     {
         ScopedTiming t("VisitInternalStringTable", *this->GetTiming());
         this->GetPandaVm()->VisitStringTable(
-            [objectsStack, &marker](ObjectHeader *str) {
+            [objectsStack, &marker](GCRoot root) {
+                auto str = root.GetObjectHeader();
                 if (marker.MarkIfNotMarked(str)) {
                     ASSERT(str != nullptr);
                     objectsStack->PushToStack(RootType::STRING_TABLE, str);

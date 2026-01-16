@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,17 +59,19 @@ NO_THREAD_SAFETY_ANALYSIS void GenerationalGC<LanguageConfig>::MarkImpl(Marker *
 {
     // concurrent visit class roots
     this->VisitClassRoots([this, marker, objectsStack](const GCRoot &gcRoot) {
-        if (marker->MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-            ASSERT(gcRoot.GetObjectHeader() != nullptr);
-            objectsStack->PushToStack(RootType::ROOT_CLASS, gcRoot.GetObjectHeader());
+        auto *object = gcRoot.GetObjectHeader();
+        if (marker->MarkIfNotMarked(object)) {
+            ASSERT(object != nullptr);
+            objectsStack->PushToStack(RootType::ROOT_CLASS, object);
         } else {
-            LOG_DEBUG_GC << "Skip root: " << gcRoot.GetObjectHeader();
+            LOG_DEBUG_GC << "Skip root: " << object;
         }
     });
     MarkStack(marker, objectsStack, markPreprocess, refPred);
     {
         ScopedTiming t1("VisitInternalStringTable", *this->GetTiming());
-        auto visitor = [marker, objectsStack](ObjectHeader *str) {
+        auto visitor = [marker, objectsStack](GCRoot root) {
+            auto str = root.GetObjectHeader();
             if (marker->MarkIfNotMarked(str)) {
                 ASSERT(str != nullptr);
                 objectsStack->PushToStack(RootType::STRING_TABLE, str);
@@ -102,8 +104,9 @@ void GenerationalGC<LanguageConfig>::VisitCardTableConcurrent(Marker *marker, GC
             this->ProcessReference(objectsStack, fromObject->ClassAddr<BaseClass>(), fromObject,
                                    GC::EmptyReferenceProcessPredicate);
         } else {
-            if (marker->MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                objectsStack->PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
+            auto *object = gcRoot.GetObjectHeader();
+            if (marker->MarkIfNotMarked(object)) {
+                objectsStack->PushToStack(gcRoot.GetType(), object);
             }
         }
     };

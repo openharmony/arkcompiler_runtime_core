@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,7 +347,7 @@ coretypes::String *StringTable::InternalTable::GetStringFast(const panda_file::F
     return nullptr;
 }
 
-void StringTable::InternalTable::VisitRoots(const StringVisitor &visitor, mem::VisitGCRootFlags flags)
+void StringTable::InternalTable::VisitRoots(const GCRootVisitor &visitor, mem::VisitGCRootFlags flags)
 {
     ASSERT(BitCount(flags & (mem::VisitGCRootFlags::ACCESS_ROOT_ALL | mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW)) ==
            1);
@@ -365,13 +365,13 @@ void StringTable::InternalTable::VisitRoots(const StringVisitor &visitor, mem::V
 
     if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ALL) != 0) {
         os::memory::ReadLockHolder lock(tableLock_);
-        for (const auto &v : table_) {
-            visitor(v.second);
+        for (auto &v : table_) {
+            visitor({mem::RootType::STRING_TABLE, reinterpret_cast<ObjectHeader **>(&v.second)});
         }
     } else if ((flags & mem::VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW) != 0) {
         os::memory::ReadLockHolder lock(tableLock_);
-        for (const auto str : newStringTable_) {
-            visitor(str);
+        for (auto &str : newStringTable_) {
+            visitor({mem::RootType::STRING_TABLE, reinterpret_cast<ObjectHeader **>(&str)});
         }
     } else {
         LOG(FATAL, RUNTIME) << "Unknown VisitGCRootFlags: " << static_cast<uint32_t>(flags);

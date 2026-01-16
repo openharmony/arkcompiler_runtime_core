@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -303,7 +303,6 @@ ObjectHeader *PandaCoreVM::GetOOMErrorObject()
 
 void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
-    PandaVM::VisitVmRoots(visitor);
     // Visit PT roots
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
         ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
@@ -316,7 +315,6 @@ void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
 
 void PandaCoreVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
 {
-    PandaVM::UpdateVmRefs(gcRootUpdater);
     LOG(DEBUG, GC) << "=== PTRoots Update moved. BEGIN ===";
     GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
         ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));

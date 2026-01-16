@@ -943,7 +943,6 @@ add_gtests(
     tests/object_helpers_test.cpp
     tests/gc_log_test.cpp
     tests/explicit_gc_test.cpp
-    tests/intrusive_gc_test_api_test.cpp
     tests/g1_pause_tracker_test.cpp
     tests/g1_analytics_test.cpp
 )

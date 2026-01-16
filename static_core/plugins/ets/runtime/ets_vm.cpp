@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -637,8 +637,7 @@ void PandaEtsVM::HandleUncaughtException()
     GetUnhandledObjectManager()->InvokeErrorHandler(coro, exception);
 }
 
-void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisitor &visitor,
-                          const EtsCoroutine *coroutine)
+void HandleEmptyArguments(PandaVector<Value> &arguments, const GCRootVisitor &visitor, const EtsCoroutine *coroutine)
 {
     // arguments may be empty in the following cases:
     // 1. The entrypoint is static and doesn't accept any arguments
@@ -651,9 +650,8 @@ void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisit
     if (!entrypoint->IsStatic()) {
         // handle 'this' argument
         ASSERT(arguments[argIdx].IsReference());
-        ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
-        ASSERT(arg != nullptr);
-        visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
+        ASSERT(arguments[argIdx].GetAs<ObjectHeader *>() != nullptr);
+        visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arguments[argIdx].GetGCRoot()));
         ++argIdx;
     }
     while (it != panda_file::ShortyIterator()) {
@@ -661,7 +659,7 @@ void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisit
             ASSERT(arguments[argIdx].IsReference());
             ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
             if (arg != nullptr) {
-                visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
+                visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arguments[argIdx].GetGCRoot()));
             }
         }
         ++it;
@@ -694,16 +692,16 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         if (!coroutine->HasManagedEntrypoint()) {
             return true;
         }
-        const PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
+        PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
         if (!arguments.empty()) {
             HandleEmptyArguments(arguments, visitor, coroutine);
         }
         return true;
     });
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&doubleToStringCache_)));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&floatToStringCache_)));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&longToStringCache_)));
         PlatformTypes(this)->VisitRoots(visitor);
     }
     {

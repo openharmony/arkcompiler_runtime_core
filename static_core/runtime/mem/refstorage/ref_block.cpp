@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,11 +59,11 @@ void RefBlock::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType ro
         }
         for (size_t index = 0; index < REFS_IN_BLOCK; index++) {
             if (block->IsBusyIndex(index)) {
-                auto objectPointer = block->refs_[index];
-                auto *obj = objectPointer.ReinterpretCast<ObjectHeader *>();
+                ObjectPointerType *objectPointer = &(block->refs_[index].GetPointer());
+                ObjectHeader *obj = block->refs_[index].ReinterpretCast<ObjectHeader *>();
                 ASSERT(obj->ClassAddr<BaseClass>() != nullptr);
                 LOG(DEBUG, GC) << " Found root from ref-storage: " << mem::GetDebugInfoAboutObject(obj);
-                gcRootVisitor({rootType, obj});
+                gcRootVisitor({rootType, objectPointer});
             }
         }
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,7 @@ void VisitVmRoots(const GCRootVisitor &visitor, PandaVM *vm)
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     RootManager<EtsLanguageConfig> rootManager(vm);
     rootManager.VisitNonHeapRoots(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
-    vm->VisitStringTable([&visitor](ObjectHeader *str) { visitor(GCRoot(RootType::STRING_TABLE, str)); },
-                         VisitGCRootFlags::ACCESS_ROOT_ALL);
+    vm->VisitStringTable(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
 }
 
 void UpdateVmRoots(const GCRootUpdater &updater, PandaVM *vm)

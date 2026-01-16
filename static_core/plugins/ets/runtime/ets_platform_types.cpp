@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ void EtsPlatformTypes::CreateAndInitializeCaches()
 void EtsPlatformTypes::VisitRoots(const GCRootVisitor &visitor) const
 {
     if (asciiCharCache_ != nullptr) {
-        visitor(mem::GCRoot(mem::RootType::ROOT_VM, asciiCharCache_->GetCoreType()));
+        visitor(mem::GCRoot(mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&asciiCharCache_)));
     }
 }
 
