@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1267,5 +1267,58 @@ TEST_F(AsyncWorkTest, AsyncWorkWithFunctionPointer)
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
     ASSERT_EQ(functionData.result, expected);
+}
+
+TEST_F(AsyncWorkTest, QueueAsyncWorkInCompleteCB)
+{
+    auto outerEvent = AsyncWorkEvent();
+    AsyncWork *outerWork = nullptr;
+    static int testCounter = 0;
+    using TestData = std::tuple<AsyncWorkEvent &, AsyncWork **, int *>;
+    auto outerTestData = TestData {outerEvent, &outerWork, &testCounter};
+    auto outerStatus = CreateAsyncWork(
+        env_,
+        []([[maybe_unused]] ani_env *outerEnv, void *outerData) {
+            auto &[_, outerW, outerCounter] = *reinterpret_cast<TestData *>(outerData);
+            (*outerCounter)++;
+        },
+        [](ani_env *outerEnv, WorkStatus outerS, void *outerData) {
+            auto &[outerE, outerW, outerCounter] = *reinterpret_cast<TestData *>(outerData);
+            ASSERT_EQ(outerS, WorkStatus::OK);
+            (*outerCounter)++;
+
+            auto innerEvent = AsyncWorkEvent();
+            AsyncWork *innerWork = nullptr;
+            auto innerTestData = TestData {innerEvent, &innerWork, &testCounter};
+            auto innerStatus = CreateAsyncWork(
+                outerEnv,
+                []([[maybe_unused]] ani_env *innerEnv, void *innerData) {
+                    auto &[_, innerW, innerCounter] = *reinterpret_cast<TestData *>(innerData);
+                    (*innerCounter)++;
+                },
+                [](ani_env *innerEnv, WorkStatus innerS, void *innerData) {
+                    auto &[innerE, innerW, innerCounter] = *reinterpret_cast<TestData *>(innerData);
+                    ASSERT_EQ(innerS, WorkStatus::OK);
+                    (*innerCounter)++;
+                    ASSERT_EQ(DeleteAsyncWork(innerEnv, *innerW), WorkStatus::OK);
+                    innerE.Fire();
+                },
+                (void *)&innerTestData, &innerWork);
+            ASSERT_EQ(innerStatus, WorkStatus::OK);
+            ASSERT_NE(innerWork, nullptr);
+
+            ASSERT_EQ(QueueAsyncWork(outerEnv, innerWork), WorkStatus::OK);
+            innerEvent.Wait();
+            ASSERT_EQ(DeleteAsyncWork(outerEnv, *outerW), WorkStatus::OK);
+            outerE.Fire();
+        },
+        (void *)&outerTestData, &outerWork);
+    ASSERT_EQ(outerStatus, WorkStatus::OK);
+    ASSERT_NE(outerWork, nullptr);
+
+    ASSERT_EQ(QueueAsyncWork(env_, outerWork), WorkStatus::OK);
+    outerEvent.Wait();
+    constexpr int expected = 4;
+    ASSERT_EQ(testCounter, expected);
 }
 }  // namespace ark::ets::ani_helpers::testing
