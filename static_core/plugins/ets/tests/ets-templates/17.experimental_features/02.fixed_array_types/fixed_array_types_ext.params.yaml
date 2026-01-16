@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,28 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # Interfaces with static members and type parameters inside
+--- # Cases for fixed arrays
 cases:
-  - desc: |-
-      Fixed arrays are not compatible with resizable arrays.
-      tags:
-        - negative
-        - compile-only
-    logic: |-
-      let fixedArr: FixedArray<number> = [1, 2, 3];
-      let resizeArr: number[] = [4, 5, 6];
-      fixedArr = resizeArr;
-
-  - desc: |-
-      Fixed arrays are not compatible with resizable arrays.
-      tags:
-        - negative
-        - compile-only
-    logic: |-
-      let fixedArr: FixedArray<number> = [1, 2, 3];
-      let resizeArr: number[] = [4, 5, 6];
-      resizeArr = fixedArr;
-
   - desc: Create a one-dimensional fixed array with the data type number.
     logic: |-
       let fixedArr: FixedArray<number> = [1, 2, 3];
@@ -107,34 +87,6 @@ cases:
       arktest.expectThrow(() => {foo(100);}, expectedException)
       arktest.expectThrow(() => {foo(-1);}, expectedException)
       arktest.expectThrow(() => {foo(-100);}, expectedException)
-
-  - desc: |-
-      Index value cannot be less than zero.
-      tags:
-        - negative
-        - compile-only
-    logic: |-
-      let x: FixedArray<int> = [3, 4, 5];
-    sub_cases_logic:
-      - |-
-        x[-1];
-      - |-
-        x[-100] = 7;
-
-  - desc: |-
-      >-
-        Array element is accessed by its index. Index is an integer number
-        starting from 0 to array length minus 1.
-      tags:
-        - negative
-        - compile-only
-    logic: |-
-      let x: FixedArray<int> = [3, 4, 5];
-    sub_cases_logic:
-      - |-
-        x[1.0] = 7;
-      - |-
-        x[1.0f] = 7;
 
   - desc: Changing the values of array elements.
     logic: |-
@@ -404,23 +356,6 @@ cases:
         arktest.assertTrue(animals[1] instanceof Cat)
         arktest.assertTrue(animals[2] instanceof Animal)
 
-  - desc: |-
-      Not covariant fixed array assignment.
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class Animal {}
-      class Dog extends Animal {}
-      class Cat extends Animal {}
-    logic: |-
-      let dogs: FixedArray<Dog> = [new Dog(), new Dog(), new Dog()]
-    sub_cases_logic:
-      - |-
-        dogs[0] = new Animal()
-      - |-
-        dogs[0] = new Cat()
-
   - desc: Covariant fixed array assignment.
     decl: |-
       class A {}
@@ -506,71 +441,3 @@ cases:
         arktest.assertTrue(b instanceof B)
         arktest.assertEQ((a as B).field, 123)
         arktest.assertEQ((b as B).field, 321)
-
-  - desc: |-
-      Not covariant fixed array assignment.
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class A {}
-      class B extends A {}
-      class C extends A {}
-      type HandlerBInt = (a: B, b: int) => int
-      const handlerBInt: HandlerBInt = (a: B, b: int): int => {
-        return 10
-      }
-      type HandlerB = (a: B) => int
-      const handlerB: HandlerB = (a: B): int => {
-        return 10
-      }
-      type HandlerCInt = (a: C, b: int) => int
-      type HandlerCIntInt = (a: C, b: int, c: int) => int
-      const handlerCIntInt: HandlerCIntInt = (a: C, b: int, c: int): int => {
-        return 10
-      }
-    sub_cases_logic:
-      - |-
-        let fs: FixedArray<HandlerCInt> = [handlerBInt]
-      - |-
-        let fs: FixedArray<HandlerCInt|null> = [null]
-        fs[0] = handlerBInt
-      - |-
-        let fs: FixedArray<HandlerCInt> = [handlerB]
-      - |-
-        let fs: FixedArray<HandlerCInt|null> = [null]
-        fs[0] = handlerB
-      - |-
-        let fs: FixedArray<HandlerCInt> = [handlerCIntInt]
-      - |-
-        let fs: FixedArray<HandlerCInt|null> = [null]
-        fs[0] = handlerCIntInt
-
-  - desc: |-
-      Not covariant fixed array assignment.
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class A {}
-      class B extends A {}
-      type HandlerReq = (a: B) => B
-      type HandlerB = (a: B) => A
-      const handlerB: HandlerB = (a: B): A => {
-        return new B()
-      }
-      type HandlerNothing = () => A
-      const handlerNothing: HandlerNothing = (): A => {
-        return new B()
-      }
-    sub_cases_logic:
-      - |-
-        let fs: FixedArray<HandlerReq> = [handlerB]
-      - |-
-        let fs: FixedArray<HandlerReq|null> = [null]
-        fs[0] = handlerB
-      - |-
-        let fs: FixedArray<HandlerReq> = [handlerNothing]
-      - |-
-        let fs: FixedArray<HandlerReq|null> = [null]
-        fs[0] = handlerNothing

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,25 +16,6 @@ cases:
     logic: |-
       let a: FixedArray<number> = []
       arktest.assertEQ(a.length, 0)
-
-  - desc: |-
-      Create 1D FixedArray with wrong type values
-      tags:
-        - negative
-        - compile-only
-    sub_cases_logic:
-      - |-
-        let a: FixedArray<Object> = [1, 3, undefined]
-      - |-
-        let a: FixedArray<Object> = [1, null, 3]
-      - |-
-        let a: FixedArray<int> = [1, 3, 5.7]
-      - |-
-        let a: FixedArray<int> = [1, "abc", 5]
-      - |-
-        let a: FixedArray<string> = ["abc", 3, "efg"]
-      - |-
-        let a: FixedArray<boolean> = [true, false, "true"]
 
   - desc: Create 1D FixedArray with the data type int
     logic: |-
@@ -222,21 +203,6 @@ cases:
       arktest.assertEQ((animals[1] as Dog).bark(), "dog")
       arktest.assertTrue(animals[2] instanceof Cat)
 
-  - desc: |-
-      Create 1D FixedArray with not covariant subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class Animal {}
-      class Dog extends Animal {}
-      class Cat extends Animal {}
-    sub_cases_logic:
-      - |-
-        let dogs: FixedArray<Dog> = [new Dog, new Animal, new Dog]
-      - |-
-        let dogs: FixedArray<Dog> = [new Dog, new Dog, new Cat]
-
   - desc: Create 1D FixedArray with covariant function subtypes
     decl: |-
       class A {
@@ -279,45 +245,3 @@ cases:
       arktest.assertEQ(a[0](new B, 7).v, -20)
       arktest.assertEQ(a[1](new B, 7).v, 13)
       arktest.assertEQ(a[2](new B, 7).v, -567)
-
-  - desc: |-
-      Create 1D FixedArray with not covariant function subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class A {}
-      class B extends A {}
-      class C extends A {}
-      type HandlerReq = (a: B, b: int) => B
-      type HandlerCInt = (a: C, b: int) => B
-      const handlerCInt: HandlerCInt = (a: C, b: int): B => {
-        return new B
-      }
-      type HandlerBInt = (a: B, b: int) => A
-      const handlerBInt: HandlerBInt = (a: B, b: int): A => {
-        return new B
-      }
-      type HandlerB = (a: B) => A
-      const handlerB: HandlerB = (a: B): A => {
-        return new B
-      }
-      type HandlerBIntInt = (a: B, b: int, c: int) => B
-      const handlerBIntInt: HandlerBIntInt = (a: B, b: int, c: int): B => {
-        return new B
-      }
-      type HandlerNothing = () => C
-      const handlerNothing: HandlerNothing = (): C => {
-        return new C
-      }
-    sub_cases_logic:
-      - |-
-        let a: FixedArray<HandlerReq> = [handlerCInt]
-      - |-
-        let a: FixedArray<HandlerReq> = [handlerBInt]
-      - |-
-        let a: FixedArray<HandlerReq> = [handlerB]
-      - |-
-        let a: FixedArray<HandlerReq> = [handlerBIntInt]
-      - |-
-        let a: FixedArray<HandlerReq> = [handlerNothing]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
+{% for c in cases %}
+
 /*---
-desc: >-
-    The type of each dimensionExpression must be convertible (see Primitive Types Conversions)
-    to an integer type. A compile-time error occurs otherwise.
-tags: [negative, compile-only]
+desc: Create Array with wrong parameters
+tags: [compile-only, negative]
 expected_out: "{{c.expected_out}}"
 ---*/
 
-{{c.defs}}
+{{c.decl}}
 
-function main() {
-    {{c.use|indent}}
+function main(): void {
+{{c.logic|indent}}
 }
-{%- endfor %}
+
+{% endfor %}

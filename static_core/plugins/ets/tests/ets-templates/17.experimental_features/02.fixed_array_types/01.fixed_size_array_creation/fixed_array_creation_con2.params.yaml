@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,18 +16,6 @@ cases:
     logic: |-
       let a = new FixedArray<string>(0, "a")
       arktest.assertEQ(a.length, 0)
-
-  - desc: |-
-      Create FixedArray with length < 0
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-    sub_cases_logic:
-      - |-
-        let a = new FixedArray<string>(-1, "a")
-      - |-
-        let a = new FixedArray<number>(-30, 0)
 
   - desc: Create FixedArray with length < 0
     decl: |-
@@ -81,21 +69,6 @@ cases:
         arktest.assertEQ(a[i], [check_value])
       }
 
-  - desc: |-
-      Create FixedArray with wrong type values
-      tags:
-        - negative
-        - compile-only
-    check_variants:
-      - {check_type: "Object", check_value: "undefined"}
-      - {check_type: "Object", check_value: "null"}
-      - {check_type: "number", check_value: "\"abc\""}
-      - {check_type: "int", check_value: "5.7"}
-      - {check_type: "string", check_value: "123"}
-      - {check_type: "boolean", check_value: "\"true\""}
-    logic: |-
-      let a = new FixedArray<[check_type]>(30, [check_value])
-
   - desc: Create FixedArray with covariant subtypes
     decl: |-
       class Animal {
@@ -129,21 +102,6 @@ cases:
       for (let i = 0; i < 30; i++) {
         arktest.assertEQ((c[i] as Cat).name, "cat")
       }
-
-  - desc: |-
-      Create FixedArray with not covariant subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class Animal {}
-      class Dog extends Animal {}
-      class Cat extends Animal {}
-    sub_cases_logic:
-      - |-
-        let a = new FixedArray<Dog>(30, new Animal)
-      - |-
-        let a = new FixedArray<Dog>(30, new Cat)
 
   - desc: Create FixedArray with covariant function subtypes
     decl: |-
@@ -198,45 +156,3 @@ cases:
       for (let i = 0; i < 30; i++) {
         arktest.assertEQ((c[i](new B, 7).v, -567)
       }
-
-  - desc: |-
-      Create FixedArray with not covariant function subtypes
-      tags:
-        - negative
-        - compile-only
-    decl: |-
-      class A {}
-      class B extends A {}
-      class C extends A {}
-      type HandlerReq = (a: B, b: int) => B
-      type HandlerCInt = (a: C, b: int) => B
-      const handlerCInt: HandlerCInt = (a: C, b: int): B => {
-        return new B
-      }
-      type HandlerBInt = (a: B, b: int) => A
-      const handlerBInt: HandlerBInt = (a: B, b: int): A => {
-        return new B
-      }
-      type HandlerB = (a: B) => A
-      const handlerB: HandlerB = (a: B): A => {
-        return new B
-      }
-      type HandlerBIntInt = (a: B, b: int, c: int) => B
-      const handlerBIntInt: HandlerBIntInt = (a: B, b: int, c: int): B => {
-        return new B
-      }
-      type HandlerNothing = () => C
-      const handlerNothing: HandlerNothing = (): C => {
-        return new C
-      }
-    sub_cases_logic:
-      - |-
-        let a = new FixedArray<HandlerReq>(30, handlerCInt)
-      - |-
-        let a = new FixedArray<HandlerReq>(30, handlerBInt)
-      - |-
-        let a = new FixedArray<HandlerReq>(30, handlerB)
-      - |-
-        let a = new FixedArray<HandlerReq>(30, handlerBIntInt)
-      - |-
-        let a = new FixedArray<HandlerReq>(30, handlerNothing)

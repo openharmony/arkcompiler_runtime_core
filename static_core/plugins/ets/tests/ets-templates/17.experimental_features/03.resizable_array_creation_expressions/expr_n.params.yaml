@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,99 +14,135 @@
 ---
 cases:
     - use: |-
-          let v: number[] = new number[false]  // CTE: dimension is not assignable to int type
+          let v: number[] = new number[false]  // CTE: dimension is not assignable to int type          
+      expected_out: "Semantic error ESE0236: Type 'Boolean' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[] = new number[true]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Boolean' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[] = new number[new Object()]   // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Object' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[] = new number[new Error()]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Error' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[][] = new number[null][undefined]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'null' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[][] = new number[new Boolean(false)][1]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Boolean' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[][] = new number["abc"]["def"]   // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type '\\\"abc\\\"' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: int|short = 42 as short
       use: |-
           let v = new Object[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Int|Short' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: BigInt = new BigInt(1n)
       use: |-
           let v: number[] = new number[size]   // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'BigInt' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: bigint = 1n
       use: |-
           let v: number[] = new number[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'BigInt' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - use: |-
           let v: number[][][] = new number[2][2][-1]  // CTE: constant expression, negative value
+      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
     - decl: |-
           const size: int = -10
       use: |-
           let v: number[][] = new number[size][-size]  // CTE: constant expression, negative value
+      expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
     - decl: |-
           let size: Long = new Long(1 as long)
       use: |-
           let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Long' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: long = 1
       use: |-
           let v: byte[] = new byte[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Long' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: Number = new Number(1.0)
       use: |-
           let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: number = 1.0
       use: |-
           let v: string[] = new string[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: Float = new Float(1.0f)
       use: |-
           let v: Byte[] = new Byte[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           let size: float = 1.0f
       use: |-
           let v: Object[] = new Object[size]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           // enum constants of string type
           enum Color { Red = 'r', Green = 'g', Blue = 'b' }
       use: |-
           let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Color' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           // enum constants of long type
           enum Color { Red = 9223372036854775807, Green = 9223372036854775806, Blue = 9223372036854775805 }
       use: |-
           let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Long' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           // enum constants of float type
           enum Color: float { Red = 1.0f, Green = 2.0f, Blue = 3.0f }
       use: |-
           let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Float' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
     - decl: |-
           // enum constants of double type
           enum Color: double { Red = 1.0, Green = 2.0, Blue = 3.0 }
       use: |-
           let v: string[][] = new string[Color.Green][Color.Blue]  // CTE: dimension is not assignable to int type
+      expected_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
+
+    - decl: |-
+          // enum constants of byte type
+          enum Color: byte { Red, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
+
+    - decl: |-
+          // enum constants of short type
+          enum Color: short { Red = 42, Green, Blue }
+      use: |-
+          let v: Color[] = new Color[Color.Green]
+      expected_out: "Semantic error ESE0270: No Matching Parameterless Constructor, parameter count 2"
