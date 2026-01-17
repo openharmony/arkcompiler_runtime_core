@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,7 +102,7 @@ function main(): void {
 function readDirRecursive(dir: string): string[] {
   const result: string[] = [];
 
-  function walk(current: string) {
+  function walk(current: string): void {
     const entries = fs.readdirSync(current, { withFileTypes: true });
 
     for (const entry of entries) {
@@ -179,70 +179,72 @@ function saveTestReport(actualReport: TestReport, test: Test): void {
   fs.writeFileSync(path.join(test.outDir, test.name + ts.Extension.Json), report);
 }
 
-function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult): boolean {
-  void emitResult;
-
-  function compareSingleFile(expectedPath: string, actualPath: string): boolean {
-    const expected = openFileWithoutComments(expectedPath);
-    const actual = openFileWithoutComments(actualPath);
-    
-    if (expected !== actual) {
-      Logger.error(
-        `Outputs for ${test.name} differ!
-Expected (${test.expectedOutput}):
+function compareSingleFile(testName: string, expectedPath: string, actualPath: string): boolean {
+  const expected = openFileWithoutComments(expectedPath);
+  const actual = openFileWithoutComments(actualPath);
+  
+  if (expected !== actual) {
+    Logger.error(`Outputs for ${testName} differ!
+Expected (${expectedPath}):
 '''
 ${expected}
 '''
 Actual (${actualPath}):
 '''
 ${actual}
-'''`
-  );
-  return false;
+'''`);
+    return false;
   }
 
   return true;
+}
+
+function compareMultipleFiles(test: Test): boolean {
+  const expectedFiles = new Set(readDirRecursive(test.expectedOutput).map((f) => {
+    const relativePath = path.relative(test.expectedOutput, f);
+    return relativePath;
+  }))
+  const actualFiles = new Set(readDirRecursive(test.outDir).map((f) => {
+    const relativePath = path.relative(test.outDir, f);
+    return relativePath;
+  }).filter((f) => f.endsWith('.d.ets')));
+
+  if (expectedFiles.size !== actualFiles.size) {
+    for (const expectedFile of expectedFiles) {
+      if (!actualFiles.has(expectedFile)) {
+        Logger.error(`Missing generated file: ${expectedFile}`);
+      }
+    }
+    for (const actualFile of actualFiles) {
+      if (!expectedFiles.has(actualFile)) {
+        Logger.error(`Unexpected generated file: ${actualFile}`);
+      }
+    }
+    return false;
   }
+
+  let allMatch = true;
+
+  for (const expectedFile of expectedFiles) {
+    const expectedFilePath = path.join(test.expectedOutput, expectedFile);
+    const actualFilePath = path.join(test.outDir, expectedFile);
+    const match = compareSingleFile(test.name, expectedFilePath, actualFilePath);
+    if (!match) {
+      allMatch = false;
+    }
+  }
+  return allMatch;
+}
+
+function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult): boolean {
+  void emitResult;
 
   if (test.suite !== 'package_source') {
     const actualPath = path.join(test.outDir, `${test.name}${Extension.DETS}`);
-    return compareSingleFile(test.expectedOutput, actualPath);
+    return compareSingleFile(test.name, test.expectedOutput, actualPath);
   }
   else {
-    const expectedFiles = new Set(readDirRecursive(test.expectedOutput).map((f) => {
-      const relativePath = path.relative(test.expectedOutput, f);
-      return relativePath;
-    }))
-    const actualFiles = new Set(readDirRecursive(test.outDir).map((f) => {
-      const relativePath = path.relative(test.outDir, f);
-      return relativePath;
-    }).filter((f) => f.endsWith('.d.ets')));
-
-    if (expectedFiles.size !== actualFiles.size) {
-      for (const expectedFile of expectedFiles) {
-        if (!actualFiles.has(expectedFile)) {
-          Logger.error(`Missing generated file: ${expectedFile}`);
-        }
-      }
-      for (const actualFile of actualFiles) {
-        if (!expectedFiles.has(actualFile)) {
-          Logger.error(`Unexpected generated file: ${actualFile}`);
-        }
-      }
-      return false;
-    }
-
-    let allMatch = true;
-
-    for (const expectedFile of expectedFiles) {
-      const expectedFilePath = path.join(test.expectedOutput, expectedFile);
-      const actualFilePath = path.join(test.outDir, expectedFile);
-      const match = compareSingleFile(expectedFilePath, actualFilePath);
-      if (!match) {
-        allMatch = false;
-      }
-    }
-    return allMatch;
+    return compareMultipleFiles(test);
   }
 }
 
