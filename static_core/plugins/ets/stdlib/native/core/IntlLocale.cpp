@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include "libarkbase/os/mutex.h"
 
 namespace ark::ets::stdlib::intl {
 
@@ -37,6 +38,12 @@ struct LocaleCheckInfo {
     std::set<std::string> langs;
     std::set<std::string> regions;
     std::set<std::string> scripts;
+    // Cached comma-separated string representations for performance
+    // These avoid repeated string concatenation when queried from ETS layer
+    std::string langsList;
+    std::string regionsList;
+    std::string scriptsList;
+    bool isPopulated = false;
 };
 
 static LocaleCheckInfo &GetLocaleCheckInfo()
@@ -44,6 +51,8 @@ static LocaleCheckInfo &GetLocaleCheckInfo()
     static LocaleCheckInfo gCheckInfo;
     return gCheckInfo;
 }
+
+static os::memory::Mutex localeCheckInfoMutex;
 
 static std::vector<std::string> &GetLocaleInfo()
 {
@@ -103,8 +112,26 @@ void HandleLocaleExtension(size_t &start, size_t &extensionEnd, const std::strin
     }
 }
 
+static std::string Set2String(std::set<std::string> &inSet);
+
 void StdCoreIntlLocaleFillCheckInfo()
 {
+    // Cache reference to avoid repeated calls
+    LocaleCheckInfo &checkInfo = GetLocaleCheckInfo();
+
+    // First check: Fast path without lock - avoids lock overhead after initialization
+    if (checkInfo.isPopulated) {
+        return;
+    }
+
+    // Lock mutex to prevent race conditions in multithreaded environments
+    os::memory::LockHolder lock(localeCheckInfoMutex);
+
+    // Second check: Verify again after acquiring lock - prevents multiple initializations
+    if (checkInfo.isPopulated) {
+        return;
+    }
+
     int32_t availableCount;
     const icu::Locale *availableLocales = icu::Locale::getAvailableLocales(availableCount);
 
@@ -115,15 +142,21 @@ void StdCoreIntlLocaleFillCheckInfo()
         const std::string region = locale.getCountry();
         const std::string script = locale.getScript();
         if (!lang.empty()) {
-            GetLocaleCheckInfo().langs.insert(lang);
+            checkInfo.langs.insert(lang);
         }
         if (!region.empty()) {
-            GetLocaleCheckInfo().regions.insert(region);
+            checkInfo.regions.insert(region);
         }
         if (!script.empty()) {
-            GetLocaleCheckInfo().scripts.insert(script);
+            checkInfo.scripts.insert(script);
         }
     }
+
+    // Cache the string representations
+    checkInfo.langsList = Set2String(checkInfo.langs);
+    checkInfo.regionsList = Set2String(checkInfo.regions);
+    checkInfo.scriptsList = Set2String(checkInfo.scripts);
+    checkInfo.isPopulated = true;
 }
 
 std::string Set2String(std::set<std::string> &inSet)
@@ -148,20 +181,20 @@ ani_string StdCoreIntlLocaleDefaultLang(ani_env *env, [[maybe_unused]] ani_class
 
 ani_string StdCoreIntlLocaleRegionList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
-    std::string regionsList = Set2String(GetLocaleCheckInfo().regions);
+    const std::string &regionsList = GetLocaleCheckInfo().regionsList;
     return StdStrToAni(env, regionsList);
 }
 
 ani_string StdCoreIntlLocaleLangList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
-    std::string langsList = Set2String(GetLocaleCheckInfo().langs);
+    const std::string &langsList = GetLocaleCheckInfo().langsList;
     return StdStrToAni(env, langsList);
 }
 
 ani_string StdCoreIntlLocaleScriptList(ani_env *env, [[maybe_unused]] ani_class klass)
 {
-    std::string scriptList = Set2String(GetLocaleCheckInfo().scripts);
-    return StdStrToAni(env, scriptList);
+    const std::string &scriptsList = GetLocaleCheckInfo().scriptsList;
+    return StdStrToAni(env, scriptsList);
 }
 
 ani_string StdCoreIntlLocaleNumberingSystemList(ani_env *env, [[maybe_unused]] ani_class klass)

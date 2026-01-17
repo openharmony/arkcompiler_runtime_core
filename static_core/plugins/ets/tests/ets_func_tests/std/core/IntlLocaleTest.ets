@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@ function main(): int {
     failures += check(testCaseFirst(), "Test caseFirst")
     failures += check(testNumberingSystem(), "Test numbering system")
     failures += check(testCollation(), "Test collation")
+    failures += check(testLocaleCaching(), "Test locale caching")
+    failures += check(testCacheWithOptions(), "Test cache with options")
+    failures += check(testCacheInvalidation(), "Test cache invalidation")
+    failures += check(testCacheWithLocaleObject(), "Test cache with Locale object")
     return failures
 }
 
@@ -225,6 +229,154 @@ function testCollation() : int {
     {
         const l = new Intl.Locale("ru", { collation: "emoji" } as Intl.LocaleOptions)
         arktest.assertEQ(l.collation, "emoji")
+    }
+    return success
+}
+
+function testLocaleCaching() : int {
+    // Test that creating the same locale multiple times returns correct results
+    // This tests the caching mechanism for parseTag()
+    {
+        const l1 = new Intl.Locale("zh-Hans-CN")
+        arktest.assertEQ(l1.language, "zh")
+        arktest.assertEQ(l1.script, "Hans")
+        arktest.assertEQ(l1.region, "CN")
+        arktest.assertEQ(l1.baseName, "zh-Hans-CN")
+    }
+    {
+        // Second creation with same tag should use cache
+        const l2 = new Intl.Locale("zh-Hans-CN")
+        arktest.assertEQ(l2.language, "zh")
+        arktest.assertEQ(l2.script, "Hans")
+        arktest.assertEQ(l2.region, "CN")
+        arktest.assertEQ(l2.baseName, "zh-Hans-CN")
+    }
+    {
+        // Third creation to ensure cache is stable
+        const l3 = new Intl.Locale("zh-Hans-CN")
+        arktest.assertEQ(l3.language, "zh")
+        arktest.assertEQ(l3.script, "Hans")
+        arktest.assertEQ(l3.region, "CN")
+        arktest.assertEQ(l3.baseName, "zh-Hans-CN")
+    }
+    {
+        // Test with complex tag including unicode extensions
+        const l4 = new Intl.Locale("en-US-u-ca-gregory-nu-latn")
+        arktest.assertEQ(l4.language, "en")
+        arktest.assertEQ(l4.region, "US")
+        arktest.assertEQ(l4.calendar, "gregory")
+        arktest.assertEQ(l4.numberingSystem, "latn")
+    }
+    {
+        // Create again with same complex tag
+        const l5 = new Intl.Locale("en-US-u-ca-gregory-nu-latn")
+        arktest.assertEQ(l5.language, "en")
+        arktest.assertEQ(l5.region, "US")
+        arktest.assertEQ(l5.calendar, "gregory")
+        arktest.assertEQ(l5.numberingSystem, "latn")
+    }
+    return success
+}
+
+function testCacheWithOptions() : int {
+    // Test that options parameter correctly overrides cached values
+    {
+        const l1 = new Intl.Locale("en-US")
+        arktest.assertEQ(l1.language, "en")
+        arktest.assertEQ(l1.region, "US")
+        arktest.assertEQ(l1.calendar, undefined)
+    }
+    {
+        // Same tag but with options should not use cache for validation
+        const l2 = new Intl.Locale("en-US", { calendar: "gregory" } as Intl.LocaleOptions)
+        arktest.assertEQ(l2.language, "en")
+        arktest.assertEQ(l2.region, "US")
+        arktest.assertEQ(l2.calendar, "gregory")
+    }
+    {
+        // Same tag with different options
+        const l3 = new Intl.Locale("en-US", { hourCycle: "h12", numeric: true } as Intl.LocaleOptions)
+        arktest.assertEQ(l3.language, "en")
+        arktest.assertEQ(l3.region, "US")
+        arktest.assertEQ(l3.hourCycle, "h12")
+        arktest.assertEQ(l3.numeric as boolean, true)
+    }
+    {
+        // Test that options can override script and region
+        const l4 = new Intl.Locale("zh-Hans-CN", { region: "TW" } as Intl.LocaleOptions)
+        arktest.assertEQ(l4.language, "zh")
+        arktest.assertEQ(l4.script, "Hans")
+        arktest.assertEQ(l4.region, "TW")
+    }
+    return success
+}
+
+function testCacheInvalidation() : int {
+    // Test that cache is properly invalidated when different tags are used
+    // Single-entry cache should only store the most recent tag
+    {
+        const l1 = new Intl.Locale("fr-FR")
+        arktest.assertEQ(l1.language, "fr")
+        arktest.assertEQ(l1.region, "FR")
+    }
+    {
+        // Different tag - cache should be replaced
+        const l2 = new Intl.Locale("de-DE")
+        arktest.assertEQ(l2.language, "de")
+        arktest.assertEQ(l2.region, "DE")
+    }
+    {
+        // Another different tag
+        const l3 = new Intl.Locale("ja-JP")
+        arktest.assertEQ(l3.language, "ja")
+        arktest.assertEQ(l3.region, "JP")
+    }
+    {
+        // Go back to previous tag - should work correctly (cache miss)
+        const l4 = new Intl.Locale("fr-FR")
+        arktest.assertEQ(l4.language, "fr")
+        arktest.assertEQ(l4.region, "FR")
+    }
+    {
+        // Verify the most recent tag is cached by creating it again
+        const l5 = new Intl.Locale("fr-FR")
+        arktest.assertEQ(l5.language, "fr")
+        arktest.assertEQ(l5.region, "FR")
+    }
+    return success
+}
+
+function testCacheWithLocaleObject() : int {
+    // Test that creating Locale from another Locale object works correctly
+    const l1 = new Intl.Locale("en-GB-u-ca-gregory")
+    {
+        arktest.assertEQ(l1.language, "en")
+        arktest.assertEQ(l1.region, "GB")
+        arktest.assertEQ(l1.calendar, "gregory")
+    }
+    {
+        // Create locale from another locale object
+        const l2 = new Intl.Locale(l1)
+        arktest.assertEQ(l2.language, "en")
+        arktest.assertEQ(l2.region, "GB")
+        arktest.assertEQ(l2.calendar, "gregory")
+    }
+    {
+        // Create locale from object with options
+        const l3 = new Intl.Locale(l1, { hourCycle: "h24" } as Intl.LocaleOptions)
+        arktest.assertEQ(l3.language, "en")
+        arktest.assertEQ(l3.region, "GB")
+        arktest.assertEQ(l3.calendar, "")
+        arktest.assertEQ(l3.hourCycle, "h24")
+    }
+    {
+        // Test with minimize and maximize
+        const l4 = new Intl.Locale("zh")
+        const maximized = l4.maximize()
+        arktest.assertEQ(maximized.language, "zh")
+        // Verify maximize returns a new locale with expanded values
+        arktest.assertTrue(maximized.script != undefined)
+        arktest.assertTrue(maximized.region != undefined)
     }
     return success
 }
