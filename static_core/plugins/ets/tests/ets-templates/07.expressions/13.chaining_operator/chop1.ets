@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,6 @@ desc: >-
     If the object to the left of ('?.') is undefined or null, then the evaluation of the entire
     surrounding expression is dropped, and undefined is used as the result of the expression.
 ---*/
-function test(b: boolean) {
-  if (!b) {
-      throw new Error()
-  }
-}
 
 class A {
     fldA: string|undefined = "abc"
@@ -45,43 +40,43 @@ function boo(p: string): B|undefined {
 }
 
 function main() {
-    test(boo("not undefined")?.fldB?.fldA === "abc")
-    test(boo("not undefined")?.fldB?.fldAn === undefined)
-    test(boo("not undefined")?.fldB?.metA("xyz") === "xyz")
-    test(boo("not undefined")?.fldB?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("not undefined")?.fldB?.fldA , "abc")
+    arktest.assertEQ(boo("not undefined")?.fldB?.fldAn , undefined)
+    arktest.assertEQ(boo("not undefined")?.fldB?.metA("xyz") , "xyz")
+    arktest.assertEQ(boo("not undefined")?.fldB?.metA("undefined") , undefined)
 
-    test(boo("not undefined")?.metB("not undefined")?.fldA === "abc")
-    test(boo("not undefined")?.metB("not undefined")?.fldAn === undefined)
-    test(boo("not undefined")?.metB("not undefined")?.metA("xyz") === "xyz")
-    test(boo("not undefined")?.metB("not undefined")?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("not undefined")?.fldA , "abc")
+    arktest.assertEQ(boo("not undefined")?.metB("not undefined")?.fldAn , undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("not undefined")?.metA("xyz") , "xyz")
+    arktest.assertEQ(boo("not undefined")?.metB("not undefined")?.metA("undefined") , undefined)
 
-    test(boo("not undefined")?.fldBn?.fldA === undefined)
-    test(boo("not undefined")?.fldBn?.fldAn === undefined)
-    test(boo("not undefined")?.fldBn?.metA("xyz") === undefined)
-    test(boo("not undefined")?.fldBn?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("not undefined")?.fldBn?.fldA , undefined)
+    arktest.assertEQ(boo("not undefined")?.fldBn?.fldAn , undefined)
+    arktest.assertEQ(boo("not undefined")?.fldBn?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("not undefined")?.fldBn?.metA("undefined") , undefined)
 
-    test(boo("not undefined")?.metB("undefined")?.fldA === undefined)
-    test(boo("not undefined")?.metB("undefined")?.fldAn === undefined)
-    test(boo("not undefined")?.metB("undefined")?.metA("xyz") === undefined)
-    test(boo("not undefined")?.metB("undefined")?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("undefined")?.fldA , undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("undefined")?.fldAn , undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("undefined")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("not undefined")?.metB("undefined")?.metA("undefined") , undefined)
 
-    test(boo("undefined")?.fldB?.fldA === undefined)
-    test(boo("undefined")?.fldB?.fldAn === undefined)
-    test(boo("undefined")?.fldB?.metA("xyz") === undefined)
-    test(boo("undefined")?.fldB?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("undefined")?.fldB?.fldA , undefined)
+    arktest.assertEQ(boo("undefined")?.fldB?.fldAn , undefined)
+    arktest.assertEQ(boo("undefined")?.fldB?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("undefined")?.fldB?.metA("undefined") , undefined)
 
-    test(boo("undefined")?.metB("not undefined")?.fldA === undefined)
-    test(boo("undefined")?.metB("not undefined")?.fldAn === undefined)
-    test(boo("undefined")?.metB("not undefined")?.metA("xyz") === undefined)
-    test(boo("undefined")?.metB("not undefined")?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("undefined")?.metB("not undefined")?.fldA , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("not undefined")?.fldAn , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("not undefined")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("not undefined")?.metA("undefined") , undefined)
 
-    test(boo("undefined")?.fldBn?.fldA === undefined)
-    test(boo("undefined")?.fldBn?.fldAn === undefined)
-    test(boo("undefined")?.fldBn?.metA("xyz") === undefined)
-    test(boo("undefined")?.fldBn?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("undefined")?.fldBn?.fldA , undefined)
+    arktest.assertEQ(boo("undefined")?.fldBn?.fldAn , undefined)
+    arktest.assertEQ(boo("undefined")?.fldBn?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("undefined")?.fldBn?.metA("undefined") , undefined)
 
-    test(boo("undefined")?.metB("undefined")?.fldA === undefined)
-    test(boo("undefined")?.metB("undefined")?.fldAn === undefined)
-    test(boo("undefined")?.metB("undefined")?.metA("xyz") === undefined)
-    test(boo("undefined")?.metB("undefined")?.metA("undefined") === undefined)
+    arktest.assertEQ(boo("undefined")?.metB("undefined")?.fldA , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("undefined")?.fldAn , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("undefined")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("undefined")?.metB("undefined")?.metA("undefined") , undefined)
 }

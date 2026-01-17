@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@ class Person {
 
 function main(): void {
   const bob = new Person("Bob");
-  const age = bob.age ?? 30;
-  bob.age = 25;
-  arktest.assertEQ(bob.age ?? 30, 25);
+  bob.age = bob.age ?? 30;
+  arktest.assertEQ(bob?.age, 30);
 }

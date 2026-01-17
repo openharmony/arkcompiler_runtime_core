@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,15 @@
  */
 
 /*---
-desc: Chaining operator, combining chaining operator with default values.
+desc: Chaining operator, access to an element of an array (union type with and without smart cast).
 ---*/
-
-class Person {
-  name: string;
-  age?: number;
-
-  constructor(name: string, age?: number) {
-    this.name = name;
-    this.age = age;
-  }
-}
+//outer let without smart cast
+let usersOuter: string[] | null = null;
 
 function main(): void {
-  let bob = new Person("Bob");
-  bob.age = 25;
-  arktest.assertEQ(bob.age, 25);
+  //inner let with smart cast to array
+  let users: string[] | null = [''];
+  
+  arktest.assertEQ(usersOuter?.[0], undefined);
+  arktest.assertEQ(users?.[0], '');
 }

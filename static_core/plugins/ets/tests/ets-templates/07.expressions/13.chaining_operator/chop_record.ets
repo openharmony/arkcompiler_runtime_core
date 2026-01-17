@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,27 @@
  */
 
 /*---
-desc: Chaining operator, combining chaining operator with optional chaining.
+desc: Chaining operator, the chaining operator and dynamic property access.
 ---*/
 
 class Person {
   name: string;
-  spouse?: Person;
+  details?: Record<'read' | 'write', boolean>;
 
-  constructor(name: string) {
+  constructor(name: string, fillDetailed?: boolean) {
     this.name = name;
+    if (fillDetailed ?? false) {
+        this.details = {"read":true, "write":false}
+    }
   }
+
 }
 
 function main(): void {
   const bob = new Person("Bob");
-  arktest.assertEQ(bob.spouse?.spouse?.name, undefined);
+  const key = "read";
+  arktest.assertEQ(bob.details?.[key], undefined);
+
+  const alice = new Person("Alice", true);
+  arktest.assertEQ(alice.details?.[key], true);
 }

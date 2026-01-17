@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ class Person {
 function main(): void {
   let person1 = new Person({});
   person1.address.street = "123";
+  arktest.assertEQ(person1.address?.city, undefined);
   person1.address.city = "xian";
   person1.name = "Alice";
   arktest.assertEQ(person1?.address.city, "xian");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,20 @@ desc: Chaining operator, accessing object fields in an array.
 ---*/
 
 class Person {
-  name: string;
+  name: string|undefined
 
   constructor(name: string) {
     this.name = name;
   }
+
+  constructor() {
+  }
 }
 
 function main(): void {
-  const people: Person[] = [new Person("Alice"), new Person("Bob")];
+  const people: Person[] = [new Person("Alice"), new Person("Bob"), new Person()];
 
   arktest.assertEQ(people[0]?.name, "Alice");
   arktest.assertEQ(people[1]?.name, "Bob");
+  arktest.assertEQ(people[2]?.name, undefined);
 }
