@@ -15,12 +15,20 @@ py -m pip install .\dist\vmb-*-py3-none-any.whl
 vmb version
 ```
 
-or use wrapper script - [see main readme](./readme.md#option-1-using-wrapper-script)
+Alternative variant is running vmb as script (without installation):
+```shell
+# 1) clone this repo and cd to src root
+cd static_core\tests\vm-benchmarks\src
+# 2) set path to module
+set PYTHONPATH=<full-path-to-repo>\static_core\tests\vm-benchmarks\src\vmb
+# 3) run vmb
+py -m vmb all -p node_host .\examples\benchmarks\ts\VoidBench.ts
+```
 
 ### Node Host platform
 
 ```shell
-vmb all -p node_host [-v debug] .\examples\benchmarks\ts\VoidBench.ts
+vmb all -p node_host <full-path-to-repo>\static_core\tests\vm-benchmarks\examples\benchmarks\ts\VoidBench.ts
 ```
 
 ### ArkJS on OHOS device platform

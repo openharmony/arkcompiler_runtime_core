@@ -224,7 +224,12 @@ Note: spaces inside option is not allowed. Please use `=` sign.
 To override paths to compilers and/or virtual machines
 `--<tool>-path` option could be used. F.e. to not use `OHOS_SDK` root:
 `--es2abc-path=/path/to/es2abc.exe`.
-(Only `es2abc`, `es2panda` and `ark_js_vm` are supported currently)
+
+Or (using aot system binary for device):
+ - ArkJsVm: `--ark_aot_compiler-path=/system/bin/ark_aot_compiler`
+ - ArkTS: `--paoc-path=/system/bin/ark_aot`
+
+`es2abc`, `es2panda` `ark_js_vm`, `ark`, `ark_aot_compiler`, `paoc` are supported currently.
 
 ## Custom script
 To run custom shell script after each benchmark test

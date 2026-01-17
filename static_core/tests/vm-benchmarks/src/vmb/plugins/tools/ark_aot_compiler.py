@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,14 +31,16 @@ class Tool(ToolBase):
             self.aot_compiler = self.ensure_file(
                 self.sdk,
                 f'{out}/ets_runtime/ark_aot_compiler')
-            self.lib_path = ':'.join([f'{self.sdk}/{p}' for p in (
+            self.lib_path = 'LD_LIBRARY_PATH=' + ':'.join([f'{self.sdk}/{p}' for p in (
                 f'{out}/ets_runtime',
                 f'{out}/../test/test',
                 f'{out}/../thirdparty/icu',
-                f'{out}/../thirdparty/zlib')])
+                f'{out}/../thirdparty/zlib')]) + ' '
         elif Target.OHOS == self.target:
-            self.aot_compiler = f'{self.dev_dir.as_posix()}/ark_aot_compiler'
-            self.lib_path = f'{self.dev_dir.as_posix()}'
+            self.aot_compiler = self.custom_path if self.custom_path \
+                else f'{self.dev_dir.as_posix()}/ark_aot_compiler'
+            self.lib_path = '' if self.custom_path \
+                else f'LD_LIBRARY_PATH={self.dev_dir.as_posix()} '
         else:
             raise RuntimeError(f'Wrong target: {self.target} for ark_aot_compiler!')
 
@@ -52,7 +54,7 @@ class Tool(ToolBase):
         opts = '' if Target.HOST == self.target \
             else '--compiler-target-triple=aarch64-unknown-linux-gnu '
         aot_cmd = (
-            f'LD_LIBRARY_PATH={self.lib_path} {self.aot_compiler} '
+            f'{self.lib_path}{self.aot_compiler} '
             '--compiler-opt-loop-peeling=true '
             '--compiler-fast-compile=false '
             '--compiler-opt-inlining=true '
