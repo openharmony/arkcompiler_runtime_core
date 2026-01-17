@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -113,7 +113,7 @@ async def test_get_possible_breakpoints(
 
             start = debugger.Location(script_id=runtime.ScriptId(1), line_number=0)
             get_breakpoints = await client.get_possible_breakpoints(start)
-            assert list(bp.line_number for bp in get_breakpoints) == list(range(8))
+            assert list(bp.line_number for bp in get_breakpoints) == list(range(1, 8))
 
         process.terminate()
     assert process.returncode == -SIGTERM
