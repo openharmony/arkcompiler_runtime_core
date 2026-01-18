@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,8 @@
 {% for c in cases %}
 
 /*---
-desc: Test of covariant _out_ type parameter modifier. 
+desc: Test of covariant _out_ type parameter modifier.
+expected_out: {{c.stdout}}
 tags: [compile-only, negative]
 ---*/
 
@@ -25,13 +26,13 @@ interface I<out T> {
 }
 
 class A<out T> implements I<T> {
-  readonly field: T = {{c.value}} as T
+  readonly field: T = {{c.case.value}} as T
   f(): T { return this.field }
 }
 
 function main(): void {
-  let arg: {{c.type}} = {{c.value}}
-  let a: I<{{c.type}}> = new A<{{c.type}}>()
+  let arg: {{c.case.type}} = {{c.case.value}}
+  let a: I<{{c.case.type}}> = new A<{{c.case.type}}>()
   arktest.assertEQ(a.f(), arg)
 }
 

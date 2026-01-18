@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,28 @@
 
 ---
 cases:
-    - use: |-
-          arktest.assertTrue(cls.foo<number>(null, 1) === 1)
-    - use: |-
+    - decl: |-
+        class Cls {
+            foo <T> (p: T, q: T): T {
+                return p ?? q
+            }
+        }
+      use: |-
+          cls.foo<number>(null, 1)
+      stdout: |-
+        "Semantic error ESE0127: No matching call signature for foo(null, Int)"
+    
+    - decl: |-
+        class Cls {
+            foo <T> (p: T, q: T): T {
+                return p ?? q
+            }
+        }
+      use: |-
           let a = 42
-          arktest.assertTrue(cls.foo<number>(a, new Object()) == 42)
+          cls.foo<number>(a, new Object())
+      stdout: |-
+        "Semantic error ESE0127: No matching call signature for foo(Int, Object)"
 
     - decl: |-
         class Cls {
@@ -27,6 +44,6 @@ cases:
             }
         }
       use: |-
-        let cls = new Cls()
         let v = cls.foo<function, function>((p: number): number => p * p, (p: number): number => p + p)
-        arktest.assertTrue(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)          
+      stdout: |-
+        "Semantic error ESE655063: Generic function foo requires explicit type arguments when used as a value."         

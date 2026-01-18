@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,6 +79,16 @@ cases:
       arktest.assertTrue(a instanceof BaseType)
   - decl: |-
       interface BaseType<T, U = SomeType, V = OtherType> {}
+      type Base<T, U = SomeType, V = OtherType> = BaseType<T, U, V>
+    use: |-
+      let a: Base<number> = {}
+      let b: Base<number, OtherType> = {}
+      let c: Base<number, Object, SomeType> = {}
+      arktest.assertTrue(a instanceof BaseType)
+      arktest.assertTrue(b instanceof BaseType)
+      arktest.assertTrue(c instanceof BaseType)
+  - decl: |-
+      interface BaseType<in T, in U = SomeType, out V = OtherType> {}
       type Base<T, U = SomeType, V = OtherType> = BaseType<T, U, V>
     use: |-
       let a: Base<number> = {}

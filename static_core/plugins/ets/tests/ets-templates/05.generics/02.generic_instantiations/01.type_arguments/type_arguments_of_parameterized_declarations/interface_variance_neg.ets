@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,11 +18,14 @@ limitations under the License.
 desc: >-
     It is a compile-time error if a covariant wildcard is specified for a contravariant type parameter.
     It is a compile-time error if a contravariant wildcard is specified for a covariant type parameter.
-params: class arguments
+params: interface arguments
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
-class A<{{c.variance}}T> {
+interface I<{{c.variance}}T> {}
+
+class A<{{c.variance}}T> implements I<T> {
     private t: T
 
     public constructor(t: T) {

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,27 @@
 
 ---
 cases:
-  - { class: class,     param: 'T',     type1: A, type2: B, desc: Invariant }
-  - { class: class,     param: 'T',     type1: B, type2: A, desc: Invariant }
-  - { class: class,     param: 'in T',  type1: A, type2: B, desc: Contravariant }
-  - { class: class,     param: 'out T', type1: B, type2: A, desc: Covariant }
-  - { class: interface, param: 'T',     type1: A, type2: B, desc: Invariant }
-  - { class: interface, param: 'T',     type1: B, type2: A, desc: Invariant }
-  - { class: interface, param: 'in T',  type1: A, type2: B, desc: Contravariant }
-  - { class: interface, param: 'out T', type1: B, type2: A, desc: Covariant }
+  - case: { class: class,     param: 'T',     type1: A, type2: B, desc: Invariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<A>'"
+  - case: { class: class,     param: 'T',     type1: B, type2: A, desc: Invariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<B>'"
+  - case: { class: class,     param: 'in T',  type1: A, type2: B, desc: Contravariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<A>'"
+  - case: { class: class,     param: 'out T', type1: B, type2: A, desc: Covariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<B>'"
+  - case: { class: interface, param: 'T',     type1: A, type2: B, desc: Invariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<A>'"
+  - case: { class: interface, param: 'T',     type1: B, type2: A, desc: Invariant }
+    stdout: |-
+      " Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<B>'"
+  - case: { class: interface, param: 'in T',  type1: A, type2: B, desc: Contravariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<A>'"
+  - case: { class: interface, param: 'out T', type1: B, type2: A, desc: Covariant }
+    stdout: |-
+      "Semantic error ESE0318: Type 'TestClass' cannot be assigned to type 'TestInterface<B>'"

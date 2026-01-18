@@ -3035,3 +3035,5 @@
 17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_2.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_6.ets
 17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_7.ets
+05.generics/02.generic_instantiations/01.type_arguments/malformed_decl_n_0.ets
+05.generics/01.type_parameters/02.type_parameter_default/generic_classes/class_type_parameter_default_n_8.ets

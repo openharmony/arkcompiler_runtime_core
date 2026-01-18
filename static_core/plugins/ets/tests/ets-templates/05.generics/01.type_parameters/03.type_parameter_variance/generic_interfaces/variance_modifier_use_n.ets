@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,12 @@
 
 /*---
 desc: Test the compile-time error occurs if a function, method or constructor type parameters have a variance modifier specified.
+expected_out: {{c.stdout}}
 tags: [compile-only, negative]
 ---*/
 
-interface I{{c.param}} {
-  {{c.expression}}
+interface I{{c.case.param}} {
+  {{c.case.expression}}
 }
 
 {% endfor %}
