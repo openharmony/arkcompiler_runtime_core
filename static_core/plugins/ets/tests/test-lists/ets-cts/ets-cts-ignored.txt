@@ -958,39 +958,52 @@
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_39_n.ets
 
 #26714
-13.modules_and_namespaces/01.import_directives/test.ets
+13.modules_and_namespaces/03.import_directives/test.ets
 
 #31411
-13.modules_and_namespaces/01.import_directives/03.selective_binding/import_conflict_neg.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_conflict_neg.ets
 
 #29656
-13.modules_and_namespaces/01.import_directives/04.import_type_directive/export_type_with_bind.ets
+13.modules_and_namespaces/03.import_directives/04.import_type_directive/export_type_with_bind.ets
+
+#32039 CTE oveload oveloaded function
+13.modules_and_namespaces/03.import_directives/03.selective_binding/original_binding_name.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/original_binding_name_neg.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_0.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_1.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_2.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_n_0.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_n_1.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_n_2.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_n_3.ets
+13.modules_and_namespaces/03.import_directives/03.selective_binding/import_example_n_4.ets
+
 
 #30658 incorrect linkage
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_2.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_3.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_6.ets
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_path_file_7.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/file/import_path_file_2.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/file/import_path_file_3.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/file/import_path_file_6.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/file/import_path_file_7.ets
 
 #28972 CTE on string[] type parameter
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_1.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_2.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_3.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_5.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_7.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_6.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_8.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_2.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_3.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_4.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_5.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_n_0.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_n_1.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_1.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_2.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_3.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_5.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_7.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_6.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_8.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_2.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_3.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_4.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_5.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_n_0.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_n_1.ets
 
 #29063 runtime complains on invalid signature
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_0.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_0.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_2.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_0.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_0.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_2.ets
 
 #29153
 14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
@@ -2381,9 +2394,40 @@
 09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_17.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_20.ets
-13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_4.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_0.ets
-13.modules_and_namespaces/07.program_entry_point/main_w_args_1.ets
+10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method.ets
+10.interfaces/05.interface_method_declarations/overriding_requirements/same_name2.ets
+10.interfaces/05.interface_method_declarations/overriding_requirements/same_name3.ets
+10.interfaces/06.interface_inheritance/inheritance_private_method_with_declared_signature2.ets
+13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_4.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_0.ets
+13.modules_and_namespaces/08.program_entry_point/main_w_args_1.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_12.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_15.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_17.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_26.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_28.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_29.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_8.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_2.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_4.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_4.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_2.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_2.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_11.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_13.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_16.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_18.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_20.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_3.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_5.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_2.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_16.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_20.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_25.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_27.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_9.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_10.ets
+15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_11.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_24.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_25.ets
 15.semantic_rules/11.type_erasure/instanceof_negative_11.ets
