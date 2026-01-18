@@ -992,9 +992,6 @@
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_0.ets
 13.modules_and_namespaces/07.program_entry_point/function_foo_w_args_n_2.ets
 
-#29153
-14.ambient_declarations/04.class_declarations/02.ambient_call_signature/call_sig_declarations_neg_2.ets
-
 #29270
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_1.ets
