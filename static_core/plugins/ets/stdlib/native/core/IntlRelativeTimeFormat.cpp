@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,8 @@
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "ani/ani_checkers.h"
+#include "plugins/ets/stdlib/native/core/IntlState.h"
+#include "plugins/ets/stdlib/native/core/IntlRelativeTimeFormatCache.h"
 
 namespace ark::ets::stdlib::intl {
 
@@ -251,50 +253,51 @@ static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_obje
     if (!icuLocale) {
         return nullptr;
     }
-    UErrorCode status = U_ZERO_ERROR;
-
-    icu::NumberFormat *icuNumberFormat = icu::NumberFormat::createInstance(*icuLocale, UNUM_DECIMAL, status);
-    if (U_FAILURE(status) != 0) {
-        delete icuNumberFormat;
-        if (status == UErrorCode::U_MISSING_RESOURCE_ERROR) {
-            ThrowRangeError(env, "can not find icu data resources");
-            return nullptr;
-        }
-        ThrowRangeError(env, "create icu::NumberFormat failed");
-        return nullptr;
-    }
-
-    // Trans RelativeStyleOption to ICU Style
     UDateRelativeDateTimeFormatterStyle uStyle = ToRelativeTimeFormatStyle(env, self);
 
-    icu::RelativeDateTimeFormatter formatter(*icuLocale, icuNumberFormat, uStyle, UDISPCTX_CAPITALIZATION_NONE, status);
+    // Generate Cache Key
+    std::string styleStr = (uStyle == UDAT_STYLE_LONG) ? "long" : (uStyle == UDAT_STYLE_SHORT) ? "short" : "narrow";
+    std::string cacheKey = std::string(icuLocale->getName()) + ";" + styleStr;
 
-    if (U_FAILURE(status) != 0) {
+    icu::RelativeDateTimeFormatter *formatter =
+        g_intlState->relativeTimeFormatCache.GetOrCreateFormatter(cacheKey, *icuLocale, uStyle);
+
+    if (formatter == nullptr) {
+        ThrowRangeError(env, "Failed to get RelativeDateTimeFormatter from cache");
         return nullptr;
     }
-    ani_size unitSize = 0;
-    env->String_GetUTF8Size(unit, &unitSize);
-    std::vector<char> unitBuf(unitSize + 1);
-    ani_size copiedChars = 0;
-    env->String_GetUTF8(unit, unitBuf.data(), unitBuf.size(), &copiedChars);
 
-    URelativeDateTimeUnit icuUnit = ToICUUnitOrThrow(env, std::string(unitBuf.data()));
-    icu::FormattedRelativeDateTime formatted;
+    // Use the obtained formatter to perform formatting
+    UErrorCode status = U_ZERO_ERROR;
+    std::string unitStr = ConvertFromAniString(env, unit);
+    URelativeDateTimeUnit icuUnit = ToICUUnitOrThrow(env, unitStr);
+    if (icuUnit == static_cast<URelativeDateTimeUnit>(-1)) {
+        return nullptr;
+    }
+
     NumericOption numericOption = GetNumericOption(env, self);
+    if (numericOption == static_cast<NumericOption>(-1)) {
+        return nullptr;
+    }
+
+    icu::FormattedRelativeDateTime formatted;
     if (numericOption == NumericOption::AUTO) {
-        formatted = formatter.formatToValue(value, icuUnit, status);
-    } else if (numericOption == NumericOption::ALWAYS) {
-        formatted = formatter.formatNumericToValue(value, icuUnit, status);
+        formatted = formatter->formatToValue(value, icuUnit, status);
     } else {
+        formatted = formatter->formatNumericToValue(value, icuUnit, status);
+    }
+
+    if (U_FAILURE(status)) {
+        ThrowRangeError(env, "RelativeDateTimeFormatter format failed");
         return nullptr;
     }
-    if (U_FAILURE(status) != 0) {
-        return nullptr;
-    }
+
     icu::UnicodeString result = formatted.toString(status);
-    if (U_FAILURE(status) != 0) {
+    if (U_FAILURE(status)) {
+        ThrowRangeError(env, "FormattedRelativeDateTime toString failed");
         return nullptr;
     }
+
     ani_string output;
     env->String_NewUTF16(reinterpret_cast<const uint16_t *>(result.getBuffer()), result.length(), &output);
     return output;

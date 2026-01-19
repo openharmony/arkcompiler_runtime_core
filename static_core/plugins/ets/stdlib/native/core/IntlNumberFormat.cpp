@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,30 @@
 #include <utility>
 
 namespace ark::ets::stdlib::intl {
+
+namespace refs {
+ani_class g_resolvedOptionsClass;
+
+ani_field g_locale_field;
+ani_field g_compactDisplay_field;
+ani_field g_currencySign_field;
+ani_field g_currency_field;
+ani_field g_currencyDisplay_field;
+ani_field g_minFractionDigits_field;
+ani_field g_maxFractionDigits_field;
+ani_field g_minSignificantDigits_field;
+ani_field g_maxSignificantDigits_field;
+ani_field g_minIntegerDigits_field;
+ani_field g_notation_field;
+ani_field g_numberingSystem_field;
+ani_field g_signDisplay_field;
+ani_field g_style_field;
+ani_field g_unit_field;
+ani_field g_unitDisplay_field;
+ani_field g_useGrouping_field;
+
+ani_field g_numberFormat_options_field;
+}  // namespace refs
 
 constexpr std::string_view INTEGER_FIELD = "integer";
 constexpr std::string_view FRACTION_FIELD = "fraction";
@@ -247,7 +271,7 @@ ani_string IcuFormatDouble(ani_env *env, ani_object self, ani_double value)
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumFmt formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
+    LocNumFmt &formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
     if (err == ANI_OK) {
         UErrorCode status = U_ZERO_ERROR;
         auto fmtNumber = formatter.formatDouble(NormalizeIfNaN(value), status);
@@ -268,7 +292,7 @@ ani_string IcuFormatLong(ani_env *env, ani_object self, ani_long value)
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumFmt formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
+    LocNumFmt &formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
     if (err != ANI_OK) {
         return nullptr;
     }
@@ -289,7 +313,7 @@ ani_string IcuFormatDecStr(ani_env *env, ani_object self, ani_string value)
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumFmt formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
+    LocNumFmt &formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
     if (err == ANI_OK) {
         const std::string &valueString = ConvertFromAniString(env, value);
         const icu::StringPiece sp {valueString.data(), static_cast<int32_t>(valueString.size())};
@@ -313,7 +337,7 @@ ani_string IcuFormatRange(ani_env *env, ani_object self, const icu::Formattable 
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumRangeFmt formatter = g_intlState->fmtsCache.NumRangeFmtsCacheInvalidation(env, options, err);
+    LocNumRangeFmt &formatter = g_intlState->fmtsCache.NumRangeFmtsCacheInvalidation(env, options, err);
     if (err == ANI_OK) {
         UErrorCode status = U_ZERO_ERROR;
         const icu::number::FormattedNumberRange &fmtRangeNumber =
@@ -547,7 +571,7 @@ ani_array IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[may
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumFmt formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
+    LocNumFmt &formatter = g_intlState->fmtsCache.NumFmtsCacheInvalidation(env, options, err);
     if (err != ANI_OK) {
         return nullptr;
     }
@@ -589,7 +613,7 @@ ani_array IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
     ParseOptions(env, self, options);
 
     ani_status err;
-    LocNumRangeFmt formatter = g_intlState->fmtsCache.NumRangeFmtsCacheInvalidation(env, options, err);
+    LocNumRangeFmt &formatter = g_intlState->fmtsCache.NumRangeFmtsCacheInvalidation(env, options, err);
     if (err != ANI_OK) {
         return nullptr;
     }
@@ -757,6 +781,42 @@ ani_status RegisterIntlNumberFormatNativeMethods(ani_env *env)
     if (!(status == ANI_OK || status == ANI_ALREADY_BINDED)) {
         return status;
     }
+
+    ANI_FATAL_IF_ERROR(env->Class_FindField(numberFormatClass, "options", &refs::g_numberFormat_options_field));
+
+    ani_class resolvedOptionsClassLocal;
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Intl.ResolvedNumberFormatOptionsImpl", &resolvedOptionsClassLocal));
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(resolvedOptionsClassLocal,
+                                                   reinterpret_cast<ani_ref *>(&refs::g_resolvedOptionsClass)));
+
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_locale", &refs::g_locale_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "_compactDisplay", &refs::g_compactDisplay_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "_currencySign", &refs::g_currencySign_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_currency", &refs::g_currency_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "_currencyDisplay", &refs::g_currencyDisplay_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "minFracStr", &refs::g_minFractionDigits_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "maxFracStr", &refs::g_maxFractionDigits_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "minSignStr", &refs::g_minSignificantDigits_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "maxSignStr", &refs::g_maxSignificantDigits_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "minIntStr", &refs::g_minIntegerDigits_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_notation", &refs::g_notation_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "_numberingSystem", &refs::g_numberingSystem_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_signDisplay", &refs::g_signDisplay_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_style", &refs::g_style_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_unit", &refs::g_unit_field));
+    ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_resolvedOptionsClass, "_unitDisplay", &refs::g_unitDisplay_field));
+    ANI_FATAL_IF_ERROR(
+        env->Class_FindField(refs::g_resolvedOptionsClass, "useGroupingStr", &refs::g_useGrouping_field));
+
     return ANI_OK;
 }
 

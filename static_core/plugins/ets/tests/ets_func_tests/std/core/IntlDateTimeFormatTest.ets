@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,8 @@ function main(): int {
     dtfTestsuite.addTest("dateTimeFormatTest4", dateTimeFormatTest4)
     dtfTestsuite.addTest("dateTimeFormatTest5", dateTimeFormatTest5)
     dtfTestsuite.addTest("dateTimeFormatTest6", dateTimeFormatTest6)
+    dtfTestsuite.addTest("dateTimeFormatTest7", dateTimeFormatTest7)
+    dtfTestsuite.addTest("dateTimeFormatTest8", dateTimeFormatTest8)
 
     dtfTestsuite.addTest("dateToLocaleString1", dateToLocaleString1)
     dtfTestsuite.addTest("dateToLocaleString2", dateToLocaleString2)
@@ -98,6 +100,26 @@ function dateTimeFormatTest6() {
     let rops = intlObj.resolvedOptions();
     arktest.assertEQ(rops.locale, 'am-ET-u-ca-ethioaa');
     arktest.assertEQ(rops.calendar, 'ethioaa');
+}
+
+function dateTimeFormatTest7() {
+    let date = new Date(Date.UTC(2021, 11, 20, 3, 23, 16));
+    let options: Intl.DateTimeFormatOptions = { dateStyle: 'full', timeZone: 'UTC' };
+    let dtf = new Intl.DateTimeFormat('en-GB', options);
+    arktest.assertEQ("Monday, 20 December 2021", dtf.format(date));
+}
+
+function dateTimeFormatTest8() {
+    // Test a specific timezone and offset formatting
+    let date = new Date(Date.UTC(2023, 5, 15, 12, 0, 0)); // A date in summer (DST for NY)
+    let options: Intl.DateTimeFormatOptions = {
+        hour: 'numeric',
+        timeZone: 'America/New_York',
+        timeZoneName: 'shortOffset'
+    };
+    let dtf = new Intl.DateTimeFormat('en-US', options);
+    // 12:00 UTC is 8:00 AM in New York (EDT = UTC-4), formatted with offset
+    arktest.assertEQ("8 AM GMT-4", dtf.format(date));
 }
 
 function dateToLocaleString1() {

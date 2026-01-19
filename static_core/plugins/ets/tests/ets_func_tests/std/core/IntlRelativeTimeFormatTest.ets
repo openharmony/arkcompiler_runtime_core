@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,14 @@
 
 const fakeLocale = "er-or"
 
-function main() {
-    testFormat()
-    testFormatToParts()
-    testResolvedOptions()
-    testSelectWithOptions()
-    testSupportedLocalesOf()
+function main(): int  {
+    const suite = new arktest.ArkTestsuite("Intl.RelativeTimeFormat format");
+    suite.addTest("testFormat", testFormat);
+    suite.addTest("testFormatToParts", testFormatToParts);
+    suite.addTest("testResolvedOptions", testResolvedOptions);
+    suite.addTest("testSelectWithOptions", testSelectWithOptions);
+    suite.addTest("testSupportedLocalesOf", testSupportedLocalesOf);
+    return suite.run();
 }
 
 function convertAllWhiteSpacesDetailed(text: string): string {
@@ -57,6 +59,10 @@ function testFormat() {
     runFormatTest("ru", 0, "day", "через 0 дней", { numeric: "always" })
     runFormatTest("fr", 5, "month", "dans 5 mois", { style: "long" })
     runFormatTest("fr", -5, "month", "il y a 5 mois", { style: "long" })
+    runFormatTest("ja", 10, "second", "10 秒後", { style: "long" })
+    runFormatTest("en", -2, "week", "2 wk. ago", { style: "short" })
+    runFormatTest("en", 3, "quarter", "in 3 qtrs.", { style: "narrow" })
+    runFormatTest("en", 1, "day", "in 1 day", { numeric: "always" })
 }
 
 function runFormatToPartsTest(locale: string, values: FixedArray<number>, unit: string, expected: FixedArray<string>,

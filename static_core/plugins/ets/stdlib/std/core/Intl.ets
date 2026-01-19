@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,30 +136,8 @@ export namespace Intl {
             }
 
             const IgnoreSensitivityValues : ReadonlyArray<string> = Array.of<string>("base",  "accent")
-            if (!IgnoreSensitivityValues.includes(this.options.sensitivity)) {
-                let lowerXToCompare = xToCompare.toLowerCase()
-                let lowerYToCompare = yToCompare.toLowerCase()
-                if (lowerXToCompare == lowerYToCompare) {
-                    let i: int = 0
-                    while (xToCompare[i] == yToCompare[i] && i < xToCompare.length && i < yToCompare.length) {
-                        ++i
-                    }
-                    const xChar = xToCompare[i]
-                    const yChar = yToCompare[i]
-                    const xIsUpper = xChar === xChar.toUpperCase() && xChar !== xChar.toLowerCase();
-                    const yIsUpper = yChar === yChar.toUpperCase() && yChar !== yChar.toLowerCase();
-            
-                    if (xIsUpper && !yIsUpper) {
-                        return this.options.caseFirst === "upper" ? -1 : 1;
-                    }
-                    if (!xIsUpper && yIsUpper) {
-                        return this.options.caseFirst === "upper" ? 1 : -1;
-                    }
-                }
-            }
-            xToCompare = xToCompare.normalize("NFD")
-            yToCompare = yToCompare.normalize("NFD")
-            return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare)
+            return this.compareByCollation(this.options.collation, this.options.locale, xToCompare, yToCompare,
+                                           this.options.caseFirst)
         }
 
         /**
@@ -266,7 +244,7 @@ export namespace Intl {
         * @param data string array contains collation, lang, x, y
         * @return icu-collator 2 strings compare result: 1 (x "more" than y), -1 (y "more" than x) or 0 (equals)
         */
-        private native compareByCollation(collation : string, lang: string, str1: string, str2: string) : double
+        private native compareByCollation(collation : string, lang: string, str1: string, str2: string, caseFirst: string) : double
 
         private static readonly SensitivityValues : ReadonlyArray<string> = Array.of<string>("base",  "accent", "case", "variant")
         private static readonly UsageValues : ReadonlyArray<string> = Array.of<string>("sort", "search")
@@ -679,6 +657,7 @@ export class DateTimeFormat {
         private readonly locale: string
         private readonly options: DateTimeFormatOptionsImpl
         private readonly pattern: string
+        private readonly cacheKey: string
 
         public constructor(locales?: string | string[], options?: DateTimeFormatOptions) {
             if (locales === undefined) {
@@ -695,6 +674,7 @@ export class DateTimeFormat {
             }
 
             this.pattern = this.getPattern()
+            this.cacheKey = this.generateCacheKey();
         }
 
         public static $_invoke(locales?: string | string[], options?: DateTimeFormatOptions): DateTimeFormat {
@@ -703,38 +683,38 @@ export class DateTimeFormat {
 
         public format(date?: Date | number): string {
             if (date === undefined) {
-                return this.formatImpl(Date.now())
+                return this.formatImpl(Date.now(), this.cacheKey)
             }
             if (date instanceof Date) {
-                return this.formatImpl(date.getTime())
+                return this.formatImpl(date.getTime(), this.cacheKey)
             }
-            return this.formatImpl(date!)
+            return this.formatImpl(date!, this.cacheKey)
         }
 
         public formatToParts(date?: Date | number): DateTimeFormatPart[] {
             if (date === undefined) {
-                return this.formatToPartsImpl(Date.now())
+                return this.formatToPartsImpl(Date.now(), this.cacheKey)
             }
             if (date instanceof Date) {
-                return this.formatToPartsImpl(date.getTime())
+                return this.formatToPartsImpl(date.getTime(), this.cacheKey)
             }
-            return this.formatToPartsImpl(date!)
+            return this.formatToPartsImpl(date!, this.cacheKey)
         }
 
         public formatRange(startDate: Date | number, endDate: Date | number): string {
             const startDateTime = this.getDateTime(startDate)
             const endDateTime = this.getDateTime(endDate)
-            return this.formatRangeImpl(startDateTime, endDateTime)
+            return this.formatRangeImpl(startDateTime, endDateTime, this.cacheKey)
         }
 
         public formatRangeToParts(startDate: Date | number, endDate: Date | number): DateTimeRangeFormatPart[] {
             const startDateTime = this.getDateTime(startDate)
             const endDateTime = this.getDateTime(endDate)
-            return this.formatRangeToPartsImpl(startDateTime, endDateTime)
+            return this.formatRangeToPartsImpl(startDateTime, endDateTime, this.cacheKey)
         }
 
         public resolvedOptions(): ResolvedDateTimeFormatOptions {
-            const resolvedOptions = this.resolvedOptionsImpl()
+            const resolvedOptions = this.resolvedOptionsImpl(this.cacheKey)
 
             if (resolvedOptions.hourCycle === undefined) {
                 const hourCycleOpt = this.options.hourCycle
@@ -774,17 +754,18 @@ export class DateTimeFormat {
             return intlBestFitLocales(langTags)
         }
 
-        private native formatImpl(timestamp: number): string
+        private native formatImpl(timestamp: number, cacheKey: string): string
 
-        private native formatToPartsImpl(timestamp: number): Intl.DateTimeFormatPart[]
+        private native formatToPartsImpl(timestamp: number, cacheKey: string): Intl.DateTimeFormatPart[]
 
-        private native formatRangeImpl(start: number, end: number): string
+        private native formatRangeImpl(start: number, end: number, cacheKey: string): string
 
-        private native formatRangeToPartsImpl(start: number, end: number): Intl.DateTimeRangeFormatPart[]
+        private native formatRangeToPartsImpl(start: number, end: number, cacheKey: string):
+                                              Intl.DateTimeRangeFormatPart[]
 
         private native getLocaleHourCycle(): HourCycle | undefined
 
-        private native resolvedOptionsImpl(): ResolvedDateTimeFormatOptions
+        private native resolvedOptionsImpl(cacheKey: string): ResolvedDateTimeFormatOptions
 
         private getDateTime(date: Date | number): number {
             return date instanceof Date ? date.getTime() : date
@@ -1073,6 +1054,27 @@ export class DateTimeFormat {
                         break
                 }
             }
+        }
+
+        private generateCacheKey(): string {
+            const sb = new StringBuilder();
+            sb.append(this.locale ?? "").append(";");
+            if (this.pattern !== undefined && this.pattern.length > 0) {
+                sb.append(this.pattern).append(";");
+            } else {
+                const dateStyle = this.options.dateStyle ?? "";
+                const timeStyle = this.options.timeStyle ?? "";
+                sb.append("style/").append(dateStyle).append("/").append(timeStyle).append(";");
+            }
+
+            sb.append(this.options.calendar ?? "").append(";");
+            sb.append(this.options.hourCycle ?? "").append(";");
+            sb.append(this.options.numberingSystem ?? "").append(";");
+            sb.append(this.options.timeZone ?? "").append(";");
+            sb.append(this.options.timeZoneName ?? "").append(";");
+            sb.append(this.options.formatMatcher ?? "");
+
+            return sb.toString();
         }
     }
 
@@ -1503,7 +1505,6 @@ export class DateTimeFormat {
             if (this.script != undefined && !this.scriptList().includes(this.script as string)) {
                 throw new RangeError(this.errMsg)
             }
-
             this.tag = this.createTag()
         }
 
@@ -2831,10 +2832,6 @@ export class DateTimeFormat {
         * @returns A Segments iterator containing segmented data
         */
         public segment(doc: string): Segments {
-            console.log("Segmentize", doc);
-            console.log("Granularity", this._granularity);
-            console.log("Locale", this._locale);
-
             let result = this.segmentWith(doc, this._granularity)
             let segments = new SegmentDataImpl[result.length];
 
