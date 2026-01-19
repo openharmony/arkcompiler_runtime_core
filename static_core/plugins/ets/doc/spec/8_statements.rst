@@ -20,9 +20,9 @@ Statements
 
 *Statements* are designed to control execution.
 
-Some statements are simple like a single *expressionStatement*
-(see :ref:`Expression Statements`), while others like :ref:`Block` or
-:ref:`if Statements` take several lines of program code.
+Some statements are simple like a single *expressionStatement* (see
+:ref:`Expression Statements`), while others take several lines of program code
+like :ref:`Block` or :ref:`if Statements`.
 
 .. code-block:: typescript
 
