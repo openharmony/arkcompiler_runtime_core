@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 import pytz
 
@@ -25,12 +26,13 @@ from runner.code_coverage.coverage_manager import CoverageManager
 from runner.common_exceptions import InvalidConfiguration
 from runner.cpumask import CPUMask
 from runner.enum_types.params import TestEnv
+from runner.extensions.suites.test_suite_registry import suite_registry
 from runner.logger import Log
 from runner.options.config import Config
 from runner.options.step import StepKind
 from runner.runner_file_based import RunnerFileBased
-from runner.suites.test_suite import TestSuite
 from runner.suites.work_dir import WorkDir
+from runner.test_base import Test
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -56,9 +58,11 @@ class RunnerStandardFlow(RunnerFileBased):
         )
 
         self.__remove_intermediate_files()
+        self.test_suite_kind = self.config.workflow.workflow_type
 
-        test_suite: TestSuite = TestSuite(self.test_env)
-        self.tests = set(test_suite.process(self.config.test_suite.ets.force_generate))
+        test_suite = suite_registry.create(self.test_suite_kind, self.test_env)
+
+        self.tests = set(cast(list[Test], test_suite.process(self.config.test_suite.ets.force_generate)))
         self.excluded = test_suite.excluded
         self.excluded_tests.update(test_suite.excluded_tests)
         self.list_root = test_suite.list_root

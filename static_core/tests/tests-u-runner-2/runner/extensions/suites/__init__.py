@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from runner.extensions.flows import test_flows  # noqa: F401
+from runner.extensions.suites import test_suites  # noqa: F401

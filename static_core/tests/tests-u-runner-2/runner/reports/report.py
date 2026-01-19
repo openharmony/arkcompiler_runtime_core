@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from os import path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
 
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.params import TestEnv, TestReport
@@ -28,7 +28,8 @@ from runner.reports.report_format import ReportFormat
 from runner.utils import write_2_file
 
 if TYPE_CHECKING:
-    from runner.runner_base import Test
+    from runner.test_base import GTest, Test
+    TestType: TypeAlias = GTest | Test
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -40,7 +41,7 @@ class ReportGenerator:
         self.__repeat = repeat
         self.__generate_for_passed = test_env.config.general.verbose_filter == VerboseFilter.ALL
 
-    def generate_reports(self, test_result: 'Test') -> dict[ReportFormat, str]:
+    def generate_reports(self, test_result: 'TestType') -> dict[ReportFormat, str]:
         if test_result.passed and not self.__generate_for_passed:
             return {}
 

@@ -32,6 +32,7 @@ _LOGGER = Log.get_logger(__file__)
 
 WORKFLOW = "workflow"
 WORKFLOW_NAME = "workflow-name"
+WORKFLOW_KIND = "workflow-kind"
 PARAMETERS = "parameters"
 STEPS = "steps"
 FROM = "from"
@@ -49,6 +50,7 @@ class WorkflowOptions(IOptions):
         self.__data = cfg_content[f"{self.__name}.data"] if not inner else cfg_content
         self.__test_suite = parent_test_suite
         self.__steps: list[Step] = []
+        self.workflow_type = self.__data.get(WORKFLOW_KIND, "ets")
         self.parent_step_name: str = parent_step_name if parent_step_name is not None else ""
         workflow_kind = "It's a main config" if not inner \
             else f"It's a nested config with the parent '{parent_workflow.__getattribute__('name')}'"
@@ -207,7 +209,7 @@ class WorkflowOptions(IOptions):
                 new_env[env] = new_env_var
             step_content['env'] = new_env
         step = Step(step_name, step_content)
-        if step.enabled:
+        if step.enabled and step.step_kind != StepKind.GTEST_RUNNER:
             if not step.executable_path_exists():
                 raise FileNotFoundException(f"Step executable path is empty or incorrect: {step.executable_path}"
                                             f"\nCheck step '{step_name}' in the '{self.name}' workflow")

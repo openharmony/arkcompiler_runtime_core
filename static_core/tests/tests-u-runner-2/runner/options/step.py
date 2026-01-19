@@ -36,6 +36,7 @@ class StepKind(BaseEnum):
     VERIFIER = "verifier"
     AOT = "aot"
     RUNTIME = "runtime"
+    GTEST_RUNNER = "gtest-runner"
     OTHER = "other"
 
 

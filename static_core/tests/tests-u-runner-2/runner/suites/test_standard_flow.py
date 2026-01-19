@@ -21,11 +21,15 @@ from collections.abc import Sequence
 from copy import deepcopy
 from fnmatch import translate
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+from typing_extensions import Self
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.params import BinaryParams, TestEnv, TestReport
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
+from runner.extensions.flows.test_flow_registry import ITestFlow
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -36,6 +40,9 @@ from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
 from runner.utils import get_class_by_name, to_bool
+
+if TYPE_CHECKING:
+    pass
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -105,19 +112,40 @@ class ComparisonUtils:
         return re.sub(pattern, '', error_message)
 
 
-class TestStandardFlow(Test):
+class StandardFlowUtils:
+
+    def __init__(self, test_env: TestEnv):
+        self.test_env = test_env
+
+    def get_step_env(self, step: Step) -> dict[str, str]:
+        cmd_env = self.test_env.cmd_env
+        if step.env:
+            cmd_env = deepcopy(self.test_env.cmd_env)
+            for env_item in step.env:
+                env_value: str | list[str] = step.env[env_item]
+                if isinstance(env_value, list):
+                    cmd_env[env_item] = "".join(env_value)
+                else:
+                    cmd_env[env_item] = env_value
+        return cmd_env
+
+
+class TestStandardFlow(ITestFlow, Test):
     __DEFAULT_ENTRY_POINT = "ETSGLOBAL::main"
     CTE_RETURN_CODE = 1
+    metadata: TestMetadata
+    flow_utils: StandardFlowUtils
     comparison_utils: ComparisonUtils = ComparisonUtils()
 
     def __init__(self, test_env: TestEnv, test_path: Path, *,
                  params: IOptions, test_id: str, is_dependent: bool = False,
                  parent_test_id: str = "") -> None:
-        Test.__init__(self, test_env, test_path, params, test_id)
 
-        self.metadata: TestMetadata = TestMetadata.get_metadata(test_path) \
-            if test_env.config.test_suite.use_metadata \
+        Test.__init__(self, test_env, test_path, params, test_id)
+        self.metadata = TestMetadata.get_metadata(test_path) if test_env.config.test_suite.use_metadata \
             else TestMetadata.create_empty_metadata(test_path)
+        self._init_bytecode_paths(test_env)
+
         self.test_cli: list[str] = self.metadata.test_cli or []
         self.main_entry_point: str = (
             f"ETSGLOBAL::{self.metadata.entry_point}"
@@ -141,19 +169,15 @@ class TestStandardFlow(Test):
         # It's supposed if the first step is failed then no step is executed further
         self.fail_kind: str | None = None
 
-        self.bytecode_path: Path = test_env.work_dir.intermediate
-        self.test_abc: Path = self.bytecode_path.joinpath(f"{self.test_id}.abc")
-        self.test_an: Path = self.bytecode_path.joinpath(f"{self.test_id}.an")
-        self.test_abc.parent.mkdir(parents=True, exist_ok=True)
-
-        self.validator: IValidator = self.__init_validator()
         self.expected_err_log = ""
+        self.flow_utils = StandardFlowUtils(test_env)
+        self.validator_utils = ValidatorUtils(self, test_env)
         self.runtime_steps = [step for step in self.test_env.config.workflow.steps
                                 if step.step_kind not in (StepKind.COMPILER, StepKind.VERIFIER)]
         self._dependent_tests: list[TestStandardFlow] = []
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
-        self._add_additional_validator()
+        self.validator_utils.add_additional_validator()
 
     @property
     def direct_dependent_tests(self) -> list['TestStandardFlow']:
@@ -260,15 +284,6 @@ class TestStandardFlow(Test):
         return options
 
     @staticmethod
-    def __get_validator_class(clazz: str) -> type[IValidator]:
-        class_obj = get_class_by_name(clazz)
-        if not issubclass(class_obj, IValidator):
-            raise InvalidConfiguration(
-                f"Validator class '{clazz}' not found. "
-                f"Check value of 'validator' parameter")
-        return class_obj
-
-    @staticmethod
     def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
         if output.find('TypeError:') > -1 or output.find('FatalOutOfMemoryError:') > -1:
             return actual_return_code if actual_return_code else -1
@@ -289,7 +304,7 @@ class TestStandardFlow(Test):
 
         return '\n'.join(expected[:index_to_delete])
 
-    def do_run(self) -> 'TestStandardFlow':
+    def do_run(self) -> Self:
         if not self._continue_after_process_dependent_files():
             return self
 
@@ -303,7 +318,7 @@ class TestStandardFlow(Test):
             pattern = re.compile(translate(step.step_filter))
             if not pattern.search(str(self.path)):
                 continue
-            self.passed, self.report, self.fail_kind = self.__do_run_one_step(step)
+            self.passed, self.report, self.fail_kind = self._do_run_one_step(step)
             if step.step_kind in allowed_steps:
                 allowed_steps.remove(step.step_kind)
             if not self.passed or (compile_only_test and not allowed_steps):
@@ -418,37 +433,6 @@ class TestStandardFlow(Test):
     def _is_compile_only_test(self) -> bool:
         return self.is_compile_only or self.metadata.tags.not_a_test or self.parent_test_id != ""
 
-    def _add_additional_validator(self) -> None:
-        runtime_steps = [step.step_kind.value for step in self.runtime_steps]
-        if self.has_expected:
-            if self.is_compile_only:
-                self.validator.add(StepKind.COMPILER.value, BaseValidator.check_output)
-            else:
-                for step in runtime_steps:
-                    self.validator.add(step, BaseValidator.check_output)
-
-    def _delete_runtime_validator(self, step_kind: str) -> None:
-        runtime_steps = [step.step_kind.value for step in self.runtime_steps]
-        runtime_steps.remove(step_kind)
-
-        for step in runtime_steps:
-            self.validator.delete(step, BaseValidator.check_output)
-
-    def _step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
-        validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
-        validator = self.validator.get_validator(validator_name)
-        if validator is not None:
-            for validator_func in validator:
-                step_validator = validator_func(self, step.step_kind.value, output, error, return_code)
-                if not step_validator.passed:
-                    return ValidationResult(step_validator.passed, step_validator.kind, step_validator.description)
-                if step_validator.stop_runtime_validation:
-                    # we have a comparison result for runtime step - no need in output comparision with expected for
-                    # further steps
-                    self._delete_runtime_validator(step.step_kind.value)
-            return ValidationResult(True, ValidatorFailKind.NONE, "")
-        return ValidationResult(True, ValidatorFailKind.NONE, "")
-
     def _get_expected_data(self) -> None:
         if self.has_expected:
             self.expected = self.metadata.expected_out or utils.read_expected_file(self.path_to_expected)
@@ -485,14 +469,7 @@ class TestStandardFlow(Test):
 
         return passed
 
-    def _log_invalid_tags(self) -> None:
-        if len(self.invalid_tags) > 0:
-            Log.default(
-                _LOGGER,
-                f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
-                f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
-
-    def __do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
+    def _do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
         if not step.enabled:
             passed, report, fail_kind = True, None, None
         elif step.step_kind == StepKind.COMPILER:
@@ -506,6 +483,23 @@ class TestStandardFlow(Test):
         else:
             passed, report, fail_kind = self.__run_step(step)
         return passed, report, fail_kind
+
+    def _make_params(self, step: Step, cmd_env: dict[str, str]) -> BinaryParams:
+        assert step.executable_path is not None
+        params = BinaryParams(
+            executor=step.executable_path,
+            flags=self.__expand_last_call_macros(step),
+            env=cmd_env,
+            timeout=step.timeout,
+            use_qemu=not step.skip_qemu
+        )
+        return params
+
+    def _init_bytecode_paths(self, test_env: TestEnv) -> None:
+        self.bytecode_path: Path = test_env.work_dir.intermediate
+        self.test_abc: Path = self.bytecode_path / f"{self.test_id}.abc"
+        self.test_an: Path = self.bytecode_path / f"{self.test_id}.an"
+        self.test_abc.parent.mkdir(parents=True, exist_ok=True)
 
     def __fix_entry_point(self, args: list[str]) -> list[str]:
         result: list[str] = args[:]
@@ -531,30 +525,17 @@ class TestStandardFlow(Test):
         return new_args
 
     def __run_step(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        cmd_env = self.test_env.cmd_env
-        if step.env:
-            cmd_env = deepcopy(self.test_env.cmd_env)
-            for env_item in step.env:
-                env_value: str | list[str] = step.env[env_item]
-                if isinstance(env_value, list):
-                    cmd_env[env_item] = "".join(env_value)
-                else:
-                    cmd_env[env_item] = env_value
+        cmd_env = self.flow_utils.get_step_env(step)
 
-        assert step.executable_path is not None
-        params = BinaryParams(
-            executor=step.executable_path,
-            flags=self.__expand_last_call_macros(step),
-            env=cmd_env,
-            timeout=step.timeout,
-            use_qemu=not step.skip_qemu
-        )
+        params = self._make_params(step, cmd_env)
 
         test_runner = OneTestRunner(self.test_env)
         passed, report, fail_kind = test_runner.run_with_coverage(
             name=step.name,
+            step_kind=step.step_kind,
             params=params,
-            result_validator=lambda out, err, return_code: self._step_validator(step, out, err, return_code),
+            result_validator=lambda out, err, return_code: self.validator_utils.step_validator(step, out, err,
+                                                                                               return_code),
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
         self.reproduce += test_runner.reproduce
@@ -596,12 +577,12 @@ class TestStandardFlow(Test):
             flags = utils.prepend_list(prepend_options, flags)
         return flags
 
-    def __init_validator(self) -> IValidator:
-        validator_class_name = self.test_env.config.test_suite.get_parameter("validator")
-        if validator_class_name is None:
-            return BaseValidator()
-        validator_class = self.__get_validator_class(validator_class_name)
-        return validator_class()
+    def __add_panda_files(self) -> str:
+        opt_name = '--panda-files'
+        if self.dependent_abc_files:
+            return f'{opt_name}={":".join(self.dependent_abc_files)}'
+
+        return f'{opt_name}={self.test_abc!s}'
 
     def __add_boot_panda_files(self, args: list[str]) -> list[str]:
         dep_files_args: list[str] = []
@@ -617,9 +598,60 @@ class TestStandardFlow(Test):
                 dep_files_args.append(arg)
         return dep_files_args
 
-    def __add_panda_files(self) -> str:
-        opt_name = '--panda-files'
-        if self.dependent_abc_files:
-            return f'{opt_name}={":".join(self.dependent_abc_files)}'
 
-        return f'{opt_name}={self.test_abc!s}'
+class ValidatorUtils:
+
+    def __init__(self, flow_type: TestStandardFlow, test_env: TestEnv):
+        self.test_env = test_env
+        self.validator: IValidator = self._init_validator()
+        self._flow_type: TestStandardFlow = flow_type
+
+    @staticmethod
+    def __get_validator_class(clazz: str) -> type[IValidator]:
+        class_obj = get_class_by_name(clazz)
+        if not issubclass(class_obj, IValidator):
+            raise InvalidConfiguration(
+                f"Validator class '{clazz}' not found. "
+                f"Check value of 'validator' parameter")
+        return class_obj
+
+    def add_additional_validator(self) -> None:
+        runtime_steps = [step.step_kind.value for step in self._flow_type.runtime_steps]
+        if self._flow_type.has_expected:
+            if self._flow_type.is_compile_only:
+                self.validator.add(StepKind.COMPILER.value, BaseValidator.check_output)
+            else:
+                for step in runtime_steps:
+                    self.validator.add(step, BaseValidator.check_output)
+
+    def step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
+        validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
+        validator = self.validator.get_validator(validator_name)
+        if validator is not None:
+            for validator_func in validator:
+                step_validator_result = validator_func(self._flow_type, step.step_kind.value,
+                                                       output, error, return_code)
+                if not step_validator_result.passed:
+                    return ValidationResult(step_validator_result.passed,
+                                            step_validator_result.kind,
+                                            step_validator_result.description)
+                if step_validator_result.stop_runtime_validation:
+                    # we have a comparison result for runtime step - no need in output comparision with expected for
+                    # further steps
+                    self._delete_runtime_validator(step.step_kind.value)
+            return ValidationResult(True, ValidatorFailKind.NONE, "")
+        return ValidationResult(True, ValidatorFailKind.NONE, "")
+
+    def _init_validator(self) -> IValidator:
+        validator_class_name = self.test_env.config.test_suite.get_parameter("validator")
+        if validator_class_name is None:
+            return BaseValidator()
+        validator_class = self.__get_validator_class(validator_class_name)
+        return validator_class()
+
+    def _delete_runtime_validator(self, step_kind: str) -> None:
+        runtime_steps = [step.step_kind.value for step in self._flow_type.runtime_steps]
+        runtime_steps.remove(step_kind)
+
+        for step in runtime_steps:
+            self.validator.delete(step, BaseValidator.check_output)

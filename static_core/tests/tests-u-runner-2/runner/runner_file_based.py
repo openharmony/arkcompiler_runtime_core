@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,7 +23,6 @@ from pathlib import Path
 import pytz
 
 from runner import common_exceptions
-from runner.common_exceptions import UnknownException
 from runner.enum_types.params import TestEnv
 from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
@@ -35,6 +34,7 @@ from runner.reports.standard_view import StandardView
 from runner.reports.summary import Summary
 from runner.reports.xml_view import XmlView
 from runner.runner_base import Runner
+from runner.suites.gtest_flow import GTestFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
@@ -145,8 +145,9 @@ class RunnerFileBased(Runner):
         excluded_but_passed: list[Test] = []
         fail_lists: dict[str, list[Test]] = {}
         for test_result in results:
-            if not isinstance(test_result, TestStandardFlow):
-                raise UnknownException(f"Incorrect type of test {type(test_result)}. Expected: TestStandardFlow")
+            if not isinstance(test_result, TestStandardFlow) and not isinstance(test_result, GTestFlow):
+                raise ValueError(f"Incorrect type of test {type(test_result)}. "
+                                       f"Expected: TestStandardFlow or GTestFlow")
 
             if test_result.excluded:
                 self.excluded_after += 1
@@ -176,7 +177,7 @@ class RunnerFileBased(Runner):
                 self.config.general.detailed_report_file)
             detailed_report.populate_report()
 
-    def _process_failed(self, test_result: TestStandardFlow, ignored_still_failed: list[Test],
+    def _process_failed(self, test_result: TestStandardFlow | GTestFlow, ignored_still_failed: list[Test],
                         excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
         if test_result.ignored and test_result.last_failure_check_passed:
             self.ignored += 1

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -165,9 +165,9 @@ class TestMetadata:     # type: ignore[explicit-any]
         return TestMetadata(**metadata)
 
     @classmethod
-    def create_empty_metadata(cls, path: Path) -> 'TestMetadata':
+    def create_empty_metadata(cls, path: Path, find_package: bool = True) -> 'TestMetadata':
         metadata = cls()
-        if metadata.package is None:
+        if metadata.package is None and find_package:
             metadata.package = cls.get_package_statement_from_source(path)
         return metadata
 
