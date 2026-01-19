@@ -538,6 +538,10 @@ A :index:`compile-time error` occurs if:
    the current module is stored; or
 -  ``import type`` is used while ``type`` is also used by one of bindings.
 
+A :index:`compile-time warning` occurs if the ``importPath`` refers to a file
+with no |LANG| code, where the grammar start sybmbol corresponds to an empty
+one.
+
 .. index::
    binding
    declaration
