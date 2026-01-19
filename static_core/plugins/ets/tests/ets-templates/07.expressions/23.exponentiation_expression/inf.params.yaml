@@ -45,3 +45,45 @@ inf:
     - { x: 1, y: Double.NEGATIVE_INFINITY, result: 1 }
     - { x: 2, y: Double.NEGATIVE_INFINITY, result: 0 }
     - { x: -2, y: Double.NEGATIVE_INFINITY, result: 0 }
+
+    # +/-0 ** y returns +/-Infinity if y is a negative odd integer
+    - { x: 0, y: -3, result: Double.POSITIVE_INFINITY }
+    - { x: "-0", y: -3, result: Double.NEGATIVE_INFINITY }
+
+    # +/-0 ** y returns +/-0 if y is a finite positive odd integer
+    - { x: 0, y: 3, result: 0 }
+    - { x: "-0", y: 3, result: "-0" }
+
+    # +/-0 ** y returns +Infinity for finite y < 0 and not an odd integer
+    - { x: 0, y: -2, result: Double.POSITIVE_INFINITY }
+    - { x: 0, y: -1.5, result: Double.POSITIVE_INFINITY }
+    - { x: "-0", y: -2, result: Double.POSITIVE_INFINITY }
+
+    # +/-0 ** y returns +0 for finite y > 0 and not an odd integer
+    - { x: 0, y: 2, result: 0 }
+    - { x: 0, y: 1.5, result: 0 }
+    - { x: "-0", y: 2, result: 0 }
+
+    # -1 ** +/-Infinity returns 1
+    - { x: -1, y: Double.POSITIVE_INFINITY, result: 1 }
+    - { x: -1, y: Double.NEGATIVE_INFINITY, result: 1 }
+
+    # x ** +Infinity returns +0 for -1 < x < 1
+    - { x: 0.5, y: Double.POSITIVE_INFINITY, result: 0 }
+    - { x: -0.5, y: Double.POSITIVE_INFINITY, result: 0 }
+
+    # x ** -Infinity returns +Infinity for -1 < x < 1
+    - { x: 0.5, y: Double.NEGATIVE_INFINITY, result: Double.POSITIVE_INFINITY }
+    - { x: -0.5, y: Double.NEGATIVE_INFINITY, result: Double.POSITIVE_INFINITY }
+
+    # -Infinity ** y returns -0 for a finite negative odd integer y
+    - { x: Double.NEGATIVE_INFINITY, y: -3, result: "-0" }
+
+    # -Infinity ** y returns +0 for finite y < 0 and not an odd integer
+    - { x: Double.NEGATIVE_INFINITY, y: -4, result: 0 }
+
+    # -Infinity ** y returns -Infinity for a finite positive odd integer y
+    - { x: Double.NEGATIVE_INFINITY, y: 3, result: Double.NEGATIVE_INFINITY }
+
+    # -Infinity ** y returns +Infinity for finite y > 0 and not an odd integer
+    - { x: Double.NEGATIVE_INFINITY, y: 4, result: Double.POSITIVE_INFINITY }

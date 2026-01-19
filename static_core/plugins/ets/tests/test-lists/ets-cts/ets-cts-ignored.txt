@@ -377,7 +377,10 @@
 07.expressions/20.nullish-coalescing_expression/resulting_type_crash.ets
 
 #30891
-07.expressions/22.multiplicative_expressions/04.exponentiation/enum.ets
+07.expressions/23.exponentiation_expression/enum.ets
+
+#32703
+07.expressions/23.exponentiation_expression/inf_27.ets
 
 #31358 number and char equality ops should produce CTE
 07.expressions/27.equality_expressions/eq_neg_16.ets
@@ -387,6 +390,44 @@
 
 #32743 bigint and numerical ==/=== should always return false (now return true - false positive)
 07.expressions/27.equality_expressions/01.numerical_equality_operators/bigint_equality_operators/eq_numeric_0.ets
+
+#32704
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_0.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_1.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_2.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_3.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_4.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_5.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_6.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_7.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_8.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_9.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_10.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_11.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_12.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_13.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_14.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_n_15.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_0.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_1.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_2.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_3.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_4.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_5.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_6.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_7.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_8.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_9.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_10.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_11.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_12.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_13.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_14.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_15.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_16.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_17.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_18.ets
+07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_19.ets
 
 #30340 &&= ||= ??= still not supported in code
 07.expressions/31.assignment/02.compound_assignment_operators/ops_12.ets
