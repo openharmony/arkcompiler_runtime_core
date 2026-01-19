@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,14 +22,14 @@ declarations:
   - decl: |-
       declare class CallSignatureDeclaration {
         (a: number): boolean
-        (a: number): string
+        (b: number): string
       }
     stdout: |-
       "Semantic error ESE0130: Function $_invoke is already declared."
   - decl: |-
       declare class CallSignatureDeclaration {
-        (): boolean
-        (a: number): string
+        (a: Array<int>): boolean
+        (a: int[]): string
       }
     stdout: |-
       "Semantic error ESE0130: Function $_invoke is already declared."
