@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -577,6 +577,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.cap = newCapacity
     }
 
+    private static native sameValueZero(o1: Any, o2: Any): boolean
+
     /**
      * Puts a pair of key and value into the Map
      *
@@ -596,7 +598,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         if (isLegalAt(bucket)) {
             let at = bucket
             do {
-                if (Runtime.sameValueZero(getKeyAt<K>(this.data, at), key)) {
+                if (Map.sameValueZero(getKeyAt<K>(this.data, at), key)) {
                     // found
                     this.setValue(getIdxAt(at), val)
                     return this
@@ -629,7 +631,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         let bucket = this.getBucketByIdx(bucketIdx)
 
         while (isLegalAt(bucket)) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+            if (Map.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
                 return true
             }
             bucket = this.getNextAt(bucket)
@@ -674,7 +676,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         let prev: At = 0
 
         while (isLegalAt(bucket)) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+            if (Map.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
                 if (isLegalAt(prev)) {
                     this.setNextAt(prev, this.getNextAt(bucket))
                 } else {
@@ -726,7 +728,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         let bucket = this.getBucketByIdx(bucketIdx)
 
         while (isLegalAt(bucket)) {
-            if (Runtime.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+            if (Map.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
                 return getValueAt<V>(this.data, bucket)
             }
             bucket = this.getNextAt(bucket)

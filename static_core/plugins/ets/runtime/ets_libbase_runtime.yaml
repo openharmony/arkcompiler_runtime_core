@@ -1898,10 +1898,25 @@ intrinsics:
     impl: ark::ets::intrinsics::EtsEscompatArrayGetBuffer
     safe_intrinsic: true
 
+####################
+# std.core.Map     #
+####################
+  - name: StdMapSameValueZero
+    space: ets
+    class_name: std.core.Map
+    method_name: sameValueZero
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeSameValueZero
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSameValueZero
+    llvm_codegen_func: EmitSameValueZero
 
-####################
+##########################
 # std.containers.WeakMap #
-####################
+##########################
   - name: WeakMapValidateKey
     space: ets
     class_name: std.containers.WeakMap
@@ -6910,19 +6925,6 @@ intrinsics:
     llvm_codegen_func: EmitGetHashCodeByValue
     need_param_locations: true
 
-  - name: StdRuntimeSameValueZero
-    space: ets
-    class_name: std.core.Runtime
-    method_name: sameValueZero
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::StdRuntimeSameValueZero
-    codegen_arch: [arm64, amd64]
-    codegen_func: CreateSameValueZero
-    llvm_codegen_func: EmitSameValueZero
-
   - name: StdCoreRuntimeFailedTypeCastExclUndefinedStub
     space: ets
     class_name: std.core.Runtime
@@ -9895,3 +9897,20 @@ intrinsics:
       ret: u1
       args: [ std.core.Class ]
     impl: ark::ets::intrinsics::ReflectProxyHasProxyFlag
+
+####################################
+# std.containers.ConcurrentHashMap #
+####################################
+  - name: StdConcurrentMapSameValueZero
+    space: ets
+    class_name: std.containers.containers.ConcurrentHashMap
+    method_name: sameValueZero
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::StdRuntimeSameValueZero
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateSameValueZero
+    llvm_codegen_func: EmitSameValueZero
+
