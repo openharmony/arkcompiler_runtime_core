@@ -243,6 +243,15 @@
 07.expressions/11.function_call_expression/fixed_array_predefined_6.ets
 07.expressions/11.function_call_expression/fixed_array_predefined_7.ets
 
+#746 specification unclear
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_0.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_1.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_2.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_3.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_4.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_5.ets
+07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_6.ets
+
 #28679
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
 07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets

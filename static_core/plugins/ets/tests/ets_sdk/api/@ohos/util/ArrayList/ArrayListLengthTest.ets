@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ function testArrayListConstructor0001() {
 }
 
 function testArrayListAdd0001() {
-    let arrayList = new ArrayList<double | string | Array<double | string | boolean> | boolean | undefined | null |
+    let arrayList = new ArrayList<double | string | Array<double | int | string | boolean> | boolean | undefined | null |
     Object>();
     arrayList.add("zhang san");
     arrayList.add(1);
