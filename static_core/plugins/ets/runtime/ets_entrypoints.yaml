@@ -2013,16 +2013,6 @@
     - ark::ObjectHeader*
     - int32_t
 
-- name: EscompatArrayReverseAsyncManual
-  entrypoint: EscompatArrayReverseAsyncManual
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - ark::ObjectHeader*
-    - ark::ObjectHeader*
-    - int32_t
-
 - name: EscompatArrayReverseHybrid
   entrypoint: EscompatArrayReverseHybrid
   bridge: none
@@ -2047,18 +2037,6 @@
 
 - name: ArrayFastCopyToRefAsync
   entrypoint: ArrayFastCopyToRefAsync
-  bridge: none
-  properties: [irtoc]
-  signature:
-    - void
-    - ark::ObjectHeader*
-    - ark::ObjectHeader*
-    - int32_t
-    - int32_t
-    - int32_t
-
-- name: ArrayFastCopyToRefAsyncManual
-  entrypoint: ArrayFastCopyToRefAsyncManual
   bridge: none
   properties: [irtoc]
   signature:

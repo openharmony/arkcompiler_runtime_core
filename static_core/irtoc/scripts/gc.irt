@@ -27,41 +27,6 @@ function(:EmptyPostWriteBarrier,
     ReturnVoid().void
 }
 
-def PostInterGenerationalBarrier(obj_num)
-    if obj_num == 0
-        params = {mem: 'ref_uint'}
-        mask = RegMask.new($full_regmap, :arg0, :tmp0, :tmp1)
-    elsif obj_num == 1
-        params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint'}
-        mask = RegMask.new($full_regmap, :arg0, :arg1, :tmp0)
-    elsif obj_num == 2
-        params = {mem: 'ref_uint', offset: 'word', obj1: 'ref_uint', obj2: 'ref_uint'}
-        mask = RegMask.new($full_regmap, :arg0, :arg1, :arg2)
-    else
-        raise "Wrong obj_num #{obj_num}"
-    end
-
-    function("PostInterGenerationalBarrier#{obj_num}".to_sym,
-             params: params,
-             regmap: $full_regmap,
-             regalloc_set: mask,
-             mode: [:FastPath]) {
-        if Options.arch == :arm32
-            Intrinsic(:UNREACHABLE).Terminator.void
-            next
-        end
-
-        min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
-        cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
-
-        mem_word := Cast(mem).SrcType(Constants::REF_UINT).word
-        card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
-        card := Add(cards, card_offset).ptr
-        StoreI(card, Constants::CARD_DIRTY_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
-        ReturnVoid().void
-   }
-end
-
 # G1 PostWrite barrier
 # - Checks if mem and obj are in different regions
 # - Checks if GC Card for mem is not marked, then marks it
@@ -271,10 +236,6 @@ end
 
 PostInterRegionBarrierSlow()
 PostInterRegionBarrierTwoCardsSlow()
-
-PostInterGenerationalBarrier(0)
-PostInterGenerationalBarrier(1)
-PostInterGenerationalBarrier(2)
 
 PostInterRegionBarrierMarkSingleFast()
 PostInterRegionBarrierMarkPairFast()

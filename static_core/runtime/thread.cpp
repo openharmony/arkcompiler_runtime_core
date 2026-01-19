@@ -114,12 +114,6 @@ void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
 {
     auto postBarrierType = barrier->GetPostType();
     switch (postBarrierType) {
-        case ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER:
-            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
-            postWrbOneObject_ = reinterpret_cast<void *>(PostInterGenerationalBarrier1);
-            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterGenerationalBarrier2);
-            break;
         case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
             cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
             cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());

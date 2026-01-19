@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,28 +78,6 @@ enum BarrierType : uint8_t {
      */
     PRE_SATB_BARRIER = EncodeBarrierType(2U, BarrierPosition::BARRIER_POSITION_PRE, BarrierActionType::WRITE_BARRIER),
     /**
-     * Post barrier. Intergenerational barrier for GCs with explicit continuous young gen space. Unconditional.
-     * Can be fully encoded by compiler
-     * Pseudocode:
-     * store obj.field <- new_val // STORE for which barrier generated
-     * load AddressOf(MIN_ADDR) -> min_addr
-     * load AddressOf(CARD_TABLE_ADDR) -> card_table_addr
-     * card_index = (AddressOf(obj) - min_addr) >> CARD_BITS   // shift right
-     * card_addr = card_table_addr + card_index
-     * store card_addr <- DIRTY_VAL
-     *
-     * Runtime should provide these parameters:
-     * MIN_ADDR - minimal address used by runtime (it is required only to support 64-bit addresses)
-     * CARD_TABLE_ADDR - address of the start of card table raw data array
-     * CARD_BITS - how many bits covered by one card (probably it will be a literal)
-     * DIRTY_VAL - some literal representing dirty card
-     *
-     * Note if store if to expensive on the architecture(for example in multithreading environment) -
-     * consider to create conditional barrier, ie check that card is not dirty before store
-     */
-    POST_INTERGENERATIONAL_BARRIER =
-        EncodeBarrierType(3U, BarrierPosition::BARRIER_POSITION_POST, BarrierActionType::WRITE_BARRIER),
-    /**
      * Inter-region barrier. For GCs without explicit continuous young gen space.
      * Pseudocode:
      * store obj.field <- new_val // STORE for which barrier generated
@@ -175,8 +153,6 @@ constexpr bool IsReadBarrier(BarrierType barrierType)
 
 static_assert(IsPreBarrier(BarrierType::PRE_SATB_BARRIER));
 static_assert(IsWriteBarrier(BarrierType::PRE_SATB_BARRIER));
-static_assert(IsPostBarrier(BarrierType::POST_INTERGENERATIONAL_BARRIER));
-static_assert(IsWriteBarrier(BarrierType::POST_INTERGENERATIONAL_BARRIER));
 static_assert(IsPostBarrier(BarrierType::POST_INTERREGION_BARRIER));
 static_assert(IsWriteBarrier(BarrierType::POST_INTERREGION_BARRIER));
 

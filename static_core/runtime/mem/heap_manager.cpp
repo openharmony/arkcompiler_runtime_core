@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/epsilon/epsilon.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
-#include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
@@ -54,10 +53,6 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
         }
         case GCType::STW_GC: {
             ret = Initialize<GCType::STW_GC>(memStats, multithreadingMode, createPygoteSpace);
-            break;
-        }
-        case GCType::GEN_GC: {
-            ret = Initialize<GCType::GEN_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         case GCType::G1_GC: {

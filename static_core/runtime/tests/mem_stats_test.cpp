@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
         RuntimeOptions options;
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
-        options.SetGcType("stw");  // NOTE(dtrubenk): fix for gen-gc
+        options.SetGcType("stw");
         options.SetRunGcInPlace(true);
         Runtime::Create(options);
         thread_ = ark::MTManagedThread::GetCurrent();

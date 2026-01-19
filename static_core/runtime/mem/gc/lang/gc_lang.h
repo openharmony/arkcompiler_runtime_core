@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 namespace ark::mem {
 
 // GCLang class is an interlayer between language-agnostic GC class and different implementations of GC.
-// It contains language-specific methods that are used in several types of GC (such as StwGC, GenGC, etc.)
+// It contains language-specific methods that are used in several types of GC (such as StwGC, etc.)
 //
 //                              GC
 //                              ^
@@ -30,7 +30,7 @@ namespace ark::mem {
 //                       |           |    ...   |
 // 	                    /            |    ...
 //                     /             |    ...
-// StwGC<SpecificLanguage> GenGC<SpecificLanguage> ...
+// StwGC<SpecificLanguage> G1GC<SpecificLanguage> ...
 
 template <class LanguageConfig>
 class GCLang : public GC {

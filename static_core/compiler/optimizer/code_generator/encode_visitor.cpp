@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1440,20 +1440,7 @@ void EncodeVisitor::VisitStoreStatic(GraphVisitor *visitor, Inst *inst)
     if (!inst->CastToStoreStatic()->GetNeedBarrier()) {
         return;
     }
-    auto barrierType {runtime->GetPostType()};
-    // We should decide here pass to barrier class+offset or managed object.
-    // For other store we already pass obj+offset and while call EncodeInterGenerationalBarrier offset is ignored.
-    // StaticStore is specific case where gen GC expects barrier for managed object instead of class which field is
-    // updated.
-    if (barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
-        enc->GetCodegen()->CreatePostWRB(inst, mem, src1, INVALID_REGISTER);
-    } else {
-        auto arch = enc->GetEncoder()->GetArch();
-        auto tmpReg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
-        enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(src0, runtime->GetManagedClassOffset(enc->GetArch())));
-        auto classHeaderMem = MemRef(tmpReg);
-        enc->GetCodegen()->CreatePostWRB(inst, classHeaderMem, src1, INVALID_REGISTER);
-    }
+    enc->GetCodegen()->CreatePostWRB(inst, mem, src1, INVALID_REGISTER);
 }
 
 void EncodeVisitor::VisitLoadObjectDynamic(GraphVisitor *visitor, Inst *inst)

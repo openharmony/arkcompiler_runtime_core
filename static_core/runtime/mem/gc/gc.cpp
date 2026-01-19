@@ -33,7 +33,6 @@
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/gc_root-inl.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
-#include "runtime/mem/gc/gen-gc/gen-gc.h"
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "runtime/mem/gc/workers/gc_workers_task_queue.h"
@@ -425,9 +424,6 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
             break;
         case GCType::STW_GC:
             ret = allocator->New<StwGC<LanguageConfig>>(objectAllocator, settings);
-            break;
-        case GCType::GEN_GC:
-            ret = allocator->New<GenGC<LanguageConfig>>(objectAllocator, settings);
             break;
         case GCType::G1_GC:
             ret = allocator->New<G1GC<LanguageConfig>>(objectAllocator, settings);

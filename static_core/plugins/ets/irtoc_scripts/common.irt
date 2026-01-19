@@ -166,14 +166,3 @@ scoped_macro(:post_inter_region_barrier) do |data, size|
   ep_offset = get_entrypoint_offset("POST_INTER_REGION_BARRIER_SLOW")
   Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("PostInterRegionBarrierSlow").Terminator.void
 end # post_inter_region_barrier
-
-scoped_macro(:post_inter_generational_barrier) do |obj|
-  min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
-  cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
-
-  # GCGenBarrierSet just ignores the offset to the data and count and works with the dst object only.
-  mem_word := Bitcast(obj).word
-  card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
-  card := Add(cards, card_offset).ptr
-  StoreI(card, Constants::CARD_DIRTY_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
-end # post_inter_generational_barrier

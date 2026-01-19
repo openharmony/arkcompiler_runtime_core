@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2479,8 +2479,7 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         ASSERT(GetGraph()->SupportManagedCode());
         return;
     }
-    ASSERT(barrierType == mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           barrierType == mem::BarrierType::POST_INTERREGION_BARRIER);
+    ASSERT(barrierType == mem::BarrierType::POST_INTERREGION_BARRIER);
 
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);

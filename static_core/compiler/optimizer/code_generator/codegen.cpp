@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2160,8 +2160,7 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
         if (barrierType == ark::mem::BarrierType::POST_WRB_NONE) {
             return;
         }
-        ASSERT(barrierType == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-               barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER ||
+        ASSERT(barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER ||
                barrierType == ark::mem::BarrierType::POST_CMC_WRITE_BARRIER);
     }
     if (barrierType == ark::mem::BarrierType::POST_CMC_WRITE_BARRIER) {
@@ -2947,8 +2946,8 @@ void PostWriteBarrier::Encode(MemRef mem, Reg reg1, Reg reg2, bool checkObject, 
     } else if (type_ == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
         EncodeInterRegionBarrier(args);
     } else {
-        ASSERT(type_ == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER);
-        EncodeInterGenerationalBarrier(mem.GetBase().As(reference));
+        // Unknown GC barrier type
+        UNREACHABLE();
     }
 }
 
@@ -2973,7 +2972,6 @@ void PostWriteBarrier::EncodeOfflineIrtocBarrier(Args args)
 void PostWriteBarrier::EncodeOnlineIrtocBarrier(Args args)
 {
     SCOPED_DISASM_STR(cg_, "Post Online Irtoc-WRB");
-    auto *enc {cg_->GetEncoder()};
     auto hasObj2 = HasObject2(args);
     if (type_ == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
         if (hasObj2) {
@@ -2982,16 +2980,8 @@ void PostWriteBarrier::EncodeOnlineIrtocBarrier(Args args)
             EncodeOnlineIrtocRegionOneRegBarrier(args);
         }
     } else {
-        static constexpr auto ENTRYPOINT_ID {RuntimeInterface::EntrypointId::POST_INTER_GENERATIONAL_BARRIER0};
-        auto base = GetBase(args);
-        auto paramRegs = GetParamRegs(1U, args);
-        cg_->SaveCallerRegisters(paramRegs, VRegMask(), false);
-        auto paramReg0 = enc->GetTarget().GetParamReg(0);
-        enc->EncodeMov(paramReg0, base);
-        ScopedTmpReg tmpReg(enc, true);
-        cg_->GetEntrypoint(tmpReg, ENTRYPOINT_ID);
-        enc->MakeCall(tmpReg);
-        cg_->LoadCallerRegisters(paramRegs, VRegMask(), false);
+        // Unknown GC barrier type
+        UNREACHABLE();
     }
 }
 
@@ -3114,41 +3104,6 @@ void PostWriteBarrier::EncodeInterRegionBarrier(Args args)
         cg_->CallBarrier(live_regs, live_vregs, ENTRYPOINT_ID, INVALID_REGISTER, tmp, args.reg2);
         enc->BindLabel(label1);
     }
-}
-
-void PostWriteBarrier::EncodeInterGenerationalBarrier(Reg base)
-{
-    ASSERT(type_ == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER);
-    SCOPED_DISASM_STR(cg_, "Post IG-WRB");
-    auto *runtime {cg_->GetRuntime()};
-    auto *enc {cg_->GetEncoder()};
-    ScopedTmpReg tmp(enc);
-    ScopedTmpReg tmp1(enc);
-    // load AddressOf(MIN_ADDR) -> min_addr
-    if (cg_->GetGraph()->IsOfflineCompilationMode()) {
-        enc->EncodeLdr(tmp, false, MemRef(cg_->ThreadReg(), runtime->GetTlsCardTableMinAddrOffset(cg_->GetArch())));
-    } else {
-        auto minAddress = reinterpret_cast<uintptr_t>(GetBarrierOperandValue<void *>(BARRIER_POSITION, "MIN_ADDR"));
-        enc->EncodeMov(tmp, Imm(minAddress));
-    }
-    // card_index = (AddressOf(obj.field) - min_addr) >> CARD_BITS
-    EncodeCalculateCardIndex(base, &tmp, &tmp1);
-    // load AddressOf(CARD_TABLE_ADDR) -> card_table_addr
-    if (cg_->GetGraph()->IsOfflineCompilationMode()) {
-        enc->EncodeLdr(tmp1.GetReg().As(INT64_TYPE), false,
-                       MemRef(cg_->ThreadReg(), runtime->GetTlsCardTableAddrOffset(cg_->GetArch())));
-    } else {
-        auto cardTableAddr =
-            reinterpret_cast<uintptr_t>(GetBarrierOperandValue<uint8_t *>(BARRIER_POSITION, "CARD_TABLE_ADDR"));
-        enc->EncodeMov(tmp1, Imm(cardTableAddr));
-    }
-    // card_addr = card_table_addr + card_index
-    enc->EncodeAdd(tmp, tmp1, tmp);
-    // store card_addr <- DIRTY_VAL
-    auto dirtyVal = GetBarrierOperandValue<uint8_t>(BARRIER_POSITION, "DIRTY_VAL");
-    auto tmp1B = cg_->ConvertRegister(tmp1.GetReg().GetId(), DataType::INT8);
-    enc->EncodeMov(tmp1B, Imm(dirtyVal));
-    enc->EncodeStr(tmp1B, MemRef(tmp));
 }
 
 void PostWriteBarrier::EncodeCalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1)

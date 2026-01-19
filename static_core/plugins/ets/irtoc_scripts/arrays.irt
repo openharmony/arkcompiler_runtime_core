@@ -17,7 +17,6 @@ include_relative 'common.irt'
 class SynchronizationType
   :Sync
   :Async
-  :AsyncManual
   :Hybrid
 end
 
@@ -79,9 +78,6 @@ def GenerateArrayFastCopyToRef(sync_type)
   Label(:LoopDone)
     if sync_type == :Async
       post_inter_region_barrier(dst_data, len_bytes)
-    elsif sync_type == :AsyncManual
-      dst_obj_ptr := Cast(dst_obj).ptr
-      post_inter_generational_barrier(dst_obj_ptr)
     end
   Label(:Done)
     ReturnVoid().void
@@ -90,5 +86,4 @@ end
 
 GenerateArrayFastCopyToRef(:Sync)
 GenerateArrayFastCopyToRef(:Async)
-GenerateArrayFastCopyToRef(:AsyncManual)
 GenerateArrayFastCopyToRef(:Hybrid)
