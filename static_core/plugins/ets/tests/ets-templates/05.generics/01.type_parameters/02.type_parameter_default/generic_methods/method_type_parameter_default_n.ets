@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,13 +21,14 @@ desc: >-
         with a default value in the declaration of a generic type.
         - Type parameter default refers to a type parameter defined after the current type parameter.
     Also covered some wrong declarations where the default parameter is not a type.
+expected_out: {{c.stdout}}
 tags: [compile-only, negative]
-params: {{c}}
+params: {{c.case}}
 ---*/
 
 class SomeType {}
 class OtherType {}
 
-class Base { foo<{{c}}>() {} }
+class Base { foo<{{c.case}}>() {} }
 
 {% endfor %}

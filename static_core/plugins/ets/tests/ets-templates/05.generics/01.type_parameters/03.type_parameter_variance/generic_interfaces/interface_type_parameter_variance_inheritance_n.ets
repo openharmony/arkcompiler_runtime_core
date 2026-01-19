@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,19 @@
 {% for c in cases %}
 
 /*---
-desc: Variance is used to describe the subtyping operation on parameterized types. Test {{c.desc}}.
+desc: Variance is used to describe the subtyping operation on parameterized types. Test {{c.case.desc}}.
+expected_out: {{c.stdout}}
 tags: [compile-only, negative]
 ---*/
 
-{{c.class}} A {}
-{{c.class}} B extends A {}
+{{c.case.class}} A {}
+{{c.case.class}} B extends A {}
 
-interface TestInterface<{{c.param}}> {}
-class TestClass implements TestInterface<{{c.type2}}> {}
+interface TestInterface<{{c.case.param}}> {}
+class TestClass implements TestInterface<{{c.case.type2}}> {}
 
 function main(): void {
-    let test: TestInterface<{{c.type1}}> = new TestClass()
+    let test: TestInterface<{{c.case.type1}}> = new TestClass()
 }
 
 {% endfor %}

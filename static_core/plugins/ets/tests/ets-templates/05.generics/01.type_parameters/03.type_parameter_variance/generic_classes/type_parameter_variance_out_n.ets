@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,17 @@
 /*---
 desc: Test of covariant _out_ type parameter modifier. 
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
 class A<out T> {
-  readonly field: T = {{c.value}} as T
+  readonly field: T = {{c.case.value}} as T
   f(): T { return this.field }
 }
 
 function main(): void {
-  let arg: {{c.type}} = {{c.value}}
-  let a: A<{{c.type}}> = new A<{{c.type}}>()
+  let arg: {{c.case.type}} = {{c.case.value}}
+  let a: A<{{c.case.type}}> = new A<{{c.case.type}}>()
   arktest.assertEQ(a.f(), arg)
 }
 

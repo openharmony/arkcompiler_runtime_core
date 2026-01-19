@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,13 +17,12 @@ limitations under the License.
 
 /*---
 desc: wrong usage of type variable in static member
+expected_out: {{stm.stdout}}
 tags: [compile-only, negative]
-params: >
-  {{stm}}
 ---*/
 
 interface I<X> {
-	{{stm}}
+	{{stm.case}}
 }
 
 function main(): void {}

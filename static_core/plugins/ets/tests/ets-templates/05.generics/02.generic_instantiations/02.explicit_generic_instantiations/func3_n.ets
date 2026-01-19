@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@ desc: >-
         An explicit generic instantiation is a language construct, which provides a list of type arguments
         (see Type Arguments) that specify real types or type parameters to substitute corresponding type parameters of a generic.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE655063: Generic function foo requires explicit type arguments when used as a value."
 ---*/
 
 // function arguments with tuple

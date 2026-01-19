@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,12 @@
 
 --- # Interfaces with static members and type parameters inside
 static_members_with_type_param:
-  - "static foo(): X"
-  - "static foo(): void {let x:X;}"
-  - "static inner class InnerC {innerVar: X}"
+  - case: "static foo(): X"
+    stdout: |-
+      "Syntax error ESY0224: Identifier expected, got 'static'."
+  - case: "static foo(): void {let x:X;}"
+    stdout: |-
+      "Syntax error ESY0224: Identifier expected, got 'static'."
+  - case: "static inner class InnerC {innerVar: X}"
+    stdout: |-
+      "Syntax error ESY0224: Identifier expected, got 'static'."

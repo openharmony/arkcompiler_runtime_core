@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,21 +15,31 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: It is a compile-time error if a wildcard is used in a parameterization of a function, method, or constructor.
-params: constructor, use-site variance
+desc: Type arguments
+params: constructor
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
-class A {
-    private t: Object | null
+interface I {}
 
-    private constructor() {}
+class X implements I {}
 
-    public constructor <T> (t: T) {
-        this()
+class Y {}
+
+class A<V,T{{c.bound}}> {
+    private v: V
+    private t: Object | null | T
+
+    public constructor (v: V, t: T) {
+        this.v = v
         this.t = t
     }
 }
+
+enum Color { Red, Green, Blue }
+
+{{c.decl}}
 
 function main() {
 

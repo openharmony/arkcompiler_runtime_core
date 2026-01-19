@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,36 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
+{% for wc in wrong_constraints %}
+{% for tog in type_with_one_generic %}
+{% for bd in bounds %}
+
 /*---
-desc: Type arguments
-params: constructor
-tags: [compile-only, negative]
+desc: Self-dependency is prohibited
+tags: [negative, compile-only]
+params: >
+  {{wc}}
+  {{tog}}
+  {{bd}}
 ---*/
 
-interface I {}
+{{tog.decl}}
 
-class X implements I {}
-
-class Y extends X {}
-
-class A<V,T{{c.bound}}> {
-    private v: V
-    private t: Object | null
-
-    public constructor (v: V, t: T) {
-        this.v = v
-        this.t = t
-    }
+function main(): void {
+    let x = {{tog.type}}<{{bd}}{{wc}}>{{tog.curly_if_need}};
 }
 
-enum Color { Red, Green, Blue }
-
-{{c.decl}}
-
-function main() {
-
-    {{c.use|indent}}
-    
-}
+{% endfor %}
+{% endfor %}
 {% endfor %}

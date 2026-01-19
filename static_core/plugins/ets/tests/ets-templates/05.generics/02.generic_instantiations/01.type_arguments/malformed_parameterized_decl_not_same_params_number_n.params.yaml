@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,20 +13,63 @@
 
 --- # Generic declarations and its wrong parameterization
 generic_types:
-  - {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric"}
-  - {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
-  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
-  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
-  - {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}
-
-  - {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric"}
-  - {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric<Object, String>"}
-  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics"}
-  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<Object>"}
-  - {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<String, Object, String>"}
-
-  - {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric"}
-  - {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
-  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
-  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
-  - {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}
+  #0
+  - case: {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric"}
+    stdout: |-
+      "Semantic error ESE0170: Type 'OneGeneric<T>' is generic but type argument were not provided."
+  #1    
+  - case: {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'OneGeneric<T>' has 1 number of type parameters, but 2 type arguments were provided."
+  #2
+  - case: {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
+    stdout: |-
+      "Semantic error ESE0170: Type 'TwoGenerics<T,U>' is generic but type argument were not provided."
+  #3
+  - case: {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'TwoGenerics<T,U>' has 2 number of type parameters, but 1 type arguments were provided."
+  #4
+  - case: {decl: "class TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'TwoGenerics<T,U>' has 2 number of type parameters, but 3 type arguments were provided."
+  #5
+  - case: {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric"}
+    stdout: |-
+      "Semantic error ESE0371: Cannot find type 'OneGeneric'."
+  #6
+  - case: {decl: "function OneGeneric<T>(): void {}", bad_param: "OneGeneric<Object, String>"}
+    stdout: |-
+      "Semantic error ESE0371: Cannot find type 'OneGeneric'."
+  #7
+  - case: {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics"}
+    stdout: |-
+      "Semantic error ESE0371: Cannot find type 'TwoGenerics'."
+  #8
+  - case: {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<Object>"}
+    stdout: |-
+      "Semantic error ESE0371: Cannot find type 'TwoGenerics'."
+  #9
+  - case: {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<String, Object, String>"}
+    stdout: |-
+      "Semantic error ESE0371: Cannot find type 'TwoGenerics'. "
+  #10
+  - case: {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric"}
+    stdout: |-
+      "Semantic error ESE0170: Type 'OneGeneric<T>' is generic but type argument were not provided."
+  #11
+  - case: {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'OneGeneric<T>' has 1 number of type parameters, but 2 type arguments were provided."
+  #12
+  - case: {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics"}
+    stdout: |-
+      "Semantic error ESE0170: Type 'TwoGenerics<T,U>' is generic but type argument were not provided."
+  #13
+  - case: {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<Object>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'TwoGenerics<T,U>' has 2 number of type parameters, but 1 type arguments were provided."
+  #14
+  - case: {decl: "interface TwoGenerics<T,U> {}", bad_param: "TwoGenerics<String, Object, String>"}
+    stdout: |-
+      "Semantic error ESE0171: Type 'TwoGenerics<T,U>' has 2 number of type parameters, but 3 type arguments were provided."
