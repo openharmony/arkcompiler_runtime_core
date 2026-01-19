@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,6 +22,7 @@ from pathlib import Path
 import yaml
 from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError, select_autoescape
 
+from runner.extensions.generators.ets_cts.yaml_extension import YamlExtension
 from runner.sts_utils.constants import (
     META_COPYRIGHT,
     META_END_COMMENT,
@@ -50,8 +51,10 @@ class Template:
         self.__params = params
         self.__jinja_env = Environment(
             loader=FileSystemLoader([test_path.parent.as_posix(), ets_templates_path.as_posix()]),
-            autoescape=select_autoescape()
+            autoescape=select_autoescape(),
+            extensions=[YamlExtension],
         )
+        self.__jinja_env.__setattr__('current_test_path_dir', test_path.parent)
 
         if self.is_copyright:
             self.__copyright = read_file(COPYRIGHT_PATH)
