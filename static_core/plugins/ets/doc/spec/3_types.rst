@@ -1093,8 +1093,8 @@ Reference Types
    void type
    type parameter
 
-The term *Objects* is used further in this document to denote any instances
-pointed at by variables and constants of reference types
+The term *Object* is used further in this document to denote any instance
+pointed at by a variable or constant of a reference type
 (see :ref:`Variable and Constant Declarations`).
 
 Multiple references to an object are possible.
@@ -2294,7 +2294,7 @@ The syntax of *union type* is as follows:
 The values of a *union* type are valid values of all types the union is created
 from.
 
-A :index:`compile-time error` occurs if the type in the right-hand side of a
+A :index:`compile-time error` occurs if type in the right-hand side of a
 union type declaration leads to a circular reference.
 
 A :index:`compile-time error` occurs if *type* is a function type (see
