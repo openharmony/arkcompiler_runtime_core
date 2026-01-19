@@ -685,7 +685,7 @@ Different cases of type argument inference are represented in the examples below
 Implicit instantiation is only possible for generic functions and methods.
 
 If a method of a generic class or interface
-*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with 
+*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with
 default type (see :ref:`Type Parameter Default`) that equals ``T``:sub:`i`,
 and an implicit generic instantion of this method provides no information
 to infer a type argument, then the type argument correspondent to ``T``:sub:`i`
