@@ -761,19 +761,20 @@ it is called a *simple name*.
 
 *Simple name* refers to the following:
 
--  Entity declared in the current module
+-  Entity declared in the current module, i.e.,
 
-   - Variable name
-   - Constant name
-   - Function name
-   - Accessor name
+   - Variable name,
+   - Constant name,
+   - Function name,
+   - Accessor name.
+
 
 -  Local variable or parameter of the surrounding function or method.
 
 If not a *simple name*, *qualifiedName* refers to the following:
 
 -  Entity imported from a module,
--  Entity exported from a namespace, or
+-  Entity exported from a namespace,
 -  Member of some class or interface, or
 -  Special syntax form of :ref:`Record Indexing Expression`.
 
@@ -1247,7 +1248,7 @@ This situation is represented in the following example:
     let c: ConcatArray<string> = [1, 2]  // compile-time error: int is not assignable to string
     let d: ArrayLike<Object> = [1, "aa"] // ok, instance of Array<Object>
 
-If the type used in a context is a *union type* (see :ref:`Union Types`),
+If a type used in a context is a *union type* (see :ref:`Union Types`),
 then the step :ref:`Array Literal Type Inference from Context` is taken
 repetitively trying to use each type of the *union type* as the context.
 If only a single type is inferred, then this single type is used as the
@@ -1585,7 +1586,7 @@ field type:
 
 Only class fields that have default values (see :ref:`Default Values for Types`)
 or explicit initializers (see :ref:`Variable and Constant Declarations`) can be
-skipped in an object literal. A :index:`compile-time` error occurs otherwise.
+skipped in an object literal. Otherwise, a :index:`compile-time` error occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1684,7 +1685,7 @@ readonly fields of a class:
     // OK - type ``number`` has default value, field3 set in ctor
     let c: C = { field1: 654 }
 
-    // Error: field2 and field3 are readonly, canot set explicitly
+    // Error: field2 and field3 are readonly, cannot be set explicitly
     let d: C = { field1: 654, field2: 3, field3: "text" }
 
 
@@ -1776,10 +1777,10 @@ for the example above has the following fields:
 If a property is defined as a getter, then the type of a field is the
 return type of the getter. If a property is defined as a setter,
 then the type of a field is the type of the parameter.
-If a property is defined as both a getter and a setter, then
-the parameter type of the setter must be the same as the return type
-of the getter. Otherwise, a :index:`compile-time error` occurs as
-described in :ref:`Implementing Required Interface Properties`.
+If a property is defined as both a getter and a setter, then the parameter type
+of the setter and the return type of the getter must be the same. Otherwise, a
+:index:`compile-time error` occurs as described in
+:ref:`Implementing Required Interface Properties`.
 
 .. index::
    interface type
@@ -3096,8 +3097,8 @@ The ``callArguments`` grammar rule refers to the list of call arguments. Only
 an argument that corresponds to a *rest parameter* can be a spread expression (see
 :ref:`Spread Expression`).
 
-A special syntactic form of call arguments that contains a *trailing lambda*
-is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
+*Trailing lambda call* is a special syntactic form of call arguments that
+contains a *trailing lambda* (see :ref:`Trailing Lambdas` for details).
 
 .. index::
    argument
@@ -3154,7 +3155,7 @@ indexing expression, then:
 
 -  If an object reference expression is not of a nullish type, then the
    chaining operator has no effect.
--  Otherwise, object reference expression must be checked to nullish
+-  Otherwise, object reference expression must be checked to a nullish
    value. If the value is ``undefined`` or ``null``,
    then the evaluation of the entire surrounding *primary expression* stops.
    The result of the entire primary expression is then ``undefined``.
@@ -3648,8 +3649,8 @@ an assignment (see :ref:`Assignment`) or expression
    increment
 
 If an expression preceding a *chaining operator* is known at compile time to
-always evaluate at runtime to a nullish value (``undefined`` or ``null``),
-or to a non-nullish value, then a :index:`compile-time warning` is issued:
+always evaluate to a nullish value (``undefined`` or ``null``) or a non-nullish
+value at runtime, then a :index:`compile-time warning` is issued:
 
 .. code-block:: typescript
    :linenos:
@@ -3882,7 +3883,7 @@ The approach is represented in the following example:
    foo(a)
 
 If an *instanceof expression* is known at compile time
-to always evaluate at runtime to ``false`` or ``true``, then
+to always evaluate to ``false`` or ``true`` at runtime, then
 a :index:`compile-time warning` is issued:
 
 .. code-block:: typescript
@@ -4103,16 +4104,16 @@ Semantically, a *cast expression* of this kind is coupled tightly with
    target type
    type
    subtype
-   sybtyping
+   subtyping
    type erasure
    check
    effective type
 
 -  If the result of ``x instanceof T`` is ``true``, then ``x as T`` succeeds and
-   cause no runtime error;
+   causes no runtime error;
 
--  If otherwise the result of ``x instanceof T`` is ``false``, then ``x as T``
-   causes ``ClassCastError`` thrown at runtime.
+-  If the result of ``x instanceof T`` is ``false``, then ``x as T`` causes
+   ``ClassCastError`` thrown at runtime.
 
 This situation is represented in the following example:
 
@@ -4163,7 +4164,7 @@ cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
    smart cast
 
 If the evaluation of a *cast expression* is known at compile time to
-always succeed, or to always throw ``ClassCastError`` at runtime, then
+always succeed or throw ``ClassCastError`` at runtime, then
 a :index:`compile-time warning` is issued:
 
 .. code-block:: typescript
@@ -4469,8 +4470,8 @@ or a conditional-or operator without parentheses, then a
    conditional-or operator
 
 If an *nullish-coalescing expression* is known at compile time to always
-evaluate at runtime to the left-hand-side expression or to the right-hand-side
-expression, then a :index:`compile-time warning` is issued:
+evaluate to the left-hand-side expression or to the right-hand-side
+expression at runtime, then a :index:`compile-time warning` is issued:
 
 .. code-block:: typescript
    :linenos:
@@ -4480,6 +4481,7 @@ expression, then a :index:`compile-time warning` is issued:
 
     a ?? 2 // warning: left-hand-side expression is always used
     b ?? 3 // warning: right-hand-side expression is always used
+
 
 |
 
@@ -4548,9 +4550,9 @@ result of a *postfix increment expression* is a value, not a variable.
 If the evaluation of the operand *expression* completes normally at runtime,
 then:
 
--  The value *1* of the same type as variable is added to the value of the
+-  Value *1* of the same type as a variable is added to the value of the
    variable; and
--  The result of addition is stored back into the variable.
+-  Result of addition is stored back into the variable.
 
 .. index::
    postfix
@@ -4620,9 +4622,9 @@ If evaluation of the operand expression completes at runtime, then:
    completion
    evaluation
 
--  The value '*1*' of the same type as a variable is subtracted from the value
+-  Value '*1*' of the same type as a variable is subtracted from the value
    of the variable; and
--  The result of the subtraction is stored back into the variable.
+-  Result of the subtraction is stored back into the variable.
 
 Otherwise, the *postfix decrement expression* completes abruptly, and
 no decrementation occurs.
@@ -4700,9 +4702,9 @@ If evaluation of the operand *expression* completes normally at runtime, then:
    conversion
    convertibility
 
--  The value *1* of the same type as a variable is added to the value of the
+-  Value *1* of the same type as a variable is added to the value of the
    variable; and
--  The result of the addition is stored back into the variable.
+-  Result of the addition is stored back into the variable.
 
 Otherwise, the *prefix increment expression* completes abruptly, and no
 incrementation occurs.
@@ -4765,9 +4767,9 @@ result of a prefix decrement expression is a value, not a variable.
 
 If evaluation of the operand *expression* completes normally at runtime, then:
 
--  The value *1* of the same type as a variable is subtracted from the value of the
+-  Value *1* of the same type as a variable is subtracted from the value of the
    variable; and
--  The result of the subtraction is stored back into the variable.
+-  Result of the subtraction is stored back into the variable.
 
 Otherwise, the *prefix decrement expression* completes abruptly, and no
 decrementation occurs.
@@ -4815,7 +4817,7 @@ Unary Plus
 *Unary plus expression* is an expression preceded by the operator ``'+'``.
 Type of the operand expression with the unary operator ``'+'`` must be
 either convertible (see :ref:`Implicit Conversions`) to a numeric type (see
-:ref:`Numeric Types`) or of ``bigint`` type. Otherwise,
+:ref:`Numeric Types`), or of ``bigint`` type. Otherwise,
 a :index:`compile-time error` occurs.
 
 The result of a unary plus expression is always a value, not a variable (even if
@@ -4858,9 +4860,9 @@ Unary Minus
     todo: let a : Double = Double.Nan; a = -a; (assertion)
 
 *Unary minus expression* is an expression preceded by the operator ``'-'``.
-Type of an operand expression with the unary operator ``'-'`` must
-be either convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
-:ref:`Numeric Types`) or of a ``bigint`` type. Otherwise,
+Type of an operand expression with the unary operator ``'-'`` must be either
+convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
+:ref:`Numeric Types`), or of ``bigint`` type. Otherwise,
 a :index:`compile-time error` occurs.
 
 Numeric widening occurs on the *expression* before a *unary minus* operator is
@@ -6432,7 +6434,7 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    function type
 
 If an *equality expression* is known at compile time to always evaluate
-at runtime to ``false`` or ``true``, then a :index:`compile-time warning`
+to ``false`` or ``true`` at runtime, then a :index:`compile-time warning`
 is issued as follows:
 
 .. code-block:: typescript
@@ -6504,7 +6506,7 @@ An equality with values of two union types is represented in the example below:
    :linenos:
 
     function f1(x: number | string, y: boolean | null): boolean {
-        return x == y // compile-time warnning: always evaluates to false
+        return x == y // compile-time warning: always evaluates to false
     }
 
     function f2(x: number | string, y: boolean | "abc"): boolean {
@@ -7886,12 +7888,21 @@ If a *lambda body* is a single ``expression``, then it is handled as follows:
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
-If *lambda signature* return type is neither ``void`` (see
+ If *lambda signature* return type is neither ``void`` (see
 :ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and the
 execution path of the lambda body has neither a return statement (see
 :ref:`Return Statements`) nor a single expression as a body, then a
-:index:`compile-time error` occurs.
+:index:`compile-time error` occurs. 
 
+.. If *lambda signature* return type is neither ``void`` (see
+   :ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and a
+   lambda execution path contains neither a return statement (see
+   :ref:`Return Statements`) nor a standalone expression for the lambda body,
+   then a :index:`compile-time error` occurs.
+
+.. and the lambda body execution path contains neither a return statement (see
+   :ref:`Return Statements`) nor a single expression as the lambda body, then a
+   :index:`compile-time error` occurs.
 
 .. index::
    lambda body
