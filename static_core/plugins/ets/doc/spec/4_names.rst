@@ -1325,7 +1325,7 @@ Optional Parameters
 The first form contains an ``expression`` that specifies a *default value*.
 It is called *parameter with default value*, and acts as an optional parameter
 of the type of a function and of its call sites. If a corresponding argument
-value is `undefined`` (i.e., a parameter is omitted, or `undefined` is
+value is ``undefined`` (i.e., a parameter is omitted, or ``undefined`` is
 passed explicitly), then the default value is used:
 
 .. index::
