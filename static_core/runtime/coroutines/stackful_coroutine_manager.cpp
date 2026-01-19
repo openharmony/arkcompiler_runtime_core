@@ -1274,7 +1274,6 @@ void StackfulCoroutineManager::PreZygoteFork()
 
 void StackfulCoroutineManager::PostZygoteFork()
 {
-    os::memory::LockHolder lh(workersLock_);
     Runtime *runtime = Runtime::GetCurrent();
     CreateWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
     if (GetConfig().enableMigration) {
