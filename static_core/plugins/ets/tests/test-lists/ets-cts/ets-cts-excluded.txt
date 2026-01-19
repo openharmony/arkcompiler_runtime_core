@@ -127,7 +127,7 @@
 08.statements/09.for_of_statements/for_of_15.ets
 
 #30101 Tests shouldn't rely on default arktsconfig contents.:
-13.modules_and_namespaces/01.import_directives/05.import_path/file/import_baseURL_path_file.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/file/import_baseURL_path_file.ets
 
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_0.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_1.ets
