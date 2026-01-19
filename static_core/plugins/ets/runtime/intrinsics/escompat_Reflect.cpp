@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,31 @@ namespace ark::ets::intrinsics {
 extern "C" EtsBoolean IsLiteralInitializedInterfaceImpl(EtsObject *target)
 {
     return helpers::IsLiteralInitializedInterface(target);
+}
+
+extern "C" EtsBoolean IsFuncObjAsyncImpl(EtsObject *target)
+{
+    static constexpr std::string_view ANNO_NAME = "Lstd/core/AsyncFunctionObject;";
+
+    if (target == nullptr) {
+        ThrowNullPointerException();
+        return false;
+    }
+
+    auto *runtimeClass = target->GetClass()->GetRuntimeClass();
+    const panda_file::File &pf = *runtimeClass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
+    EtsBoolean result = false;
+    cda.EnumerateAnnotations([&pf, &result](panda_file::File::EntityId annId) {
+        panda_file::AnnotationDataAccessor ada(pf, annId);
+        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
+        if (className == ANNO_NAME) {
+            result = true;
+            return;
+        }
+    });
+
+    return result;
 }
 
 }  // namespace ark::ets::intrinsics
