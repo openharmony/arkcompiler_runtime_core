@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,16 @@
  */
 
 /*---
-desc: Chaining operator, function call expression.
+desc: Chaining operator, method chaining call.
 ---*/
 
-function greet(name?: string): string {
-  return `Hello, ${name}`;
+function safeCall(fn?: (msg: string) => string): string {
+  return fn?.("Hello") ?? 'Default';
 }
 
 function main(): void {
-  let name: string | undefined = undefined;
-  name = "Alice";
-  arktest.assertEQ(greet(name?.toUpperCase()), "Hello, ALICE");
+  //without optional function parameter
+  arktest.assertEQ(safeCall(), 'Default');
+  //with optional function parameter
+  arktest.assertEQ(safeCall((msg: string) => {return msg}), 'Hello');
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +15,27 @@
 
 /*---
 desc: Chaining operator, method chaining call.
-tags: [compile-only, negative]
+tags: [no-warmup]
 ---*/
 
 class Builder {
+  
   private value = 0;
+  
   add(n: number) {
     this.value += n;
     return this;
   }
+
   getResult() { return this.value; }
 }
 
+let builder: Builder | null = null;
+
 function main(): void {
-  const builder: Builder | null = null;
-  arktest.assertEQ(builder?.add(5), getResult());
+  // both methods of nullable object returns undefined
+  arktest.assertEQ(builder?.add(5), builder?.getResult());
+  
+  builder = new Builder()
+  arktest.assertEQ(builder?.add(5)?.getResult(), 5);
 }

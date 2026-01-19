@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,15 +18,11 @@ desc: >-
     If the object to the left of ('?.') is undefined or null, then the evaluation of the entire
     surrounding expression is dropped, and undefined is used as the result of the expression.
 ---*/
-function test(b: boolean) {
-  if (!b) {
-      throw new Error()
-  }
-}
 
 class A {
     fldA: string|null = "abc"
     fldAn: string|null = null
+    
     metA(p: string): string|null {
         return p == "null" ? null : p
     }
@@ -35,6 +31,7 @@ class A {
 class B {
     fldB: A|null = new A()
     fldBn: A|null = null
+    
     metB(p: string): A|null {
         return p == "null" ? null : new A()
     }
@@ -46,43 +43,43 @@ function boo(p: string): B|null {
 
 
 function main() {
-    test(boo("not null")?.fldB?.fldA === "abc")
-    test(boo("not null")?.fldB?.fldAn === null)
-    test(boo("not null")?.fldB?.metA("xyz") === "xyz")
-    test(boo("not null")?.fldB?.metA("null") === null)
+    arktest.assertEQ(boo("not null")?.fldB?.fldA , "abc")
+    arktest.assertEQ(boo("not null")?.fldB?.fldAn , null)
+    arktest.assertEQ(boo("not null")?.fldB?.metA("xyz") , "xyz")
+    arktest.assertEQ(boo("not null")?.fldB?.metA("null") , null)
 
-    test(boo("not null")?.metB("not null")?.fldA === "abc")
-    test(boo("not null")?.metB("not null")?.fldAn === null)
-    test(boo("not null")?.metB("not null")?.metA("xyz") === "xyz")
-    test(boo("not null")?.metB("not null")?.metA("null") === null)
+    arktest.assertEQ(boo("not null")?.metB("not null")?.fldA , "abc")
+    arktest.assertEQ(boo("not null")?.metB("not null")?.fldAn , null)
+    arktest.assertEQ(boo("not null")?.metB("not null")?.metA("xyz") , "xyz")
+    arktest.assertEQ(boo("not null")?.metB("not null")?.metA("null") , null)
 
-    test(boo("not null")?.fldBn?.fldA === undefined)
-    test(boo("not null")?.fldBn?.fldAn === undefined)
-    test(boo("not null")?.fldBn?.metA("xyz") === undefined)
-    test(boo("not null")?.fldBn?.metA("null") === undefined)
+    arktest.assertEQ(boo("not null")?.fldBn?.fldA , undefined)
+    arktest.assertEQ(boo("not null")?.fldBn?.fldAn , undefined)
+    arktest.assertEQ(boo("not null")?.fldBn?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("not null")?.fldBn?.metA("null") , undefined)
 
-    test(boo("not null")?.metB("null")?.fldA === undefined)
-    test(boo("not null")?.metB("null")?.fldAn === undefined)
-    test(boo("not null")?.metB("null")?.metA("xyz") === undefined)
-    test(boo("not null")?.metB("null")?.metA("null") === undefined)
+    arktest.assertEQ(boo("not null")?.metB("null")?.fldA , undefined)
+    arktest.assertEQ(boo("not null")?.metB("null")?.fldAn , undefined)
+    arktest.assertEQ(boo("not null")?.metB("null")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("not null")?.metB("null")?.metA("null") , undefined)
 
-    test(boo("null")?.fldB?.fldA === undefined)
-    test(boo("null")?.fldB?.fldAn === undefined)
-    test(boo("null")?.fldB?.metA("xyz") === undefined)
-    test(boo("null")?.fldB?.metA("null") === undefined)
+    arktest.assertEQ(boo("null")?.fldB?.fldA , undefined)
+    arktest.assertEQ(boo("null")?.fldB?.fldAn , undefined)
+    arktest.assertEQ(boo("null")?.fldB?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("null")?.fldB?.metA("null") , undefined)
 
-    test(boo("null")?.metB("not null")?.fldA === undefined)
-    test(boo("null")?.metB("not null")?.fldAn === undefined)
-    test(boo("null")?.metB("not null")?.metA("xyz") === undefined)
-    test(boo("null")?.metB("not null")?.metA("null") === undefined)
+    arktest.assertEQ(boo("null")?.metB("not null")?.fldA , undefined)
+    arktest.assertEQ(boo("null")?.metB("not null")?.fldAn , undefined)
+    arktest.assertEQ(boo("null")?.metB("not null")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("null")?.metB("not null")?.metA("null") , undefined)
 
-    test(boo("null")?.fldBn?.fldA === undefined)
-    test(boo("null")?.fldBn?.fldAn === undefined)
-    test(boo("null")?.fldBn?.metA("xyz") === undefined)
-    test(boo("null")?.fldBn?.metA("null") === undefined)
+    arktest.assertEQ(boo("null")?.fldBn?.fldA , undefined)
+    arktest.assertEQ(boo("null")?.fldBn?.fldAn , undefined)
+    arktest.assertEQ(boo("null")?.fldBn?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("null")?.fldBn?.metA("null") , undefined)
 
-    test(boo("null")?.metB("null")?.fldA === undefined)
-    test(boo("null")?.metB("null")?.fldAn === undefined)
-    test(boo("null")?.metB("null")?.metA("xyz") === undefined)
-    test(boo("null")?.metB("null")?.metA("null") === undefined)
+    arktest.assertEQ(boo("null")?.metB("null")?.fldA , undefined)
+    arktest.assertEQ(boo("null")?.metB("null")?.fldAn , undefined)
+    arktest.assertEQ(boo("null")?.metB("null")?.metA("xyz") , undefined)
+    arktest.assertEQ(boo("null")?.metB("null")?.metA("null") , undefined)
 }

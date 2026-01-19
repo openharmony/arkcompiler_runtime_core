@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,10 @@
  */
 
 /*---
-desc: Chaining operator, function.
+desc: Chaining operator, matrix element access.
 ---*/
 
-class Calculator {
-  add(a: number, b: number): number {
-    return a + b;
-  }
-}
-
 function main(): void {
-  let calc: Calculator | null = null;
-  calc = new Calculator();
-  arktest.assertEQ(calc?.add(2, 3), 5);
+  const matrix: number[][] | undefined = [[1, 2], [3, 4]];
+  arktest.assertEQ(matrix?.[0]?.[1] , 2);
 }

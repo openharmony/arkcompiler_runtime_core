@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,14 @@
  */
 
 /*---
-desc: Chaining operator, combining chaining operator with function calls.
+desc: Chaining operator, multi-level chaining operator access.
+tags: [compile-only, negative]
+expected_out: 'Semantic error ESE0010: Value is possibly nullish.'
 ---*/
 
 class Person {
   name: string;
-  getGreeting?: () => string;
+  spouse?: Person;
 
   constructor(name: string) {
     this.name = name;
@@ -28,5 +30,6 @@ class Person {
 
 function main(): void {
   const bob = new Person("Bob");
-  arktest.assertEQ(bob.getGreeting?.(), undefined);
+  bob.spouse = new Person("Alice");
+  bob.spouse.spouse = new Person("Charlie");
 }

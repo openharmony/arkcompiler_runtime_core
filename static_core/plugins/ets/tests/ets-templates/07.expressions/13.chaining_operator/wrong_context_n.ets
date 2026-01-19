@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ desc: >-
     is expected, e.g., in the left-hand-side expression of an assignment or expression like
     Postfix Increment, Postfix Decrement, Prefix Increment, Prefix Decrement.
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
 {{c.decl}}

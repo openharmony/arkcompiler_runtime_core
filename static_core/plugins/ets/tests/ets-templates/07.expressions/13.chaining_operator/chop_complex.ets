@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 /*---
 desc: Chaining operator, chaining operator with complex nested structures test.
-tags: [compile-only, negative]
 ---*/
 
 class Address {
@@ -46,8 +45,5 @@ class Company {
 
 function main(): void {
   const company = new Company();
-  company.CEO = new Person("Alice");
-  company.CEO.address = new Address("San Francisco");
-  company.CEO.address.zipCode = "94105";
-  arktest.assertEQ(company.CEO?.address?.zipCode, "94105");
+  arktest.assertEQ(company.CEO?.address?.zipCode, undefined);
 }
