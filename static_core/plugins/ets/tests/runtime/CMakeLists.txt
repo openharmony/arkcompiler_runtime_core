@@ -102,6 +102,19 @@ panda_add_gtest_with_ani(is_assignable_from_union_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
+if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_PRODUCT_BUILD)
+    panda_ets_add_gtest(
+        NO_CORES
+        NAME codegen_typeid_test
+        SOURCES codegen_typeid_test.cpp
+        LIBRARIES arkbase arkfile arkruntime
+        INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+        SANITIZERS ${PANDA_SANITIZERS_LIST}
+        PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+        DEPS_TARGETS etsstdlib ark_aotdump
+    )
+endif()
+
 add_dependencies(ets_tests_runtime_gtests
     ets_vm_test_gtests
     static_object_accessor_test_gtests

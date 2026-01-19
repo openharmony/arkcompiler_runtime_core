@@ -1170,7 +1170,7 @@ void EncodeVisitor::VisitLoadClass(GraphVisitor *visitor, Inst *inst)
     ASSERT(inst->IsRuntimeCall());
     if (graph->IsAotMode()) {
         auto methodClassId = graph->GetRuntime()->GetClassIdForMethod(graph->GetMethod());
-        if (methodClassId == typeId) {
+        if (methodClassId == typeId && graph->GetRuntime()->GetClass(graph->GetMethod()) == loadClass->GetClass()) {
             auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
             enc->GetCodegen()->LoadMethod(dstPtr);
             auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
@@ -1287,13 +1287,14 @@ void EncodeVisitor::VisitLoadAndInitClass(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
+    auto loadAndInitClass = inst->CastToLoadAndInitClass();
     auto classId = inst->CastToLoadAndInitClass()->GetTypeId();
     auto encoder = enc->GetEncoder();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
     ASSERT(inst->IsRuntimeCall());
     if (graph->IsAotMode()) {
         auto methodClassId = runtime->GetClassIdForMethod(graph->GetMethod());
-        if (methodClassId == classId) {
+        if (methodClassId == classId && runtime->GetClass(graph->GetMethod()) == loadAndInitClass->GetClass()) {
             auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
             enc->GetCodegen()->LoadMethod(dstPtr);
             auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
@@ -1549,7 +1550,7 @@ void EncodeVisitor::VisitLoadType(GraphVisitor *visitor, Inst *inst)
     auto method = loadType->GetMethod();
     if (graph->IsAotMode()) {
         auto methodClassId = runtime->GetClassIdForMethod(graph->GetMethod());
-        if (methodClassId == typeId) {
+        if (methodClassId == typeId && runtime->GetClass(graph->GetMethod()) == runtime->GetClass(method, typeId)) {
             auto dstPtr = dst.As(Codegen::ConvertDataType(DataType::POINTER, graph->GetArch()));
             enc->GetCodegen()->LoadMethod(dstPtr);
             auto mem = MemRef(dstPtr, graph->GetRuntime()->GetClassOffset(graph->GetArch()));
