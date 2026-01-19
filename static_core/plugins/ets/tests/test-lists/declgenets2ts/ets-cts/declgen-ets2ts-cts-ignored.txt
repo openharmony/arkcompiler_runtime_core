@@ -2984,6 +2984,7 @@
 07.expressions/25.equality_expressions/type_neg_22.ets
 07.expressions/33.constant_expression/check_annotation/constant_bitwise_expression_neg_7.ets
 07.expressions/33.constant_expression/check_enum/constant_str_chain_initializer_neg.ets
+09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_11.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_83.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_92.ets
 17.experimental_features/04.enumerations_experimental/03.enumeration_numeric_values/enum_numeric_n_0.ets

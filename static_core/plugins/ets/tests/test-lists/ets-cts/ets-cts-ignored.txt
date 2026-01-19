@@ -55,9 +55,7 @@
 03.types/19.function_types/01.type_function/positive_args_16.ets
 
 #25512
-03.types/20.union_types/united_switch_ext_3.ets
 03.types/20.union_types/united_switch_ext_5.ets
-03.types/20.union_types/united_switch_ext_7.ets
 03.types/20.union_types/united_switch_ext_8.ets
 
 #30239 first match overload
@@ -67,15 +65,9 @@
 03.types/19.function_types/01.type_function/optional_type_params_0.ets
 03.types/19.function_types/01.type_function/optional_type_params_2.ets
 
-#24649
-04.names_declarations_and_scopes/03.scopes/type_param_class_n_3.ets
-
 #27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
-
-#30653
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_35.ets
 
 #30697
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
@@ -87,11 +79,7 @@
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
 
-#30757
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/lambda_declaration_0.ets
-
 #30760
-04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_0.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/pointer_types_copied_1.ets
 
 #31473
@@ -177,12 +165,8 @@
 #30469
 07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
-#30653
-07.expressions/03.named_reference/01.function_reference/static_field_as_ref.ets
-
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/04.array_literal/arr_n_2.ets
-07.expressions/04.array_literal/arr_n_3.ets
 
 #31022 Method in object literal rejected
 07.expressions/05.object_literal/spec_ex1.ets
@@ -215,13 +199,6 @@
 07.expressions/06.spread_expression/spex_func_46.ets
 07.expressions/06.spread_expression/spex_func_77.ets
 07.expressions/06.spread_expression/spex_func_78.ets
-
-#31617 Catch NPE (tests should be updated)
-07.expressions/06.spread_expression/spex_lmbd_33.ets
-07.expressions/06.spread_expression/spex_lmbd_35.ets
-
-#28786
-07.expressions/09.field_access_expressions/field_access_to_override.ets
 
 #26730
 07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
@@ -365,17 +342,10 @@
 07.expressions/15.instanceof_expression/instanceof_func_27.ets
 
 #31769 Tuples and derived types can't be used as instanceof rhs
-07.expressions/15.instanceof_expression/instanceof_func_37.ets
 07.expressions/15.instanceof_expression/instanceof_func_38.ets
 07.expressions/15.instanceof_expression/instanceof_func_39.ets
 07.expressions/15.instanceof_expression/instanceof_func_40.ets
 07.expressions/15.instanceof_expression/instanceof_func_41.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_3.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_4.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_5.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_8.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_9.ets
-07.expressions/15.instanceof_expression/mix_array_tuple_union_11.ets
 07.expressions/15.instanceof_expression/tuple_explicit_implicit_0.ets
 07.expressions/15.instanceof_expression/tuple_explicit_implicit_1.ets
 07.expressions/15.instanceof_expression/tuple_explicit_implicit_2.ets
@@ -407,11 +377,6 @@
 07.expressions/15.instanceof_expression/instantiated_generic_type_3.ets
 07.expressions/15.instanceof_expression/instantiated_generic_type_4.ets
 
-#31769 Tuples and derived types can't be used as instanceof rhs
-07.expressions/15.instanceof_expression/instanceof_pass_through_15.ets
-07.expressions/15.instanceof_expression/instanceof_pass_through_16.ets
-07.expressions/15.instanceof_expression/instanceof_pass_through_17.ets
-
 #28907 Specifying type for too large integer number with as doesn't produce CTE
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
 07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
@@ -419,48 +384,6 @@
 
 #30583
 07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
-
-#31200
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_2.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_3.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_42.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.consts.test_43.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.lets.test_2.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.lets.test_3.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.lets.test_42.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.lets.test_43.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_const.test_2.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_const.test_3.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_const.test_42.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_const.test_43.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_let.test_2.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_let.test_3.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_let.test_42.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.one_let.test_43.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_3.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_43.ets
-
-#31208
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_2.ets
-07.expressions/21.multiplicative_expressions/01.multiplication/long_result/multiplication.long.result_expression.test_42.ets
-
-#30486
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_21.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_22.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_23.ets
-
-#30485
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_24.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_25.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/integer_and_floating_point_26.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_11.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_12.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_13.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_14.ets
-
-#30487
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_9.ets
-07.expressions/21.multiplicative_expressions/04.exponentiation/nan_10.ets
 
 #30891
 07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
@@ -491,9 +414,6 @@
 #30813 No CTE for lambda body without return statement
 07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
 
-#30786
-07.expressions/32.lambda_expression/04.runtime_evaluation_of_lambda_expressions/lambda_instance_type_15.ets
-
 #31616 Use only available types for Annotation Fields (tests should be updated)
 07.expressions/33.constant_expression/check_annotation/constant_number_conversion_2.ets
 07.expressions/33.constant_expression/check_annotation/constant_unary_operation_2.ets
@@ -515,7 +435,6 @@
 #31942 Fix Promise<string> to string comparison
 09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri29.ets
-09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
 
 #31942 Fix Promise<string> to string comparison
 09.classes/02.class_extension_clause/class_superclass_override/class_over18.ets
@@ -525,9 +444,6 @@
 09.classes/02.class_extension_clause/extension_clause_negative_5.ets
 09.classes/02.class_extension_clause/extension_clause_negative_6.ets
 09.classes/02.class_extension_clause/extension_clause_negative_7.ets
-09.classes/02.class_extension_clause/extension_clause_negative_8.ets
-09.classes/02.class_extension_clause/extension_clause_negative_9.ets
-09.classes/02.class_extension_clause/extension_clause_negative_10.ets
 
 #26730
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call.ets
@@ -585,12 +501,6 @@
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_124.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_125.ets
 
-#29574
-09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_4.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_5.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_6.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_7.ets
-
 #31342
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_69.ets
 09.classes/06.field_declarations/02.readonly_constant_fields/class_static_readonly_fields_cte_70.ets
@@ -636,9 +546,6 @@
 09.classes/06.field_declarations/04.field_initialization/non_static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_self_initialization_reference.ets
 
-#29937
-09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_11.ets
-
 #23050
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_252.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_253.ets
@@ -661,48 +568,6 @@
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_270.ets
 09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_271.ets
 
-
-#29302
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_247.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_248.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_249.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_250.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_251.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_252.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_253.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_254.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_255.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_256.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_257.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_258.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_259.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_260.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_261.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_262.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_263.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_264.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_265.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_266.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_267.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_268.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_269.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_270.ets
-
-#29303
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_295.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_296.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_297.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_298.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_299.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_300.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_301.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_302.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_303.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_304.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_305.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_decl_306.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_override_decl_15.ets
-09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_override_decl_16.ets
 
 #194
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
@@ -802,14 +667,7 @@
 09.classes/06.field_declarations/06.overriding_fields/implementing_property_neg_obcf_wrong_type_n1.ets
 09.classes/06.field_declarations/06.overriding_fields/implementing_property_neg_obcf_wrong_type_n2.ets
 
-#29602
-09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_0.ets
-09.classes/07.method_declarations/01.static_methods/static_method_with_body_type_parameter_1.ets
-
 #30939
-09.classes/07.method_declarations/01.static_methods/use_instance_field_4.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_field_6.ets
-09.classes/07.method_declarations/01.static_methods/use_instance_field_8.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_4.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_6.ets
 09.classes/07.method_declarations/01.static_methods/use_instance_method_8.ets
@@ -821,9 +679,6 @@
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_4.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_5.ets
 09.classes/07.method_declarations/05.overriding_methods/override_method_with_default_params_neg_6.ets
-
-#23238 Method returning 'this' returns wrong instance
-09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_7.ets
 
 #29600
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_25.ets
@@ -893,10 +748,6 @@
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_10.ets
 09.classes/09.constructor_declaration/03.explicit_constructor_call/explicit_cons_call_m_11.ets
 
-#28786 Incorrect value of overriden field
-09.classes/10.inheritance/inheritance_abstr_field_override_2.ets
-09.classes/10.inheritance/inheritance_abstr_field_override_8.ets
-
 #30206
 10.interfaces/02.superinterfaces_and_subinterfaces/methods_with_override_compatible_signatures_12.ets
 10.interfaces/02.superinterfaces_and_subinterfaces/methods_with_override_compatible_signatures_13.ets
@@ -933,12 +784,7 @@
 10.interfaces/04.interface_properties/02.optional_interface_properties/optional_interface_properties_full_22.ets
 10.interfaces/04.interface_properties/02.optional_interface_properties/optional_interface_properties_full_23.ets
 
-
-
-
 #26730 implement override/overload
-10.interfaces/05.interface_method_declarations/overriding_requirements/same_name2_n.ets
-10.interfaces/05.interface_method_declarations/overriding_requirements/same_name3_n.ets
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method_n.ets
 10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature_any.ets
 10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature.ets
@@ -1007,10 +853,6 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
-#28786
-15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_generic_superclass.ets
-15.semantic_rules/02.subtyping/02.subtyping_for_generic_classes_and_interfaces/generic_cast_to_object_with_parameters.ets
-
 #27702 Type safety check
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/positive_0.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/positive_1.ets
@@ -1071,6 +913,7 @@
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_21.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_6.ets
 
+
 #30780 generic type params relation ignored
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_12.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_generic_6.ets
@@ -1088,75 +931,13 @@
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_9.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_12.ets
 
-#30911 field in return subtype not overwriting supertype field
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_0.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_10.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_11.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_13.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_14.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_15.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_16.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_17.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_18.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_2.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_7.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_8.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_0.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_10.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_11.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_13.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_14.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_15.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_16.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_17.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_18.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_2.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_7.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_instance_method_8.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_0.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_10.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_11.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_13.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_14.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_15.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_16.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_17.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_18.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_2.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_7.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_interface_method_8.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_0.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_10.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_11.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_13.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_14.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_15.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_16.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_17.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_18.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_2.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_7.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_lambda_8.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_0.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_10.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_11.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_13.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_14.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_15.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_16.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_17.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_18.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_2.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_7.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_static_method_8.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_5.ets
-
 #30968
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_0.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_1.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_2.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_3.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_4.ets
+15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_5.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_7.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_8.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_10.ets
@@ -1182,13 +963,6 @@
 #30711
 15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_non_gen_3.ets
 15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_non_gen_5.ets
-
-#30712
-15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_0.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_2.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_13.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/type_t_is_sub_of_inter_type_on_gen_0.ets
-15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/type_t_is_sub_of_inter_type_on_gen_1.ets
 
 #30713
 15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/type_t_is_sub_of_inter_type_on_non_gen_3.ets
@@ -1245,6 +1019,13 @@
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/type_t_is_sub_of_diff_on_non_gen_2.ets
 
 #30712
+15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_0.ets
+15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_2.ets
+15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_13.ets
+15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/type_t_is_sub_of_inter_type_on_gen_0.ets
+15.semantic_rules/02.subtyping/07.subtyping_for_intersection_types/type_t_is_sub_of_inter_type_on_gen_1.ets
+
+#30712
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/type_t_is_sub_of_diff_on_gen_0.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/type_t_is_sub_of_diff_on_gen_1.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/type_t_is_sub_of_diff_on_gen_2.ets
@@ -1272,7 +1053,6 @@
 #30714
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_non_gen_6.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_non_gen_7.ets
-15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_non_gen_10.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_non_gen_11.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_gen_3.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_difference_types/diff_type_is_sub_of_type_t_on_gen_5.ets
@@ -1317,109 +1097,14 @@
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_46.ets
 
 #31558
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_24.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_25.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_26.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_27.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_32.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_33.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_34.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_35.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_40.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_41.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_42.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_complement_const_43.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_0.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_1.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_10.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_11.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_16.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_17.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_18.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_19.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_2.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_24.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_25.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_26.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_27.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_3.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_32.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_33.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_34.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_35.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_40.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_41.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_42.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_43.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_8.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_const_9.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_0.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_1.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_10.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_11.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_16.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_17.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_18.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_19.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_2.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_21.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_24.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_25.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_26.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_27.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_29.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_3.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_32.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_33.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_34.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_35.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_37.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_40.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_41.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_42.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_43.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_45.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_8.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_logical_shift_const_9.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_10.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_11.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_12.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_19.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_2.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_20.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_21.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_23.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_26.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_27.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_28.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_3.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_33.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_34.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_35.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_37.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_4.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_40.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_41.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_42.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_const_9.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_10.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_11.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_12.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_13.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_2.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_20.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_21.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_22.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_23.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_25.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_28.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_29.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_3.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_30.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_31.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_33.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_4.ets
-15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_multiply_divide_const_5.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_0.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_1.ets
 15.semantic_rules/07.type_inference/01.type_inference_for_numeric_literals/numeric_operations_n_10.ets
@@ -1615,7 +1300,6 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_neg_1.ets
-
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_neg_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_3.ets
@@ -1626,7 +1310,6 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_13.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_neg_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_neg_1.ets
-
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_1.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_13.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_17.ets
@@ -1636,12 +1319,6 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_25.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
-
-#30721 No CTE when using overloads with import_all_from_reexport_0
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_1.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_2.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_4.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_3.ets
 
 #32086 overload functions from the same scope
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets
@@ -1706,9 +1383,6 @@
 15.semantic_rules/10.overloading/overload_method_negative_10.ets
 15.semantic_rules/10.overloading/overload_method_negative_11.ets
 
-#31231 ClassCastError on method call that overloads method in generic parent class
-15.semantic_rules/10.overloading/first_match/first_match_generics_5.ets
-
 #31167 RTE if class overrides overloaded method in superinterface
 15.semantic_rules/10.overloading/first_match/first_match_1c_1i_7.ets
 15.semantic_rules/10.overloading/first_match/first_match_1c_1i_8.ets
@@ -1721,16 +1395,6 @@
 15.semantic_rules/10.overloading/first_match/first_match_1c_ii_9.ets
 15.semantic_rules/10.overloading/first_match/first_match_2c_2i_7.ets
 15.semantic_rules/10.overloading/first_match/first_match_2c_2i_8.ets
-
-#32438 es2panda aborts on unknown name in arguments
-15.semantic_rules/10.overloading/01.overload_resolution/constructor/undef_ref_n_0.ets
-15.semantic_rules/10.overloading/01.overload_resolution/constructor/undef_ref_n_1.ets
-15.semantic_rules/10.overloading/01.overload_resolution/function/undef_ref_n_0.ets
-15.semantic_rules/10.overloading/01.overload_resolution/function/undef_ref_n_1.ets
-15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_0.ets
-15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_1.ets
-15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_2.ets
-15.semantic_rules/10.overloading/01.overload_resolution/method/undef_ref_n_3.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
 15.semantic_rules/11.type_erasure/instanceof_negative_0.ets
@@ -1758,10 +1422,6 @@
 15.semantic_rules/11.type_erasure/instanceof_gen_5.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_7.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_8.ets
-
-#26730 implement override/overload
-15.semantic_rules/13.dispatch/static_dispatch_0.ets
-15.semantic_rules/13.dispatch/static_dispatch_1.ets
 
 #31596
 15.semantic_rules/13.dispatch/root_call_dispatch_2.ets
@@ -1804,24 +1464,10 @@
 16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/negative/async_method_await_call_not_from_async_negative_8.ets
 16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/negative/async_method_await_call_not_from_async_negative_9.ets
 
-#30439
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/input_params/async_lambda_has_arguments_3.ets
-
 #29165
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_6.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_7.ets
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_5.ets
-
-#30786
-16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_9.ets
-16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_10.ets
-16.concurrency/03.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/user_defined_types/async_function_returns_promise_user_defined_array_11.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/no_input_params/user_defined_types/async_lambda_returns_promise_user_defined_array_9.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/no_input_params/user_defined_types/async_lambda_returns_promise_user_defined_array_10.ets
-16.concurrency/03.asynchronous_api/02.async_lambdas/return_type_is_promise/no_input_params/user_defined_types/async_lambda_returns_promise_user_defined_array_11.ets
-16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_user_defined_array_9.ets
-16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_user_defined_array_10.ets
-16.concurrency/03.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/user_defined_types/async_method_returns_promise_user_defined_array_11.ets
 
 #27260
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_0.ets
@@ -2113,34 +1759,8 @@
 17.experimental_features/06.iterable_types/it_9.ets
 17.experimental_features/06.iterable_types/it_10.ets
 
-#18767 Cannot use $_iterator from superclass
-17.experimental_features/06.iterable_types/it_3.ets
-
-#18767 Cannot use $_iterator from superclass
-17.experimental_features/06.iterable_types/it_4.ets
-
 #31022
 17.experimental_features/06.iterable_types/it_18.ets
-
-#27999
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_1.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_0.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_1.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_5_2.ets
-17.experimental_features/09.overload_declarations/01.function_overload_declarations/legacy_negative/fn_legacy_overload_6_6.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_6.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_7.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_8.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_9.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_10.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_11.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_12.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_16.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_18.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_19.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_20.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_23.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/negative/cm_legacy_overload_n_24.ets
 
 #28824
 17.experimental_features/09.overload_declarations/01.function_overload_declarations/overload_export_8.ets
@@ -2206,12 +1826,6 @@
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_19.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_32.ets
 17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over2_9.ets
-
-#29138
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_52.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_54.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_59.ets
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over2_15.ets
 
 #24129
 17.experimental_features/09.overload_declarations/03.interface_method_overload_declarations/im_over2_3.ets
@@ -2351,28 +1965,6 @@
 18.annotations/base_annotation_syntax_n_3.ets
 18.annotations/base_annotation_syntax_n_5.ets
 18.annotations/base_annotation_syntax_n_6.ets
-
-#29159
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_0.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_100.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_120.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_140.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_160.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_182.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_199.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_20.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_219.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_241.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_259.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_280.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_300.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_320.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_340.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_360.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_40.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_60.ets
-18.annotations/05.standard_annotations/02.target_annotation/AnnotationTargets_80.ets
-18.annotations/05.standard_annotations/02.target_annotation/ClassAnnoTest.ets
 
 31690 review after merge
 03.types/20.union_types/union_type_assignment_66.ets
