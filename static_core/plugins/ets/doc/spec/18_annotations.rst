@@ -153,7 +153,7 @@ The name of an *annotation* cannot coincide with the name of another entity:
 
     class Position {/*body*/} // compile-time error: duplicate identifier
 
-An annotation declaration defines no type, and no type alias can be applied to
+An annotation declaration defines no type. No type alias can be applied to
 the annotation or used as an interface:
 
 .. code-block:: typescript
@@ -495,7 +495,7 @@ Unqualified import is also allowed:
     @MyAnno
     class C {/*body*/}
 
-An annotation declaration does not define a type, and using ``export type``
+An annotation declaration does not define a type. Using ``export type``
 or ``import type`` notations to export or import an annotation causes a
 :index:`compile-time error`:
 
