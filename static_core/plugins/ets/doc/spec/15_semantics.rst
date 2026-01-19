@@ -4207,14 +4207,14 @@ member is excluded in the right-hand-side column for brevity):
    * - :ref:`String Literal Types`
      - ``string``
    * - Awaited<T>
-     - - if ``T`` is neither a type parameter nor a subtype of ``Promise``, then
-         the Effective type (Awaited<T>) is Effective type (T);
-       - if ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>)
-         is Effective type (U);
-       - if ``T`` is a type parameter with ``in`` variance, then the Effective
+     - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then
+         the Effective type (Awaited<T>) is the Effective type (T);
+       - If ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>)
+         is the Effective type (U);
+       - If ``T`` is a type parameter with ``in`` variance, then the Effective
          type (Awaited<T>) is ``never``;
-       - if ``T`` is a type parameter with ``out`` variance or no variance
-         specified, then the Effective type (Awaited<T>) is Effective type
+       - If ``T`` is a type parameter with ``out`` variance or no variance
+         specified, then the Effective type (Awaited<T>) is the Effective type
          (upper-bound(T)).
    * - NonNullable<T>
      - Effective type (T) - ``null``
