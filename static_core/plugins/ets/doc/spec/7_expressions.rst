@@ -1635,7 +1635,7 @@ A compile-time error occurs if an *object literal of class type* explicitly sets
 readonly fields of a class:
 
 .. code-block:: typescript
-   
+
     class C {
         field1 = 123
         readonly field2: number
@@ -1737,8 +1737,8 @@ for the example above has the following fields:
     - ``surname: string``
     - ``age: number``
 
-If a property is defined as a getter, then the type of a field is the 
-return type of the getter. If a property is defined as a setter, 
+If a property is defined as a getter, then the type of a field is the
+return type of the getter. If a property is defined as a setter,
 then the type of a field is the type of the parameter.
 If a property is defined as both a getter and a setter, then
 the parameter type of the setter must be the same as the return type
@@ -1813,7 +1813,7 @@ inferred interface type:
         foo (p: Drv1): Base
         foo (p: Drv2): Base
     }
-    const a1: A = { foo(p: Base): Drv1 {} } 
+    const a1: A = { foo(p: Base): Drv1 {} }
        /* OK, foo(p: Base) implements both foo (p: Drv1): base and foo (p: Drv2): Base */
 
     const a2: A = { // OK
@@ -3555,9 +3555,6 @@ the type of the entire primary expression is the union ``undefined`` |
     console.log(bob.spouse?.name) // prints "Alice"
        // type of bob.spouse?.name is undefined|string
 
-If an expression is not of a nullish type, then the chaining operator has
-no effect.
-
 The chaining operator is allowed in a method call expression for instance
 methods only. Attempting to use it with a static method is syntactically correct
 but causes a :index:`compile-time error`:
@@ -3596,6 +3593,22 @@ an assignment (see :ref:`Assignment`) or expression
    decrement
    increment
 
+If an expression is not of a nullish type, then the chaining operator has
+no effect.
+If an expression preceding a *chaining operator* is known at compile time to
+always evaluate at runtime to a nullish value (``undefined`` or ``null``),
+or to a non-nullish value, then a :index:`compile-time warning` is issued:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C { f = 1}
+
+    let c = new C()
+    c?.f // warning: expression is always non-nullish
+
+    let d: C | undefined = undefined
+    d?.f // warning: expression is always evaluated as undefined
 
 |
 
@@ -3816,6 +3829,22 @@ The approach is represented in the following example:
    let a = new B<string>()
    foo(a)
 
+If an *instanceof expression* is known at compile time
+to always evaluate at runtime to ``false`` or ``true``, then
+a :index:`compile-time warning` is issued:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {}
+    class D extends C{}
+    class E {}
+
+    function foo(d: D) {
+        console.log(d instanceof C) // warning: expression is always true
+        console.log(d instanceof E) // warning: expression is always false
+    }
+
 The ``type`` of an ``instanceof`` expression is used for *smart cast*
 (see :ref:`Smart Casts and Smart Types`) if applicable.
 
@@ -3947,11 +3976,9 @@ The following combinations of ``expr`` and ``target`` are considered for the
    object literal
 
 This kind of a *cast expression* results in inferring the target type for
-``expr``. A :index:`compile-time error` can occur when processing
-a *cast expression* (see corresponding sections for detail),
-but this expression never causes a runtime error by itself.
-However, the evaluation of array literal elements
-or object literal properties can cause a runtime error.
+``expr``. This expression never causes a runtime error
+by itself. However, the evaluation of array literal elements or
+object literal properties can cause a runtime error.
 
 Casting for numeric literals is represented in the
 example below:
@@ -4001,7 +4028,7 @@ Runtime Checking in Cast Expression
 .. meta:
     frontend_status: Partly
 
-If none of the previous kinds of *cast expression* can be applied, then
+If :ref:`Type Inference in Cast Expression` cannot be applied, then
 ``expr as target`` checks if the type of ``expr`` is a subtype of
 ``target`` (see :ref:`Subtyping`).
 
@@ -4029,9 +4056,8 @@ Semantically, a *cast expression* of this kind is coupled tightly with
    check
    effective type
 
--  If the result of ``x instanceof T`` is ``true``, then ``x as T`` never
-   causes a runtime error;
-
+-  If the result of ``x instanceof T`` is ``true``, then ``x as T`` succeeds and
+   cause no runtime error;
 
 -  If otherwise the result of ``x instanceof T`` is ``false``, then ``x as T``
    causes ``ClassCastError`` thrown at runtime.
@@ -4083,6 +4109,21 @@ cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
    expression
    cast conversion
    smart cast
+
+If the evaluation of a *cast expression* is known at compile time to
+always succeed, or to always throw ``ClassCastError`` at runtime, then
+a :index:`compile-time warning` is issued:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {}
+    class D extends C {}
+    class E extends C {}
+
+    let a: C = new D()
+    a as D // compile-time warning: cast always succeeds
+    a as E // compile-time warning: cast always throws ClassCastError
 
 |
 
@@ -4252,17 +4293,16 @@ The syntax of *ensure-not-nullish expression* is presented below:
         expression '!'
         ;
 
-If the expression *e* is not of a nullish type, then the operator ``'!'``
-has no effect.
+If the result of the evaluation of ``expr`` in ``expr!`` is not equal to
+``null`` or ``undefined``, then the result of *ensure-not-nullish expression*
+is the outcome of the evaluation of ``expr``, otherwise
+``NullPointerError`` is thrown.
 
-If the result of the evaluation of *e* is not equal to ``null`` or ``undefined``,
-then the result of *e!* is the outcome of the evaluation of *e*.
+Type of ``expr!`` is the non-nullish variant of type of ``expr``.
 
-If the result of the evaluation of *e* is equal to ``null`` or ``undefined``,
-then ``NullPointerError`` is thrown.
-
-Type of *ensure-not-nullish* expression is the non-nullish variant of
-type of *e*.
+.. note:
+    If the expression ``expr`` is not of a nullish type, then the operator ``'!'``
+    has no effect.
 
 .. index::
    ensure-not-nullish expression
@@ -4276,6 +4316,24 @@ type of *e*.
    nullish value
    null
    undefined
+
+If an *ensure-not-nullish expression* is known at compile time to always
+evaluate at runtime to a non-nullish or a nullish value (``undefined``
+or ``null``), then a :index:`compile-time warning` is issued.
+The 'NullPointerError' exception is always thrown at runtime in the latter
+case as represented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C { f = 1}
+
+    let c = new C()
+    c!.f // compile-time warning: expression is always non-nullish, operator '!' is ignored
+
+    let d: C | undefined = undefined
+    d!.f // compile-time warning: operator '!' always throws 'NullPointerError', as it is applied to nullish value
+         // runtime: throws 'NullPointerError'
 
 |
 
@@ -4335,8 +4393,17 @@ following example:
 
     // Type of x is NonNullishType(lhs_expression)|Type(rhs_expression)
 
-A :index:`compile-time error` occurs if the nullish-coalescing operator is
-mixed with conditional-and or conditional-or operators without parentheses.
+If the *nullish-coalescing operator* is mixed with a conditional-and
+or a conditional-or operator without parentheses, then a
+:index:`compile-time error` occurs as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    function  foo(n: boolean | undefined, a: boolean, b: boolean) {
+        n ?? a || b   // error: '??' and '||' operations cannot be mixed without parentheses
+        n ?? (a || b) // ok
+    }
 
 .. index::
    nullish type
@@ -4348,6 +4415,19 @@ mixed with conditional-and or conditional-or operators without parentheses.
    nullish-coalescing operator
    conditional-and operator
    conditional-or operator
+
+If an *nullish-coalescing expression* is known at compile time to always
+evaluate at runtime to the left-hand-side expression or to the right-hand-side
+expression, then a :index:`compile-time warning` is issued:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: number = 1
+    let b: number | undefined = undefined
+
+    a ?? 2 // warning: left-hand-side expression is always used
+    b ?? 3 // warning: right-hand-side expression is always used
 
 |
 
@@ -4642,7 +4722,7 @@ decrementation occurs.
 
 The value of a *prefix decrement expression* is the value of the variable
 *after* a new value is stored.
- 
+
 The operation of prefix decrement is represented in the following code example:
 
 .. code-block:: typescript
@@ -4681,7 +4761,7 @@ Unary Plus
     frontend_status: Done
 
 *Unary plus expression* is an expression preceded by the operator ``'+'``.
-Type of the operand expression with the unary operator ``'+'`` must be 
+Type of the operand expression with the unary operator ``'+'`` must be
 either convertible (see :ref:`Implicit Conversions`) to a numeric type (see
 :ref:`Numeric Types`) or of ``bigint`` type. Otherwise,
 a :index:`compile-time error` occurs.
@@ -6296,38 +6376,31 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    equality operator
    function type
 
-Otherwise, if an expression is evaluated to ``false`` at compile time because
-``A`` and ``B`` are predefined types or unions of predefined types that do not
-overlap, then a :index:`compile-time error` occurs.
+If an *equality expression* is known at compile time to always evaluate
+at runtime to ``false`` or ``true``, then a :index:`compile-time warning`
+is issued as follows:
 
-In all other cases, a :index:`compile-time warning` is issued.
+.. code-block:: typescript
+   :linenos:
 
-.. note::
-   There are two main reasons a :index:`compile-time error` does not occur at
-   compile time:
+    function  foo(b: boolean | undefined) {
+        let n: number | boolean = 1
+        b == n // warning: expression is always false due to smart cast
+        n == 1 // warning: expression is always true due to smart cast
+    }
 
-   - An expression is compatible with the |TS| code base;
-   - The inferred *smart type* (see :ref:`Smart Casts and Smart Types`) in some
-     cases can trigger an error even where it is impossible at runtime as in the
-     following example:
+    class B {
+        f(): B|undefined { return undefined }
+    }
+    class D extends B {
+        f(): D { return this }
+    }
 
-    .. code-block:: typescript
-       :linenos:
-
-       class B {
-           f(): B|undefined { return undefined }
-       }
-       class D extends B {
-           f(): D { return this }
-       }
-
-       function f(c: B) {
-           if (c instanceof D) {
-               // smart type causes compile-time warning
-               c.f() == undefined
-           }
-       }
-
+    function bar(c: B) {
+        if (c instanceof D) {
+            c.f() == undefined // warning: expression is always false
+        }
+    }
 
 An evaluation of equality expressions always uses the actual types of operands
 as in the example below:
@@ -6376,7 +6449,7 @@ An equality with values of two union types is represented in the example below:
    :linenos:
 
     function f1(x: number | string, y: boolean | null): boolean {
-        return x == y // compile-time error, always evaluates to false
+        return x == y // compile-time warnning: always evaluates to false
     }
 
     function f2(x: number | string, y: boolean | "abc"): boolean {
