@@ -3358,8 +3358,7 @@ export class Decimal {
 
 class Utils {
     public static isDecimalInstance(obj: Object): boolean {
-        return obj instanceof Decimal
-            || (obj.hasOwnProperty('toStringTag') && (obj as Decimal).toStringTag === tag) || false;
+        return obj instanceof Decimal;
     }
 
     public static getZeroString(k: double): string {

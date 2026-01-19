@@ -816,6 +816,22 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         }
         this.buckets.chgItersCounter(-1)
     }
+
+    /**
+     * Returns map keys as set
+     *
+     * @returns { Set<K> } A new set instance containing all of the keys
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public keySet(): Set<K> {
+        let res = new Set<K>()
+        for (let key of this.keys()) {
+            res.add(key)
+        }
+        return res
+    }
 }
 
 export class Record<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string>, V> extends Map<K, V> {

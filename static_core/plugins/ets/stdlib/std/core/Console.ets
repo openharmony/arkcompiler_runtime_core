@@ -514,6 +514,31 @@ export final class Console {
     */
 
     /**
+    * Checks whether data can be represented as a table
+    * @param { Any } data Instance to check
+    * @return { boolean }
+    */
+    private static isTabularData(data: Any): boolean {
+        if (data == undefined) {
+            return false
+        }
+        if (data == null) {
+            return false
+        }
+        if (data instanceof String) {
+            return false
+        }
+        if (Array.isArray(data) || Class.of(data as Object).isFixedArray()) {
+            return true
+        }
+        if (reflect.isLiteralInitializedInterface(data as Object)) {
+            return true
+        }
+        let fields = reflect.getInstanceFieldsRecursive(Class.of(data as Object))
+        return fields.length != 0
+    }
+
+    /**
     * Displays an array of objects in tabular format
     * Converts the data to a DataFrame and renders it
     * @param {Any[]} data - Array of objects to display as a table
@@ -528,9 +553,7 @@ export final class Console {
         // unwrap from Array
         let dat = data[0]!
 
-        const isSimple = (dat == undefined) || (dat == null)
-                || (dat instanceof String) || (Object.keys(dat as Object).length == 0)
-        if (isSimple) {
+        if (!Console.isTabularData(dat)) {
             this.log(dat)
             return
         }

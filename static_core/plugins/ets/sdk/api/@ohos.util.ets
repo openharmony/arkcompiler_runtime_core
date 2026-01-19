@@ -1156,22 +1156,14 @@ export namespace util {
         }
 
         private objectDescription(obj: Object, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
-
-            let strB = new StringBuilder('{ ')
-            let isComplexObject: boolean = false
-
-            for (const objEntry of Object.entries(obj)) {
-                if (!objEntry) {
-                    continue
-                }
-                isComplexObject = true
-                strB.append(this.stringifySubObject(delimiter, objEntry[1], objEntry[0], depth, full))
-            }
-
-            if (!isComplexObject) {
+            let fields = reflect.getInstanceFieldsRecursive(Class.of(obj))
+            if (fields.length == 0) {
                 return JSON.stringify(obj)
             }
-
+            let strB = new StringBuilder('{ ')
+            for (let field of fields) {
+                strB.append(this.stringifySubObject(delimiter, field.getValue(obj), field.getName(), depth, full))
+            }
             return strB.toString().slice(0, - delimiter.length - 1) + ' }'
         }
 
@@ -1292,12 +1284,10 @@ export namespace util {
             if (!obj) {
                 return null
             }
-            for (const objEntry of Object.entries(obj)) {
-                if (!objEntry) {
-                    continue
-                }
-                if ((!objEntry[0]) && (objEntry[0] == key)) {
-                    return objEntry[1]
+            let cls = Class.of(obj)
+            for (const field of reflect.getInstanceFieldsRecursive(cls)) {
+                if (field.getName() == key) {
+                    return field.getValue(key)
                 }
             }
             return null

@@ -186,6 +186,8 @@ std/core/FieldAllTests.ets
 std/core/MethodAllTests.ets
 std/core/MirrorClassAllTests.ets
 std/core/ParameterAllTests.ets
+std/core/ReflectGetInstanceFieldsRecursive.ets
+std/core/ReflectGetInstanceGettersRecursive.ets
 std/core/ValueAllTests.ets
 std/core/TypeClassTypeTest.ets
 std/core/TypeCreateClassTest.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,23 +65,15 @@ export class Formatter {
     }
 
     private objectDescription(obj: Object, delimiter: string = '\n', depth: number = 1, full: boolean = false): string {
-
-        let strB = new StringBuilder('{ ')
-        let isComplexObject: boolean = false
-
-        for (const objEntry of Object.entries(obj)) {
-            if (!objEntry) {
-                continue
-            }
-            isComplexObject = true
-            strB.append(this.stringifySubObject(delimiter, objEntry[1], objEntry[0], depth, full))
-        }
-
-        if (!isComplexObject) {
+        let fields = reflect.getInstanceFieldsRecursive(Class.of(obj))
+        if (fields.length == 0) {
             return JSON.stringify(obj)
         }
-
-        return strB.toString().slice(0,- delimiter.length - 1) + ' }'
+        let strB = new StringBuilder('{ ')
+        for (let field of fields) {
+            strB.append(this.stringifySubObject(delimiter, field.getValue(obj), field.getName(), depth, full))
+        }
+        return strB.toString().slice(0, - delimiter.length - 1) + ' }'
     }
 
     private subObjectDescription(obj: Object, objName: string, isCircular: boolean, delimiter: string, depth: number): string {
@@ -211,12 +203,10 @@ export class Formatter {
         if (!obj) {
             return null
         }
-        for (const objEntry of Object.entries(obj)) {
-            if (!objEntry) {
-                continue
-            }
-            if ((!objEntry[0]) && (objEntry[0] == key)) {
-                return objEntry[1]
+        let cls = Class.of(obj)
+        for (const field of reflect.getInstanceFieldsRecursive(cls)) {
+            if (field.getName() == key) {
+                return field.getValue(key)
             }
         }
         return null
