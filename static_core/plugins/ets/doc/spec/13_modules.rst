@@ -43,8 +43,8 @@ A variable, function, class, interface, or other declarations exported from
 a module must be imported first by the module that is to use them.
 
 .. note::
-   Only exported declarations are available for the 3rd party tools and programs
-   written in other programming languages.
+   Only exported declarations are available for the third party tools and
+   programs written in other programming languages.
 
 All *modules* are stored in a file system or a database
 (see :ref:`Modules in Host System`).
@@ -532,7 +532,7 @@ Import with ``type`` modifier is discussed in :ref:`Import Type Directive`.
 A :index:`compile-time error` occurs if:
 
 -  A non-import directive, declaration, or statement precedes an ``import``
-   directive.
+   directive;
 -  Entity added to the scope of a module by a binding is not distinguishable;
 -  Module imports itself directly, and ``importPath`` refers to a file in which
    the current module is stored; or
@@ -1406,7 +1406,6 @@ Otherwise, a :index:`compile-time error` occurs.
                                           // return type
      }
 
-
 .. index::
    export directive
    export
@@ -1418,7 +1417,6 @@ Otherwise, a :index:`compile-time error` occurs.
    module
    syntax
 
-|
 
 - Default methods of exported interfaces must have explicit return types.
 
@@ -1439,11 +1437,19 @@ Otherwise, a :index:`compile-time error` occurs.
      export J   // Compile-time error: no explicit types for get_count and set_count
 
 
-- *Modules with ambient declarations*
+- *Modules with ambient declarations*.
 
-  The limitations for modules with ambient declarations already imply requirements
+  The limitations for modules with ambient declarations imply requirements
   of explicit type as described in :ref:`ambient declarations`.
 
+.. index::
+   default method
+   exported interface
+   explicit type
+   module with ambient declaration
+   ambient declaration
+
+|
 
 .. _Selective Export Directive:
 
