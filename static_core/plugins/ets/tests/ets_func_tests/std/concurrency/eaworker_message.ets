@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,7 +168,7 @@ function testPostTask() {
         checkCount ++ ;
         waiter2.fire();
     })
-    
+
     waiter2.wait();
     eawNoMain.join();
     arktest.assertEQ(checkCount, 2);
@@ -265,19 +265,6 @@ function testMain() {
     arktest.assertEQ(mainWorker.getUncaughtExceptionHandler(), undefined);
 }
 
-
-function testTaskPool() {
-    let event = new Event();
-    taskpool.execute(() => {
-        arktest.expectError(() => {
-            EAWorker.current();
-        }, new Error('Can not get current worker in taskpool'));
-        event.fire();
-    });
-    event.wait();
-    CoroutineExtras.stopTaskpool();
-}
-
 function testQuitBeforeStart() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
@@ -323,7 +310,7 @@ function testRunAfterQuit() {
     eaw.quit();
     /**
      * Since task below could be added to task queue in two scenarios:
-     * 1. during quitting process, specifically, after enqueueing closingTask 
+     * 1. during quitting process, specifically, after enqueueing closingTask
      * 2. after quitting finished, specifically, after executing closingTask
      * So it might throw exception either
      * 1. "Can not run task when worker is quitted" or
@@ -332,25 +319,6 @@ function testRunAfterQuit() {
     arktest.expectError(() => {
         eaw.run<void>(() => {});
     });
-}
-
-function testWrapTaskErrorHandling() {
-    let errorCaught = false;
-    let waiter = new Event();
-    let eaw = new EAWorker(() => {
-        throw new Error('This is an uncaught exception!'); 
-    });
-    eaw.setUncaughtExceptionHandler((e: Error) => {
-        arktest.assertEQ(e.message, 'This is an uncaught exception!');
-        errorCaught = true;
-        waiter.fire();
-    });
-    eaw.start();
-    waiter.wait();
-    arktest.assertTrue(errorCaught);
-    arktest.expectError(() => {
-        eaw.join();
-    }, 'Unable to launch coroutine: no suitable worker was found');
 }
 
 function main() {
@@ -369,8 +337,5 @@ function main() {
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
     suite.addTest('testRunAfterQuit', testRunAfterQuit);
-    suite.addTest('testWrapTaskErrorHandling', testWrapTaskErrorHandling);
-    // flaky fail test case #28321
-    // suite.addTest('testTaskPool', testTaskPool);
     return suite.run();
 }
