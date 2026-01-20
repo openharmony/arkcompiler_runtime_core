@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -246,8 +246,13 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
         STValueThrowJSError(env, "length type is not number type;");
         return nullptr;
     }
-    uint32_t arrLength;
-    NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
+
+    int32_t arrLength;
+    NAPI_CHECK_FATAL(napi_get_value_int32(env, jsArgv[0], &arrLength));
+    if (arrLength < 0) {
+        STValueThrowJSError(env, "length must be non-negative;");
+        return nullptr;
+    }
 
     napi_value jsElement = jsArgv[1];
     STValueData *elementData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));

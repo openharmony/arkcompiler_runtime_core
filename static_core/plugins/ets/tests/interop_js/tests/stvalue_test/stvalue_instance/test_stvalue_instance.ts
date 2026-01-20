@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -221,6 +221,15 @@ function testNewArray(): void {
         checkRes = checkRes && e.message.includes('initialElement');
         checkRes = checkRes && e.message.includes('reference');
         checkRes = checkRes && e.message.includes('STValue instance does not wrap a value of type');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.newArray(-5, intObj);
+    } catch (e: Error) {
+        checkRes = true;
+        checkRes = checkRes && e.message.includes('length must be non-negative');
     }
     ASSERT_TRUE(checkRes);
 }
