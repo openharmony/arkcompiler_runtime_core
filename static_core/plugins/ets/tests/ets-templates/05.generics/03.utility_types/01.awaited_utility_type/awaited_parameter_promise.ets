@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,17 @@ desc: >-
     Type Awaited<T> constructs a type which has no type Promise in it.
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+async function foo<T, G>(awaited: Awaited<T>, expected: G) {
+    arktest.assertEQ(awaited, expected)
+    arktest.assertTrue(awaited instanceof {{c.G}})
+}
+
+async function bar() {
+    foo<{{c.T}},{{c.G}}>(await Promise.resolve({{c.val}}), {{c.check}})
 }
 
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+  waitForCompletion(bar)
 }
 
 {% endfor %}

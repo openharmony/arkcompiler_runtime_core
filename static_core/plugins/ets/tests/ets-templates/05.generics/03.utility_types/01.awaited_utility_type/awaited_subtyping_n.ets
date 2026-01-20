@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    If T in Awaited<T> is a type parameter, then subtyping for Awaited<T> is based on the subtyping for T.
+    In other words, Awaited<T> is a subtype of Awaited<U> if T is a subtype of U.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0228: Type argument 'Base' should be a subtype of 'Derived' constraint"
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+class Base {}
+class Derived extends Base {}
+class E extends Derived {}
+
+async function foo <T extends Base> (p: Awaited<T>) {
+  bar(p)
 }
+
+async function bar <T extends Derived> (p: Awaited<T>) { }
 
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+  waitForCompletion(bar<Base>(new Base()))
 }
-
-{% endfor %}

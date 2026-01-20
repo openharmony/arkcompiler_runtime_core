@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for case in cases %}
+
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    Awaited with unsupported characters
+tags: [compile-only, negative]
+expected_out: {{case.error}}
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
-}
-
-function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
-}
+{{case.decl}}
 
 {% endfor %}

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,7 +42,26 @@ cases:
               "Awaited value has type '" + typeof value + "', but expected 'boolean'")
 
     - decl: |-
-          type A = Awaited<string>
+          type C = Awaited<number | Promise<number>>
+      use: |-
+          let value: C = await Promise.resolve(5);
+          arktest.assertEQ(value, 5, "Awaited value is " + value + ", but expected 5");        
+          arktest.assertTrue(value instanceof number,
+              "Awaited value has type '" + typeof value + "', but expected 'number'")
+
+    - decl: |-
+          type C = Awaited<number | Promise<string>>
+      use: |-
+          let value: C = await Promise.resolve(5);
+          arktest.assertEQ(value, 5, "Awaited value is " + value + ", but expected 5");        
+          arktest.assertTrue(value instanceof number,
+              "Awaited value has type '" + typeof value + "', but expected 'number'")
+          value = "str"
+          arktest.assertEQ(value, "str", "Awaited value is " + value + ", but expected \"str\"");        
+          arktest.assertTrue(value instanceof string,
+              "Awaited value has type '" + typeof value + "', but expected 'string'")
+
+    - decl: |-
           type AA = Awaited<Awaited<string>>
       use: |-
           let value: AA = await Promise.resolve(Promise.resolve("hello"));
@@ -75,3 +94,10 @@ cases:
           arktest.assertEQ(value, "hello", "Awaited value is '" + value + "', but expected 'hello'");
           arktest.assertTrue(value instanceof string,
             "Awaited value has type '" + typeof value + "', but expected 'string'")
+
+    - decl: |-
+        type A = Awaited< ReturnType<()=>Promise<number>> >;
+      use: |-
+        let i: A = Number.MAX_VALUE
+        arktest.assertEQ(i, Number.MAX_VALUE)
+        arktest.assertTrue(i instanceof number)

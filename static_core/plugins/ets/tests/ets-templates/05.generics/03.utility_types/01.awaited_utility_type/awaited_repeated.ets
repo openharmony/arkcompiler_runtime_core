@@ -16,16 +16,25 @@
 {% for c in cases %}
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    Any occurrence of Awaited type is recursively removed until a generic, a
+    function, an array, or a tuple type is detected.
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+
+interface I {
+  a: number
+  b: string
 }
 
+enum ENM {Red = 8, Blue, Green}
+
+type p = Awaited<{{c.type}}>
+type o = Awaited<p>
+
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+  let i: o = {{c.value}}
+  arktest.assertEQ({{c.checkVal}})
+  arktest.assertTrue({{c.checkType}})
 }
 
 {% endfor %}
