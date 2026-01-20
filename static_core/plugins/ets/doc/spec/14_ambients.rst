@@ -103,7 +103,7 @@ Ambient Constant or Variable Declarations
 .. meta:
     frontend_status: Done
 
-The syntax of *ambient constant or variable declaration* is presented below:
+The syntax of *ambient constant* or *variable declaration* is presented below:
 
 .. code-block:: abnf
 
