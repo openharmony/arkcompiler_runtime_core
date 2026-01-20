@@ -137,9 +137,10 @@ function stringifyObjectLiteralCornerCases(): void {
     checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
 
     // Check that fields filter is not applied to object literal itself, but is applied to all nested objects
-    // Expect {"a":{},"d":-1.5,"s":"str"}
+    // Expect {"s":"str"}
     jsonStr = JSON.stringify(objLit, ["s"])
-    expected.set("a", "{}")
+    expected.delete('a')
+    expected.delete('d')
     checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
 
     // Check cyclic dependencies are detected
@@ -161,6 +162,7 @@ function stringifyObjectLiteralCornerCases(): void {
     array = [objLit, obj]
     jsonStr = JSON.stringify(array)
     expected.set("a", "{value:val}")
+    expected.set('d', '-1.5')
     checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, [expected, new Map<string, string>()])
 
     fixedArray = [obj]
