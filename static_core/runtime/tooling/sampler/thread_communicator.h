@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,50 @@
 #include "libarkbase/os/failure_retry.h"
 
 #include "runtime/tooling/sampler/sample_info.h"
+
+#ifdef PANDA_TARGET_MACOS
+static int pipe2(int pipefd[2], int flags)
+{
+    int rc;
+    int saved_errno;
+
+    // Validate flags
+    if (flags & ~(O_CLOEXEC | O_NONBLOCK)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    // Create pipe
+    rc = pipe(pipefd);
+    if (rc == -1) {
+        return -1;
+    }
+
+    // Apply flags with error handling
+    if (flags != 0) {
+        if (flags & O_CLOEXEC) {
+            if (fcntl(pipefd[0], F_SETFD, FD_CLOEXEC) == -1 || fcntl(pipefd[1], F_SETFD, FD_CLOEXEC) == -1) {
+                goto error;
+            }
+        }
+
+        if (flags & O_NONBLOCK) {
+            if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1 || fcntl(pipefd[1], F_SETFL, O_NONBLOCK) == -1) {
+                goto error;
+            }
+        }
+    }
+
+    return 0;
+
+error:
+    saved_errno = errno;
+    close(pipefd[0]);
+    close(pipefd[1]);
+    errno = saved_errno;
+    return -1;
+}
+#endif
 
 namespace ark::tooling::sampler {
 

@@ -217,8 +217,9 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
 #endif /* defined(PANDA_TARGET_OHOS) */
     }
 #else  /* PANDA_TARGET_MACOS */
+    *stackAddr = pthread_get_stackaddr_np(thread);
+    *stackSize = pthread_get_stacksize_np(thread);
     s += pthread_attr_getguardsize(&attr, guardSize);
-    s += pthread_attr_getstack(&attr, stackAddr, stackSize);
 #endif /* PANDA_TARGET_MACOS */
     s += pthread_attr_destroy(&attr);
     return s;
