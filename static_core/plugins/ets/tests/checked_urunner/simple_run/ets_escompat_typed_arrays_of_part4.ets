@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ function checkTypedArrayOf() {
 
 function testUint32ArrayOfNumber() {
     let expected: FixedArray<number> = [12, 6, 332, 42, 33, 0, 0, 0]
-    let arr = Uint32Array.of(12., 6., 332., 42., 33., NaN, Infinity, -Infinity)
+    let arr = Uint32Array.of(12.0, 6.0, 332.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -61,7 +61,7 @@ function testUint32ArrayOfLong() {
 
 function testBigUint64ArrayOfNumber() {
     let expected: FixedArray<number> = [12, 6, 332, 42, 33]
-    let arr = BigUint64Array.of(12., 6., 332., 42., 33.)
+    let arr = BigUint64Array.of(12.0, 6.0, 332.0, 42.0, 33.0)
     checkArray(arr, expected)
 }
 
