@@ -17,11 +17,9 @@ cases:
 
   - { type: byte,   value: 16,     operation: '| 7' }
   - { type: short,  value: 300,    operation: '| 7' }
-  - { type: int,   value: c'p',   operation: '| 7' }
 
   - { type: byte,   value: 16,     operation: '^ 7' }
   - { type: short,  value: 300,    operation: '^ 7' }
-  - { type: int,   value: c'p',   operation: '^ 7' }
 
   - { type: byte,   value: -16,     operation: '& 7' }
   - { type: short,  value: -300,    operation: '& 7' }

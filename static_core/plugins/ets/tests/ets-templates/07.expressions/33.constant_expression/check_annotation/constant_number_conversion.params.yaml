@@ -12,10 +12,9 @@
 # limitations under the License.
 ---
 cases:
-  - { type: byte,   value: 16      }
-  - { type: short,  value: 300     }
-  - { type: char,   value: c'p'    }
-  - { type: int,    value: 3000    }
-  - { type: long,   value: 50000   }
+  - { type: byte,   value: 16     }
+  - { type: short,  value: 300    }
+  - { type: int,    value: 3000   }
+  - { type: long,   value: 50000  }
   - { type: float,  value: 120.2f }
   - { type: number, value: 5050.9 }
