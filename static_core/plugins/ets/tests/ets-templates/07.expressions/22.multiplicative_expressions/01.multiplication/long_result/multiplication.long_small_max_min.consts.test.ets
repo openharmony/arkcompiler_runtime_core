@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-{% from '07.expressions/21.multiplicative_expressions/expressions.base.jinja' import generate_complete_test, generate_complete_test_body_common_keyword_const as test_body_generator %}
-{% from '07.expressions/21.multiplicative_expressions/01.multiplication/long_result/predefined_data.multiplication.result_long.jinja' import small_value_max_min_long_test_data as test_data %}
+{% from '07.expressions/22.multiplicative_expressions/expressions.base.jinja' import generate_complete_test, generate_complete_test_body_common_keyword_const as test_body_generator %}
+{% from '07.expressions/22.multiplicative_expressions/01.multiplication/long_result/predefined_data.multiplication.result_long.jinja' import small_value_max_min_long_test_data as test_data %}
 
 {{ generate_complete_test('*', test_data, test_body_generator) }}
 
