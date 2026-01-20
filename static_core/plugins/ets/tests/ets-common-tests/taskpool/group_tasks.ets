@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
+    }
+
+    public wait(): boolean {
+        return this.job.Await();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
+}
 
 function returnAbc(): string {
     return (() => 'a')() + (() => 'b')() + (() => 'c')();
@@ -205,13 +231,20 @@ function cancelNonStartedGroupTest() {
     }, new Error('taskpool:: taskGroup is not executed or has been executed'));
 }
 
+function waitWaiterSignal(event : Event) {
+    event.wait();
+}
+
 function cancelExecutingGroupTest() {
     let g = new taskpool.TaskGroup();
-    g.addTask(returnAbc);
+    let waiter = new Event();
+    let task = new taskpool.Task(waitWaiterSignal, waiter);
+    g.addTask(task);
     g.addTask(returnDef);
     let p = taskpool.execute(g);
     try {
         taskpool.cancel(g);
+        waiter.fire();
     } catch (e) {
         let err = e as Error;
         arktest.assertEQ(err.message, 'taskpool:: taskGroup is not executed or has been executed');

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,13 @@ public:
 TEST_F(EtsAtomicIntMembers, MemoryLayout)
 {
     auto *klass = GetClassLinker()->GetClass("Lstd/containers/AtomicInt;");
+    ASSERT(klass != nullptr);
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
+}
+
+TEST_F(EtsAtomicIntMembers, MemoryLayout2)
+{
+    auto *klass = GetClassLinker()->GetClass("Lstd/concurrency/AtomicInt;");
     ASSERT(klass != nullptr);
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }

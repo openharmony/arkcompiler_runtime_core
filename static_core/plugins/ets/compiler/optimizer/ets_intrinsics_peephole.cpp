@@ -62,6 +62,11 @@ static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
     auto runtime = graph->GetRuntime();
     auto method = graph->GetMethod();
 
+    //#15311: MethodId may from another abc file, so use GetSaveState to get the method
+    if (loadString->GetSaveState()->GetMethod() != nullptr) {
+        method = loadString->GetSaveState()->GetMethod();
+    }
+
     auto stringValue = runtime->GetStringValue(method, typeId);
     RuntimeInterface::ClassPtr klass;
     uint32_t ktypeId = 0;

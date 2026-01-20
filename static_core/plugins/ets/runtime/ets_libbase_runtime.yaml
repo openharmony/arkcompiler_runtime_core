@@ -76,6 +76,9 @@ coretypes:
 - managed_class: std.containers.AtomicInt
   mirror_class: ark::ets::EtsAtomicInt
 
+- managed_class: std.concurrency.AtomicInt
+  mirror_class: ark::ets::EtsAtomicInt
+
 - managed_class: std.core.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
 
@@ -9268,6 +9271,71 @@ intrinsics:
         - i64
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
+
+
+################################
+# std.concurrency.AtomicInt #
+################################
+
+  - name: escompatAtomicIntSet
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: set
+    static: false
+    signature:
+      ret: void
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntSetValue
+
+  - name: escompatAtomicIntGet
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: get
+    static: false
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::EtsAtomicIntGetValue
+
+  - name: escompatAtomicIntExchange
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: exchange
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntGetAndSet
+
+  - name: escompatAtomicIntCompareAndSwap
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: compareAndSwap
+    static: false
+    signature:
+      ret: i32
+      args: [ i32, i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntCompareAndSet
+
+  - name: escompatAtomicIntFetchAndAdd
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: fetchAndAdd
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndAdd
+
+  - name: escompatAtomicIntFetchAndSub
+    space: ets
+    class_name: std.concurrency.AtomicInt
+    method_name: fetchAndSub
+    static: false
+    signature:
+      ret: i32
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::EtsAtomicIntFetchAndSub
 
 ##############################
 #      std.core.reflect      #
