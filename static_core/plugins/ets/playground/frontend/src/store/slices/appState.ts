@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,10 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { VerificationMode } from '../../models/code';
 
 export type Theme = 'light' | 'dark';
+export type LogTab = 'compilation' | 'runtime';
 interface IState {
     theme: Theme;
     primaryColor: string;
@@ -25,7 +27,8 @@ interface IState {
     versions: Versions;
     versionsLoading: boolean;
     clearLogsEachRun: boolean;
-    runtimeVerify: boolean;
+    verificationMode: VerificationMode;
+    activeLogTab: LogTab;
 }
 
 export interface Versions {
@@ -39,7 +42,7 @@ const initialState: IState = {
     theme: (localStorage.getItem('theme') as Theme) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     disasm: false,
     verifier: true,
-    runtimeVerify: true,
+    verificationMode: 'ahead-of-time',
     astView: false,
     primaryColor: '#e32b49',
     versions: {
@@ -50,6 +53,7 @@ const initialState: IState = {
     },
     versionsLoading: false,
     clearLogsEachRun: localStorage.getItem('clearLogsEachRun') === 'false' ? false : true,
+    activeLogTab: 'compilation',
 };
 
 const appStateSlice = createSlice({
@@ -71,8 +75,8 @@ const appStateSlice = createSlice({
         setVerifier: (state, action: PayloadAction<boolean>) => {
             state.verifier = action.payload;
         },
-        setRuntimeVerify: (state, action: PayloadAction<boolean>) => {
-            state.runtimeVerify = action.payload;
+        setVerificationMode: (state, action: PayloadAction<VerificationMode>) => {
+            state.verificationMode = action.payload;
         },
         setVersions(state, action: PayloadAction<Versions>) {
             state.versions = action.payload;
@@ -83,6 +87,9 @@ const appStateSlice = createSlice({
         setClearLogsEachRun(state, action: PayloadAction<boolean>) {
             state.clearLogsEachRun = action.payload;
             localStorage.setItem('clearLogsEachRun', String(action.payload));
+        },
+        setActiveLogTab(state, action: PayloadAction<LogTab>) {
+            state.activeLogTab = action.payload;
         },
     },
 });
@@ -96,7 +103,8 @@ export const {
     setVersions,
     setVersionsLoading,
     setClearLogsEachRun,
-    setRuntimeVerify,
+    setVerificationMode,
+    setActiveLogTab,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

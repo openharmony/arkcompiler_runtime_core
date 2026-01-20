@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,7 +18,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from .common import DisasmResponse, ResponseLog
+from .common import DisasmResponse, ResponseLog, VerificationMode
 
 
 class CompileRequestModel(BaseModel):
@@ -26,7 +26,7 @@ class CompileRequestModel(BaseModel):
     options: dict[str, Any] = Field(default_factory=dict)
     disassemble: bool = False
     verifier: bool = False
-    runtime_verify: bool = False
+    verification_mode: VerificationMode = VerificationMode.AHEAD_OF_TIME
 
 
 class RunResponse(BaseModel):

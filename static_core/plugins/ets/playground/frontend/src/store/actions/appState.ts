@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import {
     setClearLogsEachRun,
     setDisasm,
     setPrimaryColor,
-    setRuntimeVerify,
+    setVerificationMode,
     setTheme,
     setVerifier,
     setVersions,
@@ -27,6 +27,7 @@ import {
     Theme
 } from '../slices/appState';
 import { versionService } from '../../services/versions';
+import { VerificationMode } from '../../models/code';
 
 export const setThemeAction = createAsyncThunk(
     '@theme/change',
@@ -64,10 +65,10 @@ export const setAstViewAction = createAsyncThunk(
         thunkAPI.dispatch(setAstView(data));
     },
 );
-export const setRuntimeVerifAction = createAsyncThunk(
-    '@runtimeVerify/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setRuntimeVerify(data));
+export const setVerificationModeAction = createAsyncThunk(
+    '@verificationMode/change',
+    (data: VerificationMode, thunkAPI) => {
+        thunkAPI.dispatch(setVerificationMode(data));
     },
 );
 

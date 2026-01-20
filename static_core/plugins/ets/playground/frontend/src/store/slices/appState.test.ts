@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import reducer, { setTheme, setPrimaryColor, setDisasm, Theme, setRuntimeVerify } from './appState';
+import reducer, { setTheme, setPrimaryColor, setDisasm, Theme, setVerificationMode } from './appState';
 
 describe('appStateSlice reducer', () => {
     const initialState = {
@@ -22,7 +22,7 @@ describe('appStateSlice reducer', () => {
         disasm: false,
         verifier: true,
         astView: false,
-        runtimeVerify: true,
+        verificationMode: 'ahead-of-time' as const,
         primaryColor: '#e32b49',
         versions: {
             arktsVersion: '',
@@ -31,7 +31,8 @@ describe('appStateSlice reducer', () => {
             frontend: '',
         },
         versionsLoading: false,
-        clearLogsEachRun: true
+        clearLogsEachRun: true,
+        activeLogTab: 'compilation' as const
     };
 
     it('should return the initial state when passed an empty action', () => {

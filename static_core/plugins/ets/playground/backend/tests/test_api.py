@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -184,3 +184,105 @@ def test_features_api(playground_client, monkeypatch):
     resp = playground_client.get("/features")
     assert resp.status_code == 200
     assert resp.json() == {"ast_mode": "manual"}
+
+
+@pytest.mark.parametrize("verification_mode", ["disabled", "ahead-of-time", "on-the-fly"])
+def test_run_api_with_verification_modes(playground_client, verification_mode):
+    resp = playground_client.post("/run", json={
+        "code": "let x = 1",
+        "disassemble": False,
+        "options": {},
+        "verifier": False,
+        "verification_mode": verification_mode,
+    })
+    assert resp.status_code == 200
+    result = resp.json()
+
+    expected_top_level_keys = {"compile", "run", "disassembly", "verifier"}
+    expected_compile_keys = {"exit_code", "output", "error"}
+    expected_run_keys = {"exit_code", "output", "error"}
+
+    assert set(result.keys()) == expected_top_level_keys, \
+        f"Top-level keys mismatch: got {set(result.keys())}, expected {expected_top_level_keys}"
+
+    assert result["compile"] is not None
+    assert set(result["compile"].keys()) == expected_compile_keys, \
+        f"Compile keys mismatch: got {set(result['compile'].keys())}, expected {expected_compile_keys}"
+    assert isinstance(result["compile"]["exit_code"], int)
+    assert isinstance(result["compile"]["output"], str)
+    assert isinstance(result["compile"]["error"], str)
+    assert result["compile"]["exit_code"] == 0
+
+    assert result["run"] is not None
+    assert set(result["run"].keys()) == expected_run_keys, \
+        f"Run keys mismatch: got {set(result['run'].keys())}, expected {expected_run_keys}"
+    assert isinstance(result["run"]["exit_code"], int)
+    assert isinstance(result["run"]["output"], str)
+    assert isinstance(result["run"]["error"], str)
+    assert result["run"]["exit_code"] == 0
+
+    assert result["disassembly"] is None
+    assert result["verifier"] is None
+
+
+def test_run_api_full_json_schema_validation(playground_client):
+    """Test that validates complete JSON structure without using 'in' operator"""
+    resp = playground_client.post("/run", json={
+        "code": "let x = 1",
+        "disassemble": False,
+        "options": {},
+        "verifier": False,
+        "verification_mode": "disabled",
+    })
+    assert resp.status_code == 200
+    result = resp.json()
+
+    expected_structure = {
+        "compile": {
+            "exit_code": int,
+            "output": str,
+            "error": str,
+        },
+        "run": {
+            "exit_code": int,
+            "output": str,
+            "error": str,
+        },
+        "disassembly": type(None),
+        "verifier": type(None),
+    }
+
+    assert set(result.keys()) == set(expected_structure.keys()), \
+        f"Top-level keys mismatch: {set(result.keys())} != {set(expected_structure.keys())}"
+
+    assert result["compile"] is not None
+    assert set(result["compile"].keys()) == set(expected_structure["compile"].keys()), \
+        f"Compile keys mismatch: {set(result['compile'].keys())} != {set(expected_structure['compile'].keys())}"
+    assert isinstance(result["compile"]["exit_code"], expected_structure["compile"]["exit_code"])
+    assert isinstance(result["compile"]["output"], expected_structure["compile"]["output"])
+    assert isinstance(result["compile"]["error"], expected_structure["compile"]["error"])
+    assert result["compile"]["exit_code"] == 0
+
+    assert result["run"] is not None
+    assert set(result["run"].keys()) == set(expected_structure["run"].keys()), \
+        f"Run keys mismatch: {set(result['run'].keys())} != {set(expected_structure['run'].keys())}"
+    assert isinstance(result["run"]["exit_code"], expected_structure["run"]["exit_code"])
+    assert isinstance(result["run"]["output"], expected_structure["run"]["output"])
+    assert isinstance(result["run"]["error"], expected_structure["run"]["error"])
+    assert result["run"]["exit_code"] == 0
+
+    assert result["disassembly"] is None
+    assert result["verifier"] is None
+    assert isinstance(result["disassembly"], expected_structure["disassembly"])
+    assert isinstance(result["verifier"], expected_structure["verifier"])
+
+
+def test_run_api_invalid_verification_mode(playground_client):
+    resp = playground_client.post("/run", json={
+        "code": "let x = 1",
+        "disassemble": False,
+        "options": {},
+        "verifier": False,
+        "verification_mode": "invalid-mode",
+    })
+    assert resp.status_code == 422  # Validation error

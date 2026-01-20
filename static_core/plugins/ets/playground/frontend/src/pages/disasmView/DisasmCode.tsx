@@ -44,12 +44,18 @@ const DisasmEditor: React.FC = () => {
     }, [backendSyntax]);
 
     useEffect(() => {
+        if (isCompileLoading || isRunLoading) {
+            setCode('');
+            return;
+        }
         if (compileRes?.disassembly?.code) {
             setCode(compileRes.disassembly.code);
         } else if (runRes?.disassembly?.code) {
             setCode(runRes.disassembly.code);
+        } else if (compileRes !== null || runRes !== null) {
+            setCode('');
         }
-    }, [runRes, compileRes]);
+    }, [runRes, compileRes, isCompileLoading, isRunLoading]);
 
     useEffect(() => {
         if (monaco) {

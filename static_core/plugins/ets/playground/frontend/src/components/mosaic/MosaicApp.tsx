@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ import { Button, Icon, Tab, Tabs } from '@blueprintjs/core';
 import styles from './styles.module.scss';
 import ControlPanel from '../controlPanel/ControlPanel';
 import {useDispatch, useSelector} from 'react-redux';
-import {withAstView, withDisasm} from '../../store/selectors/appState';
+import {withAstView, withDisasm, selectActiveLogTab} from '../../store/selectors/appState';
 import DisasmCode from '../../pages/disasmView/DisasmCode';
 import {AppDispatch} from '../../store';
 import {fetchOptions} from '../../store/actions/options';
@@ -42,6 +42,7 @@ import { fetchFeatures } from '../../store/actions/features';
 import { selectASTLoading } from '../../store/selectors/ast';
 import { fetchAst } from '../../store/actions/ast';
 import { selectAstMode } from '../../store/selectors/features';
+import { setActiveLogTab } from '../../store/slices/appState';
 
 export type ViewId = 'code' | 'disasm' | 'logs' | 'ast';
 
@@ -53,7 +54,7 @@ const TITLE_MAP: Record<ViewId, string> = {
 };
 
 const MosaicApp = (): JSX.Element => {
-    const [activeTab, setActiveTab] = useState<'compilation' | 'runtime'>('compilation');
+    const activeTab = useSelector(selectActiveLogTab);
     const withDisasmRender = useSelector(withDisasm);
     const withASTRender = useSelector(withAstView);
     const isAstLoading = useSelector(selectASTLoading);
@@ -74,7 +75,7 @@ const MosaicApp = (): JSX.Element => {
     }, []);
 
     const handleTabChange = (newTab: 'compilation' | 'runtime'): void => {
-        setActiveTab(newTab);
+        dispatch(setActiveLogTab(newTab));
     };
 
     const handleASTView = (): void => {

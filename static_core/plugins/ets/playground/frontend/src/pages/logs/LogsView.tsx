@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                         >
                             <Tooltip content='exit_code' placement='bottom'><span>[{log.exit_code}]:</span></Tooltip>
                         </div>
-                        <div>
+                        <div className={styles.messageContainer}>
                             {log.message.map((el, ind) => (
                                 <pre
                                     key={`${el.message}-${ind}`}

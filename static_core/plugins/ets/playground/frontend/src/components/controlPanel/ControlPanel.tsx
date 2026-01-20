@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,35 +14,36 @@
  */
 
 import React, {useEffect, useRef, useState} from 'react';
-import {Button, ButtonGroup, Checkbox, Icon, Popover, Tooltip} from '@blueprintjs/core';
+import {Button, ButtonGroup, Checkbox, Icon, Popover, Tooltip, Radio, RadioGroup} from '@blueprintjs/core';
 import styles from './styles.module.scss';
 import CompileOptions from '../../pages/compileOptions/CompileOptions';
 import {useDispatch, useSelector} from 'react-redux';
-import {withAstView, withDisasm, withRuntimeVerify, withVerifier} from '../../store/selectors/appState';
+import {withAstView, withDisasm, selectVerificationMode, withVerifier} from '../../store/selectors/appState';
 import {AppDispatch} from '../../store';
-import {setDisasmAction, setRuntimeVerifAction, setVerifAction} from '../../store/actions/appState';
+import {setDisasmAction, setVerificationModeAction, setVerifAction} from '../../store/actions/appState';
 import {fetchCompileCode, fetchRunCode, shareCodeLocally, flushPendingCodeUpdate} from '../../store/actions/code';
 import {selectCompileLoading, selectRunLoading, selectShareLoading} from '../../store/selectors/code';
 import {useClickOutside} from '../../utils/useClickOutside';
 import cx from 'classnames';
-import { setAstView } from '../../store/slices/appState';
+import { setAstView, setActiveLogTab } from '../../store/slices/appState';
+import { VerificationMode } from '../../models/code';
 
 const ControlPanel = (): JSX.Element => {
     const popoverRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const disasm = useSelector(withDisasm);
     const astView = useSelector(withAstView);
-    const runtimeVerify = useSelector(withRuntimeVerify);
+    const verificationMode = useSelector(selectVerificationMode);
     const verifier = useSelector(withVerifier);
     const dispatch = useDispatch<AppDispatch>();
     const isCompileLoading = useSelector(selectCompileLoading);
     const isShareLoading = useSelector(selectShareLoading);
     const isRunLoading = useSelector(selectRunLoading);
-    const [runVerify, setRunVerify] = useState(false);
+    const [localVerificationMode, setLocalVerificationMode] = useState<VerificationMode>('disabled');
 
     useEffect(() => {
-        setRunVerify(runtimeVerify);
-    }, [runtimeVerify]);
+        setLocalVerificationMode(verificationMode);
+    }, [verificationMode]);
 
 
     const handleDisasmChange = (): void => {
@@ -56,10 +57,12 @@ const ControlPanel = (): JSX.Element => {
     };
     const handleCompile = (): void => {
         flushPendingCodeUpdate();
+        dispatch(setActiveLogTab('compilation'));
         dispatch(fetchCompileCode());
     };
     const handleRun = (): void => {
         flushPendingCodeUpdate();
+        dispatch(setActiveLogTab('runtime'));
         dispatch(fetchRunCode());
     };
     const handleShare = (): void => {
@@ -68,17 +71,17 @@ const ControlPanel = (): JSX.Element => {
     };
     const handleClosePopover = (): void => {
         setIsOpen(false);
-        setRunVerify(runtimeVerify || false);
+        setLocalVerificationMode(verificationMode);
     };
     const handleOpenPopover = (): void => {
         setIsOpen(true);
     };
-    const handleRunVerifReset = (): void => {
-        dispatch(setRuntimeVerifAction(false));
+    const handleVerificationModeReset = (): void => {
+        dispatch(setVerificationModeAction('disabled'));
         setIsOpen(false);
     };
-    const handleRuntimeVerifChange = (): void => {
-        dispatch(setRuntimeVerifAction(runVerify));
+    const handleVerificationModeChange = (): void => {
+        dispatch(setVerificationModeAction(localVerificationMode));
         handleClosePopover();
     };
     useClickOutside(popoverRef, handleClosePopover);
@@ -113,18 +116,22 @@ const ControlPanel = (): JSX.Element => {
                         content={<div className={styles.options}>
                             <CompileOptions onClose={handleClosePopover} />
                             <span className={styles.header}>Run options</span>
-                            <Checkbox
-                                checked={runVerify}
-                                label="Runtime verify"
-                                onChange={(e): void => setRunVerify(e.target.checked)}
-                                className={styles.disasm}
-                                data-testid="runtimeVerify-checkbox"
-                            />
+                            <RadioGroup
+                                label="Verification mode:"
+                                inline={true}
+                                onChange={(e): void => setLocalVerificationMode(e.currentTarget.value as VerificationMode)}
+                                selectedValue={localVerificationMode}
+                                className={styles.radioGroup}
+                            >
+                                <Radio label="Disabled" value="disabled" />
+                                <Radio label="Ahead of Time" value="ahead-of-time" />
+                                <Radio label="On the Fly" value="on-the-fly" />
+                            </RadioGroup>
                             <div className={styles.btnContainer}>
-                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleRunVerifReset}>
+                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeReset}>
                                     Reset
                                 </Button>
-                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleRuntimeVerifChange}>
+                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeChange}>
                                     Save
                                 </Button>
                             </div>
