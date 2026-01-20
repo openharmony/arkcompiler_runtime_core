@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ export interface RunnerParms {
   customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[];
   customCompilerOptions?: ts.CompilerOptions;
   includePaths?: string[];
+  uiInteropTransformer?: Function;
 }
 
 export interface CodeInputParams {
@@ -49,7 +50,7 @@ export function generateInteropDecls(config: RunnerParms): string[] {
     tsconfig: undefined,
     includePaths: config.includePaths
   }
-  const declgen = new Declgen(tsConfig, config.customResolveModuleNames, config.customCompilerOptions);
+  const declgen = new Declgen(tsConfig, config.customResolveModuleNames, config.customCompilerOptions, [], config.uiInteropTransformer);
   declgen.run();
   return logMessages;
 }

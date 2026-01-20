@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,12 +47,14 @@ export class Declgen {
   private readonly codeInputs?: CodeInput[];
   private visitedFiles: Map<string, ts.SourceFile>;
   private writedFiles: Set<string>;
+  private uiInteropTransformer?: Function;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
     customResolveModuleNames?: (moduleName: string[], containingFile: string) => ts.ResolvedModuleFull[],
     compilerOptions?: ts.CompilerOptions,
-    codeInputs?: CodeInput[]
+    codeInputs?: CodeInput[],
+    uiInteropTransformer?: Function
   ) {
     const { rootNames, options } = Declgen.parseDeclgenOptions(declgenOptions);
 
@@ -62,6 +64,7 @@ export class Declgen {
     this.sourceFileMap = new Map<string, ts.SourceFile>();
     this.visitedFiles = new Map<string, ts.SourceFile>();
     this.writedFiles = new Set<string>();
+    this.uiInteropTransformer = uiInteropTransformer;
 
     // Create SourceFile based on code content.
     if (codeInputs) {
@@ -110,21 +113,23 @@ export class Declgen {
      * process the declaration files here.
      */
     this.processDeclarationFiles(program);
+    const afterDeclarations: ts.CustomTransformerFactory[] = [
+      ...(this.uiInteropTransformer ? [this.uiInteropTransformer(program)] : []),
+      (ctx: ts.TransformationContext): ts.CustomTransformer => {
+        const typeChecker = program.getTypeChecker();
+        const autofixer = new Autofixer(typeChecker, ctx);
+        const transformer = new Transformer(ctx, this.sourceFileMap, [autofixer.fixNode.bind(autofixer)]);
+
+        return transformer.createCustomTransformer((sourceFile: ts.SourceFile) => {
+          this.visitedFiles.set(sourceFile.fileName, sourceFile);
+        });
+      }
+    ];
 
     const emitResult = program.emit(undefined, undefined, undefined, true, {
       before: [],
       after: [],
-      afterDeclarations: [
-        (ctx: ts.TransformationContext): ts.CustomTransformer => {
-          const typeChecker = program.getTypeChecker();
-          const autofixer = new Autofixer(typeChecker, ctx);
-          const transformer = new Transformer(ctx, this.sourceFileMap, [autofixer.fixNode.bind(autofixer)]);
-
-          return transformer.createCustomTransformer((sourceFile: ts.SourceFile) => {
-            this.visitedFiles.set(sourceFile.fileName, sourceFile);
-          });
-        }
-      ]
+      afterDeclarations
     });
 
     this.visitedFiles.forEach((sourceFile, fileName) => {
