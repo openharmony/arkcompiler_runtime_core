@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,11 +233,11 @@ void StackWalker::InitCalleeBuffer(SlotType *calleeSlots, CalleeStorage *prevCal
             if (prevCallees == nullptr || prevIsNative) {
                 size_t slot = ARCH_INT_REGS_MASK.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                calleeStack_.stack[offset] = calleeSlots - slot - 1;
+                calleeStack_.stack[offset] = bit_cast<uintptr_t *>(calleeSlots - slot - 1);
             } else if (prevCallees->intRegsMask.Test(reg)) {
                 size_t slot = prevCallees->intRegsMask.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                calleeStack_.stack[offset] = calleeSlots - slot - 1;
+                calleeStack_.stack[offset] = bit_cast<uintptr_t *>(calleeSlots - slot - 1);
             } else {
                 ASSERT(nullptr != prevCallees->stack[offset]);
                 calleeStack_.stack[offset] = prevCallees->stack[offset];
@@ -249,11 +249,11 @@ void StackWalker::InitCalleeBuffer(SlotType *calleeSlots, CalleeStorage *prevCal
             if (prevCallees == nullptr || prevIsNative) {
                 size_t slot = ARCH_FP_REGS_MASK.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                calleeStack_.stack[offset] = calleeSlots - CalleeIntRegsCount() - slot - 1;
+                calleeStack_.stack[offset] = bit_cast<uintptr_t *>(calleeSlots - CalleeIntRegsCount() - slot - 1);
             } else if (prevCallees->fpRegsMask.Test(reg)) {
                 size_t slot = prevCallees->fpRegsMask.GetDistanceFromHead(reg);
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                calleeStack_.stack[offset] = calleeSlots - CalleeIntRegsCount() - slot - 1;
+                calleeStack_.stack[offset] = bit_cast<uintptr_t *>(calleeSlots - CalleeIntRegsCount() - slot - 1);
             } else {
                 ASSERT(nullptr != prevCallees->stack[offset]);
                 calleeStack_.stack[offset] = prevCallees->stack[offset];
@@ -307,7 +307,8 @@ interpreter::VRegister StackWalker::GetVRegValue(size_t vregNum)
         ASSERT(vregsList[vregNum].GetIndex() == vregNum);
         interpreter::VRegister vreg0;
         [[maybe_unused]] interpreter::VRegister vreg1;
-        GetCFrame().GetVRegValue(vregsList[vregNum], codeInfo_, calleeStack_.stack.data(),
+        GetCFrame().GetVRegValue(vregsList[vregNum], codeInfo_,
+                                 reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
                                  interpreter::StaticVRegisterRef(&vreg0, &vreg1));
         return vreg0;
     }
@@ -322,19 +323,21 @@ void StackWalker::SetVRegValue(VRegInfo regInfo, T value)
         auto &cframe = GetCFrame();
         if (IsDynamicMethod()) {
             if constexpr (sizeof(T) == sizeof(uint64_t)) {  // NOLINT
-                cframe.SetVRegValue<true>(regInfo, bit_cast<uint64_t>(value), calleeStack_.stack.data());
+                cframe.SetVRegValue<true>(regInfo, bit_cast<uint64_t>(value),
+                                          bit_cast<SlotType **>(calleeStack_.stack.data()));
             } else {  // NOLINT
                 static_assert(sizeof(T) == sizeof(uint32_t));
                 cframe.SetVRegValue<true>(regInfo, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
-                                          calleeStack_.stack.data());
+                                          reinterpret_cast<SlotType **>(calleeStack_.stack.data()));
             }
         } else {
             if constexpr (sizeof(T) == sizeof(uint64_t)) {  // NOLINT
-                cframe.SetVRegValue(regInfo, bit_cast<uint64_t>(value), calleeStack_.stack.data());
+                cframe.SetVRegValue(regInfo, bit_cast<uint64_t>(value),
+                                    reinterpret_cast<SlotType **>(calleeStack_.stack.data()));
             } else {  // NOLINT
                 static_assert(sizeof(T) == sizeof(uint32_t));
                 cframe.SetVRegValue(regInfo, static_cast<uint64_t>(bit_cast<uint32_t>(value)),
-                                    calleeStack_.stack.data());
+                                    reinterpret_cast<SlotType **>(calleeStack_.stack.data()));
             }
         }
     } else {
@@ -549,7 +552,6 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
         /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
          * retreived from cframe
          */
-
         size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
         frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
                                                                                prevFrame);
@@ -558,21 +560,22 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
         DynamicFrameHandler frameHandler(frame);
         static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
         for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
-            auto vreg = vregList[i];
-            if (!vreg.IsLive()) {
+            if (!vregList[i].IsLive()) {
                 continue;
             }
             auto regRef = frameHandler.GetVReg(i);
-            GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+            GetCFrame().GetPackVRegValue(vregList[i], codeInfo_,
+                                         reinterpret_cast<SlotType **>(calleeStack_.stack.data()), regRef);
         }
         {
             auto vreg = vregList[vregList.size() - ACC_OFFSET];
             if (vreg.IsLive()) {
                 auto regRef = frameHandler.GetAccAsVReg();
-                GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+                GetCFrame().GetPackVRegValue(vreg, codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+                                             regRef);
             }
         }
-        EnvData envData {vregList, GetCFrame(), codeInfo_, calleeStack_.stack.data()};
+        EnvData envData {vregList, GetCFrame(), codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data())};
         Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
     } else {
         auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
@@ -580,14 +583,13 @@ Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
         frame = interpreter::RuntimeInterface::CreateFrame(frameNumVregs, method, prevFrame);
         StaticFrameHandler frameHandler(frame);
         for (size_t i = 0; i < vregList.size(); i++) {
-            auto vreg = vregList[i];
-            if (!vreg.IsLive()) {
+            if (!vregList[i].IsLive()) {
                 continue;
             }
-
             bool isAcc = i == (vregList.size() - 1);
             auto regRef = isAcc ? frame->GetAccAsVReg() : frameHandler.GetVReg(i);
-            GetCFrame().GetVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+            GetCFrame().GetVRegValue(vregList[i], codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
+                                     regRef);
         }
     }
     return frame;
