@@ -331,7 +331,7 @@ export final class Promise<out T> implements PromiseLike<T> {
 
             for (let i = 0; i < promises.length; ++i) {
                 const idx = i;
-                Promise.toPromiseLike<U>(promises[idx]!).then<void, void>(
+                Promise.toPromiseLike<U>(promises[idx]).then<void, void>(
                     (value: Awaited<U>): void => {
                         values[idx] = value;
                         ++resolvedCnt;
@@ -404,7 +404,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 for (let i = 0; i < promises.length; ++i) {
                     const idx = i;
                     try {
-                        Promise.toPromiseLike<U>(promises[idx]!).then<void, void>(
+                        Promise.toPromiseLike<U>(promises[idx]).then<void, void>(
                             (value: Awaited<U>): void => {
                                 fulfill(value, idx);
                             },
@@ -468,7 +468,7 @@ export final class Promise<out T> implements PromiseLike<T> {
             for (let i = 0; i < promises.length; ++i) {
                 const idx = i;
                 try {
-                    Promise.toPromiseLike<U>(promises[idx]!).then<void, void>(
+                    Promise.toPromiseLike<U>(promises[idx]).then<void, void>(
                         (value: Awaited<U>): void => {
                             ++resolvedCnt;
                             if (resolvedCnt === 1) {
@@ -513,7 +513,7 @@ export final class Promise<out T> implements PromiseLike<T> {
             let settled = false;
             for (let i = 0; i < promises.length; ++i) {
                 const idx = i;
-                Promise.toPromiseLike<U>(promises[idx]!).then<void, void>(
+                Promise.toPromiseLike<U>(promises[idx]).then<void, void>(
                     (value: Awaited<U>): void => {
                         if (!settled) {
                             resolve(value);
@@ -553,7 +553,7 @@ export final class Promise<out T> implements PromiseLike<T> {
             return new (U | undefined)[0];
         }
         let array : FixedArray<U | undefined> = new (U | undefined)[1];
-        array[0] = v.value!;
+        array[0] = v.value;
         let len = 1;
         while (true) {
             v = it.next();
@@ -561,7 +561,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 return Promise.trim(array, len);
             }
             array = Promise.ensureCapacity(array, len + 1);
-            array[len] = v.value!;
+            array[len] = v.value;
             ++len;
         }
     }
@@ -628,7 +628,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    private static toPromiseLike<U>(value: U|PromiseLike<U>): PromiseLike<Awaited<U>> {
+    private static toPromiseLike<U>(value: U|PromiseLike<U>|undefined): PromiseLike<Awaited<U>> {
         if (value instanceof Promise) {
             let p = value as Promise<Awaited<U>>;
             return p;
