@@ -372,10 +372,6 @@
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
 08.statements/04.local_declarations/post_declaration_n_1.ets
 
-#30962 Any type can be used in switch-case in 6.0
-08.statements/13.switch_statements/Any_Switch.ets
-08.statements/13.switch_statements/Object_Switch.ets
-
 #30145
 08.statements/14.throw_statements/throw_7.ets
 
