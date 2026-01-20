@@ -2430,7 +2430,6 @@ Native Functions and Methods
 .. meta:
     frontend_status: Done
 
-|
 
 .. _Native Functions:
 
@@ -2980,8 +2979,8 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
      }
 
 A :index:`compile-time error` occurs if the name of a *function with receiver*
-(including generic functions) is the same as the name of an accessible
-instance method or field of the receiver type (see :ref:`Accessible`):
+(including generic functions) and the name of an accessible instance method or
+field of the receiver type (see :ref:`Accessible`) are the same:
 
 .. code-block:: typescript
    :linenos:
@@ -3073,8 +3072,8 @@ This situation is represented in the following example:
 
 .. note::
     While a function with receiver can be used in an explicit overload list,
-    such an overload cannot be called by using the method access syntax
-    (an example is provided in :ref:`Explicit Function Overload`)
+    such an overload cannot be called by using the method access syntax as
+    in the example provided in :ref:`Explicit Function Overload`.
 
 |
 
@@ -3340,7 +3339,7 @@ The usual rule of function type compatibility (see
       f1 = f2 // ok
 
 The sole difference is that only an entity of *function type with receiver*
-and not an entity of a compatible *function type* can be used in
+nut not an entity of a compatible *function type* can be used in
 :ref:`Method Call Expression`.
 
 .. code-block:: typescript
@@ -3680,7 +3679,7 @@ function type, and the argument is passed as a lambda using the
    lambda
    block notation
 
-The use of trailing lambda is represented in the example below:
+The use of a trailing lambda is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
