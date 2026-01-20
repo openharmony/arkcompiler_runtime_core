@@ -163,236 +163,236 @@
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
 
 #30469
-07.expressions/01.evaluation_of_expressions/04.operator_precedence/typeof.ets
+07.expressions/02.evaluation_of_expressions/04.operator_precedence/typeof.ets
 
 #31926 No CTE when array type cannot be determined in function call
-07.expressions/04.array_literal/arr_n_2.ets
+07.expressions/05.array_literal/arr_n_2.ets
 
 #31022 Method in object literal rejected
-07.expressions/05.object_literal/spec_ex1.ets
-07.expressions/05.object_literal/spec_ex3.ets
-07.expressions/05.object_literal/spec_ex7.ets
+07.expressions/06.object_literal/spec_ex1.ets
+07.expressions/06.object_literal/spec_ex3.ets
+07.expressions/06.object_literal/spec_ex7.ets
 
 #28484 Interface has methods
-07.expressions/05.object_literal/spec_ex6.ets
+07.expressions/06.object_literal/spec_ex6.ets
 
 #30924
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.ets
+07.expressions/06.object_literal/02.object_literal_of_interface_type/in_7.ets
 
 #25990
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets
 
 #28679 Record with enum keys
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_24.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_25.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_26.ets
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_27.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_24.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_25.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_26.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_27.ets
 
 #28898 Iterable refused as spread
-07.expressions/06.spread_expression/iterable0.ets
-07.expressions/06.spread_expression/iterable1.ets
-07.expressions/06.spread_expression/iterable2.ets
-07.expressions/06.spread_expression/iterable3.ets
-07.expressions/06.spread_expression/iterable4.ets
-07.expressions/06.spread_expression/spex_50.ets
-07.expressions/06.spread_expression/spex_51.ets
-07.expressions/06.spread_expression/spex_func_46.ets
-07.expressions/06.spread_expression/spex_func_77.ets
-07.expressions/06.spread_expression/spex_func_78.ets
+07.expressions/07.spread_expression/iterable0.ets
+07.expressions/07.spread_expression/iterable1.ets
+07.expressions/07.spread_expression/iterable2.ets
+07.expressions/07.spread_expression/iterable3.ets
+07.expressions/07.spread_expression/iterable4.ets
+07.expressions/07.spread_expression/spex_50.ets
+07.expressions/07.spread_expression/spex_51.ets
+07.expressions/07.spread_expression/spex_func_46.ets
+07.expressions/07.spread_expression/spex_func_77.ets
+07.expressions/07.spread_expression/spex_func_78.ets
 
 #26730
-07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
+07.expressions/10.field_access_expressions/02.accessing_superclass_fields/access_by_super_from_method_3.ets
 
 #26730
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
+07.expressions/11.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 
 #32421 Support Parametrized FixedArray in class method return type
-07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_0.ets
-07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_1.ets
+07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_0.ets
+07.expressions/11.method_call_expression/03.step_3_checking_method_modifiers/fixed_array_support_1.ets
 
 #26666 (cts #47 - bad array element type)
-07.expressions/11.function_call_expression/fixed_array_predefined_0.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_1.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_2.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_3.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_4.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_5.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_6.ets
-07.expressions/11.function_call_expression/fixed_array_predefined_7.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_0.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_1.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_2.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_3.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_4.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_5.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_6.ets
+07.expressions/12.function_call_expression/fixed_array_predefined_7.ets
 
 #746 specification unclear
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_0.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_1.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_2.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_3.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_4.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_5.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_cast_index_6.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_0.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_1.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_2.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_3.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_4.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_5.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_6.ets
 
 #28679
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_2.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_3.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_enum_index_4.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_2.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_3.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_4.ets
 
 #29719
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_0.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_1.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_access_2.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_0.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
-07.expressions/12.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_access_0.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_access_1.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_access_2.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_0.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
+07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
 
 #215 (new)
-07.expressions/13.chaining_operator/chop_record.ets
+07.expressions/14.chaining_operator/chop_record.ets
 
 #30939
-07.expressions/14.new_expressions/constructor_param_array_custom_2.ets
+07.expressions/15.new_expressions/constructor_param_array_custom_2.ets
 
 #31248
-07.expressions/14.new_expressions/constructor_param_array_gen_default_0.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_1.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_2.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_3.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_4.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_5.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_6.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_7.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_8.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_0.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_1.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_2.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_3.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_4.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_5.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_6.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_7.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_8.ets
-07.expressions/14.new_expressions/constructor_param_array_custom_n_0.ets
-07.expressions/14.new_expressions/constructor_param_array_custom_n_1.ets
-07.expressions/14.new_expressions/constructor_param_array_custom_n_2.ets
-07.expressions/14.new_expressions/constructor_param_array_custom_n_3.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_0.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_1.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_16.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_17.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_2.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_3.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_4.ets
-07.expressions/14.new_expressions/constructor_param_array_default_neg_5.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_custom_n_0.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_custom_n_1.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_custom_n_2.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_0.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_1.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_16.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_17.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_2.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_3.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_4.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_default_neg_5.ets
-07.expressions/14.new_expressions/constructor_param_array_gen_optional_lambda_neg.ets
-07.expressions/14.new_expressions/constructor_param_array_optional_lambda_neg.ets
-07.expressions/14.new_expressions/constructor_param_custom_n_0.ets
-07.expressions/14.new_expressions/constructor_param_custom_n_1.ets
-07.expressions/14.new_expressions/constructor_param_custom_n_2.ets
-07.expressions/14.new_expressions/constructor_param_custom_n_3.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_0.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_1.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_16.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_17.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_2.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_3.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_4.ets
-07.expressions/14.new_expressions/constructor_param_default_neg_5.ets
-07.expressions/14.new_expressions/constructor_param_gen_custom_n_0.ets
-07.expressions/14.new_expressions/constructor_param_gen_custom_n_1.ets
-07.expressions/14.new_expressions/constructor_param_gen_custom_n_2.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_0.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_1.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_16.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_17.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_2.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_3.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_4.ets
-07.expressions/14.new_expressions/constructor_param_gen_default_neg_5.ets
-07.expressions/14.new_expressions/constructor_param_gen_optional_lambda_neg.ets
-07.expressions/14.new_expressions/constructor_param_optional_lambda_neg.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_0.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_1.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_2.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_3.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_4.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_5.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_6.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_7.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_8.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_0.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_1.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_2.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_3.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_4.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_5.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_6.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_7.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_8.ets
+07.expressions/15.new_expressions/constructor_param_array_custom_n_0.ets
+07.expressions/15.new_expressions/constructor_param_array_custom_n_1.ets
+07.expressions/15.new_expressions/constructor_param_array_custom_n_2.ets
+07.expressions/15.new_expressions/constructor_param_array_custom_n_3.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_0.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_1.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_16.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_17.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_2.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_3.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_4.ets
+07.expressions/15.new_expressions/constructor_param_array_default_neg_5.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_custom_n_0.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_custom_n_1.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_custom_n_2.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_0.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_1.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_16.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_17.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_2.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_3.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_4.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_default_neg_5.ets
+07.expressions/15.new_expressions/constructor_param_array_gen_optional_lambda_neg.ets
+07.expressions/15.new_expressions/constructor_param_array_optional_lambda_neg.ets
+07.expressions/15.new_expressions/constructor_param_custom_n_0.ets
+07.expressions/15.new_expressions/constructor_param_custom_n_1.ets
+07.expressions/15.new_expressions/constructor_param_custom_n_2.ets
+07.expressions/15.new_expressions/constructor_param_custom_n_3.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_0.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_1.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_16.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_17.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_2.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_3.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_4.ets
+07.expressions/15.new_expressions/constructor_param_default_neg_5.ets
+07.expressions/15.new_expressions/constructor_param_gen_custom_n_0.ets
+07.expressions/15.new_expressions/constructor_param_gen_custom_n_1.ets
+07.expressions/15.new_expressions/constructor_param_gen_custom_n_2.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_0.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_1.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_16.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_17.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_2.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_3.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_4.ets
+07.expressions/15.new_expressions/constructor_param_gen_default_neg_5.ets
+07.expressions/15.new_expressions/constructor_param_gen_optional_lambda_neg.ets
+07.expressions/15.new_expressions/constructor_param_optional_lambda_neg.ets
 
 #31779 Params contravariance not checked for function type
-07.expressions/15.instanceof_expression/instanceof_func_2.ets
-07.expressions/15.instanceof_expression/instanceof_func_3.ets
-07.expressions/15.instanceof_expression/instanceof_func_10.ets
-07.expressions/15.instanceof_expression/instanceof_func_11.ets
-07.expressions/15.instanceof_expression/instanceof_func_17.ets
-07.expressions/15.instanceof_expression/instanceof_func_28.ets
-07.expressions/15.instanceof_expression/instanceof_func_31.ets
-07.expressions/15.instanceof_expression/instanceof_func_32.ets
-07.expressions/15.instanceof_expression/instanceof_func_33.ets
-07.expressions/15.instanceof_expression/instanceof_func_35.ets
-07.expressions/15.instanceof_expression/instanceof_func_36.ets
+07.expressions/16.instanceof_expression/instanceof_func_2.ets
+07.expressions/16.instanceof_expression/instanceof_func_3.ets
+07.expressions/16.instanceof_expression/instanceof_func_10.ets
+07.expressions/16.instanceof_expression/instanceof_func_11.ets
+07.expressions/16.instanceof_expression/instanceof_func_17.ets
+07.expressions/16.instanceof_expression/instanceof_func_28.ets
+07.expressions/16.instanceof_expression/instanceof_func_31.ets
+07.expressions/16.instanceof_expression/instanceof_func_32.ets
+07.expressions/16.instanceof_expression/instanceof_func_33.ets
+07.expressions/16.instanceof_expression/instanceof_func_35.ets
+07.expressions/16.instanceof_expression/instanceof_func_36.ets
 
 #730 (spec)
-07.expressions/15.instanceof_expression/instanceof_func_9.ets
+07.expressions/16.instanceof_expression/instanceof_func_9.ets
 
 #31822 Optional parameters count are not considered for function type subtyping
-07.expressions/15.instanceof_expression/instanceof_func_15.ets
-07.expressions/15.instanceof_expression/instanceof_func_16.ets
+07.expressions/16.instanceof_expression/instanceof_func_15.ets
+07.expressions/16.instanceof_expression/instanceof_func_16.ets
 
 #31808 Optional params in supertype should be optonal, if they are optional in subtype
-07.expressions/15.instanceof_expression/instanceof_func_18.ets
-07.expressions/15.instanceof_expression/instanceof_func_19.ets
+07.expressions/16.instanceof_expression/instanceof_func_18.ets
+07.expressions/16.instanceof_expression/instanceof_func_19.ets
 
 #31788 Default value for optional params
-07.expressions/15.instanceof_expression/instanceof_func_20.ets
-07.expressions/15.instanceof_expression/instanceof_func_21.ets
-07.expressions/15.instanceof_expression/instanceof_func_22.ets
-07.expressions/15.instanceof_expression/instanceof_func_23.ets
+07.expressions/16.instanceof_expression/instanceof_func_20.ets
+07.expressions/16.instanceof_expression/instanceof_func_21.ets
+07.expressions/16.instanceof_expression/instanceof_func_22.ets
+07.expressions/16.instanceof_expression/instanceof_func_23.ets
 
 #31831 Rest parameter checked with last, not with the same place
-07.expressions/15.instanceof_expression/instanceof_func_27.ets
+07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
 #31769 Tuples and derived types can't be used as instanceof rhs
-07.expressions/15.instanceof_expression/instanceof_func_38.ets
-07.expressions/15.instanceof_expression/instanceof_func_39.ets
-07.expressions/15.instanceof_expression/instanceof_func_40.ets
-07.expressions/15.instanceof_expression/instanceof_func_41.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_0.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_1.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_2.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_3.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_4.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_5.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_6.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_7.ets
-07.expressions/15.instanceof_expression/tuple_explicit_implicit_8.ets
+07.expressions/16.instanceof_expression/instanceof_func_38.ets
+07.expressions/16.instanceof_expression/instanceof_func_39.ets
+07.expressions/16.instanceof_expression/instanceof_func_40.ets
+07.expressions/16.instanceof_expression/instanceof_func_41.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_0.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_1.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_2.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_3.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_4.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_5.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_6.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
+07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
-07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_1.ets
-07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_2.ets
-07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_3.ets
-07.expressions/15.instanceof_expression/instanceof_parametrized_class_negative_4.ets
+07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_1.ets
+07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_2.ets
+07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_3.ets
+07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_4.ets
 
 #29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
-07.expressions/15.instanceof_expression/instanceof_neg_27.ets
-07.expressions/15.instanceof_expression/instanceof_neg_29.ets
-07.expressions/15.instanceof_expression/instanceof_neg_31.ets
-07.expressions/15.instanceof_expression/instanceof_neg_33.ets
-07.expressions/15.instanceof_expression/instanceof_neg_36.ets
-07.expressions/15.instanceof_expression/instanceof_neg_38.ets
+07.expressions/16.instanceof_expression/instanceof_neg_27.ets
+07.expressions/16.instanceof_expression/instanceof_neg_29.ets
+07.expressions/16.instanceof_expression/instanceof_neg_31.ets
+07.expressions/16.instanceof_expression/instanceof_neg_33.ets
+07.expressions/16.instanceof_expression/instanceof_neg_36.ets
+07.expressions/16.instanceof_expression/instanceof_neg_38.ets
 
 #32103
-07.expressions/15.instanceof_expression/instantiated_generic_type_0.ets
-07.expressions/15.instanceof_expression/instantiated_generic_type_1.ets
-07.expressions/15.instanceof_expression/instantiated_generic_type_2.ets
-07.expressions/15.instanceof_expression/instantiated_generic_type_3.ets
-07.expressions/15.instanceof_expression/instantiated_generic_type_4.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_0.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_1.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_3.ets
+07.expressions/16.instanceof_expression/instantiated_generic_type_4.ets
 
 #28907 Specifying type for too large integer number with as doesn't produce CTE
-07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
-07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
-07.expressions/16.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_2.ets
+07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
+07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
+07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_2.ets
 
 #30583
 07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
@@ -1991,7 +1991,7 @@
 31690 review after merge
 03.types/20.union_types/union_type_assignment_66.ets
 03.types/20.union_types/union_type_assignment_77.ets
-07.expressions/15.instanceof_expression/instanceof_neg_35.ets
+07.expressions/16.instanceof_expression/instanceof_neg_35.ets
 09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_17.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_20.ets
