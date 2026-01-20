@@ -277,15 +277,6 @@
 07.expressions/12.function_call_expression/fixed_array_predefined_6.ets
 07.expressions/12.function_call_expression/fixed_array_predefined_7.ets
 
-#746 specification unclear
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_0.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_1.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_2.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_3.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_4.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_5.ets
-07.expressions/13.indexing_expression/03.record_indexing_expression/record_cast_index_6.ets
-
 #28679
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_0.ets
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_enum_index_1.ets
@@ -451,9 +442,6 @@
 
 #29160
 07.expressions/35.constant_expression/check_enum/constant_number_conversion_5.ets
-
-#31475 False positive passed tests on runner-2
-09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
 
 #29971
 08.statements/04.local_declarations/post_declaration_func_n_1.ets
@@ -970,7 +958,6 @@
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_2.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_3.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_4.ets
-15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_5.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_7.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_8.ets
 15.semantic_rules/02.subtyping/05.subtyping_for_function_types/positive_function_nested_10.ets
@@ -2013,31 +2000,16 @@
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_4.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_0.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_1.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_12.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_15.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_17.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_26.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_28.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_29.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_8.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_2.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_11.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_13.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_16.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_18.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_20.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_5.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_2.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_16.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_20.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_25.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_27.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_9.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_10.ets
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_11.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_24.ets
