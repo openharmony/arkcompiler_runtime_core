@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +38,7 @@ class TestFilter:
         self.patterns = []
         for x in patterns:
             try:
-                self.patterns.append(re.compile(f'^{x.strip(to_strip)}$'))
+                self.patterns.append(re.compile(f'^{x.strip(to_strip)}$', re.IGNORECASE))
             except re.error as e:
                 die(True, f'RegExp error in [{x}]: {e}')
 
@@ -382,10 +382,10 @@ class TemplateVars:  # pylint: disable=invalid-name
         for b in parsed.benches:
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
-            if skip_tags and set.intersection(tags, skip_tags):
+            if skip_tags and set.intersection({t.lower() for t in tags}, {st.lower() for st in skip_tags}):
                 log.trace("`%s` skipped by tags: Unwanted: %s Tagged: %s", b.name, skip_tags, tags)
                 continue
-            if tags_filter and not set.intersection(tags, tags_filter):
+            if tags_filter and not set.intersection({t.lower() for t in tags}, {tf.lower() for tf in tags_filter}):
                 log.trace("`%s` skipped by tags: Wanted: %s Tagged: %s", b.name, tags_filter, tags)
                 continue
             # if no params fixtures will be [()]
