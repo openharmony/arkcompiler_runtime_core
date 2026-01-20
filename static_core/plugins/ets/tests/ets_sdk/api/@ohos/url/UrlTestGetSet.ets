@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -386,6 +386,34 @@ function testUrlSet002() {
 }
 
 
+function testUrlStringify001() {
+	let str ='https://admin:SecurePass123!@api.example.com:443/v2/resources/finance/transactions/2025Q4?id=10086&type=bond&region=CN&sort=amount_desc#payment-detail-789'
+    const uriObj3 = url.URL.parseURL(str);
+	let jsonStr = JSON.stringify(uriObj3.params);
+	let jsonElement = JSON.parseJsonElement(jsonStr);
+	arktest.assertEQ(jsonElement.getString("parentUrl"), 'https://admin:SecurePass123!@api.example.com/v2/resources/finance/transactions/2025Q4?id=10086&type=bond&region=CN&sort=amount_desc#payment-detail-789')
+}
+
+class A {
+	a:string;
+	b:int;
+	c:url.URL
+	constructor(aa:string, bb:int, cc:url.URL) {
+		this.a = aa;
+		this.b = bb;
+		this.c = cc;
+	}
+}
+function testUrlStringify002() {
+	let str ='https://admin:SecurePass123!@api.example.com:443/v2/resources/finance/transactions/2025Q4?id=10086&type=bond&region=CN&sort=amount_desc#payment-detail-789'
+    const uriObj3 = url.URL.parseURL(str);
+	let obj: A = new A("1", 1, uriObj3);
+	let jsonStr = JSON.stringify(obj);
+	let jsonElement = JSON.parseJsonElement(jsonStr);
+	arktest.assertEQ(jsonElement.getString("a"), '1')
+	arktest.assertEQ(jsonElement.getInteger("b"), 1)
+	arktest.assertEQ(jsonElement.getString("c"), 'https://admin:SecurePass123!@api.example.com/v2/resources/finance/transactions/2025Q4?id=10086&type=bond&region=CN&sort=amount_desc#payment-detail-789')
+}
 
 function main(): int {
 	let suite = new arktest.ArkTestsuite("URL UT tests");
@@ -412,6 +440,7 @@ function main(): int {
 	suite.addTest("testUrlKeys005", testUrlKeys005);
 	suite.addTest("testUrlSet001", testUrlSet001);
 	suite.addTest("testUrlSet002", testUrlSet002);
+	suite.addTest("testUrlStringify001", testUrlStringify001);
 
 	//passed
 	return suite.run();

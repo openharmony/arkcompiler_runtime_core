@@ -79,6 +79,11 @@ class JSONAPI {
     native static getJSONRename(field: reflect.InstanceField): string | undefined
 }
 
+// JsonSerializable provides a interface for external classes to override toJSON
+export interface JsonSerializable {
+    toJSON(): string
+}
+
 export class JSON {
 
     /**
@@ -960,6 +965,8 @@ class JSONWriter {
             this.writeESCompatRecord(temp)
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
+        } else if (obj instanceof JsonSerializable) {
+            this.buffer.append(obj.toJSON())
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer) {

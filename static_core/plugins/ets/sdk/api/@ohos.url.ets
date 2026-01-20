@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1563,7 +1563,7 @@ export namespace url {
     *
     * @class URL
     */
-    export class URL {
+    export class URL implements JsonSerializable {
 
         urlInner: InnerURL = new InnerURL();
 
@@ -1860,7 +1860,7 @@ export namespace url {
         *
         * @returns { string } Returns the serialized URL as a string.
         */
-        toJSON(): string {
+        override toJSON(): string {
             return this.cHref;
         }
 
@@ -2063,9 +2063,9 @@ export namespace url {
     */
     export class URLParams {
         parentUrl: URL | null = null;
-        head: ParamNode | undefined;
-        tail: ParamNode | undefined;
-        cacheMap: Map<string, int>;
+        private head: ParamNode | undefined;
+        private tail: ParamNode | undefined;
+        private cacheMap: Map<string, int>;
 
         /**
         * A parameterized constructor used to create an URLParams instance.
