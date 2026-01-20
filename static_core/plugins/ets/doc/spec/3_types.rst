@@ -1485,8 +1485,18 @@ Type ``bigint``
 |LANG| has the built-in ``bigint`` type that allows handling theoretically
 arbitrary large integers. Values of type ``bigint`` can hold numbers that are
 larger than the maximum value of type ``long``. Type ``bigint`` uses
-the arbitrary-precision arithmetic. Values of type ``bigint`` can be created
-from the following:
+the arbitrary-precision arithmetic. Type ``bigint`` does not belong to the
+hierarchy of :ref:`Numeric Types`.
+The consequences are as follows:
+
+- No implicit conversion between ``bigint`` type and numeric types.
+- Relational operators that use an operand of type ``bigint`` along with an
+  operand of another type are illegal. Attempting to use such a relational
+  operator produces a :index:`compile-time error`.
+- The equality expression with ``bigint`` against non-``bigint`` always returns
+  ``false``, and causes a compile-time warning.
+
+Values of type ``bigint`` can be created from the following:
 
 - *Bigint literals* (see :ref:`Bigint Literals`); or
 - Numeric type values, by using a call to the standard library class ``BigInt``

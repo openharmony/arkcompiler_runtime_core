@@ -6042,9 +6042,10 @@ Numeric Relational Operators
     frontend_status: Done
 
 Type of each operand in a ``numeric relational operator`` must be convertible
-to a numeric type (see :ref:`Numeric Types`) or to a ``bigint`` type
-(see :ref:`Type bigint`) as described in
-:ref:`Numeric Conversions for Relational and Equality Operands`.
+to a numeric type (see :ref:`Numeric Types`,
+:ref:`Numeric Conversions for Relational and Equality Operands`), or both operands
+must be of a ``bigint`` type (see :ref:`Type bigint`).
+.
 Otherwise, a :index:`compile-time error` occurs.
 
 Depending on the converted type of operands, a comparison is performed as follows:
@@ -6056,9 +6057,6 @@ Depending on the converted type of operands, a comparison is performed as follow
    or ``double``.
 
 -  Bigint comparison, if type of both operands is ``bigint``.
-
--  Bigint comparison against numeric, where one operand is of type ``bigint``,
-   and the other is of type ``numeric``.
 
 .. index::
    numeric relational operator
@@ -6101,8 +6099,9 @@ standard specification as follows:
    negative zero
    IEEE 754
 
-Based on the above presumption, the following rules apply to integer,
-floating-point, or ``bigint`` operands other than ``NaN``:
+Based on the presumption above, the following rules apply to integer
+operands, floating-point operands other than ``NaN``, and ``bigint``
+operands:
 
 -  The value produced by the operator ``'<'`` is ``true`` if the value of the
    left-hand-side operand is less than that of the right-hand-side operand.
@@ -6117,79 +6116,26 @@ floating-point, or ``bigint`` operands other than ``NaN``:
    left-hand-side operand is greater than or equal to that of the right-hand-side
    operand. Otherwise, the value is ``false``.
 
-A special case is where one operand in a relational operator is of type
-``bigint``, and the other operand is of type ``numeric``. In this case, not
-only the operand ``bigint`` must be compared to the result of the ``BigInt()``
-conversion of the numeric operand (thus truncating the fractional part), but
-the fractional part of the numeric operand must be also taken into account.
-
-Where the left operand *N* is of type ``bigint``, and the right operand *F* is
-of any numeric type, *R = F % 1* is the fractional part of *F*, and
-*I = BigInt(F - R)* is the integer part of *F* converted to ``bigint``, the
-following rules apply to the evaluation of the comparison result:
-
-- The value produced by *N < F* is ``true`` if **any** of the following is
-  ``true``:
-
-  1. *N < I*;
-  2. *N == I*, and *R > 0*.
-
-  Otherwise, the value is ``false``.
-
-- The value produced by *N* :math:`\leq` *F* is ``true`` if **any** of the
-  following is ``true``:
-
-  1. *N < I*;
-  2. *N == I*, and *R* :math:`\geq` *0*.
-
-  Otherwise, the value is ``false``.
-
-- The value produced by *N > F* is ``true`` if **any** of the following is
-  ``true``:
-
-  1. *N > I*;
-  2. *N == I*, and *R < 0*.
-
-  Otherwise, the value is ``false``.
-
-- The value produced by *N* :math:`\geq` *F* is ``true`` if **any** of the
-  following is ``true``:
-
-  1. *N > I*;
-  2. *N == I*, and *R* :math:`\leq` *0*.
-
-  Otherwise, the value is ``false``.
-
-The example below represents all cases where the comparison of type ``bigint``
-and type ``numeric`` operands produces the value ``true``:
+The behavior of comparison of ``numeric`` type operands and
+``bigint`` type operands is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
-   //// BigInt against numeric
-   //// Notations used in the comments
-   ////    'N' - Left operand of type bigint
-   ////    'F' - Right operand of type numeric
-   ////    'R' - fractional part of F, F%1
-   ////    'I' - integer part of 'F',  I=F-R
+   //// BigInt against any numeric - always a compile time error
+   console.log(1n < 34) // compile-time error
 
-   //  '<'
-   console.log(2n < 3)    // true, N<I
-   console.log(2n < 2.5)  // true, N==I, R>0
+   //// BigInt against BigInt
+   console.log(2n < 3n)  // true
+   console.log(2n >= 3n)  // false
 
-   // // '<='
-   console.log(2n <= 2)    // true, N<I
-   console.log(2n <= 2.5)  // true, N==I, R>0
-   console.log(2n <= 2.0)  // true, N==I, R==0
+   // // integer comparisons
+   console.log( 1 < -3) // false
+   console.log(-1 as long >= -1 as short) // true
 
-   //  '>'
-   console.log(-2n > -3)    // true, N>I
-   console.log(-2n > -2.5)  // true, N==I, R<0
-
-   //  '>='
-   console.log(-2n >= -3)    // true, N>I
-   console.log(-2n >= -2.5)  // true, N==I, R<0
-   console.log(-2n >= -2.50)  // true, N==I, R==0
+   // // floating-point comparisons
+   console.log(1 <= 1.0f)  // true
+   console.log(2 <= 1.0)   // false
 
 
 .. index::

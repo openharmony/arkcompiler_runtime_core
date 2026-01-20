@@ -296,19 +296,10 @@ Numeric Conversions for Relational and Equality Operands
      frontend_status: Done
 
 Relational and equality operators (see :ref:`Relational Expressions` and
-:ref:`Equality Expressions`) allow the following:
-
-- *Implicit conversion*, where operands are of ``numeric types`` but have
-  different sizes (see :ref:`Widening numeric conversions`), with their specific
-  details stated in :ref:`Specifics of Numeric Operator Contexts`; and
-- Conversion of operands with ``BigInt()`` function, where one operand type is
-  ``bigint`` and the other is an integer type (see :ref:`Integer Types and Operations`);
-- Conversion of the *integer* part of a floating-point operand with the function
-  ``BigInt()``, where one operand type is ``bigint`` and the other is a
-  floating-point type (see :ref:`Floating-Point Types and Operations`). In that
-  case, the fractional part of the floating-point operand is also taken into
-  account when evaluating a relational expression or an equality expression (see
-  :ref:`Numeric Relational Operators` and :ref:`Numeric Equality Operators`).
+:ref:`Equality Expressions`) allow *implicit conversion* of numeric type
+operands of different sizes (see :ref:`Widening numeric conversions`).
+Specific details of such conversions are discussed in
+:ref:`Specifics of Numeric Operator Contexts`.
   
 The situation for the relational operator ``'<'`` is represented in the example
 below:
@@ -318,13 +309,8 @@ below:
 
    let a: int = 1
    let b: long = 0
-   let c: bigint = -1n
 
    if (b<a) { // 'a' converted to 'long' prior to comparison
-      ;
-   }
-
-   if (c<b) { // 'b' converted to 'bigint' prior to comparison
       ;
    }
 
