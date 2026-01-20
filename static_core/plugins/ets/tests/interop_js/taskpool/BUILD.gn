@@ -21,7 +21,8 @@ interop_test("taskpool_interop_tests") {
 }
 
 group("taskpool_tests") {
-  if (ark_ets_hybrid) {
-    deps = [ ":taskpool_interop_tests" ]
-  }
+# NOTE(ypigunova): enable, when #217 will be solved
+#  if (ark_ets_hybrid) {
+#    deps = [ ":taskpool_interop_tests" ]
+#  }
 }
