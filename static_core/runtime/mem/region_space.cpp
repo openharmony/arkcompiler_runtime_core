@@ -108,7 +108,6 @@ TLAB *Region::CreateTLAB(size_t size)
     }
     ASSERT(End() > remainingSize);
     TLAB *tlab = GetInternalAllocator()->New<TLAB>(ToVoidPtr(End() - remainingSize), size);
-    tlab->SetZeroedFlag(HasFlag(RegionFlag::IS_ZEROED));
     tlabVector_->push_back(tlab);
     return tlab;
 }

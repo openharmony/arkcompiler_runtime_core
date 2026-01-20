@@ -28,6 +28,7 @@ CMCGCAdapter<LanguageConfig>::CMCGCAdapter(ObjectAllocatorBase *objectAllocator,
     : GCLang<LanguageConfig>(objectAllocator, settings)
 {
     this->SetType(GCType::CMC_GC);
+    this->SetTLABsSupported();
 }
 
 template <class LanguageConfig>
@@ -92,6 +93,12 @@ bool CMCGCAdapter<LanguageConfig>::WaitForGC([[maybe_unused]] GCTask task)
 template <class LanguageConfig>
 void CMCGCAdapter<LanguageConfig>::InitGCBits([[maybe_unused]] ObjectHeader *objHeader)
 {
+    constexpr ClassHelper::ClassWordSize STATIC_OBJECT_MASK = static_cast<ClassHelper::ClassWordSize>(
+        static_cast<uint64_t>(common_vm::LanguageType::STATIC)
+        << (common_vm::BaseStateWord::BASECLASS_WIDTH + common_vm::BaseStateWord::PADDING_WIDTH));
+    auto *classWord =
+        reinterpret_cast<ClassHelper::ClassWordSize *>(ToUintPtr(objHeader) + ObjectHeader::GetClassOffset());
+    *classWord |= STATIC_OBJECT_MASK;
 }
 
 template <class LanguageConfig>

@@ -77,7 +77,7 @@ bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool use
         isAdaptiveTlabSize_ = true;
     }
     // Now, USE_TLAB_FOR_ALLOCATIONS option is supported only for Generational GCs
-    ASSERT(IsGenerationalGCType(gcType) || (!useTlabForAllocations_));
+    ASSERT(IsGenerationalGCType(gcType) || gcType == GCType::CMC_GC || (!useTlabForAllocations_));
     return ret;
 }
 

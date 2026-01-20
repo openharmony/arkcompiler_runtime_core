@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,9 @@
 
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/object_helpers.h"
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "common_interfaces/mem/tlab.h"
+#endif
 
 namespace ark::mem {
 
@@ -25,8 +28,6 @@ namespace ark::mem {
 
 TLAB::TLAB(void *address, size_t size)
 {
-    prevTlab_ = nullptr;
-    nextTlab_ = nullptr;
     Fill(address, size);
     LOG_TLAB_ALLOCATOR(DEBUG) << "Construct a new TLAB at addr " << std::hex << address << " with size " << std::dec
                               << size;
@@ -38,7 +39,6 @@ void TLAB::Fill(void *address, size_t size)
     memoryStartAddr_ = address;
     memoryEndAddr_ = ToVoidPtr(ToUintPtr(address) + size);
     curFreePosition_ = address;
-    zeroed_ = false;
     ASAN_POISON_MEMORY_REGION(memoryStartAddr_, GetSize());
     LOG_TLAB_ALLOCATOR(DEBUG) << "Fill a TLAB with buffer at addr " << std::hex << address << " with size " << std::dec
                               << size;
@@ -118,6 +118,15 @@ bool TLAB::IsLive(const ObjectHeader *obj)
     ASSERT(ContainObject(obj));
     return ContainObject(obj);
 }
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+static_assert(TLAB::TLABStartAddrOffset() == common_vm::TLAB::TLABStartAddrOffset());
+static_assert(TLAB::TLABFreePointerOffset() == common_vm::TLAB::TLABAllocPtrOffset());
+static_assert(TLAB::TLABEndAddrOffset() == common_vm::TLAB::TLABEndAddrOffset());
+#endif
+
+// tlab cur addr and tlab end addr are neighbours in TLAB structure
+static_assert(TLAB::TLABFreePointerOffset() - TLAB::TLABEndAddrOffset() == sizeof(void *));
 
 #undef LOG_TLAB_ALLOCATOR
 

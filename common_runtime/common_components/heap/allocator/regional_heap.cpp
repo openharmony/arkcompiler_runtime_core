@@ -124,6 +124,26 @@ bool RegionalHeap::ShouldRetryAllocation(size_t& tryTimes) const
     }
 }
 
+TLAB* RegionalHeap::CreateTLAB()
+{
+    AllocationBuffer* allocBuffer = AllocationBuffer::GetOrCreateAllocBuffer();
+    RegionDesc* currRegion = allocBuffer->GetRegion();
+    if (currRegion != RegionDesc::NullRegion()) {
+        currRegion->SetRegionAllocPtr(allocBuffer->GetTLAB().allocPtr_);
+        currRegion->DetachTLAB();
+        this->HandleFullThreadLocalRegion<AllocBufferType::YOUNG>(currRegion);
+    }
+    RegionDesc* region = this->AllocateThreadLocalRegion<AllocBufferType::YOUNG>();
+    if (UNLIKELY_CC(region == nullptr)) {
+        return nullptr;
+    }
+
+    region->AttachTLAB(&allocBuffer->GetTLAB());
+    allocBuffer->SetRegion(region);
+
+    return &allocBuffer->GetTLAB();
+}
+
 uintptr_t RegionalHeap::AllocOldRegion()
 {
     return oldSpace_.AllocFullRegion();
@@ -288,6 +308,8 @@ void AllocationBuffer::ClearThreadLocalRegion()
 {
     if (LIKELY_CC(tlRegion_ != RegionDesc::NullRegion())) {
         RegionalHeap& heap = reinterpret_cast<RegionalHeap&>(Heap::GetHeap().GetAllocator());
+        tlRegion_->SetRegionAllocPtr(GetTLAB().allocPtr_);
+        tlRegion_->DetachTLAB();
         heap.HandleFullThreadLocalRegion<AllocBufferType::YOUNG>(tlRegion_);
         tlRegion_ = RegionDesc::NullRegion();
     }
@@ -363,7 +385,7 @@ HeapAddress AllocationBuffer::Allocate(size_t totalSize, AllocType allocType)
 
     if (allocType == AllocType::MOVEABLE_OBJECT) {
         if (LIKELY_CC(tlRegion_ != RegionDesc::NullRegion())) {
-            addr = tlRegion_->Alloc(totalSize);
+            addr = tlab_.Alloc(totalSize);
         }
     } else if (allocType == AllocType::MOVEABLE_OLD_OBJECT) {
         if (LIKELY_CC(tlOldRegion_ != RegionDesc::NullRegion())) {
@@ -386,6 +408,10 @@ HeapAddress AllocationBuffer::AllocateImpl(size_t totalSize, AllocType allocType
 
     // allocate new thread local region and try alloc
     if (allocType == AllocType::MOVEABLE_OBJECT) {
+        if (tlRegion_->IsTLABAttached()) {
+            tlRegion_->SetRegionAllocPtr(tlab_.allocPtr_);
+            tlRegion_->DetachTLAB();
+        }
         heapSpace.HandleFullThreadLocalRegion<AllocBufferType::YOUNG>(tlRegion_);
         tlRegion_ = RegionDesc::NullRegion();
 
@@ -395,7 +421,8 @@ HeapAddress AllocationBuffer::AllocateImpl(size_t totalSize, AllocType allocType
         }
 
         tlRegion_ = r;
-        return tlRegion_->Alloc(totalSize);
+        tlRegion_->AttachTLAB(&tlab_);
+        return tlab_.Alloc(totalSize);
     } else if (allocType == AllocType::MOVEABLE_OLD_OBJECT) {
         heapSpace.HandleFullThreadLocalRegion<AllocBufferType::OLD>(tlOldRegion_);
         tlOldRegion_ = RegionDesc::NullRegion();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace ark::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_TLAB_ALLOCATOR(level) LOG(level, ALLOC) << "TLAB: "
 
-#ifdef NDEBUG
+#if defined(NDEBUG) || defined(ARK_USE_COMMON_RUNTIME)
 static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = false;
 #else
 static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = true;
@@ -188,26 +188,6 @@ public:
 
     bool IsLive(const ObjectHeader *obj);
 
-    TLAB *GetNextTLAB()
-    {
-        return nextTlab_;
-    }
-
-    TLAB *GetPrevTLAB()
-    {
-        return prevTlab_;
-    }
-
-    void SetNextTLAB(TLAB *tlabPointer)
-    {
-        nextTlab_ = tlabPointer;
-    }
-
-    void SetPrevTLAB(TLAB *tlabPointer)
-    {
-        prevTlab_ = tlabPointer;
-    }
-
     void *GetStartAddr() const
     {
         return memoryStartAddr_;
@@ -282,24 +262,11 @@ public:
         return fillFraction;
     }
 
-    void SetZeroedFlag(bool val)
-    {
-        zeroed_ = val;
-    }
-
-    bool IsZeroed() const
-    {
-        return zeroed_;
-    }
-
 private:
-    TLAB *nextTlab_;
-    TLAB *prevTlab_;
     // NOTE(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.
     void *memoryStartAddr_ {nullptr};
     void *memoryEndAddr_ {nullptr};
     void *curFreePosition_ {nullptr};
-    bool zeroed_ = false;
 };
 
 #undef LOG_TLAB_ALLOCATOR

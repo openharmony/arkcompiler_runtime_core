@@ -21,6 +21,7 @@
 #include "common_components/mutator/thread_local.h"
 #include "common_components/heap/allocator/region_list.h"
 #include "common_components/common/mark_work_stack.h"
+#include "common_interfaces/mem/tlab.h"
 
 namespace common_vm {
 
@@ -68,9 +69,14 @@ public:
     RegionDesc* GetPreparedRegion() { return preparedRegion_.load(std::memory_order_acquire); }
 
     template <AllocBufferType type>
+    // CC-OFFNXT(G.FUD.06) solid logic
     inline void ClearRegion()
     {
         if constexpr (type == AllocBufferType::YOUNG) {
+            if (tlRegion_->IsTLABAttached()) {
+                tlRegion_->SetRegionAllocPtr(GetTLAB().allocPtr_);
+                tlRegion_->DetachTLAB();
+            }
             tlRegion_ = RegionDesc::NullRegion();
         } else if constexpr (type == AllocBufferType::OLD) {
             tlOldRegion_ = RegionDesc::NullRegion();
@@ -120,7 +126,7 @@ public:
     {
         if constexpr (allocType == AllocBufferType::YOUNG) {
             if (LIKELY_CC(tlRegion_ != RegionDesc::NullRegion())) {
-                return tlRegion_->Alloc(size);
+                return tlab_.Alloc(size);
             }
         } else if constexpr (allocType == AllocBufferType::OLD) {
             if (LIKELY_CC(tlOldRegion_ != RegionDesc::NullRegion())) {
@@ -142,6 +148,11 @@ public:
         return --refCount_ <= 0;
     }
 
+    TLAB &GetTLAB()
+    {
+        return tlab_;
+    }
+
     static constexpr size_t GetTLRegionOffset()
     {
         return MEMBER_OFFSET_CC(AllocationBuffer, tlRegion_);
@@ -150,6 +161,11 @@ public:
     static constexpr size_t GetTLOldRegionOffset()
     {
         return MEMBER_OFFSET_CC(AllocationBuffer, tlOldRegion_);
+    }
+
+    static constexpr size_t GetTLABOffset()
+    {
+        return MEMBER_OFFSET_CC(AllocationBuffer, tlab_);
     }
 
 private:
@@ -164,6 +180,8 @@ private:
     RegionDesc* tlOldRegion_ = RegionDesc::NullRegion();  // managed by old-space
     // only used in ToSpaceAllocate for GC copy
     RegionDesc* tlToRegion_ = RegionDesc::NullRegion();   // managed by to-space
+
+    TLAB tlab_ {};
 
     std::atomic<RegionDesc*> preparedRegion_ = { nullptr };
     // allocate objects which are exposed to runtime thus can not be moved.

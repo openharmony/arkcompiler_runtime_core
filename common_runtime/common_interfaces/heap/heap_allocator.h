@@ -20,6 +20,7 @@
 #include <cstdint>
 #include "common_interfaces/objects/base_state_word.h"
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/mem/tlab.h"
 
 namespace common_vm {
 using Address32 = uint32_t;
@@ -41,6 +42,8 @@ public:
     static Address AllocateOldRegion();
     static Address AllocateNonMovableRegion();
     static Address AllocateLargeRegion(size_t size);
+    static TLAB *CreateTLAB();
+    static size_t GetTLABMaxAllocSize();
 };
 }  // namespace common_vm
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_ALLOCATOR_H
