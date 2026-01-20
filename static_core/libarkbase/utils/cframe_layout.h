@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -326,6 +326,7 @@ enum class FrameKind { NONE, INTERPRETER, COMPILER };
 template <FrameKind KIND>
 struct BoundaryFrame;
 
+// Compiled to Interpreter
 template <>
 struct BoundaryFrame<FrameKind::INTERPRETER> {
     static constexpr ssize_t METHOD_OFFSET = 1;
@@ -334,11 +335,16 @@ struct BoundaryFrame<FrameKind::INTERPRETER> {
     static constexpr ssize_t CALLEES_OFFSET = -1;
 };
 
+// Interpreter to Compiled
+// Value at offset 0 is the FP of previous native frame, which is possibly different with that at FP_OFFSET below.
 template <>
 struct BoundaryFrame<FrameKind::COMPILER> {
     static constexpr ssize_t METHOD_OFFSET = -1;
-    static constexpr ssize_t FP_OFFSET = 0;
+    // Stores FP of previous managed frame.
+    static constexpr ssize_t FP_OFFSET = -2;
     static constexpr ssize_t RETURN_OFFSET = 1;
+    // NB: The actual offset value of callee-saved registers is -3.
+    // Set to -2 due to ARM64 alignment requirements.
     static constexpr ssize_t CALLEES_OFFSET = -2;
 };
 

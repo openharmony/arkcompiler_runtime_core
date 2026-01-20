@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,10 +116,8 @@ public:
     template <FrameKind KIND>
     static SlotType *GetPrevFromBoundary(void *ptr)
     {
-        // In current implementation fp must point to previous fp
-        static_assert(BoundaryFrame<KIND>::FP_OFFSET == 0);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return *(reinterpret_cast<SlotType **>(ptr));
+        return *(reinterpret_cast<SlotType **>(ptr) + BoundaryFrame<KIND>::FP_OFFSET);
     }
 
     static bool IsMethodInBoundaryFrame(const Method *method)

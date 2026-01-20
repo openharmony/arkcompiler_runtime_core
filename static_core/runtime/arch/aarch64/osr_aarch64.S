@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,15 +212,15 @@ OsrEntryAfterIFrame:
     CFI_REL_OFFSET(fp, 0)
     stp x0, x22, [sp, #-16]!
     CFI_ADJUST_CFA_OFFSET(16)
+    CFI_REL_OFFSET(x22, 8)
 
     // Create I2C bridge
     ldr x16, [x0, #FRAME_PREV_FRAME_OFFSET]
-    stp x16, lr, [sp, #-16]!
+    stp xzr, lr, [sp, #-16]!
     CFI_ADJUST_CFA_OFFSET(16)
-    mov x16, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    sub sp, sp, #16
+    mov x17, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    stp x16, x17, [sp, #-16]!
     CFI_ADJUST_CFA_OFFSET(16)
-    str x16, [sp, #8]
 
     // Save pointer to I2C bridge in temp register
     add x16, sp, #16
@@ -285,6 +285,7 @@ OsrEntryAfterIFrame:
 
     // Restore interpreter frame and x22 register which held stack parameters size
     ldp x16, x22, [sp], #16
+    CFI_RESTORE(x22)
 
     // Call SetOsrResult for writing the result to the interpreter frame's accumulator
     mov x1, x0

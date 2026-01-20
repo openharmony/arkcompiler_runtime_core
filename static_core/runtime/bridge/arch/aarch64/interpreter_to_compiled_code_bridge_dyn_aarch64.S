@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,29 +24,32 @@
 .type InterpreterToCompiledCodeBridgeDyn, %function
 InterpreterToCompiledCodeBridgeDyn:
     CFI_STARTPROC
-    CFI_DEF_CFA(sp, 0)
 
-    stp x1, lr, [sp, -16]!
-    CFI_ADJUST_CFA_OFFSET(2 * 8)
+    stp fp, lr, [sp, #-16]!
+    CFI_ADJUST_CFA_OFFSET(16)
+    CFI_REL_OFFSET(fp, 0)
     CFI_REL_OFFSET(lr, 8)
-    stp x19, THREAD_REG, [sp, -32]!
-    CFI_ADJUST_CFA_OFFSET(4 * 8)
-    CFI_REL_OFFSET(THREAD_REG, 8)
-    CFI_REL_OFFSET(x19, 0)
-    str fp, [sp, 16]
-    CFI_REL_OFFSET(fp, 16)
-    add fp, sp, 32
-    CFI_DEF_CFA(fp, (2 * 8))
-    mov THREAD_REG, x3
+    mov fp, sp
+    CFI_DEF_CFA_REGISTER(fp)
 
     // According to the current frame kind set the bridge type
-    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w3, #0x1
-    mov w4, #BYPASS_BRIDGE
-    mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    csel w3, w4, w5, ne
-    str x3, [sp, #24]
+    ldrb w4, [x3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    tst w4, #0x1
+    mov w5, #BYPASS_BRIDGE
+    mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    csel w4, w5, w6, ne
+
+    // x1 - iframe, x4 - bridge tag (see above)
+    stp x1, x4, [sp, #-16]!
+
+    // x19 - callee saved register used in this bridge
+    stp x19, THREAD_REG, [sp, #-16]!
+    CFI_REL_OFFSET(x19, -32)
+    CFI_REL_OFFSET(THREAD_REG, -24)
+
     // sp should be 16 byte aligned.
+
+    mov THREAD_REG, x3
 
     // setup regs as follow
     // x9 - frame.vregs, x10 - insn_ptr, x12 - method, x15 - acc
@@ -93,13 +96,13 @@ InterpreterToCompiledCodeBridgeDyn:
 
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
-    sub sp, fp, 32
-    ldp x19, THREAD_REG, [sp], #16
+    ldp x19, THREAD_REG, [fp, #-32]
     CFI_RESTORE(THREAD_REG)
     CFI_RESTORE(x19)
-    ldr lr, [sp, #24]
+
+    mov sp, fp
+    ldp fp, lr, [sp], #16
     CFI_RESTORE(lr)
-    ldr fp, [sp], #32
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, 0)
     ret
@@ -115,29 +118,32 @@ InterpreterToCompiledCodeBridgeDyn:
 .type InvokeCompiledCodeWithArgArrayDyn, %function
 InvokeCompiledCodeWithArgArrayDyn:
     CFI_STARTPROC
-    CFI_DEF_CFA(sp, 0)
 
-    stp x2, lr, [sp, -16]!
-    CFI_ADJUST_CFA_OFFSET(2 * 8)
+    stp fp, lr, [sp, #-16]!
+    CFI_ADJUST_CFA_OFFSET(16)
+    CFI_REL_OFFSET(fp, 0)
     CFI_REL_OFFSET(lr, 8)
-    stp x19, THREAD_REG, [sp, -32]!
-    CFI_ADJUST_CFA_OFFSET(4 * 8)
-    CFI_REL_OFFSET(THREAD_REG, 8)
-    CFI_REL_OFFSET(x19, 0)
-    str fp, [sp, 16]
-    CFI_REL_OFFSET(fp, 16)
-    add fp, sp, 32
-    CFI_DEF_CFA(fp, (2 * 8))
-    mov THREAD_REG, x4
+    mov fp, sp
+    CFI_DEF_CFA_REGISTER(fp)
 
     // According to the current frame kind set the bridge type
-    ldrb w4, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w4, #0x1
-    mov w5, #BYPASS_BRIDGE
-    mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    csel w4, w5, w6, ne
-    str x4, [sp, 24]
+    ldrb w5, [x4, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    tst w5, #0x1
+    mov w6, #BYPASS_BRIDGE
+    mov w7, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    csel w5, w6, w7, ne
+
+    // x2 - iframe, x5 - bridge tag (see above)
+    stp x2, x5, [sp, #-16]!
+
+    // x19 - callee saved register used in this bridge
+    stp x19, THREAD_REG, [sp, #-16]!
+    CFI_REL_OFFSET(x19, -32)
+    CFI_REL_OFFSET(THREAD_REG, -24)
+
     // sp should be 16 byte aligned.
+
+    mov THREAD_REG, x4
 
     // setup regs as follow
     // x0       <- ark::Method*
@@ -168,17 +174,17 @@ InvokeCompiledCodeWithArgArrayDyn:
 .Linvoke_:
     // invoke the entrypoint
     blr lr
-    
+
     // sp may be modified by call
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
-    sub sp, fp, 32
-    ldp x19, THREAD_REG, [sp], #16
+    ldp x19, THREAD_REG, [fp, #-32]
     CFI_RESTORE(THREAD_REG)
     CFI_RESTORE(x19)
-    ldr lr, [sp, #24]
+
+    mov sp, fp
+    ldp fp, lr, [sp], #16
     CFI_RESTORE(lr)
-    ldr fp, [sp], #32
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, 0)
     ret
