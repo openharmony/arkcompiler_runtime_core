@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-{% for fd in function_decls %}
+{% for c in cases %}
 /*---
 desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
-tags: [compile-only, negative]
-expected_out: [{{fd.expected_out}}]
+    In an implicit instantiation, type arguments are not specified explicitly.
+    Such type arguments are inferred from the context the generic is referred in.
+params: function
 ---*/
 
-{{fd.decl}}
+{{c.decl}}
 
 function main() {
-    {{fd.call|indent}}
+    {{c.use|indent}}
 }
 {% endfor %}

@@ -30,6 +30,10 @@ params: {{c.case}}
 class SomeType {}
 class OtherType {}
 
-function foo<{{c.case}}>() {}
+function foo<{{c.parametrize}}>({{c.params or ''}}) {}
+
+function main() {
+    {{c.main or ''|indent}}
+}
 
 {% endfor %}

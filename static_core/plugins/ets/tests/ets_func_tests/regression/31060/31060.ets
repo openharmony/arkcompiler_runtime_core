@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,22 @@
  * limitations under the License.
  */
 
-{% for fd in function_decls %}
 /*---
-desc: >-
-  An omitted function or method return type can be inferred from the function or the method body.
+desc: Issue 31060. [FE] es2panda crash. Critical issue when accessing extension functions as properties without invocation.
 tags: [compile-only, negative]
-expected_out: [{{fd.expected_out}}]
+expected_out: "Semantic error ESE655063: Generic function bar requires explicit type arguments when used as a value."
 ---*/
 
-{{fd.decl}}
+function foo<T>(this: T, functor: (this: T)=>this): void {
+    console.log(this)
+}
+
+function bar<T>(this: T): T {
+    console.log(this)
+    return this
+}
 
 function main() {
-    {{fd.call|indent}}
+    let x: int = 5
+    x.foo(x.bar)
 }
-{% endfor %}

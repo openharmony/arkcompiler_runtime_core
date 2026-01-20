@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ class Pos<T extends number> {
 }
 
 function main() {
+    new Pos<number>(1)
     new Pos<number>(new Number(1))
     new Pos<double>(1.0)
 }
