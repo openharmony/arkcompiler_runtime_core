@@ -2305,3 +2305,179 @@
   properties: []
   signature:
     - uint8_t             # boolean
+- name: ArrayInt8CopyWithin
+  entrypoint: ArrayInt8CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayInt16CopyWithin
+  entrypoint: ArrayInt16CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayInt32CopyWithin
+  entrypoint: ArrayInt32CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayBigInt64CopyWithin
+  entrypoint: ArrayBigInt64CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayUInt8CopyWithin
+  entrypoint: ArrayUInt8CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayUInt16CopyWithin
+  entrypoint: ArrayUInt16CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayUInt32CopyWithin
+  entrypoint: ArrayUInt32CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayBigUInt64CopyWithin
+  entrypoint: ArrayBigUInt64CopyWithin
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+
+- name: EtsEscompatInt8ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt8ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatInt16ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt16ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatInt32ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt32ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatBigInt64ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatBigInt64ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatUInt8ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt8ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatUInt16ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt16ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatUInt32ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt32ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: EtsEscompatBigUInt64ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatBigUInt64ArrayCopyWithinImpl
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t

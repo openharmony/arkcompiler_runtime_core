@@ -1,5 +1,5 @@
 # plugin typed_arrays
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 include_relative 'common.irt'
 include_relative '../../../irtoc/scripts/common.irt'
 include_relative '../../../irtoc/scripts/string_helpers.irt'
+include_relative '../../../irtoc/scripts/array_helpers.irt'
 
 module Constants
   ARRAY_BUFFER_CLASS_SIZE = "cross_values::GetArrayBufferClassSize(GetArch())"
@@ -337,3 +338,58 @@ GenerateTypedArraySetValuesFromArray('Uint8', 'u8', 'i32', 1, "unsigned")
 GenerateTypedArraySetValuesFromArray('Uint16', 'u16', 'i32', 2, "unsigned")
 GenerateTypedArraySetValuesFromArray('Uint32', 'u32', 'i32', 4, "unsigned")
 GenerateTypedArraySetValuesFromArray('BigUint64', 'u64', '', 8, "unsigned")
+
+def GenerateArrayCopyWithin(name, uname, type, scale)
+    signed = (['i8', 'i16', 'i32', 'i64', 'f32', 'f64'].include?(type) ? true : false)
+    function("Array#{name}CopyWithin".to_sym,
+            params: {arr: 'ref', dst_start: 'u32', src_start: 'u32', count: 'u32'},
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [:FastPath]) {
+
+        if Options.arch == :arm32
+          Intrinsic(:UNREACHABLE).Terminator.void
+          next
+        end
+
+        if signed
+          buffer := LoadI(arr).Imm(Constants::TYPED_ARRAY_BUFFER_OFFSET).ref
+        else
+          buffer := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BUFFER_OFFSET).ref
+        end
+
+        bufferData := Cast(LoadI(buffer).Imm(Constants::ARRAY_BUFFER_DATA_OFFSET).ref).ptr
+        If(bufferData, 0).EQ.Unlikely {
+          Goto(:SlowPathEntrypoint)
+        }
+
+        if signed
+          byteOffsetF64 := LoadI(arr).Imm(Constants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
+          byteOffset := Cast(byteOffsetF64).u32
+        else
+          byteOffset := LoadI(arr).Imm(Constants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).u32
+        end
+
+        arrayDataOffset := AddI(byteOffset).Imm(Constants::ARRAY_DATA_OFFSET).u32
+        addr := Add(bufferData, Cast(arrayDataOffset).word).ptr
+        do_array_copy_bare(1 << scale, scale, addr, dst_start, src_start, count, arr)
+        Goto(:End)
+      Label(:SlowPathEntrypoint)
+        ep_offset = get_entrypoint_offset('ETS_ESCOMPAT_' + uname + '_ARRAY_COPY_WITHIN_IMPL_USUAL')
+        ep_name = 'EtsEscompat' + name + 'ArrayCopyWithinImplUsualBridge'
+        Intrinsic(:SLOW_PATH_ENTRY, arr, dst_start, src_start, count).AddImm(ep_offset).MethodAsImm(ep_name).Terminator.void
+        Intrinsic(:UNREACHABLE).Terminator.ref if defines.DEBUG
+     Label(:End)
+     ReturnVoid().void
+  }
+end
+
+GenerateArrayCopyWithin('Int8', 'INT8', 'i8', 0)
+GenerateArrayCopyWithin('Int16', 'INT16', 'i16', 1)
+GenerateArrayCopyWithin('Int32', 'INT32', 'i32', 2)
+GenerateArrayCopyWithin('BigInt64', 'BIG_INT64', 'i64', 3)
+
+GenerateArrayCopyWithin('UInt8', 'U_INT8', 'u8', 0)
+GenerateArrayCopyWithin('UInt16', 'U_INT16', 'u''u16', 1)
+GenerateArrayCopyWithin('UInt32', 'U_INT32', 'u32', 2)
+GenerateArrayCopyWithin('BigUInt64', 'BIG_U_INT64', 'u64', 3)

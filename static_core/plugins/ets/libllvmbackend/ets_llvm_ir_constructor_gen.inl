@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "plugins/ets/compiler/compiler_constants_inl.h"
+#include "plugins/ets/compiler/compiler_intrinsic_id_mapping_inl.h"
 
 bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 {
@@ -44,6 +45,16 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
                         GetInputValue(inst, 4)});
     // Fastpath doesn't return anything, but result is in 'dst' arg, which is second
     ValueMapAdd(inst, GetInputValue(inst, 1));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitArrayCopyWithin(Inst *inst)
+{
+    auto eid = GetEntrypointByIntrinsicId(inst->CastToIntrinsic()->GetIntrinsicId());
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1),
+                                   GetInputValue(inst, 2), GetInputValue(inst, 3)});
+    // Fastpath doesn't return anything, but result is in 'dst' arg, which is second
+    ValueMapAdd(inst, call);
     return true;
 }
 

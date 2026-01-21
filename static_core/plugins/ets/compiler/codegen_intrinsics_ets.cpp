@@ -19,6 +19,7 @@
 #include "runtime/include/coretypes/array.h"
 #include "libarkbase/utils/regmask.h"
 #include "plugins/ets/compiler/compiler_constants_inl.h"
+#include "plugins/ets/compiler/compiler_intrinsic_id_mapping_inl.h"
 
 namespace ark::compiler {
 
@@ -922,6 +923,13 @@ void Codegen::CreateStringToLocaleUpperCase(IntrinsicInst *inst, [[maybe_unused]
     ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
     CallFastPath(inst, EntrypointId::STRING_TO_LOCALE_UPPER_CASE_TLAB, dst, {}, src[FIRST_OPERAND],
                  src[SECOND_OPERAND]);
+}
+
+void Codegen::CreateArrayCopyWithin(IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    auto entrypoint = GetEntrypointByIntrinsicId(inst->GetIntrinsicId());
+    CallFastPath(inst, entrypoint, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                 src[FOURTH_OPERAND]);
 }
 
 }  // namespace ark::compiler
