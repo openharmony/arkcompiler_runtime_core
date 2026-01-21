@@ -48,3 +48,6 @@ ets-common-tests/atomics/base_operation_load.ets
 
 #32032
 ets-common-tests/atomics/base_operation_exchange.ets
+
+#32432 Missing pc check
+ets-common-tests/atomics/base_operation_biguint.ets

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,32 @@
 #include "common.h"
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
+#include "optimizer/ir/runtime_interface.h"
 
 namespace ark::bytecodeopt {
+
+#ifndef NDEBUG
+static bool IsStaticAccIndexDefined(const compiler::Inst *inst)
+{
+    if (!inst->IsCallOrIntrinsic()) {
+        return true;
+    }
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && !inst->IsCall()) {
+        return true;
+    }
+    if (inst->IsIntrinsic() && inst->CastToIntrinsic()->GetIntrinsicId() ==
+                                   inst->GetBasicBlock()->GetGraph()->GetRuntime()->GetCompilerNullcheckIntrinsicId()) {
+        return true;
+    }
+    return false;
+}
+#endif  // !NDEBUG
 
 uint8_t AccReadIndex(const compiler::Inst *inst)
 {
     // For calls we cannot tell static index for acc position, thus
     // ensure that we don't invoke this for calls
-    ASSERT(!inst->IsCallOrIntrinsic() || (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && !inst->IsCall()));
-
+    ASSERT(IsStaticAccIndexDefined(inst));
     switch (inst->GetOpcode()) {
         case compiler::Opcode::LoadArray:
         case compiler::Opcode::StoreObject:
@@ -36,6 +53,12 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
         default: {
             if (inst->IsIntrinsic() && inst->IsAccRead()) {
                 if (inst->GetBasicBlock()->GetGraph()->IsAbcKit()) {
+                    ASSERT(inst->GetInputsCount() >= 1U);
+                    return 0U;
+                }
+                ASSERT(inst->CastToIntrinsic()->GetIntrinsicId() != compiler::RuntimeInterface::IntrinsicId::INVALID);
+                if (inst->CastToIntrinsic()->GetIntrinsicId() ==
+                    inst->GetBasicBlock()->GetGraph()->GetRuntime()->GetCompilerNullcheckIntrinsicId()) {
                     ASSERT(inst->GetInputsCount() >= 1U);
                     return 0U;
                 }

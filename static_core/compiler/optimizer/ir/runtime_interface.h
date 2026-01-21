@@ -1537,6 +1537,11 @@ public:
         return IntrinsicId::INVALID;
     }
 
+    virtual IntrinsicId GetCompilerNullcheckIntrinsicId() const
+    {
+        return IntrinsicId::INVALID;
+    }
+
     virtual uintptr_t GetIntrinsicAddress([[maybe_unused]] bool runtimeCall, [[maybe_unused]] SourceLanguage lang,
                                           [[maybe_unused]] IntrinsicId unused) const
     {
