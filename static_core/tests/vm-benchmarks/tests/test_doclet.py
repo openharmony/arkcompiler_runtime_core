@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -581,3 +581,46 @@ def test_templates():
                 template = generator.get_template(tpl)
                 tpl_values = asdict(v)
                 template.render(**tpl_values)
+
+
+def test_tag_len_limit():
+    src = '''
+    /**
+    * @State
+    */
+    class X {
+    /**
+    * @Benchmark
+    * @Tags ShortTag, Max_______Len____Tag
+    */
+    public one(): int {
+    }
+    /**
+    * @Benchmark
+    * @Tags OtherShortTag, Too_Long____Len____Tag
+    */
+    public two(): bool {
+    }
+    /**
+    * @Benchmark
+    * @Tags LastShortTag
+    */
+    public three(): bool {
+    }
+    /**
+    * @Benchmark
+    * @Tags Last_Too_Long____Len____Tag
+    */
+    public four(): bool {
+    }
+    '''
+    test = TestCase()
+    ets = ets_mod.Lang()
+    parser = DocletParser.create(src, ets).parse()
+    
+    with patch.object(sys, 'argv', 'vmb gen --lang ets blah'.split()):
+        args = Args()
+        tpl_vars = list(TemplateVars.params_from_parsed('', parser.state, args))
+        test.assertEqual(len(tpl_vars), 2)
+        test.assertEqual(tpl_vars[0].tags, {"ShortTag", "Max_______Len____Tag"})
+        test.assertEqual(tpl_vars[1].tags, {"LastShortTag"})

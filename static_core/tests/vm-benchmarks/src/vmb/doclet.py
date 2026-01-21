@@ -360,6 +360,28 @@ class TemplateVars:  # pylint: disable=invalid-name
     config: Dict[str, Any] = field(default_factory=dict)
     aot_opts: str = ''
     disable_inlining: bool = False
+    max_tag_len = 20
+
+    @classmethod
+    def validate_tags(cls,
+                      bench_name: str,
+                      tags_filter: list[str],
+                      skip_tags: set[str],
+                      tags: set[str]
+                      ) -> bool:
+        if skip_tags and set.intersection({t.lower() for t in tags}, {st.lower() for st in skip_tags}):
+            log.trace("`%s` skipped by tags: Unwanted: %s Tagged: %s", bench_name, skip_tags, tags)
+            return False
+        if tags_filter and not set.intersection({t.lower() for t in tags}, {tf.lower() for tf in tags_filter}):
+            log.trace("`%s` skipped by tags: Wanted: %s Tagged: %s", bench_name, tags_filter, tags)
+            return False
+        if any(len(t) > cls.max_tag_len for t in tags):
+            log.trace(
+                "`%s` skipped by tag: Too Long: %s Tagged: %s",
+                bench_name, next(t for t in tags if len(t) > cls.max_tag_len), tags
+            )
+            return False
+        return True
 
     @classmethod
     def params_from_parsed(cls,
@@ -382,11 +404,7 @@ class TemplateVars:  # pylint: disable=invalid-name
         for b in parsed.benches:
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
-            if skip_tags and set.intersection({t.lower() for t in tags}, {st.lower() for st in skip_tags}):
-                log.trace("`%s` skipped by tags: Unwanted: %s Tagged: %s", b.name, skip_tags, tags)
-                continue
-            if tags_filter and not set.intersection({t.lower() for t in tags}, {tf.lower() for tf in tags_filter}):
-                log.trace("`%s` skipped by tags: Wanted: %s Tagged: %s", b.name, tags_filter, tags)
+            if not cls.validate_tags(bench_name=b.name, tags=tags, tags_filter=tags_filter, skip_tags=skip_tags):
                 continue
             # if no params fixtures will be [()]
             fix_id = 0
