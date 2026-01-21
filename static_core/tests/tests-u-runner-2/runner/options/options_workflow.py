@@ -209,8 +209,8 @@ class WorkflowOptions(IOptions):
                 new_env[env] = new_env_var
             step_content['env'] = new_env
         step = Step(step_name, step_content)
-        if step.enabled and step.step_kind != StepKind.GTEST_RUNNER:
-            if not step.executable_path_exists():
+        if step.enabled:
+            if not step.executable_path_exists() and step.step_kind != StepKind.GTEST_RUNNER:
                 raise FileNotFoundException(f"Step executable path is empty or incorrect: {step.executable_path}"
                                             f"\nCheck step '{step_name}' in the '{self.name}' workflow")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,9 +23,10 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
-from runner.common_exceptions import InvalidConfiguration
+from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.options.cli_options import get_args
 from runner.options.config import Config
+from runner.options.step import StepKind
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils
@@ -41,6 +42,7 @@ class TestStep:
 
 COMPILER_STEP = "compiler"
 RUNTIME_STEP = "runtime"
+GTEST_RUNNER = "gtest-runner"
 INTERMEDIATE = "intermediate"
 
 
@@ -420,6 +422,8 @@ class TestStepsTest(TestCase):
         with patch('sys.argv', argv):
 
             self.assertRaises(InvalidConfiguration, self.prepare)
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     def check_steps(self, steps: list[TestStep], expected_types: list[str]) -> None:
         actual_types = [step.type for step in steps]
@@ -440,3 +444,50 @@ class TestStepsTest(TestCase):
                     values = [value[value.find(INTERMEDIATE):] for value in arg_value.split(":")
                               if INTERMEDIATE in value]
                     self.assertListEqual(values, expected_args)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @test_utils.parametrized_test_cases([
+        (["runner.sh", "workflow_bad_executables", "test_suite", "--test-file", "simple1.ets"],),
+        (["runner.sh", "workflow_bad_executables", "test_suite", "--enable-es2panda", "false",
+          "--test-file", "simple1.ets"],),
+    ])
+    def test_check_step_executable_path(self, argv: Callable) -> None:
+        """
+        case1: compiler step has incorrect test executable path
+        case2: compile step is disabled - it will be skipped, the runtime step will raise exception
+         as there is no executable-path in the step
+        """
+        with patch('sys.argv', argv):
+            self.assertRaises(FileNotFoundException, self.prepare)
+
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch('sys.argv', ["runner.sh", "workflow_bad_executables", "test_suite", "--enable-es2panda", "false",
+                        "--enable-runtime", "false", "--test-file", "simple1.ets"])
+    def test_skip_executable_path_check_gtest(self) -> None:
+        """
+        workflow has 3 steps, the first two are disabled, the 3rd step is gtest runner without executable path
+        the check of the correct executable path is skipped for step.kind == gtest_runner
+        """
+        result = self.prepare()[0]
+        steps = result.runtime_steps
+
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].step_kind, StepKind.GTEST_RUNNER)
+
+        # clear up
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
