@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,44 +269,6 @@ TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_007)
 
     ani_method fooMethodOverride {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "foo", "iii:i", &fooMethodOverride), ANI_OK);
-    ASSERT_NE(fooMethodOverride, nullptr);
-
-    ani_int result = 0;
-    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethod, &result, 0, 1), ANI_OK);
-    ASSERT_EQ(result, 42U);
-
-    ASSERT_EQ(env_->Object_CallMethod_Int(object, fooMethodOverride, &result, 0, 1, 2U), ANI_OK);
-    ASSERT_EQ(result, 43U);
-}
-
-TEST_F(ClassBindNativeMethodsTest, class_bindNativeMethods_combine_scenes_008)
-{
-    ani_class cls {};
-    const std::string clsName = std::string(MODULE_NAME).append(".TestA006");
-    ASSERT_EQ(env_->FindClass(clsName.c_str(), &cls), ANI_OK);
-    ASSERT_NE(cls, nullptr);
-
-    std::array methods = {
-        ani_native_function {"foo1", "ii:i", reinterpret_cast<void *>(NativeMethodsFooNative)},
-        ani_native_function {"foo2", "iii:i", reinterpret_cast<void *>(NativeMethodsFooNativeOverride)},
-    };
-    ASSERT_EQ(env_->Class_BindStaticNativeMethods(cls, methods.data(), methods.size()), ANI_NOT_FOUND);
-    ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
-
-    ani_method constructorMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &constructorMethod), ANI_OK);
-    ASSERT_NE(constructorMethod, nullptr);
-
-    ani_object object {};
-    ASSERT_EQ(env_->Object_New(cls, constructorMethod, &object), ANI_OK);
-    ASSERT_NE(object, nullptr);
-
-    ani_method fooMethod {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo1", "ii:i", &fooMethod), ANI_OK);
-    ASSERT_NE(fooMethod, nullptr);
-
-    ani_method fooMethodOverride {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "foo2", "iii:i", &fooMethodOverride), ANI_OK);
     ASSERT_NE(fooMethodOverride, nullptr);
 
     ani_int result = 0;

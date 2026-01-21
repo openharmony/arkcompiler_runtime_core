@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,16 +28,6 @@ static ani_int Sum([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
 }
 
 static ani_int SumA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
-{
-    return a + b + c;
-}
-
-static ani_int Foo([[maybe_unused]] ani_env *env, ani_int a, ani_int b)
-{
-    return a + b;
-}
-
-static ani_int FooA([[maybe_unused]] ani_env *env, ani_int a, ani_int b, ani_int c)
 {
     return a + b + c;
 }
@@ -135,23 +125,6 @@ TEST_F(NamespaceBindNativeFunctionsTest, function_not_found)
         ani_native_function {"sumX", "ii:i", reinterpret_cast<void *>(Sum)},
         ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
     };
-    ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_NOT_FOUND);
-}
-
-TEST_F(NamespaceBindNativeFunctionsTest, new_overload_bind)
-{
-    ani_namespace ns {};
-    const std::string nsName = std::string(MODULE_NAME).append(".ops");
-    ASSERT_EQ(env_->FindNamespace(nsName.c_str(), &ns), ANI_OK);
-    ASSERT_NE(ns, nullptr);
-
-    const char *concatSignature = "C{std.core.String}C{std.core.String}:C{std.core.String}";
-    std::array functions = {
-        ani_native_function {"foo", "ii:i", reinterpret_cast<void *>(Foo)},
-        ani_native_function {"foo", "iii:i", reinterpret_cast<void *>(FooA)},
-        ani_native_function {"concat", concatSignature, reinterpret_cast<void *>(Concat)},
-    };
-    // Note: will set as ANI_OK when FE #ICIITH solved
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_NOT_FOUND);
 }
 

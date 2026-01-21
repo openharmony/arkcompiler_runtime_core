@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// Note: cannot invoke native foo in new overload until FE #ICIIPM solved
-export native function foo1(a: int, b: int): int;
-export native function foo2(a: int, b: int, c: int): int;
-export overload foo {foo1, foo2}
 
 export native function sum(a: int, b: int): int;
 export native function sum(a: int, b: int, c: int): int;
