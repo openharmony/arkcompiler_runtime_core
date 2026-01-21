@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -49,19 +49,22 @@
 
   function getRecord(): Record<Keys, int> {
     result = result + "getRecord "
-    {{c.record|indent}}
+    if ({{c.record or 'false'}})
+        throw new Error("Any error to break assignment")
     return map
   }
 
   function getIndex(ind: Keys): Keys {
     result = result + "getIndex "
-    {{c.index|indent}}
+    if ({{c.index or 'false'}})
+        throw new Error("Any error to break assignment")
     return ind
   }
 
   function getValue(val: int): int {
     result = result + "getValue "
-    {{c.value|indent}}
+    if ({{c.value or 'false'}})
+        throw new Error("Any error to break assignment")
     return val
   }
 

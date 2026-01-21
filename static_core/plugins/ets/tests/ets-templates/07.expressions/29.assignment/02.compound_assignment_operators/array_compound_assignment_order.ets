@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 {% for c in cases %}
+{% for array in arrays %}
   /*---
   desc: >-
      If lhsExpression is an array reference expression (see Array Indexing Expression), then:
@@ -51,24 +52,27 @@
 
 
 let result: string = ""
-let test_array: long[] = [1, 2]
+let test_array: {{array.array_type}} = [1, 2]
 
-function getArray(): long[] {
+function getArray(): {{array.array_type}} {
     result = result + "getArray "
-    {{c.array|indent}}
+    if ({{c.array or 'false'}})
+        throw new Error("Any error to break assignment")
     return test_array
 }
 
 function getIndex(ind: int): int {
     result = result + "getIndex "
-    {{c.index|indent}}
+    if ({{c.index or 'false'}})
+        throw new Error("Any error to break assignment")
     return ind
 }
 
 
 function getValue(val: long): long {
     result = result + "getValue "
-    {{c.value|indent}}
+    if ({{c.value or 'false'}})
+        throw new Error("Any error to break assignment")
     return val
 }
 
@@ -79,4 +83,5 @@ function main() {
 
     arktest.assertEQ(result, {{c.assert_result}})
 }
+{% endfor %}
 {% endfor %}

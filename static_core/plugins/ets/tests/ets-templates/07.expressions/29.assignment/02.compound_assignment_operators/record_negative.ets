@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
     If lhsExpression is a record access expression (see Record Indexing Expression):
     For case 2 of Record Indexing Expression compound operators won't work
   tags: [compile-only, negative]
+  expected_out: ["Semantic error ESE0106: Bad operand type: multiple types left in the normalized union type (Double|undefined). Unions are not allowed in binary expressions except equality."]
 ---*/
 
 let result: string = ""
