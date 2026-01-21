@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,8 @@
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_string_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.h"
 
-#include "unicode/locid.h"
-#include "unicode/coll.h"
-#include "unicode/unistr.h"
 #include "unicode/normalizer2.h"
 #include "libarkbase/utils/span.h"
 
@@ -309,108 +307,24 @@ uint8_t StdCoreStringIsWellFormed(EtsString *thisStr)
     return UINT8_C(1);
 }
 
-EtsString *ToLowerCase(EtsString *thisStr, const icu::Locale &locale)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> strHandle(coroutine, thisStr->GetCoreType());
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
-    icu::UnicodeString utf16Str;
-    if (flatStringInfo.IsUtf16()) {
-        utf16Str =
-            icu::UnicodeString {flatStringInfo.GetDataUtf16(), static_cast<int32_t>(strHandle->GetUtf16Length())};
-    } else {
-        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(flatStringInfo.GetDataUtf8()),
-                                       static_cast<int32_t>(flatStringInfo.GetLength())};
-    }
-    auto res = utf16Str.toLower(locale);
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
-}
-
-EtsString *ToUpperCase(EtsString *thisStr, const icu::Locale &locale)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> strHandle(coroutine, thisStr->GetCoreType());
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
-    icu::UnicodeString utf16Str;
-    if (flatStringInfo.IsUtf16()) {
-        utf16Str =
-            icu::UnicodeString {flatStringInfo.GetDataUtf16(), static_cast<int32_t>(strHandle->GetUtf16Length())};
-    } else {
-        utf16Str = icu::UnicodeString {utf::Mutf8AsCString(flatStringInfo.GetDataUtf8()),
-                                       static_cast<int32_t>(flatStringInfo.GetLength())};
-    }
-    auto res = utf16Str.toUpper(locale);
-    return EtsString::CreateFromUtf16(reinterpret_cast<const uint16_t *>(res.getTerminatedBuffer()), res.length());
-}
-
-UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, icu::Locale &locale)
-{
-    if (langTag == nullptr) {
-        locale = icu::Locale::getDefault();
-        return U_ZERO_ERROR;
-    }
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> langTagHandle(coroutine, reinterpret_cast<ObjectHeader *>(langTag));
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(langTagHandle, ctx);
-
-    PandaVector<uint8_t> buf;
-    std::string_view locTag = EtsString::FromCoreType(flatStringInfo.GetString())->ConvertToStringView(&buf);
-    icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
-    UErrorCode status = U_ZERO_ERROR;
-    locale = icu::Locale::forLanguageTag(sp, status);
-    return status;
-}
-
 EtsString *StdCoreStringToUpperCase(EtsString *thisStr)
 {
-    return ToUpperCase(thisStr, icu::Locale::getDefault());
+    return caseconversion::StringToUpperCase(thisStr);
 }
 
 EtsString *StdCoreStringToLowerCase(EtsString *thisStr)
 {
-    return ToLowerCase(thisStr, icu::Locale::getDefault());
+    return caseconversion::StringToLowerCase(thisStr);
 }
 
 EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *langTag)
 {
-    ASSERT(langTag != nullptr);
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    icu::Locale locale;
-    VMHandle<EtsString> langTagHandle(coroutine, langTag->GetCoreType());
-    VMHandle<EtsString> thisStrHandle(coroutine, thisStr->GetCoreType());
-    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
-    if (UNLIKELY(U_FAILURE(localeParseStatus))) {
-        auto message =
-            "Language tag '" + ConvertToString(langTagHandle->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
-        return nullptr;
-    }
-    return ToUpperCase(thisStrHandle.GetPtr(), locale);
+    return caseconversion::StringToLocaleUpperCase(thisStr, langTag);
 }
 
 EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag)
 {
-    ASSERT(langTag != nullptr);
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    icu::Locale locale;
-    VMHandle<EtsString> langTagHandle(coroutine, langTag->GetCoreType());
-    VMHandle<EtsString> thisStrHandle(coroutine, thisStr->GetCoreType());
-    auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
-    if (UNLIKELY(U_FAILURE(localeParseStatus))) {
-        auto message =
-            "Language tag '" + ConvertToString(langTagHandle->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
-        return nullptr;
-    }
-    return ToLowerCase(thisStrHandle.GetPtr(), locale);
+    return caseconversion::StringToLocaleLowerCase(thisStr, langTag);
 }
 
 EtsInt StdCoreStringIndexOfAfter(EtsString *s, uint16_t ch, EtsInt fromIndex)

@@ -105,6 +105,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/array_buffer_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/reflection_helpers.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_string_case_conversion.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_string_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/json_helper.cpp

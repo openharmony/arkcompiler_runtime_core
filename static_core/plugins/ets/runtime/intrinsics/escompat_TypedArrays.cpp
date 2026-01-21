@@ -1067,8 +1067,9 @@ REVERSE_CALL_DECL(BigUInt64)
  * Typed Arrays: reversed alloc data implementation: needs for toReversed().
  */
 template <typename ElementType>
-static ALWAYS_INLINE void TypedArrayReverseCopyBuffer(EtsEscompatArrayBuffer *dstBuf, EtsEscompatArrayBuffer *srcBuf,
-                                                      EtsInt byteOffset, EtsInt srcLength)
+static ALWAYS_INLINE inline void TypedArrayReverseCopyBuffer(EtsEscompatArrayBuffer *dstBuf,
+                                                             EtsEscompatArrayBuffer *srcBuf, EtsInt byteOffset,
+                                                             EtsInt srcLength)
 {
     ASSERT(srcBuf != nullptr);
     ASSERT(dstBuf != nullptr);

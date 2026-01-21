@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -528,13 +529,18 @@ extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
                                                         EtsObject::FromCoreType(o2));
 }
 
-extern "C" uint8_t EtsStringEqualsEntrypoint(coretypes::String *str1, coretypes::String *str2)
+extern "C" EtsBoolean EtsStringEqualsEntrypoint(coretypes::String *str1, coretypes::String *str2)
 {
     // We could use `ark::ets::intrinsics::StdCoreStringEquals` as the entrypoint, it works, but
     // `ark::ets::intrinsics::StdCoreStringEquals` repeats the checks that the irtoc implementation
     // of the intrinsic has already performed: whether both pointers contain the same memory address
     // as well as for whether the pointees are actually strings.
     return ToEtsBoolean(EtsString::FromCoreType(str1)->Compare(EtsString::FromCoreType(str2)) == 0);
+}
+
+extern "C" EtsBoolean EtsDefaultLocaleAllowsFastLatinCaseConversion()
+{
+    return ToEtsBoolean(ark::ets::intrinsics::caseconversion::DefaultLocaleAllowsFastLatinCaseConversion());
 }
 
 }  // namespace ark::ets

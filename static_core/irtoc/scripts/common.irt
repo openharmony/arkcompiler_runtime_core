@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -350,6 +350,14 @@ end
 
 [['u32', 'UINT32'], ['i32', 'INT32']].each do |from, from_type|
   ['b', 'i8', 'u8', 'i16', 'u16', 'i64', 'u64'].each do |to|
+    macro(:"#{from}to#{to}") do |arg|
+      Cast(arg).SrcType("DataType::#{from_type}").send(:"#{to}")
+    end
+  end
+end
+
+[['u64', 'UINT64'], ['i64', 'INT64']].each do |from, from_type|
+  ['b', 'i8', 'u8', 'i16', 'u16', 'i32', 'u32'].each do |to|
     macro(:"#{from}to#{to}") do |arg|
       Cast(arg).SrcType("DataType::#{from_type}").send(:"#{to}")
     end
