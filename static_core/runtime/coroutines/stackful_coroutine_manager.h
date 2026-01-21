@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -124,8 +124,9 @@ public:
         return stats_;
     }
 
-    /// migrate coroutines from the 'from' worker to other workers
-    bool MigrateCoroutinesOutward(StackfulCoroutineWorker *from);
+    /// migrate coroutines from other workers to the 'to' worker
+    bool MigrateCoroutinesInward(StackfulCoroutineWorker *to);
+
     /// trigger the managerThread to migrate
     void TriggerMigration();
     /**
@@ -233,17 +234,6 @@ private:
     CoroutineWorker::Id AllocateWorkerId();
     void ReleaseWorkerId(CoroutineWorker::Id workerId);
 
-    /**
-     * The EP for manager thread. The manager thread can only be created when coroutine migration is supported.
-     * This function cannot be called directly, and can only be called once.
-     */
-    void ManagerThreadProc();
-    /// manage the lifecycle of the manager thread
-    void StartManagerThread();
-    void StopManagerThread();
-
-    void CheckForBlockedWorkers();
-    void MigrateCoroutinesInward(uint32_t &count);
     StackfulCoroutineWorker *ChooseWorkerImpl(WorkerSelectionPolicy policy, AffinityMask maskValue)
         REQUIRES(workersLock_);
 
@@ -304,14 +294,6 @@ private:  // data members
     PandaVector<CoroutineWorkerStats> finalizedWorkerStats_;
 
     os::memory::Mutex eWorkerCreationLock_;
-
-    // the number of migration triggers
-    std::atomic_uint32_t migrateCount_ = 0;
-    // manager thread infos
-    std::atomic_bool managerRunning_ = false;
-    std::thread managerThread_;
-    os::memory::Mutex managerMutex_;
-    os::memory::ConditionVariable managerCv_;
 
     // the time interval between detecting worker blocking
     static constexpr uint32_t DETECTION_INTERVAL_VALUE = 5000;

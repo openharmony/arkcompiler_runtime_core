@@ -187,8 +187,6 @@ public:
     bool MigrateFrom(StackfulCoroutineWorker *from);
     /// check whether the worker is idle
     bool IsIdle();
-    /// migrate the coroutines of the blocked worker to other workers
-    void MigrateCorosOutwardsIfBlocked();
 
     bool ProcessAsyncWork() NO_THREAD_SAFETY_ANALYSIS override;
     void OnNewCoroutineStartup(Coroutine *co) override;
@@ -259,8 +257,6 @@ private:
         return (this != Coroutine::GetCurrent()->GetWorker());
     }
 
-    /// check if this may have been blocked
-    bool IsPotentiallyBlocked();
     void MigrateCoroutinesImpl(StackfulCoroutineWorker *to, size_t migrateCount) REQUIRES(runnablesLock_);
 
     /* events */
