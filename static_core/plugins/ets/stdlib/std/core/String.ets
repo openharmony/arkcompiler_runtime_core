@@ -710,95 +710,122 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.contains(str, fromIndex.toInt());
     }
 
-    private static splitMatch(s: String, q: int, r: String): int {
-        let rLength = r.getLength();
-        if (q + rLength > s.getLength()) {
-            return -1;
+    /**
+     * Splits this String by a single char and returns an ordered array of substrings.
+     * The order of the resulted array corresponds to the order of the passage of
+     * this String from beginning to end. The pattern is excluded from substrings.
+     * The array is limited by some specified value.
+     *
+     * @param separator - Char
+     * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
+     *
+     * @returns string array contains substrings from this String
+     */
+    private split(separator: Char, limit: Int): String[] {
+        if (limit == 0) {
+            return new String[0];
         }
-        if (rLength == 0) {
-            // For making algorithm compiler-friendly
-            // should be removed after BoundsAnalysis improvement
-            return q;
+        let strLen = this.getLength();
+        if (strLen == 0) {
+            return [(this)];
         }
-        for (let i = 0; i < rLength - 1; ++i) {
-            if (s.codePointAt(q + i) != r.codePointAt(i)) {
-                return -1;
+        if (limit < 0) {
+            limit = Int.MAX_VALUE;
+        }
+
+        let out: String[] = new String[0];
+        let from: int = 0;
+        while (true) {
+            let index: int = this.indexOf(separator, from);
+            if (index == -1) {
+                out.pushOne(this.substring(from, this.getLength()));
+                break;
             }
+            if (out.pushOne(this.substring(from, index)) == limit) {
+                break;
+            }
+            from = index + 1;
         }
-        if (s.codePointAt(q + rLength - 1) != r.codePointAt(rLength - 1) as int) {
-            // For making algorithm compiler-friendly
-            // should be removed after BoundsAnalysis improvement
-            return -1;
-        }
-        return q + rLength;
+        return out;
     }
 
     /**
-     * Splits this String by pattern and returns ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the
-     * passage of this String from beginning to end. The pattern is
-     * excluded from substrings. The array is limited by some specified value.
+     * Splits this String by separator and returns an ordered array of substrings.
+     * The order of the resulted array corresponds to the order of the passage of
+     * this String from beginning to end. The pattern is excluded from substrings.
+     * The array is limited by some specified value.
      *
-     * @param pattern String or RegExp to split by
-     * @param limit max length of the returned array. If it's negative then there is no limit.
+     * @param separator - String or RegExp to split by
+     * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
      *
      * @throws NullPointerError if pattern param is null
      *
      * @returns string array contains substrings from this String
      */
-    public split(separator: RegExp, limit?: Number): String[] {
-        if (limit == undefined) {
-            return separator.split(this, undefined)
+    public split(separator: String, limit: Int): String[] {
+        if (limit == 0) {
+            return new String[0];
         }
-        return separator.split(this, limit!.toInt())
+        let strLen = this.getLength();
+        let sepLen: int = separator.getLength();
+        if (strLen == 0) {
+            if (sepLen == 0) {
+                return new String[0];
+            }
+            return [(this)];
+        }
+        if (limit < 0) {
+            limit = Int.MAX_VALUE;
+        }
+        let out: String[] = new String[0];
+        if (sepLen == 0) {
+            // The string is split by UTF-16 code units and this destroys surrogate pairs (if any).
+            if (strLen > limit) {
+                strLen = limit;
+            }
+            for (let i = 0; i < strLen; ++i) {
+                out.pushOne(String.fromCharCode(this.charAt(i).toDouble()));
+            }
+            return out;
+        }
+        let from: int = 0;
+        while (true) {
+            let index: int = this.indexOf(separator, from);
+            if (index == -1) {
+                out.pushOne(this.substring(from, this.getLength()));
+                break;
+            }
+            if (out.pushOne(this.substring(from, index)) == limit) {
+                break;
+            }
+            from = index + sepLen;
+        }
+        return out;
     }
 
     public split(separator: String, limit?: Number): String[] {
-        let lim : long
+        let maxSize = limit == undefined ? Int.MAX_VALUE : limit.toInt();
+        if (separator.getLength() != 1) {
+            return this.split(separator, maxSize);
+        }
+        return this.split(separator.charAt(0), maxSize);
+    }
+
+    public split(separator: RegExp, limit?: Number): String[] {
         if (limit == undefined) {
-            lim = (1 << 32) - 1
-        } else if (limit == 0) {
-            return new String[0]
-        } else {
-            lim = limit.toLong()
+            return separator.split(this, undefined);
         }
-        let s = this.getLength()
-        if (s == 0) {
-            let z = String.splitMatch(this, 0, separator)
-            if (z != -1) {
-                return new String[0]
-            }
-            return [(this)]
-        }
-        let splittedStrings = new containers.UndefinableStringArray(s)
-        let lastStart = 0
-        for (let lastEnd = 0; lastEnd < s;) {
-            let separatorRight = String.splitMatch(this, lastEnd, separator)
-            if (separatorRight != -1 && separatorRight != lastStart) {
-                let substr = this.substring(lastStart, lastEnd)
-                splittedStrings.pushBack(substr)
-                if (splittedStrings.size() == lim) {
-                    return splittedStrings.toArray() as String[]
-                }
-                lastStart = separatorRight
-                lastEnd = lastStart
-            } else {
-                ++lastEnd
-            }
-        }
-        let substr = this.substring(lastStart, s)
-        splittedStrings.pushBack(substr)
-        return splittedStrings.toArray() as String[]
+        return separator.split(this, limit!.toInt());
     }
 
     public split(separator: StringOrRegExp, limit?: Number): String[] {
         if (separator instanceof RegExp) {
             if (limit == undefined) {
-                return (separator as RegExp).split(this, undefined)
+                return (separator as RegExp).split(this, undefined);
             }
-            return (separator as RegExp).split(this, limit!.toInt())
+            return (separator as RegExp).split(this, limit!.toInt());
         }
-        return this.split(separator as String, limit)
+        return this.split(separator as String, limit);
     }
 
     /**
