@@ -455,7 +455,7 @@
 07.expressions/19.nullish-coalescing_expression/resulting_type_crash.ets
 
 #30891
-07.expressions/21.multiplicative_expressions/04.exponentiation/enum.ets
+07.expressions/22.multiplicative_expressions/04.exponentiation/enum.ets
 
 #31358 number and char equality ops should produce CTE
 07.expressions/25.equality_expressions/eq_neg_16.ets
