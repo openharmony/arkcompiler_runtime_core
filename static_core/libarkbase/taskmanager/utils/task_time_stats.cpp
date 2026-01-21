@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,7 @@ std::string LightTaskTimeTimeStats::GetStatisticsForProperties(QueueId id)
 
         sumTaskCount += meanStatistics.countOfTasks;
     }
+    ASSERT(sumTaskCount != 0);
     auto meanLifeTime = static_cast<double>(sumLifeTime) / sumTaskCount;
     auto meanExecutionTime = static_cast<double>(sumExecutionTime) / sumTaskCount;
     stream << "TaskQueueId: " << id << "; mean life time: " << meanLifeTime << "us; max life time: " << maxLifeTime
