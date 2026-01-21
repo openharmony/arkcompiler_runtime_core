@@ -379,7 +379,6 @@ std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_fails.ets
 #31475
 escompat/DateTest.ets
 std/core/IntlPluralRulesSupportedLocalesOfTest.ets
-std/core/ReflectFieldTest.ets
 std/concurrency/message_basic_interface.ets
 std/concurrency/AsyncLockTimeoutTest.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets

@@ -186,10 +186,10 @@ export class EAWorker {
      * @param { WorkerPriority } priority The new priority value for the worker
      */
     public setPriority(priority: WorkerPriority) {
-        this.priority = priority;
         if (this.loopStarted.get()) {
             this.worker.setPriority(priority);
         }
+        this.priority = priority;
     }
 
     /**
