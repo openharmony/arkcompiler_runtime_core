@@ -149,6 +149,16 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
+     * Creates an Uint8ClampedArray from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i].toByte())
+        }
+    }
+
+    /**
      * Creates a copy of Uint8ClampedArray.
      *
      * @param other data initializer
@@ -1631,6 +1641,16 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, Uint8Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates an Uint8Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].toByte())
         }
     }
 
@@ -3126,6 +3146,16 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Creates an Uint16Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].toShort())
+        }
+    }
+
+    /**
      * Creates a copy of Uint16Array.
      *
      * @param other data initializer
@@ -4614,6 +4644,16 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, Uint32Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates an Uint32Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i])
         }
     }
 
