@@ -274,6 +274,7 @@ private:
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
+    void EnableFullPromotionIfNeeded();
     void FullPromotion(const CollectionSet &collectibleRegions);
     void FastYoungMark(const CollectionSet &collectibleRegions);
     void EnqueueAllYoungCards(const CollectionSet &collectibleRegions);
