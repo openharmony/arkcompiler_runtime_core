@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,8 +40,8 @@ class Child extends Parent {
 }
 
 function main(): void {
-  (async () => {
+  waitForCompletion(async () => {
     const child = new Child();
-    arktest.assertEQ(child.callParentGreet(), "Hello from Child!");
-  })();
+    arktest.assertEQ(await child.callParentGreet(), "Hello from Child!");
+  });
 }
