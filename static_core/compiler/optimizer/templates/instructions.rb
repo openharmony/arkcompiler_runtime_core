@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,6 +53,7 @@ module Tokens
     ZERO_CHECK = 'zc'
     NEGATIVE_CHECK = 'ngc'
     BOUNDS_CHECK = 'bc'
+    OPTIONAL = 'opt'
   end
 
 end
@@ -121,6 +122,10 @@ class Operand
     has(Tokens::Other::DYNAMIC)
   end
 
+  def is_opt?
+    has(Tokens::Other::OPTIONAL)
+  end
+
   def pseudo?
     has(Tokens::Other::PSEUDO)
   end
@@ -144,6 +149,18 @@ class Instruction < SimpleDelegator
       @inputs = @operands.drop(@operands.first.is_dst? ? 1 : 0)
     end
     raise "Destination can be only first operand" if inputs.any? { |x| x.is_dst? }
+    raise "Optional operands can only be at the end #{@inputs}" unless
+      @inputs.each_cons(2).all? do |prev_input, next_input|
+        !prev_input.is_opt? || next_input.is_opt?
+      end
+  end
+
+  def min_num_inputs
+    @inputs.find_index { |x| x.is_opt? } || @inputs.size
+  end
+
+  def max_num_inputs
+    @inputs.size
   end
 
   def has_dst?

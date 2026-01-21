@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -226,12 +226,7 @@ Inst *User::GetInst()
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return *reinterpret_cast<Inst **>(this + GetIndex() + 1);
     }
-    auto p = reinterpret_cast<uintptr_t>(this);
-    p += (GetIndex() + 1) * sizeof(User);
-
-    auto inputsCount {SizeField::Decode(properties_)};
-    p += (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount)) * sizeof(Input);
-    return reinterpret_cast<Inst *>(p);
+    return OperandsInstLayout::UserToInst(this);
 }
 
 void Inst::InsertBefore(Inst *inst)
@@ -790,18 +785,6 @@ Inst *Inst::Clone(const Graph *targetGraph) const
     }
 #ifdef PANDA_COMPILER_DEBUG_INFO
     clone->SetCurrentMethod(GetCurrentMethod());
-#endif
-    return clone;
-}
-
-template <size_t N>
-Inst *FixedInputsInst<N>::Clone(const Graph *targetGraph) const
-{
-    auto clone = static_cast<FixedInputsInst *>(Inst::Clone(targetGraph));
-#ifndef NDEBUG
-    for (size_t i = 0; i < INPUT_COUNT; ++i) {
-        clone->SetSrcReg(i, GetSrcReg(i));
-    }
 #endif
     return clone;
 }

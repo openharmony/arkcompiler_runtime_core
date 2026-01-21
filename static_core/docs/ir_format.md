@@ -184,20 +184,27 @@ Another solution may be to introduce `Select` instructions on early stage. Third
 
 Instructions are implemented by class inheritance.
 
-**Inst** is a base class with main information about an instruction.
- * Opcode(name) of the instruction
- * pc(address) instruction in bytecode/file
- * Type of instruction(bool, uint8, uint32, float, double e.t.c)
- * Pointers to next and previous  Inst in the BasicBlock
- * Array of inputs (instructions whose result this Inst uses)(class Inst has virtual method that returns empty array. Derived classes override this method and return non empty array)
- * List of users (instructions which use result from the Inst)
- * Properties
+**Inst** is the base class with main information about an instruction:
+ * `opcode` (name) of the instruction;
+ * `pc` (address) instruction in bytecode file;
+ * type of instruction (`bool`, `uint8`, `uint32`, `float`, `double`, etc);
+ * pointers to next and previous `Inst` in the `BasicBlock`;
+ * list of users (instructions which use the result from this `Inst`);
+ * properties;
+ * a way to access inputs and the corresponding `User` instances of this `Inst`;
+ * other system information.
 
-Class **Inst** allows adding and removing users and inputs
+Class **Inst** allows adding and removing users and inputs. Based on the type of instruction (dynamic/fixed number of arguments), operands are placed differently outside the base class.
 
-Class **FixedInputsInst** inherits from **Inst** for instruction with a fixed number of inputs(operands).  
-Class **DynamicInputsInst** inherits from **Inst** for instruction with a variable number of inputs(operands).  
-Class **CompareInst** inherits from **Inst** for instruction with predicate. It contain information about type of conditional code(EQ, NE, LT, LE and e.t.c).  
+Class **LimitedInputsInst<L, H>** inherits from **Inst** for instruction with a variable, but limited below (**L**) and above (**H**) number of inputs (operands). This represents `L` mandatory inputs and `H-L` optional inputs.  
+When setting inputs at indexes `L <= i <= H`, instruction input count is increased to contain it. When resetting (setting to `nullptr`) the last input, the input count is decreased to cover the last non-`nullptr` input. Note that this may fall below `L`, but currently there is no way to check it (but input count will be checked for each known instruction in graph checker).  
+To manage this, the base **Inst** class has two fields in its properties: `StaticInputsCount` for the actual input count (should be between `L` and `H`), and `StaticInputsCapacity`, for the maximum possible statically allocated inputs count (is equal to `H`). This information is needed to access the statically allocated operands information from the base class without virtual calls and for debug checks, though in principle it would be possible to rearrange the operands storage so that `StaticInputsCapacity` is not needed.
+
+Class **FixedInputsInst<N>** inherits from **LimitedInputsInst<N, N>** for instruction with a fixed number of inputs(operands). Here, `StaticInputsCount` property always has the same value as `StaticInputsCapacity` (`N`), excluding cases when someone explicitly set last inputs to `nullptr`.
+
+Class **DynamicInputsInst** inherits from **Inst** for instruction with a variable number of inputs(operands). To determine this case, `StaticInputsCapacity` and `StaticInputsCount` properties are set to an invalid value.
+
+Class **CompareInst** inherits from **Inst** for instruction with predicate. It contain information about type of conditional code (EQ, NE, LT, LE and e.t.c).  
 Class **ConstantInst** inherits from **Inst** for constant instruction. It contains a constant and type of the constant. Constants are contained only in start block.   
 Class **ParameterInst** inherits from **Inst** for input parameter. It contains a type of parameter and parameter number. Parameters are contained only in start block.   
 Class **UnaryOperation** inherits from **FixedInputsInst** for instruction with a single input. The class is used for instructions NOT, NEG, ABS e.t.c.  
@@ -210,6 +217,7 @@ Class **PhiInst** inherits from **DynamicInputsInst** for phi instructions.
 
 **Mixin** are classes with properties or data which uses different instruction classes. For example:
 
+**Inst::InputCountMixin<N>** is a class to help properly initialize the instruction's `StaticInputsCapacity` and `StaticInputsCount` property fields in the instruction constructor.
 **ImmediateMixin** is inherited in instruction classes with immediate(BinaryImmOperation, ReturnInstI and so on)  
 **ConditionMixin** is inherited in instruction classes with conditional code(CompareInst, SelectInst, IfInst and so on)  
 **TypeIdMixin** is inherited in instruction classes wich uses TypeId(LoadObjectInst, StoreObjectInst, NewObjectInst and so on)  

@@ -355,8 +355,10 @@ private:
 
 // How many bits will be used in Inst's bit fields for number of inputs.
 constexpr size_t BITS_PER_INPUTS_NUM = 3;
+// Special value to mark dynamic inputs
+constexpr size_t DYNAMIC_INPUTS_MARK = (1U << BITS_PER_INPUTS_NUM) - 1;
 // Maximum number of static inputs
-constexpr size_t MAX_STATIC_INPUTS = (1U << BITS_PER_INPUTS_NUM) - 1;
+constexpr size_t MAX_STATIC_INPUTS = DYNAMIC_INPUTS_MARK - 1;
 
 /// Currently Input class is just a wrapper for the Inst class.
 class Input final {
@@ -371,11 +373,6 @@ public:
     const Inst *GetInst() const
     {
         return inst_;
-    }
-
-    static inline uint8_t GetPadding(Arch arch, uint32_t inputsCount)
-    {
-        return static_cast<uint8_t>(!Is64BitsArch(arch) && inputsCount % 2U == 1U);
     }
 
 private:
@@ -623,17 +620,8 @@ inline bool operator==(const User &lhs, const User &rhs)
     return lhs.GetInst() == rhs.GetInst();
 }
 
-/**
- * Operands class for instructions with fixed inputs count.
- * Actually, this class do absolutely nothing except that we can get sizeof of it when allocating memory.
- */
-template <int N>
-struct Operands {
-    static_assert(N < MAX_STATIC_INPUTS, "Invalid inputs number");
-
-    std::array<User, N> users;
-    std::array<Input, N> inputs;
-};
+/// Helper class to calculate offsets inside fixed inputs instructions data.
+class OperandsInstLayout;
 
 enum InputOrd { INP0 = 0, INP1 = 1, INP2 = 2, INP3 = 3 };
 
@@ -666,11 +654,7 @@ public:
     void Reallocate(size_t newCapacity = 0);
 
     /// Get instruction to which these operands belongs to.
-    Inst *GetOwnerInst() const
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<Inst *>(const_cast<DynamicOperands *>(this) + 1);
-    }
+    inline Inst *GetOwnerInst() const;
 
     User *GetUser(unsigned index)
     {
@@ -701,6 +685,9 @@ private:
     size_t capacity_ {0};
     ArenaAllocator *allocator_ {nullptr};
 };
+
+/// Helper class to calculate offsets inside dynamic inputs instructions data.
+class DynamicOperandsInstLayout;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 
@@ -1280,7 +1267,7 @@ public:
     /// Return true if instruction has dynamic operands storage.
     bool IsOperandsDynamic() const
     {
-        return GetField<InputsCount>() == MAX_STATIC_INPUTS;
+        return GetField<StaticInputsCapacity>() == DYNAMIC_INPUTS_MARK;
     }
 
     /**
@@ -1316,21 +1303,35 @@ public:
     /**
      * Set input instruction in specified index.
      * Old input will be removed.
+     * When setting non-dynamic optional inputs:
+     * - passing \c nullptr resets it;
+     * - @ref GetInputsCount return value is automatically updated.
      * @param index - index of input to be set
-     * @param inst - new input instruction NOTE sherstennikov: currently it can be nullptr, is it correct?
+     * @param inst - new input instruction
      */
     void SetInput(unsigned index, Inst *inst)
     {
-        CHECK_LT(index, GetInputsCount());
-        auto &input = GetInputs()[index];
-        auto user = GetUser(index);
-        if (input.GetInst() != nullptr && input.GetInst()->HasUsers()) {
-            input.GetInst()->RemoveUser(user);
+        auto inputsCount = GetInputsCount();
+        if (UNLIKELY(IsOperandsDynamic())) {
+            CHECK_LT(index, inputsCount);
+            CHECK_NE(inst, nullptr);
+        } else {
+            CHECK_LT(index, GetStaticInputsCapacity());
+            if (UNLIKELY(inst != nullptr && index >= inputsCount)) {
+                // add static optional operand
+                SetField<StaticInputsCount>(index + 1);
+            }
         }
-        if (inst != nullptr) {
-            inst->AddUser(user);
+        SetInputNoResize(index, inst);
+        if (!UNLIKELY(IsOperandsDynamic()) && UNLIKELY(inst == nullptr && index == inputsCount - 1)) {
+            // remove static optional operands
+            int lastInput = index - 1;
+            auto inputs = GetInputs();
+            while (lastInput >= 0 && inputs[lastInput] == nullptr) {
+                lastInput--;
+            }
+            SetField<StaticInputsCount>(lastInput + 1);
         }
-        input = Input(inst);
     }
 
     /**
@@ -1420,8 +1421,8 @@ public:
                 RemoveInput(inputsCount - 1);
             }
         } else {
-            for (size_t i = 0; i < GetInputsCount(); ++i) {
-                SetInput(i, nullptr);
+            for (size_t i = 0, inputsCount = GetInputsCount(); i < inputsCount; ++i) {
+                SetInputNoResize(i, nullptr);
             }
         }
     }
@@ -1448,31 +1449,27 @@ public:
      * @param index - index of input
      * @return input instruction
      */
-    Input GetInput(unsigned index)
-    {
-        ASSERT(index < GetInputsCount());
-        return GetInputs()[index];
-    }
-
     Input GetInput(unsigned index) const
     {
         ASSERT(index < GetInputsCount());
         return GetInputs()[index];
     }
 
-    Span<Input> GetInputs()
+    /**
+     * Get input by index, if it exists
+     * @param index - index of input
+     * @return input instruction, or empty optional if index is out of bounds
+     */
+    std::optional<Input> GetInputOpt(unsigned index) const
     {
-        if (UNLIKELY(IsOperandsDynamic())) {
-            DynamicOperands *operands = GetDynamicOperands();
-            return Span<Input>(operands->Inputs(), operands->Size());
+        if (index >= GetInputsCount()) {
+            return {};
         }
-
-        auto inputsCount {GetField<InputsCount>()};
-        return Span<Input>(
-            reinterpret_cast<Input *>(reinterpret_cast<uintptr_t>(this) -
-                                      (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount)) * sizeof(Input)),
-            inputsCount);
+        return GetInput(index);
     }
+
+    inline Span<Input> GetInputs();
+
     Span<const Input> GetInputs() const
     {
         return Span<const Input>(const_cast<Inst *>(this)->GetInputs());
@@ -1501,7 +1498,7 @@ public:
         if (UNLIKELY(IsOperandsDynamic())) {
             return GetDynamicOperands()->Size();
         }
-        return GetInputs().Size();
+        return GetStaticInputsCount();
     }
 
     bool HasUsers() const
@@ -1733,7 +1730,8 @@ public:
 
 protected:
     using InstBase::InstBase;
-    static constexpr int INPUT_COUNT = 0;
+    /// Stub for derived classes to shadow with their definition
+    static constexpr int STATIC_INPUTS_CAPACITY = 0;
 
     Inst() = default;
 
@@ -1748,45 +1746,62 @@ protected:
 protected:
     using FieldFlags = BitField<uint64_t, 0, MinimumBitsToStore(1ULL << inst_flags::FLAGS_COUNT)>;
     using FieldType = FieldFlags::NextField<DataType::Type, MinimumBitsToStore(DataType::LAST)>;
-    using InputsCount = FieldType::NextField<uint32_t, BITS_PER_INPUTS_NUM>;
-    using LastField = InputsCount;
+    using StaticInputsCount = FieldType::NextField<uint32_t, BITS_PER_INPUTS_NUM>;
+    /// Field to store the derived class's STATIC_INPUTS_CAPACITY
+    using StaticInputsCapacity = StaticInputsCount::NextField<uint32_t, BITS_PER_INPUTS_NUM>;
+    using LastField = StaticInputsCapacity;
 
-    DynamicOperands *GetDynamicOperands() const
+    inline DynamicOperands *GetDynamicOperands() const;
+
+    size_t GetStaticInputsCount() const
     {
-        return reinterpret_cast<DynamicOperands *>(reinterpret_cast<uintptr_t>(this) - sizeof(DynamicOperands));
+        return GetField<StaticInputsCount>();
+    }
+
+    size_t GetStaticInputsCapacity() const
+    {
+        return GetField<StaticInputsCapacity>();
+    }
+
+    void SetInputNoResize(unsigned index, Inst *inst)
+    {
+        auto &input = GetInputs()[index];
+        auto user = GetUser(index);
+        if (input.GetInst() != nullptr && input.GetInst()->HasUsers()) {
+            input.GetInst()->RemoveUser(user);
+        }
+        if (inst != nullptr) {
+            inst->AddUser(user);
+        }
+        input = Input(inst);
     }
 
     void AppendOpcodeAndTypeToVnObject(VnObject *vnObj) const;
     void AppendInputsToVnObject(VnObject *vnObj) const;
 
+public:
+    template <typename Derived, int N>
+    class InputCountMixin {
+    public:
+        static constexpr int STATIC_INPUTS_CAPACITY = N;
+
+        explicit InputCountMixin(int staticInputsCount = STATIC_INPUTS_CAPACITY)
+        {
+            static_assert(std::is_base_of_v<Inst, Derived>);
+            static_assert(std::is_base_of_v<InputCountMixin, Derived>);
+            CHECK_LE(staticInputsCount, STATIC_INPUTS_CAPACITY);
+            static_cast<Derived *>(this)->template SetField<Inst::StaticInputsCount>(staticInputsCount);
+            static_cast<Derived *>(this)->template SetField<Inst::StaticInputsCapacity>(STATIC_INPUTS_CAPACITY);
+        }
+    };
+
 private:
     template <typename InstType, typename... Args>
     static InstType *ConstructInst(InstType *ptr, ArenaAllocator *allocator, Args &&...args);
 
-    User *GetUser(unsigned index)
-    {
-        if (UNLIKELY(IsOperandsDynamic())) {
-            return GetDynamicOperands()->GetUser(index);
-        }
-        auto inputsCount {GetField<InputsCount>()};
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return reinterpret_cast<User *>(reinterpret_cast<Input *>(this) -
-                                        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                                        (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount))) -
-               // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-               index - 1;  // CC-OFF(G.FMT.02) project code style
-    }
+    inline User *GetUser(unsigned index);
 
-    size_t OperandsStorageSize() const
-    {
-        if (UNLIKELY(IsOperandsDynamic())) {
-            return sizeof(DynamicOperands);
-        }
-
-        auto inputsCount {GetField<InputsCount>()};
-        return inputsCount * (sizeof(Input) + sizeof(User)) +
-               Input::GetPadding(RUNTIME_ARCH, inputsCount) * sizeof(Input);
-    }
+    inline size_t OperandsStorageSize() const;
 
 private:
     /// Basic block this instruction belongs to
@@ -1832,6 +1847,166 @@ private:
     // Destination register type - defined in FieldType
     Register dstReg_ {GetInvalidReg()};
 };
+
+/**
+ * This is describing the following structure:
+ * | UserN | UserN-1 | ... | User0 | Input0 | Input1 | ... | InputN | Inst |
+ */
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+class OperandsInstLayout {
+private:
+    static constexpr size_t InputToInstOffset(size_t inputIndex, size_t staticInputsCapacity)
+    {
+        size_t result = (staticInputsCapacity - inputIndex) * sizeof(Input);
+        result = AlignUp(result, alignof(Inst));
+        return result;
+    }
+
+    static constexpr size_t UserToInstOffset(size_t userIndex, size_t staticInputsCapacity)
+    {
+        size_t result = (userIndex + 1) * sizeof(User);
+        result = AlignUp(result, alignof(Input));
+        return result + InputToInstOffset(0, staticInputsCapacity);
+    }
+
+public:
+    static Inst *UserToInst(const User *user)
+    {
+        auto p = reinterpret_cast<uintptr_t>(user);
+        p += UserToInstOffset(user->GetIndex(), user->GetSize());
+        return reinterpret_cast<Inst *>(p);
+    }
+
+    static User *InstToUser(const Inst *inst, size_t userIndex, size_t staticInputsCapacity)
+    {
+        auto p = reinterpret_cast<uintptr_t>(inst);
+        p -= UserToInstOffset(userIndex, staticInputsCapacity);
+        return reinterpret_cast<User *>(p);
+    }
+
+    static Input *InstToInput(const Inst *inst, size_t inputIndex, size_t staticInputsCapacity)
+    {
+        auto p = reinterpret_cast<uintptr_t>(inst);
+        p -= InputToInstOffset(inputIndex, staticInputsCapacity);
+        return reinterpret_cast<Input *>(p);
+    }
+
+    template <size_t STATIC_INPUTS_CAPACITY>
+    static std::array<User, STATIC_INPUTS_CAPACITY> *InstToUsers(const Inst *inst)
+    {
+        static_assert(STATIC_INPUTS_CAPACITY <= MAX_STATIC_INPUTS, "Invalid inputs number");
+        return reinterpret_cast<std::array<User, STATIC_INPUTS_CAPACITY> *>(
+            InstToUser(inst, STATIC_INPUTS_CAPACITY - 1, STATIC_INPUTS_CAPACITY));
+    }
+
+    template <size_t STATIC_INPUTS_CAPACITY>
+    static std::array<Input, STATIC_INPUTS_CAPACITY> *InstToInputs(const Inst *inst)
+    {
+        static_assert(STATIC_INPUTS_CAPACITY <= MAX_STATIC_INPUTS, "Invalid inputs number");
+        return reinterpret_cast<std::array<Input, STATIC_INPUTS_CAPACITY> *>(
+            InstToInput(inst, 0, STATIC_INPUTS_CAPACITY));
+    }
+
+    static constexpr size_t StorageSize(size_t staticInputsCapacity)
+    {
+        return UserToInstOffset(staticInputsCapacity - 1, staticInputsCapacity);
+    }
+
+    template <size_t STATIC_INPUTS_CAPACITY>
+    static constexpr size_t StorageAlign()
+    {
+        static_assert(STATIC_INPUTS_CAPACITY <= MAX_STATIC_INPUTS, "Invalid inputs number");
+        struct Aligner {
+            std::array<User, STATIC_INPUTS_CAPACITY> users;
+            std::array<Input, STATIC_INPUTS_CAPACITY> inputs;
+            Inst inst;
+        };
+        return alignof(Aligner);
+    }
+};
+
+/**
+ * This is describing the following structure:
+ * | DynamicOperands | Inst |
+ */
+class DynamicOperandsInstLayout {
+private:
+    static constexpr size_t ToInstOffset()
+    {
+        size_t result = sizeof(DynamicOperands);
+        result = AlignUp(result, alignof(Inst));
+        return result;
+    }
+
+public:
+    static Inst *ToInst(const DynamicOperands *operands)
+    {
+        auto p = reinterpret_cast<uintptr_t>(operands);
+        p += ToInstOffset();
+        return reinterpret_cast<Inst *>(p);
+    }
+
+    static DynamicOperands *InstToOperands(const Inst *inst)
+    {
+        auto p = reinterpret_cast<uintptr_t>(inst);
+        p -= ToInstOffset();
+        return reinterpret_cast<DynamicOperands *>(p);
+    }
+
+    static constexpr size_t StorageSize()
+    {
+        return ToInstOffset();
+    }
+
+    static constexpr size_t StorageAlign()
+    {
+        struct Aligner {
+            DynamicOperands operands;
+            Inst inst;
+        };
+        return alignof(Aligner);
+    }
+};
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+Inst *DynamicOperands::GetOwnerInst() const
+{
+    return DynamicOperandsInstLayout::ToInst(this);
+}
+
+DynamicOperands *Inst::GetDynamicOperands() const
+{
+    return DynamicOperandsInstLayout::InstToOperands(this);
+}
+
+Span<Input> Inst::GetInputs()
+{
+    if (UNLIKELY(IsOperandsDynamic())) {
+        DynamicOperands *operands = GetDynamicOperands();
+        return Span<Input>(operands->Inputs(), operands->Size());
+    }
+
+    size_t staticInputsCount = GetStaticInputsCount();
+    size_t staticInputsCapacity = GetStaticInputsCapacity();
+    return Span<Input>(OperandsInstLayout::InstToInput(this, 0, staticInputsCapacity), staticInputsCount);
+}
+
+User *Inst::GetUser(unsigned index)
+{
+    if (UNLIKELY(IsOperandsDynamic())) {
+        return GetDynamicOperands()->GetUser(index);
+    }
+    return OperandsInstLayout::InstToUser(this, index, GetStaticInputsCapacity());
+}
+
+size_t Inst::OperandsStorageSize() const
+{
+    if (UNLIKELY(IsOperandsDynamic())) {
+        return DynamicOperandsInstLayout::StorageSize();
+    }
+
+    return OperandsInstLayout::StorageSize(GetStaticInputsCapacity());
+}
 
 /**
  * Proxy class that injects new field - type of the source operands - into property field of the instruction.
@@ -2451,50 +2626,58 @@ private:
 };
 
 /**
- * Instruction with fixed number of inputs.
+ * Instruction with limited number of inputs, L <= number of inputs <= H.
  * Shall not be instantiated directly, only through derived classes.
  */
-template <size_t N>
-class FixedInputsInst : public Inst {
+template <size_t L, size_t H>
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class LimitedInputsInst : public Inst, public Inst::InputCountMixin<LimitedInputsInst<L, H>, H> {
+private:
+    using InputCountMixin = typename Inst::InputCountMixin<LimitedInputsInst, H>;
+
 public:
-    using Inst::Inst;
+    using InputCountMixin::STATIC_INPUTS_CAPACITY;
 
-    static constexpr int INPUT_COUNT = N;
+    template <size_t N>
+    using InputsArray = std::array<Inst *, N>;
 
-    using InputsArray = std::array<Inst *, INPUT_COUNT>;
-    struct Initializer {
+    template <size_t N>
+    struct InitializerN {
         Inst::Initializer base;
-        InputsArray inputs;
+        InputsArray<N> inputs;
     };
 
-    explicit FixedInputsInst(Initializer t) : Inst(t.base)
+    using Initializer = InitializerN<L>;
+
+    template <size_t N>
+    explicit LimitedInputsInst(InitializerN<N> t) : Inst(t.base), InputCountMixin(std::max(N, L))
     {
-        SetField<InputsCount>(INPUT_COUNT);
+        static_assert(N <= H);
         for (size_t i = 0; i < t.inputs.size(); i++) {
-            SetInput(i, t.inputs[i]);
+            SetInputNoResize(i, t.inputs[i]);
         }
     }
 
     template <typename... Inputs, typename = Inst::CheckBase<Inputs...>>
-    explicit FixedInputsInst(Inst::Initializer t, Inputs... inputs) : FixedInputsInst(Initializer {t, {inputs...}})
+    explicit LimitedInputsInst(Inst::Initializer t, Inputs... inputs)
+        : LimitedInputsInst(InitializerN<sizeof...(Inputs)> {t, InputsArray<sizeof...(Inputs)> {inputs...}})
     {
     }
 
-    explicit FixedInputsInst(Opcode opcode) : Inst(opcode)
+    explicit LimitedInputsInst(Opcode opcode = Opcode::INVALID, DataType::Type type = DataType::NO_TYPE)
+        : LimitedInputsInst({opcode, type, INVALID_PC})
     {
-        SetField<InputsCount>(INPUT_COUNT);
     }
-    FixedInputsInst(Opcode opcode, DataType::Type type) : FixedInputsInst({opcode, type, INVALID_PC}) {}
 
     void SetSrcReg(unsigned index, Register reg) override
     {
-        ASSERT(index < N);
+        ASSERT(index < this->template GetField<Inst::StaticInputsCount>());
         srcRegs_[index] = reg;
     }
 
     Register GetSrcReg(unsigned index) const override
     {
-        ASSERT(index < N);
+        ASSERT(index < this->template GetField<Inst::StaticInputsCount>());
         return srcRegs_[index];
     }
 
@@ -2523,7 +2706,16 @@ public:
         return tmpLocation_;
     }
 
-    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = static_cast<LimitedInputsInst *>(Inst::Clone(targetGraph));
+#ifndef NDEBUG
+        for (size_t i = 0, inputsCount = GetInputsCount(); i < inputsCount; ++i) {
+            clone->SetSrcReg(i, GetSrcReg(i));
+        }
+#endif
+        return clone;
+    }
 
 private:
     template <typename T, std::size_t... IS>
@@ -2533,8 +2725,23 @@ private:
     }
 
 private:
-    std::array<Register, N> srcRegs_ = CreateArray(GetInvalidReg(), std::make_index_sequence<INPUT_COUNT>());
+    std::array<Register, H> srcRegs_ = CreateArray(GetInvalidReg(), std::make_index_sequence<H>());
     Location tmpLocation_ {};
+};
+
+/**
+ * Instruction with fixed number of inputs.
+ * Shall not be instantiated directly, only through derived classes.
+ */
+template <size_t N>
+class FixedInputsInst : public LimitedInputsInst<N, N> {
+    using Base = LimitedInputsInst<N, N>;
+
+public:
+    using Base::STATIC_INPUTS_CAPACITY;
+    using typename Base::Initializer;
+
+    using Base::Base;
 };
 
 using FixedInputsInst0 = FixedInputsInst<0>;
@@ -2544,11 +2751,11 @@ using FixedInputsInst3 = FixedInputsInst<3U>;
 using FixedInputsInst4 = FixedInputsInst<4U>;
 
 /// Instruction with variable inputs count
-class DynamicInputsInst : public Inst {
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class DynamicInputsInst : public Inst, public Inst::InputCountMixin<DynamicInputsInst, DYNAMIC_INPUTS_MARK> {
 public:
     using Inst::Inst;
-
-    static constexpr int INPUT_COUNT = MAX_STATIC_INPUTS;
+    using Inst::InputCountMixin<DynamicInputsInst, DYNAMIC_INPUTS_MARK>::STATIC_INPUTS_CAPACITY;
 
     Location GetLocation(size_t index) const override
     {
@@ -4197,9 +4404,9 @@ private:
 };
 
 /// Load value from array or string
-class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>> {
+class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<LimitedInputsInst<2, 3>>> {
 public:
-    using Base = ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>>;
+    using Base = ArrayInstMixin<NeedBarrierMixin<LimitedInputsInst<2, 3>>>;
     using Base::Base;
 
     explicit LoadInst(Opcode opcode, bool isArray = true) : Base(opcode)
@@ -4226,6 +4433,23 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
+    Inst *GetGCBarrierEntrypoint()
+    {
+        auto input = GetInputOpt(2);
+        return input.has_value() ? input->GetInst() : nullptr;
+    }
+
+    void SetGCBarrierEntrypoint(Inst *entrypoint)
+    {
+        ASSERT(entrypoint != nullptr);
+        SetInput(2, entrypoint);
+    }
+
+    void ResetGCBarrierEntrypoint()
+    {
+        SetInput(2, nullptr);
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -4238,6 +4462,8 @@ public:
             }
             case 1:
                 return DataType::INT32;
+            case 2:
+                return DataType::POINTER;
             default:
                 return DataType::NO_TYPE;
         }
@@ -4245,7 +4471,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = NeedBarrierMixin<FixedInputsInst2>::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(static_cast<LoadInst *>(clone)->IsArray() == IsArray());
         return clone;
     }
@@ -7315,31 +7541,31 @@ struct ConstructWrapper : public T {
     {
     }
 
-    // Try wrap FixedInputs:
-    using Initializer = typename T::Initializer;
-
+    // Try wrap LimitedInputs:
     template <typename T0, typename... Args, typename = Inst::CheckBase<T0>>
     ConstructWrapper(Inst::Initializer t, T0 input0, Args &&...args)
-        : ConstructWrapper(Initializer {t, std::array<Inst *, 1U> {input0}}, std::forward<Args>(args)...)
+        : ConstructWrapper(typename T::template InitializerN<1U> {t, std::array<Inst *, 1U> {input0}},
+                           std::forward<Args>(args)...)
     {
     }
 
     template <typename T0, typename T1, typename... Args, typename = Inst::CheckBase<T0, T1>>
     ConstructWrapper(Inst::Initializer t, T0 input0, T1 input1, Args &&...args)
-        : ConstructWrapper(Initializer {t, std::array<Inst *, 2U> {input0, input1}}, std::forward<Args>(args)...)
+        : ConstructWrapper(typename T::template InitializerN<2U> {t, std::array<Inst *, 2U> {input0, input1}},
+                           std::forward<Args>(args)...)
     {
     }
 
     template <typename T0, typename T1, typename T2, typename... Args, typename = Inst::CheckBase<T0, T1, T2>>
     ConstructWrapper(Inst::Initializer t, T0 input0, T1 input1, T2 input2, Args &&...args)
-        : ConstructWrapper(Initializer {t, std::array<Inst *, 3U> {input0, input1, input2}},
+        : ConstructWrapper(typename T::template InitializerN<3U> {t, std::array<Inst *, 3U> {input0, input1, input2}},
                            std::forward<Args>(args)...)
     {
     }
 
     template <size_t N, typename... Args>
     ConstructWrapper(Inst::Initializer t, std::array<Inst *, N> &&inputs, Args &&...args)
-        : ConstructWrapper(Initializer {t, std::move(inputs)}, std::forward<Args>(args)...)
+        : ConstructWrapper(typename T::template InitializerN<N> {t, std::move(inputs)}, std::forward<Args>(args)...)
     {
     }
 
@@ -7361,45 +7587,43 @@ struct ConstructWrapper<SpillFillInst> : SpillFillInst {
 template <typename InstType, typename... Args>
 InstType *Inst::ConstructInst(InstType *ptr, ArenaAllocator *allocator, Args &&...args)
 {
-    // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto opsPtr = reinterpret_cast<char *>(ptr) - sizeof(DynamicOperands);
-        [[maybe_unused]] auto ops = new (opsPtr) DynamicOperands(allocator);
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    } else if constexpr (InstType::INPUT_COUNT != 0) {
-        constexpr size_t OPERANDS_SIZE = sizeof(Operands<InstType::INPUT_COUNT>);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto operands = new (reinterpret_cast<char *>(ptr) - OPERANDS_SIZE) Operands<InstType::INPUT_COUNT>;
-        unsigned idx = InstType::INPUT_COUNT - 1;
-        for (auto &user : operands->users) {
-            new (&user) User(true, idx--, InstType::INPUT_COUNT);
+    constexpr size_t INPUTS_COUNT = InstType::STATIC_INPUTS_CAPACITY;
+    if constexpr (INPUTS_COUNT == DYNAMIC_INPUTS_MARK) {
+        auto opsPtr = DynamicOperandsInstLayout::InstToOperands(ptr);
+        new (opsPtr) DynamicOperands(allocator);
+    } else if constexpr (INPUTS_COUNT != 0) {
+        new (OperandsInstLayout::InstToInputs<INPUTS_COUNT>(ptr)) std::array<Input, INPUTS_COUNT>();
+        auto &users = *OperandsInstLayout::InstToUsers<INPUTS_COUNT>(ptr);
+        unsigned idx = INPUTS_COUNT - 1;
+        for (auto &user : users) {
+            new (&user) User(true, idx--, INPUTS_COUNT);
         }
     }
     auto inst = new (ptr) ConstructWrapper<InstType>(allocator, std::forward<Args>(args)...);
-    inst->template SetField<Inst::InputsCount>(InstType::INPUT_COUNT);
+    ASSERT(inst->GetStaticInputsCount() <= INPUTS_COUNT);
+    ASSERT(inst->GetStaticInputsCapacity() == INPUTS_COUNT);
     return inst;
 }
 
 template <typename InstType, typename... Args>
 InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
 {
-    static_assert(alignof(InstType) >= alignof(uintptr_t));
+    static_assert(alignof(InstType) == alignof(Inst));
 
     size_t allocSize = sizeof(InstType);
     auto alignment = DEFAULT_ALIGNMENT;
     size_t operandsSize = 0;
-    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
-    if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
-        constexpr size_t OPERANDS_SIZE = sizeof(DynamicOperands);
+    constexpr size_t INPUTS_COUNT = InstType::STATIC_INPUTS_CAPACITY;
+    if constexpr (INPUTS_COUNT == DYNAMIC_INPUTS_MARK) {
+        constexpr size_t OPERANDS_SIZE = DynamicOperandsInstLayout::StorageSize();
         static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
         operandsSize = OPERANDS_SIZE;
-        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
-    } else if constexpr (InstType::INPUT_COUNT != 0) {
-        constexpr size_t OPERANDS_SIZE = sizeof(Operands<InstType::INPUT_COUNT>);
+        alignment = GetLogAlignment(DynamicOperandsInstLayout::StorageAlign());
+    } else if constexpr (INPUTS_COUNT != 0) {
+        constexpr size_t OPERANDS_SIZE = OperandsInstLayout::StorageSize(INPUTS_COUNT);
         static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
         operandsSize = OPERANDS_SIZE;
-        alignment = GetLogAlignment(alignof(Operands<InstType::INPUT_COUNT>));
+        alignment = GetLogAlignment(OperandsInstLayout::StorageAlign<INPUTS_COUNT>());
     }
 
     auto ptr = reinterpret_cast<uintptr_t>(allocator->Alloc(allocSize + operandsSize, alignment));
