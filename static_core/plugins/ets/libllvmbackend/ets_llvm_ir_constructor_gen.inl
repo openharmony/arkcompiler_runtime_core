@@ -409,6 +409,61 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
+{
+    auto arch = GetGraph()->GetArch();
+    if (arch != Arch::AARCH64) {
+        return false;
+    }
+    auto runtime = GetGraph()->GetRuntime();
+    auto str = GetInputValue(inst, 0);
+    auto ch = GetInputValue(inst, 1);
+    auto startIndex = GetInputValue(inst, 2);
+    auto firstBb = GetCurrentBasicBlock();
+    auto retBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "ret"), func_);
+    auto chkEmptyBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "chk_empty"), func_);
+    auto chkRangeBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "chk_range"), func_);
+    auto fitBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "fit"), func_);
+    auto callBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "call"), func_);
+    // Negative startIndex implies no match, i.e. return -1
+    auto startIndexNegative = builder_.CreateICmpEQ(startIndex, builder_.getInt32(0));
+    auto charIndex1 = builder_.getInt32(-1);
+    builder_.CreateCondBr(startIndexNegative, retBb, chkEmptyBb);
+    // Empty string implies no match, i.e. return -1
+    SetCurrentBasicBlock(chkEmptyBb);
+    constexpr uint32_t LENGTH_BITS_NUM = common::BaseString::STRING_LENGTH_BITS_NUM;
+    constexpr auto LENGTH_ZERO = (((uint32_t)0xFFFFFFFF) << LENGTH_BITS_NUM) >> LENGTH_BITS_NUM;
+    auto offset = runtime->GetStringLengthOffset(arch);
+    auto strLengthOffset = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), str, offset);
+    auto strLengthPacked = builder_.CreateLoad(builder_.getInt32Ty(), strLengthOffset);
+    auto strLengthZero = builder_.CreateICmpEQ(strLengthPacked, builder_.getInt32(LENGTH_ZERO));
+    auto charIndex2 = builder_.getInt32(-1);
+    builder_.CreateCondBr(strLengthZero, retBb, chkRangeBb);
+    // Make startIndex = str.length - 1 if startIndex >= str.length
+    SetCurrentBasicBlock(chkRangeBb);
+    constexpr auto LENGTH_START_BIT = common::BaseString::LengthBits::START_BIT;
+    auto strLength = builder_.CreateLShr(strLengthPacked, builder_.getInt32(LENGTH_START_BIT));
+    builder_.CreateCondBr(builder_.CreateICmpULT(startIndex, strLength), callBb, fitBb);
+    SetCurrentBasicBlock(fitBb);
+    auto fitIndex = builder_.CreateSub(strLength, builder_.getInt32(1));
+    builder_.CreateBr(callBb);
+    // Do call intrinsic
+    SetCurrentBasicBlock(callBb);
+    auto i = builder_.CreatePHI(builder_.getInt32Ty(), 2U);
+    i->addIncoming(startIndex, chkRangeBb);
+    i->addIncoming(fitIndex, fitBb);
+    auto charIndex3 = CreateFastPathCall(inst, RuntimeInterface::EntrypointId::STRING_LAST_INDEX_OF, {str, ch, i});
+    builder_.CreateBr(retBb);
+    // Return the result
+    SetCurrentBasicBlock(retBb);
+    auto charIndex = builder_.CreatePHI(builder_.getInt32Ty(), 3U);
+    charIndex->addIncoming(charIndex1, firstBb);
+    charIndex->addIncoming(charIndex2, chkEmptyBb);
+    charIndex->addIncoming(charIndex3, callBb);
+    ValueMapAdd(inst, charIndex);
+    return true;
+}
+
 bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
 {
     auto intrId = inst->CastToIntrinsic()->GetIntrinsicId();

@@ -850,6 +850,96 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: StringLastIndexOf
+  entrypoint: StringLastIndexOf
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)
+
+- name: StringLastIndexOfUncompressedPlain
+  entrypoint: StringLastIndexOfUncompressedPlain
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # start index
+    - uint16_t            # char to look up
+
+- name: StringLastIndexOfUncompressedPlainNativePlus
+  entrypoint: StringLastIndexOfUncompressedPlainNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # start index
+    - uint16_t            # char to look up
+
+- name: StringLastIndexOfUncompressedSimd
+  entrypoint: StringLastIndexOfUncompressedSimd
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # start index
+    - uint16_t            # char to look up
+
+- name: StringLastIndexOfUncompressedSimdNativePlus
+  entrypoint: StringLastIndexOfUncompressedSimdNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # start index
+    - uint16_t            # char to look up
+
+- name: StringLastIndexOfCompressedPlain
+  entrypoint: StringLastIndexOfCompressedPlain
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # start index
+    - uint8_t             # char to look up
+
+- name: StringLastIndexOfCompressedPlainNativePlus
+  entrypoint: StringLastIndexOfCompressedPlainNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # start index
+    - uint8_t             # char to look up
+
+- name: StringLastIndexOfCompressedSimd
+  entrypoint: StringLastIndexOfCompressedSimd
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # start index
+    - uint8_t             # char to look up
+
+- name: StringLastIndexOfCompressedSimdNativePlus
+  entrypoint: StringLastIndexOfCompressedSimdNativePlus
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # last index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # start index
+    - uint8_t             # char to look up
+
 - name: EtsStringEquals
   entrypoint: EtsStringEquals
   bridge: none
@@ -1934,6 +2024,26 @@
     - ark::ObjectHeader*  # string
     - uint16_t            # char to look up
     - int32_t             # unused (always zero)
+
+- name: StringLastIndexOfSlowPath
+  entrypoint: StdCoreStringLastIndexOf
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # start index
+
+- name: StringLastIndexOfOddSaved
+  entrypoint: StdCoreStringLastIndexOf
+  bridge: odd_saved
+  properties: [intrinsic]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # start index
 
 - name: StringConcat2Tlab
   entrypoint: StringConcat2Tlab

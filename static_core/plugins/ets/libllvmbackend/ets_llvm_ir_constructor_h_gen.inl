@@ -42,6 +42,7 @@ bool EmitStringEndsWith(Inst *inst);
 bool EmitStringGetBytesTlab(Inst *inst);
 bool EmitStringIndexOf(Inst *inst);
 bool EmitStringIndexOfAfter(Inst *inst);
+bool EmitStringLastIndexOf(Inst *inst);
 bool EmitStringFromCharCode(Inst *inst);
 bool EmitStringFromCharCodeSingle(Inst *inst);
 bool EmitStringRepeat(Inst *inst)

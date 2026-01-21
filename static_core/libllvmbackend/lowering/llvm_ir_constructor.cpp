@@ -214,6 +214,57 @@ private:
     llvm::Value *vcmpeq2_ = nullptr;
 };
 
+class MemLastCharSimdLowering {
+public:
+    MemLastCharSimdLowering(MemLastCharSimdLowering &&) = delete;
+    MemLastCharSimdLowering(const MemLastCharSimdLowering &) = delete;
+    MemLastCharSimdLowering &operator=(const MemLastCharSimdLowering &) = delete;
+    MemLastCharSimdLowering &operator=(MemLastCharSimdLowering &&) = delete;
+    MemLastCharSimdLowering() = delete;
+    ~MemLastCharSimdLowering() = default;
+
+    MemLastCharSimdLowering(llvm::Value *ch, llvm::Value *addr, llvm::IRBuilder<> *builder, llvm::Function *func);
+
+    llvm::Value *Generate(llvm::VectorType *vecTy);
+
+    llvm::VectorType *GetU64X2Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt64Ty(), VECTOR_SIZE_2, false);
+    }
+    llvm::VectorType *GetU16X8Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt16Ty(), VECTOR_SIZE_8, false);
+    }
+    llvm::VectorType *GetU8X16Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt8Ty(), VECTOR_SIZE_16, false);
+    }
+
+private:
+    void GenLoadAndFastCheck128(llvm::VectorType *vecTy);
+    llvm::Value *GenFindChar128(llvm::IntegerType *charTy);
+    static llvm::SmallVector<int> ShuffleMask(llvm::Type *charTy)
+    {
+        ASSERT(charTy->isIntegerTy(8U) || charTy->isIntegerTy(16U));
+        static constexpr std::initializer_list<int> MASK_U8 {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        static constexpr std::initializer_list<int> MASK_U16 {7, 6, 5, 4, 3, 2, 1, 0};
+        return {charTy->isIntegerTy(8U) ? MASK_U8 : MASK_U16};
+    }
+
+private:
+    llvm::Value *ch_;
+    llvm::Value *addr_;
+    llvm::IRBuilder<> *builder_;
+    llvm::Function *func_;
+
+    llvm::BasicBlock *lastBb_ = nullptr;
+    llvm::BasicBlock *foundBb_ = nullptr;
+    llvm::BasicBlock *inspectV1D0Bb_ = nullptr;
+    llvm::BasicBlock *inspectV1D1Bb_ = nullptr;
+    llvm::BasicBlock *clzV1D1Bb_ = nullptr;
+    llvm::Value *vcmpeq1_ = nullptr;
+};
+
 MemCharSimdLowering::MemCharSimdLowering(llvm::Value *ch, llvm::Value *addr, llvm::IRBuilder<> *builder,
                                          llvm::Function *func)
     : ch_(ch), addr_(addr), builder_(builder), func_(func)
@@ -371,13 +422,13 @@ llvm::Value *MemCharSimdLowering::Generate(llvm::VectorType *vecTy)
     foundBb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_found", func_);
     inspectV1D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d0", func_);
     inspectV1D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
-    clzV1D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+    clzV1D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_clz_v1d0", func_);
     llvm::Value *foundCharPtr = nullptr;
     if constexpr (MEM_BLOCK_SIZE_256_BITS) {
         inspectV2D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v2d0", func_);
         inspectV2D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v2d1", func_);
-        clzV1D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
-        clzV2D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+        clzV1D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_clz_v1d1", func_);
+        clzV2D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_clz_v2d0", func_);
         GenLoadAndFastCheck256(vecTy);
         foundCharPtr = GenFindChar256(charTy);
     } else {
@@ -405,6 +456,101 @@ llvm::Value *MemCharSimdLowering::Generate(llvm::VectorType *vecTy)
     return result;
 }
 
+MemLastCharSimdLowering::MemLastCharSimdLowering(llvm::Value *ch, llvm::Value *addr, llvm::IRBuilder<> *builder,
+                                                 llvm::Function *func)
+    : ch_(ch), addr_(addr), builder_(builder), func_(func)
+{
+    ASSERT(addr_ != nullptr);
+    ASSERT(builder_ != nullptr);
+    ASSERT(func_ != nullptr);
+}
+
+void MemLastCharSimdLowering::GenLoadAndFastCheck128(llvm::VectorType *vecTy)
+{
+    auto *module = func_->getParent();
+    auto addpId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_addp;
+    auto addp = llvm::Intrinsic::getDeclaration(module, addpId, {GetU64X2Ty()});
+    // Read 16-byte chunk of memory
+    auto vld1 = builder_->CreateLoad(vecTy, addr_);
+    // Prepare the search pattern
+    auto insert = builder_->CreateInsertElement(vecTy, ch_, 0UL);
+    auto pattern = builder_->CreateShuffleVector(insert, ShuffleMask(vecTy->getElementType()));
+    // Compare
+    vcmpeq1_ = builder_->CreateSExt(builder_->CreateICmpEQ(vld1, pattern), vecTy);
+    // Do fast check and give up if char is not there
+    auto v64x2 = builder_->CreateBitCast(vcmpeq1_, GetU64X2Ty());
+    auto vaddp = builder_->CreateCall(addp, {v64x2, v64x2});
+    auto low64 = builder_->CreateBitCast(builder_->CreateExtractElement(vaddp, 0UL), builder_->getInt64Ty());
+    auto charIsNotThere = builder_->CreateICmpEQ(low64, llvm::Constant::getNullValue(low64->getType()));
+    builder_->CreateCondBr(charIsNotThere, lastBb_, inspectV1D1Bb_);
+}
+
+llvm::Value *MemLastCharSimdLowering::GenFindChar128(llvm::IntegerType *charTy)
+{
+    static constexpr uint32_t sixtyFour = 64U;
+    static constexpr int32_t zeroBasedMaxIndexU8 = 15;
+    static constexpr int32_t zeroBasedMaxIndexU16 = 7;
+    ASSERT(vcmpeq1_ != nullptr);
+    auto i64Ty = builder_->getInt64Ty();
+    // Inspect high 64-bit part of vcmpeq1 first as we are looking for the last occurrence of 'ch'
+    builder_->SetInsertPoint(inspectV1D1Bb_);
+    auto vcmpeq1 = builder_->CreateBitCast(vcmpeq1_, GetU64X2Ty());
+    auto v1d1 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 1UL), i64Ty);
+    auto v1d1IsZero = builder_->CreateICmpEQ(v1d1, llvm::Constant::getNullValue(v1d1->getType()));
+    builder_->CreateCondBr(v1d1IsZero, inspectV1D0Bb_, clzV1D1Bb_);
+    builder_->SetInsertPoint(clzV1D1Bb_);
+    auto pos11 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, v1d1, builder_->getFalse(), nullptr);
+    builder_->CreateBr(foundBb_);
+    // Inspect low 64-bit part of vcmpeq1
+    builder_->SetInsertPoint(inspectV1D0Bb_);
+    auto v1d0 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 0UL), i64Ty);
+    auto clz10 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, v1d0, builder_->getFalse(), nullptr);
+    auto pos10 = builder_->CreateAdd(clz10, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(sixtyFour, sixtyFour)));
+    builder_->CreateBr(foundBb_);
+    // Compute a pointer to the char
+    builder_->SetInsertPoint(foundBb_);
+    auto nbits = builder_->CreatePHI(i64Ty, 2U);
+    nbits->addIncoming(pos11, clzV1D1Bb_);
+    nbits->addIncoming(pos10, inspectV1D0Bb_);
+    uint32_t bitsShiftWidth = charTy->isIntegerTy(8U) ? 3UL : 4UL;
+    auto nchars = builder_->CreateNeg(builder_->CreateLShr(nbits, bitsShiftWidth));
+    auto maxIndex = charTy->isIntegerTy(8U) ? zeroBasedMaxIndexU8 : zeroBasedMaxIndexU16;
+    auto maxIndexValue = llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(sixtyFour, maxIndex));
+    auto offsetInChars = builder_->CreateAdd(nchars, maxIndexValue);
+    auto foundCharPtr = builder_->CreateInBoundsGEP(charTy, addr_, offsetInChars);
+    builder_->CreateBr(lastBb_);
+    return foundCharPtr;
+}
+
+llvm::Value *MemLastCharSimdLowering::Generate(llvm::VectorType *vecTy)
+{
+    auto *charTy = llvm::cast<llvm::IntegerType>(vecTy->getElementType());
+    ASSERT(vecTy == GetU8X16Ty() || vecTy == GetU16X8Ty());
+    auto &context = func_->getContext();
+    auto firstBb = builder_->GetInsertBlock();
+    lastBb_ = llvm::BasicBlock::Create(context, "last", func_);
+    foundBb_ = llvm::BasicBlock::Create(context, "found", func_);
+    inspectV1D0Bb_ = llvm::BasicBlock::Create(context, "inspect_v1d0", func_);
+    inspectV1D1Bb_ = llvm::BasicBlock::Create(context, "inspect_v1d1", func_);
+    clzV1D1Bb_ = llvm::BasicBlock::Create(context, "clz_v1d1", func_);
+    llvm::Value *foundCharPtr = nullptr;
+    GenLoadAndFastCheck128(vecTy);
+    foundCharPtr = GenFindChar128(charTy);
+    ASSERT(foundCharPtr != nullptr);
+    // The result is either a pointer to the char or null
+    builder_->SetInsertPoint(lastBb_);
+    auto result = builder_->CreatePHI(builder_->getPtrTy(), 2U);
+    result->addIncoming(llvm::Constant::getNullValue(builder_->getPtrTy()), firstBb);
+    result->addIncoming(foundCharPtr, foundBb_);
+    // Cleanup and return
+    lastBb_ = nullptr;
+    foundBb_ = nullptr;
+    inspectV1D0Bb_ = nullptr;
+    inspectV1D1Bb_ = nullptr;
+    clzV1D1Bb_ = nullptr;
+    vcmpeq1_ = nullptr;
+    return result;
+}
 static void MarkNormalBlocksRecursive(BasicBlock *block, Marker normal)
 {
     [[maybe_unused]] size_t expected = 0;
@@ -1017,6 +1163,34 @@ bool LLVMIrConstructor::EmitMemCharU16X16UsingSimd(Inst *inst)
 
     MemCharSimdLowering memCharLowering(GetInputValue(inst, 0), GetInputValue(inst, 1), GetBuilder(), GetFunc());
     ValueMapAdd(inst, memCharLowering.Generate<true>(memCharLowering.GetU16X8Ty()));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemLastCharU8X16UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT8);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    auto ch = GetInputValue(inst, 0);
+    auto addr = GetInputValue(inst, 1);
+    MemLastCharSimdLowering memLastCharLowering(ch, addr, GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memLastCharLowering.Generate(memLastCharLowering.GetU8X16Ty()));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemLastCharU16X8UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT16);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    auto ch = GetInputValue(inst, 0);
+    auto addr = GetInputValue(inst, 1);
+    MemLastCharSimdLowering memLastCharLowering(ch, addr, GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memLastCharLowering.Generate(memLastCharLowering.GetU16X8Ty()));
     return true;
 }
 

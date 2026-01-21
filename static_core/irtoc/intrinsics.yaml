@@ -1,10 +1,10 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -106,7 +106,7 @@ intrinsics:
   signature:
     ret: void
     args: []
-  clear_flags: [require_state, can_throw, heap_inv]  
+  clear_flags: [require_state, can_throw, heap_inv]
   description: Restore registers on return bytecode
 
 - name: LoadAcquireMarkWordExclusive
@@ -366,6 +366,38 @@ intrinsics:
       ret: void*
       args: [ u16, u16* ]
   description: Find u16 char in 16-byte block of memory addressed by the second operand
+
+- name: MemLastCharU16X8UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemLastCharU16X8UsingSimd
+  signature:
+      ret: void*
+      args: [ u16, u16* ]
+  description: find the last occurrence of u16 char in 16-byte block of memory addressed by the second operand
+
+- name: MemLastCharU8X16UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemLastCharU8X16UsingSimd
+  signature:
+      ret: void*
+      args: [ u8, u8* ]
+  description: find the last occurrence of u8 char in 16-byte block of memory addressed by the second operand
 
 - name: JsCastDoubleToChar
   class_name: Irtoc

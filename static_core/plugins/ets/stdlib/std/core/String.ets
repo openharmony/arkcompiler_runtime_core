@@ -506,17 +506,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     public native indexOfImpl(str: String, fromIndex: int): int;
 
     /**
-     * Finds the last occurrence of a character in this String.
-     *
-     * @param ch to find
-     *
-     * @returns index of the character from the beginning of this string, or -1 if not found
-     */
-    public lastIndexOf(ch: char): int {
-        return this.lastIndexOf(ch, this.getLength());
-    }
-
-    /**
      * Finds the last occurrence of a character in this String at position <= fromIndex.
      * All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
      *
@@ -525,16 +514,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns index of the character from the beginning of this string, or -1 if not found
      */
-    public lastIndexOf(ch: char, fromIndex: int): int {
-        if (fromIndex >= this.getLength()) {
-            fromIndex = this.getLength() - 1;
-        }
-        for (let i: int = fromIndex; i >= 0; i--) {
-            if (this.charAt(i) == ch) {
-                return i;
-            }
-        }
-        return -1;
+    public native lastIndexOf(ch: char, fromIndex: int): int;
+
+    /**
+     * Finds the last occurrence of a character in this String.
+     *
+     * @param ch to find
+     *
+     * @returns index of the character from the beginning of this string, or -1 if not found
+     */
+    public lastIndexOf(ch: char): int {
+        return this.lastIndexOf(ch, this.getLength());
     }
 
     /**

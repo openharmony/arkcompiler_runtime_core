@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,6 +272,12 @@ void CodegenFastPath::EmitSimdIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS sr
     } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_CHAR_U16_X8_USING_SIMD) {
         GetEncoder()->EncodeMemCharU16X8UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
                                                   ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_LAST_CHAR_U16_X8_USING_SIMD) {
+        GetEncoder()->EncodeMemLastCharU16X8UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                      ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_LAST_CHAR_U8_X16_USING_SIMD) {
+        GetEncoder()->EncodeMemLastCharU8X16UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                      ConvertInstTmpReg(inst, DataType::FLOAT64));
     } else {
         UNREACHABLE();
     }
