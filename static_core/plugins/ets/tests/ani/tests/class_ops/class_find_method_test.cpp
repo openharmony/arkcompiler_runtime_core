@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -436,8 +436,8 @@ TEST_F(ClassFindMethodTest, find_intrinsics)
         const char *moduleName = "std.core";
         const char *className = "ArrayBuffer";
 
-        CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "iii:d");
-        CheckIntrinsicsFindMethod(moduleName, className, "atomicXorI32", "iii:d");
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicAndI32", "iii:l");
+        CheckIntrinsicsFindMethod(moduleName, className, "atomicXorI32", "iii:l");
     }
 }
 

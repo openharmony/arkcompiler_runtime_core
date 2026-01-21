@@ -5961,7 +5961,7 @@ intrinsics:
     method_name: atomicAddI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI8
 
@@ -5971,7 +5971,7 @@ intrinsics:
     method_name: atomicAndI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI8
 
@@ -5981,7 +5981,7 @@ intrinsics:
     method_name: atomicCompareExchangeI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI8
 
@@ -5991,7 +5991,7 @@ intrinsics:
     method_name: atomicExchangeI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI8
 
@@ -6001,7 +6001,7 @@ intrinsics:
     method_name: atomicLoadI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI8
 
@@ -6011,7 +6011,7 @@ intrinsics:
     method_name: atomicOrI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI8
 
@@ -6021,7 +6021,7 @@ intrinsics:
     method_name: atomicStoreI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI8
 
@@ -6031,7 +6031,7 @@ intrinsics:
     method_name: atomicSubI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI8
 
@@ -6041,7 +6041,7 @@ intrinsics:
     method_name: atomicXorI8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI8
 
@@ -6051,7 +6051,7 @@ intrinsics:
     method_name: atomicAddI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI16
 
@@ -6061,7 +6061,7 @@ intrinsics:
     method_name: atomicAndI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI16
 
@@ -6071,7 +6071,7 @@ intrinsics:
     method_name: atomicCompareExchangeI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI16
 
@@ -6081,7 +6081,7 @@ intrinsics:
     method_name: atomicExchangeI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI16
 
@@ -6091,7 +6091,7 @@ intrinsics:
     method_name: atomicLoadI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI16
 
@@ -6101,7 +6101,7 @@ intrinsics:
     method_name: atomicOrI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI16
 
@@ -6111,7 +6111,7 @@ intrinsics:
     method_name: atomicStoreI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI16
 
@@ -6121,7 +6121,7 @@ intrinsics:
     method_name: atomicSubI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI16
 
@@ -6131,7 +6131,7 @@ intrinsics:
     method_name: atomicXorI16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI16
 
@@ -6141,7 +6141,7 @@ intrinsics:
     method_name: atomicAddI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI32
 
@@ -6151,7 +6151,7 @@ intrinsics:
     method_name: atomicAndI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI32
 
@@ -6161,7 +6161,7 @@ intrinsics:
     method_name: atomicCompareExchangeI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI32
 
@@ -6171,7 +6171,7 @@ intrinsics:
     method_name: atomicExchangeI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI32
 
@@ -6181,7 +6181,7 @@ intrinsics:
     method_name: atomicLoadI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI32
 
@@ -6191,7 +6191,7 @@ intrinsics:
     method_name: atomicOrI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI32
 
@@ -6201,7 +6201,7 @@ intrinsics:
     method_name: atomicStoreI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI32
 
@@ -6211,7 +6211,7 @@ intrinsics:
     method_name: atomicSubI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI32
 
@@ -6221,7 +6221,7 @@ intrinsics:
     method_name: atomicXorI32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI32
 
@@ -6231,7 +6231,7 @@ intrinsics:
     method_name: atomicAddI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAddI64
 
@@ -6241,7 +6241,7 @@ intrinsics:
     method_name: atomicAndI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAndI64
 
@@ -6251,7 +6251,7 @@ intrinsics:
     method_name: atomicCompareExchangeI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeI64
 
@@ -6261,7 +6261,7 @@ intrinsics:
     method_name: atomicExchangeI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeI64
 
@@ -6271,7 +6271,7 @@ intrinsics:
     method_name: atomicLoadI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadI64
 
@@ -6281,7 +6281,7 @@ intrinsics:
     method_name: atomicOrI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferOrI64
 
@@ -6291,7 +6291,7 @@ intrinsics:
     method_name: atomicStoreI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreI64
 
@@ -6301,7 +6301,7 @@ intrinsics:
     method_name: atomicSubI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferSubI64
 
@@ -6311,7 +6311,7 @@ intrinsics:
     method_name: atomicXorI64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorI64
 
@@ -6321,7 +6321,7 @@ intrinsics:
     method_name: atomicAddU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU8
 
@@ -6331,7 +6331,7 @@ intrinsics:
     method_name: atomicAndU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU8
 
@@ -6341,7 +6341,7 @@ intrinsics:
     method_name: atomicCompareExchangeU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU8
 
@@ -6351,7 +6351,7 @@ intrinsics:
     method_name: atomicExchangeU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU8
 
@@ -6361,7 +6361,7 @@ intrinsics:
     method_name: atomicLoadU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU8
 
@@ -6371,7 +6371,7 @@ intrinsics:
     method_name: atomicOrU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU8
 
@@ -6381,7 +6381,7 @@ intrinsics:
     method_name: atomicStoreU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU8
 
@@ -6391,7 +6391,7 @@ intrinsics:
     method_name: atomicSubU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU8
 
@@ -6401,7 +6401,7 @@ intrinsics:
     method_name: atomicXorU8
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i8 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU8
 
@@ -6411,7 +6411,7 @@ intrinsics:
     method_name: atomicAddU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU16
 
@@ -6421,7 +6421,7 @@ intrinsics:
     method_name: atomicAndU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU16
 
@@ -6431,7 +6431,7 @@ intrinsics:
     method_name: atomicCompareExchangeU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU16
 
@@ -6441,7 +6441,7 @@ intrinsics:
     method_name: atomicExchangeU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU16
 
@@ -6451,7 +6451,7 @@ intrinsics:
     method_name: atomicLoadU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU16
 
@@ -6461,7 +6461,7 @@ intrinsics:
     method_name: atomicOrU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU16
 
@@ -6471,7 +6471,7 @@ intrinsics:
     method_name: atomicStoreU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU16
 
@@ -6481,7 +6481,7 @@ intrinsics:
     method_name: atomicSubU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU16
 
@@ -6491,7 +6491,7 @@ intrinsics:
     method_name: atomicXorU16
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i16 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU16
 
@@ -6501,7 +6501,7 @@ intrinsics:
     method_name: atomicAddU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU32
 
@@ -6511,7 +6511,7 @@ intrinsics:
     method_name: atomicAndU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU32
 
@@ -6521,7 +6521,7 @@ intrinsics:
     method_name: atomicCompareExchangeU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU32
 
@@ -6531,7 +6531,7 @@ intrinsics:
     method_name: atomicExchangeU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU32
 
@@ -6541,7 +6541,7 @@ intrinsics:
     method_name: atomicLoadU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU32
 
@@ -6551,7 +6551,7 @@ intrinsics:
     method_name: atomicOrU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU32
 
@@ -6561,7 +6561,7 @@ intrinsics:
     method_name: atomicStoreU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU32
 
@@ -6571,7 +6571,7 @@ intrinsics:
     method_name: atomicSubU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU32
 
@@ -6581,7 +6581,7 @@ intrinsics:
     method_name: atomicXorU32
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU32
 
@@ -6591,7 +6591,7 @@ intrinsics:
     method_name: atomicAddU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAddU64
 
@@ -6601,7 +6601,7 @@ intrinsics:
     method_name: atomicAndU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferAndU64
 
@@ -6611,7 +6611,7 @@ intrinsics:
     method_name: atomicCompareExchangeU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferCompareExchangeU64
 
@@ -6621,7 +6621,7 @@ intrinsics:
     method_name: atomicExchangeU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferExchangeU64
 
@@ -6631,7 +6631,7 @@ intrinsics:
     method_name: atomicLoadU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32 ]
     impl: ark::ets::intrinsics::ArrayBufferLoadU64
 
@@ -6641,7 +6641,7 @@ intrinsics:
     method_name: atomicOrU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferOrU64
 
@@ -6651,7 +6651,7 @@ intrinsics:
     method_name: atomicStoreU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferStoreU64
 
@@ -6661,7 +6661,7 @@ intrinsics:
     method_name: atomicSubU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferSubU64
 
@@ -6671,7 +6671,7 @@ intrinsics:
     method_name: atomicXorU64
     static: false
     signature:
-      ret: f64
+      ret: i64
       args: [ i32, i32, i64 ]
     impl: ark::ets::intrinsics::ArrayBufferXorU64
 
