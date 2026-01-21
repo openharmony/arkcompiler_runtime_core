@@ -426,6 +426,9 @@
 07.expressions/27.equality_expressions/eq_neg_18.ets
 07.expressions/27.equality_expressions/eq_neg_19.ets
 
+#32743 bigint and numerical ==/=== should always return false (now return true - false positive)
+07.expressions/27.equality_expressions/01.numerical_equality_operators/bigint_equality_operators/eq_numeric_0.ets
+
 #30340 &&= ||= ??= still not supported in code
 07.expressions/29.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_13.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,16 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
+{% for c in cases %}
 /*---
 desc: >-
-    Bigint equality with numeric type.
-    Per spec: If one operand is of type bigint, and the other is of a numeric type,
-    then the result is false for == and ===, true for != and !==.
+  When context type is not a fixed-size array, readonly array, or array type,
+  the array literal type is inferred from element types.
 ---*/
 
-function check(b: bigint, n: number): boolean {
-    return !(b == n) && !(n == b)
-        && b != n && n != b
-        && !(b === n) && !(n === b)
-        && b !== n && n !== b
-}
+{{c.decl}}
 
-function main(): void {
-    {%- for p in c['pairs'] %}
-    arktest.assertTrue(check({{p.b}}, {{p.n}}))
-    {%- endfor %}
+function main() {
+    {{c.use|indent}}
 }
-{%- endfor %}
+{% endfor %}
