@@ -550,6 +550,21 @@ numeric types to ``bigint`` occurs. The methods of class ``BigInt``
 (which is a part of :ref:`Standard Library`) must be used to create
 ``bigint`` values from numeric type values.
 
+*Numeric types* are represented by classes of the :ref:`Standard Library`. It
+means that *numeric types* are of the class type nature, that all of them are
+subtypes of ``Object``, and therefore can be used at any place where a class
+name is expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_number = new number
+    let a_byte = new byte
+    let an_integer = new int
+    console.log (a_number, a_byte, an_integer)
+    // Output is: 0 0 0 
+
+
 .. index::
    integer type
    floating-point type
@@ -1003,6 +1018,18 @@ The boolean operators are as follows:
    ``false``), and then creates a concatenation of the two strings as a new
    ``string``.
 
+Type ``boolean`` is a class type that is a part of the :ref:`Standard Library`.
+It means that type ``boolen  is a subtype of ``Object``, and therefore can be
+used at any place where a class name is expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_boolean = new boolean
+    console.log (a_boolean)
+    // Output is: false
+    let o: Object = a_boolean // OK
+
 
 .. index::
    boolean
@@ -1375,6 +1402,19 @@ Type ``string`` has dual semantics, i.e.:
    ``string`` operations (see :ref:`String Concatenation`,
    :ref:`Equality Expressions`, and :ref:`String Relational Operators`).
 
+As a result, reference type semantics of type ``string`` highlights that this
+type is a class type. The appropriate class is a part of the
+:ref:`Standard Library`, and type ``string`` is a subtype of ``Object``, and
+can be used at any place where a class name is expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_string = new string
+    console.log (a_string)
+    // Output is: <empty_string>
+    let o: Object = a_string // OK
+
 .. index::
    type string
    value
@@ -1461,14 +1501,29 @@ Similarly to ``string``, ``bigint`` type has dual semantics:
   :ref:`Integer Types and Operations`.
 
 Using ``bigint`` is recommended in all cases, although the name ``BigInt``
-also refers to type ``bigint``. Using ``BigInt`` creates new objects and calls
-to static methods in order to improve |TS| compatibility.
+also refers to type ``bigint``. For |TS| compatibility, objects of type
+``bigint`` can be created with help of ``BigInt`` static methods.
 
 .. code-block:: typescript
    :linenos:
 
    let b1: bigint = new BigInt(5) // for Typescript compatibility
    let b2: bigint = 123n
+
+Type ``bigint`` is a class type that has an appropriate class as a part of the
+:ref:`Standard Library`. It means that type ``bigint`` is a subtype of
+``Object``, and therefore can be used at any place where a class name is
+expected.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_bigint = new bigint
+    console.log (a_bigint)
+    // Output is: 0
+    let o: Object = a_bigint // OK
+
 
 .. index::
    bigint type
@@ -1568,9 +1623,9 @@ Array Types
 .. meta:
     frontend_status: Partly
 
-*Array type* is a data structure intended to comprise any number of same-type
-elements, including zero elements. |LANG| supports the following two predefined
-array types:
+*Array type* represents a data structure intended to comprize any non-negative
+number of elements of types that are subtypes of the type specified in the
+array declaration. |LANG| supports the following two predefined array types:
 
 - :ref:`Resizable Array Types`; and
 
@@ -1585,6 +1640,11 @@ requirement.
 - *Fixed-size arrays* have their length set only once to achieve a better
   performance.
 - *Fixed-Size arrays* have no methods defined.
+
+Any array type is a class type that has an appropritate class in the 
+:ref:`Standard Library`. It means that array types are subtypes of
+``Object``, and that they can be used at any place where a class
+name is expected.
 
 
 .. note::

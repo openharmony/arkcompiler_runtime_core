@@ -143,6 +143,20 @@ Values of ``char`` type are Unicode code points.
 Predefined constructors, methods, and constants for ``char`` type are
 parts of the |LANG| :ref:`Standard Library`.
 
+Type ``char`` is a class type that has an appropriate class as a part of the
+:ref:`Standard Library`. It means that type ``char`` is a subtype of 
+``Object``, and that it can be used at any place where a class name is
+expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_char = new char
+    console.log (a_char)
+    // Output is: <empty_char>
+    let o: Object = a_char // OK
+
+
 .. index::
    char type
    Unicode code point
