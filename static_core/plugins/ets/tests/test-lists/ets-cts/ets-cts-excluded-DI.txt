@@ -73,6 +73,6 @@
 05.generics/03.utility_types/04.required_utility_type/required_module_interface_0.ets
 07.expressions/04.named_reference/qualified_name_0.ets
 07.expressions/04.named_reference/qualified_name_1.ets
-07.expressions/25.equality_expressions/eq_19.ets
+07.expressions/27.equality_expressions/eq_19.ets
 13.modules_and_namespaces/06.top-level_statements/block_declaration_3.ets
 13.modules_and_namespaces/06.top-level_statements/block_declaration_5.ets
