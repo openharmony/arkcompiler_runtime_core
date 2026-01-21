@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,7 @@ TEST_F(LibAbcKitCreateDynCreateGeneratorObjInstTest, CreateDynCreategeneratorobj
 {
     auto output = helpers::ExecuteDynamicAbc(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic.abc", "creategeneratorobj_dynamic");
-    EXPECT_TRUE(helpers::Match(output, "Cannot get source code of funtion\n"));
+    EXPECT_TRUE(helpers::Match(output, "Cannot get source code of function\n"));
 
     helpers::TransformMethod(
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic.abc",
