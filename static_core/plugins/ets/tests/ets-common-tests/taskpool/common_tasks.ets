@@ -1360,6 +1360,33 @@ async function executeDelayedOneTaskThreetimes(){
     arktest.assertEQ(checkPoints.size, 3);
 }
 
+async function cancelAsyncRunnerWaittingTask(){
+    let catchCalled = false;
+    let runner = new taskpool.AsyncRunner(1);
+    let event = new Event();
+    let blockTask = (): void => {
+        event.wait();
+        return;
+    }
+
+    let emptyTask = (): void => {
+        return;
+    }
+
+    let task1 = new taskpool.Task(blockTask);
+    let task2 = new taskpool.Task(blockTask);
+    let p1 = runner.execute(task1);
+    let p2 = runner.execute(task2).catch((e: Error) => {
+        catchCalled = true;
+        arktest.assertEQ(e.message, 'taskpool:: asyncRunner task has been canceled');
+    });
+    taskpool.cancel(task2);
+    event.fire();
+    await p1;
+    await p2;
+    arktest.assertEQ(catchCalled, true);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1413,6 +1440,7 @@ function main(): int {
     commonTaskSuite.addTest('periodicTaskAddedAsDepedency', periodicTaskAddedAsDepedency);
     commonTaskSuite.addAsyncTest('executeOneTaskThreetimes', executeOneTaskThreetimes);
     commonTaskSuite.addAsyncTest('executeDelayedOneTaskThreetimes',executeDelayedOneTaskThreetimes);
+    commonTaskSuite.addAsyncTest('cancelAsyncRunnerWaittingTask', cancelAsyncRunnerWaittingTask);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
