@@ -3517,11 +3517,13 @@ nullish types. It can be used in the following contexts:
 - :ref:`Function Call Expression`,
 - :ref:`Indexing Expressions`.
 
-If the value of the expression to the left of ``'?.'`` is ``undefined`` or
-``null``, then the evaluation of the entire surrounding *primary expression*
-stops. The result of the entire primary expression is then ``undefined``. Thus
-the type of the entire primary expression is the union ``undefined`` |
-*non-nullish type of the entire primary expression*:
+If the value of ``expr`` in ``expr?.`` is of a *nullish type*,
+and is evaluated to ``undefined`` or ``null``,
+then the evaluation of the entire surrounding *primary expression*
+stops. The result of the entire primary expression evaluation is then
+``undefined``. The entire primary expression is then of the union type
+``undefined | T``, where ``T`` is a *non-nullish type* of the entire
+primary expression:
 
 .. index::
    chaining operator
@@ -3561,6 +3563,18 @@ the type of the entire primary expression is the union ``undefined`` |
     console.log(bob.spouse?.name) // prints "Alice"
        // type of bob.spouse?.name is undefined|string
 
+If the value of ``expr`` in ``expr?.`` is not of a *nullish type*,
+then the chaining operator has no effect, and does not
+influence the type of the entire primary expression:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(s1: string, s2: string | null) {
+        let a = s1?.[0] // 's' is of non-nullish type, type of 'a' is string
+        let b = s2?.[0] // type of 'b' is string | undefined
+    }
+
 The chaining operator is allowed in a method call expression for instance
 methods only. Attempting to use it with a static method is syntactically correct
 but causes a :index:`compile-time error`:
@@ -3599,8 +3613,6 @@ an assignment (see :ref:`Assignment`) or expression
    decrement
    increment
 
-If an expression is not of a nullish type, then the chaining operator has
-no effect.
 If an expression preceding a *chaining operator* is known at compile time to
 always evaluate at runtime to a nullish value (``undefined`` or ``null``),
 or to a non-nullish value, then a :index:`compile-time warning` is issued:
