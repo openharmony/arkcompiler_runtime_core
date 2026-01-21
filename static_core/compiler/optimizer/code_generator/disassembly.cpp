@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,9 +115,8 @@ void Disassembly::PrintMethodEntry(const Codegen *codegen)
     PrintChapter("METHOD_INFO");
     {
         ItemAppender item(this);
-        item.GetStream() << INDENT << "name: " << codegen->GetRuntime()->GetMethodFullName(graph->GetMethod(), true)
-                         << "\n";
-        item.GetStream() << INDENT << "mode: ";
+        auto name = codegen->GetRuntime()->GetMethodFullName(graph->GetMethod(), true);
+        item.GetStream() << INDENT << "name: " << name << "\n" << INDENT << "mode: ";
         graph->GetMode().Dump(item.GetStream());
         item.GetStream() << "\n";
     }
@@ -127,28 +126,28 @@ void Disassembly::PrintMethodEntry(const Codegen *codegen)
     }
     if (graph->IsAotMode()) {
         ItemAppender item = ItemAppender(this);
-        item.GetStream() << INDENT << "code_offset: " << reinterpret_cast<void *>(graph->GetAotData()->GetCodeOffset())
-                         << "\n";
+        auto codeOffset = reinterpret_cast<void *>(graph->GetAotData()->GetCodeOffset());
+        item.GetStream() << INDENT << "code_offset: " << codeOffset << "\n";
     }
-
     {
+        ItemAppender item(this);
+        auto slotSize = static_cast<ssize_t>(codegen_->GetFrameLayout().GetSlotSize());
+        auto dumpRegsInfo = [&item, slotSize](const char *prompt, ssize_t offset, size_t numRegs, bool isRelativeFp) {
+            auto &out = item.GetStream();
+            out << INDENT << prompt << (isRelativeFp ? "fp" : "sp");
+            out << std::showpos << (offset * slotSize) << " bytes (" << offset << " slots)" << std::noshowpos;
+            out << ", with " << numRegs << " register(s)\n";
+        };
         auto arch = codegen->GetArch();
         auto frame = codegen->GetFrameInfo();
-        ItemAppender item(this);
-        item.GetStream() << INDENT << "frame_size: " << frame->GetFrameSize() << "\n";
+        item.GetStream() << INDENT << "frame_size: " << frame->GetFrameSize() << " bytes\n";
         item.GetStream() << INDENT << "spills_count: " << frame->GetSpillsCount() << "\n";
-        item.GetStream() << INDENT << "Callees:   " << (frame->GetCalleesRelativeFp() ? "fp" : "sp") << std::showpos
-                         << frame->GetCalleesOffset() << std::noshowpos << " (" << GetCalleeRegsCount(arch, false)
-                         << ")\n";
-        item.GetStream() << INDENT << "FpCallees: " << (frame->GetCalleesRelativeFp() ? "fp" : "sp") << std::showpos
-                         << frame->GetFpCalleesOffset() << std::noshowpos << " (" << GetCalleeRegsCount(arch, true)
-                         << ")\n";
-        item.GetStream() << INDENT << "Callers:   " << (frame->GetCallersRelativeFp() ? "fp" : "sp") << std::showpos
-                         << frame->GetCallersOffset() << std::noshowpos << " (" << GetCallerRegsCount(arch, false)
-                         << ")\n";
-        item.GetStream() << INDENT << "FpCallers: " << (frame->GetCallersRelativeFp() ? "fp" : "sp") << std::showpos
-                         << frame->GetFpCallersOffset() << std::noshowpos << " (" << GetCallerRegsCount(arch, true)
-                         << ")\n";
+        bool calleesAreFpBased = frame->GetCalleesRelativeFp();
+        dumpRegsInfo("Callees:   ", frame->GetCalleesOffset(), GetCalleeRegsCount(arch, false), calleesAreFpBased);
+        dumpRegsInfo("FpCallees: ", frame->GetFpCalleesOffset(), GetCalleeRegsCount(arch, true), calleesAreFpBased);
+        bool callersAreFpBased = frame->GetCallersRelativeFp();
+        dumpRegsInfo("Callers:   ", frame->GetCallersOffset(), GetCallerRegsCount(arch, false), callersAreFpBased);
+        dumpRegsInfo("FpCallers: ", frame->GetFpCallersOffset(), GetCallerRegsCount(arch, true), callersAreFpBased);
     }
     if (IsCodeEnabled()) {
         PrintChapter("DISASSEMBLY");

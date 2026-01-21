@@ -167,6 +167,18 @@ void Encoder::EncodeLdr([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigne
     SetFalseResult();
 }
 
+void Encoder::EncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset)
+{
+    EncodeAdd(srcBase, srcBase, offset);
+    EncodeLdr(dst, dstSigned, MemRef {srcBase});
+}
+
+void Encoder::EncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset)
+{
+    EncodeLdr(dst, dstSigned, MemRef {srcBase});
+    EncodeAdd(srcBase, srcBase, offset);
+}
+
 void Encoder::EncodeLdrAcquire([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] MemRef mem)
 {
     SetFalseResult();
@@ -175,6 +187,19 @@ void Encoder::EncodeStr([[maybe_unused]] Reg src, [[maybe_unused]] MemRef mem)
 {
     SetFalseResult();
 }
+
+void Encoder::EncodeStrPreIndex(Reg src, Reg dstBase, Imm offset)
+{
+    EncodeAdd(dstBase, dstBase, offset);
+    EncodeStr(src, MemRef {dstBase});
+}
+
+void Encoder::EncodeStrPostIndex(Reg src, Reg dstBase, Imm offset)
+{
+    EncodeStr(src, MemRef {dstBase});
+    EncodeAdd(dstBase, dstBase, offset);
+}
+
 void Encoder::EncodeStrRelease([[maybe_unused]] Reg src, [[maybe_unused]] MemRef mem)
 {
     SetFalseResult();
@@ -402,9 +427,33 @@ void Encoder::EncodeLdp([[maybe_unused]] Reg dst0, [[maybe_unused]] Reg dst1, [[
     SetFalseResult();
 }
 
+void Encoder::EncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset)
+{
+    EncodeAdd(srcBase, srcBase, offset);
+    EncodeLdp(dst0, dst1, dstSigned, MemRef {srcBase});
+}
+
+void Encoder::EncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset)
+{
+    EncodeLdp(dst0, dst1, dstSigned, MemRef {srcBase});
+    EncodeAdd(srcBase, srcBase, offset);
+}
+
 void Encoder::EncodeStp([[maybe_unused]] Reg src0, [[maybe_unused]] Reg src1, [[maybe_unused]] MemRef mem)
 {
     SetFalseResult();
+}
+
+void Encoder::EncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, Imm offset)
+{
+    EncodeAdd(dstBase, dstBase, offset);
+    EncodeStp(src0, src1, MemRef {dstBase});
+}
+
+void Encoder::EncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, Imm offset)
+{
+    EncodeStp(src0, src1, MemRef {dstBase});
+    EncodeAdd(dstBase, dstBase, offset);
 }
 
 void Encoder::EncodeMAdd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src0, [[maybe_unused]] Reg src1,

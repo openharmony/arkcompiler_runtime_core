@@ -300,6 +300,31 @@ public:
         return ThreadProxy::GetFlagOffset();
     }
 
+    static constexpr uint32_t GetNativeStackBeginOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackBegin_);
+    }
+    static constexpr uint32_t GetNativeStackEndOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackEnd_);
+    }
+    static constexpr uint32_t GetNativeStackSizeOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackSize_);
+    }
+    static constexpr uint32_t GetNativeStackGuardSizeOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackGuardSize_);
+    }
+    static constexpr uint32_t GetNativeStackReservedSizeOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackReservedSize_);
+    }
+    static constexpr uint32_t GetNativeStackProtectedSizeOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, nativeStackProtectedSize_);
+    }
+
     static constexpr uint32_t GetEntrypointsTableOffset()
     {
         return MEMBER_OFFSET(ManagedThread, entrypointsTable_);
@@ -386,6 +411,11 @@ public:
         return MEMBER_OFFSET(ManagedThread, flattenedStringCache_);
     }
 
+    static constexpr uint32_t GetUnwindingDepthOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, unwindingDepth_);
+    }
+
     void *GetLanguageExtensionsData() const
     {
         return languageExtensionData_;
@@ -461,6 +491,16 @@ public:
         return --call_depth_;
     }
 #endif
+
+    void ResetUnwindingDepth()
+    {
+        unwindingDepth_ = 0;
+    }
+
+    void IncrementUnwindingDepth(uint32_t n = 1)
+    {
+        unwindingDepth_ += n;
+    }
 
     bool IsAttached()
     {
@@ -781,6 +821,8 @@ private:
 
     // Boolean which is safe to access after runtime is destroyed
     bool isManagedScope_ {false};
+
+    uint32_t unwindingDepth_ {0};
 
     friend class ark::test::ThreadTest;
     friend class ark::MTThreadManager;
