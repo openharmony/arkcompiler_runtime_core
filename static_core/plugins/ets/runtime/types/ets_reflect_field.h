@@ -55,13 +55,6 @@ public:
         return reinterpret_cast<EtsReflectField *>(field);
     }
 
-    void SetFieldType(EtsClass *fieldType)
-    {
-        ASSERT(fieldType != nullptr);
-        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsReflectField, fieldType_),
-                                  fieldType->AsObject()->GetCoreType());
-    }
-
     void SetOwnerType(EtsClass *ownerType)
     {
         ASSERT(ownerType != nullptr);
@@ -98,15 +91,9 @@ public:
 
 private:
     ObjectPointer<EtsString> name_;
-    ObjectPointer<EtsClass> fieldType_;
     ObjectPointer<EtsClass> ownerType_;
-#if defined(PANDA_32_BIT_MANAGED_POINTER)
-    EtsInt attr_;  // note alignment
     EtsLong etsField_;
-#else
-    EtsLong etsField_;
-    EtsInt attr_;  // note alignment
-#endif
+    EtsInt attr_;
     EtsByte accessMod_;
 
     friend class test::EtsReflectTest;

@@ -42,9 +42,6 @@ EtsReflectField *EtsReflectField::CreateFromEtsField(EtsCoroutine *coro, EtsFiel
         return nullptr;
     }
 
-    // do not expose primitive types and string types except std.sore.String
-    auto *resolvedType = field->GetType()->ResolvePublicClass();
-    reflectField->SetFieldType(resolvedType);
     reflectField->SetEtsField(reinterpret_cast<EtsLong>(field));
     reflectField->SetOwnerType(field->GetDeclaringClass());
 
