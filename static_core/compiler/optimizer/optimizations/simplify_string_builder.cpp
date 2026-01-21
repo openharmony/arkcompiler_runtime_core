@@ -303,11 +303,11 @@ bool CheckUnsupportedCases(Inst *instance, Inst *ctorCall)
     }
     if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
         return appendCount > 1 && appendCount <= ARGS_NUM_4;
-    } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
-        return appendCount > 0 && appendCount <= ARGS_NUM_3;
-    } else {
-        UNREACHABLE();
     }
+    if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+        return appendCount > 0 && appendCount <= ARGS_NUM_3;
+    }
+    UNREACHABLE();
     return false;
 }
 
@@ -504,11 +504,11 @@ bool SimplifyStringBuilder::ConcatenationLoopMatch::TemporaryInstructions::IsEmp
         if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
             return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr ||
                    appendAccValue == nullptr;
-        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
-            return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr;
-        } else {
-            UNREACHABLE();
         }
+        if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+            return toStringCall == nullptr || intermediateValue == nullptr || instance == nullptr;
+        }
+        UNREACHABLE();
     }
     return false;
 }
@@ -540,13 +540,13 @@ bool SimplifyStringBuilder::HasAppendOrLengthUsersOnly(Inst *inst, Inst *ctorCal
         if (IsMethodStringBuilderDefaultConstructor(ctorCall)) {
             bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
             return sameLoop && !isSaveState && !isPhi && !isAppendInstruction && !isStringLength;
-        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+        }
+        if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
             bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(user.GetInst());
             return sameLoop && !isSaveState && !isPhi && !isSbCtorStrInstruction && !isStringLength;
-        } else {
-            UNREACHABLE();
-            return true;
         }
+        UNREACHABLE();
+        return true;
     });
     ResetUserMarkersRecursively(inst, visited.GetMarker());
     return !found;
@@ -574,14 +574,14 @@ bool SimplifyStringBuilder::HasPhiOrAppendOrLengthUsersOnly(Inst *inst, Inst *ct
             bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
             return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
                    !(isAppendInstruction && isVisited);
-        } else if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
+        }
+        if (IsMethodStringBuilderConstructorWithStringArg(ctorCall)) {
             bool isSbCtorStrInstruction = IsMethodStringBuilderConstructorWithStringArg(user.GetInst());
             return sameLoop && !isSaveState && !isCheckCast && !isStringLength && !isPhi &&
                    !(isSbCtorStrInstruction && isVisited);
-        } else {
-            UNREACHABLE();
-            return true;
         }
+        UNREACHABLE();
+        return true;
     };
     bool found = HasUserPhiRecursively(inst, phiVisited.GetMarker(), fnCheckUser);
     return !found;
@@ -1289,7 +1289,7 @@ void SimplifyStringBuilder::Cleanup(const ConcatenationLoopMatch &match)
         temp.instance->ReplaceUsers(match.preheader.instance);
         temp.instance->ClearFlag(compiler::inst_flags::NO_DCE);
         temp.ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
-        if (temp.appendAccValue) {
+        if (temp.appendAccValue != nullptr) {
             temp.appendAccValue->ClearFlag(compiler::inst_flags::NO_DCE);
         }
     }

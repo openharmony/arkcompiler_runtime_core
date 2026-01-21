@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -417,15 +417,20 @@ bool SelectOptimization::Key::operator<(const SelectOptimization::Key &other) co
 {
     if (constant < other.constant) {
         return true;
-    } else if (constant > other.constant) {
+    }
+    if (constant > other.constant) {
         return false;
-    } else if (cc < other.cc) {
+    }
+    if (cc < other.cc) {
         return true;
-    } else if (cc > other.cc) {
+    }
+    if (cc > other.cc) {
         return false;
-    } else if (args < other.args) {
+    }
+    if (args < other.args) {
         return true;
-    } else if (args > other.args) {
+    }
+    if (args > other.args) {
         return false;
     }
     return false;

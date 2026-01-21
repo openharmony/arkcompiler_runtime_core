@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,11 +249,11 @@ std::string AnnotationElement::TypeToString(Value::Type type)
     }
 }
 
-void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annotation_elem_name)
+void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annotationElemName)
 {
     auto annotation_elem_iter =
         std::find_if(elements_.begin(), elements_.end(), [&](pandasm::AnnotationElement &annotation_element) -> bool {
-            return annotation_element.GetName() == annotation_elem_name;
+            return annotation_element.GetName() == annotationElemName;
         });
     if (annotation_elem_iter != elements_.end()) {
         (void)elements_.erase(annotation_elem_iter);

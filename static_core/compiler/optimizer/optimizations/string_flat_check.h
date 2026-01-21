@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ public:
 private:
     bool SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2);
     void InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t stringFlatCheckArgMask);
-    Inst *GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *flatCheck);
+    Inst *GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst);
     bool MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic);
     Inst *InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst);
     void ReplaceUsers(Inst *inputInst, Inst *flatCheck);

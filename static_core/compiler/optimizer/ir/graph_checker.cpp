@@ -1832,6 +1832,7 @@ void GraphChecker::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, [[maybe_unus
         stringFlatCheckArgMask != 0) {
         auto argsCount = inst->RequireState() ? inst->GetInputsCount() - 1 : inst->GetInputsCount();
         for (size_t i = 0; i < argsCount; i++) {
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
             if ((stringFlatCheckArgMask & (1 << i)) != 0) {
                 [[maybe_unused]] auto *inputInst = Inst::GetDataFlowInput(inst->GetInput(i).GetInst());
                 CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(

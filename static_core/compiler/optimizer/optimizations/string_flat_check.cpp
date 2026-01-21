@@ -71,7 +71,7 @@ void StringFlatCheck::InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t s
     auto argsCount = intrinsic->RequireState() ? intrinsic->GetInputsCount() - 1 : intrinsic->GetInputsCount();
 
     for (size_t i = 0; i < argsCount; i++) {
-        if ((stringFlatCheckArgMask & (1 << i)) == 0) {
+        if ((stringFlatCheckArgMask & (1 << i)) == 0) {  // NOLINT(hicpp-signed-bitwise)
             continue;
         }
 
@@ -247,6 +247,6 @@ bool StringFlatCheck::SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2)
         return false;
     }
     // to avoid additional analysis think they are separated by OSR entry if have inner loop
-    return bb1->GetLoop()->GetInnerLoops().size() != 0;
+    return !bb1->GetLoop()->GetInnerLoops().empty();
 }
 }  // namespace ark::compiler
