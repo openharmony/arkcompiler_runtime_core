@@ -17,7 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
 
 #include <cmath>
-#include "objects/string/base_string-inl.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
 #include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"

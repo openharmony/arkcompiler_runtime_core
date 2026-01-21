@@ -14,9 +14,9 @@
  */
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "objects/string/base_string-inl.h"
-#include "include/method.h"
-#include "include/thread_scopes.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
+#include "runtime/include/method.h"
+#include "runtime/include/thread_scopes.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_annotation.h"

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
-#include "js_convert_base.h"
-#include "js_convert_stdlib.h"
-#include "napi_impl/ark_napi_helper.h"
-#include "objects/dynamic_object_accessor_util.h"
+#include "plugins/ets/runtime/interop_js/js_convert_base.h"
+#include "plugins/ets/runtime/interop_js/js_convert_stdlib.h"
+#include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
+#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 
 namespace ark::ets::interop::js {
 

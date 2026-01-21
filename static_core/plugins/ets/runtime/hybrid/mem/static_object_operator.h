@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,8 @@
 #define PLUGINS_ETS_RUNTIME_HYBRID_MEM_STATIC_OBJECT_OPERATOR_H
 
 #if defined(ARK_HYBRID)
-#include "objects/base_object.h"
-#include "objects/base_object_operator.h"
+#include "common_interfaces/objects/base_object.h"
+#include "common_interfaces/objects/base_object_operator.h"
 #include "runtime/include/object_header.h"
 #endif
 
@@ -41,7 +41,8 @@ public:
 
     void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
 
-    void IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
+    size_t ForEachRefFieldAndGetSize(const common::BaseObject *object,
+                                     const common::RefFieldVisitor &visitor) const override;
 
     size_t GetSize(const common::BaseObject *object) const override
     {

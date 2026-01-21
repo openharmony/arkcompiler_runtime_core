@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,12 @@
 
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/object-references-iterator-inl.h"
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
 #if defined(ARK_HYBRID)
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/hybrid/mem/external-gc.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #endif
@@ -79,8 +80,6 @@ void StaticObjectOperator::Initialize(ark::ets::PandaEtsVM *vm)
 #if defined(ARK_HYBRID)
     instance_.vm_ = vm;
     common::BaseObject::RegisterStatic(&instance_);
-
-    common::RegisterStaticRootsProcessFunc();
 #endif
 }
 
@@ -105,23 +104,8 @@ void StaticObjectOperator::ForEachRefField(const common::BaseObject *object,
     }
 }
 
-void StaticObjectOperator::IterateXRef(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const
-{
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    auto *obj = reinterpret_cast<ObjectHeader *>(const_cast<common::BaseObject *>(object));
-    auto *etsObj = ark::ets::EtsObject::FromCoreType(obj);
-    if (!etsObj->HasInteropIndex()) {
-        return;
-    }
-    ark::ets::interop::js::XGC::GetInstance()->IterateEtsObjectXRef(etsObj, visitor);
-#else
-    // Only support in interop
-    std::abort();
-#endif  // PANDA_JS_ETS_HYBRID_MODE
-}
-
-size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const panda::BaseObject *object,
-                                                       const panda::RefFieldVisitor &visitor) const
+size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const common::BaseObject *object,
+                                                       const common::RefFieldVisitor &visitor) const
 {
     size_t size = GetSize(object);
     ForEachRefField(object, visitor);

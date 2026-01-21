@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,9 +78,6 @@
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
 #include "runtime/coroutines/native_stack_allocator/native_stack_allocator.h"
-#ifdef ARK_HYBRID
-#include "base_runtime.h"
-#endif
 #ifdef PANDA_OHOS_GET_PARAMETER
 #include "syspara/parameters.h"
 #endif
@@ -421,8 +418,6 @@ bool Runtime::Create(const RuntimeOptions &options)
         return false;
     }
 
-    InitBaseRuntime();
-
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -590,8 +585,6 @@ bool Runtime::Destroy()
 
     instance_->StopCoverageListener();
 
-    PreFiniBaseRuntime();
-
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1
@@ -616,8 +609,6 @@ bool Runtime::Destroy()
     RuntimeInternalAllocator::Destroy();
 
     os::CpuAffinityManager::Finalize();
-
-    FiniBaseRuntime();
 
     return true;
 }
@@ -1724,33 +1715,6 @@ void Runtime::CheckOptionsFromOs() const
     // for qemu-aarch64 we will get 32 from GetCacheLineSize()
     // for native arm and qemu-arm we will get 0 from GetCacheLineSize()
     ASSERT(ark::CACHE_LINE_SIZE == os::mem::GetCacheLineSize());
-#endif
-}
-
-void Runtime::InitBaseRuntime()
-{
-#ifdef ARK_HYBRID
-    auto *baseRuntime = common::BaseRuntime::GetInstance();
-    ASSERT(baseRuntime != nullptr);
-    baseRuntime->Init();
-#endif
-}
-
-void Runtime::PreFiniBaseRuntime()
-{
-#ifdef ARK_HYBRID
-    // Stop the current GC before all threads unregister
-    // Change to a more accurate function, when the function was provided (see #26240).
-    common::BaseRuntime::RequestGC(common::GcType::FULL);
-#endif
-}
-
-void Runtime::FiniBaseRuntime()
-{
-#ifdef ARK_HYBRID
-    auto *baseRuntime = common::BaseRuntime::GetInstance();
-    ASSERT(baseRuntime != nullptr);
-    baseRuntime->Fini();
 #endif
 }
 

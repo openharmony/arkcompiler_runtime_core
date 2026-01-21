@@ -47,7 +47,7 @@ panda_target_include_directories(irtoc
     PUBLIC ${PANDA_BINARY_ROOT}/panda_gen_options
     PUBLIC ${PANDA_BINARY_ROOT}/cross_values
     PUBLIC ${PANDA_BINARY_ROOT}/runtime/include
-    PUBLIC ${PANDA_ROOT}/../common_interfaces
+    PUBLIC ${PANDA_ROOT}/../common_runtime
 )
 
 panda_target_include_directories(irtoc

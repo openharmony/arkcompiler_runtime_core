@@ -29,6 +29,7 @@ arkplatform_root = "//arkcompiler/runtime_core/arkplatform"
 arkplatform_include = "$arkplatform_root"
 arkui_root = "//foundation/arkui"
 etsruntime_root = "//arkcompiler/ets_runtime"
+common_runtime_root = "//arkcompiler/runtime_core/common_runtime"
 
 ark_third_party_root = "//third_party"
 

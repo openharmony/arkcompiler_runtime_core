@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "objects/string/base_string-inl.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
 #include "libarkbase/utils/utf.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
@@ -91,14 +91,12 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
-                                        this->ClassAddr<common::BaseClass>());
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
-                                             this->ClassAddr<common::BaseClass>());
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
     }
 
     common::LineString *ToLineString()

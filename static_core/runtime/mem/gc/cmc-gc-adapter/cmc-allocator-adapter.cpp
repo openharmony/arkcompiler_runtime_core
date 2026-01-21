@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_HYBRID)
-#include "base_runtime.h"
-#include "heap/heap_allocator.h"
-#include "objects/base_object.h"
-#include "objects/base_state_word.h"
+#include "common_interfaces/base_runtime.h"
+#include "common_interfaces/heap/heap_allocator.h"
+#include "common_interfaces/objects/base_object.h"
+#include "common_interfaces/objects/base_state_word.h"
 #endif
 
 namespace ark::mem {
@@ -38,7 +38,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
                                                    [[maybe_unused]] bool pinned)
 {
 #if defined(ARK_HYBRID)
-    return reinterpret_cast<void *>(common::HeapAllocator::Allocate(size, common::LanguageType::STATIC));
+    return reinterpret_cast<void *>(common::HeapAllocator::AllocateInYoungOrHuge(size, common::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -52,7 +52,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
 {
 #if defined(ARK_HYBRID)
     return reinterpret_cast<ObjectHeader *>(
-        common::HeapAllocator::AllocateInNonmove(size, common::LanguageType::STATIC));
+        common::HeapAllocator::AllocateInNonmoveOrHuge(size, common::LanguageType::STATIC));
 #else
     return nullptr;
 #endif

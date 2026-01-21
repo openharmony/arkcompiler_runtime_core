@@ -217,7 +217,7 @@ panda_target_include_directories(arkruntime_obj PUBLIC
     ${PANDA_BINARY_ROOT}/
     # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/
-    ${PANDA_ROOT}/../common_interfaces
+    ${PANDA_ROOT}/../common_runtime
 )
 add_dependencies(arkruntime_obj es2panda-public)
 panda_target_link_libraries(arkruntime_obj es2panda-public arkassembler)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,6 @@
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage_verifier.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
-#ifdef ARK_HYBRID
-#include "base_runtime.h"
-#endif
 #include "native_engine/native_reference.h"
 #include "interfaces/inner_api/napi/native_node_hybrid_api.h"
 #endif  // PANDA_JS_ETS_HYBRID_MODE
@@ -302,43 +299,6 @@ void XGC::GCPhaseFinished(mem::GCPhase phase)
     }
 }
 
-#ifdef ARK_HYBRID
-void XGC::UnmarkAllXRefs()
-{
-    storage_->UnmarkAll();
-}
-
-void XGC::SweepUnmarkedXRefs()
-{
-    storage_->SweepUnmarkedRefs();
-}
-
-void XGC::AddXRefToStaticRoots()
-{
-    vm_->AddRootProvider(storage_);
-}
-
-void XGC::RemoveXRefFromStaticRoots()
-{
-    vm_->RemoveRootProvider(storage_);
-}
-
-void XGC::IterateEtsObjectXRef(EtsObject *etsObj, const common::RefFieldVisitor &visitor)
-{
-    // NOTE(audovichenko): Handle multithreading issue.
-    ark::ets::interop::js::ets_proxy::SharedReference::Iterator it(storage_->GetReference(etsObj));
-    ark::ets::interop::js::ets_proxy::SharedReference::Iterator end;
-    do {
-        if (it->HasJSFlag() && it->MarkIfNotMarked()) {
-            ark::ets::interop::js::ets_proxy::SharedReference *ref = *it;
-            ASSERT(ref->HasJSFlag());
-            ref->GetCtx()->GetXGCVmAdaptor()->MarkFromObject(ref->GetJsRef(), visitor);
-        }
-        ++it;
-    } while (it != end);
-}
-#endif
-
 void XGC::MarkFromObject([[maybe_unused]] void *data)
 {
     if (data == nullptr) {
@@ -422,17 +382,6 @@ size_t XGC::ComputeNewSize()
 bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<GCTask> task)
 {
     ASSERT_MANAGED_CODE();
-#ifdef ARK_HYBRID
-    common::BaseRuntime::GetInstance()->RequestGC(common::GcType::FULL_WITH_XREF);
-    // NOTE(ipetrov, XGC): if table will be cleared in concurrent, then compute the new size should not be based on
-    // the current storage size, need storage size without dead references
-    auto newTargetThreshold = this->ComputeNewSize();
-    LOG(DEBUG, GC_TRIGGER) << "XGC's new target threshold storage size = " << newTargetThreshold;
-    // Atomic with relaxed order reason: data race with targetThreasholdSize_ with no synchronization or ordering
-    // constraints imposed on other reads or writes
-    targetThreasholdSize_.store(newTargetThreshold, std::memory_order_relaxed);
-    return false;
-#else
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
     // NOTE(ipetrov, #20146): Iterate over all contexts
     auto *coro = EtsCoroutine::GetCurrent();
@@ -449,7 +398,6 @@ bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<
         return false;
     }
     return true;
-#endif
 }
 
 ALWAYS_INLINE bool XGC::NeedToTriggerXGC([[maybe_unused]] const mem::GC *gc) const

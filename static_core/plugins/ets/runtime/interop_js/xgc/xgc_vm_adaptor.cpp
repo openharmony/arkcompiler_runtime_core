@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,19 +22,6 @@
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::ets::interop::js {
-
-#if defined(ARK_HYBRID)
-void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref,
-                                  [[maybe_unused]] const common::RefFieldVisitor &visitor)
-{
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-    std::function<void(uintptr_t)> visitorWrap = [&visitor](uintptr_t address) {
-        visitor(reinterpret_cast<common::RefField<> &>(address));
-    };
-    napi_mark_from_object_for_cmc(env_, ref, visitorWrap);
-#endif  // PANDA_JS_ETS_HYBRID_MODE
-}
-#endif
 
 void XGCVmAdaptor::MarkFromObject([[maybe_unused]] napi_ref ref)
 {

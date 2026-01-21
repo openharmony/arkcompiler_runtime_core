@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 
 #include "runtime/include/coretypes/string_flatten.h"
-#include "include/object_header.h"
-#include "objects/base_object.h"
-#include "objects/string/base_string-inl.h"
+#include "runtime/include/object_header.h"
+#include "common_interfaces/objects/base_object.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
 
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/hash.h"

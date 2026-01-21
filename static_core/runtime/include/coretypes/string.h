@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 #define PANDA_RUNTIME_CORETYPES_COMMON_STRING_H_
 
 #include <cstdint>
-#include "objects/string/base_string-inl.h"
-#include "objects/string/line_string-inl.h"
+#include "common_interfaces/objects/string/base_string-inl.h"
+#include "common_interfaces/objects/string/line_string-inl.h"
+#include "common_interfaces/objects/base_class.h"
 #include "libarkbase/utils/utf.h"
-#include "objects/base_class.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/exceptions.h"
 #include "runtime/include/object_accessor.h"
@@ -370,14 +370,12 @@ public:
 
     common::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this),
-                                        this->ClassAddr<common::BaseClass>());
+        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
     }
 
     const common::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this),
-                                             this->ClassAddr<common::BaseClass>());
+        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
     }
 
     static constexpr uint32_t GetLengthOffset()
@@ -475,19 +473,19 @@ public:
     common::LineString *ToLineString()
     {
         ASSERT(IsLineString());
-        return common::LineString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
+        return common::LineString::Cast(ToString());
     }
 
     const common::SlicedString *ToSlicedString() const
     {
         ASSERT(IsSlicedString());
-        return common::SlicedString::ConstCast(ToStringConst(), this->ClassAddr<common::BaseClass>());
+        return common::SlicedString::ConstCast(ToStringConst());
     }
 
     common::TreeString *ToTreeString()
     {
         ASSERT(IsTreeString());
-        return common::TreeString::Cast(ToString(), this->ClassAddr<common::BaseClass>());
+        return common::TreeString::Cast(ToString());
     }
 
     uint16_t *GetDataUtf16()

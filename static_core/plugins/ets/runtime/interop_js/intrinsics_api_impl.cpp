@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "include/mem/panda_string.h"
-#include "objects/base_type.h"
-#include "objects/dynamic_object_accessor_util.h"
+#include "runtime/include/mem/panda_string.h"
+#include "runtime/coroutines/stackful_coroutine.h"
+#include "runtime/include/class_linker-inl.h"
+#include "runtime/include/object_header.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
@@ -29,9 +30,8 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/coroutines/stackful_coroutine.h"
-#include "runtime/include/class_linker-inl.h"
-#include "runtime/include/object_header.h"
+#include "common_interfaces/objects/base_type.h"
+#include "common_interfaces/objects/dynamic_object_accessor_util.h"
 
 // NOLINTBEGIN(readability-identifier-naming, readability-redundant-declaration)
 // CC-OFFNXT(G.FMT.10-CPP) project code style

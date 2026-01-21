@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include "libarkbase/mem/gc_barrier.h"
+#include "libarkbase/mem/mem.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
-#include "libarkbase/mem/gc_barrier.h"
-#include "libarkbase/mem/mem.h"
 #include "runtime/include/object_header.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/rem_set.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
-#include <atomic>
+#include "runtime/mem/object_helpers-inl.h"
 
 #ifdef ARK_HYBRID
-#include "base_runtime.h"
-#include "runtime/mem/object_helpers-inl.h"
+#include "common_interfaces/base_runtime.h"
 #endif
 
 namespace ark::mem {
