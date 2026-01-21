@@ -458,10 +458,10 @@
 07.expressions/22.multiplicative_expressions/04.exponentiation/enum.ets
 
 #31358 number and char equality ops should produce CTE
-07.expressions/25.equality_expressions/eq_neg_16.ets
-07.expressions/25.equality_expressions/eq_neg_17.ets
-07.expressions/25.equality_expressions/eq_neg_18.ets
-07.expressions/25.equality_expressions/eq_neg_19.ets
+07.expressions/27.equality_expressions/eq_neg_16.ets
+07.expressions/27.equality_expressions/eq_neg_17.ets
+07.expressions/27.equality_expressions/eq_neg_18.ets
+07.expressions/27.equality_expressions/eq_neg_19.ets
 
 #30340 &&= ||= ??= still not supported in code
 07.expressions/29.assignment/02.compound_assignment_operators/ops_12.ets
@@ -473,18 +473,18 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
 #30582
-07.expressions/32.lambda_expression/01.lambda_signature/positive_0.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_1.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_2.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_3.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_4.ets
-07.expressions/32.lambda_expression/01.lambda_signature/positive_5.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_0.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_1.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_2.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_3.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_4.ets
+07.expressions/34.lambda_expression/01.lambda_signature/positive_5.ets
 
 #30813 No CTE for lambda body without return statement
-07.expressions/32.lambda_expression/02.lambda_body/negative_2.ets
+07.expressions/34.lambda_expression/02.lambda_body/negative_2.ets
 
 #29160
-07.expressions/33.constant_expression/check_enum/constant_number_conversion_5.ets
+07.expressions/35.constant_expression/check_enum/constant_number_conversion_5.ets
 
 #31475 False positive passed tests on runner-2
 09.classes/02.class_extension_clause/class_superclass_non_private/class_no_pri30.ets
