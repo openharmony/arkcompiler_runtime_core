@@ -22,6 +22,7 @@
 
 namespace ark::ets::ani::verify {
 
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class VRef {
 public:
     ani_ref GetRef();

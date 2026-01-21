@@ -17,6 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PromiseResolverResolveTest : public VerifyAniTest {
 public:
     void SetUp() override
@@ -31,8 +32,10 @@ public:
     }
 
 protected:
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes, readability-identifier-naming)
     ani_string resolution;
     ani_resolver resolver;
+    // NOLINTEND(misc-non-private-member-variables-in-classes, readability-identifier-naming)
 };
 
 TEST_F(PromiseResolverResolveTest, wrong_env)

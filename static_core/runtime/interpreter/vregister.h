@@ -115,10 +115,10 @@ public:
         SetValue(v);
     }
 
-    template <bool NeedToValidate = true>
+    template <bool NEED_TO_VALIDATE = true>
     ALWAYS_INLINE inline void Set(ObjectHeader *value)
     {
-        if constexpr (NeedToValidate) {
+        if constexpr (NEED_TO_VALIDATE) {
             mem::ValidateObject(mem::RootType::ROOT_THREAD, value);
         }
         auto v = down_cast<helpers::TypeHelperT<OBJECT_POINTER_SIZE * BYTE_SIZE, true>>(value);
@@ -284,10 +284,10 @@ public:
         static_cast<T *>(this)->SetPrimitive(value);
     }
 
-    template <bool NeedToValidate = true>
+    template <bool NEED_TO_VALIDATE = true>
     ALWAYS_INLINE inline void SetReference(ObjectHeader *obj)
     {
-        static_cast<T *>(this)->SetReference<NeedToValidate>(obj);
+        static_cast<T *>(this)->template SetReference<NEED_TO_VALIDATE>(obj);
     }
 
     ALWAYS_INLINE inline void Set(int32_t value)
@@ -320,10 +320,10 @@ public:
         payload_->Set(value);
     }
 
-    template <bool NeedToValidate = true>
+    template <bool NEED_TO_VALIDATE = true>
     ALWAYS_INLINE inline void Set(ObjectHeader *value)
     {
-        payload_->Set<NeedToValidate>(value);
+        payload_->template Set<NEED_TO_VALIDATE>(value);
     }
 
     ALWAYS_INLINE inline int32_t Get() const
@@ -477,10 +477,10 @@ public:
         mirror_->SetValue(PRIMITIVE_TYPE);
     }
 
-    template <bool NeedToValidate = true>
+    template <bool NEED_TO_VALIDATE = true>
     ALWAYS_INLINE inline void SetReference(ObjectHeader *obj)
     {
-        payload_->Set<NeedToValidate>(obj);
+        payload_->Set<NEED_TO_VALIDATE>(obj);
         mirror_->SetValue(GC_OBJECT_TYPE);
     }
 
@@ -564,10 +564,10 @@ public:
         payload_->Set(value);
     }
 
-    template <bool NeedToValidate = false>
+    template <bool NEED_TO_VALIDATE = false>
     ALWAYS_INLINE inline void SetReference(ObjectHeader *obj)
     {
-        static_assert(!NeedToValidate);  // Not implemented
+        static_assert(!NEED_TO_VALIDATE);  // Not implemented
         coretypes::TaggedValue v(obj);
         payload_->Set(v.GetRawData());
     }

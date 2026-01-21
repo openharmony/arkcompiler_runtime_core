@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,5 +237,7 @@ inline uint16_t *LineString::GetDataUtf16Writable() const
     DCHECK_CC(IsUtf16() && "BaseString: Read data as utf16 for utf8 string");
     return GetData();
 }
-}
+}  // namespace common
+// NOLINTEND(cppcoreguidelines-special-member-functions)
+
 #endif //COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H

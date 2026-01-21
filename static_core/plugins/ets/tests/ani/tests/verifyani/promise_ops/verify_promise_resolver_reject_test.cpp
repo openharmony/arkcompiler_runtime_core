@@ -17,6 +17,7 @@
 
 namespace ark::ets::ani::verify::testing {
 
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class PromiseResolverRejectTest : public VerifyAniTest {
 public:
     void SetUp() override
@@ -34,6 +35,7 @@ public:
         ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
 
         ani_object errObj {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ASSERT_EQ(env_->Object_New(cls, ctor, &errObj, errStr, undef), ANI_OK);
         err = static_cast<ani_error>(errObj);
 
@@ -42,9 +44,11 @@ public:
     }
 
 protected:
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes, readability-identifier-naming)
     ani_error err;
     ani_string errStr;
     ani_resolver resolver;
+    // NOLINTEND(misc-non-private-member-variables-in-classes, readability-identifier-naming)
 };
 
 TEST_F(PromiseResolverRejectTest, wrong_env)

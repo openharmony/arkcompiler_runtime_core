@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,12 +83,14 @@ public:
     }
 
 protected:
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     // header_ is a padding field in base class, it will be used to store the root class in ets_runtime.
     FIELD_UNUSED_CC HeaderType header_;
     // bitfield will be initialized as the bitfield_ and bitfield1_ of js_hclass.
     // Now only the low 8bits in bitfield are used as the common type encode. Other field has no specific means here
     // but should follow the bitfield and bitfield1_ defines in js_hclass.
     uint64_t bitfield_;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 }  // namespace common
 #endif //COMMON_INTERFACE_OBJECTS_BASE_CLASS_H
