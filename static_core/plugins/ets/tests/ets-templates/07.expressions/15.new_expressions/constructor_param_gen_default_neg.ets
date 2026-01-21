@@ -22,7 +22,7 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-enum ENUM { Red, Green, Blue }
+{{c.decl}}
 
 class A {
   constructor({{c.param}}) { }

@@ -37,7 +37,6 @@ cases:
 
   - doc: access in static class method, no applicable constructor
     decl: |-
-      let obj = new Object()
       class C {
         constructor(i: String) { }
         private constructor(j: Object) { }
