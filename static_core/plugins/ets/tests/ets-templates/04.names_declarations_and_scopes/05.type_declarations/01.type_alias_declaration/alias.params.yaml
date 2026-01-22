@@ -164,6 +164,12 @@ cases:
 
     # recursive cases
     - defs: |-
+          type NestedTup = [boolean, NestedTup|undefined, string]
+      use: |-
+          let v1: NestedTup = [true, [true, undefined, 'xyz'], 'abc']
+          let ok = v1[0] == true
+
+    - defs: |-
           type NestedNumArray = number | NestedNumArray[]
       use: |-
           let v1: NestedNumArray = 1.0
