@@ -900,6 +900,7 @@ class DoubleArrayHandle implements ArrayHandle {
 class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_CLASS = Class.from<JSValue>()
     private static readonly GETTER_METHOD_PREFIX = "%%get-"
+    private static readonly maxSpaceLength = 10
 
     private readonly replacer: ((key: String, value: Any) => Any) | undefined
     private readonly fieldsFilter: FixedArray<string>
@@ -917,7 +918,11 @@ class JSONWriter {
     constructor(replacer?: (key: String, value: Any) => Any, space?: String) {
         this.replacer = replacer
         this.fieldsFilter = []
-        this.space = space
+        if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
+            this.space = space.substring(0, JSONWriter.maxSpaceLength)
+        } else {
+            this.space = space
+        }
 
         this.useReplacer = this.replacer != undefined
         this.useFieldsFilter = false
@@ -927,7 +932,11 @@ class JSONWriter {
     constructor(filter: FixedArray<string>, space?: String) {
         this.replacer = undefined
         this.fieldsFilter = filter
-        this.space = space
+        if (space !== undefined && space.length > JSONWriter.maxSpaceLength) {
+            this.space = space.substring(0, JSONWriter.maxSpaceLength)
+        } else {
+            this.space = space
+        }
 
         this.useReplacer = false
         this.useFieldsFilter = true
@@ -1213,7 +1222,7 @@ class JSONWriter {
         }
 
         if (Reflect.isLiteralInitializedInterface(obj)) {
-            const gettersValues = JSONWriter.getGettersKeyValuePairs(objCls, obj)
+            const gettersValues = JSONWriter.getGettersKeyValuePairs(objCls, obj, this.useFieldsFilter, this.fieldsFilter)
             if (gettersValues.length > 0) {
                 this.path.add(obj)
                 fieldDumped |= this.writeClassFields(gettersValues, fieldDumped)
@@ -1362,7 +1371,7 @@ class JSONWriter {
     * @brief Returns values of public getters of a class.
     * Searches only within direct methods of the class. Does not apply fields filter.
     */
-    private static getGettersKeyValuePairs(cls: Class, obj: Object) {
+    private static getGettersKeyValuePairs(cls: Class, obj: Object, useFieldsFilter: boolean, fieldsFilter: FixedArray<string>) {
         const namesAndValues = new Array<[string, Any]>()
         const prefixLength = JSONWriter.GETTER_METHOD_PREFIX.getLength()
         const clsMethods = cls.getInstanceMethods()
@@ -1370,11 +1379,23 @@ class JSONWriter {
             let name = method.getName()
             if (name.startsWith(JSONWriter.GETTER_METHOD_PREFIX, 0)) {
                 name = name.substring(prefixLength)
+                if (useFieldsFilter && !JSONWriter.searchField(fieldsFilter, name)) {
+                    continue
+                }
                 const value = method.invoke(obj)
                 namesAndValues.push([name, value])
             }
         }
         return namesAndValues
+    }
+
+    private static searchField(fieldsFilter: FixedArray<string>, name: string): boolean {
+        for (let i = 0; i < fieldsFilter.length; i++) {
+            if (fieldsFilter[i] == name) {
+                return true
+            }
+        }
+        return false
     }
 
     private writeArrayValue<E>(array: FixedArray<E>): void {
