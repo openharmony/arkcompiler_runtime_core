@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
 {% for c in cases %}
 /*---
 desc: Array type with prefix readonly.
@@ -21,6 +20,8 @@ desc: Array type with prefix readonly.
 
 function main() {
   let y: readonly Array<{{c.type}}> = [{{c.use}}]
+  arktest.assertTrue(y instanceof ReadonlyArray)
+  arktest.assertEQ(y.length, 1)
 }
 
 {% endfor %}
