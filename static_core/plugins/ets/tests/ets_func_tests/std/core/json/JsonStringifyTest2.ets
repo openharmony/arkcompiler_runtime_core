@@ -33,6 +33,11 @@ function main(): int {
     suite.addTest("Stringify typed arrays", testStringifyTypedArray10);
     suite.addTest("Stringify typed arrays", testStringifyTypedArray11);
     suite.addTest("Stringify typed arrays", testStringifyTypedArray12);
+    suite.addTest("Stringify Interface", testStringifyInterface01);
+    suite.addTest("Stringify Interface", testStringifyInterface02);
+    suite.addTest("Stringify Interface", testStringifyInterface03);
+    suite.addTest("Stringify Interface", testStringifyInterface04);
+    suite.addTest("Stringify Interface", testStringifyInterface05);
 
     return suite.run()
 }
@@ -152,25 +157,6 @@ function stringifyObjectLiteralCornerCases(): void {
     arktest.expectThrow(() => { JSON.stringify(fixedArray) }, (e: Error) => e instanceof TypeError)
     objLit.a = testObj
 
-    // Check that getters are invoked only on object literals
-    let obj = new TestInterfaceImpl()
-    arktest.assertEQ(JSON.stringify(obj), "{}")
-
-    array = [obj]
-    arktest.assertEQ(JSON.stringify(array), "[{}]")
-
-    array = [objLit, obj]
-    jsonStr = JSON.stringify(array)
-    expected.set("a", "{value:val}")
-    expected.set('d', '-1.5')
-    checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, [expected, new Map<string, string>()])
-
-    fixedArray = [obj]
-    arktest.assertEQ(JSON.stringify(fixedArray), "[{}]")
-
-    fixedArray = [objLit, obj]
-    jsonStr = JSON.stringify(fixedArray)
-    checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, [expected, new Map<string, string>()])
 }
 
 interface GeneratedObjectLiteralInterface_1 {
@@ -386,4 +372,82 @@ function testStringifyTypedArray12(): void {
     let jsonElement = JSON.parseJsonElement(jsonStr)
     arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
     arktest.assertEQ(jsonElement.getArray("values")[0].getInteger("num1"), 1);
+}
+
+interface I1 {
+    str1: string
+}
+
+interface I2 {
+    str1: string
+    num1: int
+}
+
+interface I3 {
+    str2: string
+    num2: int
+}
+
+class A1 implements I1 {
+    str1: string = '1'
+}
+function testStringifyInterface01(): void {
+    let str = JSON.stringify(new A1)
+    let jsonElement = JSON.parseJsonElement(str)
+    arktest.assertEQ(jsonElement.getString('str1'), '1')
+}
+
+class B1 implements I2 {
+    str1: string = 'str'
+    num1: int = 10
+}
+function testStringifyInterface02(): void {
+    let str = JSON.stringify(new B1)
+    let jsonElement = JSON.parseJsonElement(str)
+    arktest.assertEQ(jsonElement.getString('str1'), 'str')
+    arktest.assertEQ(jsonElement.getInteger('num1'), 10)
+}
+
+class C2 implements I2, I3 {
+    str1: string = 'yes'
+    num1: int = 10
+    str2: string = 'no'
+    num2: int = 100
+}
+function testStringifyInterface03(): void {
+    let str = JSON.stringify(new C2)
+    let jsonElement = JSON.parseJsonElement(str)
+    arktest.assertEQ(jsonElement.getString('str1'), 'yes')
+    arktest.assertEQ(jsonElement.getInteger('num1'), 10)
+    arktest.assertEQ(jsonElement.getString('str2'), 'no')
+    arktest.assertEQ(jsonElement.getInteger('num2'), 100)
+}
+
+class D1 implements I1 {
+    str1: string = 'str'
+}
+
+class D2 extends D1 {
+
+}
+function testStringifyInterface04(): void {
+    let str = JSON.stringify(new D2)
+    let jsonElement = JSON.parseJsonElement(str)
+    arktest.assertEQ(jsonElement.getString('str1'), 'str')
+}
+
+class E1 implements I1 {
+    str1: string = 'str'
+}
+
+class E2 extends E1 implements I3{
+    str2: string = 'yes'
+    num2: int = 1
+}
+function testStringifyInterface05(): void {
+    let str = JSON.stringify(new E2)
+    let jsonElement = JSON.parseJsonElement(str)
+    arktest.assertEQ(jsonElement.getString('str1'), 'str')
+    arktest.assertEQ(jsonElement.getString('str2'), 'yes')
+    arktest.assertEQ(jsonElement.getInteger('num2'), 1)
 }

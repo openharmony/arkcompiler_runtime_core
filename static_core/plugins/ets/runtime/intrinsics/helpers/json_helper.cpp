@@ -117,6 +117,71 @@ bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> 
     return true;
 }
 
+bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent)
+{
+    ASSERT(value.GetPtr() != nullptr);
+    auto *cls = value->GetClass();
+    bool isSuccessful = true;
+    if (IsLiteralInitializedInterface(value.GetPtr())) {
+        return true;
+    }
+
+    cls->EnumerateVtable([&](Method *method) {
+        auto *etsMethod = EtsMethod::FromRuntimeMethod(method);
+        std::string_view methodName = etsMethod->GetName();
+        if (methodName.find(GETTER_BEGIN) != 0) {
+            return false;
+        }
+
+        bool isInterfaceMethod = false;
+        cls->EnumerateInterfaces([&](EtsClass *iface) {
+            auto *res = iface->GetRuntimeClass()->GetVirtualInterfaceMethod(
+                reinterpret_cast<const uint8_t *>(methodName.data()), method->GetProto());
+            if (res != nullptr) {
+                isInterfaceMethod = true;
+                return true;
+            }
+            return false;
+        });
+
+        if (!isInterfaceMethod) {
+            return false;
+        }
+
+        PandaString keyStr(methodName.substr(std::string_view(GETTER_BEGIN).size()));
+
+        if (!etsMethod->IsPublic()) {
+            return false;
+        }
+
+        if (UNLIKELY(etsMethod->GetNumArgs() != 1)) {
+            return false;
+        }
+
+        Value selfArg(value->GetCoreType());
+        auto *result = helpers::InvokeAndResolveReturnValue(etsMethod, coro, &selfArg);
+        if (UNLIKELY(coro->HasPendingException())) {
+            isSuccessful = false;
+            return true;
+        }
+
+        if (result == nullptr) {
+            return false;
+        }
+
+        key_ = keyStr;
+        EtsHandle val(coro, result);
+        if (!AppendJSONString(val, hasContent)) {
+            isSuccessful = false;
+            return true;
+        }
+        hasContent = true;
+        return false;
+    });
+
+    return isSuccessful;
+}
+
 bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
 {
     auto *coro = EtsCoroutine::GetCurrent();
@@ -127,13 +192,19 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
     }
 
     bool hasContent = false;
+
     buffer_ += "{";
     if (!SerializeFields(coro, value, hasContent)) {
         return false;
     }
+
     // The code below mirrors managed `writeClassValue`. Ideally we'd like a single implementation
     // of `JSON.stringify`, but native code must exist to satisfy performance requirements
     if (IsLiteralInitializedInterface(value.GetPtr()) && !SerializeGetters(coro, value, hasContent)) {
+        return false;
+    }
+
+    if (!SerializeInterfaceList(coro, value, hasContent)) {
         return false;
     }
     buffer_ += "}";
