@@ -151,3 +151,22 @@ cases:
           v = [ Color.Green + Color.Blue, Color.Blue + s + "!" ]
           arktest.assertEQ(v[0], "gb")
           arktest.assertEQ(v[1], "bZ!")
+
+    - decl: |-
+          let s: string = "Z"
+          let union1: string | number
+          let union2: float | object
+          let union3: Array<int> | Any | BigInt
+      use: |-
+          // conversion to union type that contains type string
+          union1 = Color.Red
+          arktest.assertEQ(union1, "r")
+          arktest.assertTrue(union1 instanceof string)
+
+          union2 = Color.Red + Color.Blue
+          arktest.assertEQ(union2, "rb")
+          arktest.assertTrue(union2 instanceof string)
+
+          union3 = Color.Red + Color.Blue + s
+          arktest.assertEQ(union3, "rbZ")
+          arktest.assertTrue(union3 instanceof string)

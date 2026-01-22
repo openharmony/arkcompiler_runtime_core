@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A value of enumeration type is converted to type string
-    if enumeration constants of this type are of type string.
+    A value of the numeric enumeration type is converted to one of the following:
+    - Numeric type equal to or larger than the enumeration base type
+    - Union type considering the value type of the enumeration base type
 ---*/
-enum Color { Red = "r", Green = "g", Blue = "b" }
+enum Color { Red, Green = 100, Blue }
 
 {{c.decl}}
 
