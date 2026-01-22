@@ -24,7 +24,7 @@
 16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_9.ets
 
 # #27402, #28006 Deprecated char operations and conversions:
-03.types/17.array_types/array_index.ets
+03.types/16.array_types/array_index.ets
 03.types/alias_conversion/assn_var/assn-var_11.ets
 03.types/alias_conversion/assn_var/assn-var_17.ets
 03.types/alias_conversion/assn_var/assn-var_24.ets
