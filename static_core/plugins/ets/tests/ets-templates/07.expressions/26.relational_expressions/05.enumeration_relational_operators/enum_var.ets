@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{%- for c in enums %}
+{%- for c in cases %}
 /*---
 desc: >-
     If both operands are of the same Enumeration type, then Numerical Relational Operators
@@ -22,9 +22,6 @@ desc: >-
 
 {{c.decl}}
 let r = Color.Red, g = Color.Green, b = Color.Blue;
-
-// use array elements
-let arr: Color[] = [Color.Red, Color.Green, Color.Blue, Color.Blue]
 
 function main() {
 {% for d in operands %}

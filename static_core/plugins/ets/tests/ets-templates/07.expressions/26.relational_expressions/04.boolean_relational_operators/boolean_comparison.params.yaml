@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- # List of string comparison conditions
-boolean_comparison:
+cases:
   - {xvalue: "false", yvalue: "false", op: "<", result: "false"}
   - {xvalue: "false", yvalue: "true", op: "<", result: "true"}
   - {xvalue: "true", yvalue: "false", op: "<", result: "false"}

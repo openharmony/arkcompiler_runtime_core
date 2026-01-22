@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{%- for c in enums %}
+{%- for c in cases %}
 /*---
 desc: >-
     If both operands are of the same Enumeration type, then Numerical Relational Operators
@@ -21,10 +21,7 @@ desc: >-
 ---*/
 
 {{c.decl}}
-enum Size { S = "a", M = "b", L = "c", XL = "d" }
-let r: Color|Size|string = Color.Red
-let g: Size|Color = Color.Green
-let b: Size|Color|int = Color.Blue
+let r = Color.Red, g = Color.Green, b = Color.Blue;
 
 function main() {
 {% for d in operands %}

@@ -12,7 +12,11 @@
 # limitations under the License.
 
 ---
-enums:
+operands:
+    - ['(r == b ? g : r)', Color.Green, '(r == g ? Color.Red : Color.Blue)']
+    - [r, '(1 < 2 ? Color.Green : Color.Red)', Color.Blue]
+
+cases:
     - decl: |-
           // default integer values
           enum Color { Red, Green, Blue }
@@ -71,7 +75,3 @@ enums:
           // different case and encoding string values
           enum Color { Blue = "   а code", Red = "   A code", Green = "   a code" }
       op: ['', '', '', '', '', '', '!', '!', '!', '!', '!', '!']
-
-operands:
-    - ['(r == b ? g : r)', Color.Green, '(r == g ? Color.Red : Color.Blue)']
-    - [r, '(1 < 2 ? Color.Green : Color.Red)', Color.Blue]

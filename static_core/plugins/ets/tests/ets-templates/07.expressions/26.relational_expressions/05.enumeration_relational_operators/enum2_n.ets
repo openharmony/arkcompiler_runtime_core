@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,13 @@ desc: >-
     If both operands are of the same Enumeration type, then Numerical Relational Operators
     or String Relational Operators are used depending on the kind of enumeration constant value.
     Otherwise, a compile-time error occurs.
+tags: [compile-only, negative]
+expected_out: '{{c.expected}}'
 ---*/
 
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
+    {{c.checks|indent}}
 }
 {%- endfor %}

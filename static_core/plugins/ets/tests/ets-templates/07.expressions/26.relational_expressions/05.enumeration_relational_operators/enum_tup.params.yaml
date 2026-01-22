@@ -12,7 +12,12 @@
 # limitations under the License.
 
 ---
-enums:
+operands:
+    - ['tup[0]', Color.Green, 'tup[2]']
+    - [r, 'tup[1]', Color.Blue]
+    - [Color.Red, 'tup[1]', 'tup[2]']
+
+cases:
     - decl: |-
           // default integer values
           enum Color { Red, Green, Blue }
@@ -71,7 +76,3 @@ enums:
           // different case and encoding string values
           enum Color { Blue = "   а code", Red = "   A code", Green = "   a code" }
       op: ['', '', '', '', '', '', '!', '!', '!', '!', '!', '!']
-
-operands:
-    - [r, Color.Green, b]
-    - [Color.Red, g, Color.Blue]
