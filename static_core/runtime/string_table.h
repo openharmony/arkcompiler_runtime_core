@@ -51,6 +51,7 @@ public:
 
     using StringVisitor = std::function<void(ObjectHeader *)>;
 
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     void VisitRoots(GCRootVisitor visitor, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
     {
         internalTable_.VisitRoots(visitor, flags);

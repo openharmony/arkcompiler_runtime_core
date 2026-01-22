@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,9 @@ inline void LineString::Trim(uint32_t newLength)
     DCHECK_CC(IsLineString());
     uint32_t oldLength = GetLength();
     DCHECK_CC(oldLength >= newLength);
-    if (newLength == oldLength) return;
+    if (newLength == oldLength) {
+        return;
+    }
     bool isUtf8 = IsUtf8();
     size_t sizeNew = isUtf8 ?
         LineString::ComputeSizeUtf8(newLength): LineString::ComputeSizeUtf16(newLength);
