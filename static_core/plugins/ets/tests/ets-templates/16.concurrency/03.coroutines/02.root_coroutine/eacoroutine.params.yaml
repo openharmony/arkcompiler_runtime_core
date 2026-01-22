@@ -1,0 +1,44 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Interfaces with static members and type parameters inside
+cases:
+  - desc: Checking EAWorker id.
+    decl: |-
+      import { CoroutineExtras } from "std/debug/concurrency"
+      import { EAWorker } from "std/core"
+    logic: |-
+      const mainWorkerId = CoroutineExtras.getWorkerId();
+      const eaWorker = new EAWorker();
+      eaWorker.start();
+      const eaWorkerId = eaWorker.run<int>(CoroutineExtras.getWorkerId).Await();
+      
+      arktest.assertNE(eaWorkerId, mainWorkerId, "EAWorker id equal to Main worker id");
+      eaWorker.quit();
+  - desc: Checking launched EACoroutine id.
+    decl: |-
+      import { CoroutineExtras } from "std/debug/concurrency"
+      import { launch, WorkerDomain, WorkerGroup, LaunchParams } from "std/concurrency"
+      import { Job, EAWorker } from "std/core"
+    logic: |-
+      const eaWorker = new EAWorker();
+      eaWorker.start();
+      const eaWorkerId = eaWorker.run<int>(CoroutineExtras.getWorkerId).Await();
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EA, [eaWorkerId])
+      };
+      let job: Job<int> = launch<int, () => int>(CoroutineExtras.getWorkerId, params);
+      const launchedWorkerId = job.Await();
+      
+      arktest.assertEQ(launchedWorkerId, eaWorkerId, "Launched worker id is not EA");
+      eaWorker.quit();
