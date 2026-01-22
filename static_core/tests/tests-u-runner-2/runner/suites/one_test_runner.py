@@ -185,7 +185,7 @@ class OneTestRunner:
                 fail_kind = self.__fail_kind_timeout(name)
                 error = fail_kind
                 return_code = process.returncode
-                process.kill()
+                output, error = self._terminate_timed_out_process(process, name)
         return passed, fail_kind, output, error, return_code
 
     def __run_gtest(self, name: str,
@@ -260,3 +260,16 @@ class OneTestRunner:
         if return_code == 0:
             return self.__fail_kind_neg_fail(name)
         return self.__fail_kind_fail(name)
+
+    def _terminate_timed_out_process(self, process: subprocess.Popen, name: str) -> tuple[str, str]:
+        timeout = self.test_env.config.general.retrieve_log_timeout
+        try:
+            process.terminate()
+            output, error = process.communicate(timeout=timeout)
+            self.__log_cmd(f"{name}: Actual partial output: {output.strip()}")
+        except subprocess.TimeoutExpired:
+            process.kill()
+            output = ""
+            self.__log_cmd(f"{name}: Failed by second timeout on retrieving partial output after {timeout} sec")
+            error = f"Failed by second timeout on retrieving partial output after {timeout} sec"
+        return output, error

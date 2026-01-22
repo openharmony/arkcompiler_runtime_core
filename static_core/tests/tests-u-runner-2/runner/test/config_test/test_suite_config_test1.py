@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -88,7 +88,8 @@ class TestSuiteConfigTest1(unittest.TestCase):
             "--clean-gcda-before-run",
             "--time-edges", "1,10,100,500",
             "--gn-build",
-            "--gcov-tool", "/usr/bin/ls"]
+            "--gcov-tool", "/usr/bin/ls",
+            "--retrieve-log-timeout", "111"]
 
         configs = ConfigsLoader(self.workflow_name, self.test_suite_name)
 

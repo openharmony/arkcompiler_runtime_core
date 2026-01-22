@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,13 @@ class FailKindTest(TestCase):
     sys_argv_test1: ClassVar = [
         ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets"],
         ["runner.sh", "panda", "test_suite1", "--test-file", "test1.console.ets", "--gn-build"]
+    ]
+    sys_argv_test12: ClassVar = [
+        ["runner.sh", "call_sh", "test_suite1", "--test-file", "test1.console.ets"],
+    ]
+    sys_argv_test13: ClassVar = [
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets"],
+        ["runner.sh", "panda", "test_suite1", "--test-file", "test4.ets", "--retrieve-log-timeout", "111"],
     ]
 
     @staticmethod
@@ -278,3 +285,56 @@ class FailKindTest(TestCase):
                     self.assertFalse(test_result.passed)
                     self.assertEqual(test_result.fail_kind,
                                      f"{FailKindTest.COMPILER_STEP_NAME}_STDERR_NOT_EMPTY")
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    def test_fail_kind_timeout_first(self) -> None:
+        """
+        Feature: workflow step fails by timeout
+        - Expected: reproduce info should contain captured output
+        - fail_kind is <COMPILER_STEP_NAME>_TIMEOUT
+        """
+        for argv in self.sys_argv_test12:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+
+                    test_result = self.run_test()
+
+                    self.assertIn(f"Actual partial output: {test_result.test_id}", test_result.reproduce)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_TIMEOUT")
+
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    def test_fail_kind_timeout_second(self, mock_popen: MagicMock) -> None:
+        """
+        Feature: Upon failure by second timeout on retreiving output, error message contains correct info
+        - Expected: reproduce info should contain used timeout and step name
+        - fail_kind is <COMPILER_STEP_NAME>_TIMEOUT
+        """
+        for argv in self.sys_argv_test13:
+            with self.subTest(argv=argv):
+                with patch('sys.argv', argv):
+                    test_utils.set_process_mock(mock_popen, return_code=-1, timeout_exception=True)
+
+                    test_result = self.run_test()
+
+                    config = test_result.test_env.config
+
+                    self.assertIn(f"{config.workflow.steps[0].name}: Failed by second timeout \
+on retrieving partial output after {config.general.retrieve_log_timeout} sec", test_result.reproduce)
+                    self.assertEqual(test_result.fail_kind, f"{FailKindTest.COMPILER_STEP_NAME}_TIMEOUT")
+
+                    work_dir = Path(os.environ["WORK_DIR"])
+                    shutil.rmtree(work_dir, ignore_errors=True)
