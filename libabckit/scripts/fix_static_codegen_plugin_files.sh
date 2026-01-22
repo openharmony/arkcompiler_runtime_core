@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,7 @@ for FILE_PATH in "${@}"; do
     f="$(basename -- "$FILE_PATH")"
     echo "Fix plugin's file path in ${FILE_PATH}"
 
-    sed -r 's/BytecodeGen/CodeGenStatic/g' "${FILE_PATH}" > "${OUTPUT_DIR}/$f"
+    sed -E 's/BytecodeGen/CodeGenStatic/g' "${FILE_PATH}" > "${OUTPUT_DIR}/$f"
     if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' 's/plugins\/ets\/bytecode_optimizer\/visitors\///g' "${OUTPUT_DIR}/$f"
     else
