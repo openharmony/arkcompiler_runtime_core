@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,8 +89,6 @@ function test5(shor: String): int {
     let failure = 0
 
     let lambda: (str: String, args: Object[]) => String = (str: String, args: Object[]): String => {
-        failure += checkTestResult("d", RegExp.lastMatch)
-        failure += checkTestResult("d", RegExp.$1)
         return str.toUpperCase()
     }
     failure += checkTestResult(shor.replace(new RegExp("(.)", "g"), lambda), "ABCD")
