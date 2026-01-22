@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,10 +28,12 @@ namespace ark {
  * and free a large chunk of memory that should normally be used for the stack.
  * NativeStackAllocator allows you to use fewer mmap calls to work with the same number of stacks.
  */
+// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 class NativeStackAllocator {
 public:
     static constexpr uint8_t STACK_COUNT_IN_POOL = 8U;
     // Check if STACK_COUNT_IN_POOL is divisible by 8
+    // NOLINTNEXTLINE(hicpp-signed-bitwise, readability-magic-numbers)
     static_assert((STACK_COUNT_IN_POOL & 0xF) == STACK_COUNT_IN_POOL);
 
 private:
@@ -46,14 +48,14 @@ private:
         bool TryFreeStack(uint8_t *stack);
         bool CheckIsFree() const;
 
-        StacksHolder *next = nullptr;
-        const size_t size;
-        std::bitset<STACK_COUNT_IN_POOL> bitset;
-        uint8_t *mem;
+        StacksHolder *next = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
+        const size_t size;  // NOLINT(misc-non-private-member-variables-in-classes, readability-identifier-naming)
+        std::bitset<STACK_COUNT_IN_POOL> bitset;  // NOLINT(misc-non-private-member-variables-in-classes)
+        uint8_t *mem;                             // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
 public:
-    NativeStackAllocator() = default;
+    NativeStackAllocator() = default;  // NOLINT(cppcoreguidelines-pro-type-member-init)
     ~NativeStackAllocator() = default;
 
     NO_COPY_SEMANTIC(NativeStackAllocator);

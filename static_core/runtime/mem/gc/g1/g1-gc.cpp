@@ -1655,8 +1655,7 @@ void G1GC<LanguageConfig>::FastYoungMark(const CollectionSet &collectibleRegions
     ASSERT(collectibleRegions.Tenured().empty());
     PandaVector<Region *> youngRegions(collectibleRegions.Young().begin(), collectibleRegions.Young().end());
     bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
-    for (size_t idx = 0; idx < youngRegions.size(); ++idx) {
-        auto *region = youngRegions[idx];
+    for (auto *region : youngRegions) {
         region->SetLiveBytes(0U);
         GCMarkWholeRegionTask gcWorkerTask(region);
         if (useGcWorkers && this->GetWorkersTaskPool()->AddTask(GCMarkWholeRegionTask(gcWorkerTask))) {
@@ -2326,8 +2325,8 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet(PandaVector<std::pair<u
     auto g1Allocator = this->GetG1ObjectAllocator();
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
     LOG_DEBUG_GC << "Regions for FullGC:";
-    for (auto iter = garbageRegions.begin(); iter != garbageRegions.end(); ++iter) {
-        auto *region = iter->second;
+    for (auto &garbageRegion : garbageRegions) {
+        auto *region = garbageRegion.second;
         if (region->HasFlag(IS_EDEN) || region->HasPinnedObjects()) {
             LOG_DEBUG_GC << (region->HasFlags(IS_EDEN) ? "Young regions" : "Region with pinned objects") << " ("
                          << *region << ") is not added to collection set";

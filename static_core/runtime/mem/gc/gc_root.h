@@ -155,7 +155,7 @@ public:
 
     void VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const;
 
-    void UpdateAndSweep(const ReferenceUpdater &updater);
+    void UpdateAndSweep(const ReferenceUpdater &callback);
 
 private:
     /// Visit VM-specific roots

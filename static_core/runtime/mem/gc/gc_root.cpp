@@ -88,12 +88,14 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, Obje
                                                                                      ObjectHeader *objectToTraverse,
                                                                                      [[maybe_unused]] uint32_t offset,
                                                                                      [[maybe_unused]] bool isVolatile) {
-                        if (!rangeObjectChecker(objectToTraverse))
+                        if (!rangeObjectChecker(objectToTraverse)) {
                             return false;
+                        }
                         // The weak references from dynobjects should not be regarded as roots.
                         TaggedValue value(objectToTraverse);
-                        if (value.IsWeak())
+                        if (value.IsWeak()) {
                             return false;
+                        }
                         // In concurrent phase some other thread can overide the field of fromObject with offset
                         // This way fromObject->GetFieldObject(offset) can be different from objectToTraverse
                         // For that reason we use atomic::compare_exchange_weak
@@ -164,12 +166,14 @@ template <class VRegRef, class VRegInfo>
 void RootManager<LanguageConfig>::VisitRegisterRoot(VRegRef &vRegister, VRegInfo &regInfo, StackWalker &pframe,
                                                     const GCRootVisitor &gcRootVisitor)
 {
-    if (LIKELY(!vRegister.HasObject()))
+    if (LIKELY(!vRegister.HasObject())) {
         return;
+    }
     ObjectHeader *objectHeader = vRegister.GetReference();
     ObjectHeader *oldRef = objectHeader;
-    if (objectHeader == nullptr)
+    if (objectHeader == nullptr) {
         return;
+    }
     LOG(DEBUG, GC) << " Found root for register" << GetDebugInfoAboutObject(objectHeader);
 
     gcRootVisitor({RootType::ROOT_FRAME, &objectHeader});

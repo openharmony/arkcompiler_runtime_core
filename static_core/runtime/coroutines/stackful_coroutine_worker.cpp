@@ -381,6 +381,7 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
     ASSERT(newCoro != nullptr);
     newCoro->SetWorker(this);
     auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate);
 }
 
@@ -714,7 +715,7 @@ std::pair<bool, uint64_t> StackfulCoroutineWorker::CalculateShortestTimerDelay()
         return {true, WAITING_TIME_UNLIMITED};
     }
     // Returns time in ms that most close to correct one but is not less then it
-    return {true, (minTimerDelay - 1) / 1000U + 1};
+    return {true, (minTimerDelay - 1) / 1000U + 1};  // NOLINT(readability-magic-numbers)
 }
 
 }  // namespace ark

@@ -84,8 +84,8 @@ public:
     }
 
 protected:
-    Runtime *runtime_;
-    PandaVM *vm_;
+    Runtime *runtime_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    PandaVM *vm_;       // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(GCRootTest, TestVregRoot)
