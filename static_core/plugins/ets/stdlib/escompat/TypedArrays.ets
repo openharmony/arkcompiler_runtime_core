@@ -177,6 +177,16 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
+     * Creates an Int8Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].toByte())
+        }
+    }
+
+    /**
      * Creates an Int8Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
@@ -1669,6 +1679,16 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, Int16Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates an Int16Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].toShort())
         }
     }
 
@@ -3182,6 +3202,16 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, Int32Array.doubleToInt(numbers[i]))
+        }
+    }
+
+    /**
+     * Creates an Int32Array from Array<int>
+     */
+    public constructor(numbers: Array<int>) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i])
         }
     }
 
