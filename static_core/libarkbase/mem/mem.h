@@ -287,6 +287,7 @@ using ObjectVisitorEx = std::function<void(ObjectHeader *fromObject, ObjectHeade
 using ObjectChecker = std::function<bool(const ObjectHeader *)>;
 using GCRootVisitor = std::function<void(mem::GCRoot)>;
 using GCRootUpdater = std::function<bool(ObjectHeader **)>;
+using ReferenceUpdater = std::function<ObjectStatus(ObjectHeader **)>;
 using MemRangeChecker = std::function<bool(mem::MemRange &)>;
 
 inline bool NoFilterChecker([[maybe_unused]] const ObjectHeader *objectHeader)

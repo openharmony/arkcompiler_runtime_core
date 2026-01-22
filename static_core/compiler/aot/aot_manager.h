@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,30 +115,6 @@ public:
                     cb(aotStringGcRoots_[idx * MASK_WIDTH + offset]);
                 }
             }
-        }
-    }
-
-    template <typename Callback, typename IsYoungPredicate>
-    void UpdateAotStringRoots(Callback cb, IsYoungPredicate p)
-    {
-        ASSERT(aotStringGcRoots_.empty() ||
-               (aotStringYoungSet_.size() - 1) == (aotStringGcRoots_.size() - 1) / MASK_WIDTH);
-
-        hasYoungAotStringRefs_ = false;
-        size_t idx = 0;
-        for (auto root : aotStringGcRoots_) {
-            cb(root);
-            uint64_t bitmask = 1ULL << (idx % MASK_WIDTH);
-
-            if ((aotStringYoungSet_[idx / MASK_WIDTH] & bitmask) != 0) {
-                bool isYoung = p(*root);
-                hasYoungAotStringRefs_ |= isYoung;
-                if (!isYoung) {
-                    aotStringYoungSet_[idx / MASK_WIDTH] &= ~bitmask;
-                }
-            }
-
-            idx++;
         }
     }
 

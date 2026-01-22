@@ -64,7 +64,10 @@ public:
 
     virtual void Sweep(const GCObjectVisitor &gcObjectVisitor);
 
-    bool UpdateMoved(const GCRootUpdater &gcRootUpdater);
+    void UpdateAndSweep(const ReferenceUpdater &updater)
+    {
+        return table_.UpdateAndSweep(updater);
+    }
 
     size_t Size();
 
@@ -84,7 +87,7 @@ protected:
         virtual coretypes::String *GetOrInternString(coretypes::String *string, const LanguageContext &ctx);
         virtual void Sweep(const GCObjectVisitor &gcObjectVisitor);
 
-        bool UpdateMoved(const GCRootUpdater &gcRootUpdater);
+        void UpdateAndSweep(const ReferenceUpdater &updater);
 
         void VisitStrings(const StringVisitor &visitor);
 

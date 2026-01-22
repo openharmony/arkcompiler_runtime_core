@@ -303,6 +303,7 @@ ObjectHeader *PandaCoreVM::GetOOMErrorObject()
 
 void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
+    PandaVM::VisitVmRoots(visitor);
     // Visit PT roots
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
         ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
@@ -311,19 +312,6 @@ void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
         ptStorage->VisitObjects(visitor, mem::RootType::ROOT_PT_LOCAL);
         return true;
     });
-}
-
-void PandaCoreVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
-{
-    LOG(DEBUG, GC) << "=== PTRoots Update moved. BEGIN ===";
-    GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
-        ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
-        auto mtThread = MTManagedThread::CastFromThread(thread);
-        auto ptStorage = mtThread->GetPtReferenceStorage();
-        ptStorage->UpdateMovedRefs(gcRootUpdater);
-        return true;
-    });
-    LOG(DEBUG, GC) << "=== PTRoots Update moved. END ===";
 }
 
 }  // namespace ark::core

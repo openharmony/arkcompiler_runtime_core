@@ -49,7 +49,7 @@ public:
 protected:
     ~GCLang() override;
     void UpdateRefsToMovedObjectsInPygoteSpace() override;
-    void CommonUpdateRefsToMovedObjects() override;
+    void CommonUpdateAndSweepVmRefs() override;
 
     void VisitRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) override
     {

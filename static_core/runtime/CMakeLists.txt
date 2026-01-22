@@ -937,6 +937,7 @@ add_gtests(
     tests/gc_task_test.cpp
     tests/epsilon_gcs_test.cpp
     tests/g1gc_test.cpp
+    tests/gc_root_test.cpp
     tests/heap_verifier_test.cpp
     tests/collection_set_test.cpp
     tests/g1gc_fullgc_test.cpp

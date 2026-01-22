@@ -183,9 +183,8 @@ ObjectHeader *G1EvacuateRegionsWorkerState<LanguageConfig>::SetForwardAddress(Ob
 template <typename LanguageConfig>
 void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
 {
-    GCRootVisitor gcMarkCollectionSet = [this](const GCRoot &gcRoot) {
+    GCRootVisitor gcMarkCollectionSet = [this](GCRoot gcRoot) {
         ASSERT(gcRoot.GetFromObjectHeader() == nullptr);
-        auto *rootPointer = gcRoot.GetObjectPointer();
         auto object = gcRoot.GetObjectHeader();
         ASSERT(object != nullptr);
         LOG(DEBUG, GC) << "Handle root " << GetDebugInfoAboutObject(object) << " from: " << gcRoot.GetType();
@@ -196,11 +195,11 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
         // Atomic with relaxed order reason: memory order is not required
         MarkWord markWord = object->AtomicGetMark(std::memory_order_relaxed);
         if (markWord.IsForwarded()) {
-            *rootPointer = markWord.GetForwardingAddress();
+            gcRoot.Update(markWord.GetForwardingAddress());
             return;
         }
         LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(object);
-        *rootPointer = ToObjPtrType(Evacuate(object, markWord));
+        gcRoot.Update(Evacuate(object, markWord));
     };
 
     gc_->VisitRoots(gcMarkCollectionSet, VisitGCRootFlags::ACCESS_ROOT_NONE);

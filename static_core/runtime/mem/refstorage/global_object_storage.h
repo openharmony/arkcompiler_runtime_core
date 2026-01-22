@@ -99,8 +99,7 @@ public:
     void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
 
     /// Update pointers to moved Objects in global storage.
-    // NOTE(alovkov): take a closure from gc
-    void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater);
+    void UpdateAndSweep(const ReferenceUpdater &updater);
 
     void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred);
 
@@ -279,16 +278,17 @@ private:
             blocksAvailable_++;
         }
 
-        void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater)
+        void UpdateAndSweep(const ReferenceUpdater &updater)
         {
             os::memory::WriteLockHolder lk(mutex_);
             // NOLINTNEXTLINE(modernize-loop-convert)
             for (size_t index = 0; index < storage_.size(); index++) {
                 auto ref = storage_[index];
-                if (IsBusy(ref)) {
-                    auto obj = reinterpret_cast<ObjectHeader *>(ref);
-                    if (obj != nullptr && gcRootUpdater(&obj)) {
-                        storage_[index] = ToUintPtr(obj);
+                if (IsBusy(ref) && ref != 0) {
+                    ObjectStatus status = updater(reinterpret_cast<ObjectHeader **>(&storage_[index]));
+                    if (status == ObjectStatus::DEAD_OBJECT) {
+                        LOG(DEBUG, GC) << "Clear weak-reference: " << storage_[index];
+                        storage_[index] = 0;
                     }
                 }
             }

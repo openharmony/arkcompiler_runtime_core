@@ -39,7 +39,7 @@ public:
     Span<LockedObjectInfo> GetLockedObjectInfos();
 
     void VisitGCRoots(const GCRootVisitor &cb) override;
-    void UpdateGCRoots(const GCRootUpdater &gcRootUpdater) override;
+    void UpdateAndSweep(const ReferenceUpdater &updater) override;
 
     ThreadStatus GetWaitingMonitorOldStatus()
     {

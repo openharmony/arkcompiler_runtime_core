@@ -22,6 +22,7 @@
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
 #include "libarkfile/file.h"
@@ -134,6 +135,23 @@ PandaString PandaVM::GetClassesFootprint() const
 void PandaVM::ProcessReferenceFinalizers()
 {
     GetReferenceProcessor()->ProcessFinalizers();
+}
+
+void PandaVM::VisitVmRoots(const GCRootVisitor &visitor)
+{
+    auto *storage = GetGlobalObjectStorage();
+    if (storage != nullptr) {
+        storage->VisitObjects(visitor, mem::RootType::ROOT_NATIVE_GLOBAL);
+    }
+}
+
+void PandaVM::UpdateAndSweepVmRefs(const ReferenceUpdater &updater)
+{
+    GetStringTable()->UpdateAndSweep(updater);
+    auto globalStorage = GetGlobalObjectStorage();
+    if (globalStorage != nullptr) {
+        globalStorage->UpdateAndSweep(updater);
+    }
 }
 
 }  // namespace ark

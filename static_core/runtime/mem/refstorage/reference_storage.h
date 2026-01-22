@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,9 +99,6 @@ public:
     PandaVector<ObjectHeader *> GetAllObjects();
 
     void VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType);
-
-    /// Update pointers to moved Objects in local storage
-    void UpdateMovedRefs(const GCRootUpdater &gcRootUpdater);
 
     /// Dump the last several local references info(max MAX_DUMP_LOCAL_NUMS).
     void DumpLocalRef();

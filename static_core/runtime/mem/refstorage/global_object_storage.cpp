@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,13 +123,9 @@ void GlobalObjectStorage::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::
     globalFixedStorage_->VisitObjects(gcRootVisitor, rootType);
 }
 
-void GlobalObjectStorage::UpdateMovedRefs(const GCRootUpdater &gcRootUpdater)
+void GlobalObjectStorage::UpdateAndSweep(const ReferenceUpdater &updater)
 {
-    LOG(DEBUG, GC) << "=== GlobalStorage Update moved. BEGIN ===";
-    globalStorage_->UpdateMovedRefs(gcRootUpdater);
-    weakStorage_->UpdateMovedRefs(gcRootUpdater);
-    globalFixedStorage_->UpdateMovedRefs(gcRootUpdater);
-    LOG(DEBUG, GC) << "=== GlobalStorage Update moved. END ===";
+    weakStorage_->UpdateAndSweep(updater);
 }
 
 void GlobalObjectStorage::ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)

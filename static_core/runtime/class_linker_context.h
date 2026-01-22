@@ -185,13 +185,6 @@ public:
         return true;
     }
 
-    void UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
-    {
-        for (auto &root : roots_) {
-            gcRootUpdater(&root);
-        }
-    }
-
     virtual PandaVector<std::string_view> GetPandaFilePaths() const
     {
         return PandaVector<std::string_view>();

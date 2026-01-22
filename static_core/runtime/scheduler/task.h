@@ -52,14 +52,6 @@ public:
         }
     }
 
-    void UpdateGCRoots(const GCRootUpdater &gcRootUpdater) override
-    {
-        ManagedThread::UpdateGCRoots(gcRootUpdater);
-        if ((future_ != nullptr)) {
-            gcRootUpdater(&future_);
-        }
-    }
-
     void SwitchFromWorkerThread();
     static void SuspendCurrent();
     static void EndCurrent();

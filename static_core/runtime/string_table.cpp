@@ -69,11 +69,6 @@ void StringTable::Sweep(const GCObjectVisitor &gcObjectVisitor)
     table_.Sweep(gcObjectVisitor);
 }
 
-bool StringTable::UpdateMoved(const GCRootUpdater &gcRootUpdater)
-{
-    return table_.UpdateMoved(gcRootUpdater);
-}
-
 size_t StringTable::Size()
 {
     return internalTable_.Size() + table_.Size();
@@ -214,23 +209,22 @@ coretypes::String *StringTable::Table::GetOrInternString(coretypes::String *stri
     return result;
 }
 
-bool StringTable::Table::UpdateMoved(const GCRootUpdater &gcRootUpdater)
+void StringTable::Table::UpdateAndSweep(const ReferenceUpdater &updater)
 {
     os::memory::WriteLockHolder holder(tableLock_);
-    LOG(DEBUG, GC) << "=== StringTable Update moved. BEGIN ===";
-    LOG(DEBUG, GC) << "Iterate over: " << table_.size() << " elements in string table";
-    bool updated = false;
-    for (auto it = table_.begin(), end = table_.end(); it != end;) {
-        ObjectHeader *object = it->second;
-        if (gcRootUpdater(&object)) {
-            it->second = static_cast<coretypes::String *>(object);
-            LOG(DEBUG, GC) << "StringTable: forwarded " << std::hex << object;
-            updated = true;
+    auto it = table_.begin();
+    while (it != table_.end()) {
+        ObjectHeader *prevObject = it->second;
+        if (updater(reinterpret_cast<ObjectHeader **>(&it->second)) == ObjectStatus::ALIVE_OBJECT) {
+            if (it->second != prevObject) {
+                LOG(DEBUG, GC) << "StringTable: forwarded " << prevObject << " -> " << it->second;
+            }
+            ++it;
+        } else {
+            table_.erase(it++);
+            LOG(DEBUG, GC) << "StringTable: delete " << prevObject;
         }
-        ++it;
     }
-    LOG(DEBUG, GC) << "=== StringTable Update moved. END ===";
-    return updated;
 }
 
 // NOTE(alovkov): make parallel

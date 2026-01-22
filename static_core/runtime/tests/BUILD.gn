@@ -17,7 +17,10 @@ import("${ark_root}/runtime/tests/unittest_helper.gni")
 runtime_test_module_out_path = "runtime_core/static_core/runtime"
 
 ark_runtime_unittest("arkruntime_memory_management_test") {
-  deps = [ "${ark_root}/pandastdlib:arkstdlib" ]
+  deps = [
+    "${ark_root}/pandastdlib:arkstdlib",
+    "${ark_root}/compiler/aot:libarkaotmanager",
+  ]
   env = [ "PANDA_STD_LIB=" + rebase_path(
               "${root_gen_dir}/arkcompiler/runtime_core/static_core/pandastdlib/arkstdlib.abc") ]
   sources = [
@@ -31,6 +34,7 @@ ark_runtime_unittest("arkruntime_memory_management_test") {
     "g1gc_fullgc_test.cpp",
     "g1gc_test.cpp",
     "gc_log_test.cpp",
+    "gc_root_test.cpp",
     "gc_task_test.cpp",
     "heap_verifier_test.cpp",
     "object_helpers_test.cpp",

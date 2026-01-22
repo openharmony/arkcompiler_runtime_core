@@ -433,7 +433,7 @@ public:
 
     virtual void VisitGCRoots(const GCRootVisitor &cb);
 
-    virtual void UpdateGCRoots(const GCRootUpdater &gcRootUpdater);
+    virtual void UpdateAndSweep(const ReferenceUpdater &updater);
 
     PANDA_PUBLIC_API void PushLocalObject(ObjectHeader **objectHeader);
 

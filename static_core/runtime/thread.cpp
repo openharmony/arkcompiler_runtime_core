@@ -677,28 +677,7 @@ void MTManagedThread::ProcessCreatedThread()
     NativeCodeBegin();
 }
 
-void ManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
-{
-    if (exception_ != nullptr) {
-        gcRootUpdater(&exception_);
-    }
-    if (flattenedStringCache_ != nullptr) {
-        // This is the cached pointer. We need to update it; visiting it as root is not required.
-        gcRootUpdater(&flattenedStringCache_);
-    }
-    for (auto **localObject : localObjects_) {
-        gcRootUpdater(localObject);
-    }
-
-    if (!taggedHandleScopes_.empty()) {
-        taggedHandleStorage_->UpdateHeapObject(gcRootUpdater);
-        taggedGlobalHandleStorage_->UpdateHeapObject(gcRootUpdater);
-    }
-
-    if (!objectHeaderHandleScopes_.empty()) {
-        objectHeaderHandleStorage_->UpdateHeapObject(gcRootUpdater);
-    }
-}
+void ManagedThread::UpdateAndSweep([[maybe_unused]] const ReferenceUpdater &updater) {}
 
 /* return true if sleep is interrupted */
 bool MTManagedThread::Sleep(uint64_t ms)
@@ -730,19 +709,12 @@ uint32_t ManagedThread::GetThreadPriority()
     return os::thread::GetPriority(tid);
 }
 
-void MTManagedThread::UpdateGCRoots(const GCRootUpdater &gcRootUpdater)
+void MTManagedThread::UpdateAndSweep(const ReferenceUpdater &updater)
 {
-    ManagedThread::UpdateGCRoots(gcRootUpdater);
+    ManagedThread::UpdateAndSweep(updater);
     for (auto &it : localObjectsLocked_.Data()) {
-        it.UpdateObject(gcRootUpdater);
+        it.UpdateObject(updater);
     }
-
-    // Update enter_monitor_object_
-    if (enterMonitorObject_ != nullptr) {
-        gcRootUpdater(&enterMonitorObject_);
-    }
-
-    ptReferenceStorage_->UpdateMovedRefs(gcRootUpdater);
 }
 
 void MTManagedThread::VisitGCRoots(const GCRootVisitor &cb)
@@ -802,6 +774,10 @@ void ManagedThread::VisitGCRoots(const GCRootVisitor &cb)
     }
     if (!objectHeaderHandleScopes_.empty()) {
         objectHeaderHandleStorage_->VisitGCRoots(cb);
+    }
+
+    if (flattenedStringCache_ != nullptr) {
+        cb({mem::RootType::ROOT_THREAD, &flattenedStringCache_});
     }
 }
 
