@@ -66,7 +66,7 @@ public:
 private:
     // 1. Removes unnecessary String Builder instances
     InstIter SkipToStringBuilderConstructorWithStringArg(InstIter begin, InstIter end);
-    void OptimizeStringBuilderToString(BasicBlock *block);
+    bool OptimizeStringBuilderToString(BasicBlock *block);
 
     // 2. Replaces String Builder usage with string concatenation whenever optimal
     struct ConcatenationMatch {
@@ -92,7 +92,7 @@ private:
     void ReplaceWithConcatIntrinsic(const ConcatenationMatch &match);
     void RemoveStringBuilderInstance(Inst *instance);
     void Cleanup(const ConcatenationMatch &match);
-    void OptimizeStringConcatenation(BasicBlock *block);
+    bool OptimizeStringConcatenation(BasicBlock *block);
 
     // 3. Optimizes String Builder concatenation loops
 
@@ -242,6 +242,7 @@ private:
     void RemoveUnusedPhiInstructions(Loop *loop);
     void FixBrokenSaveStates(Loop *loop);
     void Cleanup(Loop *loop);
+    bool CleanupSaveStateInstructions();
 
     bool AllUsersAreVisitedAppendInstructions(Inst *inst, Marker visited);
     Inst *UpdateIntermediateValue(const StringBuilderUsage &usage, Inst *intermediateValue,
@@ -273,13 +274,13 @@ private:
     const ArenaVector<StringBuilderUsage> &GetStringBuilderUsagesPO(Inst *accValue);
 
     // 4. Merges consecutive String Builder append string calls into one appendN call
-    void OptimizeStringConcatenation(Loop *loop);
+    bool OptimizeStringConcatenation(Loop *loop);
     IntrinsicInst *CreateIntrinsicStringBuilderAppendStrings(const ConcatenationMatch &match, SaveStateInst *saveState);
     void ReplaceWithAppendIntrinsic(const ConcatenationMatch &match);
     using StringBuilderCallsMap = ArenaMap<Inst *, InstVector>;
     const StringBuilderCallsMap &CollectStringBuilderCalls(BasicBlock *block);
     void ReplaceWithAppendIntrinsic(Inst *instance, const InstVector &calls, size_t from, size_t to);
-    void OptimizeStringBuilderAppendChain(BasicBlock *block);
+    bool OptimizeStringBuilderAppendChain(BasicBlock *block);
 
     // 5. Merges consecutive String Builders into one String Builder if possible
     using InstPair = std::pair<Inst *, Inst *>;
@@ -293,10 +294,10 @@ private:
     void Cleanup(Inst *instance, Inst *instanceFirstAppendCall, Inst *inputInstanceToStringCall);
     void CleanupInstruction(Inst *inst);
     void FixBrokenSaveStatesForStringBuilderCalls(Inst *instance);
-    void OptimizeStringBuilderChain();
+    bool OptimizeStringBuilderChain();
 
     // 6. Removes extra call for StringBuilder::%%get-stringLength if possible
-    void OptimizeStringBuilderStringLength(BasicBlock *block);
+    bool OptimizeStringBuilderStringLength(BasicBlock *block);
 
 private:
     bool isApplied_ {false};

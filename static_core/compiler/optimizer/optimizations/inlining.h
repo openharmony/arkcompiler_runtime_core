@@ -84,7 +84,6 @@ protected:
     virtual bool IsInstSuitableForInline(Inst *inst) const;
     virtual bool TryInline(CallInst *callInst);
     bool TryInlineWithInlineCaches(CallInst *callInst);
-    bool TryInlineExternal(CallInst *callInst, InlineContext *ctx);
     bool TryInlineExternalAot(CallInst *callInst, InlineContext *ctx);
 
     Inst *GetNewDefAndCorrectDF(Inst *callInst, Inst *oldDef);
