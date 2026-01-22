@@ -1664,7 +1664,7 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return "false"
 
         case jsonx.JsonType.JsonString:
-            return escapeString(elem.asString())
+            return EscapeStringBuilder.process(elem.asString())
 
         case jsonx.JsonType.JsonNumber:
             const intValue = elem.tryAsInteger()
@@ -1682,31 +1682,27 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             if (array.length == 0) {
                 return "[]"
             }
-            let arrayResult = new StringBuilder("[")
+            let arrayResult: string = "["
             if (hasIndentation) {
-                arrayResult.append("\n")
+                arrayResult = arrayResult.concat("\n")
             }
             for (let i = 0; i < array.length; i++) {
                 if (hasIndentation) {
-                    arrayResult.append(nextIndentStr)
+                    arrayResult = arrayResult.concat(nextIndentStr)
                 }
-                if (array[i].jsonType == jsonx.JsonType.JsonUndefined) {
-                    arrayResult.append("null")
-                } else {
-                    arrayResult.append(stringifyElementRecursively(array[i], replacer, space, depth + 1))
-                }
+                arrayResult = arrayResult.concat(stringifyElementRecursively(array[i], replacer, space, depth + 1))
                 if (i < array.length - 1) {
-                    arrayResult.append(",")
+                    arrayResult = arrayResult.concat(",")
                 }
                 if (hasIndentation) {
-                    arrayResult.append("\n")
+                    arrayResult = arrayResult.concat("\n")
                 }
             }
             if (hasIndentation) {
-                arrayResult.append(indentStr)
+                arrayResult = arrayResult.concat(indentStr)
             }
-            arrayResult.append("]")
-            return arrayResult.toString()
+            arrayResult = arrayResult.concat("]")
+            return arrayResult
 
         case jsonx.JsonType.JsonObject:
             const it = elem.$_iterator()
@@ -1714,9 +1710,9 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             if (entries.length == 0) {
                 return "{}"
             }
-            let objectResult = new StringBuilder("{")
+            let objectResult: string = "{"
             if (hasIndentation) {
-                objectResult.append("\n")
+                objectResult = objectResult.concat("\n")
             }
             for (let i = 0; i < entries.length; i++) {
                 const key = entries[i][0]
@@ -1725,72 +1721,93 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
                     continue
                 }
                 if (hasIndentation) {
-                    objectResult.append(nextIndentStr)
+                    objectResult = objectResult.concat(nextIndentStr)
                 }
-                objectResult.append(escapeString(key))
-                objectResult.append(":")
+                objectResult = objectResult.concat(EscapeStringBuilder.process(key))
+                objectResult = objectResult.concat(":")
                 if (hasIndentation) {
-                    objectResult.append(" ")
+                    objectResult = objectResult.concat(" ")
                 }
-                objectResult.append(stringifyElementRecursively(value, replacer, space, depth + 1))
+                objectResult = objectResult.concat(stringifyElementRecursively(value, replacer, space, depth + 1))
                 if (i < entries.length - 1) {
-                    objectResult.append(",")
+                    objectResult = objectResult.concat(",")
                 }
                 if (hasIndentation) {
-                    objectResult.append("\n")
+                    objectResult = objectResult.concat("\n")
                 }
             }
             if (hasIndentation) {
-                objectResult.append(indentStr)
+                objectResult = objectResult.concat(indentStr)
             }
-            objectResult.append("}")
-            return objectResult.toString()
+            objectResult = objectResult.concat("}")
+            return objectResult
 
         default:
             return "null"
     }
 }
 
-function escapeString(str: string): string {
-    let result = new StringBuilder("\"")
-    for (let i = 0; i < str.length; i++) {
-        const ch = str.charAt(i)
-        switch (ch) {
-            case c'\"':
-                result.append("\\\"")
-                break
-            case c'\\':
-                result.append("\\\\")
-                break
-            case c'\b':
-                result.append("\\b")
-                break
-            case c'\f':
-                result.append("\\f")
-                break
-            case c'\n':
-                result.append("\\n")
-                break
-            case c'\r':
-                result.append("\\r")
-                break
-            case c'\t':
-                result.append("\\t")
-                break
-            default:
-                if (ch.toInt() < 32) {
-                    let int_value = new Int(ch.toInt());
-                    result.append("\\u" + int_value.toString(16).padStart(4, "0"))
-                } else {
-                    result.append(ch)
-                }
-                break
-        }
-    }
-    result.append("\"")
-    return result.toString()
-}
+class EscapeStringBuilder {
+    static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
+    static controlCharsRange: int = 32
 
+    static createEscapeTable(): FixedArray<string> {
+        const asciiRange: int = 128
+        const table: FixedArray<string> = new string[asciiRange]
+        for (let code = 0; code < asciiRange; code++) {
+            switch (code.toChar()) {
+                case c'\"':
+                    table[code] = "\\\""
+                    break
+                case c'\\':
+                    table[code] = "\\\\"
+                    break
+                case c'\b':
+                    table[code] = "\\b"
+                    break
+                case c'\f':
+                    table[code] = "\\f"
+                    break
+                case c'\n':
+                    table[code] = "\\n"
+                    break
+                case c'\r':
+                    table[code] = "\\r"
+                    break
+                case c'\t':
+                    table[code] = "\\t"
+                    break
+                default:
+                    if (code < EscapeStringBuilder.controlCharsRange) {
+                        table[code] = "\\u".concat(code.toString(16).padStart(4, "0"))
+                    }
+                    break
+            }
+        }        
+        return table
+    }
+
+    public static process(str: string): string {
+        let result: string = "\""
+        let begin: int = 0
+        for (let i = 0; i < str.length; i++) {
+            const ch = str.charAt(i)
+            const code = ch.toInt()
+            if (code >= EscapeStringBuilder.controlCharsRange && ch != c'\"' && ch != c'\\') {
+                continue
+            }
+            if (begin < i) {
+                result = result.concat(str.substring(begin, i))
+            }
+            result = result.concat(EscapeStringBuilder.escapeTable[code])
+            begin = i + 1
+        }
+        if (begin < str.length) {
+            result = result.concat(str.substring(begin))
+        }
+        return result.concat("\"")
+    }
+}
 
 function getIndentation(space?: int | string, depth: int = 0): string {
     if (space == undefined) {
