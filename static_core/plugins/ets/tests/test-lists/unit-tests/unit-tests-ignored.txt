@@ -1,3 +1,9 @@
+# 348
+ets-common-tests/atomics/nonconcurrent_signed_unsigned_operations_test.ets
+
+# 30894
+ets-common-tests/taskpool/common_tasks.ets
+
 # 28002
 ets-common-tests/imported_modules_TL_exec_2/a.ets
 ets-common-tests/imported_modules_TL_exec_1/a.ets
