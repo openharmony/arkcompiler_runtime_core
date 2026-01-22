@@ -1917,7 +1917,7 @@ class Position {
     }
 }
 
-export class JSONParser {
+class JSONParser {
     private json: String
     private curPos: Position
     private curChar: char
@@ -3324,7 +3324,7 @@ export class JsonLexer
     }
 }
 
-export class JSONValue extends Object {}
+export class JSONValue {}
 
 export class JSONObject extends JSONValue {
     keys_: Array<JSONString> = new Array<JSONString>()

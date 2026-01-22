@@ -133,12 +133,11 @@ function jsonStringifyRecord(): void {
     record[2] = fn
 
     let jsonStr = JSON.stringify(record);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr);
 
-    arktest.assertEQ(fields.get("name")?.toString(), "arkts");
-    arktest.assertEQ(fields.get("version")?.toString(), "1");
-    arktest.assertTrue(fields.get("2") === undefined)
+    arktest.assertEQ(jsonObj.getString('name'), 'arkts');
+    arktest.assertEQ(jsonObj.getInteger('version'), 1);
+    arktest.assertTrue(jsonObj.tryGetElement('2') === undefined)
 }
 
 function jsonStringifyRecordWithSpace(): void {
@@ -149,17 +148,16 @@ function jsonStringifyRecordWithSpace(): void {
 
 function jsonStringifyRecordWithUndefinedValue(): void {
     let record: Record<string, Any> = new Record<string, Any>();
-    record["name"] = "arkts";
-    record["version"] = 1.0;
-    record["ignore"] = undefined;
+    record['name'] = 'arkts';
+    record['version'] = 1.0;
+    record['ignore'] = undefined;
 
     let jsonStr = JSON.stringify(record);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr)
 
-    arktest.assertEQ(fields.get("name")?.toString(), "arkts");
-    arktest.assertEQ(fields.get("version")?.toString(), "1");
-    arktest.assertEQ(fields.has("ignore"), false);
+    arktest.assertEQ(jsonObj.getString('name'), 'arkts');
+    arktest.assertEQ(jsonObj.getInteger('version'), 1);
+    arktest.assertEQ(jsonObj.tryGetElement('ignore'), undefined);
 }
 
 function jsonStringifyRecordWithUndefinedValueWithSpace(): void {
@@ -170,23 +168,21 @@ function jsonStringifyRecordWithUndefinedValueWithSpace(): void {
 
 function jsonStringifyNestedRecord(): void {
     let record: Record<string, Any> = new Record<string, Any>();
-    record["name"] = "arkts";
-    record["version"] = 1.0;
+    record['name'] = 'arkts';
+    record['version'] = 1.0;
 
     const nestedRecord: Record<string, Any> = new Record<string, Any>();
-    nestedRecord["inner"] = record;
-    nestedRecord["desc"] = new String("nested");
+    nestedRecord['inner'] = record;
+    nestedRecord['desc'] = new String('nested');
 
     let jsonStr = JSON.stringify(nestedRecord);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr)
 
-    let innerObj = fields.get("inner") as JSONObject;
-    let innerFields = innerObj.getFields();
+    let innerObj = jsonObj.getElement('inner');
 
-    arktest.assertEQ(innerFields.get("name")?.toString(), "arkts");
-    arktest.assertEQ(innerFields.get("version")?.toString(), "1");
-    arktest.assertEQ(fields.get("desc")?.toString(), "nested");
+    arktest.assertEQ(innerObj.getString('name'), 'arkts');
+    arktest.assertEQ(innerObj.getInteger('version'), 1);
+    arktest.assertEQ(jsonObj.getString('desc'), 'nested');
 }
 
 function jsonStringifyNestedRecordWithSpace(): void {
@@ -200,16 +196,13 @@ function jsonStringifyNestedRecordWithSpace(): void {
 
 function jsonStringifyRecordWithClassInstance(): void {
     let record: Record<string, Any> = new Record<string, Any>();
-    record["TestClass"] = new TestClass('Test');
+    record['TestClass'] = new TestClass('Test');
 
     let jsonStr = JSON.stringify(record);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr)
 
-    let classObj = fields.get("TestClass") as JSONObject;
-    let classFields = classObj.getFields();
-
-    arktest.assertEQ(classFields.get("value")?.toString(), "Test");
+    let classObj = jsonObj.getElement('TestClass');
+    arktest.assertEQ(classObj.getString('value'), 'Test');
 }
 
 function jsonStringifyRecordWithClassInstanceWithSpace(): void {
@@ -224,16 +217,14 @@ function jsonStringifyRecordWithArray(): void {
     record['list'] = new Array<Number>(1, 2, 3);
 
     let jsonStr = JSON.stringify(record);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr);
 
-    let arr = fields.get('list') as JSONArray;
-    let elements = arr.values;
+    let arr = jsonObj.getArray('list');
 
-    arktest.assertEQ(elements.length, 3);
-    arktest.assertEQ(elements[0]?.toString(), "1");
-    arktest.assertEQ(elements[1]?.toString(), "2");
-    arktest.assertEQ(elements[2]?.toString(), "3");
+    arktest.assertEQ(arr.length, 3);
+    arktest.assertEQ(arr[0].asInteger(), 1);
+    arktest.assertEQ(arr[1].asInteger(), 2);
+    arktest.assertEQ(arr[2].asInteger(), 3);
 }
 
 function jsonStringifyRecordWithArrayWithSpace(): void {
@@ -246,11 +237,10 @@ function jsonStringifyRecordWithNull(): void {
     record['nullable'] = null;
 
     let jsonStr = JSON.stringify(record);
-    let jsonObj = JSONParser.parse(jsonStr) as JSONObject;
-    let fields = jsonObj.getFields();
+    let jsonObj = JSON.parseJsonElement(jsonStr)
 
-    let nullableVal = fields.get('nullable');
-    arktest.assertEQ(nullableVal instanceof JSONNull, true);
+    let nullableVal = jsonObj.getElement('nullable');
+    arktest.assertEQ(nullableVal.jsonType, jsonx.JsonType.JsonNull);
 }
 
 function jsonStringifyRecordWithNullWithSpace(): void {
