@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,11 @@ desc: >-
     then the string conversion applies to another non-string operand to convert it to string
 ---*/
 
+enum Direction {
+    Up,      
+    Down
+}
+
 function main() {
     let b: byte = 1
     let s: short = 2
@@ -27,8 +32,12 @@ function main() {
     let s1 = "ok"
     let s2 = `lorem
     ipsum`
+    let nil = null
+    
     arktest.assertTrue((b + s1) instanceof string)
     arktest.assertTrue((s + i + s2) instanceof string)
     arktest.assertTrue((i + "yes" + l) instanceof string)
     arktest.assertTrue((b * i + s1 + l) instanceof string)
+    arktest.assertTrue((s1 + Direction.Up) instanceof string)
+    arktest.assertTrue((s1 + nil) instanceof string)
 }

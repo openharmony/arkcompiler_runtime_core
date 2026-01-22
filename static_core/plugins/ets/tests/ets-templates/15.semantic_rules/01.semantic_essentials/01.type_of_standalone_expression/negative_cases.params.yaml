@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,20 @@
 
 ---
 cases:
+#let v = {decl} ; const c = {decl}
+    #0
     - decl: '{x: 42}'
+      stdout: |-
+        "Semantic error ESE0174: Cannot infer type for c because class composite needs an explicit target type"
+    #1
     - decl: '[]'
+      stdout: |-
+        "Semantic error ESE0301: Can't resolve array type"
+    #2
     - decl: '[[1], []]'
+      stdout: |-
+        "Semantic error ESE0301: Can't resolve array type"
+    #3
     - decl: '[[], []]'
+      stdout: |-
+        "Semantic error ESE0301: Can't resolve array type"

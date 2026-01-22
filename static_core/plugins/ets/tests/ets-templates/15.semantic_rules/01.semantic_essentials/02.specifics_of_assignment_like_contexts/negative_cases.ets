@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,14 @@ desc: >-
     Otherwise, an attempt is made to apply the type of the left-hand-side expression to the right-hand-side expression.
     A compile-time error occurs if the attempt fails as in the example below
 tags: [compile-only, negative]
+expected_out: {{c.stdout}}
 ---*/
 
-function assign{{loop.index}}(x: {{c.type1}}, y: {{c.type2}}) {
+function assign(x: {{c.type1}}, y: {{c.type2}}) {
     x = y
 }
 
 function main() {
-    assign{{loop.index}}({{c.val1}}, {{c.val1}})
+    assign({{c.val1}}, {{c.val1}})
 }
 {%- endfor %}
