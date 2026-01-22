@@ -17,7 +17,7 @@
 
 #include "types/ets_atomic_int.h"
 #include "types/ets_class.h"
-#include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
 

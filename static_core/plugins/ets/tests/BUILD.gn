@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -82,4 +82,9 @@ action("ets_func_tests_int_jit_aot") {
     "-c",
     "$command_str",
   ]
+}
+
+ark_asm_gen("mock_stdlib") {
+  input_file = "${ark_root}/plugins/ets/tests/integrational/mock_stdlib.pa"
+  output_file = "${target_gen_dir}/mock_stdlib.abc"
 }

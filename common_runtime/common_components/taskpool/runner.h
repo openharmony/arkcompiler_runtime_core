@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,24 +25,19 @@
 
 #include "common_components/taskpool/task_queue.h"
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/base/os/thread.h"
 
 namespace common {
 static constexpr uint32_t MIN_TASKPOOL_THREAD_NUM = 3;
 static constexpr uint32_t MAX_TASKPOOL_THREAD_NUM = 5;
 static constexpr uint32_t DEFAULT_TASKPOOL_THREAD_NUM = 0;
-using native_handle_type = std::thread::native_handle_type;
 
-enum class PriorityMode {
-    STW,
-    FOREGROUND,
-    BACKGROUND
-};
+enum class PriorityMode { STW, FOREGROUND, BACKGROUND };
 
 class Runner {
 public:
-    explicit Runner(uint32_t threadNum,
-        const std::function<void(native_handle_type)> prologueHook,
-        const std::function<void(native_handle_type)> epilogueHook);
+    explicit Runner(uint32_t threadNum, const std::function<void(os::thread::NativeHandleType)> prologueHook,
+                    const std::function<void(os::thread::NativeHandleType)> epilogueHook);
     ~Runner() = default;
 
     NO_COPY_SEMANTIC_CC(Runner);
@@ -79,19 +74,19 @@ public:
         return false;
     }
 
-    void PrologueHook(native_handle_type thread)
+    void PrologueHook(os::thread::NativeHandleType thread)
     {
         if (prologueHook_ != nullptr) {
             prologueHook_(thread);
         }
     }
-    void EpilogueHook(native_handle_type thread)
+    void EpilogueHook(os::thread::NativeHandleType thread)
     {
         if (epilogueHook_ != nullptr) {
             epilogueHook_(thread);
         }
     }
-    void ForEachTask(const std::function<void(Task*)> &f);
+    void ForEachTask(const std::function<void(Task *)> &f);
 
 private:
     void Run(uint32_t threadId);
@@ -99,14 +94,14 @@ private:
 
     std::vector<std::unique_ptr<std::thread>> threadPool_ {};
     TaskQueue taskQueue_ {};
-    std::array<Task*, MAX_TASKPOOL_THREAD_NUM + 1> runningTask_;
+    std::array<Task *, MAX_TASKPOOL_THREAD_NUM + 1> runningTask_;
     uint32_t totalThreadNum_ {0};
     std::vector<uint32_t> gcThreadId_ {};
     std::mutex mtx_;
     std::mutex mtxPool_;
 
-    std::function<void(native_handle_type)> prologueHook_;
-    std::function<void(native_handle_type)> epilogueHook_;
+    std::function<void(os::thread::NativeHandleType)> prologueHook_;
+    std::function<void(os::thread::NativeHandleType)> epilogueHook_;
 };
 }  // namespace common
 #endif  // COMMON_COMPONENTS_TASKPOOL_RUNNER_H

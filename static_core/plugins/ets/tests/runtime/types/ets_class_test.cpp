@@ -20,7 +20,7 @@
 
 #include "types/ets_class.h"
 #include "types/ets_method.h"
-#include "tests/runtime/types/ets_test_mirror_classes.h"
+#include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
 
 // NOLINTBEGIN(readability-magic-numbers)
 

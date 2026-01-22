@@ -334,7 +334,8 @@ config("ark_common_config") {
 
   if (ark_hybrid) {
     defines += [ "ARK_HYBRID" ]
-  } else if (!(defined(use_hwasan) && use_hwasan && current_cpu == "arm64")) {
+  } else if (!(defined(use_hwasan) && use_hwasan && current_cpu == "arm64") &&
+             !ark_static_use_64_bit_managed_pointer) {
     defines += [ "PANDA_32_BIT_MANAGED_POINTER" ]
   }
 
@@ -363,6 +364,7 @@ config("ark_common_config") {
       "PANDA_TARGET_ARM64",
       "PANDA_TARGET_64",
     ]
+
     # This optimization conflicts with HWASAN implementation
     # Both use x20 register
     if (!defined(use_hwasan) || !use_hwasan) {

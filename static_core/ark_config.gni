@@ -113,6 +113,8 @@ declare_args() {
   if (ark_static_standalone_build) {
     abckit_enable = false
   }
+
+  ark_static_use_64_bit_managed_pointer = false
 }
 
 declare_args() {
@@ -516,7 +518,6 @@ template("es2panda_gen") {
         "--env-path",
         rebase_path("${es2panda_root_out}/arkcompiler/runtime_core/") + ":" +
             rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/") +
-            ":" + rebase_path("${es2panda_root_out}/arkcompiler/ets_runtime/") +
             ":" + rebase_path("$zlib_dir") + ":" +
             rebase_path("${es2panda_root_out}/thirdparty/icu/"),
         "--expect-output",
