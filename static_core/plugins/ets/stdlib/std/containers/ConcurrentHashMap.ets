@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,6 +347,8 @@ export namespace containers {
             return strBuf.toString();
         }
 
+        private static native sameValueZero(o1: Any, o2: Any): boolean
+
         /**
         * Puts a pair of key and value into the Map
         *
@@ -369,7 +371,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (Runtime.sameValueZero(node.key, key)) {
+                if (ConcurrentHashMap.sameValueZero(node.key, key)) {
                     node.val = val;
                     this.setVal.decrease();
                     ConcurrencyHelpers.mutexUnlock(this.mutex);
@@ -420,7 +422,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (Runtime.sameValueZero(node.key, key)) {
+                    if (ConcurrentHashMap.sameValueZero(node.key, key)) {
                         node.val = newValue;
                         ConcurrencyHelpers.mutexUnlock(this.mutex);
                         return true;
@@ -451,7 +453,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (Runtime.sameValueZero(node.key, key)) {
+                    if (ConcurrentHashMap.sameValueZero(node.key, key)) {
                         return true;
                     }
                 }
@@ -512,7 +514,7 @@ export namespace containers {
                 if (node === null) {
                     continue;
                 }
-                if (!Runtime.sameValueZero(node.key, key)) {
+                if (!ConcurrentHashMap.sameValueZero(node.key, key)) {
                     continue;
                 }
 
@@ -594,7 +596,7 @@ export namespace containers {
                     if (node === null) {
                         continue;
                     }
-                    if (Runtime.sameValueZero(node.key, key)) {
+                    if (ConcurrentHashMap.sameValueZero(node.key, key)) {
                         return node.val;
                     }
                 }

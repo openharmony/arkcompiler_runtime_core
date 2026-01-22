@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,68 +37,6 @@ export final class Runtime {
      * @returns hash code
      */
     public static native getHashCodeByValue(o: Object): long;
-
-    /**
-     * Checks if two items are equal 'by value'
-     *
-     * @param o1 first object to compare
-     *
-     * @param o2 second object to compare
-     *
-     * @returns true if items are equal 'by value'
-     */
-    public static sameValue(o1: Any, o2: Any): boolean {
-        if (o1 === null) {
-            return o2 === null
-        }
-        if (o1 === undefined) {
-            return o2 === undefined
-        }
-        if (o2 === null || o2 === undefined) {
-            return false;
-        }
-
-        if (o1 instanceof Number && o2 instanceof Number) {
-            return Runtime.sameNumberValue(o1 as Number, o2 as Number)
-        } else if (o1 instanceof String && o2 instanceof String) {
-            return (o1 as String).equals(o2) // same semantics as ==, but faster
-        } else if (o1 instanceof Float && o2 instanceof Float) {
-            return Runtime.sameFloatValue(o1 as Float, o2 as Float)
-        }
-
-        return o1 == o2
-    }
-
-    private static sameNumberValue(n1: Number, n2: Number): boolean {
-        const n1val = n1.valueOf()
-        const n2val = n2.valueOf()
-        if (n1val == 0 || n2val == 0) {
-            return Double.bitCastToLong(n1val) == Double.bitCastToLong(n2val);
-        }
-        if (isNaN(n1val) != isNaN(n2val)) {
-            return false;
-        } else if (isNaN(n1val)) {
-            return true;
-        } else {
-            return n1val == n2val
-        }
-    }
-
-    private static sameFloatValue(f1: Float, f2: Float): boolean {
-        if (f1 == 0 || f2 == 0) {
-            return Float.bitCastToInt(f1) == Float.bitCastToInt(f2)
-        }
-
-        if (isNaN(f1) != isNaN(f2)) {
-            return false
-        } else if (isNaN(f1)) {
-            return true
-        } else {
-            return f1 == f2
-        }
-    }
-
-    public static native sameValueZero(o1: Any, o2: Any): boolean
 
     /**
      * Check if it is a little-endian platform
