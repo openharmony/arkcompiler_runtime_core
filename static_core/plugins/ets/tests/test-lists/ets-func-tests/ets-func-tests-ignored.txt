@@ -319,7 +319,6 @@ escompat/ArrayTest3.ets
 escompat/ArrayTest4.ets
 escompat/ArrayTest5.ets
 escompat/ArrayTest6.ets
-escompat/ArrayProxyTest.ets
 
 #21382 - instance method on primitive
 std/core/std_core_char_instance_Char_toUpperCase.ets
@@ -330,10 +329,6 @@ ets_func_tests/escompat/JsonAnnotationTest.ets
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
-
-# 3.
-# TypeError: Value is possibly nullish
-std/core/TypeCreateErasedBodyTest.ets
 
 # 5.
 # TypeError: Unresolved reference compareWrapperObjectValue

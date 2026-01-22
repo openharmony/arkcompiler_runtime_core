@@ -11,7 +11,6 @@ spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
 # extended
-escompat/ArrayProxyTest.ets
 std/containers/ArrayTestChecked.ets
 std/core/NumberTest.ets
 std/core/std_core_boolean_instance_Boolean_and.ets
@@ -76,7 +75,6 @@ spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Ex
 
 # 2.
 # TypeError: Value is possibly nullish
-std/core/TypeCreateErasedBodyTest.ets
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
 
 # 3.

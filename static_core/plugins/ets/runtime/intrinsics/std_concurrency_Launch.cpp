@@ -27,7 +27,6 @@
 #include "types/ets_type.h"
 #include "types/ets_job.h"
 #include "types/ets_promise.h"
-#include "types/ets_typeapi_create.h"
 #include "types/ets_type_comptime_traits.h"
 #include "mem/vm_handle.h"
 
