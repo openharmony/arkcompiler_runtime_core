@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,6 @@
 package std.core
 
 native function isLiteralInitializedInterfaceImpl(target: Object): boolean
-
-export class Reflect {
-    private constructor () {}
-
-    /**
-    * Determines whether an object is an interface initialized with a literal
-    *
-    * @param target an object
-    *
-    * @returns a boolean indicating whether or not the target is an interface
-    *          initialized with a literal
-    */
-    public static isLiteralInitializedInterface(target: Object): boolean {
-        return isLiteralInitializedInterfaceImpl(target)
-    }
-}
 
 export namespace reflect {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,42 +100,42 @@ class TestIfaceImpl implements TestIface {
 
 function testIfaceLiteralInit() {
     let tif: TestIface = { str: "strstr", num: 42, bl: false }
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), true)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), true)
 }
 
 function testIfaceNonLiteralInit() {
     let tif: TestIface = new TestIfaceImpl("strstr", 42, false)
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), false)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), false)
 }
 
 function testIfaceLiteralInitArr() {
     let tif: TestIfaceArr = { strs: ["strstr", "abaaba"], nums: [42, 24], bls: [false, true] }
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), true)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), true)
 }
 
 function testIfaceNonLiteralInitArr() {
     let tif: TestIfaceArr = new TestIfaceImplArr(["strstr", "abaaba"], [42, 24], [false, true])
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), false)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), false)
 }
 
 function testIfaceLiteralInitObj() {
     let tif: TestIfaceObj = { obj1: {}, obj2: {} }
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), true)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), true)
 }
 
 function testIfaceNonLiteralInitObj() {
     let tif: TestIfaceImplObj = new TestIfaceImplObj(new Object(), new Object())
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), false)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), false)
 }
 
 function testIfaceLiteralInitGeneric() {
     let tif: TestIfaceGeneric<int> = {a: 42}
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), true)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), true)
 }
 
 function testIfaceNonLiteralInitGeneric() {
     let tif: TestIfaceGeneric<int> = new TestIfaceGenericImpl<int>(42)
-    arktest.assertEQ(Reflect.isLiteralInitializedInterface(tif), false)
+    arktest.assertEQ(reflect.isLiteralInitializedInterface(tif), false)
 }
 
 function main(): int {

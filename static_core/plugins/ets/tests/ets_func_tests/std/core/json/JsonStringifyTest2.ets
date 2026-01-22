@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ function checkJSONArray(jsonArr: JSONArray, expectedValues: Map<string, string>[
 
 function stringifyObjectLiteralSimpleCases(): void {
     let obj: TestInterface = {s: "str", d: -1.5, a: undefined}
-    arktest.assertTrue(Reflect.isLiteralInitializedInterface(obj))
+    arktest.assertTrue(reflect.isLiteralInitializedInterface(obj))
 
     // Expect {"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(obj)
@@ -119,7 +119,7 @@ function stringifyObjectLiteralSimpleCases(): void {
 function stringifyObjectLiteralCornerCases(): void {
     const testObj = new TestClass("val")
     let objLit: TestInterface = {s: "str", d: -1.5, a: testObj}
-    arktest.assertTrue(Reflect.isLiteralInitializedInterface(objLit))
+    arktest.assertTrue(reflect.isLiteralInitializedInterface(objLit))
 
     // Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(objLit)

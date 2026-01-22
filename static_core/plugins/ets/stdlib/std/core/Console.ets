@@ -1200,7 +1200,7 @@ class DataFrame {
     public static getAllInstanceFieldValues(obj: object): Array<[string, Any, Class]> {
         const fieldVals = new Array<[string, Any, Class]>()
 
-        if (!Reflect.isLiteralInitializedInterface(obj)) {
+        if (!reflect.isLiteralInitializedInterface(obj)) {
             let curType = Class.of(obj)
             const typeHierarchy = new Array<Class>()
             while (curType.getSuper() !== undefined) {

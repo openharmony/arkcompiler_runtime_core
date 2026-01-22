@@ -1221,7 +1221,7 @@ class JSONWriter {
             this.path.delete(obj)
         }
 
-        if (Reflect.isLiteralInitializedInterface(obj)) {
+        if (reflect.isLiteralInitializedInterface(obj)) {
             const gettersValues = JSONWriter.getGettersKeyValuePairs(objCls, obj, this.useFieldsFilter, this.fieldsFilter)
             if (gettersValues.length > 0) {
                 this.path.add(obj)
