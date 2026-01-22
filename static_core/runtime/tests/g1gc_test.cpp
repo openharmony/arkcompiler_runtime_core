@@ -368,6 +368,23 @@ TEST_F(G1GCTest, CheckRemsetAfterPostBarrier)
     }
 }
 
+TEST_F(G1GCTest, TestRegionInvalidationDuringFullGC)
+{
+    Runtime *runtime = Runtime::GetCurrent();
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    ManagedThread *thread = ManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    auto oldString = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocString(8U));
+    gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
+    ASSERT_TRUE(ObjectToRegion(oldString.GetPtr())->HasFlag(IS_OLD));
+    VMHandle<coretypes::Array> arr(thread, ObjectAllocator::AllocArray(1U, ClassRoot::ARRAY_STRING, false));
+    ASSERT_NE(ObjectToRegion(oldString.GetPtr()), ObjectToRegion(arr.GetPtr()));
+    arr->Set(0, oldString.GetPtr());
+    gc->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+    ASSERT_EQ(ObjectToRegion(oldString.GetPtr())->GetRemSet()->Size(), 0);
+}
+
 TEST_F(G1GCTest, TestCollectTenured)
 {
     Runtime *runtime = Runtime::GetCurrent();

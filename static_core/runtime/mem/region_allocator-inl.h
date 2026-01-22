@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -822,7 +822,6 @@ template <typename AllocConfigT, typename LockConfigT>
 void RegionHumongousAllocator<AllocConfigT, LockConfigT>::ResetRegion(Region *region)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_FREE));
-    region->RmvFlag(RegionFlag::IS_FREE);
     this->GetSpace()->FreeRegion(region);
 }
 
