@@ -220,7 +220,7 @@
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
 
 #30469
-07.expressions/02.evaluation_of_expressions/04.operator_precedence/typeof.ets
+07.expressions/01.operators/01.operator_precedence/typeof.ets
 
 #31926 No CTE when array type cannot be determined in function call
 07.expressions/05.array_literal/arr_n_2.ets

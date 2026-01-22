@@ -19,6 +19,7 @@ desc: >-
   If the type of the expression cannot be determined, then the type of the array
   literal cannot be inferred, and a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 {{c.decl}}
