@@ -817,17 +817,6 @@ Inst *Inlining::GetNewDefAndCorrectDF(Inst *callInst, Inst *oldDef)
     return exisingNullptr;
 }
 
-bool Inlining::TryInlineExternal(CallInst *callInst, InlineContext *ctx)
-{
-    if (TryInlineExternalAot(callInst, ctx)) {
-        return true;
-    }
-    // Skip external methods
-    EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::SKIP_EXTERNAL);
-    LOG_INLINING(DEBUG) << "We can't inline external method: " << GetMethodFullName(GetGraph(), ctx->method);
-    return false;
-}
-
 /*
  * External methods could be inlined only if there are no instructions requiring state.
  * The only exception are NullChecks that check parameters and used by LoadObject/StoreObject.
@@ -901,8 +890,6 @@ bool Inlining::TryInlineExternalAot(CallInst *callInst, InlineContext *ctx)
         stats->SetPbcInstNum(savedPbcInstNum);
         return false;
     }
-
-    graphInl->RunPass<Cleanup>();
 
     // External method could be inlined only if there are no instructions requiring state
     // because compiler saves method id into stack map's inline info and there is no way
@@ -1336,8 +1323,8 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
             stats->SetPbcInstNum(savedPbcInstNum);
             return InlinedGraph();
         }
+        graphInl->RunPass<Cleanup>(false);
     }
-    graphInl->RunPass<Cleanup>(false);
     graphInl->RunPass<OptimizeStringConcat>();
     graphInl->RunPass<SimplifyStringBuilder>();
 
