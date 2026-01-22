@@ -45,6 +45,10 @@ namespace ark::ets::intrinsics {
 extern "C" EtsClass *ReflectMethodGetReturnTypeImpl(EtsLong etsMethodPtr)
 {
     auto *retCls = reinterpret_cast<EtsMethod *>(etsMethodPtr)->ResolveReturnType();
+    if (UNLIKELY(retCls == nullptr)) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        return nullptr;
+    }
     return retCls->ResolvePublicClass();
 }
 
@@ -55,9 +59,13 @@ extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionP
     ASSERT(i >= 0 && static_cast<uint32_t>(i) < function->GetNumArgs());
     // 0 is recevier type
     i = function->IsStatic() ? i : i + 1;
-    auto *resolvedType = function->ResolveArgType(i)->ResolvePublicClass();
+    auto *argType = function->ResolveArgType(i);
+    if (UNLIKELY(argType == nullptr)) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        return nullptr;
+    }
 
-    return resolvedType;
+    return argType->ResolvePublicClass();
 }
 
 extern "C" EtsInt ReflectMethodGetParametersNumImpl(EtsLong etsFunctionPtr)
@@ -86,7 +94,13 @@ extern "C" ObjectHeader *ReflectMethodGetParametersTypesImpl(EtsLong etsFunction
     for (uint32_t idx = 0; idx < numParams; ++idx) {
         // 0 is recevier type
         auto i = function->IsStatic() ? idx : idx + 1;
-        auto *resolvedParameterType = function->ResolveArgType(i)->ResolvePublicClass();
+        auto *argType = function->ResolveArgType(i);
+        if (UNLIKELY(argType == nullptr)) {
+            ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+            return nullptr;
+        }
+        auto *resolvedParameterType = argType->ResolvePublicClass();
+
         arrayH->Set(idx, resolvedParameterType->AsObject());
     }
 
@@ -140,6 +154,7 @@ extern "C" EtsObject *ReflectMethodCreateInstanceInternal(EtsReflectMethod *this
     return objToCreateH.GetPtr();
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod, EtsObject *thisObj,
                                                   ObjectHeader *argsArr)
 {
@@ -180,7 +195,12 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     PandaVector<EtsClass *> paramTypes;
     paramTypes.reserve(method->GetParametersNum());
     for (size_t i = 0; i < argsSize; ++i) {
-        paramTypes.emplace_back(method->ResolveArgType(i + instanceFlag));
+        auto resolvedMethod = method->ResolveArgType(i + instanceFlag);
+        if (UNLIKELY(resolvedMethod == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return nullptr;
+        }
+        paramTypes.emplace_back(resolvedMethod);
     }
 
     PandaVector<Value> passedArgs;

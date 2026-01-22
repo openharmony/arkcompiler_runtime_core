@@ -76,7 +76,6 @@ public:
     static std::vector<MirrorFieldInfo> GetReflectFieldClassMembers()
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsReflectField, name_, "name"),
-                                             MIRROR_FIELD_INFO(EtsReflectField, fieldType_, "fieldType"),
                                              MIRROR_FIELD_INFO(EtsReflectField, ownerType_, "ownerType"),
                                              MIRROR_FIELD_INFO(EtsReflectField, attr_, "attributes"),
                                              MIRROR_FIELD_INFO(EtsReflectField, etsField_, "fieldPtr"),

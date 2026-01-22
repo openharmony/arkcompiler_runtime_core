@@ -344,6 +344,10 @@ static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaV
 
     for (size_t idx = 0; idx < fields.size(); ++idx) {
         auto *reflectField = EtsReflectField::CreateFromEtsField(coro, fields[idx]);
+        if (UNLIKELY(reflectField == nullptr)) {
+            ASSERT(coro->HasPendingException());
+            return nullptr;
+        }
         arrayH->Set(idx, reflectField->AsObject());
     }
 

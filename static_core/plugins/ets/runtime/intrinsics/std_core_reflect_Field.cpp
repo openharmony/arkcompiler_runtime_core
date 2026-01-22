@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,18 @@ extern "C" EtsString *ReflectFieldGetNameInternal(EtsLong etsFieldPtr)
     return ManglingUtils::GetDisplayNameStringFromField(reinterpret_cast<EtsField *>(etsFieldPtr));
 }
 
+extern "C" EtsClass *ReflectFieldGetTypeInternal(EtsLong etsFieldPtr)
+{
+    // do not expose primitive types and string types except std.sore.String
+    auto fieldType = reinterpret_cast<EtsField *>(etsFieldPtr)->GetType();
+    if (fieldType == nullptr) {
+        ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+        return nullptr;
+    }
+
+    return fieldType->ResolvePublicClass();
+}
+
 extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsObject *thisObj, EtsObject *arg)
 {
     auto *coro = EtsCoroutine::GetCurrent();
@@ -48,7 +60,10 @@ extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsOb
     EtsHandle thisObjH(coro, thisObj);
     EtsHandle argH(coro, arg);
     EtsClass *fieldType = field->GetType();
-    ASSERT(fieldType != nullptr);
+    if (fieldType == nullptr) {
+        ASSERT(coro->HasPendingException());
+        return;
+    }
     bool isFieldPrimitive = fieldType->IsPrimitive();
 
     if (argH.GetPtr() == nullptr) {
@@ -93,6 +108,10 @@ extern "C" EtsObject *ReflectFieldGetValueInternal(ark::ObjectHeader *thisField,
     }
 
     EtsClass *fieldType = field->GetType();
+    if (fieldType == nullptr) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
     if (fieldType->IsPrimitive()) {
         EtsType fieldEtsType = fieldType->GetEtsType();
         Value val = helpers::GetPrimitiveValue(coro, thisObjH.GetPtr(), fieldEtsType, field);

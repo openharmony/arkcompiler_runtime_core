@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ export final class StaticField extends Field {
      *
      */
     public getValue(): Any {
-        return this.getValueInternal(undefined)
+        return super.getValue(undefined)
     }
 
     /**
@@ -51,7 +51,7 @@ export final class StaticField extends Field {
         if (this.isReadonly()) {
             throw new TypeError("setValue to a readonly field")
         }
-        this.setValueInternal(undefined, value)
+        super.setValue(undefined, value)
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ export final class InstanceField extends Field {
      * @throws TypeError if there is an incompatible `this`.
      */
     public getValue(thisObj: Object): Any {
-        return this.getValueInternal(thisObj)
+        return super.getValueInternal(thisObj)
     }
 
     /**
@@ -56,7 +56,7 @@ export final class InstanceField extends Field {
         if (this.isReadonly()) {
             throw new TypeError("setValue to a readonly field")
         }
-        this.setValueInternal(thisObj, value)
+        super.setValueInternal(thisObj, value)
     }
 }
 

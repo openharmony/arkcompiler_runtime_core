@@ -230,6 +230,9 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
         }
         ASSERT(refIdx <= proto.GetRefTypes().size());
         auto *resCls = classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
+        if (resCls == nullptr) {
+            return nullptr;
+        }
         return resCls->ResolvePublicClass();
     }
 
@@ -245,6 +248,9 @@ EtsClass *EtsMethod::ResolveReturnType()
         auto proto = GetPandaMethod()->GetProto();
         const char *descriptor = proto.GetReturnTypeDescriptor().data();
         auto *resCls = classLinker->GetClass(descriptor, false, GetClass()->GetLoadContext());
+        if (resCls == nullptr) {
+            return nullptr;
+        }
         return resCls->ResolvePublicClass();
     }
     return ResolveTypePrimitive(retType, classLinker);
