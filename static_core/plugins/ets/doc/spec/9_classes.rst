@@ -654,11 +654,22 @@ a :index:`compile-time error` occurs for any other combinations:
    getter and setter           field, or getter and setter
    =========================== ======================================================
 
-If a property is implemented as a class field, then accessing the field via
-a class instance always means accessing an ordinary class field.
-To provide access to a field via an instance of an interface, additional
-getter and setter are implemented implictly in the class as represented
-in the following example:
+If a class field is used to implement an interface property in any form, then:
+
+- The field is represented as an instance data member
+  (see :ref:`Field Declarations`);
+
+- Accessing the field via a class instance always means accessing
+  an ordinary class field;
+
+- Accessing a property via a reference of an interface type always means calling
+  a getter or a setter;
+
+- If an interface property is defined in a field form, then a getter and
+  a setter (if the property is not ``readonly``) are generated implictly
+  in the class by the compiler.
+
+This is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -674,19 +685,25 @@ in the following example:
     c.n = 1 // class field write
 
     let i: I = c
-    console.log(c.n) // implicitly implemented getter is called
-    i.n = 2          // implicitly implemented setter is called
+    console.log(c.n) // implicitly generated getter is called
+    i.n = 2          // implicitly generated setter is called
 
-Getter and setter implemented implicitly for the code above are as follows:
+Getter and setter generated implicitly look as follows:
 
 .. code-block:: typescript
 
     get n(): number  { return this.n }
     set n(x: number) { this.n = x }
 
-As ``this`` in the body of a getter and a setter refers to an instance
-of a class but not of an interface, such ``this.n`` constitutes
-an access to a class field but not a call to a getter or a setter.
+.. note::
+
+    - ``this.n`` in the pseudocode above is generated to provide
+      access to the class field but not as a call to a getter or a
+      setter;
+
+    - Attempting to explicitly declare a getter or a setter with the same name
+      as a field causes a :index:`compile-time error` because class members
+      must be *distinguishable* (see :ref:`Declarations`).
 
 An interface property implemented as accessor is represented
 in the example below:
@@ -699,10 +716,10 @@ in the example below:
         readonly r: string
     }
     class C implements I {
-        // 'n' is implemented as getter and setter
+        // 'n' is explicitly implemented as getter and setter
         get n(): number  { return 1 }
         set n(x: number) { /*some body*/ }
-        // 'r' is implemented as getter
+        // 'r' is explicitly implemented as getter
         get r(): string { return "abc" }
         // a setter can be defined for 'r', but it is not mandatory
         set r(x: string) { /*some body*/ }
@@ -741,7 +758,7 @@ The errors are represented in the example below:
 
 If an interface property is defined in the form of an accessor
 (a getter, a setter, or both) and implemented by a class field, then
-implicit implementation is added to the class but only for the accessors
+implicit accessor bodies are generated in the class but only for accessors
 defined in the interface. The situation is represented below:
 
 .. code-block:: typescript
@@ -751,10 +768,10 @@ defined in the interface. The situation is represented below:
       get n(): number
     }
     class C implements I {
-        n: number = 1 // property implemented as a field
-        // getter is implicitly implemented
-        // setter is not implemented
-    }  
+        n: number = 1 // property is implemented as a field
+        // getter body is implicitly generated
+        // setter is not defined and not generated
+    }
 
     function foo(i: I) {
       console.log(i.n) // OK, getter is used
@@ -766,10 +783,10 @@ defined in the interface. The situation is represented below:
       set n(x: number)
     }
     class D implements J {
-        n: number = 1 // property implemented as a field
-        // getter is implicitly implemented
-        // setter is implicitly implemented
-    }  
+        n: number = 1 // property is implemented as a field
+        // getter body is implicitly generated
+        // setter body is implicitly generated
+    }
 
     function bar(j: J) {
       console.log(j.n) // OK, getter is used
@@ -795,7 +812,7 @@ This situation is represented by the example below:
     }
     class D implements J {
         n: number = 1 // compile-time error: types mismatch
-    }  
+    }
 
 If a property defines both a getter and a setter of different types,
 then the property can be implemented by accessors:
@@ -816,7 +833,7 @@ then the property can be implemented by accessors:
 
     let e = new E
     e.n = "123"
-    console.log(e.n) 
+    console.log(e.n)
 
 If a superclass implements an interface property, then all derived classes
 inherit the property in the same form. A :index:`compile-time error` occurs
@@ -884,11 +901,11 @@ If types mismatch as represented in the example below, then a
     }
     class C extends B implements I { // compile-time error: types mismatch
     }
-    
+
     class C implements I {
         get n(): string { return "aa" } // compile-time error: types mismatch
-    }    
-    
+    }
+
 If a property is defined as ``readonly``, then the implementation of
 the property can be ``readonly`` or not ``readonly`` as follows:
 
