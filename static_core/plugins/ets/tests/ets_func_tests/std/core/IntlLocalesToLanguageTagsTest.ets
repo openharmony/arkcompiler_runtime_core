@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,37 +27,37 @@ function main(): int {
 
 function testEmptyStringInvalid() {
     const loc = '';
-    arktest.expectError((): void => { intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
 }
 
 function testNumericInvalid() {
     const loc = '123';
-    arktest.expectError((): void => { intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
 }
 
 function testDoubleHyphenInvalid() {
     const loc = 'en--US';
-    arktest.expectError((): void => { intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
 }
 
 function testValidSimpleTag() {
     const loc = 'en';
-    const result = intlLocalesToLanguageTags(loc);
+    const result = Intl.intlLocalesToLanguageTags(loc);
     arktest.assertEQ(result.toString(), 'en');
 }
 
 function testValidWithRegion() {
     const loc = 'zh-CN';
-    const result = intlLocalesToLanguageTags(loc);
+    const result = Intl.intlLocalesToLanguageTags(loc);
     arktest.assertEQ(result.toString(), 'zh-CN');
 }
 
 function testGrandfatheredInvalidTag1() {
     const loc = 'i-enochian';
-    arktest.expectError((): void => { intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
 }
 
 function testGrandfatheredInvalidTag2() {
     const loc = 'sgn-BE-FR';
-    arktest.expectError((): void => { intlLocalesToLanguageTags(loc) });
+    arktest.expectError((): void => { Intl.intlLocalesToLanguageTags(loc) });
 }

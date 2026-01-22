@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 
-const EN_US: string = intlBestFitLocale('en-US')
+const EN_US: string = Intl.intlBestFitLocale('en-US')
 
 function main(): int {
     const suite = new arktest.ArkTestsuite('Segmenter');

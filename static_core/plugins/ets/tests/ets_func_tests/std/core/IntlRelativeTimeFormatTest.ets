@@ -306,38 +306,38 @@ function testSupportedLocalesOf() {
     runSupportedLocalesStringTest(
         "en",
         undefined,
-        intlBestFitLocales("en")
+        Intl.intlBestFitLocales("en")
     )
     runSupportedLocalesStringTest(
         fakeLocale,
         undefined,
-        intlBestFitLocales(fakeLocale)
+        Intl.intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesStringTest(
         "en",
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        intlLookUpLocales("en")
+        Intl.intlLookUpLocales("en")
     )
     runSupportedLocalesArrayTest(
         ["fr", "ru"],
         undefined,
-        intlBestFitLocales(["fr", "ru"])
+        Intl.intlBestFitLocales(["fr", "ru"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         undefined,
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
     runSupportedLocalesArrayTest(
         ["ru-RU", "zh-CN", "en-US"],
         { localeMatcher: "best fit" } as Intl.RelativeTimeFormatOptions,
-        intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
     )
 
     runSupportedLocalesArrayTest(
         ["ru-RU", "en-US"],
         { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        intlLookUpLocales(["ru-RU", "en-US"])
+        Intl.intlLookUpLocales(["ru-RU", "en-US"])
     )
 }
 

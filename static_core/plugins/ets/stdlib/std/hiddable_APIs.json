@@ -38,7 +38,7 @@
         ]
     },
     {
-        "file": "core/LocaleMatch.ets",
+        "file": "core/Intl.ets",
         "interfaces": [
             "intlLookUpLocale",
             "intlBestFitLocale",
