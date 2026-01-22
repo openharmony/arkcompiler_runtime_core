@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package PreallocTest;
-
 function test(block: int): boolean {
     let storage = new Array<Uint8Array>();
     try {

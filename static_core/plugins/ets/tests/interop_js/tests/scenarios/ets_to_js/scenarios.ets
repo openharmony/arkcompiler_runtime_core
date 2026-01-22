@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package scenarios_test
-
 const STRING_VALUE = '1';
 const INT_VALUE = 1;
 const INT_VALUE2 = 2;
@@ -114,10 +112,7 @@ class ClassWithGetterSetterEts {
     }
 }
 
-let lambdaFunctionEts: () => int;
-static {
-    lambdaFunctionEts = () => { return 1; }
-}
+let lambdaFunctionEts: () => int = () => { return 1; };
 
 function getLambdaFunctionEts(): () => int {
     return lambdaFunctionEts;

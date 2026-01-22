@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@ const testRunner = require('./test_utils.js');
 
 function js2sts(etsVm) {
     let objects = new Array();
-    const js2sts = etsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'js2sts');
+    const js2sts = etsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'js2sts');
     objects.push(js2sts());
 }
 

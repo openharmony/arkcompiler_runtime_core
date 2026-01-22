@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-package map.test;
-
-export let myMap: Map<string, number>;
-static {
-  myMap = new Map<string, number>();
-  myMap.set('apple', 1);
-}
+export let myMap: Map<string, number> = new Map<string, number>();
+myMap.set('apple', 1);
 
 export function GetMapElement(key: string): number|undefined {
   return myMap.get(key);
@@ -33,14 +28,11 @@ export function GetMapSize(): number {
   return myMap.size;
 }
 
-export let WeekDays: Map<string, number>;
-static {
-  WeekDays = new Map<string, number>();
-  WeekDays.set('Monday', 1);
-  WeekDays.set('Tuesday', 2);
-  WeekDays.set('Wednesday', 3);
-  WeekDays.set('Thursday', 4);
-  WeekDays.set('Friday', 5);
-  WeekDays.set('Saturday', 6);
-  WeekDays.set('Sunday', 7);
-}
+export let WeekDays: Map<string, number> = new Map<string, number>();
+WeekDays.set('Monday', 1);
+WeekDays.set('Tuesday', 2);
+WeekDays.set('Wednesday', 3);
+WeekDays.set('Thursday', 4);
+WeekDays.set('Friday', 5);
+WeekDays.set('Saturday', 6);
+WeekDays.set('Sunday', 7);

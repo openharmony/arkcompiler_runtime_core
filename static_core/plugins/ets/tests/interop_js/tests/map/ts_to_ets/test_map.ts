@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,16 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const TestMapSetFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapSet');
-const TestMapGetFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapGet');
-const TestMapHasFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapHas');
-const TestMapDeleteFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapDelete');
-const TestMapSizeFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapSize');
-const TestMapKeysFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapKeys');
-const TestMapValuesFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapValues');
-const TestMapEntriesFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapEntries');
-const TestMapForEachFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapForEach');
-const TestMapClearFunc = etsVm.getFunction('Lmap/test/ETSGLOBAL;', 'TestMapClear');
+const TestMapSetFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapSet');
+const TestMapGetFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapGet');
+const TestMapHasFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapHas');
+const TestMapDeleteFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapDelete');
+const TestMapSizeFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapSize');
+const TestMapKeysFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapKeys');
+const TestMapValuesFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapValues');
+const TestMapEntriesFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapEntries');
+const TestMapForEachFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapForEach');
+const TestMapClearFunc = etsVm.getFunction('Lmap/ETSGLOBAL;', 'TestMapClear');
 
 let myMap: Map<string, number> = new Map<string, number>();
 myMap.set('apple', 1);

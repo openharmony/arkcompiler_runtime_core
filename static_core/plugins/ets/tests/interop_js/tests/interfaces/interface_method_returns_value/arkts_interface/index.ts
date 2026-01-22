@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ class TestModule {
 
 function getTestModule(name): Object { return new TestModule(name); }
 
-const testModule = getTestModule('interface_method_return_value');
+const testModule = getTestModule('test');
 
 export function test(): Object {
     const directClass = testModule.getClass('InstanceClass');

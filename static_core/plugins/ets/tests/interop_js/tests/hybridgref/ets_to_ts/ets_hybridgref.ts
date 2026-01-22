@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,50 +18,50 @@ let plusOne = (x: number) => {
 };
 
 function testPrimitiveTypes(etsVm: any): void {
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefChar')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefChar')();
     ASSERT_EQ(typeof nativeGetRef(), "string");
     ASSERT_EQ(nativeGetRef(), "A");
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefByte')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefByte')();
     ASSERT_EQ(nativeGetRef(), 0x12);
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefShort')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefShort')();
     ASSERT_EQ(nativeGetRef(), 300);
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefInt')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefInt')();
     ASSERT_EQ(nativeGetRef(), 123456);
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefDouble')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefDouble')();
     ASSERT_TRUE(Math.abs(nativeGetRef() - 100.111) < 1e-10);
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefFloat')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefFloat')();
     ASSERT_TRUE(Math.abs(nativeGetRef() - 1.5) < 1e-6);
 
-    etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsSaveNativeGrefString')();
+    etsVm.getFunction('Lets_hybridgref/ETSGLOBAL;', 'etsSaveNativeGrefString')();
     ASSERT_EQ(nativeGetRef(), "hello world");
 }
 
 function testArrayAndObjectTypes(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefNumberArray")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefNumberArray")();
     const arr = nativeGetRef();
     ASSERT_TRUE(arr instanceof Array);
     ASSERT_EQ(arr.length, 5);
     ASSERT_EQ(arr[2], 3);
 
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObject")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefObject")();
     const obj = nativeGetRef();
     ASSERT_EQ(obj.name, "ArkTS");
     ASSERT_EQ(obj.version, 1);
 }
 
 function testMapAndSetTypes(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefMap")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefMap")();
     const map = nativeGetRef();
     ASSERT_TRUE(map instanceof Map);
     ASSERT_EQ(map.get("a"), 10);
     ASSERT_EQ(map.get("b"), 20);
 
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefSet")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefSet")();
     const set = nativeGetRef();
     ASSERT_TRUE(set instanceof Set);
     ASSERT_TRUE(set.has("x"));
@@ -69,24 +69,24 @@ function testMapAndSetTypes(etsVm: any): void {
 }
 
 function testFunctionCallback(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefObjectFromTS")(plusOne);
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefObjectFromTS")(plusOne);
     const fn = nativeGetRef();
     ASSERT_TRUE(fn === plusOne);
 }
 
 function testBufferAndViewTypes(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefArrayBuffer")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefArrayBuffer")();
     const arrbuf = nativeGetRef();
     ASSERT_TRUE(arrbuf instanceof ArrayBuffer);
     ASSERT_EQ(arrbuf.byteLength, 8);
 
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefTypedArray")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefTypedArray")();
     const typed = nativeGetRef();
     ASSERT_TRUE(typed instanceof Int8Array);
     ASSERT_EQ(typed.length, 2);
     ASSERT_EQ(typed[1], 2);
 
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefDataView")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefDataView")();
     const view = nativeGetRef();
     ASSERT_TRUE(view instanceof DataView);
     ASSERT_TRUE(view.byteLength === 8);
@@ -99,7 +99,7 @@ function testBufferAndViewTypes(etsVm: any): void {
 }
 
 function testPromiseAndErrorTypes(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefPromise")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefPromise")();
     const promise = nativeGetRef();
     ASSERT_TRUE(promise instanceof Promise);
 
@@ -109,14 +109,14 @@ function testPromiseAndErrorTypes(etsVm: any): void {
         resolved = true;
     });
 
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefError")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefError")();
     const err = nativeGetRef();
     ASSERT_TRUE(err instanceof Error);
     ASSERT_EQ(err.message, "Test error");
 }
 
 function testDateType(etsVm: any): void {
-    etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsSaveNativeGrefDate")();
+    etsVm.getFunction("Lets_hybridgref/ETSGLOBAL;", "etsSaveNativeGrefDate")();
     const date = nativeGetRef();
     ASSERT_TRUE(date instanceof Date);
     ASSERT_EQ(date.toISOString(), "2025-05-27T12:34:56.789Z");

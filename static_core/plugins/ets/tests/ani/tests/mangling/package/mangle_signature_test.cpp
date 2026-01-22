@@ -25,15 +25,18 @@ class MangleSignatureTest : public AniTest {};
 
 // type F = (u: number | string | FixedArray<char>) => (E | B) | Partial<A>
 static constexpr std::string_view FOO_UNION_SIGNATURE =
-    "X{A{c}C{std.core.Double}C{std.core.String}}:X{C{msig.B}E{msig.E}P{msig.A}}";
+    "X{A{c}C{std.core.Double}C{std.core.String}}:"
+    "X{C{mangle_signature_test.B}E{mangle_signature_test.E}P{mangle_signature_test.A}}";
 static constexpr std::string_view NAMESPACE_FOO_UNION_SIGNATURE =
-    "X{A{c}C{std.core.Double}C{std.core.String}}:X{C{msig.rls.B}E{msig.rls.E}P{msig.A}}";
+    "X{A{c}C{std.core.Double}C{std.core.String}}:"
+    "X{C{mangle_signature_test.rls.B}E{mangle_signature_test.rls.E}P{mangle_signature_test.A}}";
 // type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
 static constexpr std::string_view FOO1_UNION_SIGNATURE =
-    "X{C{msig.A}C{std.core.String}C{std.core.Double}}:X{A{C{msig.A}}C{msig.A}C{std.core.String}C{std.core.Null}}";
+    "X{C{mangle_signature_test.A}C{std.core.String}C{std.core.Double}}:"
+    "X{A{C{mangle_signature_test.A}}C{mangle_signature_test.A}C{std.core.String}C{std.core.Null}}";
 static constexpr std::string_view NAMESPACE_FOO1_UNION_SIGNATURE =
-    "X{C{msig.rls.A}C{std.core.String}C{std.core.Double}}:X{A{C{msig.rls.A}}C{msig.rls.A}C{std.core.String}C{std.core."
-    "Null}}";
+    "X{C{mangle_signature_test.rls.A}C{std.core.String}C{std.core.Double}}:"
+    "X{A{C{mangle_signature_test.rls.A}}C{mangle_signature_test.rls.A}C{std.core.String}C{std.core.Null}}";
 
 TEST_F(MangleSignatureTest, FormatVoid_NewToOld)
 {
@@ -431,16 +434,20 @@ TEST_F(MangleSignatureTest, FormatUnion_NewToRuntime)
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(), "{U{ULe;Lstd/core/Double;}[{ULstd/core/FunctionR1;[Lstd/core/String;}}:V");
 
-    // type F = (u: number | string | FixedArray<char>) => (msig.E | msig.B) | Partial<msig.A>
+    // type F = (u: number | string | FixedArray<char>) => (mangle_signature_test.E | mangle_signature_test.B) |
+    // Partial<mangle_signature_test.A>
     desc = Mangle::ConvertSignature(FOO_UNION_SIGNATURE);
     ASSERT_TRUE(desc.has_value());
-    EXPECT_STREQ(desc.value().c_str(), "{ULstd/core/Double;Lstd/core/String;[C}:{ULmsig/%%partial-A;Lmsig/B;Lmsig/E;}");
+    EXPECT_STREQ(desc.value().c_str(),
+                 "{ULstd/core/Double;Lstd/core/String;[C}:{ULmangle_signature_test/%%partial-A;Lmangle_signature_test/"
+                 "B;Lmangle_signature_test/E;}");
 
     // type F = <T extends A, V extends T | string>(u: T | V | A | number): FixedArray<T> | null | V
     desc = Mangle::ConvertSignature(FOO1_UNION_SIGNATURE);
     ASSERT_TRUE(desc.has_value());
     EXPECT_STREQ(desc.value().c_str(),
-                 "{ULmsig/A;Lstd/core/Double;Lstd/core/String;}:{ULmsig/A;[Lmsig/A;Lstd/core/Null;Lstd/core/String;}");
+                 "{ULmangle_signature_test/A;Lstd/core/Double;Lstd/core/String;}:{ULmangle_signature_test/"
+                 "A;[Lmangle_signature_test/A;Lstd/core/Null;Lstd/core/String;}");
 }
 
 TEST_F(MangleSignatureTest, Format_Wrong)
@@ -483,7 +490,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     std::optional<PandaString> desc;
 
     ani_module m {};
-    ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->FindModule("mangle_signature_test", &m), ANI_OK);
 
     ani_function fn {};
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", ":", &fn), ANI_OK);
@@ -513,8 +520,9 @@ TEST_F(MangleSignatureTest, Module_FindFunction)
     EXPECT_EQ(env_->Module_FindFunction(m, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
     // Check references
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &fn), ANI_OK);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{msig.A}C{std.core.Array}:", &fn), ANI_OK);
+    const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", signature, &fn), ANI_OK);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -524,7 +532,7 @@ TEST_F(MangleSignatureTest, Module_FindFunction_OldFormat)
     std::optional<PandaString> desc;
 
     ani_module m {};
-    ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->FindModule("mangle_signature_test", &m), ANI_OK);
 
     ani_function fn {};
     EXPECT_EQ(env_->Module_FindFunction(m, "foo", ":V", &fn), ANI_INVALID_DESCRIPTOR);
@@ -552,8 +560,10 @@ TEST_F(MangleSignatureTest, Module_FindFunction_OldFormat)
     EXPECT_EQ(env_->Module_FindFunction(m, "foo1", "Lstd/core/Object;:Lstd/core/Object;", &fn), ANI_INVALID_DESCRIPTOR);
 
     // Check references
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &fn), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &fn), ANI_INVALID_DESCRIPTOR);
+    const char *signature = "DLmangle_signature_test/A;Lmangle_signature_test/B;:Lmangle_signature_test/E;";
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", signature, &fn), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(env_->Module_FindFunction(m, "foo", "Lmangle_signature_test/%%partial-A;Lstd/core/Array;:V", &fn),
+              ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(MangleSignatureTest, Namespace_FindFunction)
@@ -561,7 +571,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     std::optional<PandaString> desc;
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("msig.rls", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("mangle_signature_test.rls", &ns), ANI_OK);
 
     ani_function fn {};
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", ":", &fn), ANI_OK);
@@ -591,8 +601,10 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction)
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "fooFixedArray", ":A{Y}", &fn), ANI_OK);
 
     // Check references
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "dC{msig.rls.A}C{msig.rls.B}:E{msig.rls.E}", &fn), ANI_OK);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{msig.A}C{std.core.Array}:", &fn), ANI_OK);
+    const char *signature =
+        "dC{mangle_signature_test.rls.A}C{mangle_signature_test.rls.B}:E{mangle_signature_test.rls.E}";
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", signature, &fn), ANI_OK);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", NAMESPACE_FOO_UNION_SIGNATURE.data(), &fn), ANI_OK);
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo1", NAMESPACE_FOO1_UNION_SIGNATURE.data(), &fn), ANI_OK);
 }
@@ -602,7 +614,7 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction_OldFormat)
     std::optional<PandaString> desc;
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("msig.rls", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("mangle_signature_test.rls", &ns), ANI_OK);
 
     ani_function fn {};
     EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", ":V", &fn), ANI_INVALID_DESCRIPTOR);
@@ -631,9 +643,9 @@ TEST_F(MangleSignatureTest, Namespace_FindFunction_OldFormat)
               ANI_INVALID_DESCRIPTOR);
 
     // Check references
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "DLmsig/rls/A;Lmsig/rls/B;:Lmsig/rls/E;", &fn),
-              ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &fn),
+    const char *signature = "DLmangle_signature_test/rls/A;Lmangle_signature_test/rls/B;:Lmangle_signature_test/rls/E;";
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", signature, &fn), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(env_->Namespace_FindFunction(ns, "foo", "Lmangle_signature_test/%%partial-A;Lstd/core/Array;:V", &fn),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -642,7 +654,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", ":", &method), ANI_OK);
@@ -672,8 +684,9 @@ TEST_F(MangleSignatureTest, Class_FindMethod)
     EXPECT_EQ(env_->Class_FindMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 
     // Check references
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{msig.A}C{std.core.Array}:", &method), ANI_OK);
+    const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", signature, &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
@@ -683,7 +696,7 @@ TEST_F(MangleSignatureTest, Class_FindMethod_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
     EXPECT_EQ(env_->Class_FindMethod(cls, "foo", ":V", &method), ANI_INVALID_DESCRIPTOR);
@@ -712,8 +725,9 @@ TEST_F(MangleSignatureTest, Class_FindMethod_OldFormat)
               ANI_INVALID_DESCRIPTOR);
 
     // Check references
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &method),
+    const char *signature = "DLmangle_signature_test/A;Lmangle_signature_test/B;:Lmangle_signature_test/E;";
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", signature, &method), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(env_->Class_FindMethod(cls, "foo", "Lmangle_signature_test/%%partial-A;Lstd/core/Array;:V", &method),
               ANI_INVALID_DESCRIPTOR);
 }
 
@@ -722,7 +736,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.G", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.G", &cls), ANI_OK);
 
     ani_static_method method {};
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":", &method), ANI_OK);
@@ -752,8 +766,10 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod)
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "fooFixedArray", ":A{Y}", &method), ANI_OK);
 
     // Check references
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "dC{msig.A}C{msig.B}:E{msig.E}", &method), ANI_OK);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{msig.A}C{std.core.Array}:", &method), ANI_OK);
+    const char *signature = "dC{mangle_signature_test.A}C{mangle_signature_test.B}:E{mangle_signature_test.E}";
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", signature, &method), ANI_OK);
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "P{mangle_signature_test.A}C{std.core.Array}:", &method),
+              ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", FOO_UNION_SIGNATURE.data(), &method), ANI_OK);
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo1", FOO1_UNION_SIGNATURE.data(), &method), ANI_OK);
 }
@@ -763,7 +779,7 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.G", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.G", &cls), ANI_OK);
 
     ani_static_method method {};
     EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", ":V", &method), ANI_INVALID_DESCRIPTOR);
@@ -791,9 +807,11 @@ TEST_F(MangleSignatureTest, Class_FindStaticMethod_OldFormat)
               ANI_INVALID_DESCRIPTOR);
 
     // Check references
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "DLmsig/A;Lmsig/B;:Lmsig/E;", &method), ANI_INVALID_DESCRIPTOR);
-    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", "Lmsig/%%partial-A;Lstd/core/Array;:V", &method),
-              ANI_INVALID_DESCRIPTOR);
+    const char *signature = "DLmangle_signature_test/A;Lmangle_signature_test/B;:Lmangle_signature_test/E;";
+    EXPECT_EQ(env_->Class_FindStaticMethod(cls, "foo", signature, &method), ANI_INVALID_DESCRIPTOR);
+    EXPECT_EQ(
+        env_->Class_FindStaticMethod(cls, "foo", "Lmangle_signature_test/%%partial-A;Lstd/core/Array;:V", &method),
+        ANI_INVALID_DESCRIPTOR);
 }
 
 TEST_F(MangleSignatureTest, Class_FindIndexableGetter)
@@ -801,7 +819,7 @@ TEST_F(MangleSignatureTest, Class_FindIndexableGetter)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
     EXPECT_EQ(env_->Class_FindIndexableGetter(cls, "d:i", &method), ANI_OK);
@@ -812,7 +830,7 @@ TEST_F(MangleSignatureTest, Class_FindIndexableGetter_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
     EXPECT_EQ(env_->Class_FindIndexableGetter(cls, "D:I", &method), ANI_INVALID_DESCRIPTOR);
@@ -823,7 +841,7 @@ TEST_F(MangleSignatureTest, Class_FindIndexableSetter)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
     // Check primitives
@@ -850,7 +868,7 @@ TEST_F(MangleSignatureTest, Class_FindIndexableSetter_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method method {};
 
@@ -878,7 +896,7 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.G", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.G", &cls), ANI_OK);
 
     ani_int result {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -898,7 +916,7 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName)
     ASSERT_EQ(env_->Reference_IsUndefined(unionResult, &booleanResult), ANI_OK);
     ASSERT_EQ(booleanResult, ANI_FALSE);
     ani_enum enumClass {};
-    ASSERT_EQ(env_->FindEnum("msig.E", &enumClass), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("mangle_signature_test.E", &enumClass), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(unionResult), enumClass, &booleanResult), ANI_OK);
     ASSERT_EQ(booleanResult, ANI_TRUE);
 
@@ -925,7 +943,7 @@ TEST_F(MangleSignatureTest, Class_CallStaticMethodByName_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.G", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.G", &cls), ANI_OK);
 
     ani_int result {};
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -937,7 +955,7 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
@@ -964,7 +982,7 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName)
     ASSERT_EQ(env_->Reference_IsUndefined(unionResult, &booleanResult), ANI_OK);
     ASSERT_EQ(booleanResult, ANI_FALSE);
     ani_enum enumClass {};
-    ASSERT_EQ(env_->FindEnum("msig.E", &enumClass), ANI_OK);
+    ASSERT_EQ(env_->FindEnum("mangle_signature_test.E", &enumClass), ANI_OK);
     ASSERT_EQ(env_->Object_InstanceOf(static_cast<ani_object>(unionResult), enumClass, &booleanResult), ANI_OK);
     ASSERT_EQ(booleanResult, ANI_TRUE);
 
@@ -991,7 +1009,7 @@ TEST_F(MangleSignatureTest, Object_CallMethodByName_OldFormat)
     std::optional<PandaString> desc;
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
 
     ani_method ctor {};
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
@@ -1023,7 +1041,7 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods)
     };
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, functions.data(), functions.size()), ANI_OK);
 }
 
@@ -1038,8 +1056,8 @@ TEST_F(MangleSignatureTest, Class_BindNativeMethods_OldFormat)
     };
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("Lmsig/F;", &cls), ANI_INVALID_DESCRIPTOR);
-    ASSERT_EQ(env_->FindClass("msig.F", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("Lmangle_signature_test/F;", &cls), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->FindClass("mangle_signature_test.F", &cls), ANI_OK);
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, functions.data(), functions.size()), ANI_INVALID_DESCRIPTOR);
 }
 
@@ -1054,7 +1072,7 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions)
     };
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("msig.rls", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("mangle_signature_test.rls", &ns), ANI_OK);
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_OK);
 }
 
@@ -1069,8 +1087,8 @@ TEST_F(MangleSignatureTest, Namespace_BindNativeFunctions_OldFormat)
     };
 
     ani_namespace ns {};
-    ASSERT_EQ(env_->FindNamespace("Lmsig/rls;", &ns), ANI_INVALID_DESCRIPTOR);
-    ASSERT_EQ(env_->FindNamespace("msig.rls", &ns), ANI_OK);
+    ASSERT_EQ(env_->FindNamespace("Lmangle_signature_test/rls;", &ns), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->FindNamespace("mangle_signature_test.rls", &ns), ANI_OK);
     ASSERT_EQ(env_->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()), ANI_INVALID_DESCRIPTOR);
 }
 
@@ -1085,7 +1103,7 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions)
     };
 
     ani_module m {};
-    ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->FindModule("mangle_signature_test", &m), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(m, functions.data(), functions.size()), ANI_OK);
 }
 
@@ -1100,8 +1118,8 @@ TEST_F(MangleSignatureTest, Module_BindNativeFunctions_OldFormat)
     };
 
     ani_module m {};
-    ASSERT_EQ(env_->FindModule("Lmsig;", &m), ANI_INVALID_DESCRIPTOR);
-    ASSERT_EQ(env_->FindModule("msig", &m), ANI_OK);
+    ASSERT_EQ(env_->FindModule("Lmangle_signature_test;", &m), ANI_INVALID_DESCRIPTOR);
+    ASSERT_EQ(env_->FindModule("mangle_signature_test", &m), ANI_OK);
     ASSERT_EQ(env_->Module_BindNativeFunctions(m, functions.data(), functions.size()), ANI_INVALID_DESCRIPTOR);
 }
 

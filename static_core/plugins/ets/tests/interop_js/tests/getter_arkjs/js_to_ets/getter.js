@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,11 @@ class ClassObjGetter {
     }
 }
 
-const checkClassGetter = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'checkClassGetter');
-const checkLiteralObjGetter = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'checkLiteralObjGetter');
-const checkDeleteLiteralObjGetter = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'checkDeleteLiteralObjGetter');
-const checkDefinePropertyGetter = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'checkDefinePropertyGetter');
-const checkComputedPropertyGetter = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'checkComputedPropertyGetter');
+const checkClassGetter = etsVm.getFunction('Ltest_getter/ETSGLOBAL;', 'checkClassGetter');
+const checkLiteralObjGetter = etsVm.getFunction('Ltest_getter/ETSGLOBAL;', 'checkLiteralObjGetter');
+const checkDeleteLiteralObjGetter = etsVm.getFunction('Ltest_getter/ETSGLOBAL;', 'checkDeleteLiteralObjGetter');
+const checkDefinePropertyGetter = etsVm.getFunction('Ltest_getter/ETSGLOBAL;', 'checkDefinePropertyGetter');
+const checkComputedPropertyGetter = etsVm.getFunction('Ltest_getter/ETSGLOBAL;', 'checkComputedPropertyGetter');
 
 function testClassObjGetter() {
     const GClass = new ClassObjGetter();

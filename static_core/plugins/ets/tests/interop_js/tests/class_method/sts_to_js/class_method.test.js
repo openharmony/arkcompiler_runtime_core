@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,28 +15,28 @@
 const stsVm = globalThis.gtest.etsVm;
 print(stsVm);
 
-const UserClass = stsVm.getClass('Lclass_method/test/UserClass;');
+const UserClass = stsVm.getClass('Lclass_method/UserClass;');
 
-const createUserClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createUserClassFromSts');
+const createUserClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createUserClassFromSts');
 print(createUserClassFromSts);
 
-const ChildClass = stsVm.getClass('Lclass_method/test/ChildClass;');
-const createChildClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createChildClassFromSts');
+const ChildClass = stsVm.getClass('Lclass_method/ChildClass;');
+const createChildClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createChildClassFromSts');
 
-const InterfaceClass = stsVm.getClass('Lclass_method/test/InterfaceClass;');
-const createInterfaceClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createInterfaceClassFromSts');
+const InterfaceClass = stsVm.getClass('Lclass_method/InterfaceClass;');
+const createInterfaceClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createInterfaceClassFromSts');
 
-const PrivateClass = stsVm.getClass('Lclass_method/test/PrivateClass;');
-const createPrivateClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createPrivateClassFromSts');
+const PrivateClass = stsVm.getClass('Lclass_method/PrivateClass;');
+const createPrivateClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createPrivateClassFromSts');
 
-const ProtectedClass = stsVm.getClass('Lclass_method/test/ProtectedClass;');
-const createProtectedClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createProtectedClassFromSts');
+const ProtectedClass = stsVm.getClass('Lclass_method/ProtectedClass;');
+const createProtectedClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createProtectedClassFromSts');
 
-const ChildProtectedClass = stsVm.getClass('Lclass_method/test/ChildProtectedClass;');
-const createChildProtectedClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createChildProtectedClassFromSts');
+const ChildProtectedClass = stsVm.getClass('Lclass_method/ChildProtectedClass;');
+const createChildProtectedClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createChildProtectedClassFromSts');
 
-const ChildAbstractClass = stsVm.getClass('Lclass_method/test/ChildAbstractClass;');
-const createChildAbstractClassFromSts = stsVm.getFunction('Lclass_method/test/ETSGLOBAL;', 'createChildAbstractClassFromSts');
+const ChildAbstractClass = stsVm.getClass('Lclass_method/ChildAbstractClass;');
+const createChildAbstractClassFromSts = stsVm.getFunction('Lclass_method/ETSGLOBAL;', 'createChildAbstractClassFromSts');
 
 module.exports = {
     UserClass,

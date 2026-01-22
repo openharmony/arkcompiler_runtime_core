@@ -1,6 +1,6 @@
 
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package generic_static.test;
-
 const stsInt = 1;
 type Union = int | string | number;
 interface IUser {
@@ -25,10 +23,7 @@ class Base {
     a = stsInt;
 }
 type ArrayInt = Array<Int>;
-const BaseObj: Base;
-static {
-    BaseObj = { a: stsInt };
-}
+const BaseObj: Base = { a: stsInt };
 
 // NOTE: issue (1835) fix Literal type
 // type Literal = 'start' | 'stop';

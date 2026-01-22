@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-package interopStandaloneFnTest
+import { ClassWithMethodEts, ImplInterfaceWithMethodEts, makeFunctionReturningValueType, standaloneFunctionEts } from "./common.ets"
 
-const functionRetTypeNumberEts: () => number;
+const functionRetTypeNumberEts: () => number = makeFunctionReturningValueType<number>(1);
 
-const functionRetTypeByteEts: () => byte;
+const functionRetTypeByteEts: () => byte = makeFunctionReturningValueType<byte>(1);
 
-const functionRetTypeShortEts: () => short;
+const functionRetTypeShortEts: () => short = makeFunctionReturningValueType<short>(1);
 
-const functionRetTypeIntEts: () => int;
+const functionRetTypeIntEts: () => int = makeFunctionReturningValueType<int>(1);
 
-const functionRetTypeLongEts: () => long;
+const functionRetTypeLongEts: () => long = makeFunctionReturningValueType<long>(1);
 
-const functionRetTypeFloatEts: () => float;
+const functionRetTypeFloatEts: () => float = makeFunctionReturningValueType<float>(3.140000104904175);
 
-const functionRetTypeCharEts: () => char;
+const functionRetTypeCharEts: () => char = makeFunctionReturningValueType<char>(c'c');
 
-const functionRetTypeBooleanEts: () => boolean;
+const functionRetTypeBooleanEts: () => boolean = makeFunctionReturningValueType<boolean>(true);
 
-const functionRetTypeStringEts: () => string;
+const functionRetTypeStringEts: () => string = makeFunctionReturningValueType<string>('test');
 
 function functionRetTypeNumberLitEts(): number {
     return 1;

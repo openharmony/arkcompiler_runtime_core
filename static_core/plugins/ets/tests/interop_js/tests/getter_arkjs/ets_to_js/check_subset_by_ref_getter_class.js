@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 import { PUBLIC_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const SubsetByRef = etsVm.getClass('Lgetter/test/SubsetByRef;');
-const createSubsetByRefGetterClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_subset_by_ref_getter_class_from_ets');
+const SubsetByRef = etsVm.getClass('Lgetter/SubsetByRef;');
+const createSubsetByRefGetterClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_subset_by_ref_getter_class_from_ets');
 
 
 function checkSubsetByRefGetterClass() {

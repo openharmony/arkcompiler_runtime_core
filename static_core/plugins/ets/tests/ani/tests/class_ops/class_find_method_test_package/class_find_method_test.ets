@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-package test
 enum Colors {Red = 1, Green = 2, Blue = 3}
 
 function CreateTuple(a: int, b: long): [int, long] {

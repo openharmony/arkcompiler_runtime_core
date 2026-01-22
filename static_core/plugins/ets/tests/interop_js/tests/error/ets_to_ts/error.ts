@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,9 @@ const ErrorMessage = 'Panda: throw new error in ets!';
 const CustomErrorMessage = 'Panda: Something went wrong!';
 const CustomErrorCode = 1001;
 
-const ErrorFunc = etsVm.getFunction('Lerror/test/ETSGLOBAL;', 'ErrorFunc');
-const CustomErrorFunc = etsVm.getFunction('Lerror/test/ETSGLOBAL;', 'CustomErrorFunc');
-const err = etsVm.getClass('Lerror/test/ETSGLOBAL;').err;
+const ErrorFunc = etsVm.getFunction('Ltest_error/ETSGLOBAL;', 'ErrorFunc');
+const CustomErrorFunc = etsVm.getFunction('Ltest_error/ETSGLOBAL;', 'CustomErrorFunc');
+const err = etsVm.getClass('Ltest_error/ETSGLOBAL;').err;
 
 function testError(): boolean {
     let res: boolean;

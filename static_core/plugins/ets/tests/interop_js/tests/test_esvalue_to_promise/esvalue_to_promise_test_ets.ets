@@ -12,7 +12,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package esvalue_to_promise_test_ets;
 
 async function checkToPromise(): Promise<void> {
     let module = ESValue.load('esvalue_to_promise_test');

@@ -21,6 +21,8 @@
 
 namespace ark::ets::test {
 
+static constexpr const char *TEST_NAMESPACE = "ets_vm_outofmemory_test";
+
 class EtsVMOOMPreallocTest : public ani::testing::AniTest {
 private:
     std::vector<ani_option> GetExtraAniOptions() override
@@ -35,14 +37,14 @@ private:
 TEST_F(EtsVMOOMPreallocTest, ThrowPreallocatedOOMObjectInErrorCtorTest1)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = CallEtsFunction<ani_boolean>("PreallocTest", "test", 1000);
+    auto res = CallEtsFunction<ani_boolean>(TEST_NAMESPACE, "test", 1000);
     ASSERT_EQ(res, true);
 }
 
 TEST_F(EtsVMOOMPreallocTest, ThrowPreallocatedOOMObjectInErrorCtorTest2)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = CallEtsFunction<ani_boolean>("PreallocTest", "test", 650);
+    auto res = CallEtsFunction<ani_boolean>(TEST_NAMESPACE, "test", 650);
     ASSERT_EQ(res, true);
 }
 
@@ -61,14 +63,14 @@ private:
 TEST_F(EtsVMOOMPreallocJittedTest, ThrowPreallocatedOOMObjectInErrorCtorTest1)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = CallEtsFunction<ani_boolean>("PreallocTest", "test", 1000);
+    auto res = CallEtsFunction<ani_boolean>(TEST_NAMESPACE, "test", 1000);
     ASSERT_EQ(res, true);
 }
 
 TEST_F(EtsVMOOMPreallocJittedTest, ThrowPreallocatedOOMObjectInErrorCtorTest2)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto res = CallEtsFunction<ani_boolean>("PreallocTest", "test", 650);
+    auto res = CallEtsFunction<ani_boolean>(TEST_NAMESPACE, "test", 650);
     ASSERT_EQ(res, true);
 }
 

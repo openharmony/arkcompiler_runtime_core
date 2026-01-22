@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@ import {
  } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const ProtectedGetterInheritanceClass = etsVm.getClass('Lgetter/test/ProtectedGetterInheritanceClass;');
-const ProtectedGetterOverrideClass = etsVm.getClass('Lgetter/test/ProtectedGetterOverrideClass;');
-const createProtectedGetterInheritanceClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_protected_getter_inheritance_class_from_ets');
-const createProtectedGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_protected_getter_override_class_from_ets');
+const ProtectedGetterInheritanceClass = etsVm.getClass('Lgetter/ProtectedGetterInheritanceClass;');
+const ProtectedGetterOverrideClass = etsVm.getClass('Lgetter/ProtectedGetterOverrideClass;');
+const createProtectedGetterInheritanceClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_protected_getter_inheritance_class_from_ets');
+const createProtectedGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_protected_getter_override_class_from_ets');
 
 
 function checkProtectedGetterInheritanceClassalue() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,25 +39,25 @@ let RunJsGC: () => void = () => {
 };
 globalThis.test.RunJsGC = RunJsGC;
 
-export let GetSTSObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObject');
-export let GetSTSArrayOfObjects: () => Object[] = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSArrayOfObjects');
-export let GetSTSObjectAndKeepIt: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectAndKeepIt');
-export let GetSTSObjectWithWeakRef: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSObjectWithWeakRef');
-export let GetSTSStringArrayAsObject: () => Object = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetSTSStringArrayAsObject');
-export let isSTSObjectCollected: () => boolean = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'isSTSObjectCollected');
-export let isSTSPromiseCollected: () => boolean = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'isSTSPromiseCollected');
-export let SetJSObject: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObject');
-export let SetJSObjectAndKeepIt: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectAndKeepIt');
-export let SetJSObjectWithWeakRef: (obj: Object) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSObjectWithWeakRef');
-export let SetJSPromiseWithWeakRef: (prms: Promise<Object>) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'SetJSPromiseWithWeakRef');
-export let AddPandaArray: (arr: Object[]) => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'AddPandaArray');
-export let RunPandaGC: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunPandaGC');
-let RunInteropGCInternal: () => void = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'RunInteropGC');
+export let GetSTSObject: () => Object = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSObject');
+export let GetSTSArrayOfObjects: () => Object[] = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSArrayOfObjects');
+export let GetSTSObjectAndKeepIt: () => Object = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSObjectAndKeepIt');
+export let GetSTSObjectWithWeakRef: () => Object = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSObjectWithWeakRef');
+export let GetSTSStringArrayAsObject: () => Object = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetSTSStringArrayAsObject');
+export let isSTSObjectCollected: () => boolean = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'isSTSObjectCollected');
+export let isSTSPromiseCollected: () => boolean = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'isSTSPromiseCollected');
+export let SetJSObject: (obj: Object) => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'SetJSObject');
+export let SetJSObjectAndKeepIt: (obj: Object) => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'SetJSObjectAndKeepIt');
+export let SetJSObjectWithWeakRef: (obj: Object) => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'SetJSObjectWithWeakRef');
+export let SetJSPromiseWithWeakRef: (prms: Promise<Object>) => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'SetJSPromiseWithWeakRef');
+export let AddPandaArray: (arr: Object[]) => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'AddPandaArray');
+export let RunPandaGC: () => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'RunPandaGC');
+let RunInteropGCInternal: () => void = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'RunInteropGC');
 export let RunInteropGC: () => void = () => {
     globalThis.ArkTools.GC.clearWeakRefForTest();
     RunInteropGCInternal();
 };
-export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaFreeHeapSize');
-export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('LPandaGC/ETSGLOBAL;', 'GetPandaUsedHeapSize');
-export const PandaBaseClass = globalThis.test.etsVm.getClass('LPandaGC/PandaBaseClass;');
+export let GetPandaFreeHeapSize: () => number = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetPandaFreeHeapSize');
+export let GetPandaUsedHeapSize: () => number = globalThis.test.etsVm.getFunction('Lgc_test_sts_common/ETSGLOBAL;', 'GetPandaUsedHeapSize');
+export const PandaBaseClass = globalThis.test.etsVm.getClass('Lgc_test_sts_common/PandaBaseClass;');
 }

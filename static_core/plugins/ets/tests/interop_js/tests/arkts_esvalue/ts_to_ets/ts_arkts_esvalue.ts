@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,12 +34,12 @@ function main(): void {
     const wrapobj = new MyObject(42);
     nativeWrapRef(wrapobj);
     nativeSaveRef(wrapobj)
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckWrappedPtr")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_arkts_esvalue/ETSGLOBAL;", "etsCheckWrappedPtr")());
 
     nativeWrapRef(wrapobjTS);
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckWrappedPtrFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_arkts_esvalue/ETSGLOBAL;", "etsCheckWrappedPtrFromTS")());
 
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "etsCheckUnWrappedPtrFromTS")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_arkts_esvalue/ETSGLOBAL;", "etsCheckUnWrappedPtrFromTS")());
 }
 
 (globalThis as any).nativeSaveRef("temp");

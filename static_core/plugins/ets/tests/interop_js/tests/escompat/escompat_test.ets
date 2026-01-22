@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package escompat_test
-
 // import * from "./compat_array"
 
 function GCJSRuntimeCleanup(): void {

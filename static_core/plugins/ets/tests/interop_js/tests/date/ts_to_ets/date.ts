@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,41 +17,41 @@ const etsVm = globalThis.gtest.etsVm;
 const dateString = '2025-03-01T01:02:03.000Z';
 const timeStamp = 1609459200000;
 
-let funDateInstanceOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateInstanceOf');
-let funDateTypeOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateTypeOf');
-let funDateGetFullYear = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetFullYear');
-let funDateGetMonth = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetMonth');
-let funDateGetDate = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetDate');
-let funDateGetDay = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetDay');
-let funDateGetHours = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetHours');
-let funDateGetMinutes = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetMinutes');
-let funDateGetSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetSeconds');
-let funDateGetMilliseconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetMilliseconds');
-let funDateToISOString = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateToISOString');
-let funDateGetTime = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetTime');
-let funObject = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funObject');
-let funDateGetUTCDate = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCDate');
-let funDateGetUTCFullYear = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCFullYear');
-let funDateGetUTCMonth = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCMonth');
-let funDateGetUTCDay = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCDay');
-let funDateGetUTCHours = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCHours');
-let funDateGetUTCMinutes = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCMinutes');
-let funDateGetUTCSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCSeconds');
-let funDateGetUTCMilliSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetUTCMilliSeconds');
-let funDateGetTimeZoneOffSet = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateGetTimeZoneOffSet');
-let funDateToJSON = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateToJSON');
-let funDateToDateString = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateToDateString');
-let funDateValueOf = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'funDateValueOf');
+let funDateInstanceOf = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateInstanceOf');
+let funDateTypeOf = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateTypeOf');
+let funDateGetFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetFullYear');
+let funDateGetMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetMonth');
+let funDateGetDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetDate');
+let funDateGetDay = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetDay');
+let funDateGetHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetHours');
+let funDateGetMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetMinutes');
+let funDateGetSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetSeconds');
+let funDateGetMilliseconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetMilliseconds');
+let funDateToISOString = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateToISOString');
+let funDateGetTime = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetTime');
+let funObject = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funObject');
+let funDateGetUTCDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCDate');
+let funDateGetUTCFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCFullYear');
+let funDateGetUTCMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCMonth');
+let funDateGetUTCDay = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCDay');
+let funDateGetUTCHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCHours');
+let funDateGetUTCMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCMinutes');
+let funDateGetUTCSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCSeconds');
+let funDateGetUTCMilliSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetUTCMilliSeconds');
+let funDateGetTimeZoneOffSet = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateGetTimeZoneOffSet');
+let funDateToJSON = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateToJSON');
+let funDateToDateString = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateToDateString');
+let funDateValueOf = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'funDateValueOf');
 
-let testSetDateOfSetTime = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetTime');
-let testSetDateOfSetDate = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetDate');
-let testSetDateOfSetFullYear = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetFullYear');
-let testSetDateOfSetMonth = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetMonth');
-let testSetDateOfSetUTCDate = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetUTCDate');
-let testSetDateOfSetUTCFullYear = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetUTCFullYear');
-let testSetDateOfSetUTCMonth = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfSetUTCMonth');
-let testSetDateOfMilliSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfMilliSeconds');
-let testDateOfSetUTCMilliSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testDateOfSetUTCMilliSeconds');
+let testSetDateOfSetTime = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetTime');
+let testSetDateOfSetDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetDate');
+let testSetDateOfSetFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetFullYear');
+let testSetDateOfSetMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetMonth');
+let testSetDateOfSetUTCDate = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetUTCDate');
+let testSetDateOfSetUTCFullYear = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetUTCFullYear');
+let testSetDateOfSetUTCMonth = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfSetUTCMonth');
+let testSetDateOfMilliSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfMilliSeconds');
+let testDateOfSetUTCMilliSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testDateOfSetUTCMilliSeconds');
 
 let dateStr = new Date(dateString);
 let dateTimeStamp = new Date(timeStamp);

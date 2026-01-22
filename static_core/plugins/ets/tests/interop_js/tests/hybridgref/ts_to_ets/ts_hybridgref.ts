@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,18 +31,18 @@ class MyObject {
 
 function testPrimitiveValues(etsVm: any): void {
     nativeSaveRef('NativeGref String');
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefString')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefString')());
 
     nativeSaveRef(123.456);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefNumber')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefNumber')());
 
     nativeSaveRef(null);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefNullSafety')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefNullSafety')());
 }
 
 function testObjectValues(etsVm: any): void {
     nativeSaveRef({ name: 'ArkTS', version: 1 });
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefObjectField')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefObjectField')());
 
     nativeSaveRef({
         meta: {
@@ -51,62 +51,62 @@ function testObjectValues(etsVm: any): void {
             inner: { active: true }
         }
     });
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNestedObject')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNestedObject')());
 
     const sym = Symbol('secret');
     nativeSaveRef({
         sym: 'hidden',
         visible: 'shown'
     });
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckSymbolFieldIgnored')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckSymbolFieldIgnored')());
 
     nativeSaveRef({ a: 1, b: undefined });
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckUndefinedField')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckUndefinedField')());
 }
 
 function testArrayValues(etsVm: any): void {
     nativeSaveRef([10, 20, 30]);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefArray')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefArray')());
 
     nativeSaveRef([
         [1, 2],
         [3, 4],
         [5, 6]
     ]);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNestedArray')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNestedArray')());
 
     nativeSaveRef([]);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckEmptyArray')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckEmptyArray')());
 }
 
 function testFunctionValues(etsVm: any): void {
     nativeSaveRef(multiply);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckNativeGrefCallback')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckNativeGrefCallback')());
 
     const obj = new MyObject(42);
     nativeSaveRef(obj);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckObjectWithMethod')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckObjectWithMethod')());
 }
 
 function testBuiltInObjects(etsVm: any): void {
     nativeSaveRef(new Date('2025-01-01T12:00:00Z'));
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckDateObject')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckDateObject')());
 
     nativeSaveRef(new ArrayBuffer(8));
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckArrayBuffer')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckArrayBuffer')());
 
     nativeSaveRef(new Uint8Array([1, 2, 3]));
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckTypedArray')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckTypedArray')());
 
     nativeSaveRef(Promise.resolve(42));
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckPromiseResolved')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckPromiseResolved')());
 
     let mySet: Set<number> = new Set<number>([1, 2, 3]);
     nativeSaveRef(mySet);
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckSetObject')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckSetObject')());
 
     nativeSaveRef(new Error('hybridgref error test'));
-    ASSERT_TRUE(etsVm.getFunction('Lets_functions/ETSGLOBAL;', 'etsCheckErrorObject')());
+    ASSERT_TRUE(etsVm.getFunction('Lts_hybridgref/ETSGLOBAL;', 'etsCheckErrorObject')());
 }
 
 function main(): void {

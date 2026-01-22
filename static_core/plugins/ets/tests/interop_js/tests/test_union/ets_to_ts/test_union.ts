@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 
 const etsVm = globalThis.gtest.etsVm;
-const testBasicUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testBasicUnion');
-const testChildUnion = etsVm.getFunction('Lunion/test/ETSGLOBAL;', 'testChildUnion');
+const testBasicUnion = etsVm.getFunction('Lunion/ETSGLOBAL;', 'testBasicUnion');
+const testChildUnion = etsVm.getFunction('Lunion/ETSGLOBAL;', 'testChildUnion');
 
 class TestClass {
   prop: number = 1;
@@ -32,7 +32,7 @@ function testUnionType(): void {
   try {
     testChildUnion(new TestClass());
   } catch (err) {
-    ASSERT_EQ(err.toString(), 'TypeError: Lstd/interop/js/JSValue; is not assignable to {ULunion/test/Child1;Lunion/test/Child2;}');
+    ASSERT_EQ(err.toString(), 'TypeError: Lstd/interop/js/JSValue; is not assignable to {ULunion/Child1;Lunion/Child2;}');
   }
 }
 

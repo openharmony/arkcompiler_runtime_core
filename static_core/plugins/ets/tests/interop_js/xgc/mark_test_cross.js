@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ class Result {
 
 function clearActiveRef() {
     gObj = Promise.resolve();
-    const clearActiveRef = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'clearActiveRef');
+    const clearActiveRef = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'clearActiveRef');
     clearActiveRef();
 }
 
@@ -81,7 +81,7 @@ function createRecursiveJsObject(num) {
  */
 function createCrossRefNode(obj, isRootRef2) {
     let res = createRecursiveJsObject(gRedundantNum);
-    const proxyJsObjectWithReturnValue = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
+    const proxyJsObjectWithReturnValue = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObjectWithReturnValue');
     obj.ref = proxyJsObjectWithReturnValue(res.headJsObj, gRedundantNum, isRootRef2, false);
     return res.tailJsObj;
 }

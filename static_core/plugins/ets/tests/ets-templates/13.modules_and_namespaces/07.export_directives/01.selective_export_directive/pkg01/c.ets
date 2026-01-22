@@ -17,8 +17,6 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-package pkg01;
-
 function foo(): void {}
 function bar(): void {}
 

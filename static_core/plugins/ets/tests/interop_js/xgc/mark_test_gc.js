@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +24,12 @@ let gWeakRef3;
  * weak2 -> js obj <- sts pobj <- sts obj
  */
 function createWeakRefObject1() {
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     let obj1 = createStsObject(false, false);
     gWeakRef1 = new WeakRef(obj1);
 
     let obj2 = Promise.resolve();
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
     proxyJsObject(obj2, false, false);
     gWeakRef2 = new WeakRef(obj2);
 }
@@ -42,7 +42,7 @@ function createWeakRefObject1() {
  *  weak2 ->  js obj 
  */
 function createWeakRefObject2() {
-    const createStsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createStsObject');
+    const createStsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createStsObject');
     let obj1 = createStsObject(false, false);
     let obj2 = Promise.resolve();
     obj2.ref = obj1;
@@ -65,7 +65,7 @@ function createWeakRefObject3() {
     let obj2 = Promise.resolve();
     let obj3 = Promise.resolve();
 
-    const proxyJsObject = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'proxyJsObject');
+    const proxyJsObject = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'proxyJsObject');
     proxyJsObject(obj2, false, false);
     obj2.ref = obj1;
     obj3.ref = obj2;
@@ -197,9 +197,9 @@ function jsGCTest6() {
  * Before XGC, cross-reference garbage objects cannot be recycled
  */
 function callStsGCTest1() {
-    const createWeakRefObject1 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject1');
+    const createWeakRefObject1 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject1');
     createWeakRefObject1(Promise.resolve());
-    const stsGCTest1 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest1');
+    const stsGCTest1 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest1');
     stsGCTest1();
     print('The callStsGCTest1 method executes successful');
 }
@@ -209,9 +209,9 @@ function callStsGCTest1() {
  * the normal garbage object should be recycled
  */
 function callStsGCTest2() {
-    const createWeakRefObject2 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject2');
+    const createWeakRefObject2 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject2');
     createWeakRefObject2(Promise.resolve());
-    const stsGCTest2 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest2');
+    const stsGCTest2 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest2');
     stsGCTest2();
     print('The callStsGCTest2 method executes successful');
 }
@@ -221,9 +221,9 @@ function callStsGCTest2() {
  * the normal objects that are referenced by cross-reference garbage objects cannot be recycled
  */
 function callStsGCTest3() {
-    const createWeakRefObject3 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject3');
+    const createWeakRefObject3 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject3');
     createWeakRefObject3();
-    const stsGCTest3 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest3');
+    const stsGCTest3 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest3');
     stsGCTest3();
     print('The callStsGCTest3 method executes successful');
 }
@@ -232,9 +232,9 @@ function callStsGCTest3() {
  * After XGC, garbage objects should be recycled
  */
 function callStsGCTest4() {
-    const createWeakRefObject1 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject1');
+    const createWeakRefObject1 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject1');
     createWeakRefObject1(Promise.resolve());
-    const stsGCTest4 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest4');
+    const stsGCTest4 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest4');
     stsGCTest4();
     print('The callStsGCTest4 method executes successful');
 }
@@ -243,9 +243,9 @@ function callStsGCTest4() {
  * After XGC, garbage objects should be recycled
  */
 function callStsGCTest5() {
-    const createWeakRefObject2 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject2');
+    const createWeakRefObject2 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject2');
     createWeakRefObject2(Promise.resolve());
-    const stsGCTest5 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest5');
+    const stsGCTest5 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest5');
     stsGCTest5();
     print('The callStsGCTest5 method executes successful');
 }
@@ -254,9 +254,9 @@ function callStsGCTest5() {
  * After XGC, garbage objects should be recycled
  */
 function callStsGCTest6() {
-    const createWeakRefObject3 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'createWeakRefObject3');
+    const createWeakRefObject3 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'createWeakRefObject3');
     createWeakRefObject3();
-    const stsGCTest6 = gEtsVm.getFunction('Lxgc_test/ETSGLOBAL;', 'stsGCTest6');
+    const stsGCTest6 = gEtsVm.getFunction('Lxgc_tests/ETSGLOBAL;', 'stsGCTest6');
     stsGCTest6();
     print('The callStsGCTest6 method executes successful');
 }

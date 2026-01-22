@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-let EtsGenericValueHandle = etsVm.getClass('Lgeneric_types/test/EtsGenericValueHandle;');
-let EtsGenericErrorHandle = etsVm.getClass('Lgeneric_types/test/EtsGenericErrorHandle;');
-let etsGetGenericValueIdentity = etsVm.getFunction('Lgeneric_types/test/ETSGLOBAL;', 'etsGetGenericValueIdentity');
-let etsGetGenericErrorIdentity = etsVm.getFunction('Lgeneric_types/test/ETSGLOBAL;', 'etsGetGenericErrorIdentity');
+let EtsGenericValueHandle = etsVm.getClass('Ltest_generic_types/EtsGenericValueHandle;');
+let EtsGenericErrorHandle = etsVm.getClass('Ltest_generic_types/EtsGenericErrorHandle;');
+let etsGetGenericValueIdentity = etsVm.getFunction('Ltest_generic_types/ETSGLOBAL;', 'etsGetGenericValueIdentity');
+let etsGetGenericErrorIdentity = etsVm.getFunction('Ltest_generic_types/ETSGLOBAL;', 'etsGetGenericErrorIdentity');
 
 function checkGenericValueForFunction(v) {
 	// Check the parameter and the return value of the function

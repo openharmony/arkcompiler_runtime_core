@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-package error.test;
-
-export let err: Error;
-static {
-  err = new Error('This is a Error')
-}
+export let err: Error = new Error('This is a Error');
 
 export function ErrorFunc(message: string): void {
   throw new Error(message);

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package xgc_test
-
 export function xgc(): void {
     JSRuntime.xgc();
 }
@@ -68,15 +66,14 @@ let g_array: Array<Object>;
 let g_weakRef1: WeakRef<Object>|null;
 let g_weakRef2: WeakRef<Object>|null;
 let g_weakRef3: WeakRef<Object>|null;
-static {
-    root = null;
-    g_obj = new TestObject();
-    g_inlineObj = new TestObject();
-    g_array = new Array<Object>();
-    g_weakRef1 = null;
-    g_weakRef2 = null;
-    g_weakRef3 = null;
-}
+
+root = null;
+g_obj = new TestObject();
+g_inlineObj = new TestObject();
+g_array = new Array<Object>();
+g_weakRef1 = null;
+g_weakRef2 = null;
+g_weakRef3 = null;
 
 // Cancel the active objects reference cross-reference objects
 export function clearActiveRef(): void {

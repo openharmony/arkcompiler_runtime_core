@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 
 const etsVm = globalThis.gtest.etsVm;
 
-const DATASTR = etsVm.getClass('Ldate/test/ETSGLOBAL;').DATASTR;
-const TIMESTAMP = etsVm.getClass('Ldate/test/ETSGLOBAL;').TIMESTAMP;
+const DATASTR = etsVm.getClass('Ldate/ETSGLOBAL;').DATASTR;
+const TIMESTAMP = etsVm.getClass('Ldate/ETSGLOBAL;').TIMESTAMP;
 
-let etsDate = etsVm.getClass('Ldate/test/ETSGLOBAL;').etsDate;
-let etsStrDate = etsVm.getClass('Ldate/test/ETSGLOBAL;').strDate;
-let etsStampDate = etsVm.getClass('Ldate/test/ETSGLOBAL;').stampDate;
+let etsDate = etsVm.getClass('Ldate/ETSGLOBAL;').etsDate;
+let etsStrDate = etsVm.getClass('Ldate/ETSGLOBAL;').strDate;
+let etsStampDate = etsVm.getClass('Ldate/ETSGLOBAL;').stampDate;
 
 function checkGetofDate(etsDate: Date, jsDate: Date): void {
     ASSERT_TRUE(typeof etsDate === 'object');

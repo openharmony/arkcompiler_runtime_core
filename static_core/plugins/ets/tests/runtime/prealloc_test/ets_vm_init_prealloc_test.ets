@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package PreallocTest;
-
 function fillHeap(arr: Object[], numberOfIter: number): void
 {
     let globalIdx = 0;

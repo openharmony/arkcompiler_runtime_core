@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@ import {
  } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const PublicGetterClass = etsVm.getClass('Lgetter/test/PublicGetterClass;');
-const PublicGetterOverrideClass = etsVm.getClass('Lgetter/test/PublicGetterOverrideClass;');
-const createPublicGetterClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_public_getter_class_from_ets');
-const createPublicGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_public_getter_override_class_from_ets');
+const PublicGetterClass = etsVm.getClass('Lgetter/PublicGetterClass;');
+const PublicGetterOverrideClass = etsVm.getClass('Lgetter/PublicGetterOverrideClass;');
+const createPublicGetterClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_public_getter_class_from_ets');
+const createPublicGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_public_getter_override_class_from_ets');
 
 
 function checkPublicGetterClassalue() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 const etsVm = globalThis.gtest.etsVm;
-const TestFoo = etsVm.getFunction('Lunit/test/ETSGLOBAL;', 'foo');
+const TestFoo = etsVm.getFunction('Ltest_ets_wrap_jsvalue/ETSGLOBAL;', 'foo');
 
 class A {
     a: number = 1;

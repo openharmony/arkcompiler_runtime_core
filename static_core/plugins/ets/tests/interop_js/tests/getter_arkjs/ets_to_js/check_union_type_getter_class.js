@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 import { string, number} from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const UnionTypeClass = etsVm.getClass('Lgetter/test/UnionTypeClass;');
-const createUnionTypeGetterClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_union_type_getter_class_from_ets');
+const UnionTypeClass = etsVm.getClass('Lgetter/UnionTypeClass;');
+const createUnionTypeGetterClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_union_type_getter_class_from_ets');
 
 
 function checkUnionTypeGetterClassValueString() {

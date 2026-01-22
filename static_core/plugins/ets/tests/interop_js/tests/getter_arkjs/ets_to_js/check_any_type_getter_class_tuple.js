@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@ import { tuple } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
 const checkObj = (arg) => arg !== null && typeof arg === 'object' && !Array.isArray(arg);
-const AnyTypeClass = etsVm.getClass('Lgetter/test/AnyTypeClass;');
+const AnyTypeClass = etsVm.getClass('Lgetter/AnyTypeClass;');
 
-const createAnyTypeGetterClassFromEtsTuple = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_tuple');
+const createAnyTypeGetterClassFromEtsTuple = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_any_type_getter_class_from_ets_tuple');
 
 function checkClassGetterClassValueTuple() {
     const GClass = new AnyTypeClass(tuple);

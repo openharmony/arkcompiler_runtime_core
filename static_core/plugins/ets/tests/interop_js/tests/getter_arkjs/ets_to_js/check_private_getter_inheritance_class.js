@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@ import {
 } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const PrivateGetterInheritanceClass = etsVm.getClass('Lgetter/test/PrivateGetterInheritanceClass;');
-const PrivateGetterOverrideClass = etsVm.getClass('Lgetter/test/PrivateGetterOverrideClass;');
-const createPrivateGetterInheritanceClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_private_getter_inheritance_class_from_ets');
-const createPrivateGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_private_getter_override_class_from_ets');
+const PrivateGetterInheritanceClass = etsVm.getClass('Lgetter/PrivateGetterInheritanceClass;');
+const PrivateGetterOverrideClass = etsVm.getClass('Lgetter/PrivateGetterOverrideClass;');
+const createPrivateGetterInheritanceClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_private_getter_inheritance_class_from_ets');
+const createPrivateGetterOverrideClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_private_getter_override_class_from_ets');
 
 
 function checkPrivateGetterClassInheritancealue() {

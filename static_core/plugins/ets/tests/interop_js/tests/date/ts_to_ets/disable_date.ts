@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,12 @@ const etsVm = globalThis.gtest.etsVm;
 const strTime = '2025-03-01T01:02:03.000Z';
 let dateStr: Date = new Date(strTime);
 
-let testSetDateOfsetHours = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetHours');
-let testSetDateOfsetMinutes = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetMinutes');
-let testSetDateOfsetSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetSeconds');
-let testSetDateOfsetUTCHours = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetUTCHours');
-let testSetDateOfsetUTCMinutes = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetUTCMinutes');
-let testSetDateOfsetUTCSeconds = etsVm.getFunction('Ldate/test/ETSGLOBAL;', 'testSetDateOfsetUTCSeconds');
+let testSetDateOfsetHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetHours');
+let testSetDateOfsetMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetMinutes');
+let testSetDateOfsetSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetSeconds');
+let testSetDateOfsetUTCHours = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetUTCHours');
+let testSetDateOfsetUTCMinutes = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetUTCMinutes');
+let testSetDateOfsetUTCSeconds = etsVm.getFunction('Ltest_date/ETSGLOBAL;', 'testSetDateOfsetUTCSeconds');
 
 // Some Date methods are inconsistent in ArkTS1.2 and ArkTS1.1.  #IC4XA0
 ASSERT_TRUE(testSetDateOfsetHours(dateStr));

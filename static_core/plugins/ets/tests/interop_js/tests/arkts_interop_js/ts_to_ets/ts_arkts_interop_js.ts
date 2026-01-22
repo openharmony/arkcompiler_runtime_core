@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 function main(): void {
     let etsVm = globalThis.gtest.etsVm;
 
-    ASSERT_TRUE(etsVm.getFunction("Lets_functions/ETSGLOBAL;", "checkInteropApi")());
+    ASSERT_TRUE(etsVm.getFunction("Lts_arkts_interop_js/ETSGLOBAL;", "checkInteropApi")());
 }
 
 main();

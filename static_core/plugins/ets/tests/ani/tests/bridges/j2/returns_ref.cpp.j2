@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "ani.h"
 #include <iostream>
+#include <filesystem>
 #include <cstring>
 #include <cassert>
 #include <vector>
@@ -44,11 +45,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_env *env;
     LOG_IF(vm->GetEnv(ANI_VERSION_1, &env) != ANI_OK, FATAL, ANI) << "Unsupported ANI_VERSION_1";
 
-    static const char *moduleName = "EtsAniTests";
+    std::filesystem::path test_body_path(__FILE__);
+    auto moduleName = test_body_path.stem();
 
     ani_module module;
-
-    LOG_IF(env->FindModule(moduleName, &module) != ANI_OK, FATAL, ANI) << "Not found '" << moduleName << "'";
+    LOG_IF(env->FindModule(moduleName.c_str(), &module) != ANI_OK, FATAL, ANI) << "Not found '" << moduleName << "'";
 
     for (auto &m : methods) {
         LOG_IF(env->Module_BindNativeFunctions(module, &m, 1) != ANI_OK, FATAL, ANI) << "Failed to bind function'" << m.name << "'";

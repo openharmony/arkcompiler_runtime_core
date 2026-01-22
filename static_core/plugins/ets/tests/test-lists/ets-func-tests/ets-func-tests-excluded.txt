@@ -1,3 +1,6 @@
+# The package keyword is not used anylonger
+# Issue: https://gitcode.com/openharmony/arkcompiler_ets_frontend/issues/8924
+regression/22981/22981.ets
 
 #24986 (still failing tests)
 std/math/std_math_sign_double.ets

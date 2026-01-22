@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package reflect_proxy.test;
-
 export class SomeObject {
     constructor(other: int) {
         this.point = other;

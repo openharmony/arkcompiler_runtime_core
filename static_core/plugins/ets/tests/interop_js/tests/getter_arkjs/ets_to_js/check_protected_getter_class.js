@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 import { PROTECTED_GETTER_CLASS_VALUE } from './constant';
 
 const etsVm = globalThis.gtest.etsVm;
-const ProtectedGetterOrigenClass = etsVm.getClass('Lgetter/test/ProtectedGetterOrigenClass;');
-const createProtectedGetterOrigenClassFromEts = etsVm.getFunction('Lgetter/test/ETSGLOBAL;', 'create_protected_getter_origen_class_from_ets');
+const ProtectedGetterOrigenClass = etsVm.getClass('Lgetter/ProtectedGetterOrigenClass;');
+const createProtectedGetterOrigenClassFromEts = etsVm.getFunction('Lgetter/ETSGLOBAL;', 'create_protected_getter_origen_class_from_ets');
 
 
 function checkProtectedGetterClassalue() {

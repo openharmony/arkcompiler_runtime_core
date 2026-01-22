@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,16 @@
  * limitations under the License.
  */
 
-package generic_as_parameter.test;
-
 type Union = string | int;
 type TupleT = [int, boolean];
 
 const etsInt = 1;
 const etsString = 'string';
 const etsBool = true;
-const etsArr: FixedArray<int>;
-const etsObj: object;
-const etsUnion: Union;
-const etsTuple: TupleT;
-static {
-    etsArr = [etsInt];
-    etsObj = {};
-    etsUnion = etsInt;
-    etsTuple = [etsInt, etsBool];
-}
+const etsArr: FixedArray<int> = [etsInt];
+const etsObj: object = {};
+const etsUnion: Union = etsInt;
+const etsTuple: TupleT = [etsInt, etsBool];
 
 
 // NOTE: issue (1835) enable this after fix Literal type

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-package union.test;
-
 type basicUnion = number | string | boolean;
 
 export function testBasicUnion(value: basicUnion) {
