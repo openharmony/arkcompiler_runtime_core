@@ -1268,6 +1268,15 @@ export namespace taskpool {
                 while (this.waitingQueue.length > 0 && this.runningCount < this.runningCapacity) {
                     let nextTask = this.waitingQueue.shift();
                     if (nextTask == undefined) break;
+                    if (InternalTask.of(nextTask).state.get() == State.CANCELED.valueOf()) {
+                        ConcurrencyHelpers.lockGuard(InternalTask.of(nextTask).taskMutex, () => {
+                            InternalTask.of(nextTask).currentDeferred!.rejectPromise(
+                                new Error(TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED, "taskpool:: asyncRunner task has been canceled")
+                            );
+                            InternalTask.of(nextTask!).currentDeferred = undefined;
+                        });
+                        continue;
+                    }
                     this.runningCount++;
                     toEnqueue.push(nextTask);
                 }
@@ -1363,6 +1372,7 @@ export namespace taskpool {
                     InternalTask.of(task).enqueue(priority == undefined ? this.priority : priority);
                 } else {
                     // If waitingCapacity == 0, treat it's waitingQueue's length as unlimited. Task is added to tail.
+                    InternalTask.of(task).state.set(InternalState.WAITING);
                     if (this.impl.waitingCapacity == 0) {
                         this.impl.waitingQueue.push(task);
                     } else {
