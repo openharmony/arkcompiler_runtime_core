@@ -5,7 +5,7 @@
 ################################################
 
 # primitives
-17.experimental_features/09.overload_declarations/02.class_method_overload_declarations/cm_over1_7.ets
+17.experimental_features/09.explicit_overload_declarations/02.explicit_class_method_overload/cm_over1_7.ets
 
 # TypeError: No matching call signature
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_7.ets
