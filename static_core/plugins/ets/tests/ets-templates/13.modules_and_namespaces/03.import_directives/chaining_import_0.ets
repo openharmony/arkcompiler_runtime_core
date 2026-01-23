@@ -33,7 +33,11 @@ class TestClass {
     test_member = "test";
 }
 
+class DefClass {
+}
+
 export TestClass
+export default DefClass
 
 function main() {
     arktest.assertEQ(new TestClass().test_member, new DefaultExportedClass0().test_member)
