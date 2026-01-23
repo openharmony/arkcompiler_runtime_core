@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,12 @@
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",64
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",64
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",64
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",5
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",5
 //!
@@ -39,12 +39,12 @@
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",64
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",64
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",64
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",5
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",0
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",5
 
@@ -218,11 +218,11 @@ function main() {
 //! METHOD        "ets_string_builder_merge_uber_export.ETSGLOBAL::uber_chain_concat4"
 //! PASS_AFTER    "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",64
-//! INST_COUNT    /StringBuilder::append/,128
+//! INST_COUNT    /StringBuilder::append/,64
 //! INST_COUNT    /StringBuilder::toString/,64
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",59
-//! INST_COUNT    /StringBuilder::append/,123
+//! INST_COUNT    /StringBuilder::append/,64
 //! INST_COUNT    /StringBuilder::toString/,59
 
 //! CHECKER       INTERP-IRTOC, check String Builders merging

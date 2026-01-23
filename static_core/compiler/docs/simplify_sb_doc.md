@@ -81,8 +81,7 @@ Frontend output equivalent:
 ```TS
 let a, b: String
 ...
-let sb = new StringBuilder()
-sb.append(a)
+let sb = new StringBuilder(a)
 sb.append(b)
 let output = sb.toString()
 ```
@@ -94,22 +93,21 @@ The overhead of String Builder object exceeds the benefits of its usage (compari
 Consider a string accumulation loop example:
 
 ```TS
-let inputs: string[] = ... // array of strings
-let output = ""
-for (let input in inputs)
+let input: string = "input,"
+let output = "output:"
+for (let i = 0; i < 10; i++)
     output += input
 ```
 
-Like in **Replace String Builder with string concatenation** section, frontend replaces string accumulation `output += input` with a String Builder usage, resulting in a huge performance degradation (comparing to a naive string concatenation), because *at each loop iteration* String Builder object is constructed, used to append two operands, builds resulting string, and discarded.
+Like in **Replace String Builder with string concatenation** section, frontend replaces string accumulation `output += input` with a String Builder usage, resulting in a huge performance degradation (comparing to a naive string concatenation), because *at each loop iteration* String Builder object is constructed and the first operand is appended, then tne second one is appended, builds resulting string, and discarded.
 
 The equivalent code looks like the following:
 
 ```TS
-let inputs: string[] = ... // array of strings
-let output = ""
-for (let input in inputs) {
-    let sb = new StringBuilder()
-    sb.append(output)
+let input: string = "input,"
+let output = "output:"
+for (let i = 0; i < 10; i++) {
+    let sb = new StringBuilder(output)
     sb.append(input)
     output = sb.toString()
 }
@@ -118,9 +116,10 @@ for (let input in inputs) {
 To optimize cases like this, we implement the following equivalent transformation:
 
 ```TS
-let inputs: string[] = ... // array of strings
-let sb = new StringBuilder()
-for (let input in inputs) {
+let input: string = "input,"
+let output = "output:"
+let sb = new StringBuilder(output)
+for (let i = 0; i < 10; i++) {
     sb.append(input)
 }
 let output = sb.toString()
@@ -128,7 +127,7 @@ let output = sb.toString()
 
 **Merge StringBuilder::append calls chain**
 
-Consider a code sample like the following:
+Consider a code sample like the following (default constructor is used):
 
 ```TS
 // String semantics
@@ -152,6 +151,30 @@ sb.append2(str0, str1)
 let result = sb.toString()
 ```
 
+Consider a code sample like the following (constructor with a string argument is used):
+
+```TS
+// String semantics
+let result = str0 + str1 + str2
+
+// StringBuilder semantics
+let sb = new StringBuilder(str0)
+sb.append(str1)
+sb.append(str2)
+let result = sb.toString()
+```
+
+Here, we call `StringBuilder::append` twice after calling the constructor that appends the first string. The proposed algorithm combines the last two calls into a single call (in this case, `StringBuilder::append2`). Merging up to 4 consecutive calls supported.
+
+Optimized example is equivalent to:
+
+```TS
+// StringBuilder semantics
+let sb = new StringBuilder(str0)
+sb.append2(str1, str2)
+let result = sb.toString()
+```
+
 **Merge StringBuilder objects chain**
 
 Consider a code sample like the following:
@@ -162,12 +185,11 @@ let result0 = str00 + str01
 let result = result0 + str10 + str11
 
 // StringBuilder semantics
-let sb0 = new StringBuilder()
-sb0.append(str00)
+let sb0 = new StringBuilder(str00)
 sb0.append(str01)
+let result0 = sb0.toString()
 
-let sb1 = new StringBuilder()
-sb1.append(sb0.toString())
+let sb1 = new StringBuilder(result0)
 sb1.append(str10)
 sb1.append(str11)
 let result = sb1.toString()
@@ -177,8 +199,7 @@ Here we construct `result0` and `sb0` and use it only once as a first argument o
 
 ```TS
 // StringBuilder semantics
-let sb0 = new StringBuilder()
-sb0.append(str00)
+let sb0 = new StringBuilder(str00)
 sb0.append(str01)
 sb0.append(str10)
 sb0.append(str11)
@@ -269,7 +290,9 @@ function OptimizeStringBuilderToString(block: BasicBlock)
 
 **Replace String Builder with string concatenation**
 
-The algorithm works as follows: first we search for all the StringBuilder instances in a basic block, then we check if the use of instance matches concatenation pattern for 2, 3, or 4 arguments. If so, we replace the whole use of StringBuilder object with concatenation intrinsics.
+This algorithm is designed for use with default and a string-argument constructors and works as follows:
+- In the case of default constructor first we search for all the StringBuilder instances in a basic block, then we check if the use of instance matches concatenation pattern for 2, 3, or 4 arguments. If so, we replace the whole use of StringBuilder object with concatenation intrinsics;
+- In the case of a constructor with a string argument, we do the same actions as for default one, but, since the first data addition operation is performed by the constructor itself during the call, we check if the use of instance matches concatenation pattern for 1, 2, or 3 arguments. If so, we construct a fake append instruction instead of the constructor and put the new instruction at the top of the list of the other append instructions, then replace the whole use of StringBuilder object with concatenation intrinsics.
 
 ```C#
 function OptimizeStringConcatenation(block: BasicBlock)
@@ -279,6 +302,9 @@ function OptimizeStringConcatenation(block: BasicBlock)
         let appendCount = match.appendCount be number of append-calls of instance
         let append = match.append be an array of append-calls of instance
         let toStringCall = match.toStringCall be toString-call of instance
+        if ctor is constructor with string argument
+            create the new append instruction
+            put it at the top of the append list,before append[0]
         let concat01 = ConcatIntrinsic(append[0].input(1), append[1].input(1))
         remove append[0] from block
         remove append[1] from block
@@ -322,7 +348,13 @@ function MatchConcatenation(instance: StringBuilder): Match
 
 **Optimize concatenation loops**
 
-The algorithm works as follows: first we recursively process all the inner loops of current loop, then we search for string concatenation patterns within a current loop. For each pattern found we reconnect StringBuilder usage instructions in a correct way (making them point to the only one instance we have chosen), move chosen String Builder object creation and initial string value appending to a loop pre-header, move chosen StringBuilder object toString-call to loop exit block. We cleanup unused instructions at the end.
+This algorithm is designed for use with default and string-argument constructors and works as follows:
+- All loops are processed, starting from the inner loops and ending with the outer loops;
+- For each processed loop string concatenation patterns are searched;
+- For each pattern found StringBuilder usage instructions are reconnected in a correct way (making them point to the only one instance we have chosen); 
+- The object creation instruction of chosen String Builder and, in the case of default constructor, initial string value appending instruction, are moved to a loop pre-header;
+- The toString call instruction of chosen StringBuilder is moved to loop exit block;
+- All unused instructions are cleaned at the end of process during the cleanup pass.
 
 ```C#
 function OptimizeStringConcatenation(loop: Loop)
@@ -338,19 +370,19 @@ function OptimizeStringConcatenation(loop: Loop)
 
 type Match
     accValue: PhiInst
-    initialValue: Inst
+    initialValue: Inst // e.g.,a LoadString instruction
     // instructions to be hoisted to preheader
     preheader: type
-        instance: Inst
-        appendAccValue: IntrinsicInst
+        instance: Inst // a NewObject instruction
+        appendAccValue: Inst // a first append(or append intrinsic) instruction or a constructor with a string argument
     // instructions to be left inside loop
     loop: type
-        appendIntrinsics: array of IntrinsicInst
+        append: array of Inst // other append instructions
     // instructions to be deleted
     temp: array of type
         toStringCall: Inst
         instance: Inst
-        appendAccValue: IntrinsicInst
+        appendAccValue: Inst
     // instructions to be hoisted to exit block
     exit: type
         toStringCall: Inst
@@ -366,19 +398,20 @@ function MatchConcatenationLoop(loop: Loop)
                 set match.initialValue = FindInitialValue(accValue)
                 set match.exit.toStringCall = FindToStringCall(instance)
                 set match.preheader.instance = instance
-                set match.preheader.appendAccValue = FindAppendIntrinsic(instance, accValue)
+                set match.preheader.appendAccValue = FindAppend(instance, accValue) ||
+                    FindCtorStr(instance, accValue)
                 // Init loop part of a match
-                add other append instrinsics to match.loop.appendInstrinsics array
+                add other append to match.loop.append array
             else
                 // Fill loop and temporary parts of a match
                 let temp: TemporaryInstructions
                 set temp.instance = instance
                 set temp.toStringCall = FindToStringCall(instance)
-                foreach appendIntrinsic in FindAppendIntrinsics(instance)
-                    if appendIntrinsic.input(1) is accValue
-                        set temp.appendAccValue = appendIntrinsic
+                foreach append in FindAppend(instance)
+                    if append.input(1) is accValue
+                        set temp.appendAccValue = append
                     else
-                        add appendIntricsic to match.loop.appendInstrinsics array
+                        add append to match.loop.append array
                 add temp to match.temp array
         add match to matches array
     return matches
@@ -427,16 +460,18 @@ function OptimizeStringBuilderAppendChain(block: BasicBlock)
 
 **Merge StringBuilder objects chain**
 
-The algorithm works as follows. The algorithm traverses blocks of graph in Post Order, and instructions of each block in Reverse Order, this allows us iteratively merge potentially long chains of `StringBuilder` objects into a single object. First, we search a pairs `[instance, inputInstance]` of `StringBuilder` objects which we can merge, merge condition is: last call to `inputInstance.toString()` appended as a first argument to `instance`. Then we remove first call to `StringBuilder::append` from `instance` and last call to `StringBuilder::toString` from `inputInstance`. We retarget remaining calls of `instance` to `inputInstance`.
+This algorithm is designed for use with default and string-argument constructors and works as follows:
+
+The algorithm traverses blocks of graph in Post Order, and instructions of each block in Reverse Order, this allows us iteratively merge potentially long chains of `StringBuilder` objects into a single object. First, we search a pairs `[instance, inputInstance]` of `StringBuilder` objects which we can merge, merge condition is: last call to `inputInstance.toString()` appended as a first argument to `instance` by calling `StringBuilder::append` (in case of default constructor) or `StringBuilder::ctor` (in case of constructor with a string argument). Then we remove first call to `StringBuilder::append` or `StringBuilder::ctor` from `instance` and last call to `StringBuilder::toString` from `inputInstance`. We retarget remaining calls of `instance` to `inputInstance`.
 
 ```C#
 function OptimizeStringBuilderChain()
     foreach block in graph in PO
         foreach two objects [instance, inputInstance] being a consicutive pair of Stringbuilders in block in reverse order
             if CanMerge(instance, inputInstance)
-                let firstAppend be 1st StringBuilder::append call of instance
+                let firstAppend or ctorStrArg be 1st StringBuilder::append call of instance
                 let lastToString be last StringBuilder::toString call of inputInstance
-                remove firstAppend from instance users
+                remove firstAppend or ctorStrArg from instance users
                 remove lastToString from inputInstance users
                 foreach call being user of instance
                     call.setInput(0, inputInstance) // retarget append call to inputInstance
@@ -581,19 +616,18 @@ Method: std.core.String ETSGLOBAL::concat0(std.core.String, std.core.String)
 
 BB 1
 prop: start
-    0.ref  Parameter                  arg 0 -> (v10)
-    1.ref  Parameter                  arg 1 -> (v13)
+   14.ref  Parameter                  arg 0 -> (v20, v19, v16)
+   15.ref  Parameter                  arg 1 -> (v23, v21, v20, v16)
 succs: [bb 0]
 
 BB 0  preds: [bb 1]
 prop:
-    4.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v5)
-    5.ref  NewObject 11355            v4, ss -> (v13, v10, v6)
-    6.void CallStatic 60100 std.core.StringBuilder::<ctor> v5, ss
-   10.ref  Intrinsic.StdCoreSbAppendString v5, v0, ss
-   13.ref  Intrinsic.StdCoreSbAppendString v5, v1, ss
-   16.ref  CallStatic 60290 std.core.StringBuilder::toString v5, ss -> (v17)
-   17.ref  Return                     v16
+   17.ref  LoadAndInitClass 'std.core.StringBuilder' v16 -> (v18)
+   18.ref  NewObject 390              v17, v16 -> (v21, v25, v24, v22, v21, v20, v19)
+   19.void CallStatic 443 std.core.StringBuilder::<ctor> v18, v14, v20
+   23.ref  Intrinsic.StdCoreSbAppendString v22, v15, v21
+   26.ref  Intrinsic.StdCoreSbToString v25, v24 -> (v27)
+   27.ref  Return                     v26
 succs: [bb 2]
 
 BB 2  preds: [bb 0]
@@ -607,14 +641,15 @@ Method: std.core.String ETSGLOBAL::concat0(std.core.String, std.core.String)
 
 BB 1
 prop: start
-    0.ref  Parameter                  arg 0 -> (v18)
-    1.ref  Parameter                  arg 1 -> (v18)
+   14.ref  Parameter                  arg 0 -> (v31, v30, v16)
+   15.ref  Parameter                  arg 1 -> (v31, v30, v16)
 succs: [bb 0]
 
 BB 0  preds: [bb 1]
 prop:
-   18.ref  Intrinsic.StdCoreStringConcat2 v0, v1, ss -> (v17)
-   17.ref  Return                     v18
+   17.ref  LoadAndInitClass 'std.core.StringBuilder' v16
+   30.ref  Intrinsic.StdCoreStringConcat2 v14, v15, v31 -> (v27)
+   27.ref  Return                     v30
 succs: [bb 2]
 
 BB 2  preds: [bb 0]
@@ -641,50 +676,45 @@ Method: ets_string_concat_loop.ETSGLOBAL::concat_loop0
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v24)
-r252 -> r252 [ref]
-    1.i32  Parameter                  arg 1 -> (v12)
-r253 -> r253 [u32]
+    0.ref  Parameter                  arg 0 -> (v21) r252 -> r252 [ref]
+    1.i32  Parameter                  arg 1 -> (v12) r253 -> r253 [u32]
     5.i32  Constant                   0x0 -> (v8p)
-   28.i32  Constant                   0x1 -> (v29)
+   25.i32  Constant                   0x1 -> (v26)
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
 prop: prehead (loop 1)
     2.     SaveState                  inlining_depth=0
     4.     SaveState                  inlining_depth=0 -> (v3)
-    3.ref  LoadString 857             v4 -> (v7p)
+    3.ref  LoadString 481             v4 -> (v7p)
     6.     SaveStateDeoptimize        inlining_depth=0
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   7p.ref  Phi                        v3(bb0), v27(bb2) -> (v31, v21)
-   8p.i32  Phi                        v5(bb0), v29(bb2) -> (v29, v12)
+   7p.ref  Phi                        v3(bb0), v24(bb2) -> (v28, v17)
+   8p.i32  Phi                        v5(bb0), v26(bb2) -> (v26, v12)
    12.b    Compare LE i32             v1, v8p -> (v13)
    13.     IfImm NE b                 v12, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
 prop: loop 1, depth 1
-   14.     SaveState                  inlining_depth=0 -> (v16, v15)
    15.ref  LoadAndInitClass 'std.core.StringBuilder' v14 -> (v16)
-   16.ref  NewObject 645              v15, v14 -> (v27, v24, v21, v17)
+   16.ref  NewObject 390              v15, v14 -> (v24, v21, v17)
    18.     SaveState                  inlining_depth=0 -> (v17)
-   17.void CallStatic 761 std.core.StringBuilder::<ctor> v16, v18
+   17.void CallStatic 443 std.core.StringBuilder::<ctor> v16, v7p, v18
    19.     SaveState                  inlining_depth=0 -> (v21)
-   21.ref  CallStatic 799 std.core.StringBuilder::append v16, v7p, v19
+   21.ref  CallStatic 452 std.core.StringBuilder::append v16, v0, v19
    22.     SaveState                  inlining_depth=0 -> (v24)
-   24.ref  CallStatic 799 std.core.StringBuilder::append v16, v0, v22
-   25.     SaveState                  inlining_depth=0 -> (v27)
-   27.ref  CallStatic 829 std.core.StringBuilder::toString v16, v25 -> (v7p)
-   29.i32  Add                        v8p, v28 -> (v8p)
+   24.ref  CallStatic 462 std.core.StringBuilder::toString v16, v22 -> (v7p)
+   26.i32  Add                        v8p, v25 -> (v8p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   30.     SaveState                  inlining_depth=0
-   31.ref  Return                     v7p
+   27.     SaveState                  inlining_depth=0
+   28.ref  Return                     v7p
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
@@ -698,49 +728,45 @@ Method: ets_string_concat_loop.ETSGLOBAL::concat_loop0
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v24)
-r252 -> r252 [ref]
-    1.i32  Parameter                  arg 1 -> (v12)
-r253 -> r253 [u32]
+    0.ref  Parameter                  arg 0 -> (v21) r252 -> r252 [ref]
+    1.i32  Parameter                  arg 1 -> (v12) r253 -> r253 [u32]
     5.i32  Constant                   0x0 -> (v8p)
-   28.i32  Constant                   0x1 -> (v29)
+   25.i32  Constant                   0x1 -> (v26)
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
 prop: prehead (loop 1)
     2.     SaveState                  inlining_depth=0
     4.     SaveState                  inlining_depth=0 -> (v3)
-    3.ref  LoadString 857             v4 -> (v21)
+    3.ref  LoadString 481             v4 -> (v17)
     6.     SaveStateDeoptimize        inlining_depth=0
-   32.     SaveState                  inlining_depth=0 -> (v15)
-   15.ref  LoadAndInitClass 'std.core.StringBuilder' v32 -> (v16)
-   33.     SaveState                  inlining_depth=0 -> (v16)
-   16.ref  NewObject 645              v15, v33 -> (v21, v27, v24, v17)
-   34.     SaveState                  inlining_depth=0 -> (v17)
-   17.void CallStatic 761 std.core.StringBuilder::<ctor> v16, v34
-   35.     SaveState                  inlining_depth=0 -> (v21)
-   21.ref  CallStatic 799 std.core.StringBuilder::append v16, v3, v35
+   29.     SaveState                  inlining_depth=0 -> (v15)
+   15.ref  LoadAndInitClass 'std.core.StringBuilder' v29 -> (v16)
+   30.     SaveState                  inlining_depth=0 -> (v16)
+   16.ref  NewObject 390              v15, v30 -> (v17, v24, v21)
+   31.     SaveState                  inlining_depth=0 -> (v17)
+   17.void CallStatic 443 std.core.StringBuilder::<ctor> v16, v3, v31
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   8p.i32  Phi                        v5(bb0), v29(bb2) -> (v29, v12)
+   8p.i32  Phi                        v5(bb0), v26(bb2) -> (v26, v12)
    12.b    Compare LE i32             v1, v8p -> (v13)
    13.     IfImm NE b                 v12, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
 prop: loop 1, depth 1
-   22.     SaveState                  inlining_depth=0 -> (v24)
-   24.ref  CallStatic 799 std.core.StringBuilder::append v16, v0, v22
-   29.i32  Add                        v8p, v28 -> (v8p)
+   19.     SaveState                  inlining_depth=0 -> (v21)
+   21.ref  CallStatic 452 std.core.StringBuilder::append v16, v0, v19
+   26.i32  Add                        v8p, v25 -> (v8p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   30.     SaveState                  inlining_depth=0 -> (v27)
-   27.ref  CallStatic 829 std.core.StringBuilder::toString v16, v30 -> (v31)
-   31.ref  Return                     v27
+   27.     SaveState                  inlining_depth=0 -> (v24)
+   24.ref  CallStatic 462 std.core.StringBuilder::toString v16, v27 -> (v28)
+   28.ref  Return                     v24
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
@@ -756,41 +782,49 @@ Method: std.core.String ETSGLOBAL::concat_loop0(std.core.String, i32)
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v9p)
-    1.i32  Parameter                  arg 1 -> (v10p)
-    3.i64  Constant                   0x0 -> (v7p)
-   30.i64  Constant                   0x1 -> (v29)
+   13.ref  Parameter                  arg 0 -> (v25, v28, v32, v33, v35, v36, v41, v19, v18, v15)     
+   14.i32  Parameter                  arg 1 -> (v26, v28, v32, v33, v36, v41, v19, v18, v15)          
+   16.i64  Constant                   0x0 -> (v20p, v19, v18)                                         
+   40.i64  Constant                   0x1 -> (v39)                                                    
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
-prop: prehead
-    4.ref  LoadString 63726           v5 -> (v8p)
+prop: prehead (loop 1)
+   15.     SaveState                  v13(vr3), v14(vr4), caller=8, inlining_depth=1
+   18.     SaveState                  v16(vr0), v13(vr3), v14(vr4), caller=8, inlining_depth=1 -> (v17)
+   17.ref  LoadString 481             v18 -> (v21p, v19, v19)
+   19.     SaveStateDeoptimize        v16(vr0), v17(vr1), v13(vr3), v14(vr4), v17(ACC), caller=8, inlining_depth=1
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   7p.i32  Phi                        v3(bb0), v29(bb2) -> (v29, v13)
-   8p.ref  Phi                        v4(bb0), v28(bb2) -> (v31, v12)
-   9p.ref  Phi                        v0(bb0), v9p(bb2) -> (v12, v9p, v25)
-  10p.i32  Phi                        v1(bb0), v10p(bb2) -> (v10p, v13)
-   13.b    Compare GE i32             v7p, v10p -> (v14)
-   14.     IfImm NE b                 v13, 0x0
+  20p.i32  Phi                        v16(bb0), v39(bb2) -> (v39, v36, v33, v32, v28, v28, v26)       
+  21p.ref  Phi                        v17(bb0), v38(bb2) -> (v42, v41, v32, v31, v28, v25)            
+   25.     SafePoint                  v13(vr3), v21p(vr1), caller=8, inlining_depth=1
+   26.b    Compare GE i32             v20p, v14 -> (v27)
+   27.     IfImm NE b                 v26, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
 prop: loop 1, depth 1
-   16.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v17)
-   17.ref  NewObject 22178            v16, ss -> (v28, v25, v22)
-   18.void CallStatic 60220 std.core.StringBuilder::<ctor> v17, ss
-   22.ref  Intrinsic.StdCoreSbAppendString v17, v8p, ss
-   25.ref  Intrinsic.StdCoreSbAppendString v17, v9p, ss
-   28.ref  CallStatic 60410 std.core.StringBuilder::toString v17, ss -> (v11p, v8p)
-   29.i32  Add                        v7p, v30 -> (v7p)
+   28.     SaveState                  v20p(vr0), v21p(vr1), v13(vr3), v14(vr4), v20p(ACC), caller=8, inlining_depth=1 -> (v30, v29)
+   29.ref  LoadAndInitClass 'std.core.StringBuilder' v28 -> (v30)
+   30.ref  NewObject 390              v29, v28 -> (v37, v36, v34, v33, v33, v32, v31)
+   32.     SaveState                  v20p(vr0), v21p(vr1), v13(vr3), v14(vr4), v30(ACC), caller=8, inlining_depth=1 -> (v31)
+   31.void CallStatic 443 std.core.StringBuilder::<ctor> v30, v21p, v32
+   33.     SaveState                  v20p(vr0), v30(vr1), v13(vr3), v14(vr4), v30(ACC), caller=8, inlining_depth=1 -> (v35, v34)
+   34.ref  NullCheck                  v30, v33 -> (v35)
+   35.ref  Intrinsic.StdCoreSbAppendString v34, v13, v33
+   36.     SaveState                  v20p(vr0), v30(vr1), v13(vr3), v14(vr4), caller=8, inlining_depth=1 -> (v38, v37)
+   37.ref  NullCheck                  v30, v36 -> (v38)
+   38.ref  Intrinsic.StdCoreSbToString v37, v36 -> (v21p)
+   39.i32  Add                        v20p, v40 -> (v20p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   31.ref  Return                     v8p
+   41.     SaveState                  v14(vr4), v21p(vr1), v13(vr3), caller=8, inlining_depth=1
+   42.ref  Return                     v21p
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
@@ -806,36 +840,48 @@ Method: std.core.String ETSGLOBAL::concat_loop0(std.core.String, i32)
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v25)
-    1.i32  Parameter                  arg 1 -> (v40, v13)
-    3.i64  Constant                   0x0 -> (v40, v7p)
-   30.i64  Constant                   0x1 -> (v29)
+   13.ref  Parameter                  arg 0 -> (v46, v43, v44, v45, v25, v33, v35, v41, v19, v18)     
+   14.i32  Parameter                  arg 1 -> (v46, v43, v44, v45, v26, v33, v41, v19, v18)          
+   16.i64  Constant                   0x0 -> (v43, v44, v45, v20p, v19, v18)                          
+   40.i64  Constant                   0x1 -> (v39)                                                    
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
-prop: prehead
-    4.ref  LoadString 63726           ss -> (v22)
-   16.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v17)
-   17.ref  NewObject 22178            v16, ss -> (v25, v28, v22, v18)
-   18.void CallStatic 60220 std.core.StringBuilder::<ctor> v17, ss
-   22.ref  Intrinsic.StdCoreSbAppendString v17, v4, ss
-   40.b    Compare GE i32             v3, v1 -> (v41)
-   41.     IfImm NE b                 v40, 0x0
-succs: [bb 1, bb 2]
+prop: prehead (loop 1)
+   18.     SaveState                  v16(vr0), v13(vr3), v14(vr4), caller=8, inlining_depth=1 -> (v17)
+   17.ref  LoadString 481             v18 -> (v43, v44, v45, v31, v19, v19)
+   19.     SaveStateDeoptimize        v16(vr0), v17(vr1), v13(vr3), v14(vr4), v17(ACC), caller=8, inlining_depth=1
+   43.     SaveState                  v16(vr0), v13(vr3), v14(vr4), v17(bridge), caller=8, inlining_depth=1 -> (v29)
+   29.ref  LoadAndInitClass 'std.core.StringBuilder' v43 -> (v30)
+   44.     SaveState                  v16(vr0), v13(vr3), v14(vr4), v17(bridge), caller=8, inlining_depth=1 -> (v30)
+   30.ref  NewObject 390              v29, v44 -> (v41, v46, v25, v45, v31, v37, v34, v33, v33)
+   45.     SaveState                  v16(vr0), v13(vr3), v14(vr4), v30(bridge), v17(bridge), caller=8, inlining_depth=1 -> (v31)
+   31.void CallStatic 443 std.core.StringBuilder::<ctor> v30, v17, v45
+succs: [bb 3]
 
-BB 2  preds: [bb 0, bb 2]
+BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   7p.i32  Phi                        v3(bb0), v29(bb2) -> (v29)
-   25.ref  Intrinsic.StdCoreSbAppendString v17, v0, ss
-   29.i32  Add                        v7p, v30 -> (v13, v7p)
-   13.b    Compare GE i32             v29, v1 -> (v14)
-   14.     IfImm NE b                 v13, 0x0
+  20p.i32  Phi                        v16(bb0), v39(bb2) -> (v39, v33, v26)
+   25.     SafePoint                  v13(vr3), v30(bridge), caller=8, inlining_depth=1
+   26.b    Compare GE i32             v20p, v14 -> (v27)
+   27.     IfImm NE b                 v26, 0x0
 succs: [bb 1, bb 2]
 
-BB 1  preds: [bb 2, bb 0]
+BB 2  preds: [bb 3]
+prop: loop 1, depth 1
+   33.     SaveState                  v20p(vr0), v30(vr1), v13(vr3), v14(vr4), v30(ACC), caller=8, inlining_depth=1 -> (v35, v34)
+   34.ref  NullCheck                  v30, v33 -> (v35)
+   35.ref  Intrinsic.StdCoreSbAppendString v34, v13, v33
+   39.i32  Add                        v20p, v40 -> (v20p)
+succs: [bb 3]
+
+BB 1  preds: [bb 3]
 prop:
-   28.ref  CallStatic 60410 std.core.StringBuilder::toString v17, ss
-   31.ref  Return                     v28
+   41.     SaveState                  v14(vr4), v30(bridge), v13(vr3), caller=8, inlining_depth=1 -> (v38)
+   46.     SaveState                  v14(vr4), v30(bridge), v13(vr3), caller=8, inlining_depth=1 -> (v37)
+   37.ref  NullCheck                  v30, v46 -> (v38)
+   38.ref  Intrinsic.StdCoreSbToString v37, v41 -> (v42)
+   42.ref  Return                     v38
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
@@ -909,7 +955,7 @@ BB 2  preds: [bb 0]
 prop: end
 ```
 
-**Merge StringBuilder objects chain**
+**Merge StringBuilder objects chain (default constructor)**
 
 ETS checked test ets_string_concat.ets, function example:
 
@@ -923,8 +969,6 @@ function concat2(a: String, b: String): String {
     return sb1.toString();
 }
 ```
-
-Optimization in BCO is not supported since there are no append intrinsics yet to replace them with Intrinsic.StdCoreStringConcat2.
 
 AOT IR before transformation:
 
@@ -981,6 +1025,95 @@ BB 2  preds: [bb 0]
 prop: end
 ```
 
+**Merge StringBuilder objects chain (constructor with a string argument)**
+
+```TS
+function concat2(a: String, b: String): String {
+    let sb0 = new StringBuilder(a)
+    let sb1 = new StringBuilder(sb0.toString())
+    sb1.append(b)
+    return sb1.toString();
+}
+```
+
+AOT IR before transformation:
+
+```
+
+Method: std.core.String sb_test_obj_chain.ETSGLOBAL::concat2(std.core.String, std.core.String) 0x7375fbd99ba0
+
+BB 1
+prop: start
+   14.ref  Parameter                  arg 0 -> (v20, v19, v16)
+   15.ref  Parameter                  arg 1 -> (v29, v31, v28, v24, v21, v20, v16)
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+   16.     SaveState                  v14(vr2), v15(vr3), caller=9, inlining_depth=1 -> (v18, v17)
+   17.ref  LoadAndInitClass 'std.core.StringBuilder' v16 -> (v18)
+   18.ref  NewObject 390              v17, v16 -> (v21, v22, v20, v19)
+   20.     SaveState                  v14(vr2), v15(vr3), v18(ACC), caller=9, inlining_depth=1 -> (v19)
+   19.void CallStatic 443 std.core.StringBuilder::<ctor> v18, v14, v20
+   21.     SaveState                  v18(ACC), v15(vr3), caller=9, inlining_depth=1 -> (v23, v22)
+   22.ref  NullCheck                  v18, v21 -> (v23)
+   23.ref  Intrinsic.StdCoreSbToString v22, v21 -> (v24, v28, v27, v24)
+   24.     SaveState                  v23(vr1), v23(ACC), v15(vr3), caller=9, inlining_depth=1 -> (v26, v25)
+   25.ref  LoadAndInitClass 'std.core.StringBuilder' v24 -> (v26)
+   26.ref  NewObject 390              v25, v24 -> (v28, v29, v33, v32, v30, v29, v27)
+   28.     SaveState                  v23(vr1), v26(ACC), v15(vr3), caller=9, inlining_depth=1 -> (v27)
+   27.void CallStatic 443 std.core.StringBuilder::<ctor> v26, v23, v28
+   29.     SaveState                  v26(vr0), v15(vr3), v26(ACC), caller=9, inlining_depth=1 -> (v31, v30)
+   30.ref  NullCheck                  v26, v29 -> (v31)
+   31.ref  Intrinsic.StdCoreSbAppendString v30, v15, v29
+   32.     SaveState                  v26(vr0), caller=9, inlining_depth=1 -> (v34, v33)
+   33.ref  NullCheck                  v26, v32 -> (v34)
+   34.ref  Intrinsic.StdCoreSbToString v33, v32 -> (v35)
+   35.ref  Return                     v34
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
+prop: end
+
+```
+
+AOT IR after transformation:
+
+```
+
+Method: std.core.String sb_test_obj_chain.ETSGLOBAL::concat2(std.core.String, std.core.String) 0x7375fbd99ba0
+
+BB 1
+prop: start
+   14.ref  Parameter                  arg 0 -> (v20, v19, v16)
+   15.ref  Parameter                  arg 1 -> (v24, v29, v31, v21, v20, v16)
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+   16.     SaveState                  v14(vr2), v15(vr3), caller=9, inlining_depth=1 -> (v18, v17)
+   17.ref  LoadAndInitClass 'std.core.StringBuilder' v16 -> (v18)
+   18.ref  NewObject 390              v17, v16 -> (v32, v24, v29, v30, v33, v21, v22, v20, v19)
+   20.     SaveState                  v14(vr2), v15(vr3), v18(ACC), caller=9, inlining_depth=1 -> (v19)
+   19.void CallStatic 443 std.core.StringBuilder::<ctor> v18, v14, v20
+   21.     SaveState                  v18(ACC), v15(vr3), caller=9, inlining_depth=1 -> (v22)
+   22.ref  NullCheck                  v18, v21
+   24.     SaveState                  v15(vr3), v18(bridge), caller=9, inlining_depth=1 -> (v25)
+   25.ref  LoadAndInitClass 'std.core.StringBuilder' v24
+   29.     SaveState                  v15(vr3), v18(bridge), caller=9, inlining_depth=1 -> (v31, v30)
+   30.ref  NullCheck                  v18, v29 -> (v31)
+   31.ref  Intrinsic.StdCoreSbAppendString v30, v15, v29
+   32.     SaveState                  v18(bridge), caller=9, inlining_depth=1 -> (v34, v33)
+   33.ref  NullCheck                  v18, v32 -> (v34)
+   34.ref  Intrinsic.StdCoreSbToString v33, v32 -> (v35)
+   35.ref  Return                     v34
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
+prop: end
+
+```
+
 **Replace String length accessors with StringBuilder versions**
 
 ETS checked test ets_string_concat_loop.ets, function example:
@@ -1003,26 +1136,24 @@ Method: ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop1
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v44)
-r252 -> r252 [ref]
-    1.i32  Parameter                  arg 1 -> (v12)
-r253 -> r253 [u32]
+    0.ref  Parameter                  arg 0 -> (v38) r252 -> r252 [ref]
+    1.i32  Parameter                  arg 1 -> (v12) r253 -> r253 [u32]
     5.i32  Constant                   0x0 -> (v8p)
-   51.i32  Constant                   0x1 -> (v52)
+   45.i32  Constant                   0x1 -> (v46)
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
 prop: prehead (loop 1)
     2.     SaveState                  inlining_depth=0
     4.     SaveState                  inlining_depth=0 -> (v3)
-    3.ref  LoadString 857             v4 -> (v7p)
+    3.ref  LoadString 516             v4 -> (v7p)
     6.     SaveStateDeoptimize        inlining_depth=0
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   7p.ref  Phi                        v3(bb0), v47(bb2) -> (v24, v54, v21)
-   8p.i32  Phi                        v5(bb0), v52(bb2) -> (v52, v12)
+   7p.ref  Phi                        v3(bb0), v41(bb2) -> (v21, v48, v17)
+   8p.i32  Phi                        v5(bb0), v46(bb2) -> (v46, v12)
    12.b    Compare LE i32             v1, v8p -> (v13)
    13.     IfImm NE b                 v12, 0x0
 succs: [bb 1, bb 2]
@@ -1031,41 +1162,37 @@ BB 2  preds: [bb 3]
 prop: loop 1, depth 1
    14.     SaveState                  inlining_depth=0 -> (v16, v15)
    15.ref  LoadAndInitClass 'std.core.StringBuilder' v14 -> (v16)
-   16.ref  NewObject 645              v15, v14 -> (v30, v27, v21, v17)
+   16.ref  NewObject 406              v15, v14 -> (v27, v24, v17)
    18.     SaveState                  inlining_depth=0 -> (v17)
-   17.void CallStatic 761 std.core.StringBuilder::<ctor> v16, v18
+   17.void CallStatic 468 std.core.StringBuilder::<ctor> v16, v7p, v18
    19.     SaveState                  inlining_depth=0 -> (v21)
-   21.ref  CallStatic 799 std.core.StringBuilder::append v16, v7p, v19
+   21.i32  CallStatic 450 std.core.String::%%get-length v7p, v19 -> (v24)
    22.     SaveState                  inlining_depth=0 -> (v24)
-   24.i32  CallStatic 732 std.core.String::%%get-length v7p, v22 -> (v27)
+   24.ref  CallStatic 477 std.core.StringBuilder::append v16, v21, v22
    25.     SaveState                  inlining_depth=0 -> (v27)
-   27.ref  CallStatic 789 std.core.StringBuilder::append v16, v24, v25
-   28.     SaveState                  inlining_depth=0 -> (v30)
-   30.ref  CallStatic 829 std.core.StringBuilder::toString v16, v28 -> (v41, v33)
+   27.ref  CallStatic 497 std.core.StringBuilder::toString v16, v25 -> (v34, v30)
+   28.     SaveState                  inlining_depth=0 -> (v30, v29)
+   29.ref  LoadClass 'std.core.String' v28 -> (v30)
+   30.     CheckCast 387              v27, v29, v28
    31.     SaveState                  inlining_depth=0 -> (v33, v32)
-   32.ref  LoadClass 'std.core.String' v31 -> (v33)
-   33.     CheckCast 626              v30, v32, v31
-   34.     SaveState                  inlining_depth=0 -> (v36, v35)
-   35.ref  LoadAndInitClass 'std.core.StringBuilder' v34 -> (v36)
-   36.ref  NewObject 645              v35, v34 -> (v47, v44, v41, v37)
-   38.     SaveState                  inlining_depth=0 -> (v37)
-   37.void CallStatic 761 std.core.StringBuilder::<ctor> v36, v38
+   32.ref  LoadAndInitClass 'std.core.StringBuilder' v31 -> (v33)
+   33.ref  NewObject 406              v32, v31 -> (v41, v38, v34)
+   35.     SaveState                  inlining_depth=0 -> (v34)
+   34.void CallStatic 468 std.core.StringBuilder::<ctor> v33, v27, v35
+   36.     SaveState                  inlining_depth=0 -> (v38)
+   38.ref  CallStatic 487 std.core.StringBuilder::append v33, v0, v36
    39.     SaveState                  inlining_depth=0 -> (v41)
-   41.ref  CallStatic 799 std.core.StringBuilder::append v36, v30, v39
-   42.     SaveState                  inlining_depth=0 -> (v44)
-   44.ref  CallStatic 799 std.core.StringBuilder::append v36, v0, v42
-   45.     SaveState                  inlining_depth=0 -> (v47)
-   47.ref  CallStatic 829 std.core.StringBuilder::toString v36, v45 -> (v7p, v50)
-   48.     SaveState                  inlining_depth=0 -> (v50, v49)
-   49.ref  LoadClass 'std.core.String' v48 -> (v50)
-   50.     CheckCast 626              v47, v49, v48
-   52.i32  Add                        v8p, v51 -> (v8p)
+   41.ref  CallStatic 497 std.core.StringBuilder::toString v33, v39 -> (v7p, v44)
+   42.     SaveState                  inlining_depth=0 -> (v44, v43)
+   43.ref  LoadClass 'std.core.String' v42 -> (v44)
+   44.     CheckCast 387              v41, v43, v42
+   46.i32  Add                        v8p, v45 -> (v8p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   53.     SaveState                  inlining_depth=0
-   54.ref  Return                     v7p
+   47.     SaveState                  inlining_depth=0
+   48.ref  Return                     v7p
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
@@ -1105,15 +1232,13 @@ succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1, bc: 0x0000000b
-hotness=0
    8p.i32  Phi                        v5(bb0), v52(bb2) -> (v52, v12)
    12.b    Compare LE i32             v1, v8p -> (v13)
    13.     IfImm NE b                 v12, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
-prop: loop 1, depth 1, bc: 0x00000014
-hotness=0
+prop: loop 1, depth 1
    56.     SaveState                  inlining_depth=0 -> (v55)
    55.i32  CallStatic 770 std.core.StringBuilder::%%get-stringLength v16, v56 -> (v27)
    25.     SaveState                  inlining_depth=0 -> (v27)
@@ -1128,8 +1253,7 @@ hotness=0
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
-prop: bc: 0x00000074
-hotness=0
+prop:
    53.     SaveState                  inlining_depth=0 -> (v30)
    30.ref  CallStatic 829 std.core.StringBuilder::toString v16, v53 -> (v54, v33)
    62.     SaveState                  inlining_depth=0 -> (v32)
@@ -1141,6 +1265,7 @@ succs: [bb 5]
 
 BB 5  preds: [bb 1]
 prop: end
+
 ```
 
 AOT IR before transformation:
@@ -1150,86 +1275,76 @@ Method: std.core.String ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop1(std
 
 BB 4
 prop: start
-hotness=0
-    0.ref  Parameter                  arg 0 -> (v16, v20, v21, v24, v29, v32, v35, v38, v42, v43, v48, v52, v57, v46, v49, v13, v7, v6, v3, v2)
-    1.i32  Parameter                  arg 1 -> (v14, v16, v20, v21, v24, v29, v32, v35, v38, v42, v43, v57, v49, v46, v52, v7, v6, v3)
-    2.     SafePoint                  v0(vr4), inlining_depth=0
-    4.i64  Constant                   0x0 -> (v8p, v7, v6)
-   27.i64  Constant                   0x2 -> (v28)
-   56.i64  Constant                   0x1 -> (v55)
+   13.ref  Parameter                  arg 0 -> (v25, v28, v32, v33, v38, v41, v44, v47, v51, v52, v54, v55, v58, v63, v19, v18, v15)
+   14.i32  Parameter                  arg 1 -> (v26, v28, v32, v33, v38, v41, v44, v47, v51, v52, v58, v63, v55, v19, v18, v15)
+   16.i64  Constant                   0x0 -> (v20p, v19, v18)
+   36.i64  Constant                   0x2 -> (v37)
+   62.i64  Constant                   0x1 -> (v61)
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
 prop: prehead (loop 1)
-    3.     SaveState                  v0(vr4), v1(vr5), inlining_depth=0
-    6.     SaveState                  v4(vr0), v0(vr4), v1(vr5), inlining_depth=0 -> (v5)
-    5.ref  LoadString 869             v6 -> (v9p, v7, v7)
-    7.     SaveStateDeoptimize        v4(vr0), v5(vr1), v0(vr4), v1(vr5), v5(ACC), inlining_depth=0
+   15.     SaveState                  v13(vr4), v14(vr5), caller=8, inlining_depth=1
+   18.     SaveState                  v16(vr0), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v17)
+   17.ref  LoadString 516             v18 -> (v21p, v19, v19)
+   19.     SaveStateDeoptimize        v16(vr0), v17(vr1), v13(vr4), v14(vr5), v17(ACC), caller=8, inlining_depth=1
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   8p.i32  Phi                        v4(bb0), v55(bb2) -> (v55, v52, v49, v46, v43, v42, v38, v35, v32, v29, v24, v21, v20, v16, v16, v14)
-   9p.ref  Phi                        v5(bb0), v51(bb2) -> (v58, v57, v32, v29, v25, v24, v23, v21, v20, v16, v13)
-   13.     SafePoint                  v0(vr4), v9p(vr1), inlining_depth=0
-   14.b    Compare GE i32             v8p, v1 -> (v15)
-   15.     IfImm NE b                 v14, 0x0
+  20p.i32  Phi                        v16(bb0), v61(bb2) -> (v61, v58, v55, v52, v51, v47, v44, v41, v38, v33, v32, v28, v28, v26)
+  21p.ref  Phi                        v17(bb0), v57(bb2) -> (v64, v63, v41, v38, v34, v33, v32, v31, v28, v25)
+   25.     SafePoint                  v13(vr4), v21p(vr1), caller=8, inlining_depth=1
+   26.b    Compare GE i32             v20p, v14 -> (v27)
+   27.     IfImm NE b                 v26, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
 prop: loop 1, depth 1
-   16.     SaveState                  v8p(vr0), v9p(vr1), v0(vr4), v1(vr5), v8p(ACC), inlining_depth=0 -> (v18, v17)
-   17.ref  LoadAndInitClass 'std.core.StringBuilder' v16 -> (v18)
-   18.ref  NewObject 657              v17, v16 -> (v33, v32, v30, v29, v24, v22, v21, v21, v20, v19)
-   20.     SaveState                  v8p(vr0), v9p(vr1), v0(vr4), v1(vr5), v18(ACC), inlining_depth=0 -> (v19)
-   19.void CallStatic 773 std.core.StringBuilder::<ctor> v18, v20
-   21.     SaveState                  v8p(vr0), v9p(vr1), v18(vr3), v0(vr4), v1(vr5), v18(ACC), inlining_depth=0 -> (v23, v22)
-   22.ref  NullCheck                  v18, v21 -> (v23)
-   23.ref  Intrinsic.StdCoreSbAppendString v22, v9p, v21
-   24.     SaveState                  v8p(vr0), v9p(vr1), v18(vr3), v0(vr4), v1(vr5), inlining_depth=0 -> (v25)
-   25.ref  NullCheck                  v9p, v24 -> (v26)
-   
-   #       std.core.String.length
-   26.i32  LenArray                   v25 -> (v28)
-   28.i32  Shr                        v26, v27 -> (v31, v29)
-
-   29.     SaveState                  v8p(vr0), v9p(vr1), v18(vr3), v0(vr4), v1(vr5), v28(ACC), inlining_depth=0 -> (v31, v30)
-   30.ref  NullCheck                  v18, v29 -> (v31)
-   31.ref  Intrinsic.StdCoreSbAppendInt v30, v28, v29
-   32.     SaveState                  v8p(vr0), v9p(vr1), v18(vr3), v0(vr4), v1(vr5), inlining_depth=0 -> (v34, v33)
-   33.ref  NullCheck                  v18, v32 -> (v34)
-   34.ref  Intrinsic.StdCoreSbToString v33, v32 -> (v35, v38, v45, v43, v42, v38, v37, v35)
-   35.     SaveState                  v8p(vr0), v34(vr1), v34(ACC), v0(vr4), v1(vr5), inlining_depth=0 -> (v37, v36)
-   36.ref  LoadClass 'std.core.String' v35 -> (v37)
-   37.     CheckCast 638              v34, v36, v35
-   38.     SaveState                  v8p(vr0), v34(vr1), v34(ACC), v0(vr4), v1(vr5), inlining_depth=0 -> (v40, v39)
-   39.ref  LoadAndInitClass 'std.core.StringBuilder' v38 -> (v40)
-   40.ref  NewObject 657              v39, v38 -> (v42, v43, v50, v49, v47, v46, v44, v43, v41)
-   42.     SaveState                  v8p(vr0), v34(vr1), v40(ACC), v0(vr4), v1(vr5), inlining_depth=0 -> (v41)
-   41.void CallStatic 773 std.core.StringBuilder::<ctor> v40, v42
-   43.     SaveState                  v8p(vr0), v34(vr1), v40(vr2), v40(ACC), v0(vr4), v1(vr5), inlining_depth=0 -> (v45, v44)
-   44.ref  NullCheck                  v40, v43 -> (v45)
-   45.ref  Intrinsic.StdCoreSbAppendString v44, v34, v43
-   46.     SaveState                  v8p(vr0), v1(vr5), v40(vr2), v0(vr4), inlining_depth=0 -> (v48, v47)
-   47.ref  NullCheck                  v40, v46 -> (v48)
-   48.ref  Intrinsic.StdCoreSbAppendString v47, v0, v46
-   49.     SaveState                  v8p(vr0), v1(vr5), v40(vr2), v0(vr4), inlining_depth=0 -> (v51, v50)
-   50.ref  NullCheck                  v40, v49 -> (v51)
-   51.ref  Intrinsic.StdCoreSbToString v50, v49 -> (v52, v9p, v54, v52)
-   52.     SaveState                  v8p(vr0), v51(vr1), v1(vr5), v51(ACC), v0(vr4), inlining_depth=0 -> (v54, v53)
-   53.ref  LoadClass 'std.core.String' v52 -> (v54)
-   54.     CheckCast 638              v51, v53, v52
-   55.i32  Add                        v8p, v56 -> (v8p)
+   28.     SaveState                  v20p(vr0), v21p(vr1), v13(vr4), v14(vr5), v20p(ACC), caller=8, inlining_depth=1 -> (v30, v29)
+   29.ref  LoadAndInitClass 'std.core.StringBuilder' v28 -> (v30)
+   30.ref  NewObject 406              v29, v28 -> (v42, v41, v39, v38, v33, v33, v32, v31)
+   32.     SaveState                  v20p(vr0), v21p(vr1), v13(vr4), v14(vr5), v30(ACC), caller=8, inlining_depth=1 -> (v31)
+   31.void CallStatic 468 std.core.StringBuilder::<ctor> v30, v21p, v32
+   33.     SaveState                  v20p(vr0), v21p(vr1), v30(vr3), v13(vr4), v14(vr5), v30(ACC), caller=8, inlining_depth=1 -> (v34)
+   34.ref  NullCheck                  v21p, v33 -> (v35)
+   35.i32  LenArray                   v34 -> (v37)
+   37.i32  Shr                        v35, v36 -> (v40, v38)
+   38.     SaveState                  v20p(vr0), v21p(vr1), v30(vr3), v13(vr4), v14(vr5), v37(ACC), caller=8, inlining_depth=1 -> (v40, v39)
+   39.ref  NullCheck                  v30, v38 -> (v40)
+   40.ref  Intrinsic.StdCoreSbAppendInt v39, v37, v38
+   41.     SaveState                  v20p(vr0), v21p(vr1), v30(vr3), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v43, v42)
+   42.ref  NullCheck                  v30, v41 -> (v43)
+   43.ref  Intrinsic.StdCoreSbToString v42, v41 -> (v44, v47, v51, v50, v47, v46, v44)
+   44.     SaveState                  v20p(vr0), v43(vr1), v43(ACC), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v46, v45)
+   45.ref  LoadClass 'std.core.String' v44 -> (v46)
+   46.     CheckCast 387              v43, v45, v44
+   47.     SaveState                  v20p(vr0), v43(vr1), v43(ACC), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v49, v48)
+   48.ref  LoadAndInitClass 'std.core.StringBuilder' v47 -> (v49)
+   49.ref  NewObject 406              v48, v47 -> (v51, v52, v56, v55, v53, v52, v50)
+   51.     SaveState                  v20p(vr0), v43(vr1), v49(ACC), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v50)
+   50.void CallStatic 468 std.core.StringBuilder::<ctor> v49, v43, v51
+   52.     SaveState                  v20p(vr0), v49(vr1), v49(ACC), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v54, v53)
+   53.ref  NullCheck                  v49, v52 -> (v54)
+   54.ref  Intrinsic.StdCoreSbAppendString v53, v13, v52
+   55.     SaveState                  v20p(vr0), v49(vr1), v14(vr5), v13(vr4), caller=8, inlining_depth=1 -> (v57, v56)
+   56.ref  NullCheck                  v49, v55 -> (v57)
+   57.ref  Intrinsic.StdCoreSbToString v56, v55 -> (v58, v21p, v60, v58)
+   58.     SaveState                  v20p(vr0), v57(vr1), v57(ACC), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v60, v59)
+   59.ref  LoadClass 'std.core.String' v58 -> (v60)
+   60.     CheckCast 387              v57, v59, v58
+   61.i32  Add                        v20p, v62 -> (v20p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   57.     SaveState                  v1(vr5), v9p(vr1), v0(vr4), inlining_depth=0
-   58.ref  Return                     v9p
+   63.     SaveState                  v14(vr5), v21p(vr1), v13(vr4), caller=8, inlining_depth=1
+   64.ref  Return                     v21p
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
 prop: end
+
 ```
 
 AOT IR after transformation:
@@ -1239,75 +1354,69 @@ Method: std.core.String ets_string_concat_loop.ETSGLOBAL::reuse_concat_loop1(std
 
 BB 4
 prop: start
-    0.ref  Parameter                  arg 0 -> (v66, v65, v64, v60, v61, v62, v63, v29, v38, v43, v21, v24, v48, v52, v57, v46, v49, v13, v7, v6, v2)
-    1.i32  Parameter                  arg 1 -> (v66, v65, v64, v60, v61, v62, v63, v29, v38, v43, v21, v14, v24, v57, v49, v46, v52, v7, v6)
-    2.     SafePoint                  v0(vr4), inlining_depth=0
-    4.i64  Constant                   0x0 -> (v60, v61, v62, v63, v8p, v7, v6)
-   56.i64  Constant                   0x1 -> (v55)
+   13.ref  Parameter                  arg 0 -> (v71, v70, v69, v66, v67, v68, v25, v33, v38, v47, v52, v54, v55, v58, v63, v19, v18)
+   14.i32  Parameter                  arg 1 -> (v58, v47, v71, v70, v69, v66, v67, v68, v26, v33, v38, v52, v63, v55, v19, v18)
+   16.i64  Constant                   0x0 -> (v66, v67, v68, v20p, v19, v18)                          
+   62.i64  Constant                   0x1 -> (v61)                                                    
 succs: [bb 0]
 
 BB 0  preds: [bb 4]
 prop: prehead (loop 1)
-    6.     SaveState                  v4(vr0), v0(vr4), v1(vr5), inlining_depth=0 -> (v5)
-    5.ref  LoadString 869             v6 -> (v60, v61, v62, v63, v23, v7, v7)
-    7.     SaveStateDeoptimize        v4(vr0), v5(vr1), v0(vr4), v1(vr5), v5(ACC), inlining_depth=0
-   60.     SaveState                  v4(vr0), v0(vr4), v1(vr5), v5(bridge), inlining_depth=0 -> (v17)
-   17.ref  LoadAndInitClass 'std.core.StringBuilder' v60 -> (v18)
-   61.     SaveState                  v4(vr0), v0(vr4), v1(vr5), v5(bridge), inlining_depth=0 -> (v18)
-   18.ref  NewObject 657              v17, v61 -> (v49, v46, v52, v38, v13, v21, v24, v29, v43, v57, v64, v52, v38, v46, v49, v43, v43, v62, v63, v29, v43, v21, v21, v46, v49, v13, v25, v44, v47, v50, v23, v33, v30, v24, v22, v19)
-   62.     SaveState                  v4(vr0), v0(vr4), v1(vr5), v18(bridge), v5(bridge), inlining_depth=0 -> (v19)
-   19.void CallStatic 773 std.core.StringBuilder::<ctor> v18, v62
-   63.     SaveState                  v4(vr0), v0(vr4), v1(vr5), v18(bridge), v5(bridge), inlining_depth=0 -> (v23)
-   23.ref  Intrinsic.StdCoreSbAppendString v18, v5, v63
+   18.     SaveState                  v16(vr0), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v17)
+   17.ref  LoadString 516             v18 -> (v66, v67, v68, v31, v19, v19)
+   19.     SaveStateDeoptimize        v16(vr0), v17(vr1), v13(vr4), v14(vr5), v17(ACC), caller=8, inlining_depth=1
+   66.     SaveState                  v16(vr0), v13(vr4), v14(vr5), v17(bridge), caller=8, inlining_depth=1 -> (v29)
+   29.ref  LoadAndInitClass 'std.core.StringBuilder' v66 -> (v30)
+   67.     SaveState                  v16(vr0), v13(vr4), v14(vr5), v17(bridge), caller=8, inlining_depth=1 -> (v30)
+   30.ref  NewObject 406              v29, v67 -> (v63, v69, v33, v25, v58, v47, v52, v55, v52, v68, v52, v55, v34, v53, v56, v31, v42, v39, v38, v33)
+   68.     SaveState                  v16(vr0), v13(vr4), v14(vr5), v30(bridge), v17(bridge), caller=8, inlining_depth=1 -> (v31)
+   31.void CallStatic 468 std.core.StringBuilder::<ctor> v30, v17, v68
 succs: [bb 3]
 
 BB 3  preds: [bb 0, bb 2]
 prop: head, loop 1, depth 1
-   8p.i32  Phi                        v4(bb0), v55(bb2) -> (v29, v38, v43, v21, v55, v52, v49, v46, v24, v14)
-   13.     SafePoint                  v0(vr4), v18(bridge), v18(bridge), inlining_depth=0
-   14.b    Compare GE i32             v8p, v1 -> (v15)
-   15.     IfImm NE b                 v14, 0x0
+  20p.i32  Phi                        v16(bb0), v61(bb2) -> (v61, v58, v55, v52, v47, v38, v33, v26)  
+   25.     SafePoint                  v13(vr4), v30(bridge), caller=8, inlining_depth=1
+   26.b    Compare GE i32             v20p, v14 -> (v27)
+   27.     IfImm NE b                 v26, 0x0
 succs: [bb 1, bb 2]
 
 BB 2  preds: [bb 3]
 prop: loop 1, depth 1
-   21.     SaveState                  v8p(vr0), v18(bridge), v18(vr3), v0(vr4), v1(vr5), v18(ACC), inlining_depth=0 -> (v22)
-   22.ref  NullCheck                  v18, v21
-   24.     SaveState                  v8p(vr0), v18(bridge), v18(vr3), v0(vr4), v1(vr5), inlining_depth=0 -> (v25)
-   25.ref  NullCheck                  v18, v24 -> (v59)
-   59.i32  LoadObject 786196 std.core.StringBuilder.length v25 -> (v29, v31)
-   29.     SaveState                  v8p(vr0), v18(bridge), v18(vr3), v0(vr4), v1(vr5), v59(ACC), inlining_depth=0 -> (v31, v30)
-   30.ref  NullCheck                  v18, v29 -> (v31)
-   31.ref  Intrinsic.StdCoreSbAppendInt v30, v59, v29
-   38.     SaveState                  v8p(vr0), v18(bridge), v18(bridge), v0(vr4), v1(vr5), inlining_depth=0 -> (v39)
-   39.ref  LoadAndInitClass 'std.core.StringBuilder' v38
-   43.     SaveState                  v8p(vr0), v18(bridge), v18(vr2), v18(ACC), v0(vr4), v1(vr5), v18(bridge), inlining_depth=0 -> (v44)
-   44.ref  NullCheck                  v18, v43
-   46.     SaveState                  v8p(vr0), v1(vr5), v18(vr2), v0(vr4), v18(bridge), v18(bridge), inlining_depth=0 -> (v48, v47)
-   47.ref  NullCheck                  v18, v46 -> (v48)
-   48.ref  Intrinsic.StdCoreSbAppendString v47, v0, v46
-   49.     SaveState                  v8p(vr0), v1(vr5), v18(vr2), v0(vr4), v18(bridge), v18(bridge), inlining_depth=0 -> (v50)
-   50.ref  NullCheck                  v18, v49
-   52.     SaveState                  v8p(vr0), v18(bridge), v1(vr5), v18(bridge), v0(vr4), inlining_depth=0 -> (v53)
-   53.ref  LoadClass 'std.core.String' v52
-   55.i32  Add                        v8p, v56 -> (v8p)
+   33.     SaveState                  v20p(vr0), v30(ACC), v30(vr3), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v34)
+   34.ref  NullCheck                  v30, v33 -> (v65)
+   65.i32  LoadObject 821250 std.core.StringBuilder.length v34 -> (v38, v40)
+   38.     SaveState                  v20p(vr0), v65(ACC), v30(vr3), v13(vr4), v14(vr5), caller=8, inlining_depth=1 -> (v40, v39)
+   39.ref  NullCheck                  v30, v38 -> (v40)
+   40.ref  Intrinsic.StdCoreSbAppendInt v39, v65, v38
+   47.     SaveState                  v20p(vr0), v14(vr5), v30(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v48)
+   48.ref  LoadAndInitClass 'std.core.StringBuilder' v47
+   52.     SaveState                  v20p(vr0), v30(vr1), v30(ACC), v13(vr4), v14(vr5), v30(bridge), caller=8, inlining_depth=1 -> (v54, v53)
+   53.ref  NullCheck                  v30, v52 -> (v54)
+   54.ref  Intrinsic.StdCoreSbAppendString v53, v13, v52
+   55.     SaveState                  v20p(vr0), v30(vr1), v14(vr5), v13(vr4), v30(bridge), caller=8, inlining_depth=1 -> (v56)
+   56.ref  NullCheck                  v30, v55
+   58.     SaveState                  v20p(vr0), v14(vr5), v30(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v59)
+   59.ref  LoadClass 'std.core.String' v58
+   61.i32  Add                        v20p, v62 -> (v20p)
 succs: [bb 3]
 
 BB 1  preds: [bb 3]
 prop:
-   57.     SaveState                  v1(vr5), v18(bridge), v0(vr4), inlining_depth=0 -> (v34)
-   64.     SaveState                  v1(vr5), v18(bridge), v0(vr4), inlining_depth=0 -> (v33)
-   33.ref  NullCheck                  v18, v64 -> (v34)
-   34.ref  Intrinsic.StdCoreSbToString v33, v57 -> (v65, v66, v58, v37)
-   66.     SaveState                  v1(vr5), v34(bridge), v0(vr4), inlining_depth=0 -> (v36)
-   36.ref  LoadClass 'std.core.String' v66 -> (v37)
-   65.     SaveState                  v1(vr5), v34(bridge), v0(vr4), inlining_depth=0 -> (v37)
-   37.     CheckCast 638              v34, v36, v65
-   58.ref  Return                     v34
+   63.     SaveState                  v14(vr5), v30(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v43)
+   69.     SaveState                  v14(vr5), v30(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v42)
+   42.ref  NullCheck                  v30, v69 -> (v43)
+   43.ref  Intrinsic.StdCoreSbToString v42, v63 -> (v70, v71, v64, v46)
+   71.     SaveState                  v14(vr5), v43(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v45)
+   45.ref  LoadClass 'std.core.String' v71 -> (v46)
+   70.     SaveState                  v14(vr5), v43(bridge), v13(vr4), caller=8, inlining_depth=1 -> (v46)
+   46.     CheckCast 387              v43, v45, v70
+   64.ref  Return                     v43
 succs: [bb 5]
 
 BB 5  preds: [bb 1]
 prop: end
+
 ```
 
 **Remove extra call for stringLength**

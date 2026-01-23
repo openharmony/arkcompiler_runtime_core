@@ -39,3 +39,6 @@ simple_run/memory_coalescing3.ets
 
 #issue #25345
 simple_run/checks_elimination_no_hoist.ets
+
+# 31351 Excluded due to instruction reordering and LSE is not able to process this case anymore
+simple_run/lse_load_global_var.ets

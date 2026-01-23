@@ -46,20 +46,21 @@ public:
 
         auto methodId = GetMethodId(method);
         auto argCount = GetMethodArgumentsCount(method, methodId);
+        auto returnType = pda.GetReturnType();
 
         for (size_t i = 0; i < argCount; i++) {
             auto argType = pda.GetArgType(i);
             if (argType.IsPrimitive()) {
                 signature << panda_file::Type::GetSignatureByTypeId(argType);
             } else {
-                auto id = pda.GetReferenceType(i);
+                size_t argOffset = returnType.IsPrimitive() ? 0 : 1;
+                auto id = pda.GetReferenceType(i + argOffset);
                 auto refType = pandaFile_.GetStringData(id);
                 signature << reinterpret_cast<const char *>(refType.data);
             }
         }
         signature << ')';
 
-        auto returnType = pda.GetReturnType();
         if (returnType.IsPrimitive()) {
             signature << panda_file::Type::GetSignatureByTypeId(returnType);
         } else {
@@ -270,21 +271,50 @@ public:
         return nullptr;
     }
 
-    MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const override
+    MethodPtr FindMethodByName([[maybe_unused]] const std::string &methodName) const override
     {
         auto regionHeaders = pandaFile_.GetRegionHeaders();
         for (auto regionHeader : regionHeaders) {
             auto methodIdx = pandaFile_.GetMethodIndex(&regionHeader);
 
             for (auto methodId : methodIdx) {
-                if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) ==
-                    "std.core.StringBuilder::%%get-stringLength") {
-                    return reinterpret_cast<MethodPtr>(methodId.GetOffset());
+                MethodPtr methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
+                if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) == methodName) {
+                    return methodPtr;
                 }
             }
         }
 
         return nullptr;
+    }
+
+    MethodPtr FindMethodByName([[maybe_unused]] std::string const &methodName,
+                               [[maybe_unused]] std::string const &methodSignature) const override
+    {
+        auto regionHeaders = pandaFile_.GetRegionHeaders();
+        for (auto regionHeader : regionHeaders) {
+            auto methodIdx = pandaFile_.GetMethodIndex(&regionHeader);
+
+            for (auto methodId : methodIdx) {
+                MethodPtr methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
+                if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) == methodName &&
+                    GetSignature(methodPtr) == methodSignature) {
+                    return methodPtr;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const override
+    {
+        return FindMethodByName("std.core.StringBuilder::%%get-stringLength");
+    }
+
+    MethodPtr GetMethodStringBuilderAppendString([[maybe_unused]] ClassPtr klass) const override
+    {
+        return FindMethodByName("std.core.StringBuilder::append", "(Lstd/core/String;)Lstd/core/StringBuilder;");
     }
 };
 }  // namespace ark

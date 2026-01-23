@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 3
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 3
+//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 2
 //! PASS_AFTER   "TryCatchResolving"
 //! INST         "DeoptimizeIf"
 
@@ -31,7 +32,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 3
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 3
+//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 2
 //! PASS_AFTER   "TryCatchResolving"
 //! INST_NOT     "DeoptimizeIf"
 //! RUN          entry: "ets_string_builder_deopt2.ETSGLOBAL::main"
@@ -44,7 +46,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 3
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 3
+//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 2
 //! PASS_AFTER   "TryCatchResolving"
 //! INST         "DeoptimizeIf"
 //! RUN          entry: "ets_string_builder_deopt2.ETSGLOBAL::main"

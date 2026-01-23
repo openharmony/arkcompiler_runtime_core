@@ -622,7 +622,23 @@ public:
         return nullptr;
     }
 
+    virtual MethodPtr FindMethodByName([[maybe_unused]] const std::string &methodName) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr FindMethodByName([[maybe_unused]] const std::string &methodName,
+                                       [[maybe_unused]] const std::string &methodSignature) const
+    {
+        return nullptr;
+    }
+
     virtual MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetMethodStringBuilderAppendString([[maybe_unused]] ClassPtr klass) const
     {
         return nullptr;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 1
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "NewObject", 0
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 1
 //! EVENT        /Inline,ets_string_builder_deopt3.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt3.B::f,.*,SUCCESS/
 //! PASS_AFTER   "Inline"
 //! INST         "DeoptimizeIf"
@@ -32,7 +33,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 1
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "NewObject", 0
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 1
 //! EVENT_NOT    /Inline,ets_string_builder_deopt3.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt3.B::f,.*,SUCCESS/
 //! PASS_AFTER   "Inline"
 //! INST_NOT     "DeoptimizeIf"
@@ -46,7 +48,8 @@
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 1
 //! PASS_AFTER   "SimplifyStringBuilder"
-//! INST_COUNT   "NewObject", 1
+//! INST_COUNT   "NewObject", 0
+//! INST_COUNT   "Intrinsic.StdCoreStringConcat2", 1
 //! EVENT        /Inline,ets_string_builder_deopt3.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt3.B::f,.*,SUCCESS/
 //! PASS_AFTER   "Inline"
 //! INST         "DeoptimizeIf"
