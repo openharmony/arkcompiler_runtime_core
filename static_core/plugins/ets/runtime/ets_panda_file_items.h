@@ -43,7 +43,6 @@ static constexpr std::string_view STRING_BUILDER                       = "Lstd/c
 static constexpr std::string_view PROXY                                = "Lstd/core/reflect/Proxy;";
 
 // Runtime classes
-static constexpr std::string_view STACK_TRACE_ELEMENT                  = "Lstd/core/StackTraceElement;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
 
 // Box classes

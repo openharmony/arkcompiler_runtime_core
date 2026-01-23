@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_STACKTRACE_ELEMENT_H
 
+#include "ets_platform_types.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -74,8 +75,7 @@ public:
 
     inline static EtsStackTraceElement *Create(EtsCoroutine *etsCoroutine)
     {
-        EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetClass(
-            panda_file_items::class_descriptors::STACK_TRACE_ELEMENT.data());
+        EtsClass *klass = PlatformTypes(etsCoroutine)->coreStackTraceElement;
         EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
         return reinterpret_cast<EtsStackTraceElement *>(etsObject);
     }
