@@ -1667,9 +1667,9 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return EscapeStringBuilder.process(elem.asString())
 
         case jsonx.JsonType.JsonNumber:
-            const intValue = elem.tryAsInteger()
-            if (intValue != undefined) {
-                return intValue.toString()
+            const longValue = elem.tryAsLong()
+            if (longValue != undefined) {
+                return longValue.toString()
             }
             const doubleValue = elem.tryAsDouble()
             if (doubleValue != undefined) {
@@ -2480,7 +2480,7 @@ class JsonElementParser
         if (token.value.includes(".")) {
             return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
         }
-        return jsonx.JsonElement.createInteger(Double.parseInt(token.value).toInt())
+        return jsonx.JsonElement.createLong(Long.parseInt(token.value, 10))
     }
 
     private parseBool(): jsonx.JsonElement
