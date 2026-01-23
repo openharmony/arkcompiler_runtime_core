@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,7 +29,7 @@ cases:
   - { use: "-32770 + 1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0000 + 1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0002 + 1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0001 + (1).toLong()", use_type: ": long", expected_type: long }
+  - { use: "-0x8000_0000_0001 + (1).toLong()", use_type: ": long", expected_type: long }
   # subtract
   - { use: "1.0f - 1.0f", use_type: ": float", expected_type: float }
   - { use: "1.0 - 1.0", use_type: ": double", expected_type: double }
@@ -59,6 +59,6 @@ cases:
   - { use: "-129 % 130", use_type: ": int", expected_type: int }
   - { use: "-32768 % 32769", use_type: ": int", expected_type: int }
   - { use: "-32769 % 32740", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000 % 0x8000_0001", use_type: ": int", expected_type: int }
+  - { use: "-0x8000 % 0x8001", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0001 % 0x8000_0002", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0000 % 0x8000_0000_0000_0001", use_type: ": long", expected_type: long }
+  - { use: "-0x8000_0000_0000 % 0x8000_0000_0001", use_type: ": long", expected_type: long }
