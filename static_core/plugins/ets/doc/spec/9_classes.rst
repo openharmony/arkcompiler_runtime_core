@@ -1533,18 +1533,44 @@ A :index:`compile-time error` occurs if:
    static field
    non-static field
 
-Any static field can be accessed only with the qualification of a class
-name (see :ref:`Field Access Expression`).
+Any static field can be accessed only with the qualification of a class name,
+while an instance field can be accessed with the object reference qualification
+(see :ref:`Field Access Expression`).
 
-A class can inherit more than one field or property with the same name from
-its superinterfaces, or from both its superclass (see :ref:`Inheritance`)
-and superinterfaces (see :ref:`Interface Inheritance`). However,
-an attempt to refer to such a field or property by its simple name within the
-class body causes a :index:`compile-time error`.
 
-The same field or property declaration can be inherited from an interface in
-more than one way. In that case, the field or property is considered
-to be inherited only once.
+If a field declaration is an implemention of one or more properties inherited
+from superinterfaces (see :ref:`Interface Inheritance`) then the types of the
+field and all propeties must be the same. 
+Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    // Two unrelated interfaces
+    interface B1 {}
+    interface B2 {}
+    // Interface which extends both of them
+    interface B3 extends B1, B2 {}
+    // Class which implements B3
+    class BB3 implements B3 {}
+
+    interface II1 { f: B1 }
+    interface II2 { f: B2 } // Different property 'f' type as in II1
+    interface II3 { f: B1 } // The same property 'f' type as in II1
+
+    class CC1 implements II1, II2 { 
+        f: B1  = new BB3 /* Compile-time error: field and all inherited properties
+                            must be of the same type */
+    }
+    class CC2 implements II1, II3 { 
+        f: B3 = new BB3 /* Compile-time error: field and all inherited properties
+                           must be of the same type */
+    }
+    class CC3 implements II1, II3 { 
+        f: B1 = new BB3 // OK, correct properties implementation
+    }
+
+
 
 .. index::
    static field
