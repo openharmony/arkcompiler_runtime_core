@@ -544,6 +544,41 @@ bool JSONStringifier::CheckUnsupportedAnnotation(EtsField *field)
     return hasAnnotation;
 }
 
+bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *platformTypes = PlatformTypes(coro);
+    auto *cls = platformTypes->coreJsonSerializable;
+
+    if (cls == nullptr || !value->IsInstanceOf(cls)) {
+        return false;
+    }
+
+    auto *method = value->GetClass()->ResolveVirtualMethod(platformTypes->coreJsonSerializableToJSON);
+    if (method == nullptr) {
+        return false;
+    }
+
+    Value selfArg(value->GetCoreType());
+    auto *result = helpers::InvokeAndResolveReturnValue(method, coro, &selfArg);
+    if (UNLIKELY(coro->HasPendingException())) {
+        return false;
+    }
+
+    if (result == nullptr) {
+        buffer_ += "null";
+        return true;
+    }
+
+    EtsHandle<EtsObject> resObj(coro, result);
+    if (!resObj->IsStringClass()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "toJSON must return string");
+        return false;
+    }
+
+    return SerializeJSONString(resObj);
+}
+
 // CC-OFFNXT(huge_method[C++], huge_cyclomatic_complexity[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 // CC-OFFNXT(huge_cca_cyclomatic_complexity[C++]) solid logic
 bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
@@ -553,6 +588,14 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
     }
 
     auto *coro = EtsCoroutine::GetCurrent();
+
+    if (SerializeJsonSerializable(value)) {
+        return true;
+    }
+    if (UNLIKELY(coro->HasPendingException())) {
+        return false;
+    }
+
     auto *platformTypes = PlatformTypes(coro);
     bool isSuccessful = false;
 

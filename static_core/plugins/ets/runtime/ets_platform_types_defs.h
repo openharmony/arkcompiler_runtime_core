@@ -139,6 +139,8 @@
     /* JSON */                                                                                                       \
     T("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                   \
     T("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                       \
+    T("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                           \
+    I("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/String;", coreJsonSerializableToJSON)                     \
     /* RegExp */                                                                                                     \
     T("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
     /* Date */                                                                                                       \
