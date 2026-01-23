@@ -108,7 +108,8 @@ void ark::guard::NameCacheParser::ParseObjectNameCache(const JsonObject *object,
             continue;
         }
         ARK_GUARD_ABORT(ErrorCode::NAME_CACHE_MODULE_FORMAT_ERROR,
-                        "NameCache parsing failed: unknown name cache module format, key:" + key);
+                        "NameCache parsing failed: unknown name cache module format, object: " + objectName +
+                            ", key: " + key);
     }
     objectCaches.emplace(objectName, objectCache);
 }

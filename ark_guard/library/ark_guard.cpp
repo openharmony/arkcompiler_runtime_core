@@ -65,7 +65,7 @@ void ark::guard::ArkGuard::Run(int argc, const char **argv)
 
     abckit_wrapper::FileView fileView;
     auto result = fileView.Init(configuration.GetAbcPath());
-    ARK_GUARD_ASSERT(result != AbckitWrapperErrorCode::ERR_SUCCESS, ErrorCode::GENERIC_ERROR, "File View Init Failed");
+    ARK_GUARD_ASSERT(result != AbckitWrapperErrorCode::ERR_SUCCESS, ErrorCode::GENERIC_ERROR, "Abc File Init Failed");
     LOG_I << "original abc init success";
 
     Obfuscator obfuscator(configuration);

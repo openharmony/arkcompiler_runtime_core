@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,7 +188,9 @@ void ark::guard::ElementPreProcessor::StoreSeparatedModuleName(const std::string
 
     // oriName
     const auto oriPartName = StringUtil::RemovePrefixIfMatches(oriName, path);
-    ARK_GUARD_ASSERT(oriName == oriPartName, ErrorCode::GENERIC_ERROR, "keptPath not match with module: " + oriName);
+    ARK_GUARD_ASSERT(oriName == oriPartName, ErrorCode::GENERIC_ERROR,
+                     "KeptPath '" + path + "' does not match with module '" + oriName +
+                         "'. Check keptPath configuration.");
     nameMapping->AddUsedNameList(oriPartName);
 
     // obfName

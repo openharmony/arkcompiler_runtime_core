@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,40 +126,48 @@ bool ConfigurationEnd(const std::string &word)
     return ConfigurationEnd(word, false);
 }
 
-void CheckFieldAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
+void CheckFieldAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word,
+                           const std::string &currentLine)
 {
     ARK_GUARD_ASSERT(((setAccessFlags | unSetAccessFlags) & ~VALID_FLAGS_FIELD) != 0,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: invalid access flags for field:" + word);
+                     "ClassSpecification parsing failed: invalid access flags for field: '" + word +
+                         "'. \nCurrent line:\n" + currentLine);
 }
 
-void CheckMethodAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
+void CheckMethodAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word,
+                            const std::string &currentLine)
 {
     ARK_GUARD_ASSERT(((setAccessFlags | unSetAccessFlags) & ~VALID_FLAGS_METHOD) != 0,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: invalid access flags for method:" + word);
+                     "ClassSpecification parsing failed: invalid access flags for method: '" + word +
+                         "'. \nCurrent line:\n" + currentLine);
 }
 
-void CheckAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word)
+void CheckAccessFlags(uint32_t setAccessFlags, uint32_t unSetAccessFlags, const std::string &word,
+                      const std::string &currentLine)
 {
     ARK_GUARD_ASSERT((setAccessFlags & unSetAccessFlags) != 0, ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: conflicting access flags for:" + word);
+                     "ClassSpecification parsing failed: conflicting access flags for: '" + word +
+                         "'. \nCurrent line:\n" + currentLine);
 }
 
-void CheckTypeDeclarations(uint32_t setTypeDeclarations, uint32_t unSetTypeDeclarations, const std::string &word)
+void CheckTypeDeclarations(uint32_t setTypeDeclarations, uint32_t unSetTypeDeclarations, const std::string &word,
+                           const std::string &currentLine)
 {
     ARK_GUARD_ASSERT((setTypeDeclarations & unSetTypeDeclarations) != 0,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: conflicting type declarations for:" + word);
+                     "ClassSpecification parsing failed: conflicting type declarations for: '" + word +
+                         "'. \nCurrent line:\n" + currentLine);
 }
 
-void CheckSemicolonKeyword(const std::string &actualWord)
+void CheckSemicolonKeyword(const std::string &actualWord, const std::string &currentLine)
 {
     ARK_GUARD_ASSERT(actualWord != ark::guard::ConfigurationConstants::SEMICOLON_KEYWORD,
                      ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: the expect character is " +
+                     "ClassSpecification parsing failed: the expect character is '" +
                          std::string(ark::guard::ConfigurationConstants::SEMICOLON_KEYWORD) +
-                         " but actual character is " + actualWord);
+                         "', but actual character is '" + actualWord + "'. \nCurrent line:\n" + currentLine);
 }
 }  // namespace
 
@@ -181,7 +189,10 @@ std::optional<ark::guard::ClassSpecification> ark::guard::KeepOptionParser::Pars
     } else if (nextWord_ == KeepOptionsConstants::KEEP_CLASS_MEMBERS) {
         specification = ParseClassSpecificationArguments(false);
     } else {
-        ARK_GUARD_ABORT(ErrorCode::UNKNOWN_KEEP_OPTION, "KeepOption parsing failed: unknown keep option:" + nextWord_);
+        ARK_GUARD_ABORT(ErrorCode::UNKNOWN_KEEP_OPTION,
+                        "KeepOption parsing failed: keepOption can only be one of '-keep', "
+                        "'-keepclassmembers', '-keepclasswithmembers', unknown keep option: " +
+                            nextWord_);
     }
     return specification;
 }
@@ -226,9 +237,9 @@ ark::guard::ClassSpecification ark::guard::KeepOptionParser::ParseClassSpecifica
     // parse member specification part
     if (!ConfigurationEnd(nextWord_)) {
         ARK_GUARD_ASSERT(nextWord_ != ConfigurationConstants::OPEN_KEYWORD, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "ClassSpecification parsing failed: the expect character is " +
-                             std::string(ConfigurationConstants::OPEN_KEYWORD) + " but actual character is " +
-                             nextWord_);
+                         "ClassSpecification parsing failed: the expect character is '" +
+                             std::string(ConfigurationConstants::OPEN_KEYWORD) + "', but actual character is '" +
+                             nextWord_ + "'.\nCurrent line:\n" + wordReader_.GetCurrentLine());
 
         while (!nextWord_.empty()) {
             nextWord_ = wordReader_.NextWord();
@@ -256,7 +267,8 @@ void ark::guard::KeepOptionParser::GetClassAnnotationNameAndAccessFlags(std::str
 
         uint32_t accessFlag = GetClassAccessFlags(strippedWord);
         ARK_GUARD_ASSERT(accessFlag == INVALID_MODIFIERS, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "ClassSpecification parsing failed: unknown access flag:" + strippedWord);
+                         "ClassSpecification parsing failed: unknown access flag: '" + strippedWord +
+                             "'.\nCurrent line:\n" + wordReader_.GetCurrentLine());
 
         if (accessFlag == abckit_wrapper::AccessFlags::ANNOTATION) {
             nextWord_ = wordReader_.NextWord();
@@ -271,7 +283,7 @@ void ark::guard::KeepOptionParser::GetClassAnnotationNameAndAccessFlags(std::str
         } else {
             unSetAccessFlags |= accessFlag;
         }
-        CheckAccessFlags(setAccessFlags, unSetAccessFlags, strippedWord);
+        CheckAccessFlags(setAccessFlags, unSetAccessFlags, strippedWord, wordReader_.GetCurrentLine());
         if (IsTypeDeclarations(strippedWord)) {
             break;
         }
@@ -293,14 +305,15 @@ void ark::guard::KeepOptionParser::GetClassTypeDeclarations(uint32_t &setTypeDec
 
     uint32_t typeDeclaration = GetTypeDeclarations(strippedWord);
     ARK_GUARD_ASSERT(typeDeclaration == INVALID_MODIFIERS, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: unknown type declarations:" + strippedWord);
+                     "ClassSpecification parsing failed: unknown type declarations: '" + strippedWord +
+                         "'.\nCurrent line:\n" + wordReader_.GetCurrentLine());
 
     if (!negated) {
         setTypeDeclarations |= typeDeclaration;
     } else {
         unSetTypeDeclarations |= typeDeclaration;
     }
-    CheckTypeDeclarations(setTypeDeclarations, unSetTypeDeclarations, strippedWord);
+    CheckTypeDeclarations(setTypeDeclarations, unSetTypeDeclarations, strippedWord, wordReader_.GetCurrentLine());
 }
 
 /*
@@ -357,7 +370,8 @@ void ark::guard::KeepOptionParser::ParseMemberSpecificationArguments(ClassSpecif
 
     // parse memberName part
     std::string memberName = StringUtil::ConvertWildcardToRegex(nextWord_);
-    if (HandleWildcardMemberSpecification(annotationName, setAccessFlags, unSetAccessFlags, specification)) {
+    if (HandleWildcardMemberSpecification(annotationName, setAccessFlags, unSetAccessFlags, memberName,
+                                          specification)) {
         return;
     }
 
@@ -370,7 +384,9 @@ void ark::guard::KeepOptionParser::ParseMemberSpecificationArguments(ClassSpecif
     }
 
     ARK_GUARD_ABORT(ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                    "ClassSpecification parsing failed: the format of member part of class_specification is incorrect");
+                    "ClassSpecification parsing failed: the format of member part of class_specification is incorrect. "
+                    "The member name is '" +
+                        memberName + "'.\nCurrent line:\n" + wordReader_.GetCurrentLine());
 }
 
 /*
@@ -401,7 +417,7 @@ void ark::guard::KeepOptionParser::GetMemberAnnotationNameAndAccessFlags(std::st
         } else {
             unSetAccessFlags |= accessFlag;
         }
-        CheckAccessFlags(setAccessFlags, unSetAccessFlags, strippedWord);
+        CheckAccessFlags(setAccessFlags, unSetAccessFlags, strippedWord, wordReader_.GetCurrentLine());
 
         nextWord_ = wordReader_.NextWord();
     }
@@ -413,6 +429,7 @@ void ark::guard::KeepOptionParser::GetMemberAnnotationNameAndAccessFlags(std::st
  */
 bool ark::guard::KeepOptionParser::HandleWildcardMemberSpecification(const std::string &annotationName,
                                                                      uint32_t setAccessFlags, uint32_t unSetAccessFlags,
+                                                                     const std::string &memberName,
                                                                      ClassSpecification &specification)
 {
     bool isStar = nextWord_ == ConfigurationConstants::ANY_CLASS_MEMBER_KEYWORD;
@@ -429,29 +446,29 @@ bool ark::guard::KeepOptionParser::HandleWildcardMemberSpecification(const std::
     }
 
     if (isStar) {
-        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, nextWord_);
+        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
         auto fieldSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
         fieldSpecification.SetKeepMember(true);
         specification.AddField(std::move(fieldSpecification));
 
-        CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, nextWord_);
+        CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
         auto methodSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
         methodSpecification.SetKeepMember(true);
         specification.AddMethod(std::move(methodSpecification));
     } else if (isFields) {
-        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, nextWord_);
+        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
         auto fieldSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
         fieldSpecification.SetKeepMember(true);
         specification.AddField(std::move(fieldSpecification));
     } else if (isMethods) {
-        CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, nextWord_);
+        CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
         auto methodSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
         methodSpecification.SetKeepMember(true);
         specification.AddMethod(std::move(methodSpecification));
     }
 
     // Ensure the separator keyword is present
-    CheckSemicolonKeyword(nextWord_);
+    CheckSemicolonKeyword(nextWord_, wordReader_.GetCurrentLine());
     return true;
 }
 
@@ -464,7 +481,7 @@ bool ark::guard::KeepOptionParser::HandleFieldSpecification(const std::string &a
                                                             ClassSpecification &specification)
 {
     if (nextWord_ == ConfigurationConstants::SEMICOLON_KEYWORD) {
-        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName);
+        CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
         auto fieldSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
         fieldSpecification.SetMemberInfo(memberName, "", "");
         specification.AddField(std::move(fieldSpecification));
@@ -490,9 +507,9 @@ bool ark::guard::KeepOptionParser::HandleFieldSpecification(const std::string &a
         nextWord_ = wordReader_.NextWord();
     }
 
-    CheckSemicolonKeyword(nextWord_);
+    CheckSemicolonKeyword(nextWord_, wordReader_.GetCurrentLine());
 
-    CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName);
+    CheckFieldAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
     auto fieldSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
     fieldSpecification.SetMemberInfo(memberName, memberType, memberValue);
     specification.AddField(std::move(fieldSpecification));
@@ -515,16 +532,17 @@ bool ark::guard::KeepOptionParser::HandleMethodSpecification(const std::string &
 
     nextWord_ = wordReader_.NextWord();
     ARK_GUARD_ASSERT(nextWord_ != ConfigurationConstants::COLON_KEYWORD, ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                     "ClassSpecification parsing failed: the expect character is " +
-                         std::string(ConfigurationConstants::COLON_KEYWORD) + " but actual character is " + nextWord_);
+                     "ClassSpecification parsing failed: the expect character is '" +
+                         std::string(ConfigurationConstants::COLON_KEYWORD) + "', but actual character is '" +
+                         nextWord_ + "'.\nCurrent line:\n" + wordReader_.GetCurrentLine());
 
     nextWord_ = wordReader_.NextWord();  // skip COLON_KEYWORD
     std::unordered_set<std::string_view> delimiters = {ConfigurationConstants::SEMICOLON_KEYWORD};
     std::string returnType = GetMemberType(delimiters);
 
-    CheckSemicolonKeyword(nextWord_);
+    CheckSemicolonKeyword(nextWord_, wordReader_.GetCurrentLine());
 
-    CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, memberName);
+    CheckMethodAccessFlags(setAccessFlags, unSetAccessFlags, memberName, wordReader_.GetCurrentLine());
     auto methodSpecification = MemberSpecification(annotationName, setAccessFlags, unSetAccessFlags);
     methodSpecification.SetMemberInfo(memberName, arguments, returnType);
     specification.AddMethod(std::move(methodSpecification));

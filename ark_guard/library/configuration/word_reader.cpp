@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,7 +163,7 @@ std::string ark::guard::WordReader::HandleQuotedWord(char startCharacter)
     do {
         currentLinePos_++;
         ARK_GUARD_ASSERT(currentLinePos_ == currentLine_.length(), ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-                         "ClassSpecification parsing failed: missing closing quote");
+                         "ClassSpecification parsing failed: missing closing quote.\nCurrent line:\n" + currentLine_);
     } while (currentLinePos_ < currentLine_.length() && currentLine_[currentLinePos_] != startCharacter);
     currentWord_ = currentLine_.substr(startPos, currentLinePos_ - startPos);
     currentLinePos_++;
