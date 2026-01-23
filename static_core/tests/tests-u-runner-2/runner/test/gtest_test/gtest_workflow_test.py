@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import os
+import shutil
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -75,6 +76,9 @@ class GTestFlowTest(TestCase):
             self.assertEqual(test.gtest_class, "AnyCallTest")
             self.assertIn(test.gtest_name, stdout)
 
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('sys.argv', ["runner.sh", "ani_tests_wf", "ani_suite", "--test-file",
@@ -101,6 +105,9 @@ class GTestFlowTest(TestCase):
         self.assertEqual(test.gtest_name, test_name)
         self.assertEqual(test.path, path_to_test)
 
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)
+
     @patch('runner.utils.get_config_workflow_folder', data_folder)
     @patch('runner.utils.get_config_test_suite_folder', data_folder)
     @patch('runner.suites.test_suite.TestSuite._set_explicit_list', test_list)
@@ -119,3 +126,6 @@ class GTestFlowTest(TestCase):
 
         test = next(iter(tests))
         self.assertEqual(test.test_id, test_from_list)
+
+        work_dir = Path(os.environ["WORK_DIR"])
+        shutil.rmtree(work_dir, ignore_errors=True)

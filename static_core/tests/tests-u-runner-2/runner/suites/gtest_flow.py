@@ -62,8 +62,8 @@ class GTestFlow(ITestFlow, GTest):
     def do_run(self) -> Self:
         steps = list(self.test_env.config.workflow.steps)
         if not steps:
-            self.passed = True
-            self.fail_kind = 'PASSED'
+            self.passed = None
+            self.fail_kind = 'None'
 
         for step in steps:
             passed, report, fail_kind = self._do_run_one_step(step)
