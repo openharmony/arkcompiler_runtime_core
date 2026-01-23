@@ -562,7 +562,7 @@ name is expected.
     let a_byte = new byte
     let an_integer = new int
     console.log (a_number, a_byte, an_integer)
-    // Output is: 0 0 0 
+    // Output is: 0 0 0
 
 
 .. index::
@@ -733,7 +733,7 @@ discussed in :ref:`Error Handling`.
    additive expression
    error
    integer operator
-   
+
 
 Predefined constructors, methods, and constants for *integer types*
 are parts of the |LANG| :ref:`Standard Library`.
@@ -906,7 +906,7 @@ Any floating-point type value can be cast to or from any numeric type (see
 
 Conversions between floating-point types and type ``boolean`` are
 not allowed. However, the value of floating-point type can be used
-as a logical condition in some cases 
+as a logical condition in some cases
 (see :ref:`Extended Conditional Expressions`)
 
 Operators on floating-point numbers, except the remainder operator (see
@@ -1133,9 +1133,9 @@ supertype of :ref:`Types void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
-.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any 
+.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any
    non-nullable object returning a string representation of that object. This is
-   used in the examples in this document. 
+   used in the examples in this document.
 
 |
 
@@ -1239,22 +1239,22 @@ Types ``void`` or ``undefined``
     frontend_status: Done
 
 Type names ``void`` and ``undefined`` in fact refer to the same type with the
-single value named ``undefined`` (see :ref:`Undefined Literal`). 
+single value named ``undefined`` (see :ref:`Undefined Literal`).
 
 .. code-block:: typescript
    :linenos:
 
     function f1 (): void {
         return undefined // OK
-    } 
+    }
 
     function f2 (): undefined {
         return // OK
-    } 
+    }
 
     function f3 () {
         return undefined // OK
-    } 
+    }
 
     let v: void = undefined
     let u: undefined = undefined
@@ -1308,7 +1308,7 @@ function, or method as follows:
    const f1: F1<void> = (): void => {}
    const f2: F1<void> = () => {}
    const f3: F1<void> = (): undefined => { return undefined }
-   
+
    // Array literals can be assigned to the array of void type in any form
    type A1<T> = T[]
    type A2<T> = Array<T>
@@ -1651,7 +1651,7 @@ requirement.
   performance.
 - *Fixed-Size arrays* have no methods defined.
 
-Any array type is a class type that has an appropritate class in the 
+Any array type is a class type that has an appropritate class in the
 :ref:`Standard Library`. It means that array types are subtypes of
 ``Object``, and that they can be used at any place where a class
 name is expected.
@@ -1922,28 +1922,16 @@ access to tuple elements:
    tuple[0] = 42
    console.log (tuple[0], tuple[4]) // `42 42` be printed
 
-A tuple has no property ``length``, and the following code legal in |TS|
-causes a :index:`compile-time error` in |LANG|:
+The number of elements of a tuple is known as *tuple length*, and can
+be accessed by using the property ``length``:
 
 .. code-block:: typescript
    :linenos:
 
-   let tuple : [number, string]  = [1, "" ]
-   for (let index = 0; index < tuple.length; index++ ) {  // compile-time error
-                                                          // no 'length' property
-      let element: Object = tuple[index]
-      // do something with the element
-   }
+   let tuple: [number, string]  = [1, "" ]
+   console.log(tuple.length) // output: 2
 
-Any tuple type is assignable (see :ref:`Assignability`) to class
-``Object`` (see :ref:`Type Object`).
-
-An empty tuple is a corner case. It is only added to support |TS| compatibility:
-
-.. code-block:: typescript
-   :linenos:
-
-   let empty: [] = [] // empty tuple with no elements in it
+Using the property ``length`` make sense for :ref:`Type Tuple`.
 
 .. index::
    tuple type
@@ -1962,6 +1950,10 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
    square bracket
    compatibility
    access
+
+Any tuple type is subtype of type ``Tuple``
+(see :ref:`Type Tuple`). Subtyping for tuples is discussed
+in :ref:`Subtyping for Tuple Types`.
 
 |
 
@@ -1998,6 +1990,67 @@ call. Otherwise, a :index:`compile-time error` occurs as follows:
 
 |
 
+.. _Type Tuple:
+
+Type ``Tuple``
+==============
+
+.. meta:
+    frontend_status: None
+
+Type ``Tuple`` is a predefined type that is an *abstract superclass*
+of any tuple type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let pair: [number, string] = [1, "abc"]
+
+    let a: Tuple = pair // ok, subtyping
+
+An empty tuple type is identical to ``Tuple``:
+
+.. code-block:: typescript
+   :linenos:
+
+    let empty: [] = [] // empty tuple with no elements in it
+
+Type ``Tuple`` is preserved by :ref:`Type Erasure`, so it can be used
+in :ref:`InstanceOf Expression` and :ref:`Cast Expression`.
+
+An element of a ``Tuple`` value cannot be accessed directly. A developer must use the
+``unsafeGet`` or  ``unsafeSet`` methods instead, which has the following signatures:
+
+.. code-block:: typescript
+   :linenos:
+
+    unsafeGet(index: int): Any
+    unsafeSet(index: int, value: Any): void
+
+A runtime error error is caused in calls of these methods, if:
+
+-  ``index`` value is less than zero; or
+-  ``index`` value is greater or equal than tuple length.
+
+Methods usage is illustrated below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function modify(x: Object) {
+        if (x instanceof Tuple) {
+            console.log(x.unsafeGet(0))
+            x.unsafeSet(1, "aa")
+        }
+    }
+
+    let a: [string, string] = ["aa", "bb"]
+    modify(a) // ok
+
+    let b: [string] = ["aa"]
+    modify(b)     // runtime error in the 'modify' body
+
+|
 
 .. _Function Types:
 

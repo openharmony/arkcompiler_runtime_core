@@ -814,6 +814,38 @@ itself.
 
 |
 
+.. _Subtyping for Tuple Types:
+
+Subtyping for Tuple Types
+=========================
+
+.. meta:
+    frontend_status: None
+
+Any tuple type is a subtype of type ``Tuple`` (see :ref:`Type Tuple`).
+
+Tuple type ``T`` (``P``:sub:`1` ``, ... , P``:sub:`n`) is a subtype of
+type ``S`` (``P``:sub:`1` ``, ... , P``:sub:`m`), where ``n`` :math:`\geq` ``m``.
+I.e., a tuple type is a subtype of a tuple type with fewer identical
+constituent types  (:ref:`Type Identity`).
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(t1: [number], t2: [string, number]) {
+        let a: [] = t1       // ok
+        let b: [string] = t2 // ok
+
+        t1 = t2 // compile-time error
+        t2 = t1 // compile-time error
+
+        let d: [string, number, boolean] = ["a", 1, true]
+        let t2 = d // ok
+        let d = t2 // compile-time error
+    }
+
+|
+
 .. _Subtyping for Union Types:
 
 Subtyping for Union Types
@@ -3198,7 +3230,7 @@ used:
    :linenos:
 
      function goo(x: int): void {}
-     function goo(x: int): void {}  // compile-time error, overload-equivalent 
+     function goo(x: int): void {}  // compile-time error, overload-equivalent
                                     // non-generic functions
 
      function foo<T>(x: T) {}
@@ -4175,11 +4207,15 @@ member is excluded in the right-hand-side column for brevity):
    * - :ref:`String Literal Types`
      - ``string``
    * - Awaited<T>
-     - - if ``T`` is neither a type parameter nor a subtype of ``Promise``, then 
+     - - if ``T`` is neither a type parameter nor a subtype of ``Promise``, then
          the Effective type (Awaited<T>) is Effective type (T);
-       - if ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>) is Effective type (U);
-       - if ``T`` is a type parameter with ``in`` variance, then the Effective type (Awaited<T>) is ``never``;
-       - if ``T`` is a type parameter with ``out`` variance or no variance specified, then the Effective type (Awaited<T>) is Effective type (upper-bound(T)).
+       - if ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>)
+         is Effective type (U);
+       - if ``T`` is a type parameter with ``in`` variance, then the Effective
+         type (Awaited<T>) is ``never``;
+       - if ``T`` is a type parameter with ``out`` variance or no variance
+         specified, then the Effective type (Awaited<T>) is Effective type
+         (upper-bound(T)).
    * - NonNullable<T>
      - Effective type (T) - ``null``
    * - Partial<T>
@@ -4257,7 +4293,7 @@ runtime errors ensure type safety of program execution:
     }
 
     let a: A<number> = unsafe(new A<string>("a")) // A<string> resides in A<number>
-    
+
     let n = a.field // An exception is raised as the expected type is number but the actual type is string
 
 .. index::
