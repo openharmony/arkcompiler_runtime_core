@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,7 @@ SpillFillEncoder::SpillFillEncoder(Codegen *codegen, Inst *inst)
       fl_(codegen->GetFrameLayout())
 {
     spReg_ = codegen->GetTarget().GetStackReg();
+    fpReg_ = codegen->GetTarget().GetFrameReg();
 }
 
 void SpillFillEncoder::EncodeSpillFill()
@@ -213,7 +214,7 @@ size_t SpillFillEncoder::EncodeImmToX(const SpillFillData &sf)
     }
 
     ASSERT(sf.GetDst().IsAnyStack());  // imm -> stack
-    auto dstMem = codegen_->GetMemRefForSlot(sf.GetDst());
+    auto dstMem = codegen_->GetMemRefForSlot(codegen_->GetFrameInfo()->GetSpillsOffsetOrigin(), sf.GetDst());
     auto sfType = sf.GetCommonType();
     EncodeImmWithCorrectType(sfType, dstMem, constInst);
     return 1U;
@@ -229,10 +230,9 @@ size_t SpillFillEncoder::EncodeRegisterToX(const SpillFillData &sf, const SpillF
     }
 
     ASSERT(sf.GetDst().IsAnyStack());
-    auto offset = codegen_->GetStackOffset(sf.GetDst());
-    auto memRef = MemRef(spReg_, offset);
 
     if (sf.GetDst().IsStackArgument()) {  // register -> stack_arg
+        auto memRef = codegen_->GetMemRefForSlot(CFrameLayout::OffsetOrigin::SP, sf.GetDst());
         auto srcReg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetType());
         // There is possible to have sequence to intrinsics with no getter/setter in interpreter:
         // compiled_code->c2i(push to frame)->interpreter(HandleCallVirtShort)->i2c(move to stack)->intrinsic
@@ -244,6 +244,8 @@ size_t SpillFillEncoder::EncodeRegisterToX(const SpillFillData &sf, const SpillF
         return 1U;
     }
 
+    auto memRef = codegen_->GetMemRefForSlot(codegen_->GetFrameInfo()->GetSpillsOffsetOrigin(), sf.GetDst());
+    auto offset = memRef.GetDisp();
     // register -> stack
     auto srcReg = codegen_->ConvertRegister(sf.SrcValue(), sf.GetCommonType());
     // If address is no qword aligned and current group consist of even number of consecutive slots
@@ -261,8 +263,9 @@ size_t SpillFillEncoder::EncodeRegisterToX(const SpillFillData &sf, const SpillF
 
 size_t SpillFillEncoder::EncodeStackToX(const SpillFillData &sf, const SpillFillData *next, int consecutiveOpsHint)
 {
-    auto offset = codegen_->GetStackOffset(sf.GetSrc());
-    auto srcMem = MemRef(spReg_, offset);
+    auto offsetOrigin = codegen_->GetFrameInfo()->GetSpillsOffsetOrigin();
+    auto srcMem = codegen_->GetMemRefForSlot(offsetOrigin, sf.GetSrc());
+    auto offset = srcMem.GetDisp();
     auto typeInfo = Codegen::ConvertDataType(sf.GetType(), codegen_->GetArch());
 
     if (sf.GetDst().IsAnyRegister()) {  // stack -> register
@@ -283,7 +286,7 @@ size_t SpillFillEncoder::EncodeStackToX(const SpillFillData &sf, const SpillFill
 
     // stack -> stack
     ASSERT(sf.GetDst().IsAnyStack());
-    auto dstMem = codegen_->GetMemRefForSlot(sf.GetDst());
+    auto dstMem = codegen_->GetMemRefForSlot(offsetOrigin, sf.GetDst());
     encoder_->EncodeMemCopy(srcMem, dstMem, DOUBLE_WORD_SIZE);  // Stack slot is 64-bit wide
     return 1U;
 }

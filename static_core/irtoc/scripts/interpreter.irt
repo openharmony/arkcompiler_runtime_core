@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,7 +36,8 @@ if Options.arm64?  # other archs have no enough regs
 end
 
 InterpreterValidation = {
-  spills_count_max: 32  # should be synced with SPILL_SLOTS in codegen_interpreter.h
+  # should be synced with IRTOC_NUM_SPILL_SLOTS in irtoc/backend/compiler/constants.h
+  spills_count_max: 32
 }
 
 # Macros:
@@ -511,6 +512,11 @@ macro(:find_catch_block) do
   If(handler_pc, pc).EQ.Unlikely {
     Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
   }
+  if !@compile_for_llvm
+    unwinding_depth = LoadI(%tr).Imm(Constants::MANAGED_THREAD_UNWINDING_DEPTH_OFFSET).u32
+    Intrinsic(:POP_MULTIPLE_INTERPRETER_CALL_RECORDS, unwinding_depth).void
+  end
+
   frame_eh := LoadI(%tr).Imm(Constants::THREAD_FRAME_OFFSET).ptr
   if Options.arm64?
     moffset_eh := get_moffset_frame(frame_eh)
@@ -829,6 +835,11 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     StoreI(frame, advance_pc_imm(pc, size)).Imm(Constants::FRAME_NEXT_INSTRUCTION_OFFSET).ptr
     StoreI(new_frame, pc_int).Imm(Constants::FRAME_INSTRUCTIONS_OFFSET).ptr
     StoreI(%tr, new_frame).Imm(Constants::THREAD_FRAME_OFFSET).ptr
+
+    if !@compile_for_llvm
+      Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
+      Intrinsic(:PUSH_INTERPRETER_CALL_RECORD, method_ptr, pc_int).void
+    end
   }
   load_to_acc_reg(Phi(acc_native, acc).send(acc.type), Phi(acc_tag_native, acc_tag.i64).i64)
   frame := Phi(%frame, new_frame).ptr
@@ -859,6 +870,10 @@ end
 macro(:generic_return) do |copy_lambda|
   frame_flags := LoadI(%frame).Imm(Constants::FRAME_FLAGS_OFFSET).word
   If(And(frame_flags, "Frame::IS_STACKLESS").word, 0).NE.Likely {
+    if !@compile_for_llvm
+      Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
+    end
+
     prev_frame := LoadI(%frame).Imm(Constants::FRAME_PREV_FRAME_OFFSET).ptr
     next_pc := LoadI(prev_frame).Imm(Constants::FRAME_NEXT_INSTRUCTION_OFFSET).ptr
     copy_lambda.call(prev_frame, frame_flags)
@@ -2156,6 +2171,10 @@ macro(:handle_fake_return) do
       Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
     }
 
+    if !@compile_for_llvm
+      Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
+    end
+
     fake_frame := LoadI(%frame).Imm(Constants::FRAME_PREV_FRAME_OFFSET).ptr
     if Options.arm64?
       fake_moffset := get_moffset_frame(fake_frame)
@@ -2364,6 +2383,10 @@ function(:ExecuteImplFast,
   acc := LoadI(frame).Imm(Constants::GET_ACC_OFFSET).ptr
   acc_tag := LoadI(AddI(frame).Imm(Constants::GET_ACC_OFFSET).ptr).Imm(Constants::GET_ACC_MIRROR_OFFSET).i64
 
+  if !@compile_for_llvm
+    Intrinsic(:INIT_INTERPRETER_CALL_RECORD, get_method_ptr_frame(frame), pc).void
+  end
+
   LiveOut(acc).DstReg(regmap[:acc]).ptr
   LiveOut(acc_tag).DstReg(regmap[:acc_tag]).ptr
 
@@ -2394,6 +2417,10 @@ function(:ExecuteImplFastEH,
   # To prevent falling during frame verification, while acc is not initialized
   acc := LoadI(frame).Imm(Constants::GET_ACC_OFFSET).ptr
   acc_tag := LoadI(AddI(frame).Imm(Constants::GET_ACC_OFFSET).ptr).Imm(Constants::GET_ACC_MIRROR_OFFSET).i64
+
+  if !@compile_for_llvm
+    Intrinsic(:INIT_INTERPRETER_CALL_RECORD, get_method_ptr_frame(frame), pc).void
+  end
 
   LiveOut(acc).DstReg(regmap[:acc]).ptr
   LiveOut(acc_tag).DstReg(regmap[:acc_tag]).ptr

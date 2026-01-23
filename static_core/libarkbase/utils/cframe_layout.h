@@ -17,6 +17,7 @@
 #define PANDA_CFRAME_LAYOUT_H
 
 #include "arch.h"
+#include "bit_field.h"
 
 namespace ark {
 
@@ -56,6 +57,16 @@ public:
     static constexpr ssize_t GetOffsetFromSpInBytes(const CFrameLayoutT &fl)
     {
         return GetOffsetFromSpInSlots(fl) * static_cast<ssize_t>(fl.GetSlotSize());
+    }
+    template <class CFrameLayoutT>
+    static constexpr ssize_t GetOffsetFromFpInSlots()
+    {
+        return START;
+    }
+    template <class CFrameLayoutT>
+    static constexpr ssize_t GetOffsetFromFpInBytes(const CFrameLayoutT &fl)
+    {
+        return START * static_cast<ssize_t>(fl.GetSlotSize());
     }
 
 private:
@@ -195,7 +206,12 @@ public:
 
     constexpr ssize_t GetSpillOffsetFromSpInBytes(size_t spillSlot) const
     {
-        return GetSpillOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>(spillSlot);
+        return GetSpillOffset<OffsetOrigin::SP, OffsetUnit::BYTES>(spillSlot);
+    }
+
+    constexpr size_t GetSpillOffsetFromFpInBytes(size_t spillSlot) const
+    {
+        return GetSpillOffset<OffsetOrigin::FP, OffsetUnit::BYTES>(spillSlot);
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
