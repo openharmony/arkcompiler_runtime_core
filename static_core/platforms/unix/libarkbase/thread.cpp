@@ -201,13 +201,12 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
             if (s == 0) {
                 uintptr_t stackHiAddr = ToUintPtr(*stackAddr) + *stackSize;
                 size_t stackSizeLimit = lim.rlim_cur;
-#if defined(USE_HWASAN)
+
                 static constexpr size_t OHOS_DEFAULT_STACK_LIMIT_SIZE = 8_MB;
                 // HWASAN sets stack limit size to unlimited, so we manually set it to default OHOS stack size limit
-                if (stackSizeLimit > OHOS_DEFAULT_STACK_LIMIT_SIZE) {
-                    stackSizeLimit = OHOS_DEFAULT_STACK_LIMIT_SIZE;
-                }
-#endif /* USE_HWASAN */
+                stackSizeLimit = stackSizeLimit == std::numeric_limits<size_t>::max() ? OHOS_DEFAULT_STACK_LIMIT_SIZE
+                                                                                      : stackSizeLimit;
+
                 // for some reason pthread interfaces subtract 1 page from size regardless of guard size
                 uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit + ark::os::mem::GetPageSize();
                 *stackSize = stackSizeLimit;
