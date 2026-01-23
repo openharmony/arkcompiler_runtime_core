@@ -5060,8 +5060,12 @@ The syntax of *multiplicative expression* is presented below:
 
 Multiplicative operators group left-to-right.
 
-Type of each operand in a multiplicative operator must be convertible (see
-:ref:`Numeric Operator Contexts`) to a numeric type (see :ref:`Numeric Types`).
+Type of both operands in a multiplicative operator must be as follows:
+
+- Either ``bigint``; or
+- Convertible (see :ref:`Numeric Operator Contexts`) to a numeric type
+  (see :ref:`Numeric Types`).
+
 Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
@@ -5071,12 +5075,27 @@ Otherwise, a :index:`compile-time error` occurs.
    convertible type
    numeric type
 
-A numeric types conversion (see :ref:`Widening Numeric Conversions`)
-is performed on both operands to ensure that the resultant type is the type of
-the multiplicative expression.
+No implicit conversion is applied to a multiplicative expression with operands of
+type ``bigint``,  and the inferred type is always ``bigint``.
 
-The resultant type of an expression is inferred by the largest type
-after promoting ``byte`` and ``short`` operands to ``int``:
+This behavior is represented by the following example:
+
+.. code-block:: typescript
+
+   // OK, the inferred type of 'i' is ``bigint``
+   let i = 1n * 2n
+   // Compile-time error, one operand is not of 'bigint' type
+   let i = 1n * 2
+
+|
+
+A numeric types conversion (see :ref:`Widening Numeric Conversions`) 
+of an expression with operands convertible (see :ref:`Numeric Operator Contexts`)
+to a numeric type is performed on both operands to ensure
+that the resultant type is the type of the multiplicative expression.
+
+The resultant type of an expression with a numeric operand is inferred from
+the largest type after promoting ``byte`` and ``short`` operands to ``int``:
 
 - ``double`` if any operand is ``double``;
 - ``float`` if any operand is ``float``, and no operand is ``double``;
@@ -5141,12 +5160,15 @@ its operands.
 Multiplication is a commutative operation if operand expressions have no
 side effects.
 
+Bigint multiplication is associative.
+
 Integer multiplication is associative when all operands are of the same type.
 
 Floating-point multiplication is not associative.
 
-Type of a *multiplication expression* is the 'largest' (see
-:ref:`Numeric Types`) type of its operands.
+Type of a *multiplication expression* with numeric operands
+is the *largest* type (see :ref:`Numeric Types`) of its operands *after* aplying
+:ref:`Widening numeric conversions`.
 
 If overflow occurs during integer multiplication, then:
 
@@ -5238,6 +5260,13 @@ Division
 The binary operator ``'/'`` performs division and returns the quotient of its
 left-hand-side and right-hand-side expressions (``dividend`` and ``divisor``
 respectively).
+
+Bigint division rounds toward *0*, i.e., the quotient of bigint operands
+*n* and *d* is the ``bigint`` value *q* with the largest possible magnitude that
+satisfies :math:`|d\cdot{}q|\leq{}|n|`.
+
+If the divisor value of the ``bigint`` division operator is *0n*, then a
+:index:`runtime error` is thrown during execution.
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
@@ -5343,8 +5372,9 @@ The evaluation of a floating-point division operator ``'/'`` never throws an
 error despite possible overflow, underflow, division by zero, or loss of
 information.
 
-The type of the *division expression* is the '*largest*' numeric type (see
-:ref:`Numeric Types`) of its operands.
+The type of a *division expression* with operands of numeric types is the
+*largest* numeric type (see :ref:`Numeric Types`) of its operands  *after* aplying
+:ref:`Widening numeric conversions`.
 
 
 .. index::
@@ -5383,6 +5413,13 @@ implied division.
 
 The remainder operator in |LANG| accepts floating-point operands (unlike in
 C and C++).
+
+The remainder operation on ``bigint`` operands produces a result value,
+i.e., :math:`(a/b)*b+(a\%b)` equals *a*. No implicit conversion is applied
+to an operand.
+
+If the divisor value of the ``bigint`` remainder operator is *0n*, then a
+:index:`runtime error` is thrown during execution.
 
 The remainder operation on integer operands produces a result value, i.e.,
 :math:`(a/b)*b+(a\%b)` equals *a*. Numeric type conversion on remainder
@@ -5491,8 +5528,9 @@ The evaluation of the floating-point remainder operator ``'%'`` never throws
 an error, even if the right-hand operand is zero. Overflow, underflow, or
 loss of precision cannot occur.
 
-The type of the *remainder expression* is the '*largest*' numeric type (see
-:ref:`Numeric Types`) of its operands.
+The type of a *remainder expression* with numeric operands is the
+*largest* numeric type (see :ref:`Numeric Types`) of its operands   *after* aplying
+:ref:`Widening numeric conversions`.
 
 
 .. index::
@@ -5546,6 +5584,9 @@ both operands are as follows:
 
 Any other combination of operand types causes a :index:`compile-time error`.
 
+If the second operand of type ``bigint`` is negative, then a
+:index:`runtime error` is thrown.
+
 Both variants of the operator ``'**'`` are represented in example below:
 
 .. code-block:: typescript
@@ -5556,7 +5597,10 @@ Both variants of the operator ``'**'`` are represented in example below:
    let c: int = 2
    let d: int = 10
 
-   let w = a ** 2n // OK 'bigint' ** 'bigint'
+   let v = a ** 2n // OK 'bigint' ** 'bigint'
+   let u = a ** 0n // OK 'bigint' ** 'bigint'
+   let w = a ** -1n // Runtime error, exponent must be non-negative
+
    let x = a ** c // compile-time error, 'c' is not 'bigint'
    let y = b ** d // 'd' is converted to 'double'
    let z = c ** d // both 'c' and 'd' are converted to 'double'
@@ -5628,22 +5672,35 @@ The syntax of *additive expression* is presented below:
 
 Additive operators group left-to-right.
 
-If either operand of the operator is ``'+'`` of type ``string``, then the
-operation is a string concatenation (see :ref:`String Concatenation`). In all
-other cases, type of each operand of the operator ``'+'`` must be
-convertible (see :ref:`Widening Numeric Conversions`) to a numeric type (see
-:ref:`Numeric Types`). Otherwise, a :index:`compile-time error` occurs.
+The following rules apply where the operator  ``'+'`` is used:
 
-Type of each operand of the binary operator ``'-'`` must be convertible
-(see :ref:`Widening Numeric Conversions`) to a numeric type (see
-:ref:`Numeric Types`) in all cases. Otherwise, a :index:`compile-time error`
-occurs.
+- If either operand is of type ``string``, then the operation
+  is a string concatenation (see :ref:`String Concatenation`).
+- If both operands are of type ``bigint``, then no implicit
+  conversion is applied, and the inferred type is ``bigint``.
+- In all other cases, type of each operand must be
+  convertible (see :ref:`Widening Numeric Conversions`) to
+  a numeric type (see :ref:`Numeric Types`).
 
-Type of *Additive expression* is determined as follows:
+Otherwise, a :index:`compile-time error` occurs.
 
--  ``string`` if any operand is of type ``string``;
-- Type inferred after widening operands of numeric types by the rules explained
-  in the example in :ref:`Multiplicative Expressions`.
+The following rules apply where the operator  ``'-'`` is used:
+
+- Either both operands must be of type ``bigint``; or
+- Type of each operand of a binary operator must be convertible
+  (see :ref:`Widening Numeric Conversions`) to a numeric type (see
+  :ref:`Numeric Types`).
+
+Otherwise, a :index:`compile-time error` occurs.
+
+Type of an *additive expression* with a valid 
+combination of types is determined as follows:
+
+-  If any operand is of type ``string``, then ``string``;
+-  If both operands are of type ``bigint``, then ``bigint``;
+-  If both operands are convertible to a numeric type, then the type inferred
+   after widening operands of numeric types by the rules explained in the example
+   in :ref:`Multiplicative Expressions`.
 
 .. index::
    additive expression

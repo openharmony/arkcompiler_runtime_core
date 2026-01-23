@@ -1493,6 +1493,8 @@ The consequences are as follows:
 - Relational operators that use an operand of type ``bigint`` along with an
   operand of another type are illegal. Attempting to use such a relational
   operator produces a :index:`compile-time error`.
+- Binary arithmetic expressions that use an operand of type ``bigint`` along
+  with an operand of another type are illegal and produce a :index:`compile-time error`.
 - The equality expression with ``bigint`` against non-``bigint`` always returns
   ``false``, and causes a compile-time warning.
 
