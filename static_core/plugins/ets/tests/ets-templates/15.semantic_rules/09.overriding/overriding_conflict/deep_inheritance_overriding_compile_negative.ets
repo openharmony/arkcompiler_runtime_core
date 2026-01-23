@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{%- for case in cases %}
 
 /*---
-desc: Full declaration with reference arguments, {{c.desc}}
+desc: >-
+    Test for some overridden method conflict.
+    Special case is: {{ case.descr }}
+tags: [compile-only, negative] 
+expected_out: "{{ case.expected_out }}"
 ---*/
 
+{{ case.decl }}      
+
 function main() {
-    {{c.impl|indent}}
+  {{ case.call }}
 }
 
-{% endfor %}
+{%- endfor %}
