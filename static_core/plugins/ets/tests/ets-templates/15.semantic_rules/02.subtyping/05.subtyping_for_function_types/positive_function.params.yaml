@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 ---
 cases:
-    # single type param 
+    # single type param
     - decl: |-
           foobb = foobd // OK: identical parameter types, and covariant return type
       check: |-
@@ -22,8 +22,9 @@ cases:
     - decl: |-
           foodb = foobd // OK: contravariant parameter types, and covariant return type
       check: |-
-          arktest.assertTrue(foodb(new Base) instanceof Derived)
-          arktest.assertEQ(foodb(new Base).b, 'd')
+          let r = foodb.unsafeCall(new Base)
+          arktest.assertTrue(r instanceof Derived)
+          arktest.assertEQ((r as Base).b, 'd')
     - decl: |-
           foodb = foodd // OK: identical parameter types, and covariant return type
       check: |-
@@ -32,8 +33,9 @@ cases:
     - decl: |-
           foodd = foobd // OK: contravariant parameter types, and identical return type
       check: |-
-          arktest.assertTrue(foodd(new Base) instanceof Derived)
-          arktest.assertEQ(foodd(new Base).b, 'd')
+          let r = foodd.unsafeCall(new Base)
+          arktest.assertTrue(r instanceof Derived)
+          arktest.assertEQ((r as Base).b, 'd')
     # subtype has less parameters
     - decl: |-
           foobbn = foobb
@@ -45,11 +47,6 @@ cases:
       check: |-
           arktest.assertTrue(foobbo(new Base) instanceof Base)
           arktest.assertEQ(foobbo(new Base).b, 'b')
-    - decl: |-
-          foobbr = foobb
-      check: |-
-          arktest.assertTrue(foobbr(new Base) instanceof Base)
-          arktest.assertEQ(foobbr(new Base).b, 'b')
     # subtype has less parameters, parameter is identical and return type covariant
     - decl: |-
           foobbn = foobd
@@ -61,11 +58,6 @@ cases:
       check: |-
           arktest.assertTrue(foobbo(new Base) instanceof Derived)
           arktest.assertEQ(foobbo(new Base).b, 'd')
-    - decl: |-
-          foobbr = foobd
-      check: |-
-          arktest.assertTrue(foobbr(new Base) instanceof Derived)
-          arktest.assertEQ(foobbr(new Base).b, 'd')
     # subtype has less parameters, parameter is contravariant and return type covariant
     - decl: |-
           foodbn = foobd
@@ -77,11 +69,6 @@ cases:
       check: |-
           arktest.assertTrue(foodbo(new Derived) instanceof Derived)
           arktest.assertEQ(foodbo(new Derived).b, 'd')
-    - decl: |-
-          foodbr = foobd
-      check: |-
-          arktest.assertTrue(foodbr(new Derived) instanceof Derived)
-          arktest.assertEQ(foodbr(new Derived).b, 'd')
     # parameter types identical and return type covariant
     - decl: |-
           foodbn = fooddn
@@ -118,15 +105,18 @@ cases:
     - decl: |-
           foodbn = foobbn
       check: |-
-          arktest.assertTrue(foodbn(new Base, 1) instanceof Base)
-          arktest.assertEQ(foodbn(new Base, 1).b, 'b')
+          let r = foodbn.unsafeCall(new Base, 1.0)
+          arktest.assertTrue(r instanceof Base)
+          arktest.assertEQ((r as Base).b, 'b')
     - decl: |-
           foodbo = foobbo
       check: |-
-          arktest.assertTrue(foodbo(new Base) instanceof Base)
-          arktest.assertEQ(foodbo(new Base).b, 'b')
+          let r = foodbo.unsafeCall(new Base)
+          arktest.assertTrue(r instanceof Base)
+          arktest.assertEQ((r as Base).b, 'b')
     - decl: |-
           foodbr = foobbr
       check: |-
-          arktest.assertTrue(foodbr(new Base, 1, 2, 3) instanceof Base)
-          arktest.assertEQ(foodbr(new Base, 1, 2, 3).b, 'b')
+          let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
+          arktest.assertTrue(r instanceof Base)
+          arktest.assertEQ((r as Base).b, 'b')

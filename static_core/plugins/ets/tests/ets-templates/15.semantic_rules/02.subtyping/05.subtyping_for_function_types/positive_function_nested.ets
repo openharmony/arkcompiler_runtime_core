@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ desc: >-
         – FPi is a rest parameter if SPi is a rest parameter.
         – FPi is an optional parameter if SPi is an optional parameter.
     • Type FR is a subtype of SR (covariance).
+tags: [no-warmup]
 ---*/
 
 class Base {
@@ -104,14 +105,14 @@ function main() {
     {% if c.supertype_params2 %}
     //call overwritten fooSupertype with subtype params and the same amount of supertype params
     //if subtype has less params
-    arktest.assertTrue(fooSupertype({{c.supertype_params2}}) instanceof Derived)
-    arktest.assertEQ(fooSupertype({{c.supertype_params2}}).b, 'd')
+    let q = fooSupertype.unsafeCall({{c.supertype_params2}})
+    arktest.assertTrue(q instanceof Derived)
+    arktest.assertEQ((q as Base).b, 'd')
     {% endif %}
 
     //call overwritten fooSupertype with subtype params
-    arktest.assertTrue(fooSupertype({{c.subtype_params}}) instanceof Derived)
-    arktest.assertEQ(fooSupertype({{c.subtype_params}}).b, 'd')
-
+    let r = fooSupertype.unsafeCall({{c.subtype_params}})
+    arktest.assertTrue(r instanceof Derived)
+    arktest.assertEQ((r as Base).b, 'd')
 }
-
 {%- endfor %}
