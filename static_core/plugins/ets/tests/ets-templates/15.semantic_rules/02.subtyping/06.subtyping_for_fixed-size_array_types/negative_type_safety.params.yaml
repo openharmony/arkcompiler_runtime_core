@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,46 @@ cases:
           Boolean
       value: |-
           [true, false, true]
+      dtype: |-
+          Object
+      newValue: |-
+          new Object()
+    - stype: |-
+          J
+      value: |-
+          [{j: 1}, {j: 2}]
+      dtype: |-
+          I
+      newValue: |-
+          {}
+    - stype: |-
+          bigint
+      value: |-
+          [123n, 1_123n, -123n]
+      dtype: |-
+          Object
+      newValue: |-
+          new Object()
+    - stype: |-
+          '1'|'2'|'3'
+      value: |-
+          ['1','2','3']
+      dtype: |-
+          '1'|'2'|'3'|number|'4'
+      newValue: |-
+          1
+    - stype: |-
+          [Base, J, string]
+      value: |-
+          [[new Base(), {j: 1}, 'a'], [new Derived(), {j: 2}, 'b']]
+      dtype: |-
+          Object
+      newValue: |-
+          new Object
+    - stype: |-
+          string[]
+      value: |-
+          [["a", "b"],["a", "b"]]
       dtype: |-
           Object
       newValue: |-

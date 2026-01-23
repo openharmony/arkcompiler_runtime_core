@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-Semantic error ESE0318: Type 'FixedArray<Any>' cannot be assigned to type 'FixedArray<undefined>'
+Semantic error ESE0318: Type 'FixedArray<Object>' cannot be assigned to type 'FixedArray<(String|Double)>'
