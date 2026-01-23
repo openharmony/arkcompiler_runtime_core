@@ -366,6 +366,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/reg_alloc_resolver_test.cpp
     tests/rpo_test.cpp
     tests/savestate_optimization_tests.cpp
+    tests/savestate_suspend_checker_test.cpp
     tests/scheduler_test.cpp
     tests/select_optimization_test.cpp
     tests/split_resolver_test.cpp

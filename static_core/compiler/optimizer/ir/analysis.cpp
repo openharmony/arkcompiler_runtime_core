@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,6 +404,7 @@ bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
         // We check SaveState because if some of its users cannot be removed, result of OverflowCheck
         // may be used in interpreter after deoptimization
         case Opcode::SaveState:
+        case Opcode::SaveStateDeoptimize:
             for (auto &user : inst->GetUsers()) {
                 auto userInst = user.GetInst();
                 bool canRemove;

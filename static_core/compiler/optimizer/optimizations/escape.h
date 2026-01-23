@@ -354,6 +354,7 @@ private:
     void VisitNullCheck(Inst *inst);
     void VisitSaveState(Inst *inst);
     void VisitSaveStateDeoptimize(Inst *inst);
+    void VisitSaveStateSuspend(Inst *inst);
     void VisitSafePoint(Inst *inst);
     void VisitGetInstanceClass(Inst *inst);
     void VisitBlockInternal(BasicBlock *block);

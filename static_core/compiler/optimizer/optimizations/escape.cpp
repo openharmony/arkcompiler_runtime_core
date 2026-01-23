@@ -1642,6 +1642,11 @@ void EscapeAnalysis::VisitSaveStateDeoptimize(Inst *inst)
     FillVirtualInputs(inst);
 }
 
+void EscapeAnalysis::VisitSaveStateSuspend(Inst *inst)
+{
+    FillVirtualInputs(inst);
+}
+
 void EscapeAnalysis::VisitSafePoint(Inst *inst)
 {
     FillVirtualInputs(inst);

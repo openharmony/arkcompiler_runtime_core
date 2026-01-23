@@ -157,6 +157,9 @@ bool GraphChecker::Check()
     if (NeedCheckSaveState()) {
         // Check that objects in stack.
         CheckSaveStateInputs();
+        // NOTE(compiler): Run only after special pass which will SSS inputs
+        // Check that SaveStateSuspend includes all live values.
+        CheckSaveStateSuspendInputs();
         // Check that between savestate and it's runtime call user have not reference insts.
         CheckSaveStatesWithRuntimeCallUsers();
     }
@@ -1152,6 +1155,73 @@ void GraphChecker::CheckSaveStateInputs()
     }
 #endif
 }
+
+#ifdef COMPILER_DEBUG_CHECKS
+void GraphChecker::CheckSaveStateSuspendInputs()
+{
+    for (auto &block : GetGraph()->GetBlocksRPO()) {
+        for (const auto &inst : block->AllInsts()) {
+            if (inst->GetOpcode() != Opcode::SaveStateSuspend) {
+                continue;
+            }
+            auto ss = inst->CastToSaveStateSuspend();
+            CheckSaveStateSuspendInputsForInstruction(ss);
+        }
+    }
+}
+
+void GraphChecker::CheckSaveStateSuspendInputsForInstruction(SaveStateInst *ss)
+{
+    // For each instruction with destination register that dominates ss
+    // and where ss dominates any user of that instruction,
+    // the instruction must be an input of ss.
+    for (auto &otherBlock : GetGraph()->GetBlocksRPO()) {
+        for (const auto &otherInst : otherBlock->AllInsts()) {
+            // Abort checking when meet itself, no other value will dominate SS
+            if (ss == otherInst) {
+                return;
+            }
+            // Check if there is no any users
+            if (otherInst->GetUsers().Empty()) {
+                continue;
+            }
+            // Check if otherInst dominates ss
+            if (!otherInst->IsDominate(ss)) {
+                continue;
+            }
+            // Check if ss dominates any user of otherInst
+            if (!SaveStateSuspendDominatesAnyUser(ss, otherInst)) {
+                continue;
+            }
+            // Now otherInst must be an input of ss (via data flow)
+            ValidateInstructionInSaveStateSuspend(ss, otherInst);
+        }
+    }
+}
+
+bool GraphChecker::SaveStateSuspendDominatesAnyUser(SaveStateInst *ss, const Inst *otherInst)
+{
+    for (auto &user : otherInst->GetUsers()) {
+        if (ss->IsDominate(user.GetInst())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void GraphChecker::ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, const Inst *otherInst)
+{
+    auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
+                           [ss, otherInst](Input input) { return ss->GetDataFlowInput(input.GetInst()) == otherInst; });
+    CHECKER_DO_IF_NOT_AND_PRINT(it != ss->GetInputs().end(),
+                                std::cerr << "Instruction v" << otherInst->GetId() << " dominates SaveStateSuspend v"
+                                          << ss->GetId() << " and SaveStateSuspend dominates its users, "
+                                          << "but it is not an input of SaveStateSuspend:\n"
+                                          << *otherInst << std::endl
+                                          << *ss << std::endl);
+}
+
+#endif  // COMPILER_DEBUG_CHECKS
 
 void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited)
 {
@@ -2281,13 +2351,22 @@ void GraphChecker::VisitSaveStateOsr([[maybe_unused]] GraphVisitor *v, [[maybe_u
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, static_cast<GraphChecker *>(v)->GetGraph()->IsOsrMode(),
                                         std::cerr << "SafeStateOsr must be created in the OSR mode only\n");
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetBasicBlock()->IsOsrEntry(),
-                                        std::cerr << "SafeStateOsr's basic block must be osr-entry\n");
+                                        std::cerr << "SaveStateOsr's basic block must be osr-entry\n");
     auto firstInst = inst->GetBasicBlock()->GetFirstInst();
     while (firstInst != nullptr && (firstInst->IsCatchPhi() || firstInst->GetOpcode() == Opcode::Try)) {
         firstInst = firstInst->GetNext();
     }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, firstInst == inst,
-                                        std::cerr << "SafeStateOsr must be the first instruction in the basic block\n");
+                                        std::cerr << "SaveStateOsr must be the first instruction in the basic block\n");
+}
+
+void GraphChecker::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->Verify(),
+                                        std::cerr << "Inconsistent SaveStateSuspend instruction:\n"
+                                                  << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->GetUsers().Empty(),
+                                        std::cerr << "SaveStateSuspend can't have users");
 }
 
 void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
