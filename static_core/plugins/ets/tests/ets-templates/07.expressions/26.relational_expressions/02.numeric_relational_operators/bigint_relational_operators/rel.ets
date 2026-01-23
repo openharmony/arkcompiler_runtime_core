@@ -16,8 +16,7 @@
 {%- for c in cases %}
 
 /*---
-desc: Case of if not both operants are bigint 
-tags: []
+desc: Case of if not both operants are bigint
 ---*/
 
 let b: bigint = {{c.b}}

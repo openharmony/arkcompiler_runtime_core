@@ -18,6 +18,8 @@ cases:
   - { desc: "bigint < variable (boundary)", b: '1n', op: '<', operand_val: '1', expected_bool: 'false' }
   - { desc: "bigint < variable (negative)", b: '-2n', op: '<', operand_val: '-1', expected_bool: 'true' }
   - { desc: "bigint < variable (float)", b: '1n', op: '<', operand_val: '2.0', expected_bool: 'true' }
+  - { desc: "bigint < variable (float, fractional > 0)", b: '2n', op: '<', operand_val: '2.5', expected_bool: 'true' }
+  - { desc: "bigint < variable (float, fractional = 0)", b: '2n', op: '<', operand_val: '2.0', expected_bool: 'false' }
 
   # Greater than (>)
   - { desc: "bigint > variable (true)", b: '2n', op: '>', operand_val: '1', expected_bool: 'true' }
@@ -25,6 +27,8 @@ cases:
   - { desc: "bigint > variable (boundary)", b: '1n', op: '>', operand_val: '1', expected_bool: 'false' }
   - { desc: "bigint > variable (negative)", b: '-1n', op: '>', operand_val: '-2', expected_bool: 'true' }
   - { desc: "bigint > variable (float)", b: '2n', op: '>', operand_val: '1.0', expected_bool: 'true' }
+  - { desc: "bigint > variable (float, fractional > 0)", b: '2n', op: '>', operand_val: '2.5', expected_bool: 'false' }
+  - { desc: "bigint > variable (float, fractional = 0)", b: '2n', op: '>', operand_val: '2.0', expected_bool: 'false' }
 
   # Less than or equal (<=)
   - { desc: "bigint <= variable (true, less)", b: '1n', op: '<=', operand_val: '2', expected_bool: 'true' }
@@ -32,6 +36,8 @@ cases:
   - { desc: "bigint <= variable (false)", b: '2n', op: '<=', operand_val: '1', expected_bool: 'false' }
   - { desc: "bigint <= variable (negative)", b: '-1n', op: '<=', operand_val: '-1', expected_bool: 'true' }
   - { desc: "bigint <= variable (float)", b: '1n', op: '<=', operand_val: '1.0', expected_bool: 'true' }
+  - { desc: "bigint <= variable (float, fractional > 0)", b: '2n', op: '<=', operand_val: '2.5', expected_bool: 'true' }
+  - { desc: "bigint <= variable (float, fractional = 0)", b: '2n', op: '<=', operand_val: '2.0', expected_bool: 'true' }
 
   # Greater than or equal (>=)
   - { desc: "bigint >= variable (true, greater)", b: '2n', op: '>=', operand_val: '1', expected_bool: 'true' }
@@ -39,6 +45,8 @@ cases:
   - { desc: "bigint >= variable (false)", b: '1n', op: '>=', operand_val: '2', expected_bool: 'false' }
   - { desc: "bigint >= variable (negative)", b: '-1n', op: '>=', operand_val: '-1', expected_bool: 'true' }
   - { desc: "bigint >= variable (float)", b: '2n', op: '>=', operand_val: '2.0', expected_bool: 'true' }
+  - { desc: "bigint >= variable (float, fractional > 0)", b: '2n', op: '>=', operand_val: '2.5', expected_bool: 'false' }
+  - { desc: "bigint >= variable (float, fractional = 0)", b: '2n', op: '<=', operand_val: '2.0', expected_bool: 'true' }
 
   # With BigInt constructor
   - { desc: "new BigInt < variable (true)", b: 'new BigInt(10)', op: '<', operand_val: '20', expected_bool: 'true' }

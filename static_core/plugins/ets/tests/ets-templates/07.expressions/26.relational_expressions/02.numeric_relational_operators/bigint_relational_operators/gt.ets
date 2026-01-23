@@ -17,9 +17,7 @@
 
 /*---
 desc: >-
-    The type of each operand in a bigint relational operator must be bigint.
-    Otherwise, a compile-time error occurs.
-    All bigint relational operators compare bigint values.
+    Bigint comparison, if type of both operands is bigint.
 ---*/
 
 let ba: bigint[] = [
