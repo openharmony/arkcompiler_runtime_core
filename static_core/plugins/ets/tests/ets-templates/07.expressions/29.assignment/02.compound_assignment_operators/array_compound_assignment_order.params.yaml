@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,21 +12,19 @@
 # limitations under the License.
 
 ---
+arrays:
+  - array_type: Array<long>
+  - array_type: FixedArray<long>
+
 cases:
   - desc: 'Positive case for array'
-    array: ''
-    index: ''
-    value: ''
     main: |-
       getArray()[getIndex(1)] *= getValue(-21)
       arktest.assertEQ(test_array[1], -42)
     assert_result: '"getArray getIndex getValue "'
 
   - desc: 'Negative case for array. Array reference failed'
-    array: |-
-      throw new Error("Any error to break assignment")
-    index: ''
-    value: ''
+    array: 'true'
     main: |-
       let expectedException = (e: Error): boolean => { return (e instanceof Error) }
       arktest.expectThrow(() => { getArray()[getIndex(1)] *= getValue(-21) }, expectedException)
@@ -34,10 +32,7 @@ cases:
     assert_result: '"getArray "'
 
   - desc: 'Negative case for array. Index reference failed'
-    array: ''
-    index: |-
-      throw new Error("Any error to break assignment")
-    value: ''
+    index: 'true'
     main: |-
       let expectedException = (e: Error): boolean => { return (e instanceof Error) }
       arktest.expectThrow(() => { getArray()[getIndex(1)] *= getValue(-21) }, expectedException)
@@ -45,10 +40,7 @@ cases:
     assert_result: '"getArray getIndex "'
 
   - desc: 'Negative case for array. RHS reference failed'
-    array: ''
-    index: ''
-    value: |-
-      throw new Error("Any error to break assignment")
+    value: 'true'
     main: |-
       let expectedException = (e: Error): boolean => { return (e instanceof Error) }
       arktest.expectThrow(() => { getArray()[getIndex(1)] *= getValue(-21) }, expectedException)
@@ -56,9 +48,6 @@ cases:
     assert_result: '"getArray getIndex getValue "'
 
   - desc: 'Negative case for array. Binary operation failed'
-    array: ''
-    index: ''
-    value: ''
     main: |-
       let expectedException = (e: Error): boolean => { return (e instanceof Error) }
       arktest.expectThrow(() => { getArray()[getIndex(1)] /= (2 - getValue(2)) }, expectedException)
