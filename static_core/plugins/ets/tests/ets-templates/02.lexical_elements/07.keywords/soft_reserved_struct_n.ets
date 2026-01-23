@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,14 +13,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for kwd in keywords %}
 /*---
-desc: Names of primitive built-in types as well as their boxed versions also are hard keywords, and cannot be used as identifiers
+desc: ->
+    The current compiler reserves the keyword struct because it is used in legacy ArkUI code. 
+    This keyword can be used as a replacement for the keyword class in Class Declarations. 
+    Class declarations marked with the keyword struct are processed by the ArkUI plugin and replaced with class declarations that use specific ArkUI types.
+expected_out: "Semantic error ESE0364: Structs are only used to define UI components, it should be translated at 'plugin after parser' phase."
 tags: [negative, compile-only]
-params: '{{kwd}}'
 ---*/
-function foo() {
-  let {{kwd}} = 0;
-}
 
-{% endfor %}
+struct A {}

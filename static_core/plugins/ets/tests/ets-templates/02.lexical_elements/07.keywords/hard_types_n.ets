@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,11 +15,13 @@ limitations under the License.
 
 {% for kwd in keywords %}
 /*---
-desc:  Names and aliases of predefined types are hard keywords, and cannot be used as identifiers
+desc: Names and aliases of predefined types are hard keywords, and cannot be used as identifiers
 tags: [negative, compile-only]
 params: '{{kwd}}'
+expected_out: "Syntax error ESY0295: {{kwd}} is a predefined type, cannot be used as an identifier"
 ---*/
-
-let {{kwd}} = 0;
+function foo() {
+  let {{kwd}} = 0;
+}
 
 {% endfor %}
