@@ -2726,8 +2726,10 @@ function(:StringConcat2TlabAllStrings,
   StoreI(tree_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
   StoreI(tree_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
 
-  StoreI(tree_str, str1).Imm(Constants::TREE_STRING_LEFT_OFFSET).SetNeedBarrier(true).ref
-  StoreI(tree_str, str2).Imm(Constants::TREE_STRING_RIGHT_OFFSET).SetNeedBarrier(true).ref
+  # It is new object, previous reference value is null, PRE write barrier is not required.
+  # Object is allocated in young generation. POST write barrier is not required.
+  StoreI(tree_str, str1).Imm(Constants::TREE_STRING_LEFT_OFFSET).SetNeedBarrier(false).ref
+  StoreI(tree_str, str2).Imm(Constants::TREE_STRING_RIGHT_OFFSET).SetNeedBarrier(false).ref
 
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
@@ -2890,7 +2892,9 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       StoreI(result, slicedStringLength).Imm(Constants::STRING_LENGTH_OFFSET).u32
       StoreI(result, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
 
-      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(true).ref
+      # It is new object, previous reference value is null, PRE write barrier is not required.
+      # Object is allocated in young generation. POST write barrier is not required.
+      StoreI(result, fromStr).Imm(Constants::SLICED_STRING_PARENT_OFFSET).SetNeedBarrier(false).ref
       # hasBackingStoreBit become zero after shift left
       startIndexAndBits := ShlI(resultStartIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
       StoreI(result, startIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
