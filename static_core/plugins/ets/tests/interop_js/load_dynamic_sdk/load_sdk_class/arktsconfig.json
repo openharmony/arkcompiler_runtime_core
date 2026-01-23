@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "baseUrl": "../../../../..",
+        "baseUrl": "../../../../../..",
         "paths": {
             "std": ["plugins/ets/stdlib/std"],
             "escompat": ["plugins/ets/stdlib/escompat"],
@@ -8,10 +8,10 @@
             "arkts": ["plugins/ets/sdk/arkts"]
         },
         "dependencies": {
-            "@ohos.hilog": {
+            "@ohos.util.hashmap": {
                 "language": "js",
-                "path": "plugins/ets/tests/interop_js/load_dynamic_sdk/testDecl.d.ets",
-                "ohmUrl": "@ohos:load_dynamic_sdk_test_module"
+                "path": "plugins/ets/tests/interop_js/load_dynamic_sdk/load_sdk_class/sdkDecl.d.ets",
+                "ohmUrl": "@ohos:load_dynamic_sdk_class_test_module"
             }
         }
     }

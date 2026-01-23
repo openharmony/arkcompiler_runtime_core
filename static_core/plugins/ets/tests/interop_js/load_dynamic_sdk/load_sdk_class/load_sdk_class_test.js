@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@ function runTest() {
     let etsVm = requireNapiPreview('ets_interop_js_napi', true);
     globalThis.requireNapi = requireNapiPreview;
     const etsVmRes = etsVm.createRuntime({
-        'boot-panda-files': 'etsstdlib.abc:' + 'esvalue_load_ohos.abc',
+        'boot-panda-files': 'etsstdlib.abc:' + 'esvalue_load_sdk_class.abc',
         'gc-trigger-type': 'heap-trigger',
         'compiler-enable-jit': 'false',
         'run-gc-in-place': 'true',
@@ -29,11 +29,9 @@ function runTest() {
         print('ETS runtime created');
     }
 
-    let test_load_hilog = etsVm.getFunction('Lesvalue_load_ohos/ETSGLOBAL;', 'test_load_hilog');
-    test_load_hilog();
+    let test_load_hashmap = etsVm.getFunction('Lesvalue_load_sdk_class/ETSGLOBAL;', 'test_load_hashmap');
+    test_load_hashmap();
 
-    let test_call_hilog_function = etsVm.getFunction('Lesvalue_load_ohos/ETSGLOBAL;', 'test_call_hilog_function');
-    test_call_hilog_function();
 }
 
 runTest();

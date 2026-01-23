@@ -571,7 +571,7 @@ JSValue *JSRuntimeLoadModule(EtsString *module)
         if (!CheckModuleLoadStatus(coro, status, moduleName, loadedObj)) {
             return nullptr;
         }
-        if (NeedWrapDefault(moduleName, func)) {
+        if (NeedWrapDefault(moduleName, func) && GetValueType(env, loadedObj) != napi_function) {
             NAPI_CHECK_FATAL(napi_create_object(env, &modObj));
             NAPI_CHECK_FATAL(napi_set_named_property(env, modObj, "default", loadedObj));
         } else {
