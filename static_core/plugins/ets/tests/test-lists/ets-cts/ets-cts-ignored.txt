@@ -468,11 +468,12 @@
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n3.ets
 
-#30149
-09.classes/06.field_declarations/reference_to_inheritance_fields_with_same_name_0.ets
-09.classes/06.field_declarations/reference_to_inheritance_fields_with_same_name_1.ets
-09.classes/06.field_declarations/reference_to_inheritance_fields_with_same_name_2.ets
-09.classes/06.field_declarations/reference_to_inheritance_fields_with_same_name_3.ets
+#311
+09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_3.ets
+09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_8.ets
+09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_12.ets
+09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_16.ets
+09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_20.ets
 
 #31341
 09.classes/06.field_declarations/02.readonly_constant_fields/class_readonly_fields_cte_70.ets
