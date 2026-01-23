@@ -1424,7 +1424,72 @@ export class DateTimeFormat {
         COUNT
     }
 
+    final class ParsedLocaleData {
+        language: string | undefined
+        script: string | undefined
+        region: string | undefined
+        calendar: string | undefined
+        collation: string | undefined
+        numberingSystem: string | undefined
+        hourCycle: string | undefined
+        numeric: boolean | undefined
+        caseFirst: string | undefined
+        baseName: string | undefined
+        
+        constructor(
+            language: string | undefined,
+            script: string | undefined,
+            region: string | undefined,
+            calendar: string | undefined,
+            collation: string | undefined,
+            numberingSystem: string | undefined,
+            hourCycle: string | undefined,
+            numeric: boolean | undefined,
+            caseFirst: string | undefined,
+            baseName: string | undefined
+        ) {
+            this.language = language
+            this.script = script
+            this.region = region
+            this.calendar = calendar
+            this.collation = collation
+            this.numberingSystem = numberingSystem
+            this.hourCycle = hourCycle
+            this.numeric = numeric
+            this.caseFirst = caseFirst
+            this.baseName = baseName
+        }
+    }
+
     export class Locale implements LocaleOptions {
+        // Single-entry cache for parseTag to avoid re-parsing the same tag
+        // This is effective for common patterns like repeated locale creation with the same tag
+        // Using single entry keeps memory footprint minimal while covering most use cases
+        private static lastParsedTag: string | undefined = undefined;
+        private static lastParsedResult: ParsedLocaleData | undefined = undefined;
+        
+        /**
+         * Get cached locale data for a given tag
+         * @param tag The BCP47 language tag to lookup
+         * @returns Cached ParsedLocaleData or undefined if not found
+         */
+        private static getCachedLocale(tag: string): ParsedLocaleData | undefined {
+            if (Locale.lastParsedTag == tag && Locale.lastParsedResult != undefined) {
+                return Locale.lastParsedResult
+            }
+            return undefined
+        }
+        
+        /**
+         * Cache locale data for a given tag
+         * @param tag The BCP47 language tag to use as cache key
+         * @param data The parsed locale data to cache
+         */
+        private static setCachedLocale(tag: string, data: ParsedLocaleData): void {
+            Locale.lastParsedTag = tag
+            Locale.lastParsedResult = data
+        }
+        
         private _baseName?: string;
         private _language?: string;
         private _calendar?: string;
@@ -1523,15 +1588,25 @@ export class DateTimeFormat {
         * @param options options
         */
         public constructor(tag: BCP47LanguageTag | Locale, options?: LocaleOptions) {
+            // Step 1: Initialize locale
             this.initLocale()
-            this.language = this.defaultLang()
+            
+            // Use local variable for default language to avoid multiple calls within same constructor
+            let defaultLanguage: string | undefined = undefined
+            let canSkipValidation: boolean = false
+            
+            // Step 2: Process tag parameter
             if (tag instanceof BCP47LanguageTag) {
                 this.tag = tag
-                this.parseTag()
-            }
-            else {
-                this.language = (tag.language != undefined) ? tag.language : this.defaultLang()
-                this.baseName = (tag.baseName != undefined) ? tag.baseName : this.defaultLang()
+                canSkipValidation = this.parseTag()
+            } else {
+                // Get default language only once if needed for either language or baseName
+                if (tag.language == undefined || tag.baseName == undefined) {
+                    defaultLanguage = this.defaultLang()
+                }
+                
+                this.language = (tag.language != undefined) ? tag.language : defaultLanguage
+                this.baseName = (tag.baseName != undefined) ? tag.baseName : defaultLanguage
                 this.calendar = (tag.calendar != undefined) ? tag.calendar : ""
                 this.caseFirst = (tag.caseFirst != undefined) ? tag.caseFirst : undefined
                 this.numeric = (tag.numeric != undefined) ? tag.numeric : false
@@ -1542,10 +1617,28 @@ export class DateTimeFormat {
                 this.script = tag.script
                 this.tag = tag.tag
             }
+            
+            // Step 3: Process options parameter
             if (options != undefined) {
+                canSkipValidation = false  // Options modify the locale, so validation is required
                 this.checkOptions(options)
-                this.language = (options.language != undefined) ? options.language : this.defaultLang()
-                this.baseName = (options.baseName != undefined) ? options.baseName : this.defaultLang()
+                
+                // Only fetch defaultLang if we need it and haven't already cached it in local variable
+                if ((options.language == undefined || options.baseName == undefined) && defaultLanguage == undefined) {
+                    defaultLanguage = this.defaultLang()
+                }
+                
+                // For options overrides, use options value if provided, else keep current value or use default
+                if (options.language != undefined) {
+                    this.language = options.language
+                } else if (this.language == undefined && defaultLanguage != undefined) {
+                    this.language = defaultLanguage
+                }
+                if (options.baseName != undefined) {
+                    this.baseName = options.baseName
+                } else if (this.baseName == undefined && defaultLanguage != undefined) {
+                    this.baseName = defaultLanguage
+                }
                 this.calendar = (options.calendar != undefined) ? options.calendar : ""
                 this.caseFirst = (options.caseFirst != undefined) ? options.caseFirst : undefined
                 this.numeric = (options.numeric != undefined) ? options.numeric : false
@@ -1556,12 +1649,20 @@ export class DateTimeFormat {
                 this.script = (options.script != undefined) ? options.script : this.script
             }
 
-            if (this.region != undefined && !this.regionList().includes((this.region as string).toUpperCase())) {
-                throw new RangeError(this.errMsg)
-            }
+            // Step 4: Validate region and script (skip if we used cached data), then create tag (always)
+            if (!canSkipValidation) {
+                // Validate region
+                if (this.region != undefined) {
+                    let regionUpper: string = (this.region as string).toUpperCase()
+                    if (!this.regionList().includes(regionUpper)) {
+                        throw new RangeError(this.errMsg)
+                    }
+                }
 
-            if (this.script != undefined && !this.scriptList().includes(this.script as string)) {
-                throw new RangeError(this.errMsg)
+                // Validate script
+                if (this.script != undefined && !this.scriptList().includes(this.script as string)) {
+                    throw new RangeError(this.errMsg)
+                }
             }
             this.tag = this.createTag()
         }
@@ -1682,27 +1783,44 @@ export class DateTimeFormat {
             }
         }
 
-        private parseTag() {
+        private parseTag(): boolean {
             if (this.tag == "") {
                 throw new RangeError("First argument to Intl.Locale constructor can't be empty or missing")
             }
 
+            // Check if we have a cached result for this tag
+            let cached = Locale.getCachedLocale(this.tag)
+            if (cached != undefined) {
+                // Use cached values (avoids expensive validation and parsing)
+                this.language = cached.language
+                this.script = cached.script
+                this.region = cached.region
+                this.calendar = cached.calendar
+                this.collation = cached.collation
+                this.numberingSystem = cached.numberingSystem
+                this.hourCycle = cached.hourCycle
+                this.numeric = cached.numeric
+                this.caseFirst = cached.caseFirst
+                this.baseName = cached.baseName
+                return true  // Cache hit
+            }
+            
             if (this.isTagValid(this.tag as string) == 1) {
                 throw new RangeError(this.errMsg)
             }
 
             let argsStr : string = this.parseTagImpl(this.tag)
-            let args = argsStr.split(" ")
-            let getVale = (val: string) : string|undefined => {return (val == "") ? undefined : val}
+            let args: string[] = argsStr.split(" ")
+            const getValue = (val: string): string | undefined => (val === "") ? undefined : val
             this.language = args[LocaleInfoKeys.LANG]
-            this.script = getVale(args[LocaleInfoKeys.SCRIPT])
-            this.region = getVale(args[LocaleInfoKeys.COUNTRY])
-            this.calendar = getVale(args[LocaleInfoKeys.U_CA])
-            this.collation = getVale(args[LocaleInfoKeys.U_CO])
-            this.numberingSystem = getVale(args[LocaleInfoKeys.U_NU])
-            this.hourCycle = getVale(args[LocaleInfoKeys.U_HC])
+            this.script = getValue(args[LocaleInfoKeys.SCRIPT])
+            this.region = getValue(args[LocaleInfoKeys.COUNTRY])
+            this.calendar = getValue(args[LocaleInfoKeys.U_CA])
+            this.collation = getValue(args[LocaleInfoKeys.U_CO])
+            this.numberingSystem = getValue(args[LocaleInfoKeys.U_NU])
+            this.hourCycle = getValue(args[LocaleInfoKeys.U_HC])
             this.numeric = (args[LocaleInfoKeys.U_KN] == "true") ? true : false
-            this.caseFirst = getVale(args[LocaleInfoKeys.U_KF])
+            this.caseFirst = getValue(args[LocaleInfoKeys.U_KF])
 
             if (this.tag.includes("-u")) {
                if (this.language != undefined && !this.langList().includes(this.language as string)) {
@@ -1710,6 +1828,22 @@ export class DateTimeFormat {
                }
             }
             this.fillBaseName()
+            
+            // Cache the parsed result to avoid redundant parsing for the same tag
+            Locale.setCachedLocale(this.tag, new ParsedLocaleData(
+                this.language,
+                this.script,
+                this.region,
+                this.calendar,
+                this.collation,
+                this.numberingSystem,
+                this.hourCycle,
+                this.numeric,
+                this.caseFirst,
+                this.baseName
+            ))
+            
+            return false  // Cache miss
         }
 
         private fillScriptOrRegion(val : string) {
