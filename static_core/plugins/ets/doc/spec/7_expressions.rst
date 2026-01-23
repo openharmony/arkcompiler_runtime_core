@@ -1456,7 +1456,7 @@ A :index:`compile-time error` occurs if:
    :ref:`Type of Expression` for an example);
 -  Inferred type is not a class or interface type;
 -  Context is a union type, and an object literal can be treated
-   as the value of several union component types;
+   as a valid value of several union component types;
 -  New member in an *object literal* is declared;
 
 
@@ -1486,7 +1486,7 @@ A :index:`compile-time error` occurs if:
             // compile-time error, type cannot be inferred as the literal
             // fits both A and B
 
-    let u: A = { filed: 1, otherField: 2 }
+    let u: A = { field: 1, otherField: 2 }
             // compile-time error, cannot declare a new member in the literal
 
 |
@@ -1521,17 +1521,14 @@ literal is ``C``:
          used */
     foo({name: "Alice", age: 18}) // ok, parameter type is used
 
-An identifier in each *name-value pair* must name a field of class ``C``,
-or a field of any superclass of class ``C``.
+An identifier in each *object literal field* must name a field of class ``C``.
 
 A :index:`compile-time error` occurs if the identifier does not name an
 *accessible member field* (see :ref:`Accessible`) in type ``C``:
 
 .. index::
    identifier
-   name-value pair
    field
-   superclass
    class
    compile-time error
    accessible member field
@@ -1552,8 +1549,8 @@ A :index:`compile-time error` occurs if the identifier does not name an
     // compile-time error, soname is protected:
     let g: Friend = {name: "Alexander", age: 55, soname: "Reed"}
 
-A :index:`compile-time error` occurs if type of an expression in a
-*name-value pair* is not assignable (see :ref:`Assignability`) to the
+A :index:`compile-time error` occurs if type of an expression in an
+*object literal field* is not assignable (see :ref:`Assignability`) to the
 field type:
 
 .. code-block:: typescript
@@ -1569,6 +1566,9 @@ skipped in an object literal. A :index:`compile-time` error occurs otherwise.
 .. code-block:: typescript
    :linenos:
 
+    let f: Friend = {} /* OK, as name, nick, age, and sex have either default
+                          value or explicit initializer */
+
     class C {
         f1: number
         f2: string
@@ -1577,11 +1577,8 @@ skipped in an object literal. A :index:`compile-time` error occurs otherwise.
     let c1: C = {f2: "xyz", f3: new Object} // OK, f1 type has a default value
     let c2: C = {f2: "xyz"} // compile-time error, f3 value is not provided
 
-
-
 .. index::
    expression
-   name-value pair
    assignability
    type
    field type
@@ -1592,20 +1589,11 @@ skipped in an object literal. A :index:`compile-time` error occurs otherwise.
    object literal
    initializer
 
-.. code-block:: typescript
-   :linenos:
-
-    let f: Friend = {} /* OK, as name, nick, age, and sex have either default
-                          value or explicit initializer */
-
-If an object literal is to use class ``C``, then class ``C`` must have a
-*parameterless* constructor (explicit or default) that is *accessible*
-(see :ref:`Accessible`) in the class-composite context.
-
-A :index:`compile-time error` occurs if:
-
--  ``C`` contains no parameterless constructor; or
--  No constructor is accessible (see :ref:`Accessible`).
+If type of an object literal is class ``C``, then class ``C`` must have an
+explicit or default *parameterless* constructor, or a constructor with all
+parameters of the second form of optional parameters (see
+:ref:`Optional Parameters`) that is *accessible* (see :ref:`Accessible`) in the
+class-composite context. Otherwise, a :index:`compile-time error` occurs.
 
 These situations are presented in the examples below:
 
@@ -1621,7 +1609,7 @@ These situations are presented in the examples below:
    :linenos:
 
     class C {
-      constructor (x: number) {}
+      constructor (p: number) {}
     }
     // ...
     let c: C = {} /* compile-time error - no parameterless
@@ -1636,6 +1624,24 @@ These situations are presented in the examples below:
     // ...
     let c: C = {} /* compile-time error - constructor is not
         accessible */
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+      constructor (p?: number) {}
+    }
+    // ...
+    let c: C = {} // OK as constructor of has an optional parameter
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+    }
+    // ...
+    let c: C = {} // OK as default constructor is added
+
 
 A compile-time error occurs if an *object literal of class type* explicitly sets
 readonly fields of a class:
@@ -2033,17 +2039,19 @@ The evaluation of an object literal of type ``C`` (where ``C`` is either
 a named class type or an anonymous class type created for the interface)
 is to be performed by the following steps:
 
--  A parameterless constructor is executed to produce an instance ``x`` of
-   class ``C``. The execution of the object literal completes abruptly
-   if so does the execution of the constructor.
+-  Call to class ``C`` constructor with no arguments is executed to initialize
+   an instance ``x`` of class ``C``. The evaluation of the object literal
+   completes abruptly if so does the execution of the constructor.
 
--  Name-value pairs of the object literal are then executed from left to
-   right in the textual order they occur in the source code. The execution
-   of a name-value pair includes the following:
+-  All *object literal fields* are then processed from left to right in the
+   textual order they occur in the source code. The following steps are
+   performed for every *object literal field*:
 
    -  Evaluation of the expression; and
-   -  Assignment of the value of expression to the corresponding field of ``x``
-      as its initial value.
+   -  If successful, then an assignment of the expression value to the
+      corresponding field of ``x`` as its initial value. Otherwise, the
+      evaluation of the object literal completes abruptly.
+
 
 .. index::
    object literal
@@ -2057,7 +2065,6 @@ is to be performed by the following steps:
    instance
    execution
    abrupt completion
-   name-value pair
    field
    value
    initial value
@@ -2065,17 +2072,21 @@ is to be performed by the following steps:
    literal type
 
 The execution of an object literal completes abruptly if so does
-the execution of a name-value pair.
+the execution of at least one of *object literal field* expression.
 
-An object literal completes normally with the value of a newly
-initialized class instance if so do all name-value pairs.
+The evaluation of an object literal completes normally if:
+
+- Class instance was created successfully;
+- Class constructor was executed successfully;
+- All class instance fields mentioned in the object literal have initial
+  values resulting from the successful execution of all *object literal field*
+  expressions.
 
 .. index::
    execution
    object literal
    abrupt completion
    normal completion
-   name-value pair
    evaluation
    initialization
    class instance
