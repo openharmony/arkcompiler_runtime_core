@@ -190,7 +190,7 @@ static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^d
 static_core/plugins/ets/runtime/interop_js/xgc/                               ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/stdlib/std/concurrency/                               @konstanting ^dmitriitr ^udav ^wang_zhaoyong ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/concurrency/Atomics.ets                    ^dmitriitr @konstanting ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   @ipetrov ^dmitriitr ^konstanting ^molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/stdlib/std/concurrency/taskpool.ets                   ^ipetrov ^dmitriitr ^konstanting @molotkovmikhail @kastenalexey ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.ets               @konstanting ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/core/AbcRuntimeLinker.ets                  ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039 @shilei123
 static_core/plugins/ets/stdlib/std/core/BootRuntimeLinker.ets                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @liyiming13 ^lijin1039 @shilei123
