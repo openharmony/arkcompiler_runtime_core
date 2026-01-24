@@ -720,8 +720,8 @@ export class JSON {
       * @returns {JsonElement} The parsed JSON element
       * @throws {JsonParseError} If the JSON string is invalid
       */
-    static parseJsonElement(text: string): jsonx.JsonElement {
-        return new JsonElementParser(text).parse()
+    static parseJsonElement(text: string, options?: jsonx.ParseOptions): jsonx.JsonElement {
+        return new JsonElementParser(text, options).parse()
     }
 
     /**
@@ -731,8 +731,8 @@ export class JSON {
       * @returns {JsonElement} The parsed JSON element
       * @throws {JsonParseError} If the JSON string is invalid
       */
-    static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement): jsonx.JsonElement {
-        return new JsonElementParser(text, reviver).parse()
+    static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement, options?: jsonx.ParseOptions): jsonx.JsonElement {
+        return new JsonElementParser(text, reviver, options).parse()
     }
 }
 
@@ -1674,6 +1674,10 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return EscapeStringBuilder.process(elem.asString())
 
         case jsonx.JsonType.JsonNumber:
+            const bigintValue = elem.tryAsBigInt()
+            if (bigintValue != undefined) {
+                return bigintValue.toString()
+            }
             const longValue = elem.tryAsLong()
             if (longValue != undefined) {
                 return longValue.toString()
@@ -2353,18 +2357,27 @@ class JsonElementParser
     tokens: Array<JsonToken>
     position: int
     reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
+    bigIntOpt: int = 0
 
-    constructor(source: string) {
+    constructor(source: string, options?: jsonx.ParseOptions) {
         this.source = source
         this.tokens = JsonLexer.fromString(source).tokenize()
         this.position = 0
+        this.bigIntOpt = options ? options.bigIntMode : 0
+        if (this.bigIntOpt > 2 || this.bigIntOpt < 0) {
+            throw new Error("bigIntMode value should be from 0 to 2, current value is " + this.bigIntOpt)
+        }
     }
 
-    constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement) {
+    constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement, options?: jsonx.ParseOptions) {
         this.source = source
         this.tokens = JsonLexer.fromString(source).tokenize()
         this.position = 0
         this.reviver = reviver
+        this.bigIntOpt = options ? options.bigIntMode : 0
+        if (this.bigIntOpt > 2 || this.bigIntOpt < 0) {
+            throw new Error("bigIntMode value should be from 0 to 2, current value is" + this.bigIntOpt)
+        }
     }
 
     public lookahead(offset: int): JsonToken | undefined
@@ -2486,6 +2499,19 @@ class JsonElementParser
         let token = this.expect(JsonTokenKind.Number)
         if (token.value.includes(".")) {
             return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
+        }
+        if (this.bigIntOpt == 2) {
+            return jsonx.JsonElement.createBigInt(BigInt(token.value))
+        }
+        if (this.bigIntOpt == 1) {
+            try {
+                return jsonx.JsonElement.createLong(Long.parseInt(token.value, 10))
+            } catch (e) {
+                if (e instanceof FormatError) {
+                    return jsonx.JsonElement.createBigInt(BigInt(token.value))
+                }
+                throw e
+            }
         }
         return jsonx.JsonElement.createLong(Long.parseInt(token.value, 10))
     }
