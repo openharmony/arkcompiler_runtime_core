@@ -1210,6 +1210,34 @@ class JSONWriter {
         }
     }
 
+    private collectInterfaceFields(obj: Object, objCls: Class, writableFields: Array<[string, Any]>): Array<[string, Any]> {
+        const interfaceFields = new Array<[string, Any]>()
+        let currentClass: Class | undefined = objCls
+        while (currentClass != undefined) {
+            const interfaces = currentClass.getInterfaces()
+            for (let i = 0; i < interfaces.length; i++) {
+                const iface = interfaces[i]
+                const gettersValues = JSONWriter.getGettersKeyValuePairs(iface, obj, this.useFieldsFilter, this.fieldsFilter)
+                for (let j = 0; j < gettersValues.length; j++) {
+                    const pair = gettersValues[j]
+                    const name = pair[0]
+                    let isRedundant = false
+                    for (let k = 0; k < writableFields.length; k++) {
+                        if (writableFields[k][0] == name) {
+                            isRedundant = true
+                            break
+                        }
+                    }
+                    if (!isRedundant) {
+                        interfaceFields.push(pair)
+                    }
+                }
+            }
+            currentClass = currentClass.getSuper()
+        }
+        return interfaceFields
+    }
+
     private writeClassValue(obj: Object, objCls: Class): void {
         const currentBuffer = this.buffer
         // we need this local buffer to discard empty object prolog: '{','\n',<space> and replace it with '{}'
@@ -1235,6 +1263,16 @@ class JSONWriter {
                 fieldDumped |= this.writeClassFields(gettersValues, fieldDumped)
                 this.path.delete(obj)
             }
+            for (let i = 0; i < gettersValues.length; i++) {
+                    writableFields.push(gettersValues[i])
+            }
+        }
+
+        const interfaceFields = this.collectInterfaceFields(obj, objCls, writableFields)
+        if (interfaceFields.length > 0) {
+            this.path.add(obj)
+            fieldDumped = this.writeClassFields(interfaceFields, fieldDumped)
+            this.path.delete(obj)
         }
 
         if (this.useIndent) {
