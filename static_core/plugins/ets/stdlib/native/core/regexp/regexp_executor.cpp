@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16,
     }
     if (flagCaseInsentitive_) {
         flags |= PCRE2_CASELESS;
+        flags |= PCRE2_UCP;
     }
     if (flagSticky_) {
         flags |= PCRE2_ANCHORED;
@@ -64,12 +65,16 @@ bool EtsRegExp::Compile(const std::vector<uint8_t> &pattern, const bool isUtf16,
 RegExpExecResult EtsRegExp::Execute(const std::vector<uint8_t> &pattern, const std::vector<uint8_t> &str, const int len,
                                     const int startOffset)
 {
+    uint32_t matchFlags = 0U;
+    if (flagUnicode_ || flagVnicode_) {
+        matchFlags |= PCRE2_NO_UTF_CHECK;
+    }
     RegExpExecResult result;
     if (utf16_) {
-        result = RegExp16::Execute(re_, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
+        result = RegExp16::Execute(re_, matchFlags, reinterpret_cast<const uint16_t *>(str.data()), len, startOffset);
         RegExp16::EraseExtraGroups(reinterpret_cast<const uint16_t *>(pattern.data()), pattern.size() / 2U, result);
     } else {
-        result = RegExp8::Execute(re_, str.data(), len, startOffset);
+        result = RegExp8::Execute(re_, matchFlags, str.data(), len, startOffset);
         RegExp8::EraseExtraGroups(pattern.data(), pattern.size(), result);
     }
 

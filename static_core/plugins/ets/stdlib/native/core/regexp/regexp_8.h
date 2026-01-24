@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,8 @@ using Pcre2Obj = void *;
 class RegExp8 {
 public:
     static Pcre2Obj CreatePcre2Object(const uint8_t *pattern, uint32_t flags, uint32_t extraFlags, const int len);
-    static RegExpExecResult Execute(Pcre2Obj re, const uint8_t *str, const int len, const int startOffset);
+    static RegExpExecResult Execute(Pcre2Obj re, uint32_t matchFlags, const uint8_t *str, const int len,
+                                    const int startOffset);
     static void ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data);
     static void FreePcre2Object(Pcre2Obj re);
     static void EraseExtraGroups(const uint8_t *pattern, const size_t len, RegExpExecResult &result);

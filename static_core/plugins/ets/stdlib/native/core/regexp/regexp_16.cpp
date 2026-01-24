@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,18 +36,20 @@ Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *pattern, uint32_t flags, ui
     PCRE2_SIZE errorOffset;
     auto *compileContext = pcre2_compile_context_create(nullptr);
     pcre2_set_compile_extra_options(compileContext, extraFlags);
+    pcre2_set_newline(compileContext, PCRE2_NEWLINE_ANY);
     auto re = pcre2_compile(patternStr, len, flags, &errorNumber, &errorOffset, compileContext);
     pcre2_compile_context_free(compileContext);
     return reinterpret_cast<Pcre2Obj>(re);
 }
 
-RegExpExecResult RegExp16::Execute(Pcre2Obj re, const uint16_t *str, int len, const int startOffset)
+RegExpExecResult RegExp16::Execute(Pcre2Obj re, uint32_t matchFlags, const uint16_t *str, int len,
+                                   const int startOffset)
 {
     auto *expr = reinterpret_cast<pcre2_code *>(re);
     auto *matchData = pcre2_match_data_create_from_pattern(expr, nullptr);
     std::vector<std::pair<bool, std::string>> captures;
     std::vector<std::pair<int32_t, int32_t>> indices;
-    auto resultCount = pcre2_match(expr, str, len, startOffset, 0, matchData, nullptr);
+    auto resultCount = pcre2_match(expr, str, len, startOffset, matchFlags, matchData, nullptr);
     auto *ovector = pcre2_get_ovector_pointer(matchData);
 
     RegExpExecResult result;

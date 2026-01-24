@@ -15,6 +15,11 @@ import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("$ark_root/plugins/plugins.gni")
 import("$ark_root/verification/verification.gni")
 
+
+declare_args() {
+  ark_ets_pcre2_newline_patch = true
+}
+
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
 } else {
@@ -471,6 +476,39 @@ if (ark_ets_interop_js) {
 _libarkruntime_calculated_defines = []
 _libarkruntime_calculated_include_dirs = []
 
+if (ark_ets_pcre2_newline_patch) {
+  action("pcre2_patch_newline") {
+    script = "$ark_root/runtime/templates/gen_pcre2_newline.rb"
+
+    inputs = [
+      "//third_party/pcre2/pcre2/src/pcre2_newline.c",
+      "$ark_root/plugins/ets/runtime/patches/pcre2_newline.patch",
+    ]
+
+    outputs = [ "$target_gen_dir/pcre2/pcre2_newline_patched.stamp" ]
+
+    args = [
+      "--source",
+      rebase_path("//third_party/pcre2/pcre2/src/pcre2_newline.c"),
+      "--patch",
+      rebase_path("$ark_root/plugins/ets/runtime/patches/pcre2_newline.patch"),
+      "--output",
+      rebase_path("$target_gen_dir/pcre2/pcre2_newline_patched.stamp"),
+    ]
+  }
+
+  if (!(ark_standalone_build || ark_static_standalone_build)) {
+    ohos_shared_headers("arkruntime_pcre2") {
+      include_dirs = [ ]
+      deps = [ ":pcre2_patch_newline" ]
+
+      part_name = "runtime_core"
+      subsystem_name = "arkcompiler"
+    }
+  }
+
+}
+
 if (!(ark_standalone_build || ark_static_standalone_build)) {
   _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static" ]
   _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static_16" ]
@@ -559,6 +597,8 @@ if (is_safepoint_checkers_build) {
 ohos_source_set("libarkruntime_set_static") {
   cflags_cc = [ "-fno-emulated-tls" ]
   sources = _libarkruntime_calculated_sources
+  deps = []
+  defines = []
 
   if (enable_irtoc) {
     sources += [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
@@ -570,7 +610,11 @@ ohos_source_set("libarkruntime_set_static") {
   public_configs = _libarkruntime_calculated_configs
   public_configs += [ "$ark_root:ark_config" ]
 
-  deps = _libarkruntime_calculated_deps
+  if (ark_ets_pcre2_newline_patch) {
+    deps += [ ":pcre2_patch_newline" ]
+    defines += [ "ARK_PCRE2_NEWLINE_PATCH" ]
+  }
+  deps += _libarkruntime_calculated_deps
 
   if (enable_irtoc) {
     deps += [ "$ark_root/irtoc:irtoc_generate" ]
@@ -582,7 +626,7 @@ ohos_source_set("libarkruntime_set_static") {
   ]
 
   external_deps = _libarkruntime_calculated_external_deps
-  defines = _libarkruntime_calculated_defines
+  defines += _libarkruntime_calculated_defines
   include_dirs = _libarkruntime_calculated_include_dirs
 
   part_name = ark_part_name
@@ -592,18 +636,25 @@ ohos_source_set("libarkruntime_set_static") {
 ohos_source_set("libarkruntime_set_static_host") {
   cflags_cc = [ "-fno-emulated-tls" ]
   sources = _libarkruntime_calculated_sources
+  deps = []
+  defines = []
 
   public_configs = _libarkruntime_calculated_configs
   public_configs += [ "$ark_root:ark_host_config" ]
 
-  deps = _libarkruntime_calculated_deps
+  if (ark_ets_pcre2_newline_patch) {
+    deps += [ ":pcre2_patch_newline" ]
+    defines += [ "ARK_PCRE2_NEWLINE_PATCH" ]
+  }
+
+  deps += _libarkruntime_calculated_deps
   deps += [
     ":arkruntime_interpreter_impl_host",
     "$ark_root/compiler:libarktscompiler_host",
   ]
 
   external_deps = _libarkruntime_calculated_external_deps
-  defines = _libarkruntime_calculated_defines
+  defines += _libarkruntime_calculated_defines
   include_dirs = _libarkruntime_calculated_include_dirs
 
   part_name = ark_part_name
@@ -611,7 +662,12 @@ ohos_source_set("libarkruntime_set_static_host") {
 }
 
 ohos_static_library("libarkruntime_static") {
-  deps = [ ":libarkruntime_set_static" ]
+  deps = []
+  if (ark_ets_pcre2_newline_patch) {
+    deps += [ ":pcre2_patch_newline" ]
+    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
+  }
+  deps += [ ":libarkruntime_set_static" ]
   output_extension = "a"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
@@ -628,8 +684,19 @@ config("ark_integrate_public_config") {
 ohos_shared_library("libarkruntime") {
   public_configs = [ ":ark_integrate_public_config" ]
   cflags_cc = [ "-fno-emulated-tls" ]
-  ldflags = [ "-fno-emulated-tls" ]
-  deps = [ ":libarkruntime_set_static" ]
+  ldflags = [ 
+    "-fno-emulated-tls",
+    "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a",
+  ]
+
+  deps = []
+  if (ark_ets_pcre2_newline_patch) {
+    deps += [ ":pcre2_patch_newline" ]
+    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
+  }
+  deps += [ ":libarkruntime_set_static" ]
+
+  external_deps = []
   cflags = []
 
   if (is_gcov_tools) {
@@ -639,6 +706,23 @@ ohos_shared_library("libarkruntime") {
 
   if (ark_hybrid) {
     deps += [ "$common_runtime_root:libcommon_runtime" ]
+  }
+
+  if (!(ark_standalone_build || ark_static_standalone_build)) {
+    external_deps += [
+      "pcre2:libpcre2_static",
+      "pcre2:libpcre2_static_16"
+    ]
+  } else if (ark_standalone_build) {
+    deps += [
+      "//third_party/pcre2:libpcre2_static",
+      "//third_party/pcre2:libpcre2_static_16",
+    ]
+  } else if (ark_static_standalone_build) {
+    _libarkruntime_calculated_deps += [
+      ":libpcre2_16",
+      ":libpcre2_8",
+    ]
   }
 
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
@@ -658,7 +742,16 @@ ohos_shared_library("libarkruntime") {
 
 ohos_shared_library("libarkruntime_host") {
   public_configs = [ ":ark_integrate_public_config" ]
+  ldflags = []
+  ldflags += [ "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a" ]
+
   deps = []
+  if (ark_ets_pcre2_newline_patch) {
+    deps += [ ":pcre2_patch_newline" ]
+    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
+  }
+
+  external_deps = []
   if (current_toolchain == host_toolchain) {
     deps += [ ":libarkruntime_set_static_host" ]
   }
@@ -667,10 +760,27 @@ ohos_shared_library("libarkruntime_host") {
     deps += [ "$common_runtime_root:libcommon_runtime" ]
   }
 
+  if (!(ark_standalone_build || ark_static_standalone_build)) {
+    external_deps += [
+      "pcre2:libpcre2_static",
+      "pcre2:libpcre2_static_16"
+    ]
+  } else if (ark_standalone_build) {
+    deps += [
+      "//third_party/pcre2:libpcre2_static",
+      "//third_party/pcre2:libpcre2_static_16",
+    ]
+  } else if (ark_static_standalone_build) {
+    _libarkruntime_calculated_deps += [
+      ":libpcre2_16",
+      ":libpcre2_8",
+    ]
+  }
+
   if ((current_cpu == "amd64" || current_cpu == "x64" ||
        current_cpu == "x86_64") &&
       (ark_standalone_build || ark_static_standalone_build)) {
-    ldflags = [ "-latomic" ]
+    ldflags += [ "-latomic" ]
   }
 
   if (is_mingw || is_mac) {
@@ -1098,6 +1208,10 @@ if (ark_static_standalone_build) {
       ":pcre2_copy_config_h",
       ":pcre2_copy_pcre2_h",
     ]
+    if (ark_ets_pcre2_newline_patch) {
+      deps += [ ":pcre2_patch_newline" ]
+      defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
+    }
     sources = [
       "$pcre2_lib_dir/src/pcre2_auto_possess.c",
       "$pcre2_lib_dir/src/pcre2_compile.c",
@@ -1149,6 +1263,10 @@ if (ark_static_standalone_build) {
       ":pcre2_copy_config_h",
       ":pcre2_copy_pcre2_h",
     ]
+    if (ark_ets_pcre2_newline_patch) {
+      deps += [ ":pcre2_patch_newline" ]
+      defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
+    }
     sources = [
       "$pcre2_lib_dir/src/pcre2_auto_possess.c",
       "$pcre2_lib_dir/src/pcre2_chkdint.c",

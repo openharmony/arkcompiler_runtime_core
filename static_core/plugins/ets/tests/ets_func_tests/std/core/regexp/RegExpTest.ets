@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,10 @@
 
 let str1: string = "";
 let resultTest: string = "";
+class CharNumGroups {
+    charname: string = 'name';
+    num: string = '0';
+}
 
 function createHaystack(): string {
     let s = "abCdefgz";
@@ -23,6 +27,45 @@ function createHaystack(): string {
     }
     return s;
 }
+
+function replaceTest(): void {
+    const str10: string = 'A1B2';
+    const regex10 = new RegExp('(?<charname>[A-Z])(?<num>\\d)', 'g');
+    const result10: string = str10.replaceAll(
+        regex10,
+        (
+            match: string,
+            args: Object[],
+        ): string => {
+            const groups = args[4] as Record<string, string>
+            const myGroups: CharNumGroups = {
+                charname: groups.get('charname')!,
+                num: groups.get('num')!
+            }
+            return `${myGroups.num}${myGroups.charname}`;
+        }
+    ); 
+    arktest.assertEQ(result10, '1A2B');
+
+    const str11: string = 'A1';
+    const regex11 = new RegExp('([A-Z])(\\d)', 'g');
+    const result11: string = str11.replaceAll(
+        regex11,
+        (
+            _: string,
+            args: Object[]
+        ): String => {
+        const charGroup = args[0] as String;
+        const numGroup = args[1] as String;
+        const dataToConvert: CharNumGroups = { num: numGroup, charname: charGroup  };
+        return JSON.stringify(dataToConvert as CharNumGroups ) ;
+    });
+    let typ = Class.of(new CharNumGroups())
+    const res: CharNumGroups = JSON.parse<CharNumGroups>(result11, typ) as CharNumGroups
+    arktest.assertEQ(res.num, "1");
+    arktest.assertEQ(res.charname, "A");
+}
+
 
 function String1Replace(re: RegExp): void {
     resultTest = str1.replace(re, ".");
@@ -390,8 +433,55 @@ function asNonUndefined(r: RegExpExecArray | null): Array<String> {
   return r!.map((x: String | undefined): String => x!);
 }
 
+function testRegexDotAllUnicodeFlags() {
+    const rep1 = new RegExp('^.$', 'su');
+    const rep2 = new RegExp('^.$', 'sum');
+    const arr: Array<RegExp> = new Array<RegExp>(rep1, rep2);
 
-function main(): void {
+    for (let re of arr) {
+        arktest.assertEQ(re.test('a'), true);
+        arktest.assertEQ(re.test('3'), true);
+        arktest.assertEQ(re.test('π'), true);
+        arktest.assertEQ(re.test('\u2027'), true);
+        arktest.assertEQ(re.test('\u0085'), true);
+        arktest.assertEQ(re.test('\v'), true);
+        arktest.assertEQ(re.test('\f'), true);
+        arktest.assertEQ(re.test('\u180E'), true);
+        arktest.assertEQ(re.test('\u{10300}'), true);
+        arktest.assertEQ(re.test('\n'), true);
+        arktest.assertEQ(re.test('\r'), true);
+        arktest.assertEQ(re.test('\u2028'), true);
+        arktest.assertEQ(re.test('\u2029'), true);
+        arktest.assertEQ(re.test('\uD800'), true);
+        arktest.assertEQ(re.test('\uDFFF'), true);
+    }
+}
+
+function testRegexUnicodeFlagOnly() {
+    const rep1 = new RegExp('^.$', 'u');
+    const rep2 = new RegExp('^.$', 'um');
+    const arr: Array<RegExp> = new Array<RegExp>(rep1, rep2);
+
+    for (let re of arr) {
+        arktest.assertEQ(re.test('a'), true);
+        arktest.assertEQ(re.test('3'), true);
+        arktest.assertEQ(re.test('π'), true);
+        arktest.assertEQ(re.test('\u2027'), true);
+        arktest.assertEQ(re.test('\u0085'), true);
+        arktest.assertEQ(re.test('\v'), true);
+        arktest.assertEQ(re.test('\f'), true);
+        arktest.assertEQ(re.test('\u180E'), true);
+        arktest.assertEQ(re.test('\u{10300}'), true);
+        arktest.assertEQ(!re.test('\n'), true);
+        arktest.assertEQ(!re.test('\r'), true);
+        arktest.assertEQ(!re.test('\u2028'), true);
+        arktest.assertEQ(!re.test('\u2029'), true);
+        arktest.assertEQ(re.test('\uD800'), true);
+        arktest.assertEQ(re.test('\uDFFF'), true);
+    }
+}
+
+function RegExpTest() {
     {
         let reg = new RegExp("ab|cd||")
         arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("cd"))), '["cd"]')
@@ -807,4 +897,16 @@ function main(): void {
         let reg = new RegExp("a(?:|x)$");
         arktest.assertEQ(JSON.stringify(asNonUndefined(reg.exec("ax"))), '["ax"]')
     }
+
+}
+
+function main(): int {
+    const suite = new arktest.ArkTestsuite("RegExp Test")
+
+    suite.addTest('RegExp Test', RegExpTest)
+    suite.addTest('RegExp Test dotall', testRegexDotAllUnicodeFlags)
+    suite.addTest('RegExp Test Unicode flag only', testRegexUnicodeFlagOnly)
+    suite.addTest('RegExp replaceTest', replaceTest)
+
+    return suite.run()
 }
