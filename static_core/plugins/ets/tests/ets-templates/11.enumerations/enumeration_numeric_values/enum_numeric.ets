@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,12 +11,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
+ */          
 {%- for c in cases %}
 /*---
-desc: The double value of an enum constant is set implicitly if an enumeration constant specifies no value.
-tags: [compile-only, negative]
+desc: The integer value of an enum constant is set implicitly if an enumeration constant specifies no value.
 ---*/
 
 {{c.decl}}
@@ -25,3 +23,4 @@ function main() {
     {{c.use|indent}}
 }
 {%- endfor %}
+
