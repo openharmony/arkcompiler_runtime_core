@@ -92,39 +92,42 @@ export namespace taskpool {
                     continue;
                 }
                 removeFromIdleWorkers(this);
-                this.currentPriority = InternalTask.of(task)?.priority;
+
+                const internalTask = InternalTask.of(task);
+                this.currentPriority = internalTask?.priority;
                 this.currentTasks.add(task);
                 let count = getNewTaskTotalCount();
                 this.idleTime = 0;
-                    try {   
-                        let res: Any = null;
-                        res = InternalTask.of(task)?.execute(this)
-                        ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => { 
-                            InternalTask.of(task!).currentDeferred!.resolvePromise(res);
-                            InternalTask.of(task!).currentDeferred = undefined;
-                            if (InternalTask.of(task!).pendingDeferreds!.length > 0) {
-                                InternalTask.of(task!).currentDeferred = InternalTask.of(task!).pendingDeferreds!.shift();
-                            }
-                        });
-                        //clear reference
-                        res = null;
-                    } catch (e) {
-                        ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                            // if task is seq task may rejected inside the execution, so here using ? to avoid null pointer
-                            InternalTask.of(task!).currentDeferred?.rejectPromise(e);
-                            InternalTask.of(task!).currentDeferred = undefined;
-                            if (InternalTask.of(task!).pendingDeferreds!.length > 0) {
-                                InternalTask.of(task!).currentDeferred = InternalTask.of(task!).pendingDeferreds!.shift();
-                            }
-                        });
-                    } finally {
-                        // this is to mock ArkTS-dyn behavior
-                        EAWorker.postToMain<void>(() => {
-                            setTimeout(() => {
-                                InternalTask.of(task!).notifyDependencies();
-                            }, 1);
-                        });
-                    }
+
+                try {
+                    let res: Any = null;
+                    res = internalTask?.execute(this);
+                    ConcurrencyHelpers.lockGuard(internalTask!.taskMutex, () => {
+                        internalTask!.currentDeferred!.resolvePromise(res);
+                        internalTask!.currentDeferred = undefined;
+                        if (internalTask!.pendingDeferreds!.length > 0) {
+                            internalTask!.currentDeferred = internalTask!.pendingDeferreds!.shift();
+                        }
+                    });
+                    //clear reference
+                    res = null;
+                } catch (e) {
+                    ConcurrencyHelpers.lockGuard(internalTask!.taskMutex, () => {
+                        // if task is seq task may rejected inside the execution, so here using ? to avoid null pointer
+                        internalTask!.currentDeferred?.rejectPromise(e);
+                        internalTask!.currentDeferred = undefined;
+                        if (internalTask!.pendingDeferreds!.length > 0) {
+                            internalTask!.currentDeferred = internalTask!.pendingDeferreds!.shift();
+                        }
+                    });
+                } finally {
+                    // this is to mock ArkTS-dyn behavior
+                    EAWorker.postToMain<void>(() => {
+                        setTimeout(() => {
+                            internalTask!.notifyDependencies();
+                        }, 1);
+                    });
+                }
             }
         }
 
@@ -582,8 +585,10 @@ export namespace taskpool {
                 globalTaskQueue?.get(priority)?.push(this.task);
                 let count = allTasks.get(this.task) ?? 0;
                 allTasks.set(this.task, count + 1);
-                waitingTasksNum.fetchAndAdd(1);
-                tryTriggerExpand();
+                const newWaitingTasksNum = waitingTasksNum.fetchAndAdd(1);
+                if (newWaitingTasksNum > workers.size * 2) {
+                    tryTriggerExpand();
+                }
                 // Notify waiting workers using condition variable
                 ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
                     this.callUserCallback(this.onEnqueueCallback);
@@ -610,10 +615,11 @@ export namespace taskpool {
                         this.runnerImpl.isRunning = false;
                     } else {
                         nextTask = this.runnerImpl.tasks.shift();
-                        while (nextTask !==  undefined && InternalTask.of(nextTask!).state.get() == (State.CANCELED.valueOf())) {
-                            ConcurrencyHelpers.lockGuard(InternalTask.of(nextTask!).taskMutex, () => {
-                                InternalTask.of(nextTask!).currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled"));
-                                InternalTask.of(nextTask!).currentDeferred = undefined;
+                        while (nextTask !== undefined && InternalTask.of(nextTask!).state.get() == (State.CANCELED.valueOf())) {
+                            const nextInternalTask = InternalTask.of(nextTask!);
+                            ConcurrencyHelpers.lockGuard(nextInternalTask.taskMutex, () => {
+                                nextInternalTask.currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled"));
+                                nextInternalTask.currentDeferred = undefined;
                             });
                             nextTask = this.runnerImpl.tasks.shift();
                         }
@@ -1164,14 +1170,17 @@ export namespace taskpool {
         execute(task: Task): Promise<Any> {
             initWorkerPoolSync();
             this.checkExecution(task);
-            InternalTask.of(task).seqId = this.impl.id;
-            InternalTask.of(task).runnerImpl = this.impl;
+
+            const internalTask = InternalTask.of(task);
+            internalTask.seqId = this.impl.id;
+            internalTask.runnerImpl = this.impl;
             taskSubmitted(task);
-            InternalTask.of(task).isSubmitted = true;
+            internalTask.isSubmitted = true;
+
             if (isTaskPoolUseLaunch) {
-                InternalTask.of(task).enqueue(this.impl.priority);
+                internalTask.enqueue(this.impl.priority);
                 const taskRunner = (value: Any): Any => {
-                    return InternalTask.of(task).execute();
+                    return internalTask.execute();
                 };
                 this.impl.seqPromise = this.impl.seqPromise.then<Any>(taskRunner, (error) => {
                     taskRunner(undefined);
@@ -1181,21 +1190,23 @@ export namespace taskpool {
             }
 
             const promise = new Promise<Any>((resolve, reject) => {
-                ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                    if (InternalTask.of(task).currentDeferred === undefined) {
-                        InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+                const newDeferred = new PromiseDeferred(resolve, reject);
+                ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+                    if (internalTask.currentDeferred === undefined) {
+                        internalTask.currentDeferred = newDeferred;
                     } else {
-                        InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                        internalTask.pendingDeferreds.push(newDeferred);
                     }
                 });
             });
-            ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {    
+
+            ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {
                 if (this.impl.isRunning) {
                     this.impl.tasks.push(task);
                     InternalTask.of(task).state.set(InternalState.WAITING);
                 } else {
                     this.impl.isRunning = true;
-                    InternalTask.of(task).enqueue(this.impl.priority);
+                    internalTask.enqueue(this.impl.priority);
                 }
             });
             return promise;
@@ -1286,7 +1297,8 @@ export namespace taskpool {
             }
 
             for (let t of toEnqueue) {
-                InternalTask.of(t).enqueue(InternalTask.of(t).priority);
+                const taskInternalTask = InternalTask.of(t);
+                taskInternalTask.enqueue(taskInternalTask.priority);
             }
         }
 
@@ -1351,17 +1363,19 @@ export namespace taskpool {
             initWorkerPoolSync();
             this.checkExecution(task);
 
-            InternalTask.of(task).runnerAsyncImpl = this.impl;
-            InternalTask.of(task).asyncId = this.impl.id;
+            const internalTask = InternalTask.of(task);
+            internalTask.runnerAsyncImpl = this.impl;
+            internalTask.asyncId = this.impl.id;
             taskSubmitted(task);
-            InternalTask.of(task).isSubmitted = true;
+            internalTask.isSubmitted = true;
 
             const promise = new Promise<Any>((resolve, reject) => {
-                ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                    if (InternalTask.of(task).currentDeferred === undefined) {
-                        InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+                const newDeferred = new PromiseDeferred(resolve, reject);
+                ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+                    if (internalTask.currentDeferred === undefined) {
+                        internalTask.currentDeferred = newDeferred;
                     } else {
-                        InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                        internalTask.pendingDeferreds.push(newDeferred);
                     }
                 });
             });
@@ -1370,7 +1384,7 @@ export namespace taskpool {
             try {
                 if (this.impl.runningCount < this.impl.runningCapacity) {
                     this.impl.runningCount = this.impl.runningCount + 1;
-                    InternalTask.of(task).enqueue(priority == undefined ? this.priority : priority);
+                    internalTask.enqueue(priority == undefined ? this.priority : priority);
                 } else {
                     // If waitingCapacity == 0, treat it's waitingQueue's length as unlimited. Task is added to tail.
                     InternalTask.of(task).state.set(InternalState.WAITING);
@@ -1381,10 +1395,11 @@ export namespace taskpool {
                             // the waiting queue exceeds capacity, discard the head task.
                             const head = this.impl.waitingQueue.shift();
                             if (head != undefined) {
-                                if(InternalTask.of(head!).currentDeferred !== undefined) {
-                                    InternalTask.of(head!).currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
+                                const headInternalTask = InternalTask.of(head!);
+                                if(headInternalTask.currentDeferred !== undefined) {
+                                    headInternalTask.currentDeferred!.rejectPromise(new Error(TASKPOOL_ERROR_ASYNC_RUNNER_WAITING_QUEUE_DROPPED, "taskpool:: waiting queue dropped head"));
                                 }
-                                InternalTask.of(head!).isSubmitted = false;
+                                headInternalTask.isSubmitted = false;
                             }
                         }
                         this.impl.waitingQueue.push(task);
@@ -1521,23 +1536,27 @@ export namespace taskpool {
 
     function executeImpl(task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
-        InternalTask.of(task).checkExecution();
-        InternalTask.of(task).isSubmitted = true;
+        const internalTask = InternalTask.of(task);
+        internalTask.checkExecution();
+
+        internalTask.isSubmitted = true;
 
         if (isTaskPoolUseLaunch) {
-            return launchPromise(InternalTask.of(task).execute);
+            return launchPromise(internalTask.execute);
         }
 
         const promise = new Promise<Any>((resolve, reject) => {
-            ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                if (InternalTask.of(task).currentDeferred === undefined) {
-                    InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+            const newDeferred = new PromiseDeferred(resolve, reject);
+            ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+                if (internalTask.currentDeferred === undefined) {
+                    internalTask.currentDeferred = newDeferred;
                 } else {
-                    InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                    internalTask.pendingDeferreds.push(newDeferred);
                 }
             });
         });
-        InternalTask.of(task).enqueue(priority);
+
+        internalTask.enqueue(priority);
         return promise;
     }
 
@@ -1565,11 +1584,13 @@ export namespace taskpool {
                 promises.push(launchPromise(InternalTask.of(task).execute));
             } else {
                 const promise = new Promise<Any>((resolve, reject) => {
-                    ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                        if (InternalTask.of(task).currentDeferred === undefined) {
-                            InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+                    const newDeferred = new PromiseDeferred(resolve, reject);
+                    const internalTask = InternalTask.of(task);
+                    ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+                        if (internalTask.currentDeferred === undefined) {
+                            internalTask.currentDeferred = newDeferred;
                         } else {
-                            InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                            internalTask.pendingDeferreds.push(newDeferred);
                         }
                     });
                 });
@@ -1630,11 +1651,12 @@ export namespace taskpool {
                     })
                 } else {
                     const p = new Promise<Any>((resolve, reject) => {
+                        const newDeferred = new PromiseDeferred(resolve, reject);
                         ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
                             if (InternalTask.of(task).currentDeferred === undefined) {
-                                InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+                                InternalTask.of(task).currentDeferred = newDeferred;
                             } else {
-                                InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                                InternalTask.of(task).pendingDeferreds.push(newDeferred);
                             }
                         });
                     })
@@ -1685,11 +1707,12 @@ export namespace taskpool {
                 launchImpl(task, priority);
             } else {
                 const p = new Promise<Any>((resolve, reject) => {
+                    const newDeferred = new PromiseDeferred(resolve, reject);
                     ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
                         if (InternalTask.of(task).currentDeferred === undefined) {
-                            InternalTask.of(task).currentDeferred = new PromiseDeferred(resolve, reject);
+                            InternalTask.of(task).currentDeferred = newDeferred;
                         } else {
-                            InternalTask.of(task).pendingDeferreds.push(new PromiseDeferred(resolve, reject));
+                            InternalTask.of(task).pendingDeferreds.push(newDeferred);
                         }
                     });
                 })
