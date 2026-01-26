@@ -229,6 +229,7 @@
 07.expressions/15.new_expressions/constructor_param_gen_default_n_9.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/refer_to_same_impl_at_class_n4.ets
 09.classes/03.class_implementation_clause/abstract_method_inheritance.ets
+09.classes/05.access_modifiers/01.private_access_modifier/private_member_name_reuse_in_derived.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_0.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_1.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_2.ets
