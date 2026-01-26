@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,8 @@ public:
     }
 
     PANDA_PUBLIC_API StringItem *GetOrCreateStringItem(const std::string &str);
+
+    PANDA_PUBLIC_API void CreateMetadataItem(std::vector<uint8_t> metadata);
 
     PANDA_PUBLIC_API LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
 
@@ -546,6 +548,8 @@ private:
 
     bool WriteHeaderIndexInfo(Writer *writer);
 
+    bool WriteExportData(Writer *writer);
+
     void RebuildRegionSection();
 
     void RebuildLineNumberProgramIndex();
@@ -560,6 +564,7 @@ private:
 
     size_t GetForeignSize() const;
 
+    std::unique_ptr<MetadataItem> metadataItem_ = nullptr;
     std::unordered_map<std::string, StringItem *> stringMap_;
     std::map<std::string, LiteralArrayItem *, LiteralArrayCompare> literalarrayMap_;
 

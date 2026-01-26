@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ bool AbcFileProcessor::ProcessFile()
 {
     ProcessClasses();
     FillLiteralArrays();
+    FillMetadata();
     FillProgramStrings();
     FillExternalFieldsToRecords();
     GetLanguageSpecificMetadata();
@@ -80,6 +81,12 @@ void AbcFileProcessor::ProcessClasses()
 void AbcFileProcessor::FillProgramStrings()
 {
     program_->strings = stringTable_->GetStringSet();
+}
+
+void AbcFileProcessor::FillMetadata()
+{
+    auto metadata = file_->GetMetadata();
+    program_->metadata.insert(program_->metadata.begin(), metadata.begin(), metadata.end());
 }
 
 void AbcFileProcessor::FillExternalFieldsToRecords()
