@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,63 +139,75 @@ inline bool Class::IsSubClassOf(const Class *klass) const
     return false;
 }
 
-inline static bool IsAssignableFromUnion(const Class *sub, const Class *super);
-template <bool ALLOW_SUPER_TRAVERSAL>
-inline static bool IsAssignableFromRef(const Class *sub, const Class *super);
+inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super, uint32_t depth);
 
-template <bool IS_STRICT, bool IS_UNION_SUPER>
-// CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
-inline static bool IsAssignableFromUnionImpl(const Class *ref, const Class *unionCls)
+inline static bool UnionIsAssignableToRef(const Class *subUnion, const Class *super, uint32_t depth)
 {
-    bool res = false;
-    auto isAssignable = [](const Class *super, const Class *sub) {
-        if (sub->IsUnionClass() || super->IsUnionClass()) {
-            return IsAssignableFromUnion(sub, super);
-        }
-        return IsAssignableFromRef<true>(sub, super);
-    };
-    for (auto *consClass : unionCls->GetConstituentTypes()) {
-        bool isAssign;
-        if constexpr (IS_UNION_SUPER) {
-            isAssign = isAssignable(consClass, ref);
-        } else {
-            isAssign = isAssignable(ref, consClass);
-        }
-
-        res |= isAssign;
-        if constexpr (!IS_STRICT) {
-            continue;
-        }
-        if (!isAssign) {
+    for (auto *consClass : subUnion->GetConstituentTypes()) {
+        bool isAssignableTo = RefIsAssignableToImpl(consClass, super, depth);
+        if (!isAssignableTo) {
             return false;
-        }
-    }
-    return res;
-}
-
-// CC-OFFNXT(G.FUD.06) perf critical
-inline static bool IsAssignableFromUnion(const Class *sub, const Class *super)
-{
-    if (!super->IsUnionClass()) {
-        return IsAssignableFromUnionImpl<true, false>(super, sub);
-    }
-
-    if (!sub->IsUnionClass()) {
-        return IsAssignableFromUnionImpl<false, true>(sub, super);
-    }
-
-    for (auto *consClass : sub->GetConstituentTypes()) {
-        if (IsAssignableFromUnionImpl<true, true>(consClass, super)) {
-            return true;
         }
     }
     return true;
 }
 
-template <bool ALLOW_SUPER_TRAVERSAL>
-// CC-OFFNXT(G.FUD.06) perf critical
-inline bool IsAssignableFromRef(const Class *sub, const Class *super)
+inline static bool IsAssignableToUnion(const Class *sub, const Class *superUnion, uint32_t depth)
 {
+    for (auto *consClass : superUnion->GetConstituentTypes()) {
+        bool isAssignableTo = RefIsAssignableToImpl(sub, consClass, depth);
+        if (isAssignableTo) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
+inline static bool RefIsAssignableToImpl(const Class *sub, const Class *super, uint32_t depth)
+{
+    if (UNLIKELY(depth-- == 0)) {
+        LOG(ERROR, RUNTIME) << "Max class assignability test depth reached";
+        return false;
+    }
+
+    if (sub == super) {
+        return true;
+    }
+    if (sub->IsUnionClass()) {
+        return UnionIsAssignableToRef(sub, super, depth);
+    }
+    if (super->IsUnionClass()) {
+        return IsAssignableToUnion(sub, super, depth);
+    }
+    if (super->IsObjectClass()) {
+        return !sub->IsPrimitive();
+    }
+    if (super->IsInterface()) {
+        return sub->Implements(super);
+    }
+    if (sub->IsArrayClass()) {
+        if (!super->IsArrayClass()) {
+            return false;
+        }
+        return RefIsAssignableToImpl(sub->GetComponentType(), super->GetComponentType(), depth);
+    }
+
+    return sub->IsSubClassOf(super);
+}
+
+inline static bool RefIsAssignableTo(const Class *sub, const Class *super)
+{
+    constexpr uint32_t ASSIGNABILITY_MAX_DEPTH = 256U;
+    return RefIsAssignableToImpl(sub, super, ASSIGNABILITY_MAX_DEPTH);
+}
+
+// CC-OFFNXT(G.FUD.06, huge_method) perf critical, solid logic
+inline static bool RefIsAssignableToNoSuper(const Class *sub, const Class *super)
+{
+    if (sub->IsUnionClass() || super->IsUnionClass()) {
+        return RefIsAssignableTo(sub, super);
+    }
     if (sub == super) {
         return true;
     }
@@ -206,34 +218,21 @@ inline bool IsAssignableFromRef(const Class *sub, const Class *super)
         return sub->Implements(super);
     }
     if (sub->IsArrayClass()) {
-        return super->IsArrayClass() && super->GetComponentType()->IsAssignableFrom(sub->GetComponentType());
+        if (super->IsArrayClass()) {
+            return RefIsAssignableTo(sub->GetComponentType(), super->GetComponentType());
+        }
     }
-    if constexpr (ALLOW_SUPER_TRAVERSAL) {
-        return !sub->IsInterface() && sub->IsSubClassOf(super);
-    } else {
-        return false;
-    }
+    return false;
 }
 
-// CC-OFFNXT(G.FUD.06) perf critical
 inline bool Class::IsAssignableFrom(const Class *klass) const
 {
-    if (klass == this) {
-        return true;
-    }
-    if (IsUnionClass() || klass->IsUnionClass()) {
-        return IsAssignableFromUnion(klass, this);
-    }
-    return IsAssignableFromRef<true>(klass, this);
+    return RefIsAssignableTo(klass, this);
 }
 
 inline bool Class::IsAssignableFromRefNoSuper(const Class *klass) const
 {
-    if (IsUnionClass() || klass->IsUnionClass()) {
-        // Unions evaluated with full hierarchical semantics to preserve correctness.
-        return IsAssignableFromUnion(klass, this);
-    }
-    return IsAssignableFromRef<false>(klass, this);
+    return RefIsAssignableToNoSuper(klass, this);
 }
 
 inline bool Class::Implements(const Class *klass) const
