@@ -20,11 +20,12 @@ desc: >-
     When defining multiple elements of a created array, a compile-time error occurs if there is any non-default
     or optional parameter in constructor.
 tags: [compile-only, negative]
+expected_out: {{c.error}}
 ---*/
 
 {{c.decl}}
 
-class A {
+class A<T> extends Array<T> {
   constructor({{c.param}}) { }
 }
 
@@ -35,7 +36,7 @@ class C<T> {
 }
 
 function main(): void {
-  new C<A>().foo()
+  new C<A<Object>>().foo()
 }
 
 {% endfor %}

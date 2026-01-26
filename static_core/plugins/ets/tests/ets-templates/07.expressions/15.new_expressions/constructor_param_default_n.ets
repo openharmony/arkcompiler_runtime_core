@@ -17,21 +17,20 @@ limitations under the License.
 
 /*---
 desc: >-
-    A class instance creation expression that refers to classes FixedArray, Array, or classes derived from Array,
-    instantiated with an array element type of some class type, is a special form of array creation expression.
-    When defining multiple elements of a created array, such an array creation expression must:
-    - Refer to a class that contains an accessible parameterless constructor or a constructor with
-    all parameters of the second form of optional parameters (see :ref:Optional Parameters); or
-    - Have a default value.
-
-    Otherwise, a compile-time error occurs.
-
-    Class derived from array is used
-    {{c.doc}}
+    When defining multiple elements of a created array, a compile-time error occurs if there is any non-default
+    or optional parameter in constructor.
 tags: [compile-only, negative]
 expected_out: {{c.error}}
 ---*/
 
 {{c.decl}}
+
+class C {
+  constructor({{c.param}}) { }
+}
+
+function main(): void {
+  let arr = new Array<C>(5)
+}
 
 {% endfor %}

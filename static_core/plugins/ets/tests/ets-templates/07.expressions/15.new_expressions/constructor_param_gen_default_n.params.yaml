@@ -13,8 +13,17 @@
 
 ---
 cases:
-    # NO DEFAULT VALUE
-    - { param: 'i : Object' }
-    - { param: 'i : ENUM', decl: 'enum ENUM { Red, Green, Blue }' }
-    - { param: 'i : [number, string]' }
-    - { param: 'i : number[]' }
+# NO DEFAULT VALUE
+  - param: 'i : Object'
+    error: |-
+      "Error undefined"
+  - param: 'i : ENUM'
+    decl: 'enum ENUM {Red, Green, Blue}'
+    error: |-
+      "Error undefined"
+  - param: 'i : [number, string]'
+    error: |-
+      "Error undefined"
+  - param: 'i : number[]'
+    error: |-
+      "Error undefined"
