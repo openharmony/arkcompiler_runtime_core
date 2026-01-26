@@ -17,7 +17,6 @@
 
 /*---
 desc: Resizable array types
-tags: [case.tags]
 
 ---*/
 

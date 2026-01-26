@@ -13,16 +13,9 @@
 
 
 cases:
-  - tags: |-
-    typedef: "Array<String>"
-  - tags: |-
-    typedef: "String[]"
-  - tags: |-
-    typedef: "Array<Object>"
-  - tags: |-
-    typedef: "Object[]"
-  - tags: |-
-    typedef: "Array<NS>"
-  - tags: |-
-    typedef: "NS[]"
-
+    - typedef: "Array<String>"
+    - typedef: "String[]"
+    - typedef: "Array<Object>"
+    - typedef: "Object[]"
+    - typedef: "Array<NS>"
+    - typedef: "NS[]"

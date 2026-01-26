@@ -13,7 +13,7 @@
 
 cases2:
   - desc: Parse UT as a tuple [Int | null | undefined, Int, String]
-    tags:
+    tags: ''
     dec1: |-
       type UT = [Int | null | undefined, Int, String]
     check: |-
@@ -39,7 +39,7 @@ cases2:
       arktest.assertEQ(value[0], "test_neg");
 
   - desc: Parse UT as a union of tuple | boolean | string
-    tags:
+    tags: ''
     dec1: |-
       type UT =  [String | Int, boolean, string] | String | Int
     check: |-
