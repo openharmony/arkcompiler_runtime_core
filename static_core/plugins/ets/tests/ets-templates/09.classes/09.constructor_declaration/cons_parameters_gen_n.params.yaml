@@ -180,7 +180,7 @@ cases:
 
     # [] spread to rest
     - expected_out: |-
-          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_14.A(Double)
+          Semantic error ESE0127: No matching construct signature for cons_parameters_gen_n_14.A(Array<Double>)
           Semantic error ESE0323: Type 'Double' is not compatible with rest parameter type 'String' at index 1
       decl: |-
           class A<T> {
