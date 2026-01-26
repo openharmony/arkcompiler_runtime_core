@@ -361,3 +361,5 @@ std/concurrency/message_basic_interface.ets
 std/concurrency/AsyncLockTimeoutTest.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets
 
+#33140
+std/containers/concurrency/blocking_queue/blocking_queue_first_end_concurrent.ets

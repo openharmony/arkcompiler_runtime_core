@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 
 // NOTE(konstanting, #23205): in case of interop with Node, libuv will be available automatically via
@@ -262,13 +263,20 @@ void TimerModule::TimerInfo::InvokeCallback(ani_env *env)
     status = env->Object_GetType(callback, reinterpret_cast<ani_type *>(&callbackCls));
     ASSERT(status == ANI_OK);
 
-    ani_method invokeMethod {};
-    status = env->Class_FindMethod(callbackCls, ark::ets::INVOKE_METHOD_NAME, nullptr, &invokeMethod);
-    ASSERT(status == ANI_OK);
+    ark::ets::ani::ScopedManagedCodeFix s(env);
+    auto invokeObject = s.ToInternalType(callback);
 
-    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-    ark::ets::interop::js::INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    status = env->Object_CallMethod_Void(callback, invokeMethod);
-    ASSERT(status == ANI_OK);
+    auto resolvedMethod = PlatformTypes(s.GetCoroutine())->coreFunctionUnsafeCall;
+    ASSERT(invokeObject->GetClass()->IsFunction());
+    ark::ets::EtsMethod *call = invokeObject->GetClass()->ResolveVirtualMethod(resolvedMethod);
+
+    auto argArray = ark::ets::EtsObjectArray::Create(ark::ets::PlatformTypes(s.GetCoroutine())->coreObject, 0U);
+    if (UNLIKELY(argArray == nullptr)) {
+        ASSERT(s.GetCoroutine()->HasPendingException());
+        return;
+    }
+
+    ark::Value arg[2] = {ark::Value(invokeObject->GetCoreType()), ark::Value(argArray->GetCoreType())};
+
+    call->GetPandaMethod()->Invoke(s.GetCoroutine(), arg);
 }
