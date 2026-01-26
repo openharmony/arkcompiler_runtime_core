@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,27 @@ limitations under the License.
 ---*/
 
 /*---
-desc: First simple sample from spec
-
-files:
-- ./namespace_storage.ets
+desc: Switch statement
 ---*/
 
-import {Space1 as mySpace} from "./namespace_storage"
+let sr: int = -1;
+function f(i: int): void {
+  switch (i) {
+    case 0:
+    case 1:
+    case 2:
+    default: sr = 42
+  }
+}
 
-function main() {
-    arktest.assertEQ(mySpace.nsVar, 1234)
+function main(): void {
+    sr = -1
+    f(0);
+    arktest.assertEQ(42, sr)
+    sr = -1
+    f(1);
+    arktest.assertEQ(42, sr)
+    sr = -1
+    f(2);
+    arktest.assertEQ(42, sr)
 }
