@@ -1074,9 +1074,10 @@ Type of an *array literal expression* is inferred by the following rules:
    type inference
 
 -  If a context is available, then type is inferred from the context. If
-   successful, then type of an array literal is the inferred type ``T[]``,
-   ``Array<T>``, or tuple.
--  Otherwise, type is inferred from the types of array literal elements.
+   successful, then type of an array literal is the inferred type. Otherwise,
+   a :index:`compile-time error` occurs.    
+-  If no context is available, then type is inferred from the types of array
+   literal elements (see :ref:`Array Type Inference from Types of Elements`). 
 
 More details of both cases are presented below.
 
@@ -1098,42 +1099,53 @@ Array Literal Type Inference from Context
 .. meta:
     frontend_status: Done
 
-Type of an array literal can be inferred from the *context*, including
-explicit type annotation of a variable declaration, left-hand part type
-of an assignment, call parameter type, or type of a cast expression:
+Type of an array literal can be inferred from the *context* that can be
+specified as one of the following:
+
+- Explicit type annotation of a variable declaration;
+- Left-hand part type of an assignment;
+- Explicit return type of a function, a method, or a lambda in a return statement;
+- Parameter type in a call;
+- Target type of a cast expression; or
+- Type of an array element or a class field.
+
+Possible variants are represented in the following example:
 
 .. code-block:: typescript
    :linenos:
 
-    let a: number[] = [1, 2, 3] // ok, variable type is used
+    let a: number[] = [1, 2, 3] // ok, variable type in a declaration is used
     a = [4, 5] // ok, variable type is used
+
+    let b = [1, 2, 3] as number[]    // ok, cast target type is used
 
     function min(x: number[]): number {
       let m = x[0]
-      for (let v of x)
-        if (v < m)
-          m = v
+      for (let v of x) {
+        if (v < m) m = v
+      }
       return m
     }
     min([1., 3.14, 0.99]); // ok, parameter type is used
 
     // Array of array initialization
     type Matrix = number[][]
-    let m: Matrix = [[1, 2], [3, 4], [5, 6]]
+    let m: Matrix = [
+        [1, 2], [3, 4] // ok, element type is used
+    ]
 
     class aClass {}
+    //
     let b1: Array <aClass> = [new aClass, new aClass]
     let b2: Array <number> = [1, 2, 3]
     let b3: FixedArray<number> = [1, 2]
       /* Type of literal is inferred from the context
          taken from b1, b2 and b3 declarations */
 
-
 .. index::
    type
    inferred type
    type inference
-   type annotation
    variable
    variable declaration
    assignment
@@ -1145,49 +1157,95 @@ of an assignment, call parameter type, or type of a cast expression:
    context
    array
 
-Possible kinds of context are represented in the following example:
+A :index:`compile-time error` occurs if the type specified by context
+is **not** one of the following:
+
+- ``Any``;
+- ``Object``;
+- Tuple type;
+- Fixed-size array type;
+- Resizable array type;
+- Superinterface of a resizable array type;
+- Union type that contains at least one consitituent type from the above list.
+
+If type used in a context is ``Any`` or ``Object``, then
+:ref:`Array Type Inference from Types of Elements` is used: 
 
 .. code-block:: typescript
    :linenos:
 
-    let array: number[] = [1, 2, 3]   // assignment context
-    function foo (array: number[]) {}
-    foo ([1, 2, 3])                   // call context
-    let b = [1, 2, 3] as number[]             // casting conversion
+    let a: Object = [1, 2, 3] // ok, array literal is of int[] type
 
-All valid conversions are applied to the initializer expression, i.e., each
-initializer expression type must be assignable (see :ref:`Assignability`)
-to the array element type. Otherwise, a :index:`compile-time error` occurs.
+If type used in a context is a *tuple type* (see :ref:`Tuple Types`),
+then it is inferred as an array literal type on the following conditions:
 
-.. index::
-   array
-   assignment
-   context
-   function
-   casting conversion
-   initializer expression
-   conversion
-   assignability
-   array element
-   type
+- Number of expressions equals the number of constituent types;
+- Type of each expression in the array literal is assignable (see
+  :ref:`Assignability`) to the constituent type at the respective position. 
 
-.. code-block:: typescript
-   :linenos:
-
-    let value: number = 2
-    let list: Object[] = [1, value, "hello", new Error()] // ok
-
-If the type used in the context is a *tuple type* (see :ref:`Tuple Types`),
-and types of all literal expressions are compatible with tuple type elements
-at respective positions, then an array literal is of the tuple type.
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
     let tuple: [number, string] = [1, "hello"] // ok
-
     let incorrect: [number, string] = ["hello", 1] // compile-time error
 
+If type used in a context is a *fixed-size array type* (see
+:ref:`Fixed-size Array Types`), and type of each expression is
+assignable to an array element type, then an array literal is of
+the specified type. Otherwise, a :index:`compile-time error` occurs. 
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: FixedArray<string> = ["hello", "world"] // ok
+    let b: FixedArray<string> = [1, 2]             // compile-time error
+    let c: FixedArray<Object> = [1, "hello"]       // ok
+
+If type used in a context is a *resizeble array type* (see
+:ref:`Resizable Array Types` and including :ref:`Readonly Array Types`),
+and type of each expression is assignable to an array element type,
+then an array literal is of the specified type.
+Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: Array<string> = ["aa", "bb"]     // ok
+    let b: string[] = ["aa", "bb"]          // ok
+    let c: readonly string[] = ["aa", "bb"] // ok
+
+    let d: string[] = ["aa", 2]             // compile-time error
+
+    let o: Object[] = ["aa", 2]             // ok
+
+If type used in a context is an interface ``I``, and:
+
+- If ``I`` is a generic superinterface of a resizable array type with
+  the single type parameter ``I<T>``, then an array literal is considered
+  as an instance of ``Array<T>``. If each expression is assignable
+  to ``T``, then the array literal is of ``I<T>``. Otherwise, a
+  :index:`compile-time error` occurs;
+
+- If ``I`` is a non-generic superinterface of a resizable array type,
+  then an array literal type is evaluated by using
+  :ref:`Array Type Inference from Types of Elements`, and
+  then inferred as ``I``;
+
+- Otherwise, a :index:`compile-time error` occurs.
+
+This situation is represented in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface SomeI {}
+    let a = [1, 2] as SomeI // compile-time error: SomeI is not a superinterface of Array
+
+    let b: ConcatArray<number> = [1, 2]  // ok, instance of Array<number>
+    let c: ConcatArray<string> = [1, 2]  // compile-time error: int is not assignable to string
+    let d: ArrayLike<Object> = [1, "aa"] // ok, instance of Array<Object>
 
 If the type used in a context is a *union type* (see :ref:`Union Types`),
 then the step :ref:`Array Literal Type Inference from Context` is taken
@@ -1226,40 +1284,6 @@ type of the literal. Otherwise, a :index:`compile-time error` occurs:
    type inference
    inferred type
    variable
-
-
-If the type used in the context is a *fixed-size array type* (see
-:ref:`Fixed-size Array Types`), and each initializer expression type is
-compatible with the array element type, then an array literal is of
-*fixed-size array type*.
-
-.. code-block:: typescript
-   :linenos:
-
-    let array: FixedArray<number> = [1, 2]
-
-
-If the type used in the context is a readonly array, then an array literal
-is of readonly array type.
-
-.. index::
-   fixed-size array type
-   initializer expression
-   array element
-   array literal
-   type
-   context
-   readonly
-   array
-
-If another type is used in a context, then type of an array literal is inferred
-by using :ref:`Array Type Inference from Types of Elements`.
-
-.. code-block:: typescript
-   :linenos:
-
-    let o: Object = [1, 2] /* Type of array literal is inferred from the type
-                              of its elements */
 
 |
 
