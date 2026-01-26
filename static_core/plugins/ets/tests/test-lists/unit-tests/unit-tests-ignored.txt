@@ -41,6 +41,9 @@ ets-common-tests/atomics/base_operation_xor.ets
 #32070
 ets-common-tests/atomics/base_operation_biguint.ets
 
+#32837
+ets-common-tests/taskpool/asyncrunner_tasks.ets
+
 #31210
 ets-common-tests/taskpool/long_task.ets
 
