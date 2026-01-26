@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -351,8 +351,7 @@ TEST(EtsVMConfing, PeasJIT)
     ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 
-// NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
-TEST(EtsVMConfing, DISABLED_PeasAOT)
+TEST(EtsVMConfing, PeasAOT)
 {
 #ifdef HOST_CROSSCOMPILING
     GTEST_SKIP();
@@ -384,8 +383,7 @@ TEST(EtsVMConfing, DISABLED_PeasAOT)
     ASSERT_TRUE(ark::ets::DestroyRuntime());
 }
 
-// NOTE(dslynko, #32431): enable the test after fixing issue with incorrect AOT file used
-TEST(EtsVMConfing, DISABLED_PeasLLVMAOT)
+TEST(EtsVMConfing, PeasLLVMAOT)
 {
 #ifdef HOST_CROSSCOMPILING
     GTEST_SKIP();
