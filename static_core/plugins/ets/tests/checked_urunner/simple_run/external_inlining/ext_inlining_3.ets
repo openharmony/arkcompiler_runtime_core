@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,9 @@ import { safe_div } from './ext_funcs_2.ets';
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main1,ext_funcs_2.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main1"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::add.*\[file=\d+\]/
 
 function main1(): int {
     let result = 0;
@@ -48,6 +51,9 @@ function main1(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main2,ext_funcs_2.ETSGLOBAL::add_with_log,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main2"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::add_with_log.*\[file=\d+\]/
 
 function main2(): int {
     let result = 0;
@@ -67,6 +73,9 @@ function main2(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main3,ext_funcs_2.ETSGLOBAL::rand_plus,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main3"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::rand_plus.*\[file=\d+\]/
 
 function main3(): int {
     let ok = true;
@@ -84,6 +93,9 @@ function main3(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main4,ext_funcs_2.ETSGLOBAL::get_arr_element,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main4"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::get_arr_element.*\[file=\d+\]/
 
 function main4(): int {
     let arr: int[] = [1, 2, 3, 4];
@@ -95,6 +107,9 @@ function main4(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main5" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main5,ext_funcs_2.ETSGLOBAL::make_array,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main5" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main5"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::make_array.*\[file=\d+\]/
 
 function main5(): int {
     let arr: int[] = make_array(3);
@@ -105,6 +120,9 @@ function main5(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main6" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main6,ext_funcs_2.ETSGLOBAL::stringify,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main6" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main6"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::stringify.*\[file=\d+\]/
 
 function main6(): int {
     let num: int = 42;
@@ -120,6 +138,9 @@ function main6(): int {
 //! RUN_PAOC   options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main7" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Inline,ext_inlining_3.ETSGLOBAL::main7,ext_funcs_2.ETSGLOBAL::safe_div,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_3_ext_funcs_2.ets.abc", entry: "ext_inlining_3.ETSGLOBAL::main7" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_3.ETSGLOBAL::main7"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_2\.ETSGLOBAL::safe_div.*\[file=\d+\]/
 
 function main7(): int {
     let a = 10;
