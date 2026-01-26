@@ -16,12 +16,12 @@
 #include "bridge/arch/aarch64/proxy_entrypoint_aarch64.S"
 
 
-PROXY_ENTRYPOINT JSRuntimeCallJSBridge, JSRuntimeCallJS
-PROXY_ENTRYPOINT JSRuntimeCallJSByValueBridge, JSRuntimeCallJSByValue
-PROXY_ENTRYPOINT JSRuntimeNewCallJSBridge, JSRuntimeNewCallJS
+PROXY_ENTRYPOINT MAKE_ASM_NAME(JSRuntimeCallJSBridge), MAKE_ASM_NAME(JSRuntimeCallJS)
+PROXY_ENTRYPOINT MAKE_ASM_NAME(JSRuntimeCallJSByValueBridge), MAKE_ASM_NAME(JSRuntimeCallJSByValue)
+PROXY_ENTRYPOINT MAKE_ASM_NAME(JSRuntimeNewCallJSBridge), MAKE_ASM_NAME(JSRuntimeNewCallJS)
 
-PROXY_ENTRYPOINT JSRuntimeCallJSQNameBridge, JSRuntimeCallJSQName
-PROXY_ENTRYPOINT JSRuntimeNewCallJSQNameBridge, JSRuntimeNewCallJSQName
+PROXY_ENTRYPOINT MAKE_ASM_NAME(JSRuntimeCallJSQNameBridge), MAKE_ASM_NAME(JSRuntimeCallJSQName)
+PROXY_ENTRYPOINT MAKE_ASM_NAME(JSRuntimeNewCallJSQNameBridge), MAKE_ASM_NAME(JSRuntimeNewCallJSQName)
 
-PROXY_ENTRYPOINT CallJSProxyBridge, CallJSProxy
-PROXY_ENTRYPOINT CallJSFunctionBridge, CallJSFunction
+PROXY_ENTRYPOINT MAKE_ASM_NAME(CallJSProxyBridge), MAKE_ASM_NAME(CallJSProxy)
+PROXY_ENTRYPOINT MAKE_ASM_NAME(CallJSFunctionBridge), MAKE_ASM_NAME(CallJSFunction)

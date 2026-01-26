@@ -19,13 +19,11 @@
 #include "shorty_values.h"
 
 .macro PROXY_ENTRYPOINT name, entry, skip_c2i_bridge
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -34,8 +32,8 @@ _\name:
 .protected \entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -93,7 +91,7 @@ _\name:
     mov x1, sp
     add x2, fp, #24
 
-    bl MAKE_ASM_NAME(\entry)
+    bl \entry
 
     ldr x1, [sp]
 

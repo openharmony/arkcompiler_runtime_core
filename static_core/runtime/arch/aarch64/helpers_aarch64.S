@@ -144,11 +144,7 @@
 .endm
 
 .macro END_CALL func
-#ifdef PANDA_TARGET_MACOS
-    bl _\func
-#else
     bl \func
-#endif
     POP_CALLER_REGS
 .endm
 
@@ -157,7 +153,7 @@
         LARG0 \fmt
         ARG1 \arg1
         ARG2 \arg2
-    END_CALL LogEntrypoint
+    END_CALL MAKE_ASM_NAME(LogEntrypoint)
 .endm
 
 .macro ABORT

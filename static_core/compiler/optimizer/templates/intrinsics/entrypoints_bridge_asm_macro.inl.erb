@@ -24,25 +24,25 @@
 %     end
 % implementation = intrn.impl.rpartition("::").last
 // Default intrinsic implementation with runtime_call which is called by Codegen::CallIntrinsic
-ENTRYPOINT <%= implementation %>Bridge, <%= implementation %>, <%= intrn.impl_signature.args.count.to_s %>, <%= intrn.general_return_type %>
+ENTRYPOINT MAKE_ASM_NAME(<%= implementation %>Bridge), MAKE_ASM_NAME(<%= implementation %>), <%= intrn.impl_signature.args.count.to_s %>, <%= intrn.general_return_type %>
 // Default implementation for virtually called intrinsics from compiled frame
 %   if intrn.respond_to?(:irtoc_impl) && intrn.codegen_arch.include?($selected_target)
 // intrinsics having irtoc implementation for the interpreter do not need
 // CompiledAbi wrapper as they handle the MethodPtr arg by themselves
-ENTRYPOINT <%= implementation %>CompiledAbiBridge, <%= intrn.irtoc_impl %>, <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
-BRIDGE_SELECTOR <%= implementation %>BridgeSelectorEntryPoint, <%= intrn.irtoc_impl %>, <%= implementation %>CompiledAbiBridge
+ENTRYPOINT MAKE_ASM_NAME(<%= implementation %>CompiledAbiBridge), MAKE_ASM_NAME(<%= intrn.irtoc_impl %>), <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
+BRIDGE_SELECTOR MAKE_ASM_NAME(<%= implementation %>BridgeSelectorEntryPoint), MAKE_ASM_NAME(<%= intrn.irtoc_impl %>), MAKE_ASM_NAME(<%= implementation %>CompiledAbiBridge)
 %   else
-ENTRYPOINT <%= implementation %>CompiledAbiBridge, <%= implementation %>CompiledAbi, <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
+ENTRYPOINT MAKE_ASM_NAME(<%= implementation %>CompiledAbiBridge), MAKE_ASM_NAME(<%= implementation %>CompiledAbi), <%= (intrn.impl_signature.args.count + 1).to_s %>, <%= intrn.general_return_type %>
 // Depending on frame kind choose either CompiledAbiBridge (for compiled frame) or CompiledAbi (for interpreted frame) for virtual intrinsic
-BRIDGE_SELECTOR <%= implementation %>BridgeSelectorEntryPoint, <%= implementation %>CompiledAbi, <%= implementation %>CompiledAbiBridge
+BRIDGE_SELECTOR MAKE_ASM_NAME(<%= implementation %>BridgeSelectorEntryPoint), MAKE_ASM_NAME(<%= implementation %>CompiledAbi), MAKE_ASM_NAME(<%= implementation %>CompiledAbiBridge)
 %   end
 #ifndef NDEBUG
 %   implementation = intrn.fast_path if intrn.respond_to?(:fast_path)
 %   if intrn.respond_to?(:fast_path)
-RUNTIME_CALL_CHECKER <%= intrn.impl.rpartition("::").last %>RuntimeCallChecker, <%= intrn.impl.rpartition("::").last %>
+RUNTIME_CALL_CHECKER MAKE_ASM_NAME(<%= intrn.impl.rpartition("::").last %>RuntimeCallChecker), MAKE_ASM_NAME(<%= intrn.impl.rpartition("::").last %>)
 #if !(defined(PANDA_TARGET_AMD64) && !defined(PANDA_COMPILER_TARGET_X86_64))
 %   end
-RUNTIME_CALL_CHECKER <%= implementation %>RuntimeCallChecker, <%= implementation %>
+RUNTIME_CALL_CHECKER MAKE_ASM_NAME(<%= implementation %>RuntimeCallChecker), MAKE_ASM_NAME(<%= implementation %>)
 %   if intrn.respond_to?(:fast_path)
 #endif
 %   end

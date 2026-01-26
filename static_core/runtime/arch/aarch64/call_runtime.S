@@ -254,11 +254,7 @@
 
 2:
 // The call
-#ifdef PANDA_TARGET_MACOS
-    bl _\entry
-#else
     bl \entry
-#endif
 
     // Restore previous state
     str fp, [THREAD_REG, #MANAGED_THREAD_FRAME_OFFSET]

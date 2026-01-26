@@ -18,14 +18,12 @@
 #include "arch/aarch64/call_runtime.S"
 
 .macro BRIDGE_SELECTOR name, notcompiled_entry, compiled_entry
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\notcompiled_entry
-.private_extern _\compiled_entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \notcompiled_entry
+.private_extern \compiled_entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \notcompiled_entry
@@ -36,29 +34,21 @@ _\name:
 .protected \compiled_entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cbz w17, 1f
-#ifdef PANDA_TARGET_MACOS
-    b _\compiled_entry
-    // workround relocation R_AARCH64_CONDBR19 out of range
-1:  b _\notcompiled_entry
-#else
     b \compiled_entry
     // workround relocation R_AARCH64_CONDBR19 out of range
 1:  b \notcompiled_entry
-#endif
 .endm
 
 .macro RUNTIME_CALL_CHECKER name, entry
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -67,8 +57,8 @@ _\name:
 .protected \entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -81,11 +71,7 @@ _\name:
 
     str xzr, [THREAD_REG, #MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET]
 
-#ifdef PANDA_TARGET_MACOS
-    bl _\entry
-#else
     bl \entry
-#endif
 
     str x19, [THREAD_REG, #MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET]
 
@@ -99,13 +85,11 @@ _\name:
 .endm
 
 .macro ENTRYPOINT name, entry, paramsnum, ret_type
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -114,8 +98,8 @@ _\name:
 .protected \entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -125,13 +109,11 @@ _\name:
 .endm
 
 .macro ENTRYPOINT_ODD_SAVED name, entry, paramsnum, ret_type
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -140,8 +122,8 @@ _\name:
 .protected \entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -151,14 +133,11 @@ _\name:
 .endm
 
 .macro ENTRYPOINT_SLOW_PATH name, entry, paramsnum, ret_type
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
-\name:
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -168,6 +147,7 @@ _\name:
 #endif
 .type \name, %function
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -177,13 +157,11 @@ _\name:
 .endm
 
 .macro MethodEntrypointStub name, entry
-#ifdef PANDA_TARGET_MACOS
-.global _\name
-.private_extern _\name
-.private_extern _\entry
-_\name:
-#else
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -192,8 +170,8 @@ _\name:
 .protected \entry
 #endif
 .type \name, %function
-\name:
 #endif
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -254,11 +232,7 @@ _\name:
     CFI_REL_OFFSET(d9, 8)
     CFI_REL_OFFSET(d8, 0)
 
-#ifdef PANDA_TARGET_MACOS
-    bl _\entry
-#else
     bl \entry
-#endif
     // we're not going to return back here
 
 1:
@@ -269,11 +243,7 @@ _\name:
     sub sp, sp, #16
     CFI_ADJUST_CFA_OFFSET(16)
 
-#ifdef PANDA_TARGET_MACOS
-    bl _\entry
-#else
     bl \entry
-#endif
     
     add sp, sp, #16
     CFI_ADJUST_CFA_OFFSET(-16)
@@ -286,6 +256,6 @@ _\name:
 #include "entrypoints_gen.S"
 #include "entrypoints_bridge_asm_macro.inl"
 
-MethodEntrypointStub AbstractMethodStub, AbstractMethodErrorEntrypoint
+MethodEntrypointStub MAKE_ASM_NAME(AbstractMethodStub), MAKE_ASM_NAME(AbstractMethodErrorEntrypoint)
 
-MethodEntrypointStub DefaultConflictMethodStub, IncompatibleClassChangeErrorForMethodConflictEntrypoint
+MethodEntrypointStub MAKE_ASM_NAME(DefaultConflictMethodStub), MAKE_ASM_NAME(IncompatibleClassChangeErrorForMethodConflictEntrypoint)
