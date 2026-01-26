@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,11 +178,108 @@ function testArrayOfNumberFromIndex() {
     checkArray(data, -10000000001, -1, 0);
 }
 
+
+function testArrayOfBoolean() {
+    let arr: Array<boolean> = new Array<boolean>(true, false);
+    arktest.assertEQ(arr.indexOf(false, 0), 1, '[true, false].indexOf(false, 1)');
+    arktest.assertEQ(arr.indexOf(true, +0), 0, '[true, false].indexOf(true, +0)');
+    arktest.assertEQ(arr.indexOf(true, -0), 0, '[true].indexOf(true, -0)');
+}
+
+
+function testArrayOfMixedTypes() {
+    let a: Array<number | string | object | undefined | null | boolean> = new Array<number | string | object | undefined | null | boolean>(123457);
+    let _false = false;
+    let b: object = new Object();
+    let one = 1;
+    let _float = -(4 / 3);
+
+    a[100] = 1;
+    a[99999] = "";
+    a[10] = b;
+    a[14] = _float
+    a[5555] = 5.5;
+    a[123450] = "0";
+    a[123451] = +0;
+    a[123452] = -0;
+    a[123] = _false;
+    a[321] = false
+    a[467] = undefined
+
+
+    arktest.assertEQ(a.indexOf(1), 100, 'a.indexOf(1)');
+    arktest.assertEQ(a.indexOf(""), 99999, 'a.indexOf("")');
+    arktest.assertEQ(a.indexOf("0"), 123450, 'a.indexOf("0")');
+    arktest.assertEQ(a.indexOf(+0), 123451, 'a.indexOf(0) +0, +0===+0');
+    arktest.assertEQ(a.indexOf(0), 123452, 'a.indexOf(0) -0, 0===-0');
+    arktest.assertEQ(a.indexOf(-0), 123452, 'a.indexOf(-0) -0, -0===-0');
+    
+    arktest.assertEQ(a.indexOf(5.5), 5555, 'a.indexOf(5.5)');
+    arktest.assertEQ(a.indexOf(-(4 / 3)), 14, 'a[14]=_float===-(4/3)');
+
+    arktest.assertEQ(a.indexOf(true), -1, 'a.indexOf(true)');
+    arktest.assertEQ(a.indexOf(5), -1, 'a.indexOf(5)');
+    arktest.assertEQ(a.indexOf("str1"), -1, 'a.indexOf("str1")');
+    
+    arktest.assertEQ(a.indexOf(null), -1, 'a.indexOf(null)');
+    a[86634] = null
+    arktest.assertEQ(a.indexOf(null), 86634, 'a.indexOf(null)');
+
+    arktest.assertEQ(a.indexOf(new Object()), -1, 'a.indexOf(new Object())');
+    arktest.assertEQ(a.indexOf(b), 10, 'a.indexOf(b)');
+
+    arktest.assertEQ(a.indexOf(false), 123, 'a.indexOf("false")');
+    arktest.assertEQ(a.indexOf(undefined), 0, 'a.indexOf("undefined")');
+}
+
+function testArrayElementTypeDiffersFromSearchElementType() {
+    let a1: Array<string | boolean> = new Array<string | boolean>("true");
+    arktest.assertEQ(a1.indexOf(true), -1, '["true"].indexOf(true)');
+
+    let a2: Array<string | number> = new Array<string | number>("0");
+    arktest.assertEQ(a2.indexOf(0), -1, '["0"].indexOf(0)');
+
+    let a3: Array<boolean | number> = new Array<boolean | number>(false);
+    arktest.assertEQ(a3.indexOf(0), -1, '[false].indexOf(0)');
+
+    let a4: Array<undefined | number> = new Array<undefined | number>(undefined);
+    arktest.assertEQ(a4.indexOf(0), -1, '[undefined].indexOf(0)');
+
+    let a5: Array<null | number> = new Array<null | number>(null);
+    arktest.assertEQ(a5.indexOf(0), -1, '[null].indexOf(0)');
+
+    let arr: Array<number> = new Array<number>();
+    let a6: Array<Array<number> | number> = new Array<Array<number> | number>(arr);
+    arktest.assertEQ(a6.indexOf(0), -1, '[[]].indexOf(0)');
+}
+
+function testArraySelfReference() {
+    let a: Array<number> = new Array<number>(0, 1, 2, 3);
+    let arr: Array<number | Array<number>> = new Array<number | Array<number>>(0, 1, a, 3);
+    arktest.assertEQ(arr.indexOf(a), 2, 'a.indexOf(a)');
+    arktest.assertEQ(arr.indexOf(3), 3, 'a.indexOf(3)');
+}
+
+function testArrayElementOwnDataProperty() {
+    let arr: Array<boolean> = new Array<boolean>(true, true, true);
+    arktest.assertEQ(arr.indexOf(true), 0, '[true, true, true].indexOf(true)');
+    arr[0] = false;
+    arktest.assertEQ(arr.indexOf(true), 1, '[false, true, true].indexOf(true)');
+    arr[1] = false;
+    arktest.assertEQ(arr.indexOf(true), 2, '[false, false, true].indexOf(true)');
+}
+
+
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('Array.indexOf');
     testSuite.addTest('Arrays of BigInt64: indexOf for arrays', testArrayOfBigInt);
     testSuite.addTest('Arrays of BigInt64: indexOf for arrays with fromIndex', testArrayOfBigIntFromIndex);
     testSuite.addTest('Arrays of Number: indexOf for arrays', testArrayOfNumber);
     testSuite.addTest('Arrays of Number: indexOf for arrays with fromIndex', testArrayOfNumberFromIndex);
+    testSuite.addTest('Arrays of Boolean: indexOf for arrays', testArrayOfBoolean);
+    testSuite.addTest('Arrays of Mixed Types: indexOf for arrays with mixed types', testArrayOfMixedTypes);
+    testSuite.addTest('Arrays of Mixed Types: type of array element is different from type of search element', testArrayElementTypeDiffersFromSearchElementType);
+    testSuite.addTest('Arrays with self-reference: indexOf for arrays with array elements', testArraySelfReference);
+    testSuite.addTest('Arrays of Boolean: element to be retrieved is own data property on an Array', testArrayElementOwnDataProperty);
     return testSuite.run();
 }
