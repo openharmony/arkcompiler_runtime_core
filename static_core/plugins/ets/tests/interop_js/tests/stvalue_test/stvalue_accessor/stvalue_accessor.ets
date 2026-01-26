@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,4 +150,111 @@ export namespace magicNamespace {
   export let magic_long_n: long = 1024;
   export let magic_float_n: float = 3.14f as float;
   export let magic_double_n: double = 3.141592;
+}
+
+// interface
+export interface Drawable {
+  draw(): void;
+}
+
+export interface Printable {
+  print(): string;
+}
+
+export class Circle implements Drawable, Printable {
+  radius: int = 10;
+
+  draw(): void {
+  }
+
+  print(): string {
+    return 'Circle with radius: ' + this.radius.toString();
+  }
+}
+
+export class Calculator {
+  add(a: int, b: int): int {
+    return a + b;
+  }
+
+  multiply(a: int, b: int): int {
+    return a * b;
+  }
+
+  divide(a: int, b: int): double {
+    return a / b;
+  }
+
+  getResult(): int {
+    return 100;
+  }
+}
+
+export class PrimitiveTypes {
+  byteValue: byte = 0x0A;
+  shortValue: short = 1000;
+  intValue: int = 100000;
+  longValue: long = 10000000000;
+  floatValue: float = 3.14159f;
+  doubleValue: double = 2.718281828;
+  charValue: char = c'X';
+  booleanValue: boolean = true;
+}
+
+export class NullableClass {
+  name: string | null = null;
+  age: string | undefined = undefined;
+
+  setName(name: string): void {
+    this.name = name;
+  }
+
+  getName(): string {
+    return this.name ?? 'Unknown';
+  }
+}
+
+// class with private and public methods
+export class AccessControl {
+  private privateValue: int = 10;
+  public publicValue: int = 20;
+
+  public getPrivateValue(): int {
+    return this.privateValue;
+  }
+
+  public setPrivateValue(value: int): void {
+    this.privateValue = value;
+  }
+
+  public getPublicValue(): int {
+    return this.publicValue;
+  }
+}
+
+// class for testing method invocation with object parameters
+export class Point {
+  x: int = 0;
+  y: int = 0;
+
+  constructor(x: int, y: int) {
+    this.x = x;
+    this.y = y;
+  }
+
+  distanceTo(other: Point): double {
+    let dx = this.x - other.x;
+    let dy = this.y - other.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  toString(): string {
+    return 'Point(' + this.x.toString() + ', ' + this.y.toString() + ')';
+  }
+}
+
+export class Geometry {
+  static calculateDistance(p1: Point, p2: Point): double {
+    return p1.distanceTo(p2);
+  }
 }
