@@ -47,7 +47,6 @@
 //! INST       /Call((Virtual)|(Static)) .*std\.core\.Array::\$_set/
 
 //! CHECKER    JIT IR Builder: Case #2: std.core.Array get/set operations (with errors).
-//! SKIP_IF    @architecture == "arm32"
 //! RUN        force_jit: true, options: "--compiler-regex='escompat_array_get_set.ETSGLOBAL::__noinline__test.*'", entry: "escompat_array_get_set.ETSGLOBAL::test2"
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError,.*,COMPILED/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"

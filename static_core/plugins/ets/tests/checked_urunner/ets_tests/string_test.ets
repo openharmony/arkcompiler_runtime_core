@@ -14,8 +14,7 @@
  */
 
 //! CHECKER      Test check initobj for string in compiler
-//! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "", entry: "string_test.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::main'", entry: "string_test.ETSGLOBAL::main"
 //! EVENT        /Compilation,string_test.ETSGLOBAL::main,.*,COMPILED/
 //! METHOD       "string_test.ETSGLOBAL::main"
 //! PASS_AFTER   "IrBuilder"

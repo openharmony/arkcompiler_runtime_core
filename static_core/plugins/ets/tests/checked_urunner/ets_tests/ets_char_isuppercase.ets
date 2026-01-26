@@ -42,7 +42,6 @@
 //! INST_NEXT  /Add/
 
 //! CHECKER    Char.isUpperCase() in JIT
-//! SKIP_IF    @architecture == "arm32"
 //! RUN        force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_char_isuppercase.ETSGLOBAL::main"
 //! METHOD     "ets_char_isuppercase.ETSGLOBAL::callIsUpperCase"
 //! PASS_AFTER "IrBuilder"

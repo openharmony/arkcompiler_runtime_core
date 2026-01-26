@@ -14,7 +14,6 @@
  */
 
 //! CHECKER         Check preheader's `Compare` isn't squashed by VN.
-//! SKIP_IF         @architecture == "arm32"
 //! RUN             force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv --compiler-regex='.*::main'", entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"
@@ -34,7 +33,6 @@
 //! INST            /Compare.* -> \(v[0-9]+, v[0-9]+\)/
 
 //! CHECKER         Check preheader's `Compare` is squashed if unroll is disabled.
-//! SKIP_IF         @architecture == "arm32"
 //! RUN             force_jit: true, options: "--compiler-loop-unroll=false --compiler-regex='.*::main'", entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
 //! PASS_AFTER      "LoopPeeling"

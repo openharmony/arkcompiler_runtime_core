@@ -30,7 +30,6 @@
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
-//! SKIP_IF     @architecture == "arm32"
 //! RUN         force_jit: true, options: "--compiler-regex='.*will_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
@@ -66,7 +65,6 @@ function will_hoist1() {
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting is not performed in some case
-//! SKIP_IF     @architecture == "arm32"
 //! RUN         force_jit: true, options: "--compiler-regex='.*will_not_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"

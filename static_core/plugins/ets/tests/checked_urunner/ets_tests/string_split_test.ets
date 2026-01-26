@@ -20,8 +20,7 @@
 //! METHOD       "string_split_test.ETSGLOBAL::main"
 
 //! CHECKER      JIT test check no deoptimization occurs in String.split
-//! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "string_split_test.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::main' --compiler-inlining=false", entry: "string_split_test.ETSGLOBAL::main"
 //! EVENT_NOT    /Deoptimization,string_split_test.ETSGLOBAL::main,BOUNDS_CHECK/
 //! METHOD       "string_split_test.ETSGLOBAL::main"
 

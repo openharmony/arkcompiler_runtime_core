@@ -14,7 +14,6 @@
  */
 
 //! CHECKER       JIT: copyWithin()
-//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true,  options: "--compiler-regex=escompat.*Array::copyWithin", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
 //! METHOD        "escompat.Int8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"

@@ -14,8 +14,7 @@
  */
 
 //! CHECKER       Compare double JIT
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "", entry: "ets_double_compare.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::Compare_.*'", entry: "ets_double_compare.ETSGLOBAL::main"
 //! METHOD        "ets_double_compare.ETSGLOBAL::Compare_more__noinline__"
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      "Fcmp"

@@ -62,8 +62,7 @@ function test_array_push() {
 }
 
 //! CHECKER       std.core Array push2
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
+//! RUN           force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::test_array_push_managed_objects' --compiler-if-conversion=false", entry: "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::push/

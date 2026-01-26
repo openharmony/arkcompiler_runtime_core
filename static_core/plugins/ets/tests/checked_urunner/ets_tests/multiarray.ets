@@ -14,7 +14,6 @@
  */
 
 //! CHECKER         Test check optimize LenArray and MultiArray two layers
-//! SKIP_IF         @architecture == "arm32"
 //! RUN             force_jit: true, options: "--compiler-regex='.*main1.*'", entry: "multiarray.ETSGLOBAL::main1"
 //! EVENT           /Compilation,multiarray.ETSGLOBAL::main1,.*,COMPILED/
 //! METHOD          "multiarray.ETSGLOBAL::main1"
@@ -45,7 +44,6 @@
 //! RUN             options: "--compiler-enable-jit=false", entry: "multiarray.ETSGLOBAL::main2", result: 1
 
 //! CHECKER         Test check don't optimize LenArray of String in MultiArray
-//! SKIP_IF         @architecture == "arm32"
 //! RUN             force_jit: true, options: "--compiler-regex='.*main3.*'", entry: "multiarray.ETSGLOBAL::main3"
 //! EVENT           /Compilation,multiarray.ETSGLOBAL::main3,.*,COMPILED/
 //! METHOD          "multiarray.ETSGLOBAL::main3"
