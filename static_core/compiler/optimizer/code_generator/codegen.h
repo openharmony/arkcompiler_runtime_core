@@ -439,7 +439,7 @@ private:
     template <typename T>
     void EncodeImms(const T &imms, bool skipFirstLocation);
 
-    bool CheckInitClassInputsAreEqual(Inst *phi);
+    bool CheckInitClassInputsAreEqual(Inst *init);
     static bool EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params);
 
     template <typename... Args>
