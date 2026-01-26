@@ -699,7 +699,7 @@ export class JSON {
     public static parse<T>(json: string, reviver: ((key: string, value: Any) => Any) | undefined, type: Class, options?: jsonx.ParseOptions): T | null | undefined {
         JSON.checkType(type, new Map<Class, TypeColor>())
 
-        let bigIntOpt: int = options ? options.bigIntMode as int : 0
+        let bigIntOpt: int = options ? options.bigIntMode : 0
         if (bigIntOpt > 2 || bigIntOpt < 0) {
             throw new Error("bigIntMode value should be from 0 to 2, current value is" + bigIntOpt)
         }
