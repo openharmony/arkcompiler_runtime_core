@@ -81,7 +81,7 @@ cases:
           enum Color { Red, Green, Blue }
           let size = 3
       use: |-
-          let v: Color[] = new Color[size]
+          let v: Color[] = new Color[size](Color.Red)
           v[0] = Color.Blue
           arktest.assertEQ(v.length, 3)
           arktest.assertEQ(v[0], Color.Blue)
