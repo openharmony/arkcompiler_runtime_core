@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,10 @@ using Builtin = Type::Builtin;
 namespace {
 
 std::array<std::string, Builtin::LAST> builtin_names = {
-    "*undefined*", "top",        "u1",      "i8",     "u8",     "i16",       "u16",        "i32",
-    "u32",         "f32",        "f64",     "i64",    "u64",    "integral8", "integral16", "integral32",
-    "integral64",  "float32",    "float64", "bits32", "bits64", "primitive", "reference",  "null_reference",
-    "object",      "type_class", "array",   "bot"};
+    "*undefined*", "top",     "u1",      "i8",     "u8",     "i16",       "u16",        "i32",
+    "u32",         "f32",     "f64",     "i64",    "u64",    "integral8", "integral16", "integral32",
+    "integral64",  "float32", "float64", "bits32", "bits64", "primitive", "reference",  "null_reference",
+    "object",      "array",   "bot"};
 
 constexpr uint32_t Bitmap(std::initializer_list<Builtin> vs)
 {
@@ -74,33 +74,32 @@ std::array<uint32_t, SZ> TransitiveClosure(std::array<uint32_t, SZ> const *sourc
 }
 
 std::array<uint32_t, Builtin::LAST> builtin_supertypes_nontrans = {
-    0,                                                                                  /* undefined */
-    0,                                                                                  /* top */
-    Bitmap({Builtin::U8, Builtin::I8}),                                                 /* u1 */
-    Bitmap({Builtin::I16, Builtin::INTEGRAL8}),                                         /* i8 */
-    Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),                           /* u8 */
-    Bitmap({Builtin::I32, Builtin::INTEGRAL16}),                                        /* i16 */
-    Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),                          /* u16 */
-    Bitmap({Builtin::INTEGRAL32}),                                                      /* i32 */
-    Bitmap({Builtin::INTEGRAL32}),                                                      /* u32 */
-    Bitmap({Builtin::FLOAT32}),                                                         /* f32 */
-    Bitmap({Builtin::FLOAT64}),                                                         /* f64 */
-    Bitmap({Builtin::INTEGRAL64}),                                                      /* i64 */
-    Bitmap({Builtin::INTEGRAL64}),                                                      /* u64 */
-    Bitmap({Builtin::INTEGRAL16}),                                                      /* integral8 */
-    Bitmap({Builtin::INTEGRAL32}),                                                      /* integral16 */
-    Bitmap({Builtin::BITS32}),                                                          /* integral32 */
-    Bitmap({Builtin::BITS64}),                                                          /* integral64 */
-    Bitmap({Builtin::BITS32}),                                                          /* float32 */
-    Bitmap({Builtin::BITS64}),                                                          /* float64 */
-    Bitmap({Builtin::PRIMITIVE}),                                                       /* bits32 */
-    Bitmap({Builtin::PRIMITIVE}),                                                       /* bits64 */
-    Bitmap({Builtin::TOP}),                                                             /* primitive */
-    Bitmap({Builtin::TOP}),                                                             /* reference */
-    Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::TYPE_CLASS, Builtin::ARRAY}), /* null_reference */
-    Bitmap({Builtin::REFERENCE}),                                                       /* object */
-    Bitmap({Builtin::REFERENCE}),                                                       /* type_class */
-    Bitmap({Builtin::OBJECT}),                                                          /* array */
+    0,                                                             /* undefined */
+    0,                                                             /* top */
+    Bitmap({Builtin::U8, Builtin::I8}),                            /* u1 */
+    Bitmap({Builtin::I16, Builtin::INTEGRAL8}),                    /* i8 */
+    Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),      /* u8 */
+    Bitmap({Builtin::I32, Builtin::INTEGRAL16}),                   /* i16 */
+    Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),     /* u16 */
+    Bitmap({Builtin::INTEGRAL32}),                                 /* i32 */
+    Bitmap({Builtin::INTEGRAL32}),                                 /* u32 */
+    Bitmap({Builtin::FLOAT32}),                                    /* f32 */
+    Bitmap({Builtin::FLOAT64}),                                    /* f64 */
+    Bitmap({Builtin::INTEGRAL64}),                                 /* i64 */
+    Bitmap({Builtin::INTEGRAL64}),                                 /* u64 */
+    Bitmap({Builtin::INTEGRAL16}),                                 /* integral8 */
+    Bitmap({Builtin::INTEGRAL32}),                                 /* integral16 */
+    Bitmap({Builtin::BITS32}),                                     /* integral32 */
+    Bitmap({Builtin::BITS64}),                                     /* integral64 */
+    Bitmap({Builtin::BITS32}),                                     /* float32 */
+    Bitmap({Builtin::BITS64}),                                     /* float64 */
+    Bitmap({Builtin::PRIMITIVE}),                                  /* bits32 */
+    Bitmap({Builtin::PRIMITIVE}),                                  /* bits64 */
+    Bitmap({Builtin::TOP}),                                        /* primitive */
+    Bitmap({Builtin::TOP}),                                        /* reference */
+    Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::ARRAY}), /* null_reference */
+    Bitmap({Builtin::REFERENCE}),                                  /* object */
+    Bitmap({Builtin::OBJECT}),                                     /* array */
     /* bot */
     Bitmap({Builtin::U1, Builtin::I8, Builtin::U8, Builtin::I16, Builtin::U16, Builtin::I32, Builtin::U32, Builtin::F32,
             Builtin::F64, Builtin::I64, Builtin::U64, Builtin::NULL_REFERENCE, Builtin::OBJECT, Builtin::ARRAY})};
@@ -150,11 +149,6 @@ bool IsClassArray(Class const *klass)
     return klass->IsArrayClass();
 }
 
-bool IsClassClass(Class const *klass)
-{
-    return klass->IsClassClass();
-}
-
 bool IsObjectClass(Class const *klass)
 {
     return klass->IsObjectClass();
@@ -191,7 +185,6 @@ std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
     ClassSubtypingFuns {AlwaysTrue, nullptr},       /* reference */
     ClassSubtypingFuns {nullptr, AlwaysTrue},       /* null_reference */
     ClassSubtypingFuns {AlwaysTrue, IsObjectClass}, /* object */
-    ClassSubtypingFuns {IsClassClass, nullptr},     /* type_class */
     ClassSubtypingFuns {IsClassArray, nullptr},     /* array */
     ClassSubtypingFuns {nullptr, AlwaysTrue}};      /* bot */
 
