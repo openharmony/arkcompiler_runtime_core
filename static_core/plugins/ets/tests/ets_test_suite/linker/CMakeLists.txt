@@ -208,3 +208,50 @@ function(test_mock_linker test)
 endfunction()
 
 test_mock_linker(mock_runtime_linker)
+
+function(test_proxy_with_linker TARGET WORK_DIR)
+    set(MAIN_SOURCE "${linker_tests_in_dir}/proxy/main.ets")
+    set(MAIN_ABC "${WORK_DIR}/main.abc")
+    set(MAIN_ABC_TARGET ${TARGET}-main-abc)
+    compile_ets_code(${MAIN_SOURCE} ${MAIN_ABC} ${MAIN_ABC_TARGET})
+
+    set(ADDITIONAL_ABC_FILES "")
+
+    set(ADDITIONAL_SOURCE
+        "${linker_tests_in_dir}/proxy/myinterface.ets"
+        "${linker_tests_in_dir}/proxy/myinterface2.ets"
+    )
+    set(ADDITIONAL_FILES_COMPILE_TARGET "compile_additional_files")
+    add_custom_target(${ADDITIONAL_FILES_COMPILE_TARGET})
+
+    foreach(src ${ADDITIONAL_SOURCE})
+        get_filename_component(src_name ${src} NAME_WLE)
+        set(ADDITIONAL_ABC "${WORK_DIR}/${TARGET}-external-${src_name}.abc")
+        set(ADDITIONAL_ABC_TARGET ${TARGET}-external-abc-${src_name})
+        message(${ADDITIONAL_ABC})
+        compile_ets_code(${src} ${ADDITIONAL_ABC} ${ADDITIONAL_ABC_TARGET} COMPILER_EXTRA_OPTIONS "--ets-module")
+        add_dependencies(${ADDITIONAL_FILES_COMPILE_TARGET} ${ADDITIONAL_ABC_TARGET})
+
+        list(APPEND ADDITIONAL_ABC_FILES ${ADDITIONAL_ABC})
+    endforeach()
+
+    string(JOIN ":" ALL_ADDITIONAL_ABC_FILES ${ADDITIONAL_ABC_FILES})
+
+    set(BOOT_PANDA_FILES ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc)
+
+    add_custom_target(${TARGET}
+        COMMAND
+            ADDITIONAL_ABC_FILES=${ALL_ADDITIONAL_ABC_FILES}
+            $<TARGET_FILE:ark>
+            --boot-panda-files=${BOOT_PANDA_FILES}
+            --load-runtimes=ets
+            --gc-type=g1-gc
+            --verification-mode=disabled
+            ${MAIN_ABC}
+            main.ETSGLOBAL::main
+        DEPENDS ark etsstdlib ${MAIN_ABC_TARGET} ${ADDITIONAL_FILES_COMPILE_TARGET}
+    )
+    add_dependencies(ets_test_suite_linker ${TARGET})
+endfunction()
+
+test_proxy_with_linker(proxy_linker_test ${linker_tests_out_dir})

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,19 +190,6 @@ class TU implements TIface, UIface {
     foo(x: Base): double { return 2.0 }
 }
 
-interface VIface {
-    foo(x: Base): double { return 1.2 }
-}
-
-interface WIface {
-    foo(x: Derived): double
-}
-
-class VW implements VIface, WIface {
-    // foo(x: Base)  with default implementation here
-    // #32316 foo(x: Derived): double { return 2.2 }
-}
-
 class ValueHandler extends EmptyHandler {
     getSomeValue(): double {
         return 42.42
@@ -247,7 +234,7 @@ enum Event {
 
 let LATEST_EVENT: Event = Event.NONE
 
-type AcceptableTypes = A | AB | CD | EF | G | H | EFGH | IJ | KL | M | N | O | P | Q | RS | TU | VW | X | Y | Z
+type AcceptableTypes = A | AB | CD | EF | G | H | EFGH | IJ | KL | M | N | O | P | Q | RS | TU | X | Y | Z
 
 class Handler implements reflect.InvocationHandler {
     target: AcceptableTypes
@@ -828,41 +815,6 @@ function testTwoIntfOneDefaultImpl2() {
     testInvokeUIface(proxyInstance as UIface)
 }
 
-function testInvokeVIface(proxyObj: VIface) {
-    let fooRes = proxyObj.foo(new Base)
-    arktest.assertEQ(LATEST_EVENT, Event.METHOD_CALLED)
-    arktest.assertTrue(fooRes instanceof double)
-    arktest.assertEQ(fooRes, 2.2)
-    LATEST_EVENT = Event.NONE
-
-    fooRes = proxyObj.foo(new Derived)
-    arktest.assertEQ(LATEST_EVENT, Event.METHOD_CALLED)
-    arktest.assertTrue(fooRes instanceof double)
-    arktest.assertEQ(fooRes, 2.2)
-    LATEST_EVENT = Event.NONE
-}
-
-function testInvokeWIface(proxyObj: WIface) {
-    let fooRes = proxyObj.foo(new Derived)
-    arktest.assertEQ(LATEST_EVENT, Event.METHOD_CALLED)
-    arktest.assertTrue(fooRes instanceof double)
-    arktest.assertEQ(fooRes, 2.2)
-    LATEST_EVENT = Event.NONE
-}
-
-function testTwoIntfOneDefaultImpl3() {
-    let obj = new VW
-    let linker = Class.of(obj).getLinker()
-    let handler = new Handler(obj)
-    let interfaces: FixedArray<Class> = [ Class.from<VIface>(), Class.from<WIface>() ]
-
-    let proxyInstance = reflect.Proxy.create(linker, interfaces, handler)
-    checkIsProxy(proxyInstance)
-
-    testInvokeVIface(proxyInstance as VIface)
-    testInvokeWIface(proxyInstance as WIface)
-}
-
 function testGetHandlerProxy1() {
     let obj = new X
     let linker = Class.of(obj).getLinker()
@@ -942,9 +894,6 @@ function main() {
     suite.addTest('Interfaces with the same method signatures but different return types (default implementations)', testTwoInterfacesDefaultDifferentReturnTypes)
     suite.addTest('Two interfaces, both has compatible method, one of which has default implementations: part1', testTwoIntfOneDefaultImpl)
     suite.addTest('Two interfaces, both has compatible method, one of which has default implementations: part2', testTwoIntfOneDefaultImpl2)
-
-    // enable after #32216
-    // suite.addTest('Two interfaces, both has compatible method, one of which has default implementations: part3', testTwoIntfOneDefaultImpl3)
 
     // enable after #31839 is fixed.
     // suite.addTest('Two interfaces, both provide override-compatible methods with same name', testDefaultMethods3)

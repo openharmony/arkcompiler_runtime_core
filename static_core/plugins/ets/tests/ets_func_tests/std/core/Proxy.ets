@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,9 @@ class BasicHandler implements reflect.InvocationHandler {
 
 function createProxy(ifaces: FixedArray<Class>, handle: reflect.InvocationHandler) : reflect.Proxy {
     let linker = Class.current().getLinker()
-    return reflect.Proxy.create(linker, ifaces, handle)
+    let proxy = reflect.Proxy.create(linker, ifaces, handle)
+    arktest.assertTrue(reflect.Proxy.isProxyClass(Class.of(proxy)))
+    return proxy
 }
 
 // Test proxyClass basic properties
@@ -704,8 +706,51 @@ function extraDispatchTestBody7(proxy: F) {
     proxy.ioo()
 }
 
+function isProxyTestPrimitives() {
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_BOOLEAN))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_BYTE))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_CHAR))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_SHORT))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_INT))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_LONG))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_FLOAT))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_DOUBLE))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_NUMBER))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.PRIMITIVE_VOID))
+}
+
+class ProxyChild extends reflect.Proxy {
+    constructor(handler: reflect.InvocationHandler) {
+        super(handler)
+    }
+}
+class ProxyChildChild extends ProxyChild {
+    constructor(handler: reflect.InvocationHandler) {
+        super(handler)
+    }
+}
+
+function isProxyTestReference() {
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<String>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<Object>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<I1>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<I1Impl>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<Event>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<int>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<int | double>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<String | I1Impl>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<ESValue>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<Any>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<never>()))
+
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<ProxyChild>()))
+    arktest.assertFalse(reflect.Proxy.isProxyClass(Class.from<ProxyChildChild>()))
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Proxy test')
+    suite.addTest('negative test Proxy.isProxyClass for primitive types', isProxyTestPrimitives)
+    suite.addTest('negative test Proxy.isProxyClass for reference types', isProxyTestReference)
     suite.addTest('Test create proxyClass', createProxyBasicTest)
     suite.addTest('Test example proxyClass', exampleDispatchTest)
     suite.addTest('Test basic dispatch', basicDispatchTest)
