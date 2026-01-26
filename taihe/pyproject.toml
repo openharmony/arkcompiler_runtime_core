@@ -12,23 +12,23 @@
 # limitations under the License.
 
 [project]
-version = "0.55.5"
+version = "1.2.3"
 name = "taihe"
 description = "Language-neutral API tooling"
 requires-python = ">=3.10"
 dependencies = [
-    "antlr4-python3-runtime>=4.13.2",
+    "antlr4-python3-runtime>=4.11.1",
     "typing-extensions>=4.13.2",
 ]
 
 [dependency-groups]
 dev = [
-    "coverage>=7.8.0",
-    "hatchling>=1.27.0",
-    "pyright[nodejs]>=1.1.400",
-    "pytest>=8.3.5",
-    "removestar>=1.5.2",
-    "ruff>=0.11.6",
+    "coverage==7.13.2",
+    "hatchling==1.26.3",
+    "pyright[nodejs]==1.1.400",
+    "pytest==8.3.5",
+    "removestar==1.5.2",
+    "ruff==0.8.4",
 ]
 
 [[tool.uv.index]]
@@ -59,6 +59,7 @@ packages = ["compiler/taihe"]
 [tool.hatch.build.targets.wheel.force-include]
 "./runtime" = "taihe/data/runtime"
 "./stdlib" = "taihe/data/stdlib"
+"./cmake" = "taihe/data/cmake"
 
 ### Linting ###
 
@@ -112,6 +113,7 @@ ignore = [
     # -> "would imply to update tests every time you update exception message"
     "SIM108",
     "F541", # "f-string without any placeholders"
+    "F841",
     "E731",
     "D100",
     "D101",
@@ -128,4 +130,5 @@ ignore = [
     "TC006",
     "B007",
     "E501", # TODO fix long lines
+    "UP009",
 ]
