@@ -794,6 +794,8 @@
 04.names_declarations_and_scopes/02.declarations/spec_decl_n6.ets
 04.names_declarations_and_scopes/02.declarations/spec_decl_n7.ets
 04.names_declarations_and_scopes/02.declarations/spec_decl_n8.ets
+04.names_declarations_and_scopes/02.declarations/spec_decl_let_func_same_name_n.ets
+04.names_declarations_and_scopes/02.declarations/spec_decl_predefined_type_class_n.ets
 04.names_declarations_and_scopes/03.scopes/type_param_class_n_1.ets
 04.names_declarations_and_scopes/03.scopes/type_param_class_n_3.ets
 04.names_declarations_and_scopes/03.scopes/unique_class_decl_n.ets

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 /*---
 desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
-expected_out: 'Syntax error ESY0295: Object is a predefined type, cannot be used as an identifier'
+expected_out: "Semantic error ESE0351: Variable 'PI' has already been declared."
 ---*/
 
-// CTE: Name of the declaration clashes with the predefined type or standard library entity name.
+// The variable and the function have the same name:
 
-interface Object {}
+let PI = 3.14
 
+function PI(): double { return 3.14 }

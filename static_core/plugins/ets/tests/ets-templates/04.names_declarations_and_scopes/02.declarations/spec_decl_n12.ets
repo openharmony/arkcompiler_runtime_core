@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 /*---
 desc: Declarations must be distinguishable in a declaration space.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0351: Variable 'Person' has already been declared."
 ---*/
 
 // CTE: Class and enum have the same name.
