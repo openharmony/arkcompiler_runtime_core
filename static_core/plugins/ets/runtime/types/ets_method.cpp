@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_method.h"
 
+#include "ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/utf.h"
@@ -37,58 +38,25 @@ bool EtsMethod::IsMethod(const PandaString &td)
     return td[0] == METHOD_PREFIX;
 }
 
-static EtsMethod *FindInvokeMethodInFunctionalType(EtsClass *type)
-{
-    ASSERT(type->IsFunction());
-    for (size_t arity = 0; arity < EtsPlatformTypes::CORE_FUNCTION_ARITY_THRESHOLD; ++arity) {
-        PandaStringStream ss;
-        ss << STD_CORE_FUNCTION_INVOKE_PREFIX << arity;
-        PandaString str = ss.str();
-        EtsMethod *method = type->GetInstanceMethod(str.c_str(), nullptr);
-        if (method != nullptr) {
-            return method;
-        }
-        PandaStringStream ssR;
-        ssR << STD_CORE_FUNCTION_INVOKE_R_PREFIX << arity;
-        PandaString strR = ssR.str();
-
-        EtsMethod *methodR = type->GetInstanceMethod(strR.c_str(), nullptr);
-        if (methodR != nullptr) {
-            return methodR;
-        }
-    }
-    UNREACHABLE();
-}
-
 EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td, EtsRuntimeLinker *contextLinker)
 {
     ASSERT(contextLinker != nullptr);
     auto *ctx = contextLinker->GetClassLinkerContext();
 
     EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    if (td[0] == METHOD_PREFIX) {
-        // here we resolve method in existing class, which is stored as pointer to panda file + entity id
-        uint64_t filePtr = 0;
-        uint64_t id = 0;
-        const auto scanfStr = std::string_view {td}.substr(1).data();
-        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
-        [[maybe_unused]] auto res = sscanf_s(scanfStr, "%" PRIu64 ";%" PRIu64 ";", &filePtr, &id);
-        // NOLINTEND(cppcoreguidelines-pro-type-vararg,cert-err34-c)
-        [[maybe_unused]] static constexpr int SCANF_PARAM_CNT = 2;
-        ASSERT(res == SCANF_PARAM_CNT);
-        auto pandaFile = reinterpret_cast<const panda_file::File *>(filePtr);
-        auto *method = classLinker->GetMethod(*pandaFile, panda_file::File::EntityId(id), ctx);
-        return EtsMethod::FromRuntimeMethod(method);
-    }
-    ASSERT(td[0] == CLASS_TYPE_PREFIX);
-    auto type = classLinker->GetClass(td.c_str(), true, ctx);
-    ASSERT(type != nullptr);
-    EtsMethod *method = type->GetInstanceMethod(ark::ets::INVOKE_METHOD_NAME, nullptr);
-    method = method == nullptr ? type->GetStaticMethod(ark::ets::INVOKE_METHOD_NAME, nullptr) : method;
-    if (method != nullptr) {
-        return method;
-    }
-    return FindInvokeMethodInFunctionalType(type);
+    ASSERT(td[0] == METHOD_PREFIX);
+    // here we resolve method in existing class, which is stored as pointer to panda file + entity id
+    uint64_t filePtr = 0;
+    uint64_t id = 0;
+    const auto scanfStr = std::string_view {td}.substr(1).data();
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,cert-err34-c)
+    [[maybe_unused]] auto res = sscanf_s(scanfStr, "%" PRIu64 ";%" PRIu64 ";", &filePtr, &id);
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg,cert-err34-c)
+    [[maybe_unused]] static constexpr int SCANF_PARAM_CNT = 2;
+    ASSERT(res == SCANF_PARAM_CNT);
+    auto pandaFile = reinterpret_cast<const panda_file::File *>(filePtr);
+    auto *method = classLinker->GetMethod(*pandaFile, panda_file::File::EntityId(id), ctx);
+    return EtsMethod::FromRuntimeMethod(method);
 }
 
 ani_status EtsMethod::Invoke(ani::ScopedManagedCodeFix &s, Value *args, EtsValue *result)

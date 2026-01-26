@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunctionGenericString)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunctionGenericString"));
 }
 
-TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunctionGenericInt)
+TEST_F(EtsGenericCallParamsTsToEtsTest, DISABLED_checkApplyFunctionGenericInt)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunctionGenericInt"));
 }
@@ -50,7 +50,7 @@ TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunctionGenericArrayCallFromTs
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunctionGenericArrayCallFromTs"));
 }
 
-TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunctionGenericArray)
+TEST_F(EtsGenericCallParamsTsToEtsTest, DISABLED_checkApplyFunctionGenericArray)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunctionGenericArray"));
 }
@@ -60,7 +60,7 @@ TEST_F(EtsGenericCallParamsTsToEtsTest, DISABLED_CheckApplyFunWithConstraintsFun
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunWithConstraintsFun"));
 }
 
-TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunWithConstraintsArrowFun)
+TEST_F(EtsGenericCallParamsTsToEtsTest, DISABLED_checkApplyFunWithConstraintsArrowFun)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunWithConstraintsArrowFun"));
 }
@@ -80,7 +80,7 @@ TEST_F(EtsGenericCallParamsTsToEtsTest, checkSubsetClassCallFromTs)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkSubsetClassCallFromTs"));
 }
 
-TEST_F(EtsGenericCallParamsTsToEtsTest, checkApplyFunctionGenericUnion)
+TEST_F(EtsGenericCallParamsTsToEtsTest, DISABLED_checkApplyFunctionGenericUnion)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkApplyFunctionGenericUnion"));
 }

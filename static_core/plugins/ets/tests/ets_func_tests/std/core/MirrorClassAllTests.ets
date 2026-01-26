@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+function getGlobalClass(): Class {
+	return Class.current()
+}
 class StaticFieldHolder {
 	public static a: int = 5
 	public b: int = 10
@@ -91,11 +94,11 @@ function testFieldIsInherited(): void {
 }
 
 function testParameterGetType(): void {
-	const ft = Type.of(paramDummy) as FunctionType
-	const p0 = ft.getParameter(0)
-	arktest.assertTrue(p0.getType().equals(Type.of(0 as int)))
-	const p1 = ft.getParameter(1)
-	arktest.assertTrue(p1.getType().equals(Type.of(new String(''))))
+	let global = getGlobalClass()
+	let method = global.getStaticMethod("paramDummy")
+	arktest.assertNE(method, undefined)
+    arktest.assertEQ(method!.getParameterType(0)!, Class.PRIMITIVE_INT)
+    arktest.assertEQ(method!.getParameterType(1)!.getName(), "std.core.String")
 }
 
 function isInherited(f: Method, cls: ClassType): boolean {
