@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,6 +209,11 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
     [[maybe_unused]] auto item = GetOrInsert<StringItem>(stringMap_, items_, itemsEnd_, str, false, str);
     ASSERT(item != nullptr);
     return item;
+}
+
+void ItemContainer::CreateMetadataItem(std::vector<uint8_t> metadata)
+{
+    metadataItem_ = std::make_unique<MetadataItem>(std::move(metadata));
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
@@ -554,8 +559,10 @@ uint32_t ItemContainer::ComputeLayout()
     uint32_t numLiteralarrays = literalarrayMap_.size();
     uint32_t numExportClasses = exportMap_.size();
     uint32_t classIdxOffset = sizeof(File::Header);
-    uint32_t exportIdxOffset = classIdxOffset + numClasses * ID_SIZE;  // immediately after class table
-    uint32_t curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE;
+    uint32_t exportDataOffset = classIdxOffset + numClasses * ID_SIZE;  // immediately after class table
+    uint32_t metadataSize =
+        File::METADATA_FLAG_SIZE + (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+    uint32_t curOffset = exportDataOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
 
     UpdateOrderIndexes();
     UpdateLiteralIndexes();
@@ -700,15 +707,20 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    if (!writer->Write<uint32_t>(sizeof(File::Header))) {
+    uint32_t headerSize = sizeof(File::Header);
+    if (!writer->Write<uint32_t>(headerSize)) {
         return false;
     }
 
-    if (!writer->Write<uint32_t>(exportMap_.size())) {
+    uint32_t metadataSize =
+        File::METADATA_FLAG_SIZE + (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+    uint32_t exportDataSize = exportMap_.size() * ID_SIZE + metadataSize;
+    if (!writer->Write<uint32_t>(exportDataSize)) {
         return false;
     }
 
-    uint32_t exportMapOffset = sizeof(File::Header) + classMap_.size() * ID_SIZE;
+    uint32_t classMapSize = classMap_.size() * ID_SIZE;
+    uint32_t exportMapOffset = headerSize + classMapSize;
     if (!writer->Write<uint32_t>(exportMapOffset)) {
         return false;
     }
@@ -725,7 +737,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    uint32_t literalarrayIdxOffset = sizeof(File::Header) + (classMap_.size() + exportMap_.size()) * ID_SIZE;
+    uint32_t literalarrayIdxOffset = headerSize + classMapSize + exportDataSize;
     if (!writer->Write<uint32_t>(literalarrayIdxOffset)) {
         return false;
     }
@@ -782,6 +794,30 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset)
     return WriteHeaderIndexInfo(writer);
 }
 
+bool ItemContainer::WriteExportData(Writer *writer)
+{
+    // Write export class idx and metadata
+    auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(
+        metadataItem_);  // If metadata emitting is disabled (e.g. by compilation option), it'd be empty
+    if (!writer->Write<uint32_t>(!isMetadataSkipped)) {
+        return false;
+    }
+    if (!isMetadataSkipped && !writer->Write<uint32_t>(metadataItem_->Size())) {
+        return false;
+    }
+    for (auto &entry : exportMap_) {
+        if (!writer->Write(entry.second->GetOffset())) {
+            return false;
+        }
+    }
+
+    if (!isMetadataSkipped && !metadataItem_->Write(writer)) {
+        return false;
+    }
+
+    return true;
+}
+
 bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout)
 {
     if (deduplicateItems) {
@@ -801,11 +837,8 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
         }
     }
 
-    // Write export class idx
-    for (auto &entry : exportMap_) {
-        if (!writer->Write(entry.second->GetOffset())) {
-            return false;
-        }
+    if (!WriteExportData(writer)) {
+        return false;
     }
 
     // Write literalArray idx

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,11 +60,11 @@ static std::vector<uint8_t> GetEmptyPandaFileBytes()
     ASSERT(pf != nullptr);
 
     std::vector<uint8_t> data {};
-    const auto headerPtr = reinterpret_cast<const uint8_t *>(pf->GetHeader());
+    const auto basePtr = pf->GetBase();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    data.assign(headerPtr, headerPtr + sizeof(File::Header));
+    data.assign(basePtr, basePtr + sizeof(File::Header) + File::METADATA_FLAG_SIZE);
 
-    ASSERT(data.size() == sizeof(File::Header));
+    ASSERT(data.size() == pf->GetPtr().GetSize());
 
     return data;
 }

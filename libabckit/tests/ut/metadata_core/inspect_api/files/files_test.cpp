@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ TEST_F(LibAbcKitInspectApiFilesTest, StaticFileGetVersion)
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/files/file_static.abc", &file);
 
     AbckitFileVersion version = g_implI->fileGetVersion(file);
-    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {0, 0, 0, 6};
+    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {0, 0, 0, 7};
 
     const auto versionsEquality = std::memcmp(expectedVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE);
     ASSERT_EQ(versionsEquality, 0);
