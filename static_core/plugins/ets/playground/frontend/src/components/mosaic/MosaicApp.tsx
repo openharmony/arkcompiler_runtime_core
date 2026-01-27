@@ -135,11 +135,11 @@ const MosaicApp = (): JSX.Element => {
                     onChange={(tabId): void => handleTabChange(tabId as 'compilation' | 'runtime')}
                     selectedTabId={activeTab}
                 >
-                    <Tab id="compilation" className={styles.tab}>
+                    <Tab id="compilation" className={styles.tab} data-testid="tab-compile">
                         Compile
                         {compilationLogsCount > 0 && <div className={styles.notif} />}
                     </Tab>
-                    <Tab id="runtime" className={styles.tab}>
+                    <Tab id="runtime" className={styles.tab} data-testid="tab-execute">
                         Execute
                         {runtimeLogsCount > 0 && <div className={styles.notif} />}
                     </Tab>
@@ -167,7 +167,7 @@ const MosaicApp = (): JSX.Element => {
                         <div className={cx(styles.code, 'monaco-editor')}>
                             <ArkTSEditor />
                         </div>
-                        {withDisasmRender && <div className={cx(styles.disasm, 'monaco-editor')}>
+                        {withDisasmRender && <div className={cx(styles.disasm, 'monaco-editor')} data-testid="disasm-panel">
                             <DisasmCode />
                         </div>}
                     </div>

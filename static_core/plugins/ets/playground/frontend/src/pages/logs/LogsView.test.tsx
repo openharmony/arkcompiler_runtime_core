@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ describe('LogsView component', () => {
     it('calls clearFilters when clear icon is clicked', () => {
         renderWithProviders(<LogsView logArr={mockLogs} logType='out' clearFilters={mockClearFilters} />);
 
-        const clearIcon = screen.getByTestId('clear-icon');
+        const clearIcon = screen.getByRole('button', { name: 'Clear logs' });
         fireEvent.click(clearIcon);
 
         expect(mockClearFilters).toHaveBeenCalled();
