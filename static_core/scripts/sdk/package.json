@@ -6,7 +6,6 @@
         "panda-sdk-tslinter": "tslinter/bin/tslinter.js"
     },
     "dependencies": {
-        "typescript": "4.8.4",
         "log4js": "6.4.0"
     }
 }
