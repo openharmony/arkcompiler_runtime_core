@@ -60,7 +60,7 @@ Expected<int, Error> ExecWithCallback(Callback callback, Span<const char *> args
     if (resPid != pid) {
         return Unexpected(Error(errno));
     }
-    unsigned int statusCasted = static_cast<unsigned int>(status);
+    auto statusCasted = static_cast<unsigned int>(status);
     if (WIFEXITED(statusCasted)) {
         return static_cast<int>(WEXITSTATUS(statusCasted));
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -994,7 +994,7 @@ static void EmitAndLoadPandaFile(ClassLinker *classLinker, const char *source, c
     auto res = parser.Parse(source);
     ASSERT_TRUE(res);
     std::unique_ptr<const panda_file::File> pf = nullptr;
-    if (pandaFname) {
+    if (pandaFname != nullptr) {
         ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname->GetFileName(), res.Value()));
         pf = panda_file::File::Open(pandaFname->GetFileName());
     } else {
@@ -1066,6 +1066,7 @@ static void CreateFilesForTestWithInMemoryFile(const TmpFile &pandaFname1, const
     }
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 class AotCompilerTest : public ::testing::Test {
 public:
     AotCompilerTest()

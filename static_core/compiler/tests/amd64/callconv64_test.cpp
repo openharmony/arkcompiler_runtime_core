@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,19 +173,20 @@ TEST_F(Callconv64Test, NativeParamsEight)
     }
 }
 
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class Callconv64ParamTypedTest : public Callconv64Test, public testing::WithParamInterface<TypeInfo> {};
 
 TEST_P(Callconv64ParamTypedTest, NativeParamsAndTmpRegs)
 {
     // no tmp registers in param registers
-    auto param_info = GetCallconv()->GetParameterInfo(0);
+    auto paramInfo = GetCallconv()->GetParameterInfo(0);
     const auto &target = GetEncoder()->GetTarget();
     auto getTempRegsMaskByType = [&target](Reg &reg) {
         return reg.IsFloat() ? target.GetTempVRegsMask() : target.GetTempRegsMask();
     };
 
     while (true) {
-        auto ret = param_info->GetNativeParam(GetParam());
+        auto ret = paramInfo->GetNativeParam(GetParam());
         if (!std::holds_alternative<Reg>(ret)) {
             break;
         }

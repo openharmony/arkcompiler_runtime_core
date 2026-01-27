@@ -1320,7 +1320,7 @@ void Aarch64Encoder::EncodeMemLastCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAdd
     GetMasm()->Bind(labelFound);
     GetMasm()->Lsr(xReg0, xReg0, 3U);  // number of 8-bit chars
     GetMasm()->Neg(xReg0, xReg0);
-    GetMasm()->Add(xReg0, xReg0, VixlImm(15U));
+    GetMasm()->Add(xReg0, xReg0, VixlImm(15U));  // NOLINT(readability-magic-numbers)
     GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
     GetMasm()->Bind(labelReturn);
 }

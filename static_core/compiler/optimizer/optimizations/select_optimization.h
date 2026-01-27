@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,9 +49,9 @@ public:
 
 private:
     struct Key {
-        std::array<Inst *, 3U> args;
-        uint64_t constant;
-        ConditionCode cc;
+        std::array<Inst *, 3U> args;  // NOLINT(misc-non-private-member-variables-in-classes)
+        uint64_t constant;            // NOLINT(misc-non-private-member-variables-in-classes)
+        ConditionCode cc;             // NOLINT(misc-non-private-member-variables-in-classes)
 
         bool operator<(const Key &other) const;
     };

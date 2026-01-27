@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -249,36 +249,36 @@ public:
         }
     }
 
-    void DeleteAnnotationElementByName(std::string_view annotation_name, std::string_view annotation_elem_name)
+    void DeleteAnnotationElementByName(std::string_view annotationName, std::string_view annotationElemName)
     {
-        auto annotation_iter =
+        auto annotationIter =
             std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
+                return annotation.GetName() == annotationName;
             });
-        if (annotation_iter != annotations_.end()) {
-            annotation_iter->DeleteAnnotationElementByName(annotation_elem_name);
+        if (annotationIter != annotations_.end()) {
+            annotationIter->DeleteAnnotationElementByName(annotationElemName);
         }
     }
 
-    void DeleteAnnotationByName(const std::string_view &annotation_name)
+    void DeleteAnnotationByName(const std::string_view &annotationName)
     {
-        auto annotation_iter =
+        auto annotationIter =
             std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
+                return annotation.GetName() == annotationName;
             });
-        if (annotation_iter != annotations_.end()) {
-            (void)annotations_.erase(annotation_iter);
+        if (annotationIter != annotations_.end()) {
+            (void)annotations_.erase(annotationIter);
         }
     }
 
-    void AddAnnotationElementByName(const std::string_view &annotation_name, AnnotationElement &&element)
+    void AddAnnotationElementByName(const std::string_view &annotationName, AnnotationElement &&element)
     {
-        auto annotation_iter =
+        auto annotationIter =
             std::find_if(annotations_.begin(), annotations_.end(), [&](pandasm::AnnotationData &annotation) -> bool {
-                return annotation.GetName() == annotation_name;
+                return annotation.GetName() == annotationName;
             });
-        if (annotation_iter != annotations_.end()) {
-            annotation_iter->AddElement(std::move(element));
+        if (annotationIter != annotations_.end()) {
+            annotationIter->AddElement(std::move(element));
         }
     }
 
