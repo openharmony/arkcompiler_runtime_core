@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ static {
     globStsByte = new Byte(126 as byte);
     globStsShort = new Short(4242 as short);
     globStsLong = new Long(42 as long);
-    globStsFloat = new Float(42.42 as float);
+    globStsFloat = new Float(42.42.toFloat());
     globStsDouble = new Double(42.42 as double);
     globStsChar = new Char(c'a');
     globStsBoolean = new Boolean(true);
