@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,15 +77,29 @@ final class SetIteratorImpl<T> implements SetIterator<T> {
     }
 }
 
+final class FinalMap<K, V> extends Map<K, V> {
+    constructor(initialCapacity: int) {
+        super(initialCapacity)
+    }
+
+    constructor(map: FinalMap<K, V>) {
+        super(map)
+    }
+
+    constructor(entries?: Iterable<[K, V]> | readonly ((readonly [K, V]) | null | undefined)[] | null) {
+        super(entries)
+    }
+}
+
 /**
  * Set implementation
  */
 export class Set<K> implements ReadonlySet<K> {
-    private readonly elements: Map<K, K>
+    private readonly elements: FinalMap<K, K>
 
     // NOTE: This API may be removed someday due #28030 internal issue
     constructor(bucketsCount: int) {
-        this.elements = new Map<K, K>(bucketsCount);
+        this.elements = new FinalMap<K, K>(bucketsCount);
     }
 
     /**
@@ -93,14 +107,14 @@ export class Set<K> implements ReadonlySet<K> {
      * @param set another Set
      */
     constructor(set: Set<K>) {
-        this.elements = new Map<K, K>(set.elements)
+        this.elements = new FinalMap<K, K>(set.elements)
     }
 
     // NOTE(templin.konstantin): Temporary workaround due #20944 internal issue
     //  if we remove this constructor we got error on "readonly K[]" branch
     //  at constructor from union type
     constructor(values: K[]) {
-        this.elements = new Map<K, K>()
+        this.elements = new FinalMap<K, K>()
         for (let i = 0; i < values.length; ++i) {
             this.elements.set(values[i], values[i])
         }
@@ -112,17 +126,17 @@ export class Set<K> implements ReadonlySet<K> {
      */
     constructor(elements?: Iterable<K> | FixedArray<K> | null) {
         if (elements == null) {
-            this.elements = new Map<K, K>();
+            this.elements = new FinalMap<K, K>();
         } else if (elements instanceof Iterable) {
             const it = (elements as Iterable<K>).$_iterator()
             const entriesIter = new MappingIterator<K, [K, K]>(it, (element: K): [K, K] => [element, element])
-            this.elements = new Map<K, K>(entriesIter)
+            this.elements = new FinalMap<K, K>(entriesIter)
         } else {
             const entries = new ([K, K] | null | undefined)[(elements as FixedArray<K>).length]
             for (let i = 0; i < elements.length; ++i) {
                 entries[i] = [elements[i], elements[i]] as [K, K]
             }
-            this.elements = new Map<K, K>(entries)
+            this.elements = new FinalMap<K, K>(entries)
         }
     }
 

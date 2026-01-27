@@ -487,16 +487,6 @@ public:
         return false;
     }
 
-    virtual bool IsClassEscompatMap([[maybe_unused]] ClassPtr klass) const
-    {
-        return false;
-    }
-
-    virtual bool IsClassEscompatSet([[maybe_unused]] ClassPtr klass) const
-    {
-        return false;
-    }
-
     virtual bool IsClassEscompatInt8Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;

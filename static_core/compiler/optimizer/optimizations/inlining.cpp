@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1663,8 +1663,7 @@ bool Inlining::ResolveTarget(CallInst *callInst, InlineContext *ctx)
     }
 
     // Resolve the method directly if: method is marked as 'final' or String or if manual devirtualization is possible.
-    if (runtime->IsMethodFinal(method) || runtime->IsClassFinalOrString(runtime->GetClass(method)) ||
-        IsManualDevirtualize(callInst, runtime)) {
+    if (runtime->IsMethodFinal(method) || runtime->IsClassFinalOrString(runtime->GetClass(method))) {
         ctx->method = method;
         return true;
     }
@@ -1729,16 +1728,6 @@ void Inlining::InsertChaGuard(CallInst *callInst, InlineContext *ctx)
 
     GetCha()->AddDependency(ctx->method, GetGraph()->GetOutermostParentGraph()->GetMethod());
     GetGraph()->GetOutermostParentGraph()->AddSingleImplementationMethod(ctx->method);
-}
-
-bool Inlining::IsManualDevirtualize(CallInst *callInst, RuntimeInterface *runtime)
-{
-    auto callerMethod = GetGraph()->GetMethod();
-    auto callerClass = runtime->GetClass(callerMethod);
-    auto calleeMethod = callInst->GetCallMethod();
-    auto calleeClass = runtime->GetClass(calleeMethod);
-    // Replace CallVirtual instruction for Map methods inside Set methods
-    return runtime->IsClassEscompatSet(callerClass) && runtime->IsClassEscompatMap(calleeClass);
 }
 
 bool Inlining::SkipBlock(const BasicBlock *block) const

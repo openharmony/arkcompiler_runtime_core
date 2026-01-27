@@ -50,8 +50,6 @@ public:
     bool IsMethodInModuleScope([[maybe_unused]] MethodPtr method) const override;
     bool IsMethodTypedArrayCtor([[maybe_unused]] MethodPtr method) const override;
     bool IsClassStringBuilder(ClassPtr klass) const override;
-    bool IsClassEscompatMap(ClassPtr klass) const override;
-    bool IsClassEscompatSet(ClassPtr klass) const override;
     bool IsClassEscompatArray(ClassPtr klass) const override;
     bool IsClassEscompatInt8Array(ClassPtr klass) const override;
     bool IsClassEscompatUint8Array(ClassPtr klass) const override;

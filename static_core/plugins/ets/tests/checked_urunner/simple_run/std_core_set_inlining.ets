@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,13 @@
 
 //! CHECKER       AOT + external inlining: inline Map methods inside Set
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_set_.*' --compiler-inline-external-methods-aot=true", entry: "ets_escompat_set_inlining.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex='.*test_set_.*' --compiler-inline-external-methods-aot=true", entry: "std_core_set_inlining.ETSGLOBAL::main"
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_bool"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -29,9 +31,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_char"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -41,9 +45,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_byte"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -53,9 +59,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_short"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -65,9 +73,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_int"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -76,13 +86,17 @@
 //! INST          /Call.*std\.core\.Map::has/
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
+//!
+//! RUN           entry: "std_core_set_inlining.ETSGLOBAL::main"
 
 //! CHECKER       JIT: inline Map methods inside Set
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "ets_escompat_set_inlining.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "std_core_set_inlining.ETSGLOBAL::main"
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_bool"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_bool"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -92,9 +106,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_char"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_char"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -104,9 +120,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_byte"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_byte"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -116,9 +134,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_short"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_short"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -128,9 +148,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,ets_escompat_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
-//! METHOD        "ets_escompat_set_inlining.ETSGLOBAL::test_set_int"
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
+//! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_int"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/

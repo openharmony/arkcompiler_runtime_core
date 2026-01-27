@@ -230,16 +230,6 @@ bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
     return ClassCast(klass)->GetName() == "std.core.StringBuilder";
 }
 
-bool EtsRuntimeInterface::IsClassEscompatMap(ClassPtr klass) const
-{
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreMap;
-}
-
-bool EtsRuntimeInterface::IsClassEscompatSet(ClassPtr klass) const
-{
-    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->coreSet;
-}
-
 bool EtsRuntimeInterface::IsClassEscompatArray(ClassPtr klass) const
 {
     return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes(PandaEtsVM::GetCurrent())->escompatArray;
