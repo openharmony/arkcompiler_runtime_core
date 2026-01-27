@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,8 @@ AbckitValue *FindOrCreateValueU1Static(AbckitFile *file, bool value);
 AbckitValue *FindOrCreateValueIntStatic(AbckitFile *file, int value);
 AbckitValue *FindOrCreateValueDoubleStatic(AbckitFile *file, double value);
 AbckitValue *FindOrCreateValueStringStatic(AbckitFile *file, const char *value, size_t len);
-
+AbckitValue *FindOrCreateValueMethodStatic(AbckitFile *file, AbckitCoreFunction *method);
+AbckitValue *FindOrCreateRecordValueStatic(AbckitFile *file, AbckitCoreClass *klass);
 // ========================================
 // Enum
 // ========================================
@@ -122,6 +123,8 @@ bool InterfaceFieldRemoveAnnotationStatic(AbckitArktsInterfaceField *field, Abck
 // ========================================
 // Function
 // ========================================
+AbckitArktsFunctionParam *CreateFunctionParameterStatic(AbckitFile *file,
+                                                        const struct AbckitArktsFunctionParamCreatedParams *params);
 bool FunctionAddParameterStatic(AbckitArktsFunction *func, AbckitArktsFunctionParam *param);
 bool FunctionSetReturnTypeStatic(AbckitArktsFunction *func, AbckitType *type);
 bool FunctionRemoveParameterStatic(AbckitArktsFunction *func, size_t index);

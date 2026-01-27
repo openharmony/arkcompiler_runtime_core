@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,9 +175,10 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddFunctionStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    ASSERT_EQ(helpers::ExecuteStaticAbc(OUTPUT_PATH, "modules_static_modify", "main"), "15\n");
+    ASSERT_EQ(helpers::ExecuteStaticAbc(OUTPUT_PATH, "modules_static_modify", "main"), "15\nPartial  undefined\n");
 }
-// Test: test-kind=api, api=ArktsModifyApiImpl::moduleSetName, abc-kind=ArkTS2, category=positive
+// Test : test - kind = api, api = ArktsModifyApiImpl::moduleSetName, abc - kind = ArkTS2,
+//               category = positive
 TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleSetNameStatic)
 {
     AbckitFile *file = nullptr;
@@ -191,6 +192,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleSetNameStatic)
     auto arkModule = g_implArkI->coreModuleToArktsModule(module);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(arkModule, nullptr);
+
     g_implArkM->moduleSetName(arkModule, NEW_NAME);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(arkModule, nullptr);
@@ -340,7 +342,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportStaticFunction)
     auto output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc",
                                   "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\n"));
+    ASSERT_TRUE(helpers::Match(output, "25\nPartial  undefined\n"));
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
     auto arkModule = g_implArkM->fileAddExternalModuleArktsV2(file, "std.math");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -386,7 +388,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportStaticFunction)
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
                                   "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "302\n"));
+    ASSERT_TRUE(helpers::Match(output, "302\nPartial  undefined\n"));
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::moduleImportClassMethod, abc-kind=ArkTS2, category=positive
@@ -397,7 +399,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportClassMethod)
     auto output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc",
                                   "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\n"));
+    ASSERT_TRUE(helpers::Match(output, "25\nPartial  undefined\n"));
     helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
     auto coreModule = g_implArkM->fileAddExternalModuleArktsV2(file, "std.core");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -434,7 +436,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportClassMethod)
     output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
                                   "modules_static_modify", "main");
-    ASSERT_TRUE(helpers::Match(output, "25\nhellostring\n"));
+    ASSERT_TRUE(helpers::Match(output, "25\nPartial  undefined\nhellostring\n"));
 }
 
 }  // namespace libabckit::test

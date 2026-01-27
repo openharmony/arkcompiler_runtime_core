@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -894,7 +894,8 @@ std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionNa
     function->owningModule = m.get();
     if (m->target == ABCKIT_TARGET_ARK_TS_V1) {
         auto functionKind = functionImpl.GetFunctionKind();
-        function->isAnonymous = functionKind == panda::panda_file::FunctionKind::NC_FUNCTION;
+        function->isAnonymous = functionKind == panda::panda_file::FunctionKind::NC_FUNCTION ||
+                                functionKind == panda::panda_file::FunctionKind::ASYNC_NC_FUNCTION;
     } else {
         function->isAnonymous = IsAnonymousName(functionName);
     }
@@ -1298,6 +1299,20 @@ void DestroyGraphDynamicSync(AbckitGraph *graph)
 void CloseFileDynamic(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
+
+    for (auto &[_, type] : file->types) {
+        if (type != nullptr) {
+            type->functionUsers.clear();
+            type->fieldTypeUsers.clear();
+            type->types.clear();
+        }
+    }
+    for (auto &[_, type] : file->types) {
+        if (type != nullptr) {
+            delete type;
+        }
+    }
+    file->types.clear();
 
     if (file->needOptimize) {
         std::unordered_map<AbckitCoreFunction *, FunctionStatus *> &functionsMap = file->functionsMap;

@@ -378,6 +378,11 @@ struct AbckitCoreClass {
     std::vector<AbckitType *> typeUsers;
 
     /*
+     * To store class[]
+     */
+    std::unique_ptr<AbckitCoreClass> array = nullptr;
+
+    /*
      * Language-dependent implementation to store class data.
      */
     std::variant<std::unique_ptr<AbckitJsClass>, std::unique_ptr<AbckitArktsClass>> impl;
@@ -920,6 +925,7 @@ struct AbckitFile {
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> methodVals;
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> enumVals;
         std::unordered_map<std::string, std::unique_ptr<AbckitValue>> annotationVals;
+        std::unordered_map<std::string, std::unique_ptr<AbckitValue>> arrayVals;
     };
 
     libabckit::Mode frontend = libabckit::Mode::DYNAMIC;
@@ -949,7 +955,7 @@ struct AbckitFile {
     }
 
     AbcKitLiterals literals;
-    std::unordered_map<size_t, std::unique_ptr<AbckitType>> types;
+    std::unordered_map<size_t, AbckitType *> types;
     AbcKitValues values;
     std::vector<std::unique_ptr<AbckitLiteralArray>> litarrs;
 
@@ -991,6 +997,11 @@ struct AbckitFile {
      * Function point to delete data
      */
     void (*destoryData)(void *) = nullptr;
+
+    /**
+     * Whether need refresh insts
+     */
+    bool needRefreshInsts = false;
 };
 
 struct AbckitDynamicImportDescriptorPayload {
@@ -1527,6 +1538,10 @@ struct AbckitCoreInterface {
      * To store type users
      */
     std::vector<AbckitType *> typeUsers;
+    /*
+     * To store interface[]
+     */
+    std::unique_ptr<AbckitCoreClass> array = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsInterface>> impl;
     AbckitArktsInterface *GetArkTSImpl()
@@ -1656,7 +1671,7 @@ struct AbckitCoreEnum {
     /*
      * To store enum[]
      */
-    std::unique_ptr<AbckitCoreClass> arrayEnum = nullptr;
+    std::unique_ptr<AbckitCoreClass> array = nullptr;
 
     std::variant<std::unique_ptr<AbckitArktsEnum>> impl;
     AbckitArktsEnum *GetArkTSImpl()

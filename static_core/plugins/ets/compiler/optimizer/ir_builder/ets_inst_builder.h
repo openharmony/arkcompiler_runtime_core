@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ virtual void BuildIsNullValue(const BytecodeInstruction *bcInst);
 virtual void BuildNullcheck(const BytecodeInstruction *bcInst);
 template <bool IS_STRICT = false>
 void BuildEquals(const BytecodeInstruction *bcInst);
-void BuildTypeof(const BytecodeInstruction *bcInst);
-void BuildIstrue(const BytecodeInstruction *bcInst);
+virtual void BuildTypeof(const BytecodeInstruction *bcInst);
+virtual void BuildIstrue(const BytecodeInstruction *bcInst);
 
 #endif  // PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_ETS_INST_BUILDER_H

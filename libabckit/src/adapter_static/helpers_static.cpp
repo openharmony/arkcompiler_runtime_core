@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,13 @@ namespace libabckit {
 std::tuple<std::string, std::string> ClassGetNames(const std::string &fullName)
 {
     static const std::string GLOBAL_CLASS_NAME = "ETSGLOBAL";
+    {
+        const std::string kSep = ".@ohos.";
+        auto sepPos = fullName.rfind(kSep);
+        if (sepPos != std::string::npos) {
+            return {fullName.substr(0, sepPos), fullName.substr(sepPos + 1)};
+        }
+    }
     std::string::size_type pos = fullName.rfind('.');
     if (pos == std::string::npos) {
         return {".", fullName};
@@ -1089,10 +1096,23 @@ AbckitValue *FindOrCreateRecordValueStaticImpl(AbckitFile *file, const ark::pand
     return file->values.recordVals[key].get();
 }
 
-AbckitValue *FindOrCreateValueMethodStaticImpl(AbckitFile *file, const std::string &value)
+AbckitValue *FindOrCreateValueMethodStaticImpl(AbckitFile *file, const std::string &value, bool isStatic)
 {
-    return FindOrCreateScalarValue<std::string, ark::pandasm::Value::Type::METHOD>(file, file->values.methodVals,
-                                                                                   value);
+    std::string key = value;
+    if (file->values.methodVals.count(key) == 1) {
+        return file->values.methodVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ScalarValue *>(val); };
+
+    // Create ScalarValue with std::string and correct isStatic flag
+    auto *pval = new ark::pandasm::ScalarValue(
+        ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(value, isStatic));
+
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.methodVals.insert({key, std::move(abcVal)});
+    return file->values.methodVals[key].get();
 }
 
 AbckitValue *FindOrCreateValueEnumStaticImpl(AbckitFile *file, const std::string &value)
@@ -1116,6 +1136,48 @@ AbckitValue *FindOrCreateAnnotationValueStaticImpl(AbckitFile *file, const ark::
     return file->values.annotationVals[key].get();
 }
 
+AbckitValue *FindOrCreateArrayValueStaticImpl(AbckitFile *file, const ark::pandasm::ArrayValue &value)
+{
+    // Generate a unique key based on component type and all values
+    std::string key = std::to_string(static_cast<int>(value.GetComponentType())) + ":";
+    const auto &values = value.GetValues();
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        key += (i > 0 ? "," : "");
+
+        const auto &val = values[i];
+        auto *scalarValue = val.GetAsScalar();
+        auto valType = val.GetType();
+
+        if (valType == ark::pandasm::Value::Type::METHOD && scalarValue != nullptr) {
+            key += scalarValue->GetValue<std::string>();
+            key += (scalarValue->IsStatic() ? ":static" : "");
+            continue;
+        }
+
+        if ((valType == ark::pandasm::Value::Type::STRING || valType == ark::pandasm::Value::Type::ENUM) &&
+            scalarValue != nullptr) {
+            key += scalarValue->GetValue<std::string>();
+            continue;
+        }
+
+        // For other types, use a placeholder
+        key += "?";
+    }
+
+    if (file->values.arrayVals.find(key) != file->values.arrayVals.end()) {
+        return file->values.arrayVals[key].get();
+    }
+
+    auto valueDeleter = [](pandasm_Value *val) -> void { delete reinterpret_cast<ark::pandasm::ArrayValue *>(val); };
+    // Create a copy of the ArrayValue
+    auto *pval = new ark::pandasm::ArrayValue(value.GetComponentType(), value.GetValues());
+    auto abcVal =
+        std::make_unique<AbckitValue>(file, AbckitValueImplT(reinterpret_cast<pandasm_Value *>(pval), valueDeleter));
+    file->values.arrayVals.insert({key, std::move(abcVal)});
+    return file->values.arrayVals[key].get();
+}
+
 AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value &value)
 {
     switch (value.GetType()) {
@@ -1132,12 +1194,16 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
         case ark::pandasm::Value::Type::U64:
             return FindOrCreateValueLongStaticImpl(file, value.GetAsScalar()->GetValue<int64_t>());
         case ark::pandasm::Value::Type::F32:
+            return FindOrCreateValueDoubleStaticImpl(file, static_cast<double>(value.GetAsScalar()->GetValue<float>()));
         case ark::pandasm::Value::Type::F64:
             return FindOrCreateValueDoubleStaticImpl(file, value.GetAsScalar()->GetValue<double>());
         case ark::pandasm::Value::Type::STRING:
             return FindOrCreateValueStringStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
-        case ark::pandasm::Value::Type::METHOD:
-            return FindOrCreateValueMethodStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
+        case ark::pandasm::Value::Type::METHOD: {
+            auto *scalarValue = value.GetAsScalar();
+            bool isStatic = scalarValue->IsStatic();
+            return FindOrCreateValueMethodStaticImpl(file, scalarValue->GetValue<std::string>(), isStatic);
+        }
         case ark::pandasm::Value::Type::ENUM:
             return FindOrCreateValueEnumStaticImpl(file, value.GetAsScalar()->GetValue<std::string>());
         case ark::pandasm::Value::Type::STRING_NULLPTR:
@@ -1149,7 +1215,16 @@ AbckitValue *FindOrCreateValueStatic(AbckitFile *file, const ark::pandasm::Value
         case ark::pandasm::Value::Type::ANNOTATION:
             return FindOrCreateAnnotationValueStaticImpl(file,
                                                          value.GetAsScalar()->GetValue<ark::pandasm::AnnotationData>());
-        case ark::pandasm::Value::Type::ARRAY:
+        case ark::pandasm::Value::Type::ARRAY: {
+            // Value is a reference, need to get pointer for casting
+            auto *arrayValue = const_cast<ark::pandasm::Value *>(&value);
+            if (arrayValue == nullptr || arrayValue->GetType() != ark::pandasm::Value::Type::ARRAY) {
+                LIBABCKIT_LOG(ERROR) << "Failed to get ArrayValue from Value" << std::endl;
+                LIBABCKIT_UNREACHABLE;
+            }
+            auto *castedArrayValue = static_cast<ark::pandasm::ArrayValue *>(arrayValue);
+            return FindOrCreateArrayValueStaticImpl(file, *castedArrayValue);
+        }
         case ark::pandasm::Value::Type::VOID:
         case ark::pandasm::Value::Type::METHOD_HANDLE:
         case ark::pandasm::Value::Type::UNKNOWN:
@@ -1247,6 +1322,9 @@ std::string TypeToNameStatic(AbckitType *type)
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
         if (!type->types.empty()) {
             return libabckit::StringUtil::GetTypeNameStr(type);
+        }
+        if (type->name != nullptr) {
+            return type->name->impl.data();
         }
         if (type->GetClass() == nullptr) {
             return "";

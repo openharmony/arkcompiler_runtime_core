@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -507,7 +507,18 @@ AbckitType *FunctionGetReturnTypeStatic(AbckitCoreFunction *function)
     auto returnType = func->returnType;
     auto file = function->owningModule->file;
     auto typeName = CreateStringStatic(file, returnType.GetName().data(), returnType.GetName().size());
-    return GetOrCreateType(file, ArkPandasmTypeToAbckitTypeId(returnType), returnType.GetRank(), nullptr, typeName);
+    auto typeId = ArkPandasmTypeToAbckitTypeId(returnType);
+    auto rank = returnType.GetRank();
+    auto type = GetOrCreateType(file, typeId, rank, nullptr, typeName);
+    if (returnType.IsUnion() && type->types.empty()) {
+        auto typeNames = returnType.GetComponentNames();
+        for (const auto &memberTypeName : typeNames) {
+            auto memberName = CreateStringStatic(file, memberTypeName.data(), memberTypeName.size());
+            type->types.emplace_back(GetOrCreateType(file, typeId, rank, nullptr, memberName));
+        }
+    }
+
+    return type;
 }
 
 // ========================================

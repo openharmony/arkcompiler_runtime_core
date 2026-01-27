@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1998,7 +1998,7 @@ extern "C" bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *da
     LIBABCKIT_BAD_ARGUMENT(anno, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    AbckitCoreModule *m = anno->ai->owningModule;
+    AbckitCoreModule *m = GetAnnotationOwningModule(anno);
 
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -2198,7 +2198,7 @@ extern "C" int ValueGetInt(AbckitValue *value)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
 
-    LIBABCKIT_BAD_ARGUMENT(value, false);
+    LIBABCKIT_BAD_ARGUMENT(value, 0);
 
     switch (value->file->frontend) {
         case Mode::STATIC:

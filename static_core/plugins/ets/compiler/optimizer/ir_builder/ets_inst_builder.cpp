@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,31 @@ static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
     }
 }
 
+#ifdef ENABLE_LIBABCKIT
+static RuntimeInterface::IntrinsicId GetAbcKitIntrinsicId(DataType::Type type)
+{
+    switch (type) {
+        case DataType::REFERENCE:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_ETS_LD_OBJ_BY_NAME_OBJECT;
+        case DataType::UINT64:
+        case DataType::INT64:
+        case DataType::FLOAT64:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_ETS_LD_OBJ_BY_NAME_I64;
+        case DataType::BOOL:
+        case DataType::UINT8:
+        case DataType::INT8:
+        case DataType::UINT16:
+        case DataType::INT16:
+        case DataType::UINT32:
+        case DataType::INT32:
+        case DataType::FLOAT32:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_ETS_LD_OBJ_BY_NAME_I32;
+        default:
+            UNREACHABLE();
+    }
+}
+#endif  // ENABLE_LIBABCKIT
+
 template <bool IS_ABC_KIT>
 void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type)
 {
@@ -63,8 +88,26 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
         type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
 
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, GetIntrinsicId(type));
-    if constexpr (!IS_ABC_KIT) {
+    RuntimeInterface::IntrinsicId intrinsicId;
+    if constexpr (IS_ABC_KIT) {
+#ifdef ENABLE_LIBABCKIT
+        intrinsicId = GetAbcKitIntrinsicId(type);
+#else
+        UNREACHABLE();
+#endif  // ENABLE_LIBABCKIT
+    } else {
+        intrinsicId = GetIntrinsicId(type);
+    }
+
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, intrinsicId);
+    if constexpr (IS_ABC_KIT) {
+        // AbcKit mode: add object reference as input and fieldId as imm
+        intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 1_I);
+        intrinsic->AppendInput(GetDefinition(bcInst->GetVReg(0)));
+        intrinsic->AddInputType(DataType::REFERENCE);
+        intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
+        intrinsic->SetMethod(GetMethod());
+    } else {
         intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
 
         // Create SaveState instruction
@@ -81,13 +124,13 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
 
         AddInstruction(saveState);
         AddInstruction(nullCheck);
+
+        intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
+        intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
+
+        intrinsic->SetMethodFirstInput();
+        intrinsic->SetMethod(GetMethod());
     }
-
-    intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
-    intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
-
-    intrinsic->SetMethodFirstInput();
-    intrinsic->SetMethod(GetMethod());
 
     AddInstruction(intrinsic);
 

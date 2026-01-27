@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -747,6 +747,44 @@ TEST_F(LibAbcKitArkTSModifyApiClassTests, ClassSetOwningModule2)
 
     output = helpers::ExecuteStaticAbc(OUTPUT_PATH, "classset_static", "main");
     EXPECT_TRUE(helpers::Match(output, "Alice\n"));
+}
+
+TEST_F(LibAbcKitArkTSModifyApiClassTests, EnumerateSetName)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static.abc", &file);
+
+    g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *module, void * /*data*/) -> bool {
+        g_implI->moduleEnumerateNamespaces(module, nullptr, [](AbckitCoreNamespace *ns, void * /*data*/) -> bool {
+            auto nsName = g_implI->abckitStringToString(g_implI->namespaceGetName(ns));
+            if (nsName != nullptr) {
+                std::string newNsName = std::string(nsName) + "_Modified";
+                auto arktsNs = g_implArkI->coreNamespaceToArktsNamespace(ns);
+                g_implArkM->namespaceSetName(arktsNs, newNsName.c_str());
+                EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            }
+
+            g_implI->namespaceEnumerateClasses(ns, nullptr, [](AbckitCoreClass *klass, void * /*data*/) -> bool {
+                auto className = g_implI->abckitStringToString(g_implI->classGetName(klass));
+                if (className == nullptr) {
+                    return true;
+                }
+
+                std::string newName = std::string(className) + "_Modified";
+                auto arktsClass = g_implArkI->coreClassToArktsClass(klass);
+                bool ret = g_implArkM->classSetName(arktsClass, newName.c_str());
+                EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+                EXPECT_TRUE(ret);
+
+                return true;
+            });
+            return true;
+        });
+        return true;
+    });
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static_out.abc",
+                     strlen(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/class/classset_static_out.abc"));
+    g_impl->closeFile(file);
 }
 
 }  // namespace libabckit::test

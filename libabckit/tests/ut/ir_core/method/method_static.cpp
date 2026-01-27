@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ TEST_F(LibAbcKitMethodStaticTest, LibAbcKitTestSetCallMethod)
 {
     auto output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", "method_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "foo\n"));
+    EXPECT_TRUE(helpers::Match(output, "foo\ntest\n"));
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "main",
@@ -62,7 +62,63 @@ TEST_F(LibAbcKitMethodStaticTest, LibAbcKitTestSetCallMethod)
 
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "method_static",
                                        "main");
-    EXPECT_TRUE(helpers::Match(output, "bar\n"));
+    EXPECT_TRUE(helpers::Match(output, "bar\ntest\n"));
+}
+
+TEST_F(LibAbcKitMethodStaticTest, TestIsTrue)
+{
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", "method_static", "main");
+    EXPECT_TRUE(helpers::Match(output, "foo\ntest\n"));
+
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",
+        ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "test",
+        [](AbckitFile * /*file*/, AbckitCoreFunction *method, AbckitGraph *graph) { g_implG->gDump(graph, 1); });
+
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "method_static",
+                                       "main");
+    EXPECT_TRUE(helpers::Match(output, "foo\ntest\n"));
+}
+
+TEST_F(LibAbcKitMethodStaticTest, TestFldai)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", &file);
+    auto *method = helpers::FindMethodByName(file, "test2");
+    ASSERT_NE(method, nullptr);
+    auto *graph = g_implI->createGraphFromFunction(method);
+    ASSERT_NE(graph, nullptr);
+    g_impl->destroyGraph(graph);
+    g_impl->closeFile(file);
+}
+
+TEST_F(LibAbcKitMethodStaticTest, TestTypeOf)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", &file);
+    auto *method = helpers::FindMethodByName(file, "test3");
+    ASSERT_NE(method, nullptr);
+    auto *graph = g_implI->createGraphFromFunction(method);
+    ASSERT_NE(graph, nullptr);
+    g_impl->destroyGraph(graph);
+    g_impl->closeFile(file);
+}
+
+TEST_F(LibAbcKitMethodStaticTest, TestLdObjByName)
+{
+    auto output =
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc", "method_static", "main");
+    EXPECT_TRUE(helpers::Match(output, "foo\ntest\n"));
+
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/ir_core/method/method_static.abc",
+        ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "test4",
+        [](AbckitFile * /*file*/, AbckitCoreFunction *method, AbckitGraph *graph) { g_implG->gDump(graph, 1); });
+
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/method/method_static_modified.abc", "method_static",
+                                       "main");
+    EXPECT_TRUE(helpers::Match(output, "foo\ntest\n"));
 }
 
 }  // namespace libabckit::test

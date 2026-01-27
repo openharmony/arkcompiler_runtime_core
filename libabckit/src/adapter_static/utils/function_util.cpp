@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "function_util.h"
 #include "libabckit/c/statuses.h"
 #include "libabckit/src/macros.h"
+#include "libabckit/src/adapter_static/helpers_static.h"
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "libabckit/src/adapter_static/string_util.h"
 #include "libabckit/src/metadata_inspect_impl.h"
@@ -27,6 +28,89 @@
 #include <string>
 
 namespace abckit::util {
+
+// update lambda record annotations (FunctionalReference) when modify a function's mangle name
+static bool UpdateLambdaAnnotationsForSignatureChange(ark::pandasm::Program *prog, const std::string &oldMangleName,
+                                                      const std::string &newMangleName)
+{
+    constexpr const char *LAMBDA_RECORD_KEY = "%%lambda-";
+    constexpr const char *FUNCTIONAL_REFERENCE_ANNO = "ets.annotation.FunctionalReference";
+    constexpr const char *ELEMENT_NAME = "value";
+
+    if (oldMangleName == newMangleName) {
+        return true;
+    }
+
+    for (auto &[recordName, record] : prog->recordTable) {
+        std::string recordNameCopy = recordName;
+
+        if (recordName.find(LAMBDA_RECORD_KEY) == std::string::npos) {
+            continue;
+        }
+
+        if (record.metadata == nullptr) {
+            continue;
+        }
+
+        bool needsUpdate = false;
+        std::string newMethodValue;
+        bool isStatic = false;
+
+        record.metadata->EnumerateAnnotations([&](ark::pandasm::AnnotationData &anno) {
+            if (anno.GetName() != FUNCTIONAL_REFERENCE_ANNO) {
+                return;
+            }
+
+            for (const auto &elem : anno.GetElements()) {
+                if (elem.GetName() != ELEMENT_NAME) {
+                    continue;
+                }
+
+                auto *value = elem.GetValue();
+                if (value->GetType() != ark::pandasm::Value::Type::METHOD) {
+                    continue;
+                }
+
+                auto *scalarValue = value->GetAsScalar();
+                std::string methodValue = scalarValue->GetValue<std::string>();
+
+                // in annotations the method value may contain additional prefixes
+                // (e.g. "<static> "), so replace the old mangle name as a substring
+                auto pos = methodValue.find(oldMangleName);
+                if (pos == std::string::npos) {
+                    continue;
+                }
+
+                newMethodValue = methodValue;
+                newMethodValue.replace(pos, oldMangleName.size(), newMangleName);
+                isStatic = scalarValue->IsStatic();
+                needsUpdate = true;
+
+                LIBABCKIT_LOG_NO_FUNC(DEBUG) << "Updating FunctionalReference in lambda record " << recordNameCopy
+                                             << " from " << methodValue << " to " << newMethodValue << std::endl;
+                return;
+            }
+        });
+
+        if (!needsUpdate) {
+            continue;
+        }
+
+        auto *metadata = record.metadata.get();
+        if (metadata == nullptr) {
+            continue;
+        }
+
+        metadata->DeleteAnnotationElementByName(FUNCTIONAL_REFERENCE_ANNO, ELEMENT_NAME);
+
+        auto newVal = std::make_unique<ark::pandasm::ScalarValue>(
+            ark::pandasm::ScalarValue::Create<ark::pandasm::Value::Type::METHOD>(newMethodValue, isStatic));
+        ark::pandasm::AnnotationElement newElement(ELEMENT_NAME, std::move(newVal));
+        metadata->AddAnnotationElementByName(FUNCTIONAL_REFERENCE_ANNO, std::move(newElement));
+    }
+
+    return true;
+}
 
 std::string ReplaceFunctionModuleName(const std::string &oldModuleName, const std::string &newName)
 {
@@ -50,30 +134,63 @@ std::string GenerateFunctionMangleName(const std::string &moduleName, const ark:
     return ss.str();
 }
 
-bool UpdateFunctionTableKey(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &newName,
-                            std::string &oldMangleName, std::string &newMangleName)
+static ark::pandasm::Function *UpdateTableKey(std::map<std::string, ark::pandasm::Function> &table,
+                                              const std::string &oldKey, const std::string &newKey,
+                                              const std::string &tableName)
 {
+    auto it = table.find(oldKey);
+    if (it == table.end()) {
+        return nullptr;
+    }
+
+    if (table.find(newKey) != table.end()) {
+        LIBABCKIT_LOG(FATAL) << "Target mangle name already exists in " << tableName << ": " << newKey << std::endl;
+        return nullptr;
+    }
+
+    auto node = table.extract(it);
+    node.key() = newKey;
+    auto result = table.insert(std::move(node));
+
+    LIBABCKIT_LOG(DEBUG) << "Updated function in " << tableName << ": " << oldKey << " -> " << newKey << std::endl;
+    return &result.position->second;
+}
+
+bool UpdateFunctionTableKey(ark::pandasm::Program *prog, ark::pandasm::Function *impl, const std::string &newName,
+                            std::string &oldMangleName, std::string &newMangleName, AbckitArktsFunction *arktsFunc)
+{
+    // Generate new mangle name if not provided
     if (newMangleName.empty()) {
         std::string newModuleName = ReplaceFunctionModuleName(impl->name, newName);
         newMangleName = GenerateFunctionMangleName(newModuleName, *impl);
     }
 
-    auto staticIt = prog->functionStaticTable.find(oldMangleName);
-    if (staticIt != prog->functionStaticTable.end()) {
-        auto staticNode = prog->functionStaticTable.extract(staticIt);
-        staticNode.key() = newMangleName;
-        prog->functionStaticTable.insert(std::move(staticNode));
+    LIBABCKIT_LOG(DEBUG) << "Updating function key: " << oldMangleName << " -> " << newMangleName << std::endl;
+
+    // Try tables in priority order: static first, then instance
+    ark::pandasm::Function *newImpl =
+        UpdateTableKey(prog->functionStaticTable, oldMangleName, newMangleName, "static table");
+    if (newImpl == nullptr) {
+        newImpl = UpdateTableKey(prog->functionInstanceTable, oldMangleName, newMangleName, "instance table");
     }
 
-    auto instanceIt = prog->functionInstanceTable.find(oldMangleName);
-    if (instanceIt != prog->functionInstanceTable.end()) {
-        auto instanceNode = prog->functionInstanceTable.extract(instanceIt);
-        instanceNode.key() = newMangleName;
-        prog->functionInstanceTable.insert(std::move(instanceNode));
+    if (newImpl == nullptr) {
+        LIBABCKIT_LOG(FATAL) << "Function table key not found or update failed: " << oldMangleName << std::endl;
+        return false;
     }
 
-    if (staticIt == prog->functionStaticTable.end() && instanceIt == prog->functionInstanceTable.end()) {
-        LIBABCKIT_LOG(FATAL) << "Function table key not found: " << oldMangleName << '\n';
+    if (arktsFunc) {
+        auto *oldImpl = arktsFunc->GetStaticImpl();
+        if (oldImpl != newImpl) {
+            arktsFunc->impl = newImpl;
+            LIBABCKIT_LOG(DEBUG) << "Updated AbckitArktsFunction impl pointer (address changed)" << std::endl;
+        }
+    }
+
+    // also refresh lambda record annotations (FunctionalReference) that reference this function by its mangle name.
+    if (!UpdateLambdaAnnotationsForSignatureChange(prog, oldMangleName, newMangleName)) {
+        LIBABCKIT_LOG(ERROR) << "Failed to update lambda FunctionalReference annotations for " << oldMangleName
+                             << " -> " << newMangleName << std::endl;
         return false;
     }
 
@@ -108,18 +225,15 @@ void ReplaceInstructionIds(ark::pandasm::Program *prog, ark::pandasm::Function *
     ReplaceIdsInFunctionTable(prog->functionInstanceTable, oldId, newId);
 }
 
-static std::string GetReferenceTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type)
+static std::string GetReferenceTypeName(const AbckitType *type)
 {
     if (!type->types.empty()) {
         return libabckit::StringUtil::GetTypeNameStr(type);
     }
-    AbckitString *classNameStr = libabckit::ClassGetNameStatic(type->GetClass());
-    if (classNameStr == nullptr) {
-        LIBABCKIT_LOG(ERROR) << "[Error] Class name is null" << std::endl;
-        return {};
-    }
-    std::string className(classNameStr->impl);
-    std::string moduleName(coreFunc->owningModule->moduleName->impl);
+    auto *record = type->GetClass()->GetArkTSImpl()->impl.GetStaticClass();
+    auto [moduleName, className] = libabckit::ClassGetNames(record->name);
+    LIBABCKIT_LOG(DEBUG) << "parsed moduleName: " << moduleName << ", className: " << className << std::endl;
+    LIBABCKIT_LOG(DEBUG) << moduleName + "." + className << std::endl;
     return moduleName + "." + className;
 }
 
@@ -149,10 +263,10 @@ static std::string GetPrimitiveTypeName(AbckitTypeId typeId, bool useComponentFo
     return "invalid";
 }
 
-std::string GetTypeName(AbckitCoreFunction *coreFunc, const AbckitType *type, bool useComponentFormat)
+std::string GetTypeName(const AbckitType *type, bool useComponentFormat)
 {
     if (type->id == ABCKIT_TYPE_ID_REFERENCE) {
-        return GetReferenceTypeName(coreFunc, type);
+        return GetReferenceTypeName(type);
     }
     return GetPrimitiveTypeName(type->id, useComponentFormat);
 }
@@ -168,6 +282,7 @@ void AddFunctionParameterImpl(AbckitCoreFunction *coreFunc, ark::pandasm::Functi
     paramHolder->function = coreFunc;
     paramHolder->type = paramCore->type;
     paramHolder->name = paramCore->name;
+    paramHolder->defaultValue = paramCore->defaultValue;
 
     auto arktsParam = std::make_unique<AbckitArktsFunctionParam>();
     arktsParam->core = paramHolder.get();

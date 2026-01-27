@@ -99,6 +99,11 @@ AbckitWrapperErrorCode abckit_wrapper::Class::InitFields()
                 field->owningModule_ = this->owningModule_;
                 field->parent_ = this;
                 LOG_I << "Found Field:" << field->GetFullyQualifiedName();
+                auto fqName = field->GetFullyQualifiedName();
+                if (this->fieldTable_.find(fqName) != this->fieldTable_.end()) {
+                    LOG_W << "Duplicated field:" << fqName;
+                    continue;
+                }
                 auto rc = field->Init();
                 if (ABCKIT_WRAPPER_ERROR(rc)) {
                     LOG_E << "Failed to init field:" << coreField.GetName() << " errCode:" << rc;

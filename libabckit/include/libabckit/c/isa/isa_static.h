@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_CONSTANT,
     ABCKIT_ISA_API_STATIC_OPCODE_PARAMETER,
     ABCKIT_ISA_API_STATIC_OPCODE_LOADSTRING,
+    ABCKIT_ISA_API_STATIC_OPCODE_LOADTYPE,
     ABCKIT_ISA_API_STATIC_OPCODE_RETURN,
     ABCKIT_ISA_API_STATIC_OPCODE_TRY,
     ABCKIT_ISA_API_STATIC_OPCODE_CATCHPHI,
@@ -84,6 +85,9 @@ enum AbckitIsaApiStaticOpcode {
     ABCKIT_ISA_API_STATIC_OPCODE_EQUALS,
     ABCKIT_ISA_API_STATIC_OPCODE_STRICTEQUALS,
     ABCKIT_ISA_API_STATIC_OPCODE_NULLCHECK,
+    ABCKIT_ISA_API_STATIC_OPCODE_ETSISTRUE,
+    ABCKIT_ISA_API_STATIC_OPCODE_ETSTYPEOF,
+    ABCKIT_ISA_API_STATIC_OPCODE_ETSLDOBJBYNAME,
     /* Return: */
     ABCKIT_ISA_API_STATIC_OPCODE_RETURN_VOID,
 

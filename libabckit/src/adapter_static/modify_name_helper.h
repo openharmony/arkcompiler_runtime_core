@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 
 #ifndef LIBABCKIT_SRC_ADAPTER_STATIC_MODIFY_NAME_HELPER_H
 #define LIBABCKIT_SRC_ADAPTER_STATIC_MODIFY_NAME_HELPER_H
+
+#include <string>
+#include <variant>
 
 #include "libabckit/src/metadata_inspect_impl.h"
 
@@ -50,11 +53,15 @@ private:
     static bool NamespaceRefreshInterfaces(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshEnums(AbckitCoreNamespace *ns);
     static bool NamespaceRefreshAnnotationInterfaces(AbckitCoreNamespace *ns);
+    static bool NamespaceRefreshAnnotationElements(AbckitCoreNamespace *ns);
 
     static bool FunctionRefreshParams(AbckitCoreFunction *function);
     static bool FunctionRefreshReturnType(AbckitCoreFunction *function);
     static bool FunctionRefreshAnnotations(AbckitCoreFunction *function, const std::string &oldName,
                                            const std::string &newName);
+    static void GenerateNewFunctionNames(AbckitCoreFunction *function, const std::string &newName,
+                                         const std::string &oldFunctionKeyName, std::string &newFunctionKeyName,
+                                         std::string &newFunctionName);
 
     static bool ClassRefreshMethods(AbckitCoreClass *klass);
     static bool ClassRefreshObjectLiteral(AbckitCoreClass *klass);
@@ -73,6 +80,8 @@ private:
 
     static bool AnnotationInterfaceRefreshAnnotation(AbckitCoreAnnotationInterface *ai);
     static bool RefreshPartial(const std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *> &object);
+    static bool RefreshArray(const std::variant<AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *> &object);
+    static bool ArrayRefreshName(AbckitCoreClass *array, const std::string &newName);
 
     static bool ObjectLiteralRefreshName(AbckitCoreClass *objectLiteral, const std::string &newName = "");
     static bool PartialRefreshName(AbckitCoreClass *partial, const std::string &newName = "");

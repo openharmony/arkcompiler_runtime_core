@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,7 @@ static int GetLiteralArrayIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
 [[maybe_unused]] static bool HasTypeIdOperandStatic(AbckitIsaApiStaticOpcode opcode)
 {
     switch (opcode) {
+        case ABCKIT_ISA_API_STATIC_OPCODE_LOADTYPE:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWOBJECT:
         case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST:
@@ -129,6 +130,7 @@ static int GetLiteralArrayIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
 [[maybe_unused]] static int GetTypeIdOperandIndexStatic(AbckitIsaApiStaticOpcode opcode)
 {
     switch (opcode) {
+        case ABCKIT_ISA_API_STATIC_OPCODE_LOADTYPE:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWARRAY:
         case ABCKIT_ISA_API_STATIC_OPCODE_NEWOBJECT:
         case ABCKIT_ISA_API_STATIC_OPCODE_CHECKCAST:

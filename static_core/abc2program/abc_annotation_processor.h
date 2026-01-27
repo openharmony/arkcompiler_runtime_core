@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,9 @@ private:
     void FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements);
     void FillLiteralArrayAnnotation(std::vector<pandasm::AnnotationElement> &elements,
                                     const std::string &annotationElemName, uint32_t value);
+    void ProcessArrayAnnotationElement(std::vector<pandasm::AnnotationElement> &elements,
+                                       const panda_file::AnnotationDataAccessor::Elem &elem, const std::string &name,
+                                       pandasm::Value::Type arrayType);
     std::optional<pandasm::AnnotationElement> CreateAnnotationElement(
         const panda_file::AnnotationDataAccessor::Elem &annotationDataAccessorElem, std::string &annotationElemName,
         pandasm::Value::Type valueType);

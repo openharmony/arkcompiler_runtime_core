@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -511,6 +511,17 @@ bool FunctionSetName(AbckitArktsFunction *func, const char *name)
     return DEFAULT_BOOL;
 }
 
+AbckitArktsFunctionParam *CreateFunctionParameter(AbckitFile *file,
+                                                  const struct AbckitArktsFunctionParamCreatedParams *params)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(params != nullptr);
+    EXPECT_TRUE(params->name == DEFAULT_CONST_CHAR);
+    EXPECT_TRUE(params->type == DEFAULT_TYPE);
+    return DEFAULT_ARKTS_FUNCTION_PARAM;
+}
+
 bool FunctionAddParameter(AbckitArktsFunction *func, AbckitArktsFunctionParam *param)
 {
     g_calledFuncs.push(__func__);
@@ -682,8 +693,8 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // Function
     // ========================================
 
-    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetName, FunctionAddParameter, FunctionRemoveParameter,
-    FunctionSetReturnType, ModuleAddFunction, ClassAddMethod,
+    FunctionAddAnnotation, FunctionRemoveAnnotation, FunctionSetName, CreateFunctionParameter, FunctionAddParameter,
+    FunctionRemoveParameter, FunctionSetReturnType, ModuleAddFunction, ClassAddMethod,
 
     // ========================================
     // Annotation

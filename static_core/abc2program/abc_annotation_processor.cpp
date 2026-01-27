@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -191,9 +191,11 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
             if (entityType == EntityType::METHOD) {
                 AbcMethodProcessor methodProcessor(entityId, keyData_);
                 std::string methodSignature = methodProcessor.GetMethodSignature();
+                LOG(DEBUG, ABC2PROGRAM) << "[CreateAnnotationElement] METHOD signature: " << methodSignature;
                 return CreateAnnoElem<pandasm::Value::Type::METHOD, std::string>(annotationElemName, methodSignature);
             }
 
+            LOG(DEBUG, ABC2PROGRAM) << "[CreateAnnotationElement] WARNING: EntityType is not METHOD, returning nullopt";
             return std::nullopt;  // NOTE: Annotations are not fully supported #20663
         }
         case pandasm::Value::Type::ARRAY: {
@@ -212,19 +214,67 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
     return std::nullopt;
 }
 
+// Process array annotation elements (for module annotations)
+void AbcAnnotationProcessor::ProcessArrayAnnotationElement(std::vector<pandasm::AnnotationElement> &elements,
+                                                           const panda_file::AnnotationDataAccessor::Elem &elem,
+                                                           const std::string &name, pandasm::Value::Type arrayType)
+{
+    LOG(DEBUG, ABC2PROGRAM) << "[ProcessArrayAnnotationElement] array type: " << static_cast<int>(arrayType);
+
+    auto arrayValue = elem.GetArrayValue();
+    LOG(DEBUG, ABC2PROGRAM) << "[ProcessArrayAnnotationElement] array value count: " << arrayValue.GetCount();
+
+    std::vector<pandasm::ScalarValue> values;
+    for (uint32_t j = 0; j < arrayValue.GetCount(); ++j) {
+        auto arrayValueElem = arrayValue.Get<uint32_t>(j);
+        panda_file::File::EntityId entityId(arrayValueElem);
+        EntityType entityType = AbcFileUtils::GetEntityType(*file_, entityId);
+        if (entityType == EntityType::CLASS) {
+            panda_file::ClassDataAccessor cda(*file_, entityId);
+            auto nameData = file_->GetStringData(cda.GetClassId());
+            std::string className = keyData_.GetAbcStringTable().StringDataToString(nameData);
+            std::replace(className.begin(), className.end(), '/', '.');
+
+            auto recordType = pandasm::Type::FromDescriptor(className);
+            auto tmp = pandasm::ScalarValue::Create<pandasm::Value::Type::RECORD>(recordType);
+            values.emplace_back(tmp);
+        } else if (entityType == EntityType::METHOD) {
+            AbcMethodProcessor methodProcessor(entityId, keyData_);
+            std::string methodSignature = methodProcessor.GetMethodSignature();
+            LOG(DEBUG, ABC2PROGRAM) << "[ProcessArrayAnnotationElement] Array METHOD signature: " << methodSignature;
+            auto tmp = pandasm::ScalarValue::Create<pandasm::Value::Type::METHOD>(methodSignature);
+            values.emplace_back(tmp);
+        }
+    }
+
+    auto arrayElement =
+        pandasm::AnnotationElement(name, std::make_unique<pandasm::ArrayValue>(pandasm::Value::Type::RECORD, values));
+    elements.emplace_back(arrayElement);
+    LOG(DEBUG, ABC2PROGRAM) << "[ProcessArrayAnnotationElement] Added array element '" << name << "' with "
+                            << values.size() << " values";
+}
+
 void AbcAnnotationProcessor::FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements)
 {
     for (uint32_t i = 0; i < annotationDataAccessor_->GetCount(); ++i) {
-        auto annotationDataAccessorElem = annotationDataAccessor_->GetElement(i);
-        auto annotationElemName = keyData_.GetAbcStringTable().GetStringById(annotationDataAccessorElem.GetNameId());
-        auto valueType = pandasm::Value::GetCharAsType(annotationDataAccessor_->GetTag(i).GetItem());
-        // NOTE: Module annotation, which contains arrays of records
+        auto elem = annotationDataAccessor_->GetElement(i);
+        auto name = keyData_.GetAbcStringTable().GetStringById(elem.GetNameId());
+        auto tagItem = annotationDataAccessor_->GetTag(i).GetItem();
+        auto valueType = pandasm::Value::GetCharAsType(tagItem);
+        // Handle array annotations (module annotations)
         if (valueType == pandasm::Value::Type::UNKNOWN) {
-            valueType = pandasm::Value::GetCharAsArrayType(annotationDataAccessor_->GetTag(i).GetItem());
-        }
-        auto annoElem = CreateAnnotationElement(annotationDataAccessorElem, annotationElemName, valueType);
-        if (annoElem) {
-            elements.emplace_back(annoElem.value());
+            valueType = pandasm::Value::GetCharAsArrayType(tagItem);
+            ProcessArrayAnnotationElement(elements, elem, name, valueType);
+        } else {
+            // Handle standard elements
+            LOG(DEBUG, ABC2PROGRAM) << "[FillAnnotationElements] Processing standard element '" << name
+                                    << "' with valueType=" << static_cast<int>(valueType);
+            auto annoElem = CreateAnnotationElement(elem, const_cast<std::string &>(name), valueType);
+            if (annoElem) {
+                elements.emplace_back(annoElem.value());
+                LOG(DEBUG, ABC2PROGRAM) << "[FillAnnotationElements] Successfully added standard element '" << name
+                                        << "'";
+            }
         }
     }
 }

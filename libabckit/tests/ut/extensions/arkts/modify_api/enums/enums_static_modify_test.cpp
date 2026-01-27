@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,8 +130,8 @@ TEST_F(LibAbcKitArkTSModifyApiEnumsTest, EnumAddField)
         return true;
     });
     std::vector<std::string> actualFieldNames = {
-        "_ordinal",           "RED",         "BLUE",  "BLACK", "_NamesArray", "_ValuesArray",
-        "_StringValuesArray", "_ItemsArray", "YELLOW"};
+        "#ordinal",           "RED",         "BLUE",  "BLACK", "#NamesArray", "#ValuesArray",
+        "#StringValuesArray", "#ItemsArray", "YELLOW"};
     ASSERT_EQ(FieldNames, actualFieldNames);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

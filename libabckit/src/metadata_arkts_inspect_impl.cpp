@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -447,7 +447,14 @@ extern "C" AbckitArktsAnnotation *CoreAnnotationToArktsAnnotation(AbckitCoreAnno
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
+
+    AbckitCoreModule *module = GetAnnotationOwningModule(a);
+    if (module == nullptr) {
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    LIBABCKIT_CHECK_ARKTS_TARGET(module);
     return a->GetArkTSImpl();
 }
 
@@ -470,7 +477,15 @@ extern "C" AbckitArktsAnnotationElement *CoreAnnotationElementToArktsAnnotationE
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->ann->ai->owningModule);
+    LIBABCKIT_BAD_ARGUMENT(a->ann, nullptr);
+
+    AbckitCoreModule *module = GetAnnotationOwningModule(a->ann);
+    if (module == nullptr) {
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
+    LIBABCKIT_CHECK_ARKTS_TARGET(module);
     return a->GetArkTSImpl();
 }
 
@@ -520,6 +535,12 @@ extern "C" AbckitArktsAnnotationInterfaceField *CoreAnnotationInterfaceFieldToAr
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_TIME_EXEC;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
+
+    if (a->ai == nullptr) {
+        libabckit::statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
+    }
+
     LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
     return a->GetArkTSImpl();
 }
@@ -970,9 +991,7 @@ bool ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
     LIBABCKIT_BAD_ARGUMENT(anno, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    LIBABCKIT_INTERNAL_ERROR(anno->ai, false)
-
-    AbckitCoreModule *m = anno->ai->owningModule;
+    AbckitCoreModule *m = GetAnnotationOwningModule(anno);
 
     LIBABCKIT_BAD_ARGUMENT(m, false)
     LIBABCKIT_INTERNAL_ERROR(m->file, false)

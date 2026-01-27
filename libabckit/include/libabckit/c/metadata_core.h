@@ -2124,6 +2124,28 @@ struct CAPI_EXPORT AbckitModifyApi {
     AbckitValue *(*createValueString)(AbckitFile *file, const char *value, size_t len);
 
     /**
+     * @brief Creates value item containing the given method reference.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] method - Method from which value item is created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `method` is NULL.
+     * @note Allocates
+     */
+    AbckitValue *(*createValueMethod)(AbckitFile *file, AbckitCoreFunction *method);
+
+    /**
+     * @brief Creates value item containing the given record reference.
+     * @return Pointer to the `AbckitValue`.
+     * @param [ in ] file - Binary file to be modified.
+     * @param [ in ] record - Record from which value item is created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `record` is NULL.
+     * @note Allocates
+     */
+    AbckitValue *(*createValueRecord)(AbckitFile *file, AbckitCoreClass *record);
+
+    /**
      * @brief Creates literal array value item with size `size` from the given value items array `value`.
      * @return Pointer to the `AbckitValue`.
      * @param [ in ] file - Binary file to be modified.

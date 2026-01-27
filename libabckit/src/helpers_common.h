@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef LIBABCKIT_SRC_HELPERS_COMMON_H
 #define LIBABCKIT_SRC_HELPERS_COMMON_H
 
+#include <variant>
 #include "metadata_inspect_impl.h"
 
 namespace libabckit {
@@ -92,6 +93,8 @@ void AddFieldUserToAbckitType(AbckitType *abckitType,
                               std::variant<AbckitCoreModuleField *, AbckitCoreNamespaceField *, AbckitCoreClassField *,
                                            AbckitCoreEnumField *, AbckitCoreAnnotationInterfaceField *>
                                   field);
+
+AbckitCoreModule *GetAnnotationOwningModule(const AbckitCoreAnnotation *annotation);
 
 }  // namespace libabckit
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,4 +13,30 @@
  * limitations under the License.
  */
 
-namespace NS1 {}
+@interface Anno2{}
+export namespace NS1{
+    export namespace NS2{
+    @interface Anno1{}
+        interface Iface{
+            field2:string
+        }
+        @Anno2
+        export class C1{
+            @Anno1
+            f1(){}
+            
+            @Anno1
+            field1:string;
+            
+        }
+        const field3:string;
+        function f2(){}
+        export enum E1{}
+        namespace NS3{
+            namespace NS5{}
+        }
+    }
+    namespace NS4{
+        namespace NS5{}
+    }
+}

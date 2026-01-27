@@ -62,7 +62,7 @@ public:
         return elements_;
     }
 
-    void EnumerateAnnotationElements(const std::function<void(AnnotationElement &)> &callback);
+    PANDA_PUBLIC_API void EnumerateAnnotationElements(const std::function<void(AnnotationElement &)> &callback);
 
     void AddElement(AnnotationElement &&element)
     {

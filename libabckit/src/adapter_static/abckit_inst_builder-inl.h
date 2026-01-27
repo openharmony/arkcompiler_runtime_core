@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,27 @@ void AbcKitInstBuilder::AbcKitBuildStoreObject(const BytecodeInstruction *bcInst
 void AbcKitInstBuilder::BuildNullcheck(const BytecodeInstruction *bcInst)
 {
     BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NULL_CHECK);
+}
+
+void AbcKitInstBuilder::BuildIstrue(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+    Inst *obj = GetDefinition(bcInst->GetVReg(0));
+
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::INT32, pc,
+                                                     RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_ETS_ISTRUE);
+
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 1U);
+    intrinsic->AppendInput(obj);
+    intrinsic->AddInputType(DataType::REFERENCE);
+
+    AddInstruction(intrinsic);
+    UpdateDefinitionAcc(intrinsic);
+}
+
+void AbcKitInstBuilder::BuildTypeof(const BytecodeInstruction *bcInst)
+{
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_ETS_TYPEOF);
 }
 
 void AbcKitInstBuilder::BuildIsNullValue(const BytecodeInstruction *bcInst)
@@ -102,50 +123,18 @@ void AbcKitInstBuilder::BuildThrow(const BytecodeInstruction *bcInst)
 template <Opcode OPCODE>
 void AbcKitInstBuilder::AbcKitBuildLoadFromPool(const BytecodeInstruction *bcInst)
 {
-    auto method = GetGraph()->GetMethod();
-    uint32_t typeId;
-    Inst *inst;
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements)
     if constexpr (OPCODE == Opcode::LoadType) {
-        auto typeIndex = bcInst->GetId(0).AsIndex();
-        typeId = GetRuntime()->ResolveTypeIndex(method, typeIndex);
-        if (GetRuntime()->ResolveType(method, typeId) == nullptr) {
-            inst = GetGraph()->CreateInstUnresolvedLoadType(DataType::REFERENCE, GetPc(bcInst->GetAddress()));
-            if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
-                GetRuntime()->GetUnresolvedTypes()->AddTableSlot(method, typeId,
-                                                                 UnresolvedTypesInterface::SlotKind::MANAGED_CLASS);
-            }
-        } else {
-            inst = GetGraph()->CreateInstLoadType(DataType::REFERENCE, GetPc(bcInst->GetAddress()));
-        }
-        // NOLINTNEXTLINE(readability-misleading-indentation)
-    } else {
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        static_assert(OPCODE == Opcode::LoadString);
+        BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_TYPE);
+        return;
+    }
+
+    // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
+    if constexpr (OPCODE == Opcode::LoadString) {
         BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING);
         return;
     }
-    if (!GetGraph()->IsDynamicMethod() || GetGraph()->IsBytecodeOptimizer()) {
-        // Create SaveState instruction
-        auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
-        inst->SetInput(0, saveState);
-        static_cast<LoadFromPool *>(inst)->SetTypeId(typeId);
-        static_cast<LoadFromPool *>(inst)->SetMethod(method);
-        AddInstruction(saveState);
-    } else {
-        inst->SetInput(0, GetEnvDefinition(CONST_POOL_IDX));
-        inst->CastToLoadFromConstantPool()->SetTypeId(typeId);
-        inst->CastToLoadFromConstantPool()->SetMethod(method);
-    }
-
-    AddInstruction(inst);
-    UpdateDefinitionAcc(inst);
-    // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
-    if constexpr (OPCODE == Opcode::LoadString) {
-        if (GetGraph()->IsDynamicMethod() && GetGraph()->IsBytecodeOptimizer()) {
-            BuildCastToAnyString(bcInst);
-        }
-    }
+    UNREACHABLE();
 }
 
 }  // namespace ark::compiler
