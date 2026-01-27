@@ -21,7 +21,7 @@
 17.experimental_features/02.fixed_array_types/far3_7.ets
 
 # Looks like should be positive (async tests)
-16.concurrency/03.asynchronous_api/01.async_functions/afunc_n_9.ets
+16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_9.ets
 
 # #27402, #28006 Deprecated char operations and conversions:
 03.types/16.array_types/array_index.ets
