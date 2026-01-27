@@ -696,12 +696,6 @@
 09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_2.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_3.ets
 
-#29811  no matching call signature if undefined is used for optional parameter
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_13.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_14.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_m_10.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_m_11.ets
-
 #32267 No CTE extending class from Base with private default constructor
 09.classes/09.constructor_declaration/02.explicit_constructor_call/invalid_cons_call_neg_1.ets
 

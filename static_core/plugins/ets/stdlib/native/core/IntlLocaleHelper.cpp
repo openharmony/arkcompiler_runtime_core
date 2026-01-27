@@ -26,11 +26,11 @@ void StdCoreVerifyBCP47LanguageTag(ani_env *env, [[maybe_unused]] ani_class klas
     auto localeCStr = ConvertFromAniString(env, locale);
     if (localeCStr.length() == 0) {
         std::string message = "Incorrect locale information provided";
-        ThrowNewError(env, "std.core.RangeError", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
     if (!intl::IsStructurallyValidLanguageTag(localeCStr)) {
         std::string message = "Incorrect locale information provided";
-        ThrowNewError(env, "std.core.RangeError", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 }
 

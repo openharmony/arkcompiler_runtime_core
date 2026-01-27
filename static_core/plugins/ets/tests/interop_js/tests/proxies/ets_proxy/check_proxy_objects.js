@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ const ListNode = getTestClass('ListNode');
 
 {
 	// test basic proxy-object capabilities
-	let n1 = new ListNode(1);
+	let n1 = new ListNode(1, undefined);
 	ASSERT_EQ(n1.tag, 1);
 	ASSERT_EQ(n1.next, undefined);
 
@@ -43,7 +43,7 @@ const ListNode = getTestClass('ListNode');
 
 {
 	// test proxy-reference wrap/unwrap invariant
-	let n1 = new ListNode(1);
+	let n1 = new ListNode(1, undefined);
 	let n2 = new ListNode(2, n1);
 	ASSERT_EQ(n2.tag, 2);
 	ASSERT_EQ(n2.next, n1);
@@ -54,7 +54,7 @@ const ListNode = getTestClass('ListNode');
 
 {
 	// create loop and walk it
-	let head = new ListNode(0);
+	let head = new ListNode(0, undefined);
 	head.next = new ListNode(1, new ListNode(2, new ListNode(3, head)));
 
 	for (let n = head, i = 0; i < 256; ++i, n = n.next) {

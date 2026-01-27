@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,10 @@
  */
 class Test {
   public constructor() {}
-  public constructor(a: int, b: int, c: int, d: int, e: int, f: int = 0) {
+  public constructor(a: int, b: int, c: int, d: int, e: int) {
+    this(a, b, c, d, e, 0)
+  }
+  public constructor(a: int, b: int, c: int, d: int, e: int, f: int) {
     console.log(a, b, c, d, e, f)
   }
   test() {

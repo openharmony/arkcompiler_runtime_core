@@ -20,7 +20,6 @@ tags: [negative]
 expected_error: |-
     Unhandled exception: nested_inner_throw_n.ExpectedError
     Error
-    	at escompat.Error.<ctor> (Error.ets:56:0)
     	at nested_inner_throw_n.ExpectedError.<ctor> (nested_inner_throw_n.ets:22:0)
         at nested_inner_throw_n.ETSGLOBAL.%async-inner (nested_inner_throw_n.ets:1:0)
 ---*/

@@ -20,9 +20,8 @@ tags: [negative]
 expected_error: |-
     Unhandled exception: error_call_n.TestError
       Error
-        at escompat.Error.<ctor> (Error.ets:56:0)
-        at error_call_n.TestError.<ctor> (error_call_n.ets:26:0)
-        at error_call_n.ETSGLOBAL.main (error_call_n.ets:29:0)
+        at error_call_n.TestError.<ctor> (error_call_n.ets:29:0)
+        at error_call_n.ETSGLOBAL.main (error_call_n.ets:32:0)
 ---*/
 
 class TestError extends Error {}

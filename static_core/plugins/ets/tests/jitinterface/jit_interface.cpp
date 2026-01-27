@@ -42,14 +42,16 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         if (foundName != nullptr) {
             auto msg = std::string("Found two suitable test modules: \"") + moduleName + std::string("\" and \"") +
                        foundName + std::string("\".");
-            ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
+            ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(),
+                                            ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
             return ANI_ERROR;
         }
         foundName = moduleName;
     }
     if (foundName == nullptr) {
         auto msg = std::string("Cannot find suitable test module!");
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(),
+                                        ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return ANI_ERROR;
     }
 
@@ -58,7 +60,8 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
         auto msg = std::string("Cannot bind native functions to \"") + foundName + std::string("\".");
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeError", msg.data(),
+                                        ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return ANI_ERROR;
     };
 

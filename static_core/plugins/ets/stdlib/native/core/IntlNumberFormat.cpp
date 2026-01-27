@@ -277,7 +277,7 @@ ani_string IcuFormatDouble(ani_env *env, ani_object self, ani_double value)
         auto fmtNumber = formatter.formatDouble(NormalizeIfNaN(value), status);
         if (UNLIKELY(U_FAILURE(status))) {
             std::string message = "Icu formatter format failed " + std::string(u_errorName(status));
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return nullptr;
         }
         icu::UnicodeString ustr = fmtNumber.toString(status);
@@ -300,7 +300,7 @@ ani_string IcuFormatLong(ani_env *env, ani_object self, ani_long value)
     auto fmtNumber = formatter.formatInt(value, status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Icu formatter format failed " + std::string(u_errorName(status));
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     icu::UnicodeString ustr = fmtNumber.toString(status);
@@ -321,7 +321,7 @@ ani_string IcuFormatDecStr(ani_env *env, ani_object self, ani_string value)
         const icu::number::FormattedNumber &fmtNumber = formatter.formatDecimal(sp, status);
         if (UNLIKELY(U_FAILURE(status))) {
             std::string message = "Icu formatter format failed " + std::string(u_errorName(status));
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return nullptr;
         }
         icu::UnicodeString ustr = fmtNumber.toString(status);
@@ -344,7 +344,7 @@ ani_string IcuFormatRange(ani_env *env, ani_object self, const icu::Formattable 
             formatter.formatFormattableRange(startFrmtbl, endFrmtbl, status);
         if (UNLIKELY(U_FAILURE(status))) {
             std::string message = "Icu range formatter format failed " + std::string(u_errorName(status));
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return nullptr;
         }
         icu::UnicodeString ustr = fmtRangeNumber.toString(status);
@@ -366,7 +366,7 @@ icu::Formattable StrToFormattable(ani_env *env, ani_string value)
     icu::Formattable ret(sp, status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "StrToToFormattable failed " + std::string(u_errorName(status));
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
         return icu::Formattable();
     }
     return ret;
@@ -452,7 +452,7 @@ std::vector<NumberFormatPart> ExtractParts(ani_env *env, const icu::FormattedVal
 
     if (UNLIKELY(U_FAILURE(status) != 0)) {
         std::string message = "ExtractParts. Unable to convert formatted value to string";
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return parts;
     }
 
@@ -482,7 +482,7 @@ std::vector<NumberFormatPart> ExtractParts(ani_env *env, const icu::FormattedVal
     while (formatted.nextPosition(cfpos, status) != 0) {
         if (UNLIKELY(U_FAILURE(status) != 0)) {
             std::string message = "ExtractParts. Error during field iteration";
-            ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
+            ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
             return parts;
         }
         int32_t cat = cfpos.getCategory();
@@ -714,7 +714,7 @@ ani_string IcuNumberingSystem(ani_env *env, [[maybe_unused]] ani_object self, an
         std::unique_ptr<icu::NumberingSystem> numSystem(icu::NumberingSystem::createInstance(icuLocale, status));
         if (UNLIKELY(U_FAILURE(status))) {
             std::string message = "NumberingSystem creation failed";
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return nullptr;
         }
         return CreateUtf8String(env, numSystem->getName(), strlen(numSystem->getName()));

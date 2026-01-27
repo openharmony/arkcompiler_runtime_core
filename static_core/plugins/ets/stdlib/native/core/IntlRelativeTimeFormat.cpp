@@ -54,7 +54,7 @@ static ani_status ThrowError(ani_env *env, const char *errorClassName, const std
     ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
 
     ani_method errorCtor;
-    aniStatus = env->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &errorCtor);
+    aniStatus = env->Class_FindMethod(errorClass, "<ctor>", ark::ets::stdlib::ERROR_CTOR_SIGNATURE, &errorCtor);
     ANI_CHECK_RETURN_IF_NE(aniStatus, ANI_OK, aniStatus);
 
     ani_string errorMsg;
@@ -76,7 +76,7 @@ static ani_status ThrowRangeError(ani_env *env, const std::string &message)
         return ANI_PENDING_ERROR;
     }
     ani_method ctor;
-    if (env->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &ctor) != ANI_OK) {
+    if (env->Class_FindMethod(errorClass, "<ctor>", ark::ets::stdlib::ERROR_CTOR_SIGNATURE, &ctor) != ANI_OK) {
         return ANI_PENDING_ERROR;
     }
     ani_string msgStr;
@@ -160,7 +160,8 @@ static URelativeDateTimeUnit ToICUUnitOrThrow(ani_env *env, const std::string &u
     if (unit == "year") {
         return UDAT_REL_UNIT_YEAR;
     }
-    ThrowNewError(env, "std.core.RuntimeError", ("Invalid unit: " + unitStr).c_str(), "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", ("Invalid unit: " + unitStr).c_str(),
+                  ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     return static_cast<URelativeDateTimeUnit>(-1);
 }
 

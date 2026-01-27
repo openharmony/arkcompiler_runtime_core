@@ -12,4 +12,4 @@
 # limitations under the License.
 Unhandled exception: escompat.Error
 Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
+        at main_n_24.ETSGLOBAL.main (main_n_24.ets:25:0)

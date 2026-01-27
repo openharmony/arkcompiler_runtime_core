@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 namespace ark::ets::stdlib {
 
 constexpr const char *ERR_CLS_RUNTIME_EXCEPTION = "std.core.RuntimeError";
-constexpr const char *CTOR_SIGNATURE_STR = "C{std.core.String}:";
+constexpr const char *ERROR_CTOR_SIGNATURE = "C{std.core.String}C{escompat.ErrorOptions}:";
 
 void StdlibLogFatal(const char *msg);
 void StdlibLogFatal(const char *msg, ani_status status);

@@ -256,8 +256,8 @@ function testConstructors() {
     arktest.assertEQ(1 as long, tB.getConstructorsNum());
     arktest.assertEQ(false, tB.hasEmptyConstructor());
     const tC = Type.of(new ConstrC()) as ClassType;
-    arktest.assertEQ(2 as long, tC.getConstructorsNum());
-    arktest.assertEQ(true, tC.hasEmptyConstructor());
+    arktest.assertEQ(1 as long, tC.getConstructorsNum());
+    arktest.assertEQ(false, tC.hasEmptyConstructor());
     arktest.assertEQ(1 as long, tC.getConstructor(0).getType().getParametersNum());
 }
 

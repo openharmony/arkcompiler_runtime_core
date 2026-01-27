@@ -53,7 +53,7 @@ constexpr const char *STYLE_LONG = "long";
 constexpr const char *STYLE_MEDIUM = "medium";
 constexpr const char *STYLE_SHORT = "short";
 
-constexpr const char *ERROR_CTOR_SIGNATURE = "C{std.core.String}:";
+constexpr const char *ERROR_CTOR_SIGNATURE = ark::ets::stdlib::ERROR_CTOR_SIGNATURE;
 constexpr const char *DTF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}:";
 constexpr const char *DTRF_PART_IMPL_CTOR_SIGNATURE = "C{std.core.String}C{std.core.String}C{std.core.String}:";
 constexpr const char *RESOLVED_OPTS_CTOR_SIGNATURE =

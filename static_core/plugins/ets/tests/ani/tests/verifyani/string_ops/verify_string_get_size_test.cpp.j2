@@ -42,9 +42,9 @@ public:
         ASSERT_EQ(env_->Object_New(cls, ctor, &obj_), ANI_OK);
 
         ASSERT_EQ(env_->FindClass("escompat.Error", &cls_), ANI_OK);
-        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", ":", &ctor), ANI_OK);
+        ASSERT_EQ(env_->Class_FindMethod(cls_, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        ASSERT_EQ(env_->Object_New(cls_, ctor, &err_), ANI_OK);
+        ASSERT_EQ(env_->Object_New(cls_, ctor, &err_, undef_, undef_), ANI_OK);
     }
 
 protected:

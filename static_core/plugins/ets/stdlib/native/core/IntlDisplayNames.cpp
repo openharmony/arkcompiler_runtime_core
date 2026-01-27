@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -277,7 +277,8 @@ static std::string ValidateAndCanonicalizeCode(ani_env *env, CodeType codeType, 
         if (fallbackStr == "code") {
             return codeStr;
         }
-        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(),
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 
     return canonicalizedCode;
@@ -365,7 +366,8 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     auto codeType = StringToCodeType(typeStr, isValidCodeType);
 
     if (!isValidCodeType) {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid type: " + typeStr).c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid type: " + typeStr).c_str(),
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
 
@@ -379,7 +381,8 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     UErrorCode status = U_ZERO_ERROR;
     auto icuLocale = icu::Locale::forLanguageTag(localeStr, status);
     if ((U_FAILURE(status) != 0)) {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid locale tag: " + localeStr).c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid locale tag: " + localeStr).c_str(),
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
 
@@ -402,7 +405,8 @@ static ani_string StdCoreIntlDisplayNamesOf(ani_env *env, [[maybe_unused]] ani_c
     } else if (fallbackStr == "code") {
         retVal = StdStrToAni(env, codeStr);
     } else {
-        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RangeError", ("Invalid code: " + codeStr).c_str(),
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
 
     SafeCloseDisplayNames(displayNames);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     if (!locale) {
         std::string message = "Unable to create ICU locale for specified tag (bcp47): ";
         message += ConvertFromAniString(env, localeStr);
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     icu::Locale breakLocale = locale.value();
@@ -149,7 +149,7 @@ ani_array IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerFa
     std::unique_ptr<icu::BreakIterator> breaker(factory(breakLocale, status));
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Unable to create break iterator";
-        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", message.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
 

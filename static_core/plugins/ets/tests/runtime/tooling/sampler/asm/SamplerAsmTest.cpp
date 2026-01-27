@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_module md;
     if (ANI_OK != env->FindModule(MODULE_NAME.data(), &md)) {
         std::string msg = "Cannot find \"" + std::string(MODULE_NAME) + "\" module!";
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(),
+                                        ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return ANI_ERROR;
     }
 
@@ -70,7 +71,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if (ANI_OK != env->Module_BindNativeFunctions(md, functions.data(), functions.size())) {
         std::string msg = "Cannot bind native functions to '" + std::string(MODULE_NAME) + "'";
-        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(), "C{std.core.String}:");
+        ark::ets::stdlib::ThrowNewError(env, "std.core.RuntimeException", msg.c_str(),
+                                        ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return ANI_ERROR;
     };
 
