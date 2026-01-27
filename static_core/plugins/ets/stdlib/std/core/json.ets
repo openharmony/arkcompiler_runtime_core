@@ -2570,14 +2570,14 @@ class JsonElementParser
 
 export class JsonLexer
 {
-    chars: char[]
+    chars: string
     index: int
-    constructor(chars: char[]) {
+    constructor(chars: string) {
         this.chars = chars
         this.index = 0
     }
     public static fromString(json: string): JsonLexer {
-        return new JsonLexer(json.getChars())
+        return new JsonLexer(json)
     }
 
     /**
@@ -2647,49 +2647,56 @@ export class JsonLexer
      * @throws JsonError if string is malformed
      */
     private readString(start: int): JsonToken {
-        let value = new StringBuilder()
+        let value: string = ""
+        let begin = this.index
 
         while (!this.isAtEnd() && this.peek() != c'"') {
             let ch = this.advance()
-            if (ch == c'\\') {
-                if (this.isAtEnd()) {
-                    throw new JsonParseError("Unterminated string escape at end of input", start, this.index)
-                }
-                let escaped = this.advance()
-                switch (escaped) {
-                    case c'"':
-                        value.append("\"")
-                        break
-                    case c'\\':
-                        value.append("\\")
-                        break
-                    case c'/':
-                        value.append("/")
-                        break
-                    case c'b':
-                        value.append("\b")
-                        break
-                    case c'f':
-                        value.append("\f")
-                        break
-                    case c'n':
-                        value.append("\n")
-                        break
-                    case c'r':
-                        value.append("\r")
-                        break
-                    case c't':
-                        value.append("\t")
-                        break
-                    case c'u':
-                        value.append(this.readUnicodeEscape())
-                        break
-                    default:
-                        throw new JsonParseError(`Invalid escape sequence '\\${escaped}' in string`, start, this.index)
-                }
-            } else {
-                value.append(ch)
+            if (ch != c'\\') {
+                continue
             }
+            if (this.isAtEnd()) {
+                throw new JsonParseError("Unterminated string escape at end of input", start, this.index)
+            }
+            if (begin < this.index - 1) {
+                value = value.concat(this.chars.substring(begin, this.index - 1))
+            }
+            let escaped = this.advance()
+            switch (escaped) {
+                case c'"':
+                    value = value.concat("\"")
+                    break
+                case c'\\':
+                    value = value.concat("\\")
+                    break
+                case c'/':
+                    value = value.concat("/")
+                    break
+                case c'b':
+                    value = value.concat("\b")
+                    break
+                case c'f':
+                    value = value.concat("\f")
+                    break
+                case c'n':
+                    value = value.concat("\n")
+                    break
+                case c'r':
+                    value = value.concat("\r")
+                    break
+                case c't':
+                    value = value.concat("\t")
+                    break
+                case c'u':
+                    value = value.concat(this.readUnicodeEscape())
+                    break
+                default:
+                    throw new JsonParseError(`Invalid escape sequence '\\${escaped}' in string`, start, this.index)
+            }
+            begin = this.index
+        }
+        if (begin < this.index) {
+            value = value.concat(this.chars.substring(begin, this.index))
         }
 
         if (this.isAtEnd()) {
@@ -2697,7 +2704,7 @@ export class JsonLexer
         }
 
         this.advance() // Consume closing quote
-        return this.makeToken(JsonTokenKind.String, start, value.toString())
+        return this.makeToken(JsonTokenKind.String, start, value)
     }
 
     /**
@@ -2829,7 +2836,7 @@ export class JsonLexer
      */
     private advance(): char {
         if (this.isAtEnd()) return c'\0'
-        return this.chars[this.index++]
+        return this.chars.charAt(this.index++)
     }
 
     /**
@@ -2838,7 +2845,7 @@ export class JsonLexer
      */
     private peek(): char {
         if (this.isAtEnd()) return c'\0'
-        return this.chars[this.index]
+        return this.chars.charAt(this.index)
     }
 
     /**
