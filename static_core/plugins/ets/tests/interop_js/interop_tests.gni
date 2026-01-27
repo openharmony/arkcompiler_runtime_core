@@ -175,7 +175,7 @@ template("interop_test") {
       deps += [ ":${target_name}_helpers_jsabc" ]
     }
     outputs = [ "$target_out_dir/${target_name}/" ]
-    script = "../run_test.sh"
+    script = "$ark_root/plugins/ets/tests/interop_js/run_test.sh"
     args = []
     ld_lib_path = "LD_LIBRARY_PATH=" +
                   rebase_path("${root_out_dir}/arkcompiler/ets_runtime")
