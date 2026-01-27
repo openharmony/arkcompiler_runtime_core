@@ -1540,7 +1540,7 @@ while an instance field can be accessed with the object reference qualification
 
 If a field declaration is an implemention of one or more properties inherited
 from superinterfaces (see :ref:`Interface Inheritance`) then the types of the
-field and all propeties must be the same. 
+field and all propeties must be the same.
 Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -1558,15 +1558,15 @@ Otherwise, a :index:`compile-time error` occurs.
     interface II2 { f: B2 } // Different property 'f' type as in II1
     interface II3 { f: B1 } // The same property 'f' type as in II1
 
-    class CC1 implements II1, II2 { 
+    class CC1 implements II1, II2 {
         f: B1  = new BB3 /* Compile-time error: field and all inherited properties
                             must be of the same type */
     }
-    class CC2 implements II1, II3 { 
+    class CC2 implements II1, II3 {
         f: B3 = new BB3 /* Compile-time error: field and all inherited properties
                            must be of the same type */
     }
-    class CC3 implements II1, II3 { 
+    class CC3 implements II1, II3 {
         f: B1 = new BB3 // OK, correct properties implementation
     }
 
@@ -2998,15 +2998,20 @@ The high-level sequence of a *primary constructor* body includes the following:
 1. Optional arbitrary code that uses neither ``this`` nor ``super``.
 
 2. Mandatory call to a superconstructor (see :ref:`Explicit Constructor Call`)
-   if a class has an extension clause (see :ref:`Class Extension Clause`) on all
-   execution paths of the constructor body.
+   if a class has an extension clause (see :ref:`Class Extension Clause`).
+   A :index:`compile-time error` occurs if:
+
+   - The call is not a root-level statement within a constructor;
+
+   - An argument of the call uses ``this`` or ``super``.
+
 
 3. Mandatory execution of field initializers (if any) in the order they appear
    in a class body implicitly added by the compiler.
 
 4. Optional arbitrary code that avoids using non-initialized fields.
 
-5. Optional code that ensures all object fields to be initialized.
+5. Code that ensures all object fields to be initialized.
 
 6. Optional arbitrary code.
 
@@ -3153,9 +3158,13 @@ The high-level sequence of a *secondary constructor* body includes the following
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Call to another same-class constructor that uses the keyword ``this`` (see
-   :ref:`Explicit Constructor Call`) on all execution paths of the constructor
-   body.
+2. Mandatory call to another same-class constructor that uses the keyword
+   ``this`` (see :ref:`Explicit Constructor Call`).
+   A :index:`compile-time error` occurs if:
+
+   - The call is not a root-level statement within a constructor;
+
+   - An argument of the call uses ``this`` or ``super``.
 
 3. Optional arbitrary code.
 
