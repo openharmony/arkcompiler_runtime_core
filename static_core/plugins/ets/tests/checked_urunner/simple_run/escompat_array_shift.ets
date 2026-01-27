@@ -33,7 +33,7 @@
 //! INST       /Intrinsic.EscompatObjectFastCopyToUncheckedWithBarriers/
 //! INST       /CallStatic.Inlined.*std.core.Array::popImpl/
 
-function check_array(arr: Array<int>, expected: Array<int>) {
+function checkArray(arr: Array<int>, expected: Array<int>) {
     let len = arr.length;
     arktest.assertEQ(len, expected.length);
     for (let i = 0; i < len; i++) {
@@ -44,10 +44,14 @@ function check_array(arr: Array<int>, expected: Array<int>) {
 function test(): void {
     let size = 16;
     let arr = new Array<int>(size);
-    let exp_arr = new Array<int>(size - 1);
-    for (let i = 0; i < size; ++i) arr[i] = i;
-    for (let i = 0; i < size - 1; ++i) exp_arr[i] = i + 1;
+    let expArr = new Array<int>(size - 1);
+    for (let i = 0; i < size; ++i) {
+        arr[i] = i;
+    }
+    for (let i = 0; i < size - 1; ++i) {
+        expArr[i] = i + 1;
+    }
     arr.shift();
     arktest.assertEQ(arr.length, size - 1);
-    check_array(arr, exp_arr);
+    checkArray(arr, expArr);
 }

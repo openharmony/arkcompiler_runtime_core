@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,14 +60,14 @@ function testFloat64ArrayOfInt() {
 }
 
 function testFloat64ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
-    let arr = Float64Array.of(12., 22., 32., 42., 33.)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0]
+    let arr = Float64Array.of(12.0, 22.0, 32.0, 42.0, 33.0)
     checkArray(arr, expected)
 }
 
 function testUint8ClampedArrayOfNumber() {
     let expected: FixedArray<number> = [12, 0, 255, 42, 33, 0, 255, 0]
-    let arr = Uint8ClampedArray.of(12., -6., 332., 42., 33., NaN, Infinity, -Infinity)
+    let arr = Uint8ClampedArray.of(12.0, -6.0, 332.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -85,7 +85,7 @@ function testUint8ClampedArrayOfShort() {
 
 function testUint8ArrayOfNumber() {
     let expected: FixedArray<number> = [12, 6, 76, 42, 33, 0, 0, 0]
-    let arr = Uint8Array.of(12., 6., 76., 42., 33., NaN, Infinity, -Infinity)
+    let arr = Uint8Array.of(12.0, 6.0, 76.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -103,7 +103,7 @@ function testUint8ArrayOfShort() {
 
 function testUint16ArrayOfNumber() {
     let expected: FixedArray<number> = [12, 6, 76, 42, 33, 0, 0, 0]
-    let arr = Uint16Array.of(12., 6., 76., 42., 33., NaN, Infinity, -Infinity)
+    let arr = Uint16Array.of(12.0, 6.0, 76.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,8 +66,8 @@ function testInt8ArrayOfInt() {
 }
 
 function testInt8ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., 0, 0, 0]
-    let arr = Int8Array.of(12., 22., 32., 42., 33., NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0, 0, 0, 0]
+    let arr = Int8Array.of(12.0, 22.0, 32.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -84,8 +84,8 @@ function testInt16ArrayOfInt() {
 }
 
 function testInt16ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., 0, 0, 0]
-    let arr = Int16Array.of(12., 22., 32., 42., 33., NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0, 0, 0, 0]
+    let arr = Int16Array.of(12.0, 22.0, 32.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -96,8 +96,8 @@ function testInt32ArrayOfInt() {
 }
 
 function testInt32ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., -2147483648, 0, 0, 0, 0]
-    let arr = Int32Array.of(12., 22., 32., 42., 33., 1.93428e+25, 3.86856e+25, NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0 , 33.0, -2147483648, 0, 0, 0, 0]
+    let arr = Int32Array.of(12.0, 22.0, 32.0, 42.0, 33.0, 1.93428e+25, 3.86856e+25, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -115,7 +115,7 @@ function testBigInt64ArrayOfLong() {
 
 function testBigInt64ArrayOfNumber() {
     let expected: FixedArray<number> = [12, 22, 32, 42, 33]
-    let arr = BigInt64Array.of(12., 22., 32., 42., 33.)
+    let arr = BigInt64Array.of(12.0, 22.0, 32.0, 42.0, 33.0)
     checkArray(arr, expected)
 }
 
@@ -126,13 +126,13 @@ function testFloat32ArrayOfInt() {
 }
 
 function testFloat32ArrayOfFloat() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
-    let arr = Float32Array.of(12., 22., 32., 42., 33.)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0]
+    let arr = Float32Array.of(12.0, 22.0, 32.0, 42.0, 33.0)
     checkArray(arr, expected)
 }
 
 function testFloat32ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0]
     let arr = Float32Array.of((12).toDouble(), (22).toDouble(), (32).toDouble(), (42).toDouble(), (33).toDouble())
     checkArray(arr, expected)
 }
@@ -144,8 +144,8 @@ function testFloat64ArrayOfInt() {
 }
 
 function testFloat64ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33.]
-    let arr = Float64Array.of(12., 22., 32., 42., 33.)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0]
+    let arr = Float64Array.of(12.0, 22.0, 32.0, 42.0, 33.0)
     checkArray(arr, expected)
 }
 
