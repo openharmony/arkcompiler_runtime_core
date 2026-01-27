@@ -910,20 +910,32 @@ uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const In
     if (!g_options.IsCompilerInlineExternalMethods() || !g_options.IsCompilerInlineExternalMethodsAot()) {
         return panda_file::File::INVALID_FILE_INDEX;
     }
-    const SaveStateInst *saveState =
-        !inst->IsSaveState() ? inst->GetSaveState() : static_cast<const SaveStateInst *>(inst);
-    ASSERT(saveState != nullptr);
+
+    RuntimeInterface::MethodPtr method = nullptr;
+    if (inst->GetOpcode() == Opcode::LoadClass) {
+        // For LoadClass there are cases when this instruction is artificially created outside of IrBuilder.
+        // Specifically, on setting type guard after inlining, inst's method pointer is not equal to method of SaveState
+        // as it points to real inlined method, not virtual.
+        method = inst->CastToLoadClass()->GetMethod();
+    } else {
+        // GetCallMethod() of CallInst (call target) and ResolveVirtualInst (interface method) may point to different
+        // files than the inlined code's actual source.
+        // Instead, GetCallerInst() from SaveState returns the CallInst that was inlined.
+        const SaveStateInst *saveState =
+            !inst->IsSaveState() ? inst->GetSaveState() : static_cast<const SaveStateInst *>(inst);
+        ASSERT(saveState != nullptr);
+        if (auto callInst = saveState->GetCallerInst()) {
+            method = callInst->GetCallMethod();
+            ASSERT(method != nullptr);
+        }
+    }
 
     uint32_t index = panda_file::File::INVALID_FILE_INDEX;
-    if (auto callInst = saveState->GetCallerInst()) {
-        auto callMethod = callInst->GetCallMethod();
-        ASSERT(callMethod != nullptr);
+    if (method != nullptr) {
         auto runtime = GetGraph()->GetRuntime();
         // Write index only if inst is externally inlined
-        if (runtime->GetBinaryFileForMethod(callMethod) == runtime->GetBinaryFileForMethod(GetGraph()->GetMethod())) {
-            index = panda_file::File::INVALID_FILE_INDEX;
-        } else {
-            index = GetGraph()->GetRuntime()->GetAOTBinaryFileSnapshotIndexForMethod(callMethod);
+        if (runtime->GetBinaryFileForMethod(method) != runtime->GetBinaryFileForMethod(GetGraph()->GetMethod())) {
+            index = runtime->GetAOTBinaryFileSnapshotIndexForMethod(method);
         }
     }
 

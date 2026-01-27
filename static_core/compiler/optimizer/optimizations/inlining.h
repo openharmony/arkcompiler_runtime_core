@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,7 +101,7 @@ protected:
     bool DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
     SaveStateInst *GetOrCloneSaveState(CallInst *callInst, BasicBlock *callBb);
     void CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
-                            BasicBlock *callBb);
+                            BasicBlock *callBb, RuntimeInterface::MethodPtr ctxMethod);
     BasicBlockPair MakeCallBbs(InstPair insts, BasicBlockPair bbs, [[maybe_unused]] PhiInst **phiInst,
                                [[maybe_unused]] size_t receiversSize);
     void InlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, size_t receiversSize,

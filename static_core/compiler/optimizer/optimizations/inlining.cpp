@@ -363,12 +363,14 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
     Inst *loadClsInst = nullptr;
     if (GetGraph()->IsAotMode()) {
         auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
+        MethodPtr method = currMethod;
         if (classId == 0) {
-            classId = runtime->GetClassIdWithinFile(currMethod, runtime->GetClass(currMethod));
+            classId = runtime->GetClassIdWithinFile(ctx.method, receiver);
+            method = ctx.method;
         }
         ASSERT(classId != 0);
         loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
-                                                      TypeIdMixin {classId, currMethod}, receiver);
+                                                      TypeIdMixin {classId, method}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -411,7 +413,7 @@ SaveStateInst *Inlining::GetOrCloneSaveState(CallInst *callInst, BasicBlock *cal
 }
 
 void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
-                                  BasicBlock *callBb)
+                                  BasicBlock *callBb, RuntimeInterface::MethodPtr ctxMethod)
 {
     auto runtime = GetGraph()->GetRuntime();
     auto currMethod = GetGraph()->GetMethod();
@@ -420,12 +422,14 @@ void Inlining::CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeI
     if (GetGraph()->IsAotMode()) {
         auto saveState = GetOrCloneSaveState(callInst, callBb);
         auto classId = runtime->GetClassIdWithinFile(currMethod, receiver);
+        MethodPtr method = currMethod;
         if (classId == 0) {
-            classId = runtime->GetClassIdWithinFile(currMethod, runtime->GetClass(currMethod));
+            classId = runtime->GetClassIdWithinFile(ctxMethod, receiver);
+            method = ctxMethod;
         }
         ASSERT(classId != 0);
         loadClsInst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, callInst->GetPc(), saveState,
-                                                      TypeIdMixin {classId, currMethod}, receiver);
+                                                      TypeIdMixin {classId, method}, receiver);
     } else {
         loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     }
@@ -644,7 +648,7 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
         callBb = blocks.first;
         callContBb = blocks.second;
 
-        CreateCompareClass(callInst, getClsInst, receiver, callBb);
+        CreateCompareClass(callInst, getClsInst, receiver, callBb, ctx.method);
         InlineReceiver({callInst, newCallInst, phiInst}, {callBb, callContBb},
                        {&hasUnreachableBlocks, &hasRuntimeCalls}, receivers->size(), inlGraph);
 
