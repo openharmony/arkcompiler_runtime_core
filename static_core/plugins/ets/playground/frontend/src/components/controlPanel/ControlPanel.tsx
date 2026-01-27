@@ -120,7 +120,7 @@ const ControlPanel = (): JSX.Element => {
                         className={styles.btn}
                         onClick={handleRun}
                         disabled={isRunLoading || isCompileLoading}
-                        data-testid="run-btn"
+                        aria-label="Run"
                     />
                 </Tooltip>
                 <Tooltip content="Compile" placement="bottom">
@@ -131,7 +131,7 @@ const ControlPanel = (): JSX.Element => {
                         className={styles.btn}
                         onClick={handleCompile}
                         disabled={isCompileLoading || isRunLoading}
-                        data-testid="compile-btn"
+                        aria-label="Compile"
                     />
                 </Tooltip>
                 <Tooltip content="Options" placement="bottom">
@@ -176,7 +176,7 @@ const ControlPanel = (): JSX.Element => {
                                 <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeReset}>
                                     Reset
                                 </Button>
-                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeChange}>
+                                <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeChange} data-testid="run-options-save-btn">
                                     Save
                                 </Button>
                             </div>
@@ -191,7 +191,7 @@ const ControlPanel = (): JSX.Element => {
                             icon={<div className={styles.icon}><Icon icon="more" size={14} /></div>}
                             className={styles.btn}
                             onClick={handleOpenPopover}
-                            data-testid='options'
+                            aria-label="Options"
                         />
                     </Popover>
                 </Tooltip>
@@ -203,7 +203,7 @@ const ControlPanel = (): JSX.Element => {
                         className={styles.btn}
                         onClick={handleShare}
                         disabled={isShareLoading}
-                        data-testid="share-btn"
+                        aria-label="Share"
                     />
                 </Tooltip>
             </ButtonGroup>

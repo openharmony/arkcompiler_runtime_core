@@ -12,5 +12,14 @@
       "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": false }],
       "curly": ["error", "all"],
       "brace-style": ["error", "1tbs", { "allowSingleLine": false }]
-    }
+    },
+    "overrides": [
+      {
+        "files": ["e2e/**/*.ts", "e2e/**/*.spec.ts"],
+        "rules": {
+          "testing-library/prefer-screen-queries": "off",
+          "testing-library/no-node-access": "off"
+        }
+      }
+    ]
 }

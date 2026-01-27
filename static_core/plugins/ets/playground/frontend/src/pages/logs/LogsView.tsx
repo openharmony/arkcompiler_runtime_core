@@ -117,10 +117,10 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
     }, [logs, dispatch, outLogs, errLogs]);
 
     return (
-        <div className={styles.container}>
-            <div className={styles.containerLogs} ref={containerRef}>
+        <div className={styles.container} data-testid={`logs-container-${logType}`}>
+            <div className={styles.containerLogs} ref={containerRef} data-testid={`logs-content-${logType}`}>
                 {logs.map((log: ILog, index) => (
-                    <div key={index} data-index={index} className={styles.logRow}>
+                    <div key={index} data-index={index} className={styles.logRow} data-testid="log-row">
                         <span
                             className={cx({
                                 [styles.tag]: true,
@@ -149,6 +149,7 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                                 >
                                     <span
                                         className={styles.logText}
+                                        data-testid="log-message"
                                         onClick={(): void => {
                                             if (el?.line && el?.column) {
                                                 dispatch(setJumpTo({line: el.line, column: el.column, nonce: Date.now()}));
@@ -162,12 +163,14 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                 ))}
             </div>
             <div className={styles.filterContainer}>
-                <Icon
-                    icon={'disable'}
+                <button
                     className={styles.clearIc}
                     onClick={clearFilters}
-                    data-testid="clear-icon"
-                />
+                    aria-label="Clear logs"
+                    type="button"
+                >
+                    <Icon icon={'disable'} />
+                </button>
                 <Checkbox
                     checked={showOut}
                     label="Out"
