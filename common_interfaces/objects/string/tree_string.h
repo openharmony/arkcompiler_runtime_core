@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,8 @@ class TreeStringTemplate : public BaseString {
 public:
     BASE_CAST_CHECK(TreeStringTemplate<POINTER_SIZE>, IsTreeString);
 
-    NO_MOVE_SEMANTIC_CC(TreeStringTemplate<POINTER_SIZE>);
-    NO_COPY_SEMANTIC_CC(TreeStringTemplate<POINTER_SIZE>);
+    NO_MOVE_SEMANTIC_CC(TreeStringTemplate);
+    NO_COPY_SEMANTIC_CC(TreeStringTemplate);
     // Minimum length for a tree string
     static constexpr uint32_t MIN_TREE_STRING_LENGTH = 13;
     static constexpr size_t LEFT_OFFSET = BaseString::SIZE;

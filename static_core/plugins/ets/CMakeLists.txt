@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.5.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(plugin_ets)
 
 message(STATUS "eTS plugin is found")
@@ -198,6 +198,7 @@ if(TARGET es2panda)
             COPYONLY
         )
         add_custom_command(TARGET etsstdlib
+            POST_BUILD
             COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}'" -P
         )
 

@@ -97,6 +97,7 @@ if(NOT CMAKE_CROSSCOMPILING)
         COPYONLY
     )
     add_custom_command(TARGET link_ets_sdk 
+        POST_BUILD
         COMMAND bash -c "${RUN_VERIFIER_DST_DIR}/run_verifier.sh '${verifier_bin}' '${ETS_STD_LIB}' '${ETS_SDK_ABC}'" -P
     )
         

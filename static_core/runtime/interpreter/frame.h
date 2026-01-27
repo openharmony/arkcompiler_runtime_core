@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -741,14 +741,13 @@ public:
     }
 
 private:
-    static constexpr uint32_t EXT_DATA_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, extData_);
-    static constexpr uint32_t FRAME_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, frame_);
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
     ExtData extData_;
     __extension__ Frame frame_;
 #pragma GCC diagnostic pop
+    static constexpr uint32_t EXT_DATA_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, extData_);
+    static constexpr uint32_t FRAME_OFFSET = MEMBER_OFFSET(ExtFrame<ExtData>, frame_);
 };
 
 #pragma GCC diagnostic push

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,8 +61,8 @@ template <size_t POINTER_SIZE>
 class SlicedStringTemplate : public BaseString {
 public:
     BASE_CAST_CHECK(SlicedStringTemplate<POINTER_SIZE>, IsSlicedString);
-    NO_MOVE_SEMANTIC_CC(SlicedStringTemplate<POINTER_SIZE>);
-    NO_COPY_SEMANTIC_CC(SlicedStringTemplate<POINTER_SIZE>);
+    NO_MOVE_SEMANTIC_CC(SlicedStringTemplate);
+    NO_COPY_SEMANTIC_CC(SlicedStringTemplate);
     static constexpr uint32_t MIN_SLICED_STRING_LENGTH = 13;
     static constexpr size_t PARENT_OFFSET = BaseString::SIZE;
     static constexpr uint32_t START_INDEX_BITS_NUM = 30U;
