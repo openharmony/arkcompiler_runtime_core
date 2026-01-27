@@ -1986,6 +1986,8 @@ export class JSONParser {
                 if (this.curChar != c'\\') {
                     resBuilder.append(this.curChar)
                 }
+            } else if (this.curChar == c'u') {
+                resBuilder.append(this.readUnicodeEscape())
             } else {
                 let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar, 0)
                 if (escapedCharIndex != -1) {
@@ -2003,6 +2005,20 @@ export class JSONParser {
         }
         this.escapeWhitespaces = true
         return res
+    }
+
+    private readUnicodeEscape(): string {
+        let sb = new StringBuilder()
+        for (let i = 0; i < 4; i++) {
+            if (!this.getNextChar() || this.curChar == JSONString.END_CHAR) {
+                throw new SyntaxError(`Incomplete Unicode escape sequence at ${this.getCurPosDescr()}`)
+            }
+            if (!Char.isHexDigit(this.curChar)) {
+                throw new SyntaxError(`Invalid hexadecimal digit '${this.curChar}' at ${this.getCurPosDescr()}`)
+            }
+            sb.append(this.curChar)
+        }
+        return String.fromCharCode(Double.parseInt(sb.toString(), 16))
     }
 
     static parse(json: String): JSONValue {
