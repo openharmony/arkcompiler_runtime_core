@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	};
 
 	let popFunction: () => FixedArray<int> = () => {
-		let counter: FixedArray<int> = new int[PUSH_COUNT];
+		let counter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 		while (true) {
 			let val = queue.pop();
 			if (val == EXTRA) break;
@@ -80,7 +80,7 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	}
 
 	awaitAll<void>(pushers);
-	let finalCounter: FixedArray<int> = new int[PUSH_COUNT];
+	let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 	let resCounters = awaitAll<FixedArray<int>>(poppers);
 
 	for (let i = 0; i < JOB_COUNT; ++ i)

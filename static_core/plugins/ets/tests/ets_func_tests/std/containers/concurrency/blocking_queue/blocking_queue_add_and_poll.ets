@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ function testOrderAddAndPollMany(constr: BQConstructorI) {
 
     let pollF = () => {
         let found = new Array<int>();
-        let prev: FixedArray<int> = new int [JOB_COUNT];
+        let prev: FixedArray<int> = new FixedArray<int>(JOB_COUNT);
         for (let i = 0; i < JOB_COUNT; ++ i) prev[i] = -1;
         while (true) {
             let val = queue.poll();
@@ -92,7 +92,7 @@ function testOrderAddAndPollMany(constr: BQConstructorI) {
     }
 
     // each must be found in poll or lost in add
-    let check: FixedArray<int> = new int [JOB_COUNT * ADD_COUNT];     awaitAll(adders);
+    let check: FixedArray<int> = new FixedArray<int>(JOB_COUNT * ADD_COUNT);     awaitAll(adders);
     let lost = awaitAll(adders);
     let found = awaitAll(pollers);
     lost.forEach(arr => arr.forEach(i => { ++check[i] }));
@@ -113,7 +113,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
     const EXTRA = -1;
 
     let addFunction: () => FixedArray<int> = () => {
-        let added: FixedArray<int> = new int[ADD_COUNT];
+        let added: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
         for (let i = 0; i < ADD_COUNT; ++i) {
             if (queue.add(i))
                 ++ added[i];
@@ -123,7 +123,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
     };
 
     let pollFunction: () => FixedArray<int> = () => {
-        let polled: FixedArray<int> = new int[ADD_COUNT];
+        let polled: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
         while (true) {
             let val = queue.poll();
             Coroutine.Schedule();
@@ -140,7 +140,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
         addLaunch(pollers, pollFunction);
     }
 
-    let finalCounter: FixedArray<int> = new int[ADD_COUNT];
+    let finalCounter: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
     let addedCounter = awaitAll(adders);
     let polledCounter = awaitAll(pollers);
     for (let i = 0; i < JOB_COUNT; ++ i) {

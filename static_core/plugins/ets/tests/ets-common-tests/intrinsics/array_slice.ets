@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,8 +57,8 @@ function testArrayOfStringWithGC() {
 }
 
 function testFixedArrayOfInt() {
-    let empty: FixedArray<int> = new int[0];
-    checkArray(slice(empty), new int[0]);
+    let empty: FixedArray<int> = new FixedArray<int>(0);
+    checkArray(slice(empty), new FixedArray<int>(0));
     let arr1: FixedArray<int> = [-10, -10];
     checkArray(slice(arr1), [-10, -10]);
     let arr2: FixedArray<int> = [5, 6];
@@ -68,7 +68,7 @@ function testFixedArrayOfInt() {
 }
 
 function createNewStringArray(size: int): Array<string> {
-    let src: FixedArray<string> = new string[1000];
+    let src: FixedArray<string> = new FixedArray<string>(1000);
     for (let i = 0; i < src.length; i++) {
         src[i] = "s" + (i + 1);
     }
@@ -170,9 +170,9 @@ function testFixedArrayOfIntStartIndex() {let arr1: FixedArray<int> = [42];
     let arr4: FixedArray<int> = slice(arr2, 1);
     checkArray(arr4, [-1]);
     let arr5: FixedArray<int> = slice(arr2, 2);
-    checkArray(arr5, new int[0]);
+    checkArray(arr5, new FixedArray<int>(0));
     let arr6: FixedArray<int> = slice(arr2, 3);
-    checkArray(arr6, new int[0]);
+    checkArray(arr6, new FixedArray<int>(0));
     let arr7: FixedArray<int> = slice(arr2, -1);
     checkArray(arr7, [-1]);
     let arr8: FixedArray<int> = slice(arr2, -2);

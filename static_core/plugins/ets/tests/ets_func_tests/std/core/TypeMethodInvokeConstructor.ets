@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ function main(): void {
     const cType = Type.of(c) as ClassType
     arktest.assertEQ( cType.getConstructorsNum(), 1)
     const m = cType.getConstructor(0)
-    const args : FixedArray<Any> = new Any[1];
+    const args : FixedArray<Any> = new FixedArray<Any>(1);
     args[0] = 10
     let res = m.invoke(null, args) as C
     arktest.assertEQ( res.a, 10)

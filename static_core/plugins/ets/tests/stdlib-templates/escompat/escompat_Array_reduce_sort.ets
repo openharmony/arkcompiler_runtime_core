@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ const FAILURE = 1
 
 function testToSorted(): int {
 
-    let unsorted: FixedArray<Object> = new Object[source.length]
+    let unsorted: FixedArray<Object> = new FixedArray<Object>(source.length)
     let l:int = unsorted.length
 
     for (let i: int = 0; i < l; i++) {

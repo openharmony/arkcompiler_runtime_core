@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@ tags: [compile-only]
 ---*/
 
 function main() {
-  let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new {{c.src_type}}[1];
-  let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new {{c.dst_type}}[1];
+  let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new FixedArray<{{c.src_type}}>(1);
+  let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new FixedArray<{{c.dst_type}}>(1);
   dst_{{loop.index}} = src_{{loop.index}};
 }
 {% endfor %}

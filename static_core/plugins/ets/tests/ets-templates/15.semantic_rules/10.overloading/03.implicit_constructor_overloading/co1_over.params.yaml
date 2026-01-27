@@ -142,7 +142,7 @@ cases:
           arktest.assertEQ(new A([new Object()]).t, "Object")
           arktest.assertEQ(new A([Color.Red]).t, "Color")
           arktest.assertEQ(new A([Size.M]).t, "Size")
-          arktest.assertEQ(new A(new A[1]).t, "A")
+          arktest.assertEQ(new A(new FixedArray<A>(1)).t, "A")
 
     - decl: |-
           // tuple and array

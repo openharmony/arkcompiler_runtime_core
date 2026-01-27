@@ -1311,7 +1311,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end) {
             return this;
         }
-        let arr : FixedArray<char> = new char[end]
+        let arr : FixedArray<char> = new FixedArray<char>(end)
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[i] = this.charAt(i)
         }
@@ -1325,7 +1325,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr : FixedArray<char> = new char[end];
+        let arr : FixedArray<char> = new FixedArray<char>(end);
         let length = this.getLength();
         let strLength = str.getLength()
         for (let i: int = 0; i < length; i++) {
@@ -1381,7 +1381,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (padLen <= 0) {
             return this;
         }
-        let arr: FixedArray<char> = new char[end]
+        let arr: FixedArray<char> = new FixedArray<char>(end)
         for(let i = 0; i < padLen; i++){
             arr[i] = ch
         }
@@ -1395,7 +1395,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
-        let arr: FixedArray<char> = new char[end];
+        let arr: FixedArray<char> = new FixedArray<char>(end);
         let padLen: int = end - this.getLength();
         for (let i: int = 0; i < this.getLength(); i++) {
             arr[padLen + i] = this.charAt(i);

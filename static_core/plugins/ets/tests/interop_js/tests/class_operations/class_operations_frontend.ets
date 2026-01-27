@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -315,7 +315,7 @@ function jscallStaticMethodString(): int {
 
 function jscallArray(): int {
     try {
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -335,7 +335,7 @@ function jscallArray(): int {
 
 function jsnewArray(): int {
     try {
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -357,7 +357,7 @@ function jsnewArray(): int {
 
 function jsnewSetPropertyArray(): int {
     try {
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }
@@ -382,7 +382,7 @@ function jsnewSetPropertyArray(): int {
 
 function jscallStaticMethodArray(): int {
     try {
-        const v0: FixedArray<int> = new int[10]
+        const v0: FixedArray<int> = new FixedArray<int>(10)
         for (let i = 0; i < 10; ++i) {
             v0[i] = i * i
         }

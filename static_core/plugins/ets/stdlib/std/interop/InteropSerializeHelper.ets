@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,14 +40,14 @@ export class InteropArgRecord {
 export class InteropSerializeHelper {
     constructor(args: FixedArray<Any>) {
         this.argsHolder = args;
-        this.argRecords = new InteropArgRecord[args.length];
+        this.argRecords = new FixedArray<InteropArgRecord>(args.length);
         for (let i = 0; i < args.length; i++) {
             this.argRecords[i] = this.classifyAndSerializeArg(args[i]);
         }
     }
 
     public deserialize(): FixedArray<Any> {
-        let res: FixedArray<Any> = new Any[this.argRecords.length];
+        let res: FixedArray<Any> = new FixedArray<Any>(this.argRecords.length);
         for (let i = 0; i < this.argRecords.length; i++) {
             let type = this.argRecords[i].type;
             let value = this.argRecords[i].value;

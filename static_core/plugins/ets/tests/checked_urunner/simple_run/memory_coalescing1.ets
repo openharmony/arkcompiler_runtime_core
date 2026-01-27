@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,8 +148,8 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: FixedArray<double> = new double[n];
-        let v: FixedArray<double> = new double[n];
+        let u: FixedArray<double> = new FixedArray<double>(n)
+        let v: FixedArray<double> = new FixedArray<double>(n)
         let vv1: double = 0;
         let vv2: double = 0;
         let vv3: double = 0;

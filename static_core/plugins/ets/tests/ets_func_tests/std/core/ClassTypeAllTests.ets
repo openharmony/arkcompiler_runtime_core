@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,7 +272,7 @@ function testMake() {
     const tA = Type.of(new MakeA()) as ClassType;
     arktest.assertEQ(42 as int, (tA.make() as MakeA).value);
     const tB = Type.of(new MakeB(0, "")) as ClassType;
-    const args = new Object[2] as FixedArray<Any>;
+    const args = new FixedArray<Object>(2) as FixedArray<Any>;
     args[0] = new Int(7);
     args[1] = new String("hi");
     const b = tB.make(args) as MakeB;

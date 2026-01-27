@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -583,7 +583,7 @@ export final class Proxy {
     }
 
     private arrayHandlerInvoke<T>(arrayProxy: ArrayProxy<T>, method: Method, args: FixedArray<Any>): Any {
-        const methodArgs: FixedArray<Any> = new Any[args.length]
+        const methodArgs: FixedArray<Any> = new FixedArray<Any>(args.length)
 
         for (let argIdx = 0; argIdx < args.length; argIdx++) {
             const arg = args[argIdx]

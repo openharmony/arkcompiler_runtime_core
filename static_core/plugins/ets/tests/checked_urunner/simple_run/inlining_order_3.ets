@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ function hot(i:int):int { return -i; }
 
 function test_loops(): void {
     let N = cold();
-    let arr: FixedArray<int> = new int[N];
+    let arr: FixedArray<int> = new FixedArray<int>(N);
 
     for (let i:int = 0; i < N; i++) {
         arr[i] += hot(i);

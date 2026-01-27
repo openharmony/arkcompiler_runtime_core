@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ export namespace containers {
         /* const */ static ArrayInitSize : int = 16
 
         private init(capacity: int, val: UndefinableObject): void {
-            this.data = new UndefinableObject[capacity]
+            this.data = new FixedArray<UndefinableObject>(capacity)
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val
             }
@@ -47,7 +47,7 @@ export namespace containers {
         * @param capacity
         */
         constructor(capacity: int) {
-            this.data = new UndefinableObject[capacity]
+            this.data = new FixedArray<UndefinableObject>(capacity)
             this.curSize = 0
         }
 
@@ -65,7 +65,7 @@ export namespace containers {
         */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : FixedArray<UndefinableObject> = new UndefinableObject[capacity]
+                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(capacity)
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
                 }
@@ -79,7 +79,7 @@ export namespace containers {
         * @returns the underlying array
         */
         public toArray(): Object[] {
-            let newData = new Object[this.curSize]
+            let newData = new (Object)[this.curSize]
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]!
             }
@@ -104,7 +104,7 @@ export namespace containers {
         */
         public pushBack(e: UndefinableObject): void {
             if (this.curSize == this.data.length) {
-                let newData : FixedArray<UndefinableObject> = new UndefinableObject[UndefinableObjectArray.getNewCapacity(this.data.length)]
+                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(UndefinableObjectArray.getNewCapacity(this.data.length))
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i]
                 }

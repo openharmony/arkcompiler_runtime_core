@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -322,7 +322,7 @@ export final class Long extends Integral implements Comparable<Long> {
         if (negative) {
             ++digitsNum;
         }
-        let data : FixedArray<char> = new char[digitsNum];
+        let data : FixedArray<char> = new FixedArray<char>(digitsNum);
         let curPlace = digitsNum - 1;
         while (val != 0) {
             let remainder = val % radix.toInt();

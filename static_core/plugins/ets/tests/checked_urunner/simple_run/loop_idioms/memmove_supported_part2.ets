@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,7 +93,7 @@ let GLOBAL_OFFS: int = 1;
 class TestSupported {
     static test_noAlias_locals(): int {
         let src: FixedArray<int> = [1, 2, 3, 4];
-        let dst: FixedArray<int> = new int[4];
+        let dst: FixedArray<int> = new FixedArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -102,7 +102,7 @@ class TestSupported {
 
     static test_noAlias_locals_ref(): int {
         let src: FixedArray<string> = ["1", "2", "3", "4"];
-        let dst: FixedArray<string> = new string[4];
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -111,7 +111,7 @@ class TestSupported {
 
     static test_noAlias_updateFirstOnly_ref(): int {
         let src: FixedArray<string> = ["1", "2", "3", "4"];
-        let dst: FixedArray<string> = new string[4];
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         TestSupported.__noinline__updateFirst(dst);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
@@ -129,7 +129,7 @@ class TestSupported {
     }
 
     static __noinline__test_noAlias_localAndParam(src: FixedArray<int>): FixedArray<int> {
-        let dst: FixedArray<int> = new int[4];
+        let dst: FixedArray<int> = new FixedArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }

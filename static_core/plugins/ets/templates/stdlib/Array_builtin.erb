@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %     elsif elt == 'U'
 %       "__alloc_array<#{elt}>(#{l}, null)"
 %     else
-%       "new #{elt}[#{l}]"
+%       "new FixedArray<#{elt}>(#{l})"
 %     end
 %   }
 %   ctx.make_fixed_array = "FixedArray<#{el_type}>"
@@ -133,7 +133,7 @@ function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx.el_type %>, k: number, array: <%= ctx.this_type %>) => boolean): <%= ctx.this_type %> {
-    const mask : FixedArray<boolean> = new boolean[<%= ctx.this_len_int %>]
+    const mask : FixedArray<boolean> = new FixedArray<boolean>(<%= ctx.this_len_int %>)
     let cnt = 0
 
     for (let i: int = 0; i < <%= ctx.this_len_int %>; i++) {
@@ -270,8 +270,8 @@ function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex
 function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<T | undefined> = new (T | undefined)[len1];
-    let right : FixedArray<T | undefined> = new (T | undefined)[len2];
+    let left : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len1);
+    let right : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -364,8 +364,8 @@ function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buf
     const len2 = endIndex - midIndex;
     let left: (T | undefined)[] = new Array<T | undefined>(len1);
     let right: (T | undefined)[] = new Array<T | undefined>(len2);
-    let leftStr : FixedArray<buffStr> = new buffStr[len1]
-    let rightStr : FixedArray<buffStr> = new buffStr[len2]
+    let leftStr : FixedArray<buffStr> = new FixedArray<buffStr>(len1)
+    let rightStr : FixedArray<buffStr> = new FixedArray<buffStr>(len2)
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i]
         leftStr[i] = arrStr[startIndex + i]

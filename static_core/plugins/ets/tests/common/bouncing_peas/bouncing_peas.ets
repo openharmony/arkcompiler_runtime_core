@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ function encodeFPS(input: int): FixedArray<byte>/*Uint8Array*/ {
     let digitsQuantity = 0;
     for (let x = input; x > 0; x = x / 10) digitsQuantity++;
     let resultLength = digitsQuantity + HEADER_LEN + 1;
-    let result : FixedArray<byte> = new byte[resultLength];/*Uint8Array(resultLength);*/
+    let result : FixedArray<byte> = new FixedArray<byte>(resultLength);/*Uint8Array(resultLength);*/
     let index: int = HEADER_LEN;
     for (let digitNumber: int = 0; digitNumber < digitsQuantity; digitNumber++) {
         let cp = input / power(10., (digitsQuantity - digitNumber - 1).toDouble()).toInt() % 10 + 48;

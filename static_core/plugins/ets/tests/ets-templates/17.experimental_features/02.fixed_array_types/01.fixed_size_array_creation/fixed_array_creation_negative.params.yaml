@@ -13,25 +13,25 @@
 
 cases:
    - logic: "let a = new FixedArray<number>(-1)"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a = new FixedArray<number>(-30)"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a: FixedArray<T> = [1,2,3]"
      expected_out: "Semantic error ESE0371: Cannot find type 'T'."
 
    - logic: "let a = new FixedArray<string>(-1, 'a')"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a = new FixedArray<number>(-30, 0)"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a = new FixedArray<string>(-1, (inx: int) => 'a')"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a = new FixedArray<int>(-30, (inx: int) => -inx)"
-     expected_out: "Semantic error ESE0292: This expression is not constructible."
+     expected_out: "Semantic error ESE0247: Index value cannot be less than zero."
 
    - logic: "let a: FixedArray<Object> = [1, 3, undefined]"
      expected_out: "Semantic error ESE0227: Array element at index 2 with type 'undefined' is not compatible with the target array element type 'Object'"

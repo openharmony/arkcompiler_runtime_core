@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,7 @@ export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<{{T}}>): FixedArray<{{T}}> {
-    const r : FixedArray<{{T}}> = new {{T}}[src.length];
+    const r : FixedArray<{{T}}> = new FixedArray<{{T}}>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {

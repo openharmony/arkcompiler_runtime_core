@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ class A {
     b: int;
 };
 
-let arr: FixedArray<int> = new int[4]
+let arr: FixedArray<int> = new FixedArray<int>(4)
 function foo(obj: A, cnt: int): int  {
     obj.b = 2;
     return arr[cnt]

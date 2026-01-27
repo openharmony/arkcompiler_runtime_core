@@ -387,8 +387,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     private allocDataAndBuckets(capacity: int): [DataArrType, BucketsArrType] {
-        const data: DataArrType = new Any[pairs(capacity) + 2]  // extra two elements at the end are: links to buckets and nested data.
-        const buckets: BucketsArrType = new int[pairs(capacity) + 1]  // extra element at the end is: iterators counter.
+        const data: DataArrType = new FixedArray<Any>(pairs(capacity) + 2)  // extra two elements at the end are: links to buckets and nested data.
+        const buckets: BucketsArrType = new FixedArray<int>(pairs(capacity) + 1)  // extra element at the end is: iterators counter.
         data.setBucketsToData(buckets)
         return [data, buckets]
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ class C {
 }
 
 function testSum(sum: Method): void {
-    const args : FixedArray<Any> = new Any[2]
+    const args : FixedArray<Any> = new FixedArray<Any>(2)
     args[0] = Int.MAX_VALUE
     args[1] = 30
     const res = sum.invoke(null, args)
@@ -36,7 +36,7 @@ function testSum(sum: Method): void {
 function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
     const c = new C()
     c.a = 15
-    const args : FixedArray<Any> = new Any[1]
+    const args : FixedArray<Any> = new FixedArray<Any>(1)
 
     args[0] = 13
     arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ function testConcurrentDelete2() {
 
 	let deleteJobs: Job<FixedArray<int>>[] = [];
 	let deleteF: ()=>FixedArray<int> = () => {
-		let arr: FixedArray<int> = new int[SET_COUNT];
+		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT);
 		for (let i = 0; i < SET_COUNT; ++ i)
 			if(map.delete(i))
 				arr[i] = 1;

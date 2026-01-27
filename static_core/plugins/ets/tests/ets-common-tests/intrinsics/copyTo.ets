@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,18 +149,18 @@ function resetStringArray(arr: FixedArray<string>) {
 }
 
 function createSourceStringArray(size: int): FixedArray<string> {
-    let arr: FixedArray<string> = new string[size];
+    let arr: FixedArray<string> = new FixedArray<string>(size);
     initStringArray(arr);
     return arr;
 }
 
 
 function createNewStringArray(size: int): FixedArray<string> {
-    let src: FixedArray<string> = new string[100];
+    let src: FixedArray<string> = new FixedArray<string>(100)
     for (let i = 0; i < src.length; i++) {
         src[i] = "s" + (i + 1);
     }
-    let arr: FixedArray<string> = new string[size];
+    let arr: FixedArray<string> = new FixedArray<string>(size)
     for (let i: int = 0; i < arr.length; i++) {
         arr[i] = src[(i + 1) % src.length];
     }
@@ -179,7 +179,7 @@ function checkStringArray(src: FixedArray<string>, dst: FixedArray<string>, offs
 
 function testArrayOfObjectsBigLength() {
     let farr1: FixedArray<string> = createSourceStringArray(10240);
-    let farr2: FixedArray<string> = new string[farr1.length];
+    let farr2: FixedArray<string> = new FixedArray<string>(farr1.length)
     copyTo(farr1, farr2, 0, 1, farr1.length);
     // checkStringArray dominates the test's running time and because it is a very slow operation (checking an array of
     // 300'000 strings takes about 80 seconds on x86-64 for the debug build), we need to shrink the checked range.
@@ -196,7 +196,7 @@ function testArrayOfObjectsBigLength() {
     checkStringArray(farr2, farr1, 1, farr2.length / 2 - 500, farr2.length / 2 + 500);
 
     farr1 = createSourceStringArray(200000);
-    farr2 = new string[farr1.length];
+    farr2 = new FixedArray<string>(farr1.length)
     copyTo(farr1, farr2, 0, 1, farr1.length);
     checkStringArray(farr1, farr2, 1, 0, 1000);
     checkStringArray(farr1, farr2, 1, farr1.length - 1000, farr1.length);
@@ -209,7 +209,7 @@ function testArrayOfObjectsBigLength() {
     checkStringArray(farr2, farr1, 1, farr2.length / 2 - 500, farr2.length / 2 + 500);
 
     farr1 = createSourceStringArray(300033);
-    farr2 = new string[farr1.length];
+    farr2 = new FixedArray<string>(farr1.length)
     copyTo(farr1, farr2, 0, 1, farr1.length);
     checkStringArray(farr1, farr2, 1, 0, 1000);
     checkStringArray(farr1, farr2, 1, farr1.length - 1000, farr1.length);
@@ -339,9 +339,9 @@ function checkArrays(objarr: FixedArray<string>, dstarr: FixedArray<string>) {
 }
 
 function testArrayOfObjectsFull(overlap: boolean) {
-    let srcarr: FixedArray<string> = new string[10];
-    let objarr: FixedArray<string> = new string[10];
-    let dstarr: FixedArray<string> = new string[10];
+    let srcarr: FixedArray<string> = new FixedArray<string>(10)
+    let objarr: FixedArray<string> = new FixedArray<string>(10)
+    let dstarr: FixedArray<string> = new FixedArray<string>(10)
 
     for (let pos1: int = 0; pos1 < srcarr.length; pos1++) {
         for (let pos2: int = 0; pos2 < srcarr.length; pos2++) {

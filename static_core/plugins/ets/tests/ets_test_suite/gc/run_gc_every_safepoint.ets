@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 function simpleTestCall(): void {
-    let obj_array: FixedArray<Object> = new Object[4];
+    let obj_array: FixedArray<Object> = new FixedArray<Object>(4);
     for (let i = 0; i < 4; i++) {
         obj_array[i] = new Object();
         arktest.assertLT(0, GC.getObjectAddress(obj_array[i]), "getObjectAddress for regular object must return value > 0");
@@ -28,7 +28,7 @@ function main(): int {
     let obj = new Object();
     arktest.assertLT(0, GC.getObjectAddress(obj), "getObjectAddress for regular object must return value > 0");
     arktest.assertLT(0, GC.getObjectAddress("non-movable string"), "getObjectAddress for non-movable must return value > 0");
-    let h_obj: FixedArray<long> = new long[1024 * 1024];
+    let h_obj: FixedArray<long> = new FixedArray<long>(1024 * 1024);
     simpleTestCall()
     return 0;
 }

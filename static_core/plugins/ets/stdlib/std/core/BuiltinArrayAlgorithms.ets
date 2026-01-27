@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,7 +139,7 @@ export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
-    const r : FixedArray<boolean> = new boolean[src.length];
+    const r : FixedArray<boolean> = new FixedArray<boolean>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -289,7 +289,7 @@ export function upperBoundSearch(arr: FixedArray<byte>, key: byte): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
-    const r : FixedArray<byte> = new byte[src.length];
+    const r : FixedArray<byte> = new FixedArray<byte>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -439,7 +439,7 @@ export function upperBoundSearch(arr: FixedArray<short>, key: short): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<short>): FixedArray<short> {
-    const r : FixedArray<short> = new short[src.length];
+    const r : FixedArray<short> = new FixedArray<short>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -589,7 +589,7 @@ export function upperBoundSearch(arr: FixedArray<int>, key: int): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<int>): FixedArray<int> {
-    const r : FixedArray<int> = new int[src.length];
+    const r : FixedArray<int> = new FixedArray<int>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -739,7 +739,7 @@ export function upperBoundSearch(arr: FixedArray<long>, key: long): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<long>): FixedArray<long> {
-    const r : FixedArray<long> = new long[src.length];
+    const r : FixedArray<long> = new FixedArray<long>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -889,7 +889,7 @@ export function upperBoundSearch(arr: FixedArray<float>, key: float): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<float>): FixedArray<float> {
-    const r : FixedArray<float> = new float[src.length];
+    const r : FixedArray<float> = new FixedArray<float>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1039,7 +1039,7 @@ export function upperBoundSearch(arr: FixedArray<double>, key: double): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<double>): FixedArray<double> {
-    const r : FixedArray<double> = new double[src.length];
+    const r : FixedArray<double> = new FixedArray<double>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1189,7 +1189,7 @@ export function upperBoundSearch(arr: FixedArray<char>, key: char): int {
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<char>): FixedArray<char> {
-    const r : FixedArray<char> = new char[src.length];
+    const r : FixedArray<char> = new FixedArray<char>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1226,7 +1226,7 @@ export native function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstS
  * @returns copy of `src`
  */
 export function copyOf(src: FixedArray<Any>): FixedArray<Any> {
-    const r : FixedArray<Any> = new Any[src.length];
+    const r : FixedArray<Any> = new FixedArray<Any>(src.length);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {

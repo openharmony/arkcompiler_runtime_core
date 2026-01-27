@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -261,7 +261,7 @@ export final class ESValue {
     }
 
     public instantiate(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new Any[args.length];
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         // NOTE(www): ICMTI1, it should be handled in JSRuntime.
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
@@ -367,7 +367,7 @@ export final class ESValue {
     }
 
     public invoke(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new Any[args.length];
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
@@ -380,7 +380,7 @@ export final class ESValue {
     }
 
     public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new Any[args.length];
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
@@ -397,7 +397,7 @@ export final class ESValue {
         if (callable.isUndefined()) {
             throw Error("failed to get property");
         }
-        let argsAny: FixedArray<Any> = new Any[args.length];
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;

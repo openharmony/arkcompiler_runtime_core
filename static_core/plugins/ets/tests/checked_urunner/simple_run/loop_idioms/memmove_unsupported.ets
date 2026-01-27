@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,7 @@ class TestUnsupported {
         return check(TestUnsupported.__noinline__noAlias_RefTypeCheck(src), src);
     }
     static __noinline__noAlias_RefTypeCheck(src: FixedArray<string>): FixedArray<string> {
-        let dst: FixedArray<string> = new string[4];
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -120,7 +120,7 @@ class TestUnsupported {
     
     static noAlias_UpdateFirst_inLoop_ref(): int {
         let src: FixedArray<string> = ["1", "2", "3", "4"];
-        let dst: FixedArray<string> = new string[4];
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             TestUnsupported.__noinline__updateFirst(dst);
             dst[i] = src[i];

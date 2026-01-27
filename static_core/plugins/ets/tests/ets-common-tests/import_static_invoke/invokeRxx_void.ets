@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ class TestObj {
 
 let arg = (...args: Array<Object | string | number | undefined | null>) => { return ('HelloWorld') }
 
-const methodArgs: FixedArray<Object> = new Object[1];
+const methodArgs: FixedArray<Object> = new FixedArray<Object>(1);
 
 methodArgs[0] = arg;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ export namespace containers {
     export class ArrayAsListInt implements ListInt {
 
         private init(capacity: int, val: Int): void {
-            this.data = new Int[capacity];
+            this.data = new FixedArray<Int>(capacity);
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val;
             }
@@ -61,7 +61,7 @@ export namespace containers {
         */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : FixedArray<Int> = new Int[capacity];
+                let newData : FixedArray<Int> = new FixedArray<Int>(capacity);
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
                 }
@@ -102,7 +102,7 @@ export namespace containers {
         public override pushFront(e: Int): void {
             let dst = this.data;
             if (this.curSize == this.data.length) {
-                dst = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
+                dst = new FixedArray<Int>(ArrayAsListInt.getNewCapacity(this.data.length));
             }
             for (let i = this.curSize; i != 0; --i) {
                 dst[i] = this.data[i-1];
@@ -136,7 +136,7 @@ export namespace containers {
         */
         public override pushBack(e: Int): void {
             if (this.curSize == this.data.length) {
-                let newData : FixedArray<Int> = new Int[ArrayAsListInt.getNewCapacity(this.data.length)];
+                let newData : FixedArray<Int> = new FixedArray<Int>(ArrayAsListInt.getNewCapacity(this.data.length));
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i];
                 }

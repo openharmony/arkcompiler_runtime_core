@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 function sortArrayFromSecondElementTest(): int
 {
     let size: int = 100;
-    let arr: FixedArray<int> = new int[size];
-    let expected: FixedArray<int> = new int[size];
+    let arr: FixedArray<int> = new FixedArray<int>(size);
+    let expected: FixedArray<int> = new FixedArray<int>(size);
     for (let i = 0; i < size; ++i) {
         arr[i] = size - i;
         expected[i] = i;
