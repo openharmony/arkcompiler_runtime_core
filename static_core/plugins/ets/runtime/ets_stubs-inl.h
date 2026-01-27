@@ -184,7 +184,7 @@ ALWAYS_INLINE inline ark::Method *GetAccessorByName(InterpreterCache::Entry *ent
 {
     auto *res = entry->item;
     auto resUint = reinterpret_cast<uint64_t>(res);
-    bool cacheExists = res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1);
+    bool cacheExists = res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && address == entry->pc;
     auto methodPtr = reinterpret_cast<Method *>(resUint & ~METHOD_FLAG_MASK);
     ark::Method *callee = nullptr;
     Class *current = klass;
