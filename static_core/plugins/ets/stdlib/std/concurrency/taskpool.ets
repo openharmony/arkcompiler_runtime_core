@@ -1192,6 +1192,7 @@ export namespace taskpool {
             ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {    
                 if (this.impl.isRunning) {
                     this.impl.tasks.push(task);
+                    InternalTask.of(task).state.set(InternalState.WAITING);
                 } else {
                     this.impl.isRunning = true;
                     InternalTask.of(task).enqueue(this.impl.priority);

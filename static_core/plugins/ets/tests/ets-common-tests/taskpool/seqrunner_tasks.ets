@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -357,6 +357,33 @@ async function sameNameSharedRunnerTest() {
     arktest.assertEQ(resultStr, 'abcd');
 }
 
+async function cancelSequenceRunnerWaittingTask(){
+    let catchCalled = false;
+    let runner = new taskpool.SequenceRunner();
+    let event = new Event();
+    let blockTask = (): void => {
+        event.wait();
+        return;
+    }
+
+    let emptyTask = (): void => {
+        return;
+    }
+
+    let task1 = new taskpool.Task(blockTask);
+    let task2 = new taskpool.Task(blockTask);
+    let p1 = runner.execute(task1);
+    let p2 = runner.execute(task2).catch((e: Error) => {
+        catchCalled = true;
+        arktest.assertEQ(e.message, 'taskpool:: sequenceRunner task has been canceled');
+    });
+    taskpool.cancel(task2);
+    event.fire();
+    await p1;
+    await p2;
+    arktest.assertEQ(catchCalled, true);
+}
+
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
@@ -375,6 +402,7 @@ function main(): int {
     seqRunnerSuite.addAsyncTest('TaskWithDifferentParamsTest', taskWithDifferentParamsTest);
     seqRunnerSuite.addAsyncTest('TestSequenceRunnerExecuteOrder', testSequenceRunnerexecuteorder);
     seqRunnerSuite.addAsyncTest('sameNameSharedRunnerTest', sameNameSharedRunnerTest);
+    seqRunnerSuite.addAsyncTest('cancelSequenceRunnerWaittingTask', cancelSequenceRunnerWaittingTask);
     let res = seqRunnerSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
