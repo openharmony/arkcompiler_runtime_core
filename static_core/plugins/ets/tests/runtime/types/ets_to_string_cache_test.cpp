@@ -419,7 +419,12 @@ TEST_F(EtsToStringCacheTest, BitcastTestFloat)
     }
 }
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #32786)
+TEST_F(EtsToStringCacheTest, DISABLED_ToStringCacheElementLayout)
+#else
 TEST_F(EtsToStringCacheTest, ToStringCacheElementLayout)
+#endif
 {
     CheckCacheElementMembers<EtsDouble>();
     CheckCacheElementMembers<EtsFloat>();

@@ -80,7 +80,7 @@ public:
     static constexpr size_t MAX_STRING_LENGTH = 0x40000000U;  // 30 bits for string length, 2 bits for special meaning
     static constexpr uint32_t MAX_ELEMENT_INDEX_LEN = 10;
     static constexpr size_t HASH_SHIFT = 5;
-#if !defined(PANDA_32_BIT_MANAGED_POINTER)
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
     static constexpr size_t PADDING_OFFSET = BaseObjectSize();
 #else
     static constexpr size_t LENGTH_AND_FLAGS_OFFSET = BaseObjectSize();
@@ -117,7 +117,7 @@ public:
     static_assert(LengthBits::START_BIT + LengthBits::SIZE == sizeof(uint32_t) * BITS_PER_BYTE,
                   "LengthBits does not match the field size");
 
-#if !defined(PANDA_32_BIT_MANAGED_POINTER)
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
     // When enable cmcgc, the ObjectHeader in 1.2 is 128 bits, to align with it, a 64bits padding is needed.
     PRIMITIVE_FIELD(padding, uint64_t, PADDING_OFFSET, LENGTH_AND_FLAGS_OFFSET)
 #endif
