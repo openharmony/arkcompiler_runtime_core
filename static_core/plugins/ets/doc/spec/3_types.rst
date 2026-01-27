@@ -1407,6 +1407,9 @@ type is a class type. The appropriate class is a part of the
 :ref:`Standard Library`, and type ``string`` is a subtype of ``Object``, and
 can be used at any place where a class name is expected.
 
+Moreover, type ``string`` is iterable (see :ref:`Iterable Types`),
+and can be used at any place where an iterable type is expected. 
+
 .. code-block:: typescript
    :linenos:
 
@@ -1656,7 +1659,9 @@ requirement.
 Any array type is a class type that has an appropritate class in the
 :ref:`Standard Library`. It means that array types are subtypes of
 ``Object``, and that they can be used at any place where a class
-name is expected.
+name is expected. 
+Moreover, array types are iterable (see :ref:`Iterable Types`), and can be
+used at any place where an iterable type is expected. 
 
 
 .. note::

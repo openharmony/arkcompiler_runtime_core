@@ -2128,10 +2128,10 @@ Spread Expression
 
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing (see :ref:`Rest Parameter`).
-The *expression* must be of array type (see :ref:`Array Types`), tuple type
-(see :ref:`Tuple Types`), or any type with an iterator defined
-(see :ref:`Iterable Types`). Otherwise, a
-:index:`compile-time error` occurs.
+The *expression* must be of an iterable type (see :ref:`Iterable Types`)
+or a tuple type (see :ref:`Tuple Types`). 
+
+Otherwise, a :index:`compile-time error` occurs.
 
 The syntax of *spread expression* is presented below:
 
@@ -2141,15 +2141,15 @@ The syntax of *spread expression* is presented below:
         '...' expression
         ;
 
-A *spread expression* for arrays, tuples, or iterable types is evaluated:
+A *spread expression* is evaluated:
 
--  By the compiler at compile time if *expression* is constant (see
+-  At compile time by the compiler if *expression* is constant (see
    :ref:`Constant Expressions`);
--  At runtime otherwise.
+-  Otherwise, at runtime.
 
-An array, tuple, or iterable object referred by the *expression* is broken by
-the evaluation into a sequence of values. This sequence is used where a
-*spread expression* is used. It can be an assignment, a call of a function,
+Any iterable or tuple object referred by the *expression* is broken down
+into a sequence of values by the evaluation. This sequence is used where
+a *spread expression* is used. It can be an assignment, a call of a function,
 method, or constructor. A sequence of types of these values is the type of the
 *spread expression*.
 

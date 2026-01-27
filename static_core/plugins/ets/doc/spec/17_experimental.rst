@@ -1028,6 +1028,9 @@ type which implements ``Iterator``, and thus allows traversing an object of the
 A union of iterable types is also *iterable*. It means that instances of such
 types can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
+Array (see :ref:`Array Types`) and string (see :ref:`Type string`) types are
+iterable.
+
 An *iterable* class ``C`` is represented in the example below:
 
 .. index::
