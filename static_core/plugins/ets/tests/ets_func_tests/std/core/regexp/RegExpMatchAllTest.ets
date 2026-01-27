@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,14 @@ function matchTest(): void {
     let matchres3 = str2.match(regexp3)
     arktest.assertEQ(matchres3?.index, 0)
     arktest.assertEQ(matchres3?.input, 'ttt')
+
+    const str4: string = '𐐀a'
+    const regexp4 = new RegExp('(?=a)', 'gu')
+    arktest.assertEQ(Array.from(str4.matchAll(regexp4)).length, 1)
+
+    const str5: string = '😄'
+    const regexp5 = new RegExp('(b)?', 'gu')
+    arktest.assertEQ(Array.from(str5.matchAll(regexp5))[0][1], undefined)
 }
 
 function checkTestResult(actual: boolean, expected: boolean) : int {
