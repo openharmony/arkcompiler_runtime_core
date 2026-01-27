@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -764,7 +764,6 @@ size_t BaseString::CopyDataToUtf16(ReadBarrier &&readBarrier, uint16_t *buf, uin
     return UtfUtils::ConvertRegionUtf8ToUtf16(data, buf, length, bufLength);
 }
 
-#ifdef PANDA_32_BIT_MANAGED_POINTER
 // To change the hash algorithm of BaseString, please modify BaseString::CalculateConcatHashCode
 // and BaseStringHashHelper::ComputeHashForDataPlatform simultaneously!!
 template <typename T>
@@ -776,7 +775,6 @@ uint32_t BaseString::ComputeHashForData(const T *data, size_t size, uint32_t has
     }
     return hash;
 }
-#endif
 
 inline bool BaseString::IsASCIICharacter(uint16_t data)
 {

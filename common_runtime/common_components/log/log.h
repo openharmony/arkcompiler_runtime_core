@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,10 @@
 #include <cstdint>
 #include <string>
 
+#include <securec.h>
+
 #include "common_components/log/log_base.h"
 #include "common_components/base/time_utils.h"
-#include "securec.h"
 
 #ifdef ENABLE_HILOG
 #if defined(__clang__)
@@ -37,18 +38,17 @@
 #define LOG_TAG "ArkCompiler"
 
 #if defined(ENABLE_HITRACE)
-    #include "hitrace_meter.h"
-
-    #define OHOS_HITRACE(level, name, customArgs) \
-        HITRACE_METER_NAME_EX(level, HITRACE_TAG_ARK, name, customArgs)
-    #define OHOS_HITRACE_START(level, name, customArgs)  StartTraceEx(level, HITRACE_TAG_ARK, name, customArgs)
-    #define OHOS_HITRACE_FINISH(level)                   FinishTraceEx(level, HITRACE_TAG_ARK)
-    #define OHOS_HITRACE_COUNT(level, name, count)       CountTraceEx(level, HITRACE_TAG_ARK, name, count)
+#include "hitrace_meter.h"
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define OHOS_HITRACE(level, name, customArgs) HITRACE_METER_NAME_EX(level, HITRACE_TAG_ARK, name, customArgs)
+#define OHOS_HITRACE_START(level, name, customArgs) StartTraceEx(level, HITRACE_TAG_ARK, name, customArgs)
+#define OHOS_HITRACE_FINISH(level) FinishTraceEx(level, HITRACE_TAG_ARK)
+#define OHOS_HITRACE_COUNT(level, name, count) CountTraceEx(level, HITRACE_TAG_ARK, name, count)
 #else
-    #define OHOS_HITRACE(level, name, customArgs)
-    #define OHOS_HITRACE_START(level, name, customArgs)
-    #define OHOS_HITRACE_FINISH(level)
-    #define OHOS_HITRACE_COUNT(level, name, count)
+#define OHOS_HITRACE(level, name, customArgs)
+#define OHOS_HITRACE_START(level, name, customArgs)
+#define OHOS_HITRACE_FINISH(level)
+#define OHOS_HITRACE_COUNT(level, name, count)
 #endif
 
 namespace common {
@@ -57,47 +57,47 @@ public:
     static void Initialize(const LogOptions &options);
     static inline bool LogIsLoggable(Level level, Component component)
     {
-        switch (component) //LCOV_EXCL_BR_LINE
+        switch (component)  // LCOV_EXCL_BR_LINE
         {
-            case Component::SA: //LCOV_EXCL_BR_LINE
+            case Component::SA:  // LCOV_EXCL_BR_LINE
                 return ((components_ & static_cast<ComponentMark>(component)) != 0ULL);
-            default: //LCOV_EXCL_BR_LINE
+            default:  // LCOV_EXCL_BR_LINE
                 return (level >= level_) && ((components_ & static_cast<ComponentMark>(component)) != 0ULL);
         }
     }
     static inline std::string GetComponentStr(Component component)
     {
-        switch (component) //LCOV_EXCL_BR_LINE
+        switch (component)  // LCOV_EXCL_BR_LINE
         {
-            case Component::NO_TAG: //LCOV_EXCL_BR_LINE
+            case Component::NO_TAG:  // LCOV_EXCL_BR_LINE
                 return "";
-            case Component::GC: //LCOV_EXCL_BR_LINE
+            case Component::GC:  // LCOV_EXCL_BR_LINE
                 return "[gc] ";
-            case Component::ECMASCRIPT: //LCOV_EXCL_BR_LINE
+            case Component::ECMASCRIPT:  // LCOV_EXCL_BR_LINE
                 return "[ecmascript] ";
-            case Component::PGO: //LCOV_EXCL_BR_LINE
+            case Component::PGO:  // LCOV_EXCL_BR_LINE
                 return "[pgo] ";
-            case Component::INTERPRETER: //LCOV_EXCL_BR_LINE
+            case Component::INTERPRETER:  // LCOV_EXCL_BR_LINE
                 return "[interpreter] ";
-            case Component::DEBUGGER: //LCOV_EXCL_BR_LINE
+            case Component::DEBUGGER:  // LCOV_EXCL_BR_LINE
                 return "[debugger] ";
-            case Component::COMPILER: //LCOV_EXCL_BR_LINE
+            case Component::COMPILER:  // LCOV_EXCL_BR_LINE
                 return "[compiler] ";
-            case Component::BUILTINS: //LCOV_EXCL_BR_LINE
+            case Component::BUILTINS:  // LCOV_EXCL_BR_LINE
                 return "[builtins] ";
-            case Component::TRACE: //LCOV_EXCL_BR_LINE
+            case Component::TRACE:  // LCOV_EXCL_BR_LINE
                 return "[trace] ";
-            case Component::JIT: //LCOV_EXCL_BR_LINE
+            case Component::JIT:  // LCOV_EXCL_BR_LINE
                 return "[jit] ";
-            case Component::BASELINEJIT: //LCOV_EXCL_BR_LINE
+            case Component::BASELINEJIT:  // LCOV_EXCL_BR_LINE
                 return "[baselinejit] ";
-            case Component::SA: //LCOV_EXCL_BR_LINE
+            case Component::SA:  // LCOV_EXCL_BR_LINE
                 return "[sa] ";
-            case Component::COMMON: //LCOV_EXCL_BR_LINE
+            case Component::COMMON:  // LCOV_EXCL_BR_LINE
                 return "[common] ";
-            case Component::ALL: //LCOV_EXCL_BR_LINE
+            case Component::ALL:  // LCOV_EXCL_BR_LINE
                 return "[default] ";
-            default: //LCOV_EXCL_BR_LINE
+            default:  // LCOV_EXCL_BR_LINE
                 return "[unknown] ";
         }
     }
@@ -105,14 +105,12 @@ public:
     static Level ConvertFromRuntime(LOG_LEVEL level);
 
 private:
-    static int32_t PrintLogger(int32_t, int32_t level, const char *, const char *, const char *message);
-
     static Level level_;
     static ComponentMark components_;
 };
 
 #if defined(ENABLE_HILOG)
-template<LogLevel level, Component component>
+template <LogLevel level, Component component>
 class HiLog {
 public:
     HiLog()
@@ -122,46 +120,25 @@ public:
     }
     ~HiLog()
     {
-        if constexpr (level == LOG_LEVEL_MIN) { //LCOV_EXCL_BR_LINE
+        if constexpr (level == LOG_LEVEL_MIN) {  // LCOV_EXCL_BR_LINE
             // print nothing
-        } else if constexpr (level == LOG_DEBUG) { //LCOV_EXCL_BR_LINE
+        } else if constexpr (level == LOG_DEBUG) {  // LCOV_EXCL_BR_LINE
             HILOG_DEBUG(LOG_CORE, "%{public}s", stream_.str().c_str());
-        } else if constexpr (level == LOG_INFO) { //LCOV_EXCL_BR_LINE
+        } else if constexpr (level == LOG_INFO) {  // LCOV_EXCL_BR_LINE
             HILOG_INFO(LOG_CORE, "%{public}s", stream_.str().c_str());
-        } else if constexpr (level == LOG_WARN) { //LCOV_EXCL_BR_LINE
+        } else if constexpr (level == LOG_WARN) {  // LCOV_EXCL_BR_LINE
             HILOG_WARN(LOG_CORE, "%{public}s", stream_.str().c_str());
-        } else if constexpr (level == LOG_ERROR) { //LCOV_EXCL_BR_LINE
+        } else if constexpr (level == LOG_ERROR) {  // LCOV_EXCL_BR_LINE
             HILOG_ERROR(LOG_CORE, "%{public}s", stream_.str().c_str());
-        } else { //LCOV_EXCL_BR_LINE
+        } else {  // LCOV_EXCL_BR_LINE
             HILOG_FATAL(LOG_CORE, "%{public}s", stream_.str().c_str());
-            if (level == LOG_FATAL) { //LCOV_EXCL_BR_LINE
+            if (level == LOG_FATAL) {  // LCOV_EXCL_BR_LINE
                 std::abort();
             }
         }
     }
-    template<class type>
-    std::ostream &operator <<(type input)
-    {
-        stream_ << input;
-        return stream_;
-    }
-
-private:
-    std::ostringstream stream_;
-};
-#elif defined(ENABLE_ANLOG)  // ENABLE_ANLOG
-template<Level level>
-class PUBLIC_API AndroidLog {
-public:
-    AndroidLog()
-    {
-        std::string str = "[default] ";
-        stream_ << str;
-    }
-    ~AndroidLog();
-
-    template<class type>
-    std::ostream &operator <<(type input)
+    template <class type>
+    std::ostream &operator<<(type input)
     {
         stream_ << input;
         return stream_;
@@ -171,7 +148,7 @@ private:
     std::ostringstream stream_;
 };
 #else
-template<Level level, Component component>
+template <Level level, Component component>
 class StdLog {
 public:
     StdLog()
@@ -181,19 +158,19 @@ public:
     }
     ~StdLog()
     {
-        if constexpr (level >= Level::ERROR) { //LCOV_EXCL_BR_LINE
+        if constexpr (level >= Level::ERROR) {  // LCOV_EXCL_BR_LINE
             std::cerr << stream_.str().c_str() << std::endl;
-        } else { //LCOV_EXCL_BR_LINE
+        } else {  // LCOV_EXCL_BR_LINE
             std::cout << stream_.str().c_str() << std::endl;
         }
 
-        if constexpr (level == Level::FATAL) { //LCOV_EXCL_BR_LINE
+        if constexpr (level == Level::FATAL) {  // LCOV_EXCL_BR_LINE
             std::abort();
         }
     }
 
-    template<class type>
-    std::ostream &operator <<(type input)
+    template <class type>
+    std::ostream &operator<<(type input)
     {
         stream_ << input;
         return stream_;
@@ -205,18 +182,20 @@ private:
 #endif
 
 #if defined(ENABLE_HILOG)
-#define ARK_LOG(level, component) common::Log::LogIsLoggable(Level::level, component) && \
-                                  common::HiLog<LOG_##level, (component)>()
+#define ARK_LOG(level, component) \
+    common::Log::LogIsLoggable(Level::level, component) && common::HiLog<LOG_##level, (component)>()
 #elif defined(ENABLE_ANLOG)
 #define ARK_LOG(level, component) common::AndroidLog<(Level::level)>()
 #else
 #if defined(OHOS_UNIT_TEST)
-#define ARK_LOG(level, component) ((Level::level >= Level::INFO) ||                      \
-                                  common::Log::LogIsLoggable(Level::level, component)) && \
-                                  common::StdLog<(Level::level), (component)>()
+#define ARK_LOG(level, component)                                                             \
+    ((Level::level >= Level::INFO) || common::Log::LogIsLoggable(Level::level, component)) && \
+        common::StdLog<(Level::level), (component)>()
 #else
-#define ARK_LOG(level, component) common::Log::LogIsLoggable(Level::level, component) && \
-                                  common::StdLog<(Level::level), (component)>()
+// CC-OFFNXT(G.PRE.02) code readability, standard log macro approach
+#define ARK_LOG(level, component)                                                  \
+    /* CC-OFFNXT(G.PRE.02) level is enum and can not be enclosed to parentheses */ \
+    common::Log::LogIsLoggable(Level::level, component) && common::StdLog<(Level::level), (component)>()
 #endif
 #endif
 
@@ -247,25 +226,22 @@ private:
 #define ASSERT_LOGF(cond, msg)
 #endif  // NDEBUG
 
-#define CHECK_CALL(call, args, what)        \
-    do {                                    \
-        int rc = call args;                 \
-        if (UNLIKELY_CC(rc != 0)) {         \
-            errno = rc;                     \
-            /* LCOV_EXCL_BR_LINE */         \
-            LOG_COMMON(FATAL) << #call <<   \
-                " failed for " <<           \
-                (what) <<" reason " <<      \
-                 strerror(errno) <<         \
-                 " return " << errno;       \
-        }                                   \
-    } while (false) //LCOV_EXCL_BR_LINE
+#define CHECK_CALL(call, args, what)                                                                              \
+    do {                                                                                                          \
+        int rc = call args;                                                                                       \
+        if (UNLIKELY_CC(rc != 0)) {                                                                               \
+            errno = rc;                                                                                           \
+            /* LCOV_EXCL_BR_LINE */                                                                               \
+            LOG_COMMON(FATAL) << #call << " failed for " << (what) << " reason " << strerror(errno) << " return " \
+                              << errno;                                                                           \
+        }                                                                                                         \
+    } while (false)  // LCOV_EXCL_BR_LINE
 
 std::string Pretty(uint64_t number) noexcept;
-std::string PrettyOrderInfo(uint64_t number, const char* unit);
-std::string PrettyOrderMathNano(uint64_t number, const char* unit);
-std::string FormatLogMessage(const char* format, va_list agrs) noexcept;
-std::string FormatLog(const char* format, ...) noexcept;
+std::string PrettyOrderInfo(uint64_t number, const char *unit);
+std::string PrettyOrderMathNano(uint64_t number, const char *unit);
+std::string FormatLogMessage(const char *format, va_list agrs) noexcept;
+std::string FormatLog(const char *format, ...) noexcept;
 class Timer {
 public:
     explicit Timer(const std::string pName) : name_(pName)

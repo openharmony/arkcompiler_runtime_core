@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "common_components/taskpool/runner.h"
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/base/os/thread.h"
 
 namespace common {
 class PUBLIC_API Taskpool {
@@ -39,8 +40,8 @@ public:
     NO_MOVE_SEMANTIC_CC(Taskpool);
 
     void Initialize(int threadNum = DEFAULT_TASKPOOL_THREAD_NUM,
-        std::function<void(native_handle_type)> prologueHook = nullptr,
-        const std::function<void(native_handle_type)> epilogueHook = nullptr);
+                    std::function<void(os::thread::NativeHandleType)> prologueHook = nullptr,
+                    const std::function<void(os::thread::NativeHandleType)> epilogueHook = nullptr);
     void Destroy(int32_t id);
 
     void PostTask(std::unique_ptr<Task> task) const
@@ -77,7 +78,7 @@ public:
         runner_->SetQosPriority(mode);
     }
 
-    void ForEachTask(const std::function<void(Task*)> &f);
+    void ForEachTask(const std::function<void(Task *)> &f);
 
 private:
     virtual uint32_t TheMostSuitableThreadNum(uint32_t threadNum) const;

@@ -360,7 +360,11 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
     "runtime/entrypoints/arch/arm32/ets_proxy_entry_point_arm32.S",
   ]
 }
+
 # TODO(nsizov): Support 32-bit ARM
 
 # Tests list
-unittests_list = [ "tests/runtime/types:ets_internal_objects_tests" ]
+unittests_list = [
+  "tests/runtime/types:ets_internal_objects_mock_tests",
+  "tests/runtime/types:ets_internal_objects_tests",
+]

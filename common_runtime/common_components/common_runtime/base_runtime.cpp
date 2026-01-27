@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,19 +18,13 @@
 #include "common_components/common_runtime/base_runtime_param.h"
 #include "common_components/common_runtime/hooks.h"
 #include "common_components/common/page_pool.h"
-#include "common_components/heap/allocator/region_desc.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_components/heap/heap.h"
 #include "common_components/heap/heap_manager.h"
 #include "common_components/mutator/mutator_manager.h"
 #include "common_interfaces/thread/thread_state_transition.h"
 
-namespace panda::ecmascript {
-class TaggedObject;
-}
-
 namespace common {
-using panda::ecmascript::TaggedObject;
 
 std::mutex BaseRuntime::vmCreationLock_;
 BaseRuntime *BaseRuntime::baseRuntimeInstance_ = nullptr;
@@ -54,26 +48,26 @@ void BaseRuntime::DestroyInstance()
     baseRuntimeInstance_ = nullptr;
 }
 
-template<typename T>
-inline T* NewAndInit()
+template <typename T>
+inline T *NewAndInit()
 {
-    T* temp = new (std::nothrow) T();
+    T *temp = new (std::nothrow) T();
     LOGF_CHECK(temp != nullptr) << "NewAndInit failed";
     temp->Init();
     return temp;
 }
 
-template<typename T, typename A>
-inline T* NewAndInit(A arg)
+template <typename T, typename A>
+inline T *NewAndInit(A arg)
 {
-    T* temp = new (std::nothrow) T();
+    T *temp = new (std::nothrow) T();
     LOGF_CHECK(temp != nullptr) << "NewAndInit failed";
     temp->Init(arg);
     return temp;
 }
 
-template<typename T>
-inline void CheckAndFini(T*& module)
+template <typename T>
+inline void CheckAndFini(T *&module)
 {
     if (module != nullptr) {
         module->Fini();
@@ -115,23 +109,24 @@ void BaseRuntime::InitFromDynamic(const RuntimeParam &param)
     param_ = param;
     size_t pagePoolSize = param_.heapParam.heapSize;
 #if defined(PANDA_TARGET_32)
-    pagePoolSize = pagePoolSize / 128; // 128 means divided.
+    pagePoolSize = pagePoolSize / 128;  // 128 means divided.
 #endif
     PagePool::Instance().Init(pagePoolSize * KB / COMMON_PAGE_SIZE);
     mutatorManager_ = NewAndInit<MutatorManager>();
     heapManager_ = NewAndInit<HeapManager>(param_);
     VLOG(INFO, "Arkcommon runtime started.");
     // Record runtime parameter to report. heap growth value needs to plus 1.
-    VLOG(DEBUG, "Runtime parameter:\n\tHeap size: %zu(KB)\n\tRegion size: %zu(KB)\n\tExemption threshold: %.2f\n\t"
-        "Heap utilization: %.2f\n\tHeap growth: %.2f\n\tAllocation rate: %.2f(MB/s)\n\tAlloction wait time: %zuns\n\t"
-        "GC Threshold: %zu(KB)\n\tGarbage threshold: %.2f\n\tGC interval: %zums\n\tBackup GC interval: %zus\n\t"
-        "Log level: %d\n\tThread stack size: %zu(KB)\n\tArkcommon stack size: %zu(KB)\n\t"
-        "Processor number: %d", pagePoolSize, param_.heapParam.regionSize,
-        param_.heapParam.exemptionThreshold, param_.heapParam.heapUtilization, 1 + param_.heapParam.heapGrowth,
-        param_.heapParam.allocationRate, param_.heapParam.allocationWaitTime,
-        param_.gcParam.gcThreshold / KB, param_.gcParam.garbageThreshold,
-        param_.gcParam.gcInterval / MILLI_SECOND_TO_NANO_SECOND,
-        param_.gcParam.backupGCInterval / SECOND_TO_NANO_SECOND);
+    VLOG(DEBUG,
+         "Runtime parameter:\n\tHeap size: %zu(KB)\n\tRegion size: %zu(KB)\n\tExemption threshold: %.2f\n\t"
+         "Heap utilization: %.2f\n\tHeap growth: %.2f\n\tAllocation rate: %.2f(MB/s)\n\tAlloction wait time: %zuns\n\t"
+         "GC Threshold: %zu(KB)\n\tGarbage threshold: %.2f\n\tGC interval: %zums\n\tBackup GC interval: %zus\n\t"
+         "Log level: %d\n\tThread stack size: %zu(KB)\n\tArkcommon stack size: %zu(KB)\n\t"
+         "Processor number: %d",
+         pagePoolSize, param_.heapParam.regionSize, param_.heapParam.exemptionThreshold,
+         param_.heapParam.heapUtilization, 1 + param_.heapParam.heapGrowth, param_.heapParam.allocationRate,
+         param_.heapParam.allocationWaitTime, param_.gcParam.gcThreshold / KB, param_.gcParam.garbageThreshold,
+         param_.gcParam.gcInterval / MILLI_SECOND_TO_NANO_SECOND,
+         param_.gcParam.backupGCInterval / SECOND_TO_NANO_SECOND);
 
     initialized_ = true;
 }
@@ -193,47 +188,55 @@ void BaseRuntime::WriteRoot(void *obj)
     Heap::GetBarrier().WriteRoot(reinterpret_cast<BaseObject *>(obj));
 }
 
-void BaseRuntime::WriteBarrier(void* obj, void* field, void* ref, Mutator *mutator)
+void BaseRuntime::WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator)
 {
     DCHECK_CC(field != nullptr);
-    Heap::GetBarrier().WriteBarrier(mutator, reinterpret_cast<BaseObject*>(obj),
-        *reinterpret_cast<RefField<>*>(field), reinterpret_cast<BaseObject*>(ref));
+    Heap::GetBarrier().WriteBarrier(mutator, reinterpret_cast<BaseObject *>(obj),
+                                    *reinterpret_cast<RefField<> *>(field), reinterpret_cast<BaseObject *>(ref));
 }
 
-void* BaseRuntime::ReadBarrier(void* obj, void* field)
+void *BaseRuntime::ReadBarrier(void *obj, void *field)
 {
-    return reinterpret_cast<void*>(Heap::GetBarrier().ReadRefField(reinterpret_cast<BaseObject*>(obj),
-        *reinterpret_cast<RefField<false>*>(field)));
+    return reinterpret_cast<void *>(Heap::GetBarrier().ReadRefField(reinterpret_cast<BaseObject *>(obj),
+                                                                    *reinterpret_cast<RefField<false> *>(field)));
 }
 
-void* BaseRuntime::ReadBarrier(void* field)
+void *BaseRuntime::ReadBarrier(void *field)
 {
-    return reinterpret_cast<void*>(Heap::GetBarrier().ReadStaticRef(*reinterpret_cast<RefField<false>*>(field)));
+    return reinterpret_cast<void *>(Heap::GetBarrier().ReadStaticRef(*reinterpret_cast<RefField<false> *>(field)));
 }
 
-void* BaseRuntime::AtomicReadBarrier(void* obj, void* field, std::memory_order order)
+void *BaseRuntime::AtomicReadBarrier(void *obj, void *field, std::memory_order order)
 {
-    return reinterpret_cast<void*>(Heap::GetBarrier().AtomicReadRefField(reinterpret_cast<BaseObject*>(obj),
-        *reinterpret_cast<RefField<true>*>(field), order));
+    return reinterpret_cast<void *>(Heap::GetBarrier().AtomicReadRefField(
+        reinterpret_cast<BaseObject *>(obj), *reinterpret_cast<RefField<true> *>(field), order));
 }
 
 void BaseRuntime::RequestGC(GCReason reason, bool async, GCType gcType)
 {
-    if (reason < GC_REASON_BEGIN || reason > GC_REASON_END ||
-        gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
-        VLOG(ERROR, "Invalid gc reason or gc type, gc reason: %s, gc type: %s",
-            GCReasonToString(reason), GCTypeToString(gcType));
+    if (reason < GC_REASON_BEGIN || reason > GC_REASON_END || gcType < GC_TYPE_BEGIN || gcType > GC_TYPE_END) {
+        VLOG(ERROR, "Invalid gc reason or gc type, gc reason: %s, gc type: %s", GCReasonToString(reason),
+             GCTypeToString(gcType));
         return;
     }
     HeapManager::RequestGC(reason, async, gcType);
 }
 
-void BaseRuntime::WaitForGCFinish() { Heap::GetHeap().WaitForGCFinish(); }
+void BaseRuntime::WaitForGCFinish()
+{
+    Heap::GetHeap().WaitForGCFinish();
+}
 
-void BaseRuntime::EnterGCCriticalSection() { return Heap::GetHeap().MarkGCStart(); }
-void BaseRuntime::ExitGCCriticalSection() { return Heap::GetHeap().MarkGCFinish(); }
+void BaseRuntime::EnterGCCriticalSection()
+{
+    return Heap::GetHeap().MarkGCStart();
+}
+void BaseRuntime::ExitGCCriticalSection()
+{
+    return Heap::GetHeap().MarkGCFinish();
+}
 
-bool BaseRuntime::ForEachObj(HeapVisitor& visitor, bool safe)
+bool BaseRuntime::ForEachObj(HeapVisitor &visitor, bool safe)
 {
     return Heap::GetHeap().ForEachObject(visitor, safe);
 }

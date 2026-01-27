@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,23 +14,20 @@
  */
 
 #include "common_components/taskpool/runner.h"
-
-#include "libpandabase/os/thread.h"
+#include "common_interfaces/base/os/thread.h"
 
 #ifdef ENABLE_QOS
 #include "qos.h"
 #endif
 
 namespace common {
-Runner::Runner(uint32_t threadNum, const std::function<void(native_handle_type)> prologueHook,
-    const std::function<void(native_handle_type)> epilogueHook)
-    : totalThreadNum_(threadNum),
-    prologueHook_(prologueHook),
-    epilogueHook_(epilogueHook)
+Runner::Runner(uint32_t threadNum, const std::function<void(os::thread::NativeHandleType)> prologueHook,
+               const std::function<void(os::thread::NativeHandleType)> epilogueHook)
+    : totalThreadNum_(threadNum), prologueHook_(prologueHook), epilogueHook_(epilogueHook)
 {
     for (uint32_t i = 0; i < threadNum; i++) {
         // main thread is 0;
-        std::unique_ptr<std::thread> thread = std::make_unique<std::thread>([this, i] {this->Run(i + 1);});
+        std::unique_ptr<std::thread> thread = std::make_unique<std::thread>([this, i] { this->Run(i + 1); });
         threadPool_.emplace_back(std::move(thread));
     }
 
@@ -69,7 +66,7 @@ void Runner::TerminateThread()
     threadPool_.clear();
 }
 
-void Runner::ForEachTask(const std::function<void(Task*)> &f)
+void Runner::ForEachTask(const std::function<void(Task *)> &f)
 {
     taskQueue_.ForEachTask(f);
     std::lock_guard<std::mutex> guard(mtx_);
@@ -113,7 +110,7 @@ void Runner::SetQosPriority([[maybe_unused]] PriorityMode mode)
 void Runner::RecordThreadId()
 {
     std::lock_guard<std::mutex> guard(mtx_);
-    gcThreadId_.emplace_back(panda::os::thread::GetCurrentThreadId());
+    gcThreadId_.emplace_back(os::thread::GetCurrentThreadId());
 }
 
 void Runner::SetRunTask(uint32_t threadId, Task *task)
@@ -124,8 +121,8 @@ void Runner::SetRunTask(uint32_t threadId, Task *task)
 
 void Runner::Run(uint32_t threadId)
 {
-    native_handle_type thread = panda::os::thread::GetNativeHandle();
-    panda::os::thread::SetThreadName(thread, "OS_GC_Thread");
+    auto thread = os::thread::GetNativeHandle();
+    os::thread::SetThreadName(thread, "OS_GC_Thread");
     PrologueHook(thread);
     RecordThreadId();
     while (std::unique_ptr<Task> task = taskQueue_.PopTask()) {
