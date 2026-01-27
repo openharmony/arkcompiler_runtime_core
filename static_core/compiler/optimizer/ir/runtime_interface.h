@@ -562,11 +562,6 @@ public:
         UNREACHABLE();
     }
 
-    virtual uint32_t GetClassOffsetObject([[maybe_unused]] MethodPtr method) const
-    {
-        UNREACHABLE();
-    }
-
     virtual bool IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
     {
         return false;
@@ -623,7 +618,7 @@ public:
         return nullptr;
     }
 
-    virtual MethodPtr GetGetterStringBuilderStringLength([[maybe_unused]] ClassPtr klass) const
+    virtual MethodPtr GetGetterStringBuilderStringLength() const
     {
         return nullptr;
     }
