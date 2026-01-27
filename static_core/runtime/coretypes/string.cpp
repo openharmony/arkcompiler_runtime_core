@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -28,6 +29,7 @@
 #include "libarkbase/utils/hash.h"
 #include "libarkbase/utils/span.h"
 #include "runtime/arch/memory_helpers.h"
+#include "runtime/coretypes/algorithm/knuth_morris_pratt.h"
 #include "runtime/include/coretypes/array.h"
 #include "runtime/include/runtime.h"
 #include "runtime/handle_base-inl.h"
@@ -529,21 +531,135 @@ String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHa
     return String::Cast(treeStr);
 }
 
-int32_t String::IndexOf(String *rhs, const LanguageContext &ctx, int32_t pos)
+namespace {
+// The prefix-function is stored in the state and takes O(|pattern|) space. For patterns below this length, the shift
+// of KMP is too short to compensate for the time required to allocate/deallocate the prefix-function.
+//
+// Performance measurement on the device demonstrates that `KMP_MIN_PATTERN_LENGTH` it the correct threshold.
+constexpr int32_t KMP_MIN_PATTERN_LENGTH = 10;
+
+}  // namespace
+
+template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
+int32_t GetIndexOf(common::Span<const T1> lhs, common::Span<const T2> rhs, int pos, int max)
 {
-    auto thread = ManagedThread::GetCurrent();
+    ASSERT(pos >= 0 && max >= pos);
+    return rhs.size() < KMP_MIN_PATTERN_LENGTH || max == pos
+               ? common::BaseString::IndexOf(lhs, rhs, pos, max)
+               : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.IndexOf(Span {lhs.begin(), lhs.end()}, pos);
+}
+
+template <typename Str>
+int32_t FastIndexOf(Str &lhs, Str &rhs, int pos)
+{
+    auto lhsCount = lhs.GetLength();
+    auto rhsCount = rhs.GetLength();
+    ASSERT(lhsCount >= rhsCount);
+
+    auto max = static_cast<int32_t>(lhsCount - rhsCount);
+    if (rhs.IsUtf8() && lhs.IsUtf8()) {
+        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        return GetIndexOf(lhsSp, rhsSp, pos, max);
+    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
+        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        return GetIndexOf(lhsSp, rhsSp, pos, max);
+    } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
+        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        return GetIndexOf(lhsSp, rhsSp, pos, max);
+    } else {  // NOLINT(readability-else-after-return)
+        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        return GetIndexOf(lhsSp, rhsSp, pos, max);
+    }
+}
+
+template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
+int32_t GetLastIndexOf(common::Span<const T1> lhs, common::Span<const T2> rhs, int pos)
+{
+    ASSERT(pos >= 0 && lhs.size() >= pos + rhs.size() && (lhs.size() != rhs.size() || pos == 0));
+    return rhs.size() < KMP_MIN_PATTERN_LENGTH || pos == 0
+               ? common::BaseString::LastIndexOf(lhs, rhs, pos)
+               : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.LastIndexOf(Span {lhs.begin(), lhs.end()}, pos);
+}
+
+template <typename Str>
+int32_t FastLastIndexOf(Str &lhs, Str &rhs, int pos)
+{
+    auto lhsCount = lhs.GetLength();
+    auto rhsCount = rhs.GetLength();
+    ASSERT(lhsCount >= rhsCount);
+
+    if (rhs.IsUtf8() && lhs.IsUtf8()) {
+        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        return GetLastIndexOf(lhsSp, rhsSp, pos);
+    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
+        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        return GetLastIndexOf(lhsSp, rhsSp, pos);
+    } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
+        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        return GetLastIndexOf(lhsSp, rhsSp, pos);
+    } else {  // NOLINT(readability-else-after-return)
+        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        return GetLastIndexOf(lhsSp, rhsSp, pos);
+    }
+}
+
+int32_t String::IndexOf(String *pattern, const LanguageContext &ctx, int32_t pos)
+{
+    auto subjCount = static_cast<int32_t>(this->GetLength());
+    auto patternCount = static_cast<int32_t>(pattern->GetLength());
+
+    pos = std::max(pos, 0);
+    if (patternCount == 0) {
+        return std::min(subjCount, pos);
+    }
+
+    int32_t max = subjCount - patternCount;
+    if (max < pos) {
+        return -1;
+    }
+
+    if (this->IsLineString() && pattern->IsLineString()) {
+        return FastIndexOf(*this, *pattern, pos);
+    }
+
+    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> receiver(thread, this);
-    VMHandle<coretypes::String> search(thread, rhs);
+    VMHandle<coretypes::String> search(thread, pattern);
     return String::IndexOf(receiver, search, ctx, pos);
 }
 
-int32_t String::LastIndexOf(String *rhs, const LanguageContext &ctx, int32_t pos)
+int32_t String::LastIndexOf(String *pattern, const LanguageContext &ctx, int32_t pos)
 {
-    auto thread = ManagedThread::GetCurrent();
+    auto subjCount = static_cast<int32_t>(this->GetLength());
+    auto patternCount = static_cast<int32_t>(pattern->GetLength());
+
+    int32_t max = subjCount - patternCount;
+    pos = std::min(pos, max);
+    if (pos < 0) {
+        return -1;
+    }
+
+    if (patternCount == 0) {
+        return pos;
+    }
+
+    if (this->IsLineString() && pattern->IsLineString()) {
+        return FastLastIndexOf(*this, *pattern, pos);
+    }
+
+    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> receiver(thread, this);
-    VMHandle<coretypes::String> search(thread, rhs);
+    VMHandle<coretypes::String> search(thread, pattern);
     return String::LastIndexOf(receiver, search, ctx, pos);
 }
 
@@ -555,42 +671,15 @@ int32_t String::IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, co
     if (lhstring == nullptr || rhstring == nullptr) {
         return -1;
     }
-    int32_t lhsCount = static_cast<int32_t>(receiver.GetPtr()->GetLength());  // NOLINT(modernize-use-auto)
-    int32_t rhsCount = static_cast<int32_t>(search.GetPtr()->GetLength());    // NOLINT(modernize-use-auto)
 
-    if (pos < 0) {
-        pos = 0;
-    }
-
-    if (rhsCount == 0) {
-        return std::min(lhsCount, pos);
-    }
-
-    int32_t max = lhsCount - rhsCount;
-    auto thread = ManagedThread::GetCurrent();
+    auto *thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     FlatStringInfo lhs = FlatStringInfo::FlattenAllString(receiver, ctx);
     VMHandle<String> string(thread, lhs.GetString());
     FlatStringInfo rhs = FlatStringInfo::FlattenAllString(search, ctx);
     lhs.SetString(string.GetPtr());
 
-    if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return common::BaseString::IndexOf(lhsSp, rhsSp, pos, max);
-    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return common::BaseString::IndexOf(lhsSp, rhsSp, pos, max);
-    } else if (rhs.IsUtf16()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return common::BaseString::IndexOf(lhsSp, rhsSp, pos, max);
-    } else {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return common::BaseString::IndexOf(lhsSp, rhsSp, pos, max);
-    }
+    return FastIndexOf(lhs, rhs, pos);
 }
 
 /* static */
@@ -601,21 +690,6 @@ int32_t String::LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search
     if (lhstring == nullptr || rhstring == nullptr) {
         return -1;
     }
-    int32_t lhsCount = static_cast<int32_t>(receiver.GetPtr()->GetLength());  // NOLINT(modernize-use-auto)
-    int32_t rhsCount = static_cast<int32_t>(search.GetPtr()->GetLength());    // NOLINT(modernize-use-auto)
-
-    int32_t max = lhsCount - rhsCount;
-    if (pos > max) {
-        pos = max;
-    }
-
-    if (pos < 0) {
-        return -1;
-    }
-
-    if (rhsCount == 0) {
-        return pos;
-    }
 
     auto thread = ManagedThread::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
@@ -624,23 +698,7 @@ int32_t String::LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search
     FlatStringInfo rhs = FlatStringInfo::FlattenAllString(search, ctx);
     lhs.SetString(string.GetPtr());
 
-    if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return common::BaseString::LastIndexOf(lhsSp, rhsSp, pos);
-    } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return common::BaseString::LastIndexOf(lhsSp, rhsSp, pos);
-    } else if (rhs.IsUtf16()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
-        return common::BaseString::LastIndexOf(lhsSp, rhsSp, pos);
-    } else {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
-        return common::BaseString::LastIndexOf(lhsSp, rhsSp, pos);
-    }
+    return FastLastIndexOf(lhs, rhs, pos);
 }
 
 /* static */

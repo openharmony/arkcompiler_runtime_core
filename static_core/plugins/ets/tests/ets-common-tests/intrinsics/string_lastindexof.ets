@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,138 +13,242 @@
  * limitations under the License.
  */
 
-let Empty: String = '';
-let EscChars: String = '\f\n\r\t\v';
-let RusChars: String = 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя'; // 16-bit
-let EngChars: String = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';               //  8-bit
-let DupChars: String = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';               //  8-bit
-const Digits: String = '0123456789';
-const Symbols: String = '`~!@#$%^&*()_-+={}[]:;\"\'\\|/<>,.';
-const CharNotFound: int = -1;
+// Ideally we'd like to avoid call (and test) anything but String.lastIndexOf(char).
+// In particular the array of chars to avoid calling String.charAt(pos).
 
-function main(): int {
+let empty = new string('');
 
-    /**
-     * lastIndexOf(string): int => StdCoreStringlastIndexOfString
-     */
+let u8_line = new string('abcdefghijklmnopqrstuvwxyz');
+let u8_chars = new Array<char>(c'a', c'b', c'c', c'd', c'e', c'f', c'g', c'h', c'i', c'j', c'k', c'l', c'm',
+                               c'n', c'o', c'p', c'q', c'r', c's', c't', c'u', c'v', c'w', c'x', c'y', c'z');
 
-    arktest.assertEQ(Empty.lastIndexOf(''), 0);
-    arktest.assertEQ(Empty.lastIndexOf('x'), CharNotFound);
-    arktest.assertEQ(EscChars.lastIndexOf('\r\t\v'), 2);
-    arktest.assertEQ(EscChars.lastIndexOf(EscChars), 0);
-    for (let i = 0; i < EscChars.getLength(); ++i) {
-        arktest.assertEQ(EscChars.lastIndexOf(EscChars.substring(i, EscChars.length)), i);
-    }
-    for (let i = 1; i < EscChars.getLength(); ++i) {
-        arktest.assertEQ(EscChars.lastIndexOf(EscChars.substring(0, i), i + 1), 0);
-    }
-    let mixedTreeChars = EscChars.concat(EngChars);
-    for (let i = 0; i < mixedTreeChars.getLength(); ++i) {
-        arktest.assertEQ(mixedTreeChars.lastIndexOf(mixedTreeChars.substring(i, mixedTreeChars.length)), i);
-    }
-    for (let i = 1; i < mixedTreeChars.getLength(); ++i) {
-        arktest.assertEQ(mixedTreeChars.lastIndexOf(mixedTreeChars.substring(0, i), i + 1), 0);
-    }
-    let escSlicedChars = EscChars.substring(1, 18);
-    for (let i = 0; i < escSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(escSlicedChars.lastIndexOf(escSlicedChars.substring(i, escSlicedChars.length)), i);
-    }
-    for (let i = 1; i < escSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(escSlicedChars.lastIndexOf(escSlicedChars.substring(0, i), i + 1), 0);
-    }
+let u8_line2 = new string('abcdefghabcdefgh');
+let u8_chars2 = new Array<char>(c'a',c'b',c'c',c'd',c'e',c'f',c'g',c'h',
+                                c'a',c'b',c'c',c'd',c'e',c'f',c'g',c'h');
 
-    for (let i = 0; i < RusChars.getLength(); ++i) {
-        arktest.assertEQ(RusChars.lastIndexOf(RusChars.substring(i, RusChars.length)), i);
-    }
-    for (let i = 1; i < RusChars.getLength(); ++i) {
-        arktest.assertEQ(RusChars.lastIndexOf(RusChars.substring(0, i), i + 1), 0);
-    }
-    arktest.assertEQ(RusChars.lastIndexOf('Ѫ'), CharNotFound);
-    arktest.assertEQ(RusChars.lastIndexOf(RusChars), 0);
+let u8_line3 = new string('123412341234123412341234');
+let u8_chars3 = new Array<char>(c'1',c'2',c'3',c'4',c'1',c'2',c'3',c'4',
+                                c'1',c'2',c'3',c'4',c'1',c'2',c'3',c'4',
+                                c'1',c'2',c'3',c'4',c'1',c'2',c'3',c'4')
 
-    let rusChars_1 = 'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНн';
-    let rusChars_2 = 'ОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя';
-    let rusTreeChars = rusChars_1.concat(rusChars_2);
-    arktest.assertTrue(rusTreeChars === RusChars);
-    arktest.assertTrue(RusChars === rusTreeChars);
-    arktest.assertEQ(RusChars.lastIndexOf(rusChars_1), 0);
-    arktest.assertEQ(RusChars.lastIndexOf(rusChars_2), rusChars_1.length);
-    arktest.assertEQ(rusTreeChars.lastIndexOf(rusChars_1), 0);
-    arktest.assertEQ(rusTreeChars.lastIndexOf(rusChars_2), rusChars_1.length);
-    for (let i = 0; i < rusTreeChars.getLength(); ++i) {
-        arktest.assertEQ(rusTreeChars.lastIndexOf(rusTreeChars.substring(i, rusTreeChars.length)), i);
-    }
-    for (let i = 1; i < rusTreeChars.getLength(); ++i) {
-        arktest.assertEQ(rusTreeChars.lastIndexOf(rusTreeChars.substring(0, i), i + 1), 0);
-    }
-    let rusSlicedChars = rusTreeChars.substring(3, 30);
-    arktest.assertEQ(RusChars.lastIndexOf(rusSlicedChars), 3);
-    for (let i = 0; i < rusSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(rusSlicedChars.lastIndexOf(rusSlicedChars.substring(i, rusSlicedChars.length)), i);
-    }
-    for (let i = 1; i < rusSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(rusSlicedChars.lastIndexOf(rusSlicedChars.substring(0, i), i + 1), 0);
-    }
+let u8_line4 = new string('121112111211121112111211');
+let u8_chars4 = new Array<char>(c'1',c'2',c'1',c'1',c'1',c'2',c'1',c'1',
+                                c'1',c'2',c'1',c'1',c'1',c'2',c'1',c'1',
+                                c'1',c'2',c'1',c'1',c'1',c'2',c'1',c'1')
 
-    for (let i = 0; i < EngChars.getLength(); ++i) {
-        arktest.assertEQ(EngChars.lastIndexOf(EngChars.substring(i, EngChars.length)), i);
-    }
-    for (let i = 1; i < EngChars.getLength(); ++i) {
-        arktest.assertEQ(EngChars.lastIndexOf(EngChars.substring(0, i), i + 1), 0);
-    }
-    arktest.assertEQ(EngChars.lastIndexOf(c'æ'), CharNotFound);
-    arktest.assertEQ(EngChars.lastIndexOf(EngChars), 0);
+let u8_line5 = new string('123443211234432112344321');
+let u8_chars5 = new Array<char>(c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1',
+                                c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1',
+                                c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1')
 
-    let engChars_1 = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNn';
-    let engChars_2 = 'OoPpQqRrSsTtUuVvWwXxYyZz';
-    let engTreeChars = engChars_1.concat(engChars_2);
-    arktest.assertEQ(EngChars.lastIndexOf(engChars_1), 0);
-    arktest.assertEQ(EngChars.lastIndexOf(engChars_2), engChars_1.length);
-    arktest.assertEQ(engTreeChars.lastIndexOf(engChars_1), 0);
-    arktest.assertEQ(engTreeChars.lastIndexOf(engChars_2), engChars_1.length);
-    arktest.assertTrue(engTreeChars === EngChars);
-    arktest.assertTrue(EngChars === engTreeChars);
-    for (let i = 0; i < engTreeChars.getLength(); ++i) {
-        arktest.assertEQ(engTreeChars.lastIndexOf(engTreeChars.substring(i, engTreeChars.length)), i);
-    }
-    for (let i = 1; i < engTreeChars.getLength(); ++i) {
-        arktest.assertEQ(engTreeChars.lastIndexOf(engTreeChars.substring(0, i), i + 1), 0);
-    }
-    let engSlicedChars = engTreeChars.substring(3, 30);
-    for (let i = 0; i < engSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(engSlicedChars.lastIndexOf(engSlicedChars.substring(i, engSlicedChars.length)), i);
-    }
-    for (let i = 1; i < engSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(engSlicedChars.lastIndexOf(engSlicedChars.substring(0, i), i + 1), 0);
-    }
+let u8_tree: String = StringBuilder.concatStrings('123443211234', '432112344321');
+let u8_tree_chars = new Array<char>(c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1',
+                                    c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1',
+                                    c'1',c'2',c'3',c'4',c'4',c'3',c'2',c'1')
 
-    for (let i = 0; i < DupChars.getLength(); ++i) {
-        arktest.assertEQ(DupChars.lastIndexOf(DupChars.substring(i, DupChars.length)), i);
+let u8_sliced: String = '123443211234432112344321'.substr(4, 16);
+let u8_sliced_chars = new Array<char>(c'4',c'3',c'2',c'1',c'1',c'2',c'3',c'4',
+                                      c'4',c'3',c'2',c'1',c'1',c'2',c'3',c'4');
+
+
+function u8_test(): int
+{
+    arktest.assertEQ(empty.lastIndexOf(c' '), -1);
+    arktest.assertEQ(u8_line.lastIndexOf(c'零', -1), -1);
+    arktest.assertEQ(u8_line.lastIndexOf(c'a', -1), -1);
+    arktest.assertEQ(u8_line.lastIndexOf(c'a', u8_line.length), 0);
+    arktest.assertEQ(u8_line.lastIndexOf(c'a', u8_line.length + 1), 0);
+
+    arktest.assertEQ(u8_line.lastIndexOf(c'-'), -1);
+    for (let i = 0; i < u8_line.length; ++i) {
+        let c: char = u8_chars[i];
+        let index = u8_line.lastIndexOf(c);
+        arktest.assertEQ(index, i);
     }
-    for (let i = 1; i < DupChars.getLength(); ++i) {
-        arktest.assertEQ(DupChars.lastIndexOf(DupChars.substring(0, i)), DupChars.length - i);
+    for (let i = 0; i < u8_line.length; ++i) {
+        let c: char = u8_chars[i];
+        let index = u8_line.lastIndexOf(c, i);
+        arktest.assertEQ(index, i);
     }
-    for (let i = 0; i < Digits.getLength(); ++i) {
-        arktest.assertEQ(Digits.lastIndexOf(Digits.substring(i, Digits.length)), i);
+    for (let i = 0; i < u8_line2.length; ++i) {
+        let c: char = u8_chars2[i];
+        let index = u8_line2.lastIndexOf(c);
+        arktest.assertEQ(index, i%8 + 8);
     }
-    for (let i = 1; i < Digits.getLength(); ++i) {
-        arktest.assertEQ(Digits.lastIndexOf(Digits.substring(0, i), i + 1), 0);
+    for (let i = 0; i < u8_line3.length; ++i) {
+        let c: char = u8_chars3[i];
+        let index = u8_line3.lastIndexOf(c);
+        if (c == c'1')
+            arktest.assertEQ(index, 20);
+        else if (c == c'2')
+            arktest.assertEQ(index, 21);
+        else if (c == c'3')
+            arktest.assertEQ(index, 22);
+        else if (c == c'4')
+            arktest.assertEQ(index, 23);
+        else
+            arktest.assertTrue(false);
     }
-    for (let i = 0; i < Symbols.getLength(); ++i) {
-        arktest.assertEQ(Symbols.lastIndexOf(Symbols.substring(i, Symbols.length)), i);
+    for (let i = 0; i < u8_line4.length; ++i) {
+        let c: char = u8_chars4[i];
+        let index = u8_line4.lastIndexOf(c);
+        if (c == c'1')
+            arktest.assertEQ(index, 23);
+        else if (c == c'2')
+            arktest.assertEQ(index, 21);
+        else
+            arktest.assertTrue(false);
     }
-    for (let i = 1; i < Symbols.getLength(); ++i) {
-        arktest.assertEQ(Symbols.lastIndexOf(Symbols.substring(0, i), i + 1), 0);
+    for (let i = 0; i < u8_line5.length; ++i) {
+        let c: char = u8_chars5[i];
+        let index = u8_line5.lastIndexOf(c);
+        if (c == c'1')
+            arktest.assertEQ(index, 23);
+        else if (c == c'2')
+            arktest.assertEQ(index, 22);
+        else if (c == c'3')
+            arktest.assertEQ(index, 21);
+        else if (c == c'4')
+            arktest.assertEQ(index, 20);
+        else
+            arktest.assertTrue(false);
     }
-    let symbols_1 = '`~!@#$%^&*()_-+={}[]';
-    let symbols_2 = ':;\"\'\\|/<>,.';
-    let symbolsTreeChars = symbols_1.concat(symbols_2);
-    for (let i = 0; i < symbolsTreeChars.getLength(); ++i) {
-        arktest.assertEQ(symbolsTreeChars.lastIndexOf(symbolsTreeChars.substring(i, symbolsTreeChars.length)), i);
+    for (let i = 0; i < u8_tree.length; ++i) {
+        let c: char = u8_tree_chars[i];
+        let index = u8_tree.lastIndexOf(c);
+        if (c == c'1')
+            arktest.assertEQ(index, 23);
+        else if (c == c'2')
+            arktest.assertEQ(index, 22);
+        else if (c == c'3')
+            arktest.assertEQ(index, 21);
+        else if (c == c'4')
+            arktest.assertEQ(index, 20);
+        else
+            arktest.assertTrue(false);
     }
-    let symbolsSlicedChars = symbolsTreeChars.substring(1, 12);
-    for (let i = 1; i < symbolsSlicedChars.getLength(); ++i) {
-        arktest.assertEQ(symbolsSlicedChars.lastIndexOf(symbolsSlicedChars.substring(0, i), i + 1), 0);
+    for (let i = 0; i < u8_sliced.length; ++i) {
+        let c: char = u8_sliced_chars[i];
+        let index = u8_sliced.lastIndexOf(c);
+        if (c == c'1')
+            arktest.assertEQ(index, 12);
+        else if (c == c'2')
+            arktest.assertEQ(index, 13);
+        else if (c == c'3')
+            arktest.assertEQ(index, 14);
+        else if (c == c'4')
+            arktest.assertEQ(index, 15);
+        else
+            arktest.assertTrue(false);
     }
     return 0;
+}
+
+let u16_line = new string('零一二三四五六七八九音乐诗歌哲学物理');
+let u16_chars = new Array<char>(c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九',
+                                c'音', c'乐', c'诗', c'歌', c'哲', c'学', c'物', c'理');
+
+let u16_line2 = new string('零一二三四五六七八九零一二三四五六七八九');
+let u16_chars2 = new Array<char>(c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九',
+                                 c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九');
+
+let u16_line3 = new string('一二三四一二三四一二三四一二三四一二三四一二三四');
+let u16_chars3 = new Array<char>(c'一', c'二', c'三', c'四', c'一', c'二', c'三', c'四',
+                                 c'一', c'二', c'三', c'四', c'一', c'二', c'三', c'四',
+                                 c'一', c'二', c'三', c'四', c'一', c'二', c'三', c'四');
+
+let u16_line4 = new string('一二一一一二一一一二一一一二一一一二一一一二一一');
+let u16_chars4 = new Array<char>(c'一', c'二', c'一', c'一', c'一', c'二', c'一', c'一',
+                                 c'一', c'二', c'一', c'一', c'一', c'二', c'一', c'一',
+                                 c'一', c'二', c'一', c'一', c'一', c'二', c'一', c'一');
+
+let u16_line5 = new string('一二三四四三二一一二三四四三二一一二三四四三二一');
+let u16_chars5 = new Array<char>(c'一', c'二', c'三', c'四', c'四', c'三', c'二', c'一',
+                                 c'一', c'二', c'三', c'四', c'四', c'三', c'二', c'一',
+                                 c'一', c'二', c'三', c'四', c'四', c'三', c'二', c'一');
+
+let u16_tree: String = StringBuilder.concatStrings('零一二三四五六七八九', '零一二三四五六七八九');
+let u16_tree_chars = new Array<char>(c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九',
+                                     c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九');
+
+let u16_sliced: String = '零一二三四五六七八九音乐诗歌哲学物理'.substr(0, 10);
+let u16_sliced_chars = new Array<char>(c'零', c'一', c'二', c'三', c'四', c'五', c'六', c'七', c'八', c'九');
+
+
+function u16_test(): int
+{
+    arktest.assertEQ(u16_line.lastIndexOf(c'-'), -1);
+    arktest.assertEQ(u16_line.lastIndexOf(c'零', -1), -1);
+    arktest.assertEQ(u16_line.lastIndexOf(c'零', u16_line.length), 0);
+    arktest.assertEQ(u16_line.lastIndexOf(c'零', u16_line.length + 1), 0);
+
+    for (let i = 0; i < u16_line.length; ++i) {
+        let c: char = u16_chars[i];
+        let index = u16_line.lastIndexOf(c);
+        arktest.assertEQ(index, i);
+    }
+    for (let i = 0; i < u16_line.length; ++i) {
+        let c: char = u16_chars[i];
+        let index = u16_line.lastIndexOf(c, i);
+        arktest.assertEQ(index, i);
+    }
+    for (let i = 0; i < u16_line2.length; ++i) {
+        let c: char = u16_chars2[i];
+        let index = u16_line2.lastIndexOf(c);
+        arktest.assertEQ(index, i%10 + 10);
+    }
+    for (let i = 0; i < u16_line3.length; ++i) {
+        let c: char = u16_chars3[i];
+        let index = u16_line3.lastIndexOf(c);
+        if (c == c'一')
+            arktest.assertEQ(index, 20);
+        else if (c == c'二')
+            arktest.assertEQ(index, 21);
+        else if (c == c'三')
+            arktest.assertEQ(index, 22);
+        else if (c == c'四')
+            arktest.assertEQ(index, 23);
+        else
+            arktest.assertTrue(false);
+    }
+    for (let i = 0; i < u16_line4.length; ++i) {
+        let c: char = u16_chars4[i];
+        let index = u16_line4.lastIndexOf(c);
+        if (c == c'一')
+            arktest.assertEQ(index, 23);
+        else if (c == c'二')
+            arktest.assertEQ(index, 21);
+        else
+            arktest.assertTrue(false);
+    }
+    for (let i = 0; i < u16_line5.length; ++i) {
+        let c: char = u16_chars5[i];
+        let index = u16_line5.lastIndexOf(c);
+        if (c == c'一')
+            arktest.assertEQ(index, 23);
+        else if (c == c'二')
+            arktest.assertEQ(index, 22);
+        else if (c == c'三')
+            arktest.assertEQ(index, 21);
+        else if (c == c'四')
+            arktest.assertEQ(index, 20);
+        else
+            arktest.assertTrue(false);
+    }
+    for (let i = 0; i < u16_tree.length; ++i) {
+        let c: char = u16_tree_chars[i];
+        let index = u16_tree.lastIndexOf(c);
+        arktest.assertEQ(index, i%10 + 10);
+    }
+    for (let i = 0; i < u16_sliced.length; ++i) {
+        let c: char = u16_sliced_chars[i];
+        let index = u16_sliced.lastIndexOf(c);
+        arktest.assertEQ(index, i%10);
+    }
+    return 0;
+}
+
+function main() {
+    u8_test();
+    u16_test();
 }
