@@ -50,7 +50,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
 
 native function __alloc_array<T>(len: int, ofType: Object | null): FixedArray<T>
 
-class BuiltinArrayKeysIterator implements IterableIterator<number> {
+class BuiltinArrayKeysIterator implements IterableIterator<int> {
     private len: int
     private idx: int = 0
     private isDone: boolean = false
@@ -59,15 +59,15 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
         this.len = len
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<int> {
         if (this.isDone || this.idx >= this.len) {
             this.isDone = true
-            return new IteratorResult<number>()
+            return new IteratorResult<int>()
         }
-        return new IteratorResult<number>((this.idx++).toDouble())
+        return new IteratorResult<int>(this.idx++)
     }
 
-    override $_iterator(): IterableIterator<number> {
+    override $_iterator(): IterableIterator<int> {
         return this
     }
 }
@@ -190,7 +190,6 @@ export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -635,7 +634,7 @@ export function toSorted(self: FixedArray<boolean>): FixedArray<boolean> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => number): FixedArray<boolean> {
+export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => int): FixedArray<boolean> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -751,8 +750,8 @@ export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValu
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<boolean>, fn: (v: boolean, k: number, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<boolean>, fn: (v: boolean, k: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -803,7 +802,7 @@ export function concat(self: FixedArray<boolean>, fst: FixedArray<boolean>, ...m
 export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArray<boolean>>): FixedArray<boolean> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<boolean> = new FixedArray<boolean>(totalAdd);
@@ -815,7 +814,7 @@ export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArr
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -831,7 +830,7 @@ export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArr
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => number, start?: int, end?: int): FixedArray<boolean> {
+export function sort(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => int, start?: int, end?: int): FixedArray<boolean> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: boolean, r: boolean): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -850,7 +849,7 @@ export function sort(self: FixedArray<boolean>): FixedArray<boolean> {
     return self;
 }
 
-export function keys(self: FixedArray<boolean>): IterableIterator<number> {
+export function keys(self: FixedArray<boolean>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -876,10 +875,11 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]> {
     private parent: FixedArray<boolean>
     private idx: int = 0
@@ -904,7 +904,7 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -1026,7 +1026,6 @@ export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -1471,7 +1470,7 @@ export function toSorted(self: FixedArray<byte>): FixedArray<byte> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) => number): FixedArray<byte> {
+export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) => int): FixedArray<byte> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -1587,8 +1586,8 @@ export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<byte>, fn: (v: byte, k: number, array: FixedArray<byte>) => boolean): FixedArray<byte> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<byte>, fn: (v: byte, k: int, array: FixedArray<byte>) => boolean): FixedArray<byte> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -1639,7 +1638,7 @@ export function concat(self: FixedArray<byte>, fst: FixedArray<byte>, ...more: F
 export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<byte>>): FixedArray<byte> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<byte> = new FixedArray<byte>(totalAdd);
@@ -1651,7 +1650,7 @@ export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -1667,7 +1666,7 @@ export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<byte>, comparator: (a: byte, b: byte) => number, start?: int, end?: int): FixedArray<byte> {
+export function sort(self: FixedArray<byte>, comparator: (a: byte, b: byte) => int, start?: int, end?: int): FixedArray<byte> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: byte, r: byte): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -1686,7 +1685,7 @@ export function sort(self: FixedArray<byte>): FixedArray<byte> {
     return self;
 }
 
-export function keys(self: FixedArray<byte>): IterableIterator<number> {
+export function keys(self: FixedArray<byte>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -1712,10 +1711,11 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
     private parent: FixedArray<byte>
     private idx: int = 0
@@ -1740,7 +1740,7 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -1862,7 +1862,6 @@ export function fill(self: FixedArray<short>, value: short, start?: int, end?: i
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -2307,7 +2306,7 @@ export function toSorted(self: FixedArray<short>): FixedArray<short> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<short>, comparator: (a: short, b: short) => number): FixedArray<short> {
+export function toSorted(self: FixedArray<short>, comparator: (a: short, b: short) => int): FixedArray<short> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -2423,8 +2422,8 @@ export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue:
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<short>, fn: (v: short, k: number, array: FixedArray<short>) => boolean): FixedArray<short> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<short>, fn: (v: short, k: int, array: FixedArray<short>) => boolean): FixedArray<short> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -2475,7 +2474,7 @@ export function concat(self: FixedArray<short>, fst: FixedArray<short>, ...more:
 export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray<short>>): FixedArray<short> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<short> = new FixedArray<short>(totalAdd);
@@ -2487,7 +2486,7 @@ export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -2503,7 +2502,7 @@ export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<short>, comparator: (a: short, b: short) => number, start?: int, end?: int): FixedArray<short> {
+export function sort(self: FixedArray<short>, comparator: (a: short, b: short) => int, start?: int, end?: int): FixedArray<short> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: short, r: short): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -2522,7 +2521,7 @@ export function sort(self: FixedArray<short>): FixedArray<short> {
     return self;
 }
 
-export function keys(self: FixedArray<short>): IterableIterator<number> {
+export function keys(self: FixedArray<short>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -2548,10 +2547,11 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
     private parent: FixedArray<short>
     private idx: int = 0
@@ -2576,7 +2576,7 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -2698,7 +2698,6 @@ export function fill(self: FixedArray<int>, value: int, start?: int, end?: int):
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -3143,7 +3142,7 @@ export function toSorted(self: FixedArray<int>): FixedArray<int> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => number): FixedArray<int> {
+export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => int): FixedArray<int> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -3259,8 +3258,8 @@ export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: i
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<int>, fn: (v: int, k: number, array: FixedArray<int>) => boolean): FixedArray<int> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<int>, fn: (v: int, k: int, array: FixedArray<int>) => boolean): FixedArray<int> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -3311,7 +3310,7 @@ export function concat(self: FixedArray<int>, fst: FixedArray<int>, ...more: Fix
 export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<int>>): FixedArray<int> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<int> = new FixedArray<int>(totalAdd);
@@ -3323,7 +3322,7 @@ export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<i
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -3339,7 +3338,7 @@ export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<i
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<int>, comparator: (a: int, b: int) => number, start?: int, end?: int): FixedArray<int> {
+export function sort(self: FixedArray<int>, comparator: (a: int, b: int) => int, start?: int, end?: int): FixedArray<int> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: int, r: int): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -3358,7 +3357,7 @@ export function sort(self: FixedArray<int>): FixedArray<int> {
     return self;
 }
 
-export function keys(self: FixedArray<int>): IterableIterator<number> {
+export function keys(self: FixedArray<int>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -3384,10 +3383,11 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
     private parent: FixedArray<int>
     private idx: int = 0
@@ -3412,7 +3412,7 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -3534,7 +3534,6 @@ export function fill(self: FixedArray<long>, value: long, start?: int, end?: int
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -3979,7 +3978,7 @@ export function toSorted(self: FixedArray<long>): FixedArray<long> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) => number): FixedArray<long> {
+export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) => int): FixedArray<long> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -4095,8 +4094,8 @@ export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<long>, fn: (v: long, k: number, array: FixedArray<long>) => boolean): FixedArray<long> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<long>, fn: (v: long, k: int, array: FixedArray<long>) => boolean): FixedArray<long> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -4147,7 +4146,7 @@ export function concat(self: FixedArray<long>, fst: FixedArray<long>, ...more: F
 export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<long>>): FixedArray<long> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<long> = new FixedArray<long>(totalAdd);
@@ -4159,7 +4158,7 @@ export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -4175,7 +4174,7 @@ export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<long>, comparator: (a: long, b: long) => number, start?: int, end?: int): FixedArray<long> {
+export function sort(self: FixedArray<long>, comparator: (a: long, b: long) => int, start?: int, end?: int): FixedArray<long> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: long, r: long): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -4194,7 +4193,7 @@ export function sort(self: FixedArray<long>): FixedArray<long> {
     return self;
 }
 
-export function keys(self: FixedArray<long>): IterableIterator<number> {
+export function keys(self: FixedArray<long>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -4220,10 +4219,11 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
     private parent: FixedArray<long>
     private idx: int = 0
@@ -4248,7 +4248,7 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -4370,7 +4370,6 @@ export function fill(self: FixedArray<float>, value: float, start?: int, end?: i
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -4823,7 +4822,7 @@ export function toSorted(self: FixedArray<float>): FixedArray<float> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<float>, comparator: (a: float, b: float) => number): FixedArray<float> {
+export function toSorted(self: FixedArray<float>, comparator: (a: float, b: float) => int): FixedArray<float> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -4939,8 +4938,8 @@ export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue:
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<float>, fn: (v: float, k: number, array: FixedArray<float>) => boolean): FixedArray<float> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<float>, fn: (v: float, k: int, array: FixedArray<float>) => boolean): FixedArray<float> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -4991,7 +4990,7 @@ export function concat(self: FixedArray<float>, fst: FixedArray<float>, ...more:
 export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray<float>>): FixedArray<float> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<float> = new FixedArray<float>(totalAdd);
@@ -5003,7 +5002,7 @@ export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -5019,7 +5018,7 @@ export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<float>, comparator: (a: float, b: float) => number, start?: int, end?: int): FixedArray<float> {
+export function sort(self: FixedArray<float>, comparator: (a: float, b: float) => int, start?: int, end?: int): FixedArray<float> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: float, r: float): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -5038,7 +5037,7 @@ export function sort(self: FixedArray<float>): FixedArray<float> {
     return self;
 }
 
-export function keys(self: FixedArray<float>): IterableIterator<number> {
+export function keys(self: FixedArray<float>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -5064,10 +5063,11 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
     private parent: FixedArray<float>
     private idx: int = 0
@@ -5092,7 +5092,7 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -5214,7 +5214,6 @@ export function fill(self: FixedArray<double>, value: double, start?: int, end?:
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -5667,7 +5666,7 @@ export function toSorted(self: FixedArray<double>): FixedArray<double> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<double>, comparator: (a: double, b: double) => number): FixedArray<double> {
+export function toSorted(self: FixedArray<double>, comparator: (a: double, b: double) => int): FixedArray<double> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -5783,8 +5782,8 @@ export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<double>, fn: (v: double, k: number, array: FixedArray<double>) => boolean): FixedArray<double> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<double>, fn: (v: double, k: int, array: FixedArray<double>) => boolean): FixedArray<double> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -5835,7 +5834,7 @@ export function concat(self: FixedArray<double>, fst: FixedArray<double>, ...mor
 export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArray<double>>): FixedArray<double> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<double> = new FixedArray<double>(totalAdd);
@@ -5847,7 +5846,7 @@ export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArra
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -5863,7 +5862,7 @@ export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArra
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<double>, comparator: (a: double, b: double) => number, start?: int, end?: int): FixedArray<double> {
+export function sort(self: FixedArray<double>, comparator: (a: double, b: double) => int, start?: int, end?: int): FixedArray<double> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: double, r: double): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -5882,7 +5881,7 @@ export function sort(self: FixedArray<double>): FixedArray<double> {
     return self;
 }
 
-export function keys(self: FixedArray<double>): IterableIterator<number> {
+export function keys(self: FixedArray<double>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -5908,10 +5907,11 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_double implements IterableIterator<[number, double]> {
     private parent: FixedArray<double>
     private idx: int = 0
@@ -5936,7 +5936,7 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
@@ -6058,7 +6058,6 @@ export function fill(self: FixedArray<char>, value: char, start?: int, end?: int
     for (let i = start; i < end; i++) {
         self[i] = value;
     }
-
     return self;
 }
 
@@ -6503,7 +6502,7 @@ export function toSorted(self: FixedArray<char>): FixedArray<char> {
  *
  * @returns sorted copy of the current instance comparator
  */
-export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) => number): FixedArray<char> {
+export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) => int): FixedArray<char> {
     let arr = cloneArray(self);
     sort(arr, comparator)
     return arr
@@ -6619,8 +6618,8 @@ export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-export function filter(self: FixedArray<char>, fn: (v: char, k: number, array: FixedArray<char>) => boolean): FixedArray<char> {
-    const mask : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+export function filter(self: FixedArray<char>, fn: (v: char, k: int, array: FixedArray<char>) => boolean): FixedArray<char> {
+    const mask: FixedArray<boolean> = new FixedArray<boolean>(self.length)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -6671,7 +6670,7 @@ export function concat(self: FixedArray<char>, fst: FixedArray<char>, ...more: F
 export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<char>>): FixedArray<char> {
     let totalAdd = self.length;
     for (let i = 0; i < items.length; i++) {
-        totalAdd += items[i].length.toInt()
+        totalAdd += items[i].length
     }
 
     const buf : FixedArray<char> = new FixedArray<char>(totalAdd);
@@ -6683,7 +6682,7 @@ export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<
     let insertTo = self.length;
     for (let i = 0; i < items.length; i++) {
         const arr = items[i]
-        const len = arr.length.toInt()
+        const len = arr.length
         for (let j = 0; j < len; j++) {
             buf[insertTo++] = arr.$_get(j)
         }
@@ -6699,7 +6698,7 @@ export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<
  *
  * @note Mutating method
  */
-export function sort(self: FixedArray<char>, comparator: (a: char, b: char) => number, start?: int, end?: int): FixedArray<char> {
+export function sort(self: FixedArray<char>, comparator: (a: char, b: char) => int, start?: int, end?: int): FixedArray<char> {
     sort_subarray(self, (start == undefined) ? 0 : start!, (end == undefined) ? self.length : end!, (l: char, r: char): boolean => {
         return comparator(l, r ) < 0;
     });
@@ -6718,7 +6717,7 @@ export function sort(self: FixedArray<char>): FixedArray<char> {
     return self;
 }
 
-export function keys(self: FixedArray<char>): IterableIterator<number> {
+export function keys(self: FixedArray<char>): IterableIterator<int> {
     return new BuiltinArrayKeysIterator(self.length);
 }
 
@@ -6744,10 +6743,11 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
+ // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
 class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
     private parent: FixedArray<char>
     private idx: int = 0
@@ -6772,11 +6772,11 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
     }
 
     public __Iterator_getLength(): int {
-        return this.parent.length.toInt()
+        return this.parent.length
     }
 }
 
-function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => int): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
         if (comp(tmp, arr[startIndex]) < 0) {
@@ -6795,7 +6795,7 @@ function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex
     }
 }
 
-function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
     let left : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len1);
@@ -6810,7 +6810,7 @@ function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, en
     let j = 0;
     let k = startIndex;
     while (i < len1 && j < len2) {
-        if ((comp(left[i]!, right[j]!).toInt()) <= 0) {
+        if (comp(left[i]!, right[j]!) <= 0) {
             arr[k] = left[i]!;
             i++;
         } else {
@@ -6831,7 +6831,7 @@ function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, en
     }
 }
 
-export function sort_stable<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+export function sort_stable<T>(arr: FixedArray<T>, startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => int): void {
     if (endIndex <= startIndex) {
         return;
     }
@@ -6858,7 +6858,7 @@ export function sort_stable<T>(arr: FixedArray<T>, startIndex: int, endIndex: in
     }
 }
 
-function defaultComparatorStr(a: String, b: String): number {
+function defaultComparatorStr(a: String, b: String): int {
     return a.compareTo(b)
 }
 
@@ -6967,10 +6967,10 @@ export function sort_default<T>(arr: FixedArray<T>, arrStr: FixedArray<buffStr>,
  *
  * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: number, array: Array<U>) => T, initialValue: T): T {
+export function reduce<U, T>(self: Array<U>, callbackfn: (previousValue: T, currentValue: U, index: int, array: Array<U>) => T, initialValue: T): T {
     let acc = initialValue
-    for (let i = 0; i < self.length; i++) {
-        acc = callbackfn(acc, self[i], i.toDouble(), self)
+    for (let i: int = 0; i < self.length; i++) {
+        acc = callbackfn(acc, self[i], i, self)
     }
     return acc
 }

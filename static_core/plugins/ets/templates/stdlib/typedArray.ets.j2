@@ -1489,9 +1489,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns sorted {{N}}Array
      */
     {%- if N == 'BigInt64' %}
-    {%- set sortCompareFnRetTy = 'number | BigInt' %}
+    {%- set sortCompareFnRetTy = 'int | BigInt' %}
     {%- else %}
-    {%- set sortCompareFnRetTy = 'number' %}
+    {%- set sortCompareFnRetTy = 'int' %}
     {%- endif %}
     public sort(compareFn?: (a: {{elType}}, b: {{elType}}) => {{sortCompareFnRetTy}}): this {
         if (compareFn == undefined) {
@@ -1499,16 +1499,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return this
         }
 
-        let cmp = (l: {{T}}, r: {{T}}): number => {
+        let cmp = (l: {{T}}, r: {{T}}): int => {
             const result = compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
             {%- if N == 'BigInt64' %}
             if (result instanceof BigInt) {
-                return result.getLong()
+                return result.getLong().toInt()
             } else {
-                return result.toDouble()
+                return result.toInt()
             }
             {%- else %}
-            return result
+            return result.toInt()
             {%- endif %}
         }
 

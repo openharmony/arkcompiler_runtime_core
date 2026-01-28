@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ function testSetValueAtBoundaryIndex() {
     let plainArray = new PlainArray<double>();
     initializePlainArray(plainArray, TestData.forNumber2);
     plainArray.setValueAt(0, TestData.testNumber6);
-    plainArray.setValueAt(TestData.forNumber2.length.toInt() - TestData.testNumber1, TestData.testNumber6);
+    plainArray.setValueAt(TestData.forNumber2.length - TestData.testNumber1, TestData.testNumber6);
     arktest.assertEQ(plainArray.toString(), TestData.testString3, "Set successful and other elements should not change");
 }
 

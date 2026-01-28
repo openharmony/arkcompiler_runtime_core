@@ -322,7 +322,7 @@ export final class TypeCreatorCtx {
 
         this.checkError()
 
-        const objsArray : FixedArray<Object> = new FixedArray<Object>(this.objects.length.toInt())
+        let objsArray: FixedArray<Object> = new FixedArray<Object>(this.objects.length)
         for (let i = 0; i < this.objects.length; i++) {
             objsArray[i] = this.objects.$_get(i) as Object
         }

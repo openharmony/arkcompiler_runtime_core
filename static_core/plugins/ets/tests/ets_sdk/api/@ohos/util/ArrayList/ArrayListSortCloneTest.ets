@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ function testArrayListSort0001() {
     arrayList.add(51);
     arrayList.add(8);
     arrayList.add(0);
-    arrayList.sort((firstValue, secondValue) => firstValue - secondValue);
+    arrayList.sort((firstValue, secondValue) => (firstValue - secondValue).toInt());
 
     const expectedValues = [0, 1, 3, 5, 8, 22, 24, 51];
     for (let i: int = 0; i < expectedValues.length; i++) {
@@ -58,7 +58,7 @@ function testArrayListSort0002() {
     arrayList.add(51);
     arrayList.add(8);
     arrayList.add(0);
-    arrayList.sort((firstValue, secondValue) => secondValue - firstValue);
+    arrayList.sort((firstValue, secondValue) => (secondValue - firstValue).toInt());
 
     const expectedValues = [51, 24, 22, 8, 5, 3, 1, 0];
     for (let i: int = 0; i < expectedValues.length; i++) {

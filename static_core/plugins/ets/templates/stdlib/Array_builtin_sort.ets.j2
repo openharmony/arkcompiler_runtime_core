@@ -26,7 +26,7 @@ package std.core;
     ('float', 'Float'),
     ('double', 'Double')]
  %}
-function insertion_sort(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => number): void {
+function insertion_sort(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => int): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
         const tmp = arr[i];
         if (comp(tmp, arr[startIndex]) < 0) {
@@ -45,7 +45,7 @@ function insertion_sort(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int,
     }
 }
 
-function arr_perform_merge(arr: FixedArray<{{TT}}>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => number): void {
+function arr_perform_merge(arr: FixedArray<{{TT}}>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
     let left : FixedArray<{{TT}}> = new FixedArray<{{TT}}>(len1);
@@ -81,7 +81,7 @@ function arr_perform_merge(arr: FixedArray<{{TT}}>, startIndex: int, midIndex: i
     }
 }
 
-export function arr_sort_stable(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => number): void {
+export function arr_sort_stable(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => int): void {
     if (endIndex <= startIndex) {
         return;
     }
@@ -133,7 +133,7 @@ function copyPart(dst: FixedArray<{{T}}>, counter: int, src: FixedArray<{{T}}>, 
     }
 }
 
-function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number): FixedArray<{{T}}> {
+function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => int): FixedArray<{{T}}> {
     const result:FixedArray<{{T}}> = new FixedArray<{{T}}>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
@@ -155,7 +155,7 @@ function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T
     return result
 }
 
-export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => number, begin: int = 0, end: int = 0): FixedArray<{{T}}> {
+export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => int, begin: int = 0, end: int = 0): FixedArray<{{T}}> {
     if (end == 0) {
         end = array.length
     }

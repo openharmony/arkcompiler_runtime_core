@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,16 +67,16 @@ function Array_TestJSPop(arr: Array<FooClass>): void {
 }
 
 function Array_TestJSSort(arr: Array<FooClass>): void {
-    let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return Int.toDouble(a.toString().compareTo(b.toString()));
+    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
+        return a.toString().compareTo(b.toString())
     }
     arr.sort(comparator);
     arktest.assertEQ(arr.at(1)!.toString(), "{Foo named zero}");
 }
 
 function Array_TestJSToSorted(arr: Array<FooClass>): void {
-    let comparator: (a: FooClass, b: FooClass) => number = (a: FooClass, b: FooClass): number => {
-        return Int.toDouble(a.toString().compareTo(b.toString()));
+    let comparator: (a: FooClass, b: FooClass) => int = (a: FooClass, b: FooClass): int => {
+        return a.toString().compareTo(b.toString())
     }
     let toSorted = arr.toSorted(comparator);
     arktest.assertEQ(toSorted.at(1)!.toString(), "{Foo named zero}");

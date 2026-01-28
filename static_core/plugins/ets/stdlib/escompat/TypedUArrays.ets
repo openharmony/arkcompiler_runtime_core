@@ -1044,13 +1044,13 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @returns sorted Uint8ClampedArray
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: int, r: int): number => {
+        let cmp = (l: int, r: int): int => {
             return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
@@ -2559,13 +2559,13 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Uint8Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: int, r: int): number => {
+        let cmp = (l: int, r: int): int => {
             return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
@@ -4058,13 +4058,13 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Uint16Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: int, r: int): number => {
+        let cmp = (l: int, r: int): int => {
             return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
@@ -5591,13 +5591,13 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns sorted Uint32Array
      */
-    public sort(compareFn?: (a: number, b: number) => number): this {
+    public sort(compareFn?: (a: number, b: number) => int): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: long, r: long): number => {
+        let cmp = (l: long, r: long): int => {
             return compareFn!(l, r)
         }
         const MAX_SHORT_LENGTH = 24
@@ -7136,19 +7136,19 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @returns sorted BigUint64Array
      */
-    public sort(compareFn?: (a: BigInt, b: BigInt) => number | BigInt): this {
+    public sort(compareFn?: (a: BigInt, b: BigInt) => int | BigInt): this {
         if (compareFn == undefined) {
             this.sort()
             return this
         }
 
-        let cmp = (l: long, r: long): number => {
+        let cmp = (l: long, r: long): int => {
             const result = compareFn!(BigInt.fromULong(l), BigInt.fromULong(r))
             if (result instanceof BigInt) {
                 const val = result as BigInt
                 return val == 0n ? 0 : val > 0n ? 1 : -1
             } else {
-                return result as number
+                return result.toInt()
             }
         }
         const MAX_SHORT_LENGTH = 24

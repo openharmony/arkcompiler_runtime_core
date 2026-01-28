@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,7 @@ class Test {
     }
 
     private static loadRawFiles(paths: string[]): Array<FixedArray<byte>> {
-        const rawFiles = new Array<FixedArray<byte>>(paths.length.toInt());
+        const rawFiles = new Array<FixedArray<byte>>(paths.length);
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);

@@ -600,7 +600,11 @@ const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
         // descending
         array.sort(
             (x: {{.item.type}}, y: {{.item.type}}) => {
-                return new Number(y - x)
+                {%- if item.objectType == 'BigInt64Array' -%}
+                return (y - x)
+                {%- else -%}
+                return (y - x).toInt()
+                {%- endif -%}
             }
         )
 
@@ -659,7 +663,11 @@ const testTypedArraySortWithNaN = parametrize<ObjectTypeAndExpectations<number[]
 
         // asc
         array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
-                return new Number(x - y)
+                {%- if item.objectType == 'BigInt64Array' -%}
+                return (x - y)
+                {%- else -%}
+                return (x - y).toInt()
+                {%- endif -%}
         })
 
         const isEqualToGoldAsc =
@@ -705,7 +713,11 @@ const testTypedArraySortWithNaNReversed = parametrize<ObjectTypeAndExpectations<
 
         // desc
         array.sort((x: {{.item.type}}, y: {{.item.type}}) => {
-            return new Number(y - x)
+            {%- if item.objectType == 'BigInt64Array'-%}
+            return (y - x) 
+            {%-else-%}
+            return (y - x).toInt() 
+            {%-endif-%}
         })
 
         const isEqualToGold =

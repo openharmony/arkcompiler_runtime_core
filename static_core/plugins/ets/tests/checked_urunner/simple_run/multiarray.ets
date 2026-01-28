@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,5 +67,5 @@ function main2(): int {
 function main3(): int {
     let arr: FixedArray<FixedArray<String>> = new String[2][3];
     arr[0][0] = new String();
-    return arr[0][0].length.toInt();  // Should be "0"
+    return arr[0][0].length  // Should be "0"
 }

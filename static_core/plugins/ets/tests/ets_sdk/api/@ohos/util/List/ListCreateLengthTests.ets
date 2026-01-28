@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,9 +64,9 @@ function testLengthSyncSingleType() {
     let list = new List<double>();
     arktest.assertEQ(list.length, 0, "List length should be 0");
     initializeList(list, TestData.arrayForNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt(), "List length should be TestData.arrayForNumber1 length");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length, "List length should be TestData.arrayForNumber1 length");
     list.remove(TestData.testNumber1);
-    arktest.assertEQ(list.length, TestData.arrayForNumber1.length.toInt() - TestData.testNumber1, "List length should - 1");
+    arktest.assertEQ(list.length, TestData.arrayForNumber1.length - TestData.testNumber1, "List length should - 1");
 }
 
 function testLengthSyncMultiType() {

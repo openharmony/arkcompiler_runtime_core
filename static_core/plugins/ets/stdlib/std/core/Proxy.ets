@@ -783,17 +783,14 @@ abstract class ArrayProxy<T> extends Array<T> {
     private static readonly CONCAT_METHOD: Method = ArrayProxy.getArrayMethod("concat", Type.of([] as FixedArray<ConcatArray<object>>))
     private static readonly UNSHIFT_METHOD: Method = ArrayProxy.getArrayMethod("unshift", Type.of(new Array<object>()))
     private static readonly SHIFT_METHOD: Method = ArrayProxy.getArrayMethod("shift")
-    private static readonly SPLICE_METHOD_NUM: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as number))
     private static readonly SPLICE_METHOD_INT: Method = ArrayProxy.getArrayMethod("splice", Type.of(1 as int))
     private static readonly TO_SPLICED_METHOD_INT_INT: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1), Type.of(1))
+
     private static readonly TO_SPLICED_METHOD_INT_INT_ARR: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1 as int), Type.of(1 as int), Type.of([] as FixedArray<object>))
     private static readonly TO_SPLICED_METHOD_INT: Method = ArrayProxy.getArrayMethod("toSpliced", Type.of(1))
 
     private static readonly SPLICE_METHOD_INT_INT_ARR: Method =
             ArrayProxy.getArrayMethod("splice", Type.of(1 as int), Type.of(1 as int), Type.of(new Array<Object>(0)))
-
-    private static readonly SPLICE_METHOD_NUM_OBJ_ARR: Method =
-            ArrayProxy.getArrayMethod("splice", Type.of(1.0 + 0), Type.of(new Number(0)), Type.of(new Array<Object>(0)))
 
     constructor(target: Array<T>, handler: ArrayProxyHandler<T>) {
         this.target = target

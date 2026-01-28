@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,7 +92,7 @@ function testGetWithinRange() {
     initializeList(list, TestData.arrayForNumber1);
     arktest.assertEQ(list.get(0), 0, "Element at index 0 should be 0");
     arktest.assertEQ(list.get(TestData.testNumber1), TestData.testNumber1, "Element at index 1 should be 1");
-    arktest.assertEQ(list.get(TestData.arrayForNumber1.length.toInt() - TestData.testNumber1), TestData.testNumber20,
+    arktest.assertEQ(list.get(TestData.arrayForNumber1.length - TestData.testNumber1), TestData.testNumber20,
         "Element at index 20 should be 20");
 }
 

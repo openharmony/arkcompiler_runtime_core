@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,7 +148,7 @@ function testArrayList0003() {
     arr2.add(1);
     arr2.add(2);
     arr2.add(0);
-    arr2.sort((a,b) => a - b);
+    arr2.sort((a,b) => (a - b).toInt());
     for (let i: int = 0; i < 5; i++) {
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after sorting in ascending order`);
     }
@@ -161,7 +161,7 @@ function testArrayList0003() {
     arr2.add(1);
     arr2.add(2);
     arr2.add(0);
-    arr2.sort((a,b) => a - b);
+    arr2.sort((a,b) => (a - b).toInt());
     for (let i: int = 0; i < 5; i++) {
         arktest.assertEQ(arr2[i], i, `The element at index ${i} should be ${i} after re-sorting in ascending order`);
     }

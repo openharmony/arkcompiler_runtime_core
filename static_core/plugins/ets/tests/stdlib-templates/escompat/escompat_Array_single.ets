@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ function testCreateFromString(): int {
 function testCreateFromString1(): int {
     let src: String = "HELLO";
 
-    let test = Array.from(src, (item: String, k: number): String => { return item.toLowerCase(); });
+    let test = Array.from(src, (item: String, k: int): String => { return item.toLowerCase(); });
     if(test.length != src.length) {
         console.println("Array size mismatch");
         return 1;
@@ -71,7 +71,7 @@ function testCreateFromString1(): int {
 
 function testCreateFromString2(): int {
     let src: String = "Hello";
-    let test = Array.from(src, (v: String, k: number): Int => { return k.toInt(); });
+    let test = Array.from(src, (v: String, k: int): Int => { return k });
     if(test.length != src.length) {
         console.println("Array size mismatch");
         return 1;
@@ -89,7 +89,7 @@ function testCreateFromString2(): int {
 function testFiltered(): int {
     let src: String = "HHeelllloo";
     let exp: String = "Hello";
-    let test = Array.from(src, (c: string, i: number): string => c).filter((v: String, k: int): boolean => k%2 == 0);
+    let test = Array.from(src, (c: string, i: int): string => c).filter((v: String, k: int): boolean => k%2 == 0);
 
     if(test.length != exp.length) {
         console.println("Array size mismatch");

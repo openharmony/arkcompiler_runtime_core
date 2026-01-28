@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@ function main(): int {
 }
 
 class TestData {
-    static readonly arrayLength1: number = -1234;
+    static readonly arrayLength1: int = -1234;
     static readonly initialValue1: number = -1;
-    static readonly arrayLength2: number = 3;
+    static readonly arrayLength2: int = 3;
     static readonly initialValue2: number = -1;
     static readonly expected2 = Array.of<number>(-1, -1, -1);
 }

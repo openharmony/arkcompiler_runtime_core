@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,20 +101,24 @@ function testSortDifferentTypesAscending() {
     }
 }
 
+let arrStrCmp = (a: object, b: object): int => {
+    let sa = new String(a);
+    let sb = new String(b);
+    return sb.compareTo(sa);
+}
+
+let listStrCmp = (a: object, b: object): double => {
+    let sa = new String(a);
+    let sb = new String(b);
+    return sb.compareTo(sa);
+}
+
 function testSortObjectAscending() {
     let list1 = new List<object>();
     initializeList(list1, TestData.arrayForObject);
     let array1 = list1.convertToArray();
-    list1.sort((a: object, b: object): double => {
-        let sa = new String(a);
-        let sb = new String(b);
-        return sa.compareTo(sb);
-    });
-    array1.sort((a: object, b: object): double => {
-        let sa = new String(a);
-        let sb = new String(b);
-        return sa.compareTo(sb);
-    });
+    list1.sort(listStrCmp);
+    array1.sort(arrStrCmp);
     for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
@@ -125,8 +129,8 @@ function testSortObjectAscending() {
     list2.add(TestData.testObject3);
     list2.add(TestData.testObject4);
     let array2 = list2.convertToArray();
-    list2.sort((a: Temp, b: Temp) => a.age - b.age);
-    array2.sort((a: Temp, b: Temp) => a.age - b.age);
+    list2.sort((a: Temp, b: Temp) => (a.age - b.age).toInt());
+    array2.sort((a: Temp, b: Temp) => (a.age - b.age).toInt());
     for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }
@@ -163,16 +167,8 @@ function testSortObjectDescending() {
     let list1 = new List<object>();
     initializeList(list1, TestData.arrayForObject);
     let array1 = list1.convertToArray();
-    list1.sort((a: object, b: object): double => {
-        let sa = new String(a);
-        let sb = new String(b);
-        return sb.compareTo(sa);
-    });
-    array1.sort((a: object, b: object): double => {
-        let sa = new String(a);
-        let sb = new String(b);
-        return sb.compareTo(sa);
-    });
+    list1.sort(listStrCmp);
+    array1.sort(arrStrCmp);
     for (let i: int = 0; i < list1.length; i++) {
         arktest.assertEQ(list1.get(i), array1[i], `Element at index ${i} should match`);
     }
@@ -183,8 +179,8 @@ function testSortObjectDescending() {
     list2.add(TestData.testObject3);
     list2.add(TestData.testObject4);
     let array2 = list2.convertToArray();
-    list2.sort((a: Temp, b: Temp) => b.age - a.age);
-    array2.sort((a: Temp, b: Temp) => b.age - a.age);
+    list2.sort((a: Temp, b: Temp) => (b.age - a.age).toInt());
+    array2.sort((a: Temp, b: Temp) => (b.age - a.age).toInt());
     for (let i: int = 0; i < list2.length; i++) {
         arktest.assertEQ(list2.get(i), array2[i], `Element at index ${i} should match`);
     }

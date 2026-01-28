@@ -1,4 +1,4 @@
-%# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+%# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 %# Licensed under the Apache License, Version 2.0 (the "License");
 %# you may not use this file except in compliance with the License.
 %# You may obtain a copy of the License at
@@ -124,7 +124,6 @@
     for (let i = start; i < end; i++) {
         <%= set_unsafe.(this, 'i', 'value') %>;
     }
-
     return <%= this %>;
 }
 
@@ -705,8 +704,8 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
 % elsif el_type == 'T'
     if (val instanceof String) {
         return this.searchString(val, fi, len)
-    } else if (val instanceof Number) {
-        return this.searchNumber(val, fi, len)
+    } else if (val instanceof Double) {
+        return this.searchDouble(val, fi, len)
     } else if (val instanceof Float) {
         return this.searchFloat(val, fi, len)
     } else if (val instanceof Long) {
@@ -751,7 +750,7 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
     return -1
 }
 % else
-<%= access_private %> static native indexOfImpl<<%= el_type %>>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, val: <%= el_type %>, fromIndex1: int): int;
+<%= access_private %> static native indexOfImpl<<%= el_type %>>(<%= this_arg %>buffer: FixedArray<Any>, actualLength: int, val: <%= el_type %>, fromIndex: int): int;
 % end
 
 % if this_array == 'escompat_array'
@@ -794,7 +793,7 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
  *
  * @returns sorted copy of the current instance comparator
  */
-<%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>comparator: (a: <%= el_type %>, b: <%= el_type %>) => number): <%= this_type %> {
+<%= access_public %> toSorted<%= this_generic %>(<%= this_arg %>comparator: (a: <%= el_type %>, b: <%= el_type %>) => int): <%= this_type %> {
     let arr = <%= clone_this %>;
     <%= arr_method_call.('arr', 'sort', 'comparator') %>
     return arr

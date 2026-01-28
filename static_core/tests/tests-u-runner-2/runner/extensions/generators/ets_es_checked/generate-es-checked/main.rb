@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -322,6 +322,8 @@ class Generator
             # ts part
             ts_path = File.join $options[:tmp], "#{k}#{chunk_id}.ts"
             buf = $template_ts.result(binding)
+            buf = buf.gsub("%int%", "number")
+            buf = buf.gsub("%.toInt()%", "")
             File.write ts_path, buf
             # NOTE retries are a workaround for https://github.com/nodejs/node/issues/51555
             stdout_str = ""
@@ -329,6 +331,7 @@ class Generator
             NODE_RETRIES.times do |i|
                 Timeout.timeout(NODE_TIMEOUT) {
                     stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                    stdout_str = stdout_str.gsub("%int%", "number")
                 }
                 break
             rescue => e
@@ -343,6 +346,8 @@ class Generator
             # ets part
             expected = JSON.load(stdout_str)
             buf = $template_ets.result(binding)
+            buf = buf.gsub("%int%", "int")
+            buf = buf.gsub("%.toInt()%", ".toInt()")
             ets_path = File.join $options[:out], "#{k}#{chunk_id}.ets"
             File.write ets_path, buf
 

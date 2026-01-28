@@ -1271,9 +1271,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @returns sorted {{element['name']}}Array
      */
     {%- if element['name'] == 'BigUint64' %}
-    {%- set sortCompareFnRetTy = 'number | BigInt' %}
+    {%- set sortCompareFnRetTy = 'int | BigInt' %}
     {%- else %}
-    {%- set sortCompareFnRetTy = 'number' %}
+    {%- set sortCompareFnRetTy = 'int' %}
     {%- endif %}
     public sort(compareFn?: (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => {{sortCompareFnRetTy}}): this {
         if (compareFn == undefined) {
@@ -1281,14 +1281,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             return this
         }
 
-        let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): number => {
+        let cmp = (l: {{element['primitiveType']}}, r: {{element['primitiveType']}}): int => {
             {%- if element['name'] == 'BigUint64' %}
             const result = compareFn!(BigInt.fromULong(l), BigInt.fromULong(r))
             if (result instanceof BigInt) {
                 const val = result as BigInt
                 return val == 0n ? 0 : val > 0n ? 1 : -1
             } else {
-                return result as number
+                return result.toInt()
             }
             {%- else %}
             return compareFn!(l, r)

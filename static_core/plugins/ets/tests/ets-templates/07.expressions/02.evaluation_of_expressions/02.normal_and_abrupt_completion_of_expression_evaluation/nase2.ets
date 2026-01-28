@@ -24,7 +24,7 @@ function main() {
   let b: int = 1;
   // Changed to small number because it will cause runtime timeout
   let sz: int = 10;
-  let v: int = 42 + (a = 2) + new byte[sz].length.toInt() + (b = 2);
+  let v: int = 42 + (a = 2) + new byte[sz].length + (b = 2);
   arktest.assertEQ(a, 2);
   arktest.assertEQ(b, 2);
 }
