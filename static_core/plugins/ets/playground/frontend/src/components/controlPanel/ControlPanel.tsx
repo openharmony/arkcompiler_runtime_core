@@ -18,9 +18,9 @@ import {Button, ButtonGroup, Checkbox, Icon, Popover, Tooltip, Radio, RadioGroup
 import styles from './styles.module.scss';
 import CompileOptions from '../../pages/compileOptions/CompileOptions';
 import {useDispatch, useSelector} from 'react-redux';
-import {withAstView, withDisasm, selectVerificationMode, withVerifier} from '../../store/selectors/appState';
+import {withAstView, withDisasm, selectVerificationMode, withVerifier, withIrDump, withAotMode} from '../../store/selectors/appState';
 import {AppDispatch} from '../../store';
-import {setDisasmAction, setVerificationModeAction, setVerifAction} from '../../store/actions/appState';
+import {setDisasmAction, setVerificationModeAction, setVerifAction, setIrDumpCompilerDumpAction, setIrDumpDisasmDumpAction, setAotModeAction} from '../../store/actions/appState';
 import {fetchCompileCode, fetchRunCode, shareCodeLocally, flushPendingCodeUpdate} from '../../store/actions/code';
 import {selectCompileLoading, selectRunLoading, selectShareLoading} from '../../store/selectors/code';
 import {useClickOutside} from '../../utils/useClickOutside';
@@ -35,15 +35,29 @@ const ControlPanel = (): JSX.Element => {
     const astView = useSelector(withAstView);
     const verificationMode = useSelector(selectVerificationMode);
     const verifier = useSelector(withVerifier);
+    const irDump = useSelector(withIrDump);
+    const aotMode = useSelector(withAotMode);
     const dispatch = useDispatch<AppDispatch>();
     const isCompileLoading = useSelector(selectCompileLoading);
     const isShareLoading = useSelector(selectShareLoading);
     const isRunLoading = useSelector(selectRunLoading);
     const [localVerificationMode, setLocalVerificationMode] = useState<VerificationMode>('disabled');
+    const [runAotMode, setRunAotMode] = useState(false);
+    const [irDumpCompilerDump, setIrDumpCompilerDumpLocal] = useState(false);
+    const [irDumpDisasmDump, setIrDumpDisasmDumpLocal] = useState(false);
 
     useEffect(() => {
         setLocalVerificationMode(verificationMode);
     }, [verificationMode]);
+
+    useEffect(() => {
+        setRunAotMode(aotMode);
+    }, [aotMode]);
+
+    useEffect(() => {
+        setIrDumpCompilerDumpLocal(irDump.compilerDump);
+        setIrDumpDisasmDumpLocal(irDump.disasmDump);
+    }, [irDump]);
 
 
     const handleDisasmChange = (): void => {
@@ -72,16 +86,25 @@ const ControlPanel = (): JSX.Element => {
     const handleClosePopover = (): void => {
         setIsOpen(false);
         setLocalVerificationMode(verificationMode);
+        setRunAotMode(aotMode || false);
+        setIrDumpCompilerDumpLocal(irDump.compilerDump);
+        setIrDumpDisasmDumpLocal(irDump.disasmDump);
     };
     const handleOpenPopover = (): void => {
         setIsOpen(true);
     };
     const handleVerificationModeReset = (): void => {
         dispatch(setVerificationModeAction('disabled'));
+        dispatch(setAotModeAction(false));
+        dispatch(setIrDumpCompilerDumpAction(false));
+        dispatch(setIrDumpDisasmDumpAction(false));
         setIsOpen(false);
     };
     const handleVerificationModeChange = (): void => {
         dispatch(setVerificationModeAction(localVerificationMode));
+        dispatch(setAotModeAction(runAotMode));
+        dispatch(setIrDumpCompilerDumpAction(irDumpCompilerDump));
+        dispatch(setIrDumpDisasmDumpAction(irDumpDisasmDump));
         handleClosePopover();
     };
     useClickOutside(popoverRef, handleClosePopover);
@@ -127,6 +150,28 @@ const ControlPanel = (): JSX.Element => {
                                 <Radio label="Ahead of Time" value="ahead-of-time" />
                                 <Radio label="On the Fly" value="on-the-fly" />
                             </RadioGroup>
+                            <Checkbox
+                                checked={runAotMode}
+                                label="AOT mode"
+                                onChange={(e): void => setRunAotMode(e.target.checked)}
+                                className={styles.disasm}
+                                data-testid="aotMode-checkbox"
+                            />
+                            <span className={styles.sectionHeader}>IR Dump options</span>
+                            <Checkbox
+                                checked={irDumpCompilerDump}
+                                label="Compiler Dump"
+                                onChange={(e): void => setIrDumpCompilerDumpLocal(e.target.checked)}
+                                className={styles.disasm}
+                                data-testid="irDumpCompiler-checkbox"
+                            />
+                            <Checkbox
+                                checked={irDumpDisasmDump}
+                                label="Disasm Dump"
+                                onChange={(e): void => setIrDumpDisasmDumpLocal(e.target.checked)}
+                                className={styles.disasm}
+                                data-testid="irDumpDisasm-checkbox"
+                            />
                             <div className={styles.btnContainer}>
                                 <Button className={cx(styles.btn, styles.btnBorder)} onClick={handleVerificationModeReset}>
                                     Reset

@@ -42,3 +42,22 @@ class VersionsResponse(BaseModel):
     backend_version: str | None = Field(alias="backendVersion")
     arkts_version: str | None = Field(alias="arktsVersion")
     es2panda_version: str | None = Field(alias="es2pandaVersion")
+
+
+class IrDumpOptions(BaseModel):
+    """Options for IR dump generation"""
+    compiler_dump: bool = False
+    disasm_dump: bool = False
+
+    def is_enabled(self) -> bool:
+        """IR dump is enabled if at least one dump type is selected"""
+        return self.compiler_dump or self.disasm_dump
+
+
+class IrDumpResponse(BaseModel):
+    """Response containing IR dump data"""
+    output: str | None = None
+    error: str | None = None
+    compiler_dump: str | None = None
+    disasm_dump: str | None = None
+    exit_code: int | None = None

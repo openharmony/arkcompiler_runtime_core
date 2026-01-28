@@ -18,7 +18,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from .common import DisasmResponse, ResponseLog, VerificationMode
+from .common import DisasmResponse, IrDumpOptions, IrDumpResponse, ResponseLog, VerificationMode
 
 
 class CompileRequestModel(BaseModel):
@@ -27,16 +27,21 @@ class CompileRequestModel(BaseModel):
     disassemble: bool = False
     verifier: bool = False
     verification_mode: VerificationMode = VerificationMode.AHEAD_OF_TIME
+    aot_mode: bool = False
+    ir_dump: IrDumpOptions | None = None
 
 
 class RunResponse(BaseModel):
     run: ResponseLog | None = None
+    run_aot: ResponseLog | None = None
     compile: ResponseLog
     disassembly: DisasmResponse | None = None
     verifier: ResponseLog | None = None
+    ir_dump: IrDumpResponse | None = None
 
 
 class CompileResponse(BaseModel):
     compile: ResponseLog
     disassembly: DisasmResponse | None = None
     verifier: ResponseLog | None = None
+    ir_dump: IrDumpResponse | None = None

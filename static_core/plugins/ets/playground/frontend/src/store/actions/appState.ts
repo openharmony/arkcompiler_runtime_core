@@ -20,10 +20,13 @@ import {
     setDisasm,
     setPrimaryColor,
     setVerificationMode,
+    setAotMode,
     setTheme,
     setVerifier,
     setVersions,
     setVersionsLoading,
+    setIrDumpCompilerDump,
+    setIrDumpDisasmDump,
     Theme
 } from '../slices/appState';
 import { versionService } from '../../services/versions';
@@ -72,6 +75,13 @@ export const setVerificationModeAction = createAsyncThunk(
     },
 );
 
+export const setAotModeAction = createAsyncThunk(
+    '@aotMode/change',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setAotMode(data));
+    },
+);
+
 export const fetchVersions = createAsyncThunk(
     '@versions/fetchVersions',
     async (_, thunkAPI) => {
@@ -96,5 +106,19 @@ export const setVersionAction = createAsyncThunk(
     '@versions/setVersion',
     (data: { frontend: string; backend: string; arkts: string; es2panda: string }, thunkAPI) => {
         thunkAPI.dispatch(setVersions(data));
+    }
+);
+
+export const setIrDumpCompilerDumpAction = createAsyncThunk(
+    '@irDump/compilerDump',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setIrDumpCompilerDump(data));
+    }
+);
+
+export const setIrDumpDisasmDumpAction = createAsyncThunk(
+    '@irDump/disasmDump',
+    (data: boolean, thunkAPI) => {
+        thunkAPI.dispatch(setIrDumpDisasmDump(data));
     }
 );

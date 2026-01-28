@@ -14,7 +14,7 @@
  */
 
 import { RootState } from '..';
-import { Theme, Versions, LogTab } from '../slices/appState';
+import { IrDumpOptions, Theme, Versions, LogTab } from '../slices/appState';
 import { VerificationMode } from '../../models/code';
 
 export const theme = (state: RootState): Theme => state.appState.theme;
@@ -23,7 +23,11 @@ export const withDisasm = (state: RootState): boolean => state.appState.disasm;
 export const withVerifier = (state: RootState): boolean => state.appState.verifier;
 export const withAstView = (state: RootState): boolean => state.appState.astView;
 export const selectVerificationMode = (state: RootState): VerificationMode => state.appState.verificationMode;
+export const withAotMode = (state: RootState): boolean => state.appState.aotMode;
 export const versions = (state: RootState): Versions => state.appState.versions;
 export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
 export const clearLogsEachRun = (state: RootState): boolean => state.appState.clearLogsEachRun;
 export const selectActiveLogTab = (state: RootState): LogTab => state.appState.activeLogTab;
+export const withIrDump = (state: RootState): IrDumpOptions => state.appState.irDump;
+export const withIrDumpEnabled = (state: RootState): boolean =>
+    state.appState.irDump.compilerDump || state.appState.irDump.disasmDump;

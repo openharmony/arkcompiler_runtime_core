@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ describe('ControlPanel component', () => {
 
         store = mockStore({
         // @ts-ignore
-            appState: { disasm: false },
+            appState: { disasm: false, irDump: { compilerDump: false, disasmDump: false } },
             code: { compileLoading: false, runLoading: false },
             options: { isLoading: false, options: [], pickedOptions: [] }
         });
@@ -88,7 +88,7 @@ describe('ControlPanel component', () => {
     it('disables Compile button when compile is loading', () => {
         store = mockStore({
             // @ts-ignore
-            appState: { disasm: false },
+            appState: { disasm: false, irDump: { compilerDump: false, disasmDump: false } },
             options: { isLoading: false, options: [], pickedOptions: [] },
             code: { isCompileLoading: true, isRunLoading: false },
         });
@@ -100,7 +100,7 @@ describe('ControlPanel component', () => {
     it('disables Run button when run is loading', () => {
         store = mockStore({
             // @ts-ignore
-            appState: { disasm: false },
+            appState: { disasm: false, irDump: { compilerDump: false, disasmDump: false } },
             options: { isLoading: false, options: [], pickedOptions: [] },
             code: { isCompileLoading: false, isRunLoading: true },
         });

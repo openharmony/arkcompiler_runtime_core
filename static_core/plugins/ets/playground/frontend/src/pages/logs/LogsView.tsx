@@ -128,6 +128,12 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                         >
                             [{log.from?.includes('Err') ? 'err' : 'out'}]
                         </span>
+                        {log.from?.includes('Aot') && (
+                            <span className={cx(styles.tag, styles.modeTag)}>[AOT]</span>
+                        )}
+                        {(log.from === 'runOut' || log.from === 'runErr') && (
+                            <span className={cx(styles.tag, styles.modeTag)}>[JIT]</span>
+                        )}
                         <div
                             className={cx({
                                 [styles.tag]: true,

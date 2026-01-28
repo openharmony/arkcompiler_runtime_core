@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import os
+from importlib.metadata import PackageNotFoundError
 
 import pytest
 from structlog.testing import capture_logs
@@ -84,7 +86,7 @@ async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
 
     r = Runner(ark_build[0])
     with capture_logs() as cap_logs:
-        res = await r.compile_arkts("code", compile_opts, disasm, verifier)
+        res = await r.compile_arkts("code", compile_opts, disasm=disasm, verifier=verifier)
 
     log_entry_assert(cap_logs[0], event_expected="Compilation pipeline started", stage_expected="compile")
     log_entry_assert(cap_logs[1], event_expected="Compilation succeeded", stage_expected="compile")
@@ -96,7 +98,10 @@ async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
     elif verifier:
         log_entry_assert(cap_logs[2], event_expected="Verification completed")
 
-    expected = {"compile": {"error": "", "exit_code": 0, "output": "executed"}, "disassembly": None, "verifier": None}
+    expected = {
+        "compile": {"error": "", "exit_code": 0, "output": "executed"},
+        "disassembly": None, "verifier": None, "ir_dump": None
+    }
     if disasm:
         expected["disassembly"] = {
             "code": "disassembly output",
@@ -183,6 +188,8 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
         },
         "disassembly": None,
         "verifier": None,
+        "ir_dump": None,
+        "run_aot": None,
         "run": {
             "error": "", "exit_code": 0, "output": "run and compile"
         }
@@ -200,7 +207,12 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
             "error": "",
             "exit_code": 0
         }
-    assert res == expected
+    assert res["run"]["exit_code"] == expected["run"]["exit_code"]
+    assert res["run"]["error"] == expected["run"]["error"]
+    assert res["run"]["output"] == expected["run"]["output"]
+    res_without_run = {k: v for k, v in res.items() if k != "run"}
+    expected_without_run = {k: v for k, v in expected.items() if k != "run"}
+    assert res_without_run == expected_without_run
 
 
 @pytest.mark.asyncio
@@ -229,6 +241,8 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
         },
         "disassembly": None,
         "verifier": None,
+        "ir_dump": None,
+        "run_aot": None,
         "run": None
     }
     assert res == expected
@@ -258,6 +272,8 @@ async def test_run_when_compile_segfault(monkeypatch, ark_build):
         },
         "disassembly": None,
         "verifier": None,
+        "ir_dump": None,
+        "run_aot": None,
         "run": None
     }
     assert res == expected
@@ -288,16 +304,14 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
     log_entry_assert(cap_logs[0], event_expected="Compile and run pipeline started")
     log_entry_assert(cap_logs[2], event_expected="Disassembling failed with nonzero exit code")
 
+    assert res["run"]["exit_code"] == 1
+    assert res["run"]["error"] == "runtime error"
+    assert res["run"]["output"] == ""
     expected = {
         "compile": {
             "error": "",
             "exit_code": 0,
             "output": "executed"
-        },
-        "run": {
-            "error": "runtime error",
-            "exit_code": 1,
-            "output": ""
         },
         "disassembly": {
             "code": None,
@@ -305,9 +319,12 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
             "error": "disassembly failed",
             "output": ""
         },
-        "verifier": None
+        "verifier": None,
+        "ir_dump": None,
+        "run_aot": None
     }
-    assert res == expected
+    res_without_run = {k: v for k, v in res.items() if k != "run"}
+    assert res_without_run == expected
 
 
 async def test_compile_failed_with_disasm(monkeypatch, ark_build):
@@ -322,7 +339,7 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
     r = Runner(ark_build[0])
     with capture_logs() as cap_logs:
-        res = await r.compile_arkts("code", [], True, False)
+        res = await r.compile_arkts("code", [], disasm=True, verifier=False)
     log_entry_assert(cap_logs[0], event_expected="Compilation pipeline started")
     log_entry_assert(cap_logs[-1], event_expected="Compilation failed with nonzero exit code", level_expected="error")
     expected = {
@@ -332,7 +349,8 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
             "output": "compile error"
         },
         "disassembly": None,
-        "verifier": None
+        "verifier": None,
+        "ir_dump": None
     }
     assert res == expected
 
@@ -361,21 +379,14 @@ async def test_run_with_verification_modes(monkeypatch, ark_build, verification_
 
     r = Runner(ark_build[0])
     res = await r.compile_run_arkts("code", [], False, verification_mode=verification_mode)
-    expected = {
-        "compile": {
-            "error": "",
-            "exit_code": 0,
-            "output": "executed"
-        },
-        "run": {
-            "error": "",
-            "exit_code": 0,
-            "output": "run output"
-        },
-        "disassembly": None,
-        "verifier": None
-    }
-    assert res == expected
+    assert res["run"]["exit_code"] == 0
+    assert res["run"]["error"] == ""
+    assert res["run"]["output"] == "run output"
+    assert res["compile"] == {"error": "", "exit_code": 0, "output": "executed"}
+    assert res["disassembly"] is None
+    assert res["verifier"] is None
+    assert res["ir_dump"] is None
+    assert res["run_aot"] is None
 
 
 async def test_get_versions(monkeypatch, ark_build):
@@ -572,3 +583,382 @@ async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build
 
     assert captured.get("encoding") == "utf-8"
     assert captured.get("errors") == "replace"
+
+
+def test_parse_compyile_options():
+    """Test parse_compile_options extracts opt-level correctly."""
+    assert not Runner.parse_compile_options({})
+    assert Runner.parse_compile_options({"--opt-level": "2"}) == ["--opt-level=2"]
+    assert not Runner.parse_compile_options({"--other": "val"})
+
+
+@pytest.mark.asyncio
+async def test_run_segfault(monkeypatch, ark_build):
+    """Test run handles segfault correctly."""
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stderr=b"",
+                        return_code=-11),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    with capture_logs() as cap_logs:
+        res = await r.compile_run_arkts("code", [], False)
+    assert res["run"]["exit_code"] == -11
+    assert "run: Segmentation fault" in res["run"]["error"]
+    segfault_logs = [l for l in cap_logs if "segmentation fault" in l.get("event", "")]
+    assert len(segfault_logs) > 0
+
+
+@pytest.mark.asyncio
+async def test_ast_dump_failure_nonzero(monkeypatch, ark_build, fake_saved_stsfile):
+    """Test AST dump with non-zero non-segfault exit code."""
+    subproc_mock = MockAsyncSubprocess([
+        FakeCommand(
+            expected=str(ark_build[1]),
+            opts=["--dump-ast", "--extension=ets", f"--output={fake_saved_stsfile}.abc"],
+            stdout=b"",
+            stderr=b"parse error",
+            return_code=1,
+        ),
+    ])
+    monkeypatch.setattr("asyncio.create_subprocess_exec", subproc_mock.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    with capture_logs() as cap_logs:
+        res = await r.dump_ast("code")
+    assert res["exit_code"] == 1
+    assert res["ast"] is None
+    log_entry_assert(cap_logs[-1], event_expected="Ast dump completed")
+
+
+@pytest.mark.asyncio
+async def test_compile_run_with_aot_mode(monkeypatch, ark_build):
+    """Test compile_run_arkts with AOT mode enabled."""
+    boot_panda = f"--boot-panda-files={ark_build[4]}"
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[boot_panda, "--load-runtimes=ets", "--aot-file=", "ETSGLOBAL::main"],
+                        stdout=b"aot run output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[boot_panda, "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"jit output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-ignore-failures=false"],
+                        stdout=b"aot compile output",
+                        return_code=0),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, aot_mode=True)
+    assert res["run"]["exit_code"] == 0
+    assert res["run"]["output"] == "jit output"
+    assert res["run_aot"]["exit_code"] == 0
+    assert "aot run output" in res["run_aot"]["output"]
+
+
+@pytest.mark.asyncio
+async def test_aot_compile_failure(monkeypatch, ark_build):
+    """Test AOT compilation failure handling."""
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"jit output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-ignore-failures=false"],
+                        stdout=b"aot stdout",
+                        stderr=b"aot error",
+                        return_code=1),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    with capture_logs() as cap_logs:
+        res = await r.compile_run_arkts("code", [], False, aot_mode=True)
+    assert res["run_aot"]["exit_code"] == 1
+    assert "AOT compilation failed:" in res["run_aot"]["error"]
+    aot_fail_logs = [l for l in cap_logs if "AOT compilation failed" in l.get("event", "")]
+    assert len(aot_fail_logs) > 0
+
+
+@pytest.mark.asyncio
+async def test_aot_compile_segfault(monkeypatch, ark_build):
+    """Test AOT compilation segfault handling."""
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"jit output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-ignore-failures=false"],
+                        stderr=b"crash",
+                        return_code=-11),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, aot_mode=True)
+    assert res["run_aot"]["exit_code"] == -11
+    assert "AOT compilation: Segmentation fault" in res["run_aot"]["error"]
+
+
+@pytest.mark.asyncio
+async def test_aot_run_nonzero(monkeypatch, ark_build):
+    """Test AOT run with non-zero exit code."""
+    boot_panda = f"--boot-panda-files={ark_build[4]}"
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[boot_panda, "--load-runtimes=ets", "--aot-file=", "ETSGLOBAL::main"],
+                        stderr=b"runtime error",
+                        return_code=1),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[boot_panda, "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"jit output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-ignore-failures=false"],
+                        stdout=b"aot compile",
+                        return_code=0),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, aot_mode=True)
+    assert res["run_aot"]["exit_code"] == 1
+
+
+@pytest.mark.asyncio
+async def test_aot_missing_binary(monkeypatch, tmp_path):
+    """Test AOT mode when ark_aot binary doesn't exist."""
+    build_path = tmp_path / "build_no_aot"
+    bin_path = build_path / "bin"
+    plugin_path = build_path / "plugins" / "ets"
+    plugin_path.mkdir(parents=True)
+    bin_path.mkdir()
+    (bin_path / "es2panda").write_text("")
+    (bin_path / "ark_disasm").write_text("")
+    (bin_path / "ark").write_text("")
+    (plugin_path / "etsstdlib.abc").write_text("")
+    (bin_path / "verifier").write_text("")
+
+    stdlib_abc = plugin_path / "etsstdlib.abc"
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(bin_path / "es2panda"),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(bin_path / "ark"),
+                        opts=[f"--boot-panda-files={stdlib_abc}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"jit output",
+                        return_code=0),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(build_path)
+    res = await r.compile_run_arkts("code", [], False, aot_mode=True)
+    assert res["run_aot"]["exit_code"] == 1
+    assert "AOT mode requires ark_aot binary" in res["run_aot"]["error"]
+
+
+@pytest.mark.asyncio
+async def test_compile_run_with_ir_dump(monkeypatch, ark_build):
+    """Test compile_run_arkts with IR dump options."""
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[3]),
+                        opts=[f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets", "ETSGLOBAL::main"],
+                        stdout=b"run output",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-dump"],
+                        stdout=b"ir dump output",
+                        return_code=0),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False, ir_dump={"compiler_dump": True, "disasm_dump": False})
+    assert res["run"]["exit_code"] == 0
+    assert res["ir_dump"] is not None
+
+
+@pytest.mark.asyncio
+async def test_compile_with_ir_dump(monkeypatch, ark_build):
+    """Test compile_arkts with IR dump options."""
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=ets"],
+                        expected=str(ark_build[1]),
+                        stdout=b"executed",
+                        return_code=0),
+            FakeCommand(expected=str(ark_build[7]),
+                        opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-dump"],
+                        stdout=b"ir dump",
+                        return_code=0),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    ir_dump_opts = {"compiler_dump": True, "disasm_dump": False}
+    res = await r.compile_arkts("code", [], disasm=False, verifier=False, ir_dump=ir_dump_opts)
+    assert res["ir_dump"] is not None
+
+
+@pytest.mark.asyncio
+async def test_ir_dump_abc_not_found(ark_build):
+    """Test generate_ir_dump when ABC file doesn't exist."""
+    r = Runner(ark_build[0])
+    ir_dump_opts = {"compiler_dump": True, "disasm_dump": False}
+    res = await r.generate_ir_dump("/nonexistent/file.abc", "/tmp", ir_dump_opts)
+    assert res["exit_code"] == 1
+    assert "ABC file not found" in res["error"]
+
+
+@pytest.mark.asyncio
+async def test_ir_dump_nonzero_exit(monkeypatch, ark_build, tmp_path):
+    """Test generate_ir_dump handles non-zero exit code."""
+    abc_file = tmp_path / "test.abc"
+    abc_file.write_text("")
+
+    mocker = MockAsyncSubprocess([
+        FakeCommand(expected=str(ark_build[7]),
+                    opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-dump"],
+                    stderr=b"error",
+                    return_code=1),
+    ])
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    with capture_logs() as cap_logs:
+        res = await r.generate_ir_dump(str(abc_file), str(tmp_path), {"compiler_dump": True, "disasm_dump": False})
+    assert res["exit_code"] == 1
+    log_entry_assert(cap_logs[-1], event_expected="IR dump failed with nonzero exit code", level_expected="error")
+
+
+@pytest.mark.asyncio
+async def test_ir_dump_success_with_files(monkeypatch, ark_build, tmp_path):
+    """Test generate_ir_dump successfully reads dump files."""
+    abc_file = tmp_path / "test.abc"
+    abc_file.write_text("")
+
+    mocker = MockAsyncSubprocess([
+        FakeCommand(expected=str(ark_build[7]),
+                    opts=["--paoc-mode=aot", "--load-runtimes=ets", "--compiler-dump"],
+                    stdout=b"success",
+                    return_code=0),
+    ])
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    dump_folder = tmp_path / "ir_dump"
+    dump_folder.mkdir()
+    (dump_folder / "dump1.ir").write_text("IR content 1")
+    (dump_folder / "dump2.ir").write_text("IR content 2")
+    disasm_file = dump_folder / "ir_disasm.txt"
+    disasm_file.write_text("disasm content")
+
+    r = Runner(ark_build[0])
+    res = await r.generate_ir_dump(str(abc_file), str(tmp_path), {"compiler_dump": True, "disasm_dump": True})
+    assert res["exit_code"] == 0
+    assert res["compiler_dump"] is not None
+    assert "IR content 1" in res["compiler_dump"]
+    assert "IR content 2" in res["compiler_dump"]
+    assert res["disasm_dump"] == "disasm content"
+
+
+@pytest.mark.asyncio
+async def test_execute_cmd_timeout(monkeypatch, ark_build):
+    """Test _execute_cmd handles timeout."""
+
+    class TimeoutProcess:
+        returncode = None
+
+        async def communicate(self):
+            await asyncio.sleep(10)
+            return b"", b""
+
+        def kill(self):
+            pass
+
+    async def mock_create_subprocess(*_args, **_kwargs):
+        return TimeoutProcess()
+
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mock_create_subprocess)
+
+    r = Runner(ark_build[0], timeout=0.01)
+    with capture_logs() as cap_logs:
+        # pylint: disable=protected-access
+        _, stderr, _ = await r._execute_cmd("test_cmd")
+    assert stderr == "Timeout expired"
+    log_entry_assert(cap_logs[-1], event_expected="Subprocess execution timed out", level_expected="error")
+
+
+@pytest.mark.asyncio
+async def test_playground_version_not_installed(monkeypatch, ark_build):
+    """Test _get_playground_version handles PackageNotFoundError."""
+
+    def raise_not_found(_):
+        raise PackageNotFoundError()
+
+    monkeypatch.setattr("src.arkts_playground.deps.runner.version", raise_not_found)
+
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--version"],
+                        expected=str(ark_build[3]),
+                        stdout=b"arkts ver",
+                        return_code=1),
+            FakeCommand(opts=["--version"],
+                        expected=str(ark_build[1]),
+                        stderr=b"es2panda ver",
+                        return_code=1),
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+
+    r = Runner(ark_build[0])
+    playground_ver, _, _ = await r.get_versions()
+    assert playground_ver == "not installed"
