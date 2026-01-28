@@ -23,6 +23,8 @@ cases:
       function main(): void {
         let arr = new Array<C<Object>>(5)
       }
+    error: |-
+      "Error undefined"
 
   - doc: applicable constructor is not accessible
     decl: |-
@@ -34,6 +36,8 @@ cases:
       function main(): void {
         let arr = new Array<C<number>>(5)
       }
+    error: |-
+      "Error undefined"
 
   - doc: access in static class method, no applicable constructor having default value
     decl: |-
@@ -49,6 +53,8 @@ cases:
       function main(): void {
         C.foo()
       }
+    error: |-
+      "Error undefined"
 
   - doc: Base class constructor does not make derived class applicable for use
     decl: |-
@@ -62,3 +68,5 @@ cases:
       function main(): void {
         let arr = new Array<C<Object>>(5)
       }
+    error: |-
+      "Error undefined"

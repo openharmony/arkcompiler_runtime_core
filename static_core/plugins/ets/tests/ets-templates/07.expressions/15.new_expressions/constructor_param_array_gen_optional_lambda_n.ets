@@ -23,17 +23,25 @@ desc: >-
     - Have a default value.
 
 tags: [compile-only, negative]
+expected_out: "Error undefined"
 ---*/
 
 type foo = () => Object|undefined
 
-class C {
+
+class A<T> extends Array<T> {
   i: Object|undefined
   constructor(i: foo) {
       this.i = i()
   }
 }
 
+class C<T> {
+  foo() {
+    let arr = new Array<T>(5)
+  }
+}
+
 function main(): void {
-  let arr = new Array<C>(5)
+  new C<A<Object>>().foo()
 }

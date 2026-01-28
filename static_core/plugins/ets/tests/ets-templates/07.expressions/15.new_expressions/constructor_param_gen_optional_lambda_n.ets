@@ -23,6 +23,7 @@ desc: >-
     - Have a default value.
 
 tags: [compile-only, negative]
+expected_out: "Error undefined"
 ---*/
 
 type foo = () => Object|undefined
