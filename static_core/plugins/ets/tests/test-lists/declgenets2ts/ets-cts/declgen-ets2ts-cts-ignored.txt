@@ -1947,11 +1947,6 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_2.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_public_neg_3.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/different_access_modifiers_0.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/overloading_0.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/overloading_1.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/overloading_2.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/overloading_3.ets
-15.semantic_rules/09.overriding/02.overriding_and_overloading_in_interfaces/overloading_4.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_5.ets
@@ -2113,6 +2108,11 @@
 15.semantic_rules/10.overloading/first_match/first_match_2c_4i.ets
 15.semantic_rules/10.overloading/first_match/first_match_2c_5i.ets
 15.semantic_rules/10.overloading/first_match/first_match_3c_8i.ets
+15.semantic_rules/10.overloading/overloading_0.ets
+15.semantic_rules/10.overloading/interfaces/overloading_0.ets
+15.semantic_rules/10.overloading/interfaces/overloading_1.ets
+15.semantic_rules/10.overloading/interfaces/overloading_3.ets
+15.semantic_rules/10.overloading/interfaces/overloading_4.ets
 15.semantic_rules/13.static_initialization/bad-static-location.ets
 15.semantic_rules/13.static_initialization/base_and_derived/extended_with_static_initializer.ets
 15.semantic_rules/13.static_initialization/base_and_derived/extended_with_static_initializer_2.ets
