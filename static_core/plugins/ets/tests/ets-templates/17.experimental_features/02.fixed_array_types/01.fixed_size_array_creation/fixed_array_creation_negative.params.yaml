@@ -50,3 +50,37 @@ cases:
 
    - logic: "let a: FixedArray<boolean> = [true, false, 'true']"
      expected_out: "Semantic error ESE0227: Array element at index 2 with type '\\\"true\\\"' is not compatible with the target array element type 'Boolean'"
+
+   - logic: "let a = new FixedArray<Function>(30, () => '')"
+     expected_out: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+
+   - logic: "let a = new FixedArray<MyAbstractClass>(30, new IImpl)"
+     expected_out: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+
+   - type: 'Object'
+     value: 'undefined'
+     initType: 'undefined'
+
+   - type: 'Object'
+     value: 'null'
+     initType: 'null'
+
+   - type: 'Double'
+     value: '"abc"'
+     initType: 'String'
+
+   - type: 'Int'
+     value: "5.7"
+     initType: 'Double'
+
+   - type: 'String'
+     value: 123
+     initType: 'Int'
+
+   - type: 'Boolean'
+     value: '"true"'
+     initType: 'String'
+
+   - type: 'Double'
+     value: '(index: int) => undefined'
+     initType: '((p1: Int) => undefined)'

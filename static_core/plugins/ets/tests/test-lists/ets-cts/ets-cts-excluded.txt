@@ -163,7 +163,7 @@
 05.generics/03.utility_types/01.awaited_utility_type/awaited_return_1.ets
 05.generics/03.utility_types/01.awaited_utility_type/awaited_parameter_1.ets
 
-#276
+#29157
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_0.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_1.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_2.ets
@@ -174,5 +174,3 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_7.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_8.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_of_functions_creation_negative_9.ets
-17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_predef_values_creation_negative_6.ets
-17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_predef_values_creation_negative_7.ets

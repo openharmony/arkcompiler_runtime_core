@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,13 @@
 /*---
 desc: New Expressions cannot use generic parameters to create a Fixed-size array. Attempting to do so causes a compile-time error
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0007: Cannot use array creation expression with type parameter."
 ---*/
 
 interface ArrayBuilder<T> {
 
-    init(): FixedArray<T> {
-        let rr = new FixedArray<T>(3);
+    init(size: int): FixedArray<T> {
+        let rr = new FixedArray<T>(size);
         return rr;
     }
 }
@@ -31,5 +32,5 @@ class ArrayBuilderImpl<T> implements ArrayBuilder<T> {
 
 function main() {
     let r = new ArrayBuilderImpl<string>()
-    let rr = r.init()
+    let rr = r.init(3)
 }
