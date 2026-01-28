@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@ class C1 {
   protected c1F2: string = 'protected';
   private c1F3: string = 'private';
   public static c1F4: string = 'static';
-  internal c1F5: int = 1;
   public readonly c1F6: int = 2;
   public final c1F7: int = 1;
 }

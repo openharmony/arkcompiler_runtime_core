@@ -16,7 +16,6 @@ ids:
     # reserved
     - 'abstract'
     - 'else'
-    - 'internal'
     - 'static'
     - 'as'
     - 'enum'
