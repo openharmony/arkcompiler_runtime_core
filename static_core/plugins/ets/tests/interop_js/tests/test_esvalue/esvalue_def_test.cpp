@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,4 +233,288 @@ TEST_F(EtsESValueJsToEtsTest, checkThrowNullOrUndefined)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkThrowNullOrUndefined"));
 }
 
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_test_wrap_boundary)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapNaN"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapInfinity"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapNegativeInfinity"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapMaxSafeInteger"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapMinSafeInteger"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapMaxValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapMinValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapZero"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapEmptyString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapMaxBigInt"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapByteMin"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapByteMax"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapShortMin"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapShortMax"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapIntMin"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapIntMax"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapLargeLong"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapFloatMax"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapStaticObject"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, typeConversionExceptionTests)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToBooleanThrowsOnNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToStringThrowsOnNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToNumberThrowsOnString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToBigIntThrowsOnNumber"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToUndefinedThrowsOnNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToNullThrowsOnUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToStaticObjectThrowsOnECMAObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapUndefined"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testInvokeMethodThrowsOnNonExistent)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInvokeMethodThrowsOnNonExistent"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIteratorThrowsOnNonIterable)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIteratorThrowsOnNonIterable"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testToPromiseThrowsOnNonPromise)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testToPromiseThrowsOnNonPromise"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testUnwrap)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUnwrap"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testInstantiateEmptyObject)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInstantiateEmptyObject"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testInstantiateEmptyArray)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInstantiateEmptyArray"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testGetGlobal)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testGetGlobal"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testGetGlobalProperty"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsECMAObject)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsECMAObject"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsObjectWithStatic)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsObjectWithStatic"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsObjectWithECMA)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsObjectWithECMA"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testAreEqualSafe)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testAreEqualSafeNullNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testAreEqualSafeUndefUndef"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testAreEqualSafeNullUndef"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsEqualToSafe)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsEqualToSafe"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsPromise)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsPromise"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIsNotPromise)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testIsNotPromise"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testIndexAccess)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testNegativeIndexAccess"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testLargeIndexAccess"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testNaNIndexAccess"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testHasOwnProperty)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnProperty"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnPropertyWithESValue"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasPropertyVsHasOwnProperty"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testInvokeWithRecv)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInvokeWithRecv"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testGetPropertySafe)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testGetPropertySafeNumberNonExistent"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testGetPropertySafeESValueNonExistent"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testSetProperty)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSetPropertyToUndefined"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSetPropertyToNull"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSetPropertyWithESValue"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testWrapLongLossy)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWrapLongLossy"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testEmptyObjectIteration)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testEmptyObjectIteration"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testEmptyArrayIteration)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testEmptyArrayIteration"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testComplexObjectNestedAccess)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testComplexObjectNestedAccess"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testObjectWithMethodsInvocation)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testObjectWithMethodsInvocation"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testObjWithNullsAccess)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testObjWithNullsAccess"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testJSClassInstantiation)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJSClassInstantiation"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJSClassInstanceProperties"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testCustomIterable)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testCustomIterableManualNext"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testHasOwnPropertyVsHasPropertyWithProto)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnPropertyVsHasPropertyWithProto"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnPropertyVsHasPropertyWithInheritance"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnPropertyOnClassConstructor"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testHasOwnPropertyOnMethods"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testComplexObjectPropertyModification)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testComplexObjectPropertyModification"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testClassMethod)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassMethodOverride"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassUniqueMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassInheritedMethod"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassSuperMethodCall"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testClassInstanceOfInheritance)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassInstanceOfInheritance"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testClassModifyInheritedFields)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testClassModifyInheritedFields"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testSymbolPropertyAccess)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSymbolPropertyAccess"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testESValeueReflect)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReflectHasProperty"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReflectOwnKeys"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReflectGetOwnPropertyDescriptor"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testReflectApply"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testObjectImmutability)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testObjectIsFrozenAndSealed"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testObjectIsExtensible"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFrozenObjectCannotModify"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testFunctionOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFunctionBind"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFunctionApply"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testFunctionCall"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testESValueOptJson)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJsonStringify"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJsonParse"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJsonSpecialValues"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testJsonCircularReference"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testMapOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testMapOperations"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testSetOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSetOperations"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testWeakMapOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWeakMapOperations"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testWeakSetOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testWeakSetOperations"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testSparseArray)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testSparseArray"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testArrayWithHoles"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testArrayLikeObject"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testNonElementProperties"));
+}
+
+TEST_F(EtsESValueJsToEtsTest, testDateOperations)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateCreation"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateGetTime"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testInvalidDate"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateToISOString"));
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testDateGetMethods"));
+}
 }  // namespace ark::ets::interop::js::testing

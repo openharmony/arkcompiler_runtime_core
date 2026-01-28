@@ -276,6 +276,28 @@ let doubleWrap = ESValue.wrapDouble(3.14159265358);
 let doubleValue = doubleWrap.toDouble(); // 3.14159265358
 ```
 ---
+### wrap
+`public static wrap(o: Any): ESValue`  
+将原始的值类型包装为ESValue对象。
+
+参数：
+
+| 参数名 |  类型  | 必填 |          说明          |
+| :----: | :----: | :--: | :------------------: |
+|    o   | Any |  是  | 需要包装的原始值类型 |
+
+返回值：
+
+|    类型     |           说明           |
+| :---------: | :----------------------: |
+|   ESValue   | 存储动态原始值的ESValue对象 |
+
+示例代码：
+```typescript
+let objVal = ESValue.wrap(dynamicObject);
+let raw = objVal.isObject(); // true
+```
+---
 ### unwrap
 `public unwrap(): Any`  
 将ESValue解包为原始值类型
@@ -566,9 +588,9 @@ let nullValue = val.toNull(); // null
 
 示例代码：
 ```typescript
-let objVal = ESValue.instantiateEmptyObject();
-let obj = objVal.toStaticObject();
-obj.property = 'value';
+class A {};
+let objA = ESValue.wrap(new A());
+let obj = objA.toStaticObject();
 ```
 ---
 ### areEqual
@@ -666,14 +688,14 @@ let res = val1.isStrictlyEqualTo(val2); // true
 ```
 ---
 ### instantiate
-`public instantiate(...args: FixedArray<ESValue>): ESValue`  
+`public instantiate(...args: FixedArray<StaticOrESValue>): ESValue`  
 实例化一个类，并将其包装成ESValue对象返回。参数为构造函数所需的参数。
 
 参数：
 
 |     参数名     |         类型         | 必填 |       说明       |
 | :------------: | :------------------: | :--: | :--------------: |
-| ...args (动态) | FixedArray<ESValue> |  否  | 构造函数的参数列表 |
+| ...args (动态) | FixedArray<StaticOrESValue> |  否  | 构造函数的参数列表 |
 
 返回值：
 
@@ -727,8 +749,8 @@ obj.setProperty('key', ESValue.wrapString('value'));
 示例代码：
 ```typescript
 let arr = ESValue.instantiateEmptyArray();
-arr.push(ESValue.wrapNumber(1));
-arr.push(ESValue.wrapNumber(2));
+arr.invokeMethod('push', ESValue.wrapNumber(1));
+arr.invokeMethod('push', ESValue.wrapNumber(2));
 ```
 ---
 ### getProperty (string版本)
@@ -811,7 +833,7 @@ let val = jsArray.getProperty(ESValue.wrapNumber(2));
 ```
 ---
 ### setProperty (string版本)
-`public setProperty(name: string, value: ESValue): void`  
+`public setProperty(name: string, value: StaticOrESValue): void`  
 以`name`值为属性名，`value`保存的动态对象为属性值，设置this保存的动态对象的属性值。
 
 参数：
@@ -819,7 +841,7 @@ let val = jsArray.getProperty(ESValue.wrapNumber(2));
 | 参数名 |       类型        | 必填 |     说明     |
 | :----: | :-------: | :--: | :----------: |
 |  name  |  string   |  是  |   属性名称   |
-| value  |  ESValue  |  是  |   属性值     |
+| value  |  StaticOrESValue  |  是  |   属性值     |
 
 示例代码：
 ```typescript
@@ -830,12 +852,12 @@ export let A = {
 // file2.ets
 let module = ESValue.load('file1');
 let value = ESValue.wrapNumber(5);
-let property = ESValue.wrapString('property1');
+let property = 'property1';
 jsObjectA.setProperty(property, value);
 ```
 ---
 ### setProperty (number版本)
-`public setProperty(index: number, value: ESValue): void`  
+`public setProperty(index: number, value: StaticOrESValue): void`  
 以`index`值为属性名，`value`保存的动态对象为属性值，设置this保存的动态对象的属性值。
 
 参数：
@@ -843,7 +865,7 @@ jsObjectA.setProperty(property, value);
 | 参数名 |       类型        | 必填 |     说明     |
 | :----: | :-------: | :--: | :----------: |
 | index  |  number   |  是  |   数组索引   |
-| value  |  ESValue  |  是  |   元素值     |
+| value  |  StaticOrESValue  |  是  |   元素值     |
 
 示例代码：
 ```typescript
@@ -857,7 +879,7 @@ jsArray1.setProperty(2, value);
 ```
 ---
 ### setProperty (ESValue版本)
-`public setProperty(property: ESValue, value: ESValue): void`  
+`public setProperty(property: ESValue, value: StaticOrESValue): void`  
 以`property`保存的动态对象为属性名，`value`保存的动态对象为属性值，设置this保存的动态对象的属性。
 
 参数：
@@ -865,7 +887,7 @@ jsArray1.setProperty(2, value);
 |  参数名  |       类型        | 必填 |     说明     |
 | :------: | :-------: | :--: | :----------: |
 | property |  ESValue  |  是  | 属性标识对象 |
-|  value   |  ESValue  |  是  |   属性值     |
+|  value   |  StaticOrESValue  |  是  |   属性值     |
 
 示例代码：
 ```typescript
@@ -1001,14 +1023,14 @@ let hasIdx = obj.hasOwnProperty('idx');
 ```
 ---
 ### invoke
-`public invoke(...args: FixedArray<ESValue>): ESValue`  
+`public invoke(...args: FixedArray<StaticOrESValue>): ESValue`  
 执行this中保存的动态对象的函数或方法，`args`为包装的ESValue对象。
 
 参数：
 
 |   参数名   |       类型        | 必填 |     说明     |
 | :--------: | :--------------: | :--: | :----------: |
-| ...args | FixedArray<ESValue> |  否  | 函数参数列表 |
+| ...args | FixedArray<StaticOrESValue> |  否  | 函数参数列表 |
 
 返回值：
 
@@ -1027,7 +1049,7 @@ let result = jsFunc.invoke();
 ```
 ---
 ### invokeWithRecv
-`public invokeWithRecv(recv: ESValue, ...args: FixedArray<ESValue>): ESValue`  
+`public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue`  
 以`recv`为this，`args`为参数，执行ESValue中保存的方法。`args`为包装的ESValue对象。
 
 参数：
@@ -1035,7 +1057,7 @@ let result = jsFunc.invoke();
 | 参数名 |       类型        | 必填 |     说明     |
 | :----: | :---------------: | :--: | :----------: |
 |  recv  |      ESValue       |  是  |    this值   |
-| ...args | FixedArray<ESValue> |  否  | 函数参数列表 |
+| ...args | FixedArray<StaticOrESValue> |  否  | 函数参数列表 |
 
 返回值：
 
@@ -1053,7 +1075,7 @@ let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 ```
 ---
 ### invokeMethod
-`public invokeMethod(method: string, ...args: FixedArray<ESValue>): ESValue`  
+`public invokeMethod(method: string, ...args: FixedArray<StaticOrESValue>): ESValue`  
 以`mothod`方法名，`args`为参数，获取this中保存的动态对象的方法并执行该方法。`args`为包装的ESValue对象。
 
 参数：
@@ -1061,7 +1083,7 @@ let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 | 参数名 |       类型        | 必填 |     说明     |
 | :----: | :---------------: | :--: | :----------: |
 | method |      string       |  是  |   方法名称   |
-| ...args | FixedArray<ESValue> |  否  | 方法参数列表 |
+| ...args | FixedArray<StaticOrESValue> |  否  | 方法参数列表 |
 
 返回值：
 
@@ -1155,14 +1177,14 @@ for (const entry of jsIterableObject.entries()) {
 ```
 ---
 ### instanceOf
-`public instanceOf(type: ESValue): boolean`  
+`public instanceOf(type: ESValue | Type): boolean`  
 检查this对象中保存的动态对象，是否是`type`对象中保存的动态类型的实例。
 
 参数：
 
 | 参数名 |   类型    | 必填 |     说明     |
 | :----: | :-----: | :--: | :----------: |
-|  type  | ESValue |  是  | 动态类型 |
+|  type  | ESValue/Type |  是  | 动态类型 |
 
 返回值：
 
@@ -1259,6 +1281,30 @@ export async function sleepRetNumber(ms: number): Promise<number> {
 let module = ESValue.load('file1');
 let sleepRetNumber = module.getProperty('sleepRetNumber');
 let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
+```
+---
+### toPromise
+`public toPromise(): Promise<ESValue>`  
+判断ESValue对象中保存的对象是否是为Promise类型，若是则将其以Promise<ESValue>对象返回，否则抛出异常。
+
+返回值：
+
+|   类型    |            说明             |
+| :-------: | :-------------------------: |
+|  Promise\<ESValue\> | 一个将来会完成、并返回 ESValue 的异步结果 |
+
+示例代码：
+```typescript
+// file1.ts
+export async function sleepRetNumber(ms: number): Promise<number> {
+    await sleep(ms);
+    return 0xcafe;
+}
+// file2.ets
+let module = ESValue.load('file1');
+let sleepRetNumber = module.getProperty('sleepRetNumber');
+let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
+await res;
 ```
 ---
 ### $_iterator
