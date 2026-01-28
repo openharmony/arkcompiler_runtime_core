@@ -172,8 +172,22 @@
 07.expressions/06.object_literal/spec_ex3.ets
 07.expressions/06.object_literal/spec_ex7.ets
 
-#28484 Interface has methods
-07.expressions/05.object_literal/spec_ex6.ets
+#33083
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_1.ets
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_2.ets
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_3.ets
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_4.ets
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_negative/class_literals_negative_12.ets
+
+#33084
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_abstract_3.ets
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_abstract_4.ets
+
+#33091
+07.expressions/06.object_literal/01.object_literal_of_class_type/class_literal_positive/class_literals_abstract_2.ets
+
+#33086
+07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
 
 #25990
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets

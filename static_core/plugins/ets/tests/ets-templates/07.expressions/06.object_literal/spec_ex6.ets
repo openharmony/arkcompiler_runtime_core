@@ -17,32 +17,32 @@
 desc: >-
     If a class or an interface has some method implementation,
     then its object literal can either skip providing a new method implementation,
-    or provide its own version of method
+    or provide its own version of the method
 ---*/
 
 abstract class Base {
-    method () { console.log ("method() from Base is called") }
+    method(): number { return 1 }
 }
 
 interface I {
-    method () { console.log ("method() from I is called") }
+    method(): number { return 3 }
 }
 
 function main(): void {
     const x1: Base = {} // Valid literal of type Base
-    x1.method()
+    arktest.assertEQ(x1.method(), 1)
 
     const x2: Base = { // Valid literal of type compatible to Base
-        method () { console.log ("method() from object literal is called") }
+        method(): number { return 2}
     }
-    x2.method ()
+    arktest.assertEQ(x2.method(), 2)
 
     const x3: I = {} // Valid literal of anonymous class type
-    x3.method ()
+    arktest.assertEQ(x3.method(), 3)
 
     const x4: I = { // Valid literal of anonymous class type
-        method () { console.log ("method() from object literal is called") }
+        method(): number { return 4 }
     }
-    x4.method ()
+    arktest.assertEQ(x4.method(), 4)
 
 }

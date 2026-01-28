@@ -1,0 +1,222 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    checks:
+      # keeping default values or initializers
+      - literal: "{a: 'a'}"
+        field: a
+        value: "'a'"
+      - literal: "{a: 'a'}"
+        field: foo('b')
+        value: "'ab'"
+      - literal: "{}"
+        field: a
+        value: "'default'"
+      - literal: "{}"
+        field: foo('b')
+        value: "'defaultb'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    checks:
+      # overriding method in literal
+      - literal: "{foo(a: string): string { return a + a}, a: 'a'}"
+        field: foo('b')
+        value: "'bb'"
+      - literal: "{foo(a: string): string { return a}}"
+        field: foo('b')
+        value: "'b'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        foo(a: string): string {
+          return this.a + a
+        }
+      }
+    type: |-
+      A
+    checks:
+      # overriding method in literal
+      - literal: "{foo(a: string): string { return this.a + a + a}, a: 'a'}"
+        field: foo('b')
+        value: "'abb'"
+      - literal: "{foo(a: string): string { return this.a}}"
+        field: foo('b')
+        value: "'default'"
+
+  - decl: |-
+      class A {
+        b: Base = new Base
+        foo(d: Derived): Base {
+          return new Base
+        }
+      }
+      class Base { b: string = "base"}
+      class Derived extends Base { b: string  = "derived"}
+    type: |-
+      A
+    checks:
+      # overriding method according to override-compatible sig in literal
+      - literal: "{foo(a: Base): Derived { return new Derived}, b: new Base}"
+        field: foo(new Base).b
+        value: "'derived'"
+      - literal: "{foo(a: Base): Derived { return new Derived}}"
+        field: foo(new Base).b
+        value: "'derived'"
+
+  - decl: |-
+      class A {
+        b: Base = new Base
+        foo(d: Derived): Base {
+          this.b = d
+          return this.b
+        }
+      }
+      class Base { b: string = "base"}
+      class Derived extends Base { b: string  = "derived"}
+    type: |-
+      A
+    checks:
+      # overriding method according to override-compatible sig in literal
+      - literal: "{foo(a: Base): Derived { this.b = new Derived; return this.b}, b: new Base}"
+        field: foo(new Base).b
+        value: "'derived'"
+      - literal: "{foo(a: Base): Derived { this.b = new Derived; return this.b}}"
+        field: foo(new Base).b
+        value: "'derived'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        constructor(p?: string) {
+          if (p) {
+              this.a = p
+          }
+        }
+      }
+    type: |-
+      A
+    checks:
+      # constructor with optional params
+      - literal: "{a: 'a'}"
+        field: a
+        value: "'a'"
+      - literal: "{}"
+        field: a
+        value: "'default'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        constructor(p: string) {
+          this.a = p
+        }
+        constructor() {}
+      }
+    type: |-
+      A
+    checks:
+      # explicit default constructor if constructor with params is present
+      - literal: "{a: 'a'}"
+        field: a
+        value: "'a'"
+      - literal: "{}"
+        field: a
+        value: "'default'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        readonly b: string
+        constructor() {
+          this.b = "readonly"
+        }
+      }
+    type: |-
+      A
+    checks:
+      # readonly field init with class literal
+      - literal: "{a: 'a'}"
+        field: a
+        value: "'a'"
+      - literal: "{}"
+        field: a
+        value: "'default'"
+      - literal: "{a: 'a'}"
+        field: b
+        value: "'readonly'"
+      - literal: "{}"
+        field: b
+        value: "'readonly'"
+
+  - decl: |-
+      class A {
+        private _a: string = 'default'
+        set a (a: string) {
+          this._a = a
+        }
+        get a (): string {
+          return this._a
+        }
+      }
+    type: |-
+      A
+    checks:
+      # accessors in object literal
+      - literal: "{a: 'a'}"
+        field: a
+        value: "'a'"
+      - literal: "{}"
+        field: a
+        value: "'default'"
+
+  - decl: |-
+      class A {
+        a: string = 'default'
+        b?: number
+      }
+    type: |-
+      A
+    checks:
+      # optional in object literal
+      - literal: "{a: 'a'}"
+        field: b
+        value: "undefined"
+      - literal: "{}"
+        field: b
+        value: "undefined"
+      - literal: "{a: 'a', b: 99}"
+        field: b
+        value: "99"
+      - literal: "{b: 99}"
+        field: a
+        value: "'default'"
