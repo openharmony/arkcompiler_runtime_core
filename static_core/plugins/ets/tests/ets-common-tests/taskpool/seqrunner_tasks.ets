@@ -384,6 +384,13 @@ async function cancelSequenceRunnerWaittingTask(){
     arktest.assertEQ(catchCalled, true);
 }
 
+function seqRunnerPriorityChangeTest() {
+    let runner1 = new taskpool.SequenceRunner('runner1', taskpool.Priority.LOW);
+    arktest.expectError(() => {
+        let runner2 = new taskpool.SequenceRunner('runner1', taskpool.Priority.MEDIUM);
+    }, new Error('seqRunner:: The priority can not be changed.'));
+}
+
 function main(): int {
     let seqRunnerSuite = new arktest.ArkTestsuite('taskpool.SequenceRunner');
     let seqRunnerSuiteDisabled = new arktest.ArkTestsuite('taskpool.SequenceRunner.DISABLED');
@@ -403,6 +410,7 @@ function main(): int {
     seqRunnerSuite.addAsyncTest('TestSequenceRunnerExecuteOrder', testSequenceRunnerexecuteorder);
     seqRunnerSuite.addAsyncTest('sameNameSharedRunnerTest', sameNameSharedRunnerTest);
     seqRunnerSuite.addAsyncTest('cancelSequenceRunnerWaittingTask', cancelSequenceRunnerWaittingTask);
+    seqRunnerSuite.addTest('SeqRunnerPriorityChangeTest', seqRunnerPriorityChangeTest);
     let res = seqRunnerSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
