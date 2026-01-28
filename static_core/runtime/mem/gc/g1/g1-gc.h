@@ -253,6 +253,7 @@ private:
     void CollectMetrickBeforeSinglePass(size_t &allocatedBytesYoung, size_t &allocatedBytesOld,
                                         size_t &allocatedObjectsYoung, size_t &allocatedObjectsOld);
     void EvacuateCollectionSet(const RemSet<> &remset);
+    void UpdateAndSweep();
     void MergeRemSet(RemSet<> *remset);
     void HandleReferences(const GCTask &task);
     void ResetRegionAfterMixedGC();
@@ -281,15 +282,6 @@ private:
 
     template <typename Marker, typename Predicate>
     GCRootVisitor CreateGCRootVisitor(GCMarkingStackType &objectsStack, Marker &marker, const Predicate &refPred);
-
-    /**
-     * Mark roots and add them to the stack
-     * @param objects_stack
-     * @param visit_class_roots
-     * @param visit_card_table_roots
-     */
-    void MarkRoots(GCMarkingStackType *objectsStack, CardTableVisitFlag visitCardTableRoots,
-                   VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL);
 
     /**
      * Initial marks roots and fill in 1st level from roots into stack.
@@ -385,8 +377,6 @@ private:
 
     /// Sweep VM refs for non-regular (humongous + nonmovable) objects
     void SweepNonRegularVmRefs();
-
-    void SweepRegularVmRefs();
 
     void VerifyHeapBeforeConcurrent();
 

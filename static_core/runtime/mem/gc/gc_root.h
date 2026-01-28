@@ -97,6 +97,16 @@ public:
         return fromObject_;
     }
 
+    void Update(ObjectPointerType newAddr)
+    {
+        *object_ = newAddr;
+    }
+
+    void Update(ObjectHeader *newAddr)
+    {
+        *object_ = static_cast<ObjectPointerType>(ToUintPtr(newAddr));
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const GCRoot &root);
 
     ~GCRoot() = default;
@@ -145,7 +155,7 @@ public:
 
     void VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const;
 
-    void UpdateRefsToMovedObjects(const GCRootUpdater &gcRootUpdater);
+    void UpdateAndSweep(const ReferenceUpdater &updater);
 
 private:
     /// Visit VM-specific roots
@@ -162,19 +172,6 @@ private:
      * @param thread
      */
     void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const;
-
-    void UpdateRefsInVRegs(ManagedThread *thread, const GCRootUpdater &gcRootUpdater);
-
-    /// Updates references to moved objects in TLS
-    void UpdateThreadLocals(const GCRootUpdater &gcRootUpdater);
-
-    void UpdateVmRefs(const GCRootUpdater &gcRootUpdater);
-
-    void UpdateGlobalObjectStorage(const GCRootUpdater &gcRootUpdater);
-
-    void UpdateClassLinkerContextRoots(const GCRootUpdater &gcRootUpdater);
-
-    void UpdateAotStringRoots(const GCRootUpdater &gcRootUpdater);
 
     PandaVM *vm_ {nullptr};
 };

@@ -75,8 +75,8 @@ public:
     virtual void InitializeGC() = 0;
     virtual void StartGC() = 0;
     virtual void StopGC() = 0;
-    virtual void VisitVmRoots(const GCRootVisitor &visitor) = 0;
-    virtual void UpdateVmRefs(const GCRootUpdater &gcRootUpdater) = 0;
+    virtual void VisitVmRoots(const GCRootVisitor &visitor);
+    virtual void UpdateAndSweepVmRefs(const ReferenceUpdater &updater);
     virtual void UninitializeThreads() = 0;
     virtual void SaveProfileInfo() {}
 
@@ -129,16 +129,6 @@ public:
     virtual void VisitStrings(const StringTable::StringVisitor &visitor)
     {
         GetStringTable()->VisitStrings(visitor);
-    }
-
-    virtual void SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
-    {
-        GetStringTable()->Sweep(gcObjectVisitor);
-    }
-
-    virtual bool UpdateMovedStrings(const GCRootUpdater &gcRootUpdater)
-    {
-        return GetStringTable()->UpdateMoved(gcRootUpdater);
     }
 
     // NOTE(maksenov): remove this method after fixing interpreter performance

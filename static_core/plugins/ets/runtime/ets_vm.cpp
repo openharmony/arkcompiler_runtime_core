@@ -683,6 +683,7 @@ void PandaEtsVM::RemoveRootProvider(mem::RootProvider *provider)
 
 void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
+    PandaVM::VisitVmRoots(visitor);
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
         const auto coroutine = EtsCoroutine::CastFromThread(thread);
         if (auto etsNapiEnv = coroutine->GetEtsNapiEnv()) {
@@ -713,87 +714,25 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
     GetUnhandledObjectManager()->VisitObjects(visitor);
 }
 
-template <bool REF_CAN_BE_NULL>
-void PandaEtsVM::UpdateMovedVmRef(Value &ref, const GCRootUpdater &gcRootUpdater)
+void PandaEtsVM::UpdateAndSweepVmRefs(const ReferenceUpdater &updater)
 {
-    ASSERT(ref.IsReference());
-    ObjectHeader *arg = ref.GetAs<ObjectHeader *>();
-    if constexpr (REF_CAN_BE_NULL) {
-        if (arg == nullptr) {
-            return;
-        }
-    } else {
-        ASSERT(arg != nullptr);
-    }
-
-    if (gcRootUpdater(&arg)) {
-        ref = Value(arg);
-        LOG(DEBUG, GC) << "Forwarded root object: " << arg;
-    }
-}
-
-void PandaEtsVM::UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine, const GCRootUpdater &gcRootUpdater)
-{
-    PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
-    if (!arguments.empty()) {
-        // arguments may be empty in the following cases:
-        // 1. The entrypoint is static and doesn't accept any arguments
-        // 2. The coroutine is launched.
-        // 3. The entrypoint is the main method
-        Method *entrypoint = coroutine->GetManagedEntrypoint();
-        panda_file::ShortyIterator it(entrypoint->GetShorty());
-        size_t argIdx = 0;
-        ++it;  // skip return type
-        if (!entrypoint->IsStatic()) {
-            // handle 'this' argument
-            UpdateMovedVmRef<false>(arguments[argIdx], gcRootUpdater);
-            ++argIdx;
-        }
-        while (it != panda_file::ShortyIterator()) {
-            if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                UpdateMovedVmRef<true>(arguments[argIdx], gcRootUpdater);
-            }
-            ++it;
-            ++argIdx;
-        }
-    }
-}
-
-void PandaEtsVM::UpdateVmRefs(const GCRootUpdater &gcRootUpdater)
-{
-    GetThreadManager()->EnumerateThreads([&gcRootUpdater](ManagedThread *thread) {
-        auto coroutine = EtsCoroutine::CastFromThread(thread);
-        if (auto etsNapiEnv = coroutine->GetEtsNapiEnv()) {
-            auto etsStorage = etsNapiEnv->GetEtsReferenceStorage();
-            etsStorage->GetAsReferenceStorage()->UpdateMovedRefs(gcRootUpdater);
-        }
-        if (!coroutine->HasManagedEntrypoint()) {
-            return true;
-        }
-        UpdateManagedEntrypointArgRefs(coroutine, gcRootUpdater);
-        return true;
-    });
-
-    objStateTable_->EnumerateObjectStates([&gcRootUpdater](EtsObjectStateInfo *info) {
+    PandaVM::UpdateAndSweepVmRefs(updater);
+    objStateTable_->EnumerateObjectStates([&updater](EtsObjectStateInfo *info) {
         auto *obj = info->GetEtsObject()->GetCoreType();
-        if (gcRootUpdater(&obj)) {
-            info->SetEtsObject(EtsObject::FromCoreType(obj));
-        }
+        [[maybe_unused]] ObjectStatus status = updater(&obj);
+        ASSERT(status == ObjectStatus::ALIVE_OBJECT);
+        info->SetEtsObject(EtsObject::FromCoreType(obj));
     });
-
+    finalizationRegistryManager_->UpdateAndSweep(updater);
     {
         os::memory::LockHolder lock(rootProviderlock_);
         for (auto *rootProvider : rootProviders_) {
-            rootProvider->UpdateRefs(gcRootUpdater);
+            rootProvider->UpdateRefs([&updater](ObjectHeader **ref) {
+                auto status = updater(ref);
+                return status == ObjectStatus::ALIVE_OBJECT;
+            });
         }
     }
-    GetUnhandledObjectManager()->UpdateObjects(gcRootUpdater);
-}
-
-void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
-{
-    PandaVM::SweepVmRefs(gcObjectVisitor);
-    finalizationRegistryManager_->Sweep(gcObjectVisitor);
 }
 
 EtsFinalizableWeakRef *PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,

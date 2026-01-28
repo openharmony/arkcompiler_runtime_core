@@ -963,7 +963,7 @@ void GC::MoveObjectsToPygoteSpace()
 
     // Update because we moved objects from object_allocator -> pygote space
     UpdateRefsToMovedObjectsInPygoteSpace();
-    CommonUpdateRefsToMovedObjects();
+    CommonUpdateAndSweepVmRefs();
 
     // Clear the moved objects in old space
     objectAllocator_->FreeObjectsMovedToPygoteSpace();

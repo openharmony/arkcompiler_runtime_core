@@ -1319,8 +1319,7 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     CollectMetrickBeforeSinglePass(allocatedBytesYoung, allocatedBytesOld, allocatedObjectsYoung, allocatedObjectsOld);
 
     EvacuateCollectionSet(remset);
-
-    this->CommonUpdateRefsToMovedObjects();
+    UpdateAndSweep();
     HandleReferences(task);
     ActualizeRemSets();
 
@@ -1330,17 +1329,6 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 
     updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefsQueueTemp_->begin(), updatedRefsQueueTemp_->end());
     updatedRefsQueueTemp_->clear();
-
-    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
-        if ((*object)->IsForwarded()) {
-            *object = GetForwardAddress(*object);
-            return true;
-        }
-        return false;
-    };
-
-    this->GetPandaVm()->UpdateMovedStrings(gcRootUpdaterCallback);
-    SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
 }
@@ -1465,12 +1453,30 @@ void G1GC<LanguageConfig>::MergeRemSet(RemSet<> *remset)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::UpdateAndSweep()
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    auto callback = [this](ObjectHeader **objPtr) {
+        ObjectHeader *object = *objPtr;
+        if (!InGCSweepRange(object)) {
+            return ObjectStatus::ALIVE_OBJECT;
+        }
+        if (object->IsForwarded()) {
+            *objPtr = GetForwardAddress(object);
+            return ObjectStatus::ALIVE_OBJECT;
+        }
+        return ObjectStatus::DEAD_OBJECT;
+    };
+    RootManager<LanguageConfig> rootManager(this->GetPandaVm());
+    rootManager.UpdateAndSweep(callback);
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::HandleReferences([[maybe_unused]] const GCTask &task)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     this->ProcessReferences(refClearPred);
-    this->GetPandaVm()->GetGlobalObjectStorage()->ClearWeakRefs(refClearPred);
     ProcessDirtyCards();
 }
 
@@ -1770,7 +1776,6 @@ void G1GC<LanguageConfig>::UpdateRefsAndClear(const CollectionSet &collectionSet
     }
 
     VerifyCollectAndMove(std::move(*collectVerifier), collectionSet);
-    SweepRegularVmRefs();
 
     auto objectAllocator = this->GetG1ObjectAllocator();
     if (!collectionSet.Young().empty()) {
@@ -1951,7 +1956,14 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
         GCScope<TRACE_TIMING> waitingTiming("WaitUntilTasksEnd", this);
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
-    this->CommonUpdateRefsToMovedObjects();
+    this->VisitRoots(
+        [](GCRoot root) {
+            if (root.GetObjectHeader()->IsForwarded()) {
+                root.Update(GetForwardAddress(root.GetObjectHeader()));
+            }
+        },
+        VisitGCRootFlags::ACCESS_ROOT_NONE);
+    UpdateAndSweep();
 }
 
 template <class LanguageConfig>
@@ -2158,7 +2170,8 @@ void G1GC<LanguageConfig>::SweepNonRegularVmRefs()
 {
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
 
-    this->GetPandaVm()->SweepVmRefs([this](ObjectHeader *object) {
+    this->GetPandaVm()->UpdateAndSweepVmRefs([this](ObjectHeader **ref) {
+        ObjectHeader *object = *ref;
         Region *region = ObjectToRegion(object);
         if (region->HasFlag(RegionFlag::IS_EDEN)) {
             return ObjectStatus::ALIVE_OBJECT;
@@ -2172,19 +2185,6 @@ void G1GC<LanguageConfig>::SweepNonRegularVmRefs()
             }
         }
         return this->IsMarked(object) ? ObjectStatus::ALIVE_OBJECT : ObjectStatus::DEAD_OBJECT;
-    });
-}
-
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::SweepRegularVmRefs()
-{
-    ScopedTiming t(__FUNCTION__, *this->GetTiming());
-
-    this->GetPandaVm()->SweepVmRefs([this](ObjectHeader *obj) {
-        if (this->InGCSweepRange(obj)) {
-            return ObjectStatus::DEAD_OBJECT;
-        }
-        return ObjectStatus::ALIVE_OBJECT;
     });
 }
 

@@ -153,8 +153,8 @@ template <class LanguageConfig>
 template <typename StwGC<LanguageConfig>::MarkType MARK_TYPE>
 void StwGC<LanguageConfig>::SweepImpl()
 {
-    this->GetPandaVm()->SweepVmRefs([this](ObjectHeader *object) {
-        return this->marker_.template MarkChecker<static_cast<bool>(MARK_TYPE)>(object);
+    this->GetPandaVm()->UpdateAndSweepVmRefs([this](ObjectHeader **ref) -> ObjectStatus {
+        return this->marker_.template MarkChecker<static_cast<bool>(MARK_TYPE)>(*ref);
     });
     this->GetObjectAllocator()->Collect(
         [this](ObjectHeader *object) {

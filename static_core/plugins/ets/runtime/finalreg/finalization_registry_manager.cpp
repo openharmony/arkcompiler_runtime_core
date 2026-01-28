@@ -21,11 +21,6 @@
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 
 namespace ark::ets {
-FinalizationRegistryManager::FinalizationRegistryManager(PandaEtsVM *vm) : vm_(vm)
-{
-    vm->AddRootProvider(this);
-}
-
 void FinalizationRegistryManager::CleanupCoroFinished()
 {
     // Atomic with acq_rel order reason: other threads should see correct value
@@ -68,42 +63,13 @@ void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
     }
 }
 
-void FinalizationRegistryManager::VisitRoots([[maybe_unused]] const GCRootVisitor &visitor) {}
-
-void FinalizationRegistryManager::UpdateRefs(const GCRootUpdater &gcRootUpdater)
-{
-    for (auto it = finalizationList_.begin(); it != finalizationList_.end(); ++it) {
-        EtsFinalizationRegistry *head = nullptr;
-        EtsFinalizationRegistry *cur = *it;
-        EtsFinalizationRegistry *prev = nullptr;
-        while (cur != nullptr) {
-            auto *next = cur->GetNextFinReg();
-            if (gcRootUpdater(reinterpret_cast<ObjectHeader **>(&cur))) {
-                LOG(DEBUG, GC) << "FinalizationRegistryManager: update pointer for "
-                               << mem::GetDebugInfoAboutObject(cur->GetCoreType());
-            }
-            if (head == nullptr) {
-                head = cur;
-            } else {
-                prev->SetNextFinReg(cur);
-            }
-            prev = cur;
-            cur = next;
-        }
-        ASSERT(head != nullptr);
-        *it = head;
-    }
-}
-
-void FinalizationRegistryManager::Sweep(const GCObjectVisitor &gcObjectVisitor)
+void FinalizationRegistryManager::UpdateAndSweep(const ReferenceUpdater &updater)
 {
     auto it = finalizationList_.begin();
     while (it != finalizationList_.end()) {
-        EtsFinalizationRegistry *head = SweepFinRegChain(*it, gcObjectVisitor);
+        EtsFinalizationRegistry *head = UpdateAndSweepFinRegChain(*it, updater);
         if (head == nullptr) {
-            auto toDelete = it;
-            ++it;
-            finalizationList_.erase(toDelete);
+            finalizationList_.erase(it++);
         } else {
             *it = head;
             ++it;
@@ -111,14 +77,16 @@ void FinalizationRegistryManager::Sweep(const GCObjectVisitor &gcObjectVisitor)
     }
 }
 
-EtsFinalizationRegistry *FinalizationRegistryManager::SweepFinRegChain(EtsFinalizationRegistry *cur,
-                                                                       const GCObjectVisitor &gcObjectVisitor)
+EtsFinalizationRegistry *FinalizationRegistryManager::UpdateAndSweepFinRegChain(EtsFinalizationRegistry *cur,
+                                                                                const ReferenceUpdater &updater)
 {
     EtsFinalizationRegistry *head = nullptr;
     EtsFinalizationRegistry *prev = nullptr;
     while (cur != nullptr) {
         auto *next = cur->GetNextFinReg();
-        if (gcObjectVisitor(cur->GetCoreType()) == ObjectStatus::ALIVE_OBJECT) {
+        ObjectHeader *obj = cur->GetCoreType();
+        if (updater(&obj) == ObjectStatus::ALIVE_OBJECT) {
+            cur = EtsFinalizationRegistry::FromCoreType(obj);
             if (head == nullptr) {
                 head = cur;
             } else {

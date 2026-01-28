@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,12 +58,12 @@ class PandaEtsVM;
  * The manager finds the corresponding FinalizationRegistry list (there are may be several lists) and combine
  * all finalization queues into a single list. This list is passed as an argument to the clenaup coroutine.
  */
-class FinalizationRegistryManager final : public mem::RootProvider {
+class FinalizationRegistryManager final {
 public:
-    explicit FinalizationRegistryManager(PandaEtsVM *vm);
+    explicit FinalizationRegistryManager(PandaEtsVM *vm) : vm_(vm) {}
     NO_COPY_SEMANTIC(FinalizationRegistryManager);
     NO_MOVE_SEMANTIC(FinalizationRegistryManager);
-    ~FinalizationRegistryManager() override = default;
+    ~FinalizationRegistryManager() = default;
 
     /**
      * @brief Checks the number of called coroutines with cleanup and calls the next one
@@ -79,11 +79,7 @@ public:
 
     void Enqueue(EtsFinalizationRegistry *finReg);
 
-    void VisitRoots(const GCRootVisitor &visitor) override;
-
-    void UpdateRefs(const GCRootUpdater &gcRootUpdater) override;
-
-    void Sweep(const GCObjectVisitor &gcObjectVisitor);
+    void UpdateAndSweep(const ReferenceUpdater &updater);
 
     static bool CanCleanup(CoroutineWorker::Id currentId, CoroutineWorkerDomain currentDomain, CoroutineWorker::Id id,
                            CoroutineWorkerDomain domain);
@@ -91,7 +87,7 @@ public:
 private:
     /// @brief Increase number of cleanup coroutines and check if not exceeds limit
     bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded();
-    EtsFinalizationRegistry *SweepFinRegChain(EtsFinalizationRegistry *head, const GCObjectVisitor &gcObjectVisitor);
+    EtsFinalizationRegistry *UpdateAndSweepFinRegChain(EtsFinalizationRegistry *head, const ReferenceUpdater &updater);
 
     // Limit of cleanup coroutines count
     static constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;

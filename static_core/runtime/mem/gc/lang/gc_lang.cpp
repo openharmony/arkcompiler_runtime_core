@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,19 +68,23 @@ void GCLang<LanguageConfig>::UpdateRefsToMovedObjectsInPygoteSpace()
 }
 
 template <class LanguageConfig>
-void GCLang<LanguageConfig>::CommonUpdateRefsToMovedObjects()
+void GCLang<LanguageConfig>::CommonUpdateAndSweepVmRefs()
 {
     trace::ScopedTrace scopedTrace(__FUNCTION__);
 
-    auto gcRootUpdaterCallback = [](ObjectHeader **object) {
-        if ((*object)->IsForwarded()) {
-            *object = GetForwardAddress(*object);
-            return true;
+    rootManager_.VisitNonHeapRoots([](GCRoot root) {
+        if (root.GetObjectHeader()->IsForwarded()) {
+            root.Update(GetForwardAddress(root.GetObjectHeader()));
         }
-        return false;
+    });
+    auto callback = [](ObjectHeader **objPtr) {
+        ObjectHeader *object = *objPtr;
+        if (object->IsForwarded()) {
+            *objPtr = GetForwardAddress(object);
+        }
+        return ObjectStatus::ALIVE_OBJECT;
     };
-
-    rootManager_.UpdateRefsToMovedObjects(gcRootUpdaterCallback);
+    rootManager_.UpdateAndSweep(callback);
 }
 
 template <class LanguageConfig>
