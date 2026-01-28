@@ -301,10 +301,19 @@ inline ObjectStatus GCKillEmAllVisitor([[maybe_unused]] const ObjectHeader *mem)
 
 }  // namespace ark
 
+#ifdef PANDA_TARGET_MACOS
+// macOS page size is not constexpr, and is defined as vm_page_size
+// which is extern  vm_size_t vm_page_size;
+#undef PAGE_SIZE
+#endif
+
 // If the OS has this macro, do not redefine it.
-#ifndef PAGE_SIZE
+#ifdef PAGE_SIZE
+inline constexpr size_t PANDA_PAGE_SIZE = PAGE_SIZE;
+#else
 // NB! Keep inline to avoid ODR-violation
-inline constexpr size_t PAGE_SIZE = 4096U;
+inline constexpr size_t PANDA_PAGE_SIZE = 4096U;
+inline constexpr size_t PAGE_SIZE = PANDA_PAGE_SIZE;
 #endif
 
 #endif  // LIBPANDABASE_MEM_H

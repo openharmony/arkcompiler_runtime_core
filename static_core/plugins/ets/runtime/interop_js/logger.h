@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
     va_start(ap, fmt);
     va_copy(apCopy, ap);
 
-    int len = vsnprintf_s(nullptr, 0, PAGE_SIZE, fmt, ap);
+    int len = vsnprintf_s(nullptr, 0, PANDA_PAGE_SIZE, fmt, ap);
     if (len < 0) {
         LOG(FATAL, ETS) << "interop_js: Cannot convert message to log buffer";
         UNREACHABLE();

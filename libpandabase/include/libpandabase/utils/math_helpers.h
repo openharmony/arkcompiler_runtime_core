@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,11 @@ constexpr uint32_t GetIntLog2(const uint32_t X)
     return static_cast<uint32_t>(panda_bit_utils_ctz(X));
 }
 
+constexpr int32_t GetIntLog2(const int32_t X)
+{
+    return static_cast<int32_t>(GetIntLog2(static_cast<uint32_t>(X)));
+}
+
 /**
  * \brief returns log2 for argument
  * @param X - of type uint64_t, should be power of 2
@@ -46,6 +51,11 @@ constexpr uint64_t GetIntLog2(const uint64_t X)
 {
     ASSERT((X > 0) && !(X & (X - 1U)));
     return static_cast<uint64_t>(panda_bit_utils_ctzll(X));
+}
+
+constexpr int32_t GetIntLog2(const int64_t X)
+{
+    return static_cast<int64_t>(GetIntLog2(static_cast<uint64_t>(X)));
 }
 
 /**

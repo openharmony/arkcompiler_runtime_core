@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ CrossingMap::CrossingMap(InternalAllocatorPtr internalAllocator, uintptr_t start
     mapElementsCount_ = size / CROSSING_MAP_GRANULARITY;
     staticArrayElementsCount_ =
         AlignUp(size, CROSSING_MAP_STATIC_ARRAY_GRANULARITY) / CROSSING_MAP_STATIC_ARRAY_GRANULARITY;
-    ASSERT((startAddr & (PAGE_SIZE - 1)) == 0U);
+    ASSERT((startAddr & (PANDA_PAGE_SIZE - 1)) == 0U);
     LOG_CROSSING_MAP(DEBUG) << "Create CrossingMap with start_addr 0x" << std::hex << startAddr_;
 }
 

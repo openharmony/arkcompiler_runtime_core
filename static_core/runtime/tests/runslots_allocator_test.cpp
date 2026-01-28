@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,10 +64,10 @@ protected:
     void AddMemoryPoolToAllocatorProtected(NonObjectAllocator &alloc) override
     {
         os::memory::LockHolder lock(poolLock_);
-        void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE);
-        mprotect(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + DEFAULT_POOL_SIZE_FOR_ALLOC), PAGE_SIZE,
-                 PROT_NONE);
-        std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE};
+        void *mem = ark::os::mem::MapRWAnonymousRaw(DEFAULT_POOL_SIZE_FOR_ALLOC + PANDA_PAGE_SIZE);
+        mprotect(reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(mem) + DEFAULT_POOL_SIZE_FOR_ALLOC),
+                 PANDA_PAGE_SIZE, PROT_NONE);
+        std::pair<void *, size_t> newPair {mem, DEFAULT_POOL_SIZE_FOR_ALLOC + PANDA_PAGE_SIZE};
         allocatedMemMmap_.push_back(newPair);
         if (!alloc.AddMemoryPool(mem, DEFAULT_POOL_SIZE_FOR_ALLOC)) {
             ASSERT_TRUE(0 && "Can't add mem pool to allocator");

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,7 +130,7 @@ TEST_F(HumongousObjAllocatorTest, SimpleAllocateDifferentObjSizeTest)
     std::vector<void *> values;
     // NOLINTNEXTLINE(readability-magic-numbers)
     for (size_t i = 0; i < 20U; i++) {
-        size_t poolSize = DEFAULT_POOL_SIZE_FOR_ALLOC + PAGE_SIZE * i;
+        size_t poolSize = DEFAULT_POOL_SIZE_FOR_ALLOC + PANDA_PAGE_SIZE * i;
         size_t allocSize = poolSize - sizeof(POOL_HEADER_SIZE) - GetAlignmentInBytes(LOG_ALIGN_MAX);
         AddMemoryPoolToAllocator(allocator, poolSize);
         void *mem = allocator.Alloc(allocSize);

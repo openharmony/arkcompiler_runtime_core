@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,11 @@ static uint64_t RealTimeSecond()
 
 static void ThreadCpuClock(os::thread::NativeHandleType thread, clockid_t *clockId)
 {
+#ifdef PANDA_TARGET_MACOS
+    *clockId = CLOCK_THREAD_CPUTIME_ID;
+#else
     pthread_getcpuclockid(thread, clockId);
+#endif
 }
 static uint64_t GetCpuMicroSecond()
 {

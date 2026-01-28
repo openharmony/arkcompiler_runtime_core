@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,10 +29,10 @@ static constexpr uint64_t PANDA_CROSSING_MAP_COVERAGE = PANDA_MAX_HEAP_SIZE;
 // If enabled - we will manage elements, which cross map borders.
 // since now we dirty card by object header, so disable cross-border
 static constexpr bool PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER = false;
-static constexpr size_t PANDA_CROSSING_MAP_GRANULARITY = PAGE_SIZE;
+static constexpr size_t PANDA_CROSSING_MAP_GRANULARITY = PANDA_PAGE_SIZE;
 // NOTE(aemelenko): Now, we can't change the granularity parameter here
 // because IteratingOverObjectsInRange is depended on it
-static_assert(PANDA_CROSSING_MAP_GRANULARITY == PAGE_SIZE);
+static_assert(PANDA_CROSSING_MAP_GRANULARITY == PANDA_PAGE_SIZE);
 
 //  CrossingMap structure is a double linked array:
 //

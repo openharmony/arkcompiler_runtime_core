@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ protected:
 
     void *AddPage(void *addr)
     {
-        return ToVoidPtr(ToUintPtr(addr) + PAGE_SIZE);
+        return ToVoidPtr(ToUintPtr(addr) + PANDA_PAGE_SIZE);
     }
 
     void *IncreaseAddr(void *addr, size_t value)
@@ -133,7 +133,7 @@ TEST_F(CrossingMapTest, OneSmallObjTest)
 {
     static constexpr size_t OBJ_SIZE = 1;
     // Use OBJ_SIZE + PAGE_SIZE here or we can get an overflow during AddPage(obj_addr)
-    void *objAddr = GetRandomObjAddr(OBJ_SIZE + PAGE_SIZE);
+    void *objAddr = GetRandomObjAddr(OBJ_SIZE + PANDA_PAGE_SIZE);
     GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, objAddr) == objAddr) << " seed = " << GetSeed();
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(AddPage(objAddr), AddPage(objAddr)) == nullptr)
@@ -142,7 +142,7 @@ TEST_F(CrossingMapTest, OneSmallObjTest)
 
 TEST_F(CrossingMapTest, BigSmallObjTest)
 {
-    static constexpr size_t OBJ_SIZE = PAGE_SIZE * 2U;
+    static constexpr size_t OBJ_SIZE = PANDA_PAGE_SIZE * 2U;
     void *objAddr = GetRandomObjAddr(OBJ_SIZE);
     GetCrossingMap()->AddObject(objAddr, OBJ_SIZE);
     ASSERT_TRUE(GetCrossingMap()->FindFirstObject(objAddr, ToVoidPtr(ToUintPtr(objAddr) + OBJ_SIZE)) == objAddr)

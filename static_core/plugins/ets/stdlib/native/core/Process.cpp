@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -507,8 +507,7 @@ static ani_long GetProcessStartRealTime([[maybe_unused]] ani_env *env)
 
 static ani_long GetProcessPastCpuTime([[maybe_unused]] ani_env *env)
 {
-    constexpr int PROCESS_CLOCK = 2;
-    return ark::os::time::GetClockTime<std::chrono::milliseconds>(PROCESS_CLOCK);
+    return ark::os::time::GetClockTime<std::chrono::milliseconds>(CLOCK_PROCESS_CPUTIME_ID);
 }
 
 static void AbortProcess([[maybe_unused]] ani_env *env)
@@ -530,8 +529,11 @@ static void ChangeCurrentWorkingDirectory(ani_env *env, ani_string path)
 
 static ani_long GetSystemUptime([[maybe_unused]] ani_env *env)
 {
-    constexpr int BOOTTIME_CLOCK = 7;
-    return ark::os::time::GetClockTime<std::chrono::milliseconds>(BOOTTIME_CLOCK);
+#ifdef PANDA_TARGET_MACOS
+    return ark::os::time::GetClockTime<std::chrono::milliseconds>(CLOCK_MONOTONIC_RAW);
+#else
+    return ark::os::time::GetClockTime<std::chrono::milliseconds>(CLOCK_BOOTTIME);
+#endif
 }
 
 void RegisterProcessNativeMethods(ani_env *env)

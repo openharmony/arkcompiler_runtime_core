@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@
 namespace ark::mem {
 
 static constexpr size_t PAGES_IN_RUNSLOTS = 1;
-static constexpr size_t RUNSLOTS_SIZE = PAGES_IN_RUNSLOTS * PAGE_SIZE;
-static constexpr size_t RUNSLOTS_ALIGNMENT_IN_BYTES = PAGE_SIZE;
+static constexpr size_t RUNSLOTS_SIZE = PAGES_IN_RUNSLOTS * PANDA_PAGE_SIZE;
+static constexpr size_t RUNSLOTS_ALIGNMENT_IN_BYTES = PANDA_PAGE_SIZE;
 static constexpr size_t RUNSLOTS_ALIGNMENT = 10 + 2;  // Alignment for shift
 static constexpr size_t RUNSLOTS_ALIGNMENT_MASK = (1UL << RUNSLOTS_ALIGNMENT) - 1;
 static_assert((1UL << RUNSLOTS_ALIGNMENT) == RUNSLOTS_ALIGNMENT_IN_BYTES);

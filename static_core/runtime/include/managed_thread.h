@@ -52,7 +52,12 @@ public:
 #else
     static constexpr size_t STACK_OVERFLOW_RESERVED_SIZE = 12_KB;
 #endif
+
+#ifdef PANDA_TARGET_MACOS
+    static constexpr size_t STACK_OVERFLOW_PROTECTED_SIZE = 16_KB;
+#else
     static constexpr size_t STACK_OVERFLOW_PROTECTED_SIZE = 4_KB;
+#endif
 
     void SetLanguageContext([[maybe_unused]] const LanguageContext &ctx)
     {
