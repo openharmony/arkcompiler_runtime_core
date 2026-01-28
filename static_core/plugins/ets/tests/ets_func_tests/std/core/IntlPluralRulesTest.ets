@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const fakeLocale = "er-or"
+const fakeLocale = 'er-or'
 
 function main() {
     testSelect()
@@ -29,60 +29,60 @@ function runSelectTest(locale: string, value: number, expected: string, options?
 }
 
 function testSelect() {
-    runSelectTest("en", 1, "one")
-    runSelectTest("en", 2, "other")
-    runSelectTest("en", 0, "other")
+    runSelectTest('en', 1, 'one')
+    runSelectTest('en', 2, 'other')
+    runSelectTest('en', 0, 'other')
   
-    runSelectTest("ru", 1, "one")
-    runSelectTest("ru", 2, "few")
-    runSelectTest("ru", 5, "many")
-    runSelectTest("ru", 21, "one")
-    runSelectTest("ru", 102, "few")
-    runSelectTest("ru", 1005, "many")
+    runSelectTest('ru', 1, 'one')
+    runSelectTest('ru', 2, 'few')
+    runSelectTest('ru', 5, 'many')
+    runSelectTest('ru', 21, 'one')
+    runSelectTest('ru', 102, 'few')
+    runSelectTest('ru', 1005, 'many')
   
-    runSelectTest("fr", 1, "one")
-    runSelectTest("fr", 2, "other")
-    runSelectTest("fr", 0, "one")
+    runSelectTest('fr', 1, 'one')
+    runSelectTest('fr', 2, 'other')
+    runSelectTest('fr', 0, 'one')
   
-    runSelectTest("zh", 1, "other")
-    runSelectTest("zh", 100, "other")
-    runSelectTest("zh", 0, "other")
+    runSelectTest('zh', 1, 'other')
+    runSelectTest('zh', 100, 'other')
+    runSelectTest('zh', 0, 'other')
   
-    runSelectTest("ja", 1, "other")
-    runSelectTest("ja", 5, "other")
+    runSelectTest('ja', 1, 'other')
+    runSelectTest('ja', 5, 'other')
   
-    runSelectTest(fakeLocale, 1, "one")
-    runSelectTest(fakeLocale, 2, "few")
+    runSelectTest(fakeLocale, 1, 'one')
+    runSelectTest(fakeLocale, 2, 'few')
 }
 
 function testResolvedOptions() {
     {
-        const rules = new Intl.PluralRules("en")
+        const rules = new Intl.PluralRules('en')
         const result = rules.resolvedOptions()
         arktest.assertEQ(result.minimumIntegerDigits, 1)
         arktest.assertEQ(result.minimumFractionDigits, 0)
         arktest.assertEQ(result.maximumFractionDigits, 3)
         arktest.assertEQ(result.minimumSignificantDigits, undefined)
         arktest.assertEQ(result.maximumSignificantDigits, undefined)
-        arktest.assertEQ(result.type, "cardinal")
+        arktest.assertEQ(result.type, 'cardinal')
     }
     {
-        const rules = new Intl.PluralRules("en", { type: "ordinal" } as Intl.PluralRulesOptions)
+        const rules = new Intl.PluralRules('en', { type: 'ordinal' } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
-        arktest.assertEQ(result.type, "ordinal")
+        arktest.assertEQ(result.type, 'ordinal')
     }
     {
-        const rules = new Intl.PluralRules("en", { minimumFractionDigits: 2 } as Intl.PluralRulesOptions)
+        const rules = new Intl.PluralRules('en', { minimumFractionDigits: 2 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
         arktest.assertEQ(result.minimumFractionDigits, 2)
     }
     {
-        const rules = new Intl.PluralRules("en", { maximumFractionDigits: 4 } as Intl.PluralRulesOptions)
+        const rules = new Intl.PluralRules('en', { maximumFractionDigits: 4 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
         arktest.assertEQ(result.maximumFractionDigits, 4)
     }
     {
-        const rules = new Intl.PluralRules("en", { minimumSignificantDigits: 3 } as Intl.PluralRulesOptions)
+        const rules = new Intl.PluralRules('en', { minimumSignificantDigits: 3 } as Intl.PluralRulesOptions)
         const result = rules.resolvedOptions()
         arktest.assertEQ(result.minimumSignificantDigits, 3)
     }
@@ -107,94 +107,94 @@ function runTestWithOptions(locale: string, value: number, options: Intl.PluralR
 }
 
 function testSelectWithOptions() {
-    runTestWithOptions("en", 1, { type: "cardinal" }, "one")
-    runTestWithOptions("en", 2, { type: "cardinal" }, "other")
-    runTestWithOptions("en", 1, { type: "ordinal" }, "one")
-    runTestWithOptions("en", 2, { type: "ordinal" }, "two")
-    runTestWithOptions("en", 3, { type: "ordinal" }, "few")
-    runTestWithOptions("en", 4, { type: "ordinal" }, "other")
+    runTestWithOptions('en', 1, { type: 'cardinal' }, 'one')
+    runTestWithOptions('en', 2, { type: 'cardinal' }, 'other')
+    runTestWithOptions('en', 1, { type: 'ordinal' }, 'one')
+    runTestWithOptions('en', 2, { type: 'ordinal' }, 'two')
+    runTestWithOptions('en', 3, { type: 'ordinal' }, 'few')
+    runTestWithOptions('en', 4, { type: 'ordinal' }, 'other')
 
-    runTestWithOptions("fr", 1, { localeMatcher: "lookup" }, "one")
-    runTestWithOptions("fr", 1, { localeMatcher: "best fit" }, "one")
+    runTestWithOptions('fr', 1, { localeMatcher: 'lookup' }, 'one')
+    runTestWithOptions('fr', 1, { localeMatcher: 'best fit' }, 'one')
 
-    runTestWithOptions("fr", 0, { minimumFractionDigits: 2 }, "one")
-    runTestWithOptions("fr", 0.5, { maximumFractionDigits: 1 }, "one")
-    runTestWithOptions("fr", 1.5, { minimumFractionDigits: 2, maximumFractionDigits: 2 }, "one")
-    runTestWithOptions("en", 1.99, { minimumFractionDigits: 1, maximumFractionDigits: 2 }, "other")
-    runTestWithOptions("en", 2.5, { minimumFractionDigits: 1 }, "other")
+    runTestWithOptions('fr', 0, { minimumFractionDigits: 2 }, 'one')
+    runTestWithOptions('fr', 0.5, { maximumFractionDigits: 1 }, 'one')
+    runTestWithOptions('fr', 1.5, { minimumFractionDigits: 2, maximumFractionDigits: 2 }, 'one')
+    runTestWithOptions('en', 1.99, { minimumFractionDigits: 1, maximumFractionDigits: 2 }, 'other')
+    runTestWithOptions('en', 2.5, { minimumFractionDigits: 1 }, 'other')
 
-    runTestWithOptions("de", 1, { minimumIntegerDigits: 2 }, "one")
-    runTestWithOptions("de", 9, { minimumIntegerDigits: 3 }, "other")
+    runTestWithOptions('de', 1, { minimumIntegerDigits: 2 }, 'one')
+    runTestWithOptions('de', 9, { minimumIntegerDigits: 3 }, 'other')
 
-    runTestWithOptions("ru", 1, { minimumSignificantDigits: 2 }, "other")
-    runTestWithOptions("ru", 12, { minimumSignificantDigits: 2, maximumSignificantDigits: 3 }, "many")
-    runTestWithOptions("ru", 1234, { minimumSignificantDigits: 3, maximumSignificantDigits: 5 }, "few")
-    runTestWithOptions("ru", 0.0005, { minimumSignificantDigits: 1, maximumSignificantDigits: 2 }, "other")
+    runTestWithOptions('ru', 1, { minimumSignificantDigits: 2 }, 'other')
+    runTestWithOptions('ru', 12, { minimumSignificantDigits: 2, maximumSignificantDigits: 3 }, 'many')
+    runTestWithOptions('ru', 1234, { minimumSignificantDigits: 3, maximumSignificantDigits: 5 }, 'few')
+    runTestWithOptions('ru', 0.0005, { minimumSignificantDigits: 1, maximumSignificantDigits: 2 }, 'other')
 
-    runTestWithOptions("ja", 0, {}, "other")
-    runTestWithOptions("zh", 2, {}, "other")
-    runTestWithOptions("ar", 0, {}, "zero")
-    runTestWithOptions("ar", 1, {}, "one")
-    runTestWithOptions("ar", 2, {}, "two")
-    runTestWithOptions("ar", 3, {}, "few")
-    runTestWithOptions("ar", 11, {}, "many")
-    runTestWithOptions("ar", 100, {}, "other")
+    runTestWithOptions('ja', 0, {}, 'other')
+    runTestWithOptions('zh', 2, {}, 'other')
+    runTestWithOptions('ar', 0, {}, 'zero')
+    runTestWithOptions('ar', 1, {}, 'one')
+    runTestWithOptions('ar', 2, {}, 'two')
+    runTestWithOptions('ar', 3, {}, 'few')
+    runTestWithOptions('ar', 11, {}, 'many')
+    runTestWithOptions('ar', 100, {}, 'other')
 
     runTestWithOptions(
-        "fr", 
+        'fr', 
         1234.567, 
         { 
-            localeMatcher: "best fit", 
-            type: "cardinal", 
+            localeMatcher: 'best fit', 
+            type: 'cardinal', 
             minimumIntegerDigits: 3, 
             minimumFractionDigits: 2, 
             maximumFractionDigits: 4, 
             minimumSignificantDigits: 3, 
             maximumSignificantDigits: 5 
         }, 
-        "other"
+        'other'
     )
     runTestWithOptions(
-        "fr", 
+        'fr', 
         1.0, 
         { 
-            localeMatcher: "lookup", 
-            type: "cardinal", 
+            localeMatcher: 'lookup', 
+            type: 'cardinal', 
             minimumIntegerDigits: 1, 
             minimumFractionDigits: 0, 
             maximumFractionDigits: 2, 
             minimumSignificantDigits: 1, 
             maximumSignificantDigits: 3 
         }, 
-        "one"
+        'one'
     )
     runTestWithOptions(
-        "ar", 
+        'ar', 
         2, 
         { 
-            localeMatcher: "best fit", 
-            type: "cardinal", 
+            localeMatcher: 'best fit', 
+            type: 'cardinal', 
             minimumIntegerDigits: 1, 
             minimumFractionDigits: 0, 
             maximumFractionDigits: 3, 
             minimumSignificantDigits: 1, 
             maximumSignificantDigits: 5 
         }, 
-        "two"
+        'two'
     )
     runTestWithOptions(
-        "en", 
+        'en', 
         3, 
         { 
-            localeMatcher: "lookup", 
-            type: "ordinal", 
+            localeMatcher: 'lookup', 
+            type: 'ordinal', 
             minimumIntegerDigits: 1, 
             minimumFractionDigits: 0, 
             maximumFractionDigits: 2, 
             minimumSignificantDigits: 1, 
             maximumSignificantDigits: 3 
         }, 
-        "few"
+        'few'
     )
 }
 
@@ -211,9 +211,9 @@ function runSupportedLocalesTest(
 
 function testSupportedLocalesOf() {
     runSupportedLocalesTest(
-        "en",
+        'en',
         undefined,
-        Intl.intlBestFitLocales("en")
+        Intl.intlBestFitLocales('en')
     )
     runSupportedLocalesTest(
         fakeLocale,
@@ -221,35 +221,35 @@ function testSupportedLocalesOf() {
         Intl.intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesTest(
-        ["fr", fakeLocale, "ru"],
+        ['fr', fakeLocale, 'ru'],
         undefined,
-        Intl.intlBestFitLocales(["fr", fakeLocale, "ru"])
+        Intl.intlBestFitLocales(['fr', fakeLocale, 'ru'])
     )
     runSupportedLocalesTest(
-        ["ru-RU", "zh-CN", "en-US"],
+        ['ru-RU', 'zh-CN', 'en-US'],
         undefined,
-        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(['ru-RU', 'zh-CN', 'en-US'])
     )
     runSupportedLocalesTest(
-        ["ru-RU", "zh-CN", "en-US"],
-        { localeMatcher: "best fit" } as Intl.SupportedLocalesOfOptions,
-        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        ['ru-RU', 'zh-CN', 'en-US'],
+        { localeMatcher: 'best fit' } as Intl.SupportedLocalesOfOptions,
+        Intl.intlBestFitLocales(['ru-RU', 'zh-CN', 'en-US'])
     )
 
     runSupportedLocalesTest(
-        "en",
-        { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        Intl.intlLookUpLocales("en")
+        'en',
+        { localeMatcher: 'lookup' } as Intl.SupportedLocalesOfOptions,
+        Intl.intlLookUpLocales('en')
     )
     runSupportedLocalesTest(
         fakeLocale,
-        { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
+        { localeMatcher: 'lookup' } as Intl.SupportedLocalesOfOptions,
         Intl.intlLookUpLocales(fakeLocale)
     )
 
     runSupportedLocalesTest(
-        ["ru-RU", "zh-CN", fakeLocale, "en-US"],
-        { localeMatcher: "lookup" } as Intl.SupportedLocalesOfOptions,
-        Intl.intlLookUpLocales(["ru-RU", "zh-CN", fakeLocale, "en-US"])
+        ['ru-RU', 'zh-CN', fakeLocale, 'en-US'],
+        { localeMatcher: 'lookup' } as Intl.SupportedLocalesOfOptions,
+        Intl.intlLookUpLocales(['ru-RU', 'zh-CN', fakeLocale, 'en-US'])
     )
 }

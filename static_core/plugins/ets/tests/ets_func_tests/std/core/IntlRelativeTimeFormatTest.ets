@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-const fakeLocale = "er-or"
+const fakeLocale = 'er-or'
 
 function main(): int  {
-    const suite = new arktest.ArkTestsuite("Intl.RelativeTimeFormat format");
-    suite.addTest("testFormat", testFormat);
-    suite.addTest("testFormatToParts", testFormatToParts);
-    suite.addTest("testResolvedOptions", testResolvedOptions);
-    suite.addTest("testSelectWithOptions", testSelectWithOptions);
-    suite.addTest("testSupportedLocalesOf", testSupportedLocalesOf);
+    const suite = new arktest.ArkTestsuite('Intl.RelativeTimeFormat format');
+    suite.addTest('testFormat', testFormat);
+    suite.addTest('testFormatToParts', testFormatToParts);
+    suite.addTest('testResolvedOptions', testResolvedOptions);
+    suite.addTest('testSelectWithOptions', testSelectWithOptions);
+    suite.addTest('testSupportedLocalesOf', testSupportedLocalesOf);
     return suite.run();
 }
 
@@ -53,16 +53,16 @@ function runFormatTest(locale: Intl.UnicodeBCP47LocaleIdentifier,
 }
 
 function testFormat() {
-    runFormatTest("en", 1, "day", "tomorrow", { numeric: "auto" })
-    runFormatTest("en", -1, "day", "yesterday", { numeric: "auto" })
-    runFormatTest("ru", 2, "days", "послезавтра", { numeric: "auto" })
-    runFormatTest("ru", 0, "day", "через 0 дней", { numeric: "always" })
-    runFormatTest("fr", 5, "month", "dans 5 mois", { style: "long" })
-    runFormatTest("fr", -5, "month", "il y a 5 mois", { style: "long" })
-    runFormatTest("ja", 10, "second", "10 秒後", { style: "long" })
-    runFormatTest("en", -2, "week", "2 wk. ago", { style: "short" })
-    runFormatTest("en", 3, "quarter", "in 3 qtrs.", { style: "narrow" })
-    runFormatTest("en", 1, "day", "in 1 day", { numeric: "always" })
+    runFormatTest('en', 1, 'day', 'tomorrow', { numeric: 'auto' })
+    runFormatTest('en', -1, 'day', 'yesterday', { numeric: 'auto' })
+    runFormatTest('ru', 2, 'days', 'послезавтра', { numeric: 'auto' })
+    runFormatTest('ru', 0, 'day', 'через 0 дней', { numeric: 'always' })
+    runFormatTest('fr', 5, 'month', 'dans 5 mois', { style: 'long' })
+    runFormatTest('fr', -5, 'month', 'il y a 5 mois', { style: 'long' })
+    runFormatTest('ja', 10, 'second', '10 秒後', { style: 'long' })
+    runFormatTest('en', -2, 'week', '2 wk. ago', { style: 'short' })
+    runFormatTest('en', 3, 'quarter', 'in 3 qtrs.', { style: 'narrow' })
+    runFormatTest('en', 1, 'day', 'in 1 day', { numeric: 'always' })
 }
 
 function runFormatToPartsTest(locale: string, values: FixedArray<number>, unit: string, expected: FixedArray<string>,
@@ -241,22 +241,22 @@ function testFormatToParts() {
 
 function testResolvedOptions() {
     {
-        const format = new Intl.RelativeTimeFormat("en")
+        const format = new Intl.RelativeTimeFormat('en')
         const result = format.resolvedOptions()
         console.log(result)
-        arktest.assertEQ(result.style, "long")
-        arktest.assertEQ(result.numeric, "always")
-        arktest.assertEQ(result.numberingSystem, "latn")
+        arktest.assertEQ(result.style, 'long')
+        arktest.assertEQ(result.numeric, 'always')
+        arktest.assertEQ(result.numberingSystem, 'latn')
     }
     {
-        const format = new Intl.RelativeTimeFormat("en", { style: "short" } as Intl.RelativeTimeFormatOptions)
+        const format = new Intl.RelativeTimeFormat('en', { style: 'short' } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        arktest.assertEQ(result.style, "short")
+        arktest.assertEQ(result.style, 'short')
     }
     {
-        const format = new Intl.RelativeTimeFormat("en", { numeric: "always" } as Intl.RelativeTimeFormatOptions)
+        const format = new Intl.RelativeTimeFormat('en', { numeric: 'always' } as Intl.RelativeTimeFormatOptions)
         const result = format.resolvedOptions()
-        arktest.assertEQ(result.numeric, "always")
+        arktest.assertEQ(result.numeric, 'always')
     }
 }
 
@@ -272,12 +272,12 @@ function runTestWithOptions(locale: Intl.UnicodeBCP47LocaleIdentifier,
 }
 
 function testSelectWithOptions() {
-    runTestWithOptions("en", 1, "day", { numeric: "auto" }, "tomorrow")
-    runTestWithOptions("en", -1, "hour", { numeric: "auto" }, "1 hour ago")
-    runTestWithOptions("en", 0, "minute", { numeric: "always" }, "in 0 minutes")
-    runTestWithOptions("ru", 3, "month", { style: "long" }, "через 3 месяца")
-    runTestWithOptions("fr", 7, "day", { style: "short" }, "dans 7 j")
-    runTestWithOptions("zh", -7, "day", { style: "short" }, "7天前")
+    runTestWithOptions('en', 1, 'day', { numeric: 'auto' }, 'tomorrow')
+    runTestWithOptions('en', -1, 'hour', { numeric: 'auto' }, '1 hour ago')
+    runTestWithOptions('en', 0, 'minute', { numeric: 'always' }, 'in 0 minutes')
+    runTestWithOptions('ru', 3, 'month', { style: 'long' }, 'через 3 месяца')
+    runTestWithOptions('fr', 7, 'day', { style: 'short' }, 'dans 7 j')
+    runTestWithOptions('zh', -7, 'day', { style: 'short' }, '7天前')
 }
 
 function runSupportedLocalesStringTest(locales: string,
@@ -304,9 +304,9 @@ function runSupportedLocalesArrayTest(locales: string[],
 
 function testSupportedLocalesOf() {
     runSupportedLocalesStringTest(
-        "en",
+        'en',
         undefined,
-        Intl.intlBestFitLocales("en")
+        Intl.intlBestFitLocales('en')
     )
     runSupportedLocalesStringTest(
         fakeLocale,
@@ -314,91 +314,91 @@ function testSupportedLocalesOf() {
         Intl.intlBestFitLocales(fakeLocale)
     )
     runSupportedLocalesStringTest(
-        "en",
-        { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        Intl.intlLookUpLocales("en")
+        'en',
+        { localeMatcher: 'lookup' } as Intl.RelativeTimeFormatOptions,
+        Intl.intlLookUpLocales('en')
     )
     runSupportedLocalesArrayTest(
-        ["fr", "ru"],
+        ['fr', 'ru'],
         undefined,
-        Intl.intlBestFitLocales(["fr", "ru"])
+        Intl.intlBestFitLocales(['fr', 'ru'])
     )
     runSupportedLocalesArrayTest(
-        ["ru-RU", "zh-CN", "en-US"],
+        ['ru-RU', 'zh-CN', 'en-US'],
         undefined,
-        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        Intl.intlBestFitLocales(['ru-RU', 'zh-CN', 'en-US'])
     )
     runSupportedLocalesArrayTest(
-        ["ru-RU", "zh-CN", "en-US"],
-        { localeMatcher: "best fit" } as Intl.RelativeTimeFormatOptions,
-        Intl.intlBestFitLocales(["ru-RU", "zh-CN", "en-US"])
+        ['ru-RU', 'zh-CN', 'en-US'],
+        { localeMatcher: 'best fit' } as Intl.RelativeTimeFormatOptions,
+        Intl.intlBestFitLocales(['ru-RU', 'zh-CN', 'en-US'])
     )
 
     runSupportedLocalesArrayTest(
-        ["ru-RU", "en-US"],
-        { localeMatcher: "lookup" } as Intl.RelativeTimeFormatOptions,
-        Intl.intlLookUpLocales(["ru-RU", "en-US"])
+        ['ru-RU', 'en-US'],
+        { localeMatcher: 'lookup' } as Intl.RelativeTimeFormatOptions,
+        Intl.intlLookUpLocales(['ru-RU', 'en-US'])
     )
 }
 
 function testRelativeFormat() {
-    let relativetimefmt = new Intl.RelativeTimeFormat("en", { style: "narrow"});
+    let relativetimefmt = new Intl.RelativeTimeFormat('en', { style: 'narrow'});
     let value = relativetimefmt.format(100, 'second');
     arktest.assertEQ(value, 'in 100 sec.');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { style: 'narrow'});
     value = relativetimefmt.format(-1, 'day');
     arktest.assertEQ(value, '1 day ago');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("zh", { style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('zh', { style: 'narrow'});
     value = relativetimefmt.format(-1, 'day');
     arktest.assertEQ(value, '1天前');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { style: 'narrow'});
     value = relativetimefmt.format(2, 'day');
     arktest.assertEQ(value, 'in 2 days');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("zh", { style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('zh', { style: 'narrow'});
     value = relativetimefmt.format(2, 'day');
     arktest.assertEQ(value, '2天后');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "short"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'short'});
     value = relativetimefmt.format(-1, 'quarter');
     arktest.assertEQ(value, 'last qtr.');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'auto');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'short');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "short"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'short'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, 'next qtr.');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'auto');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'short');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'narrow'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, 'next qtr.');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'auto');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'narrow');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { numeric: "always", style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { numeric: 'always', style: 'narrow'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, 'in 1 qtr.');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'always');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'narrow');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("zh", { numeric: "always", style: "narrow"});
+    relativetimefmt = new Intl.RelativeTimeFormat('zh', { numeric: 'always', style: 'narrow'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, '1个季度后');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'always');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'narrow');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("en", { numeric: "always", style: "long"});
+    relativetimefmt = new Intl.RelativeTimeFormat('en', { numeric: 'always', style: 'long'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, 'in 1 quarter');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'always');
     arktest.assertEQ(relativetimefmt.resolvedOptions().style, 'long');
 
-    relativetimefmt = new Intl.RelativeTimeFormat("zh", { numeric: "always", style: "long"});
+    relativetimefmt = new Intl.RelativeTimeFormat('zh', { numeric: 'always', style: 'long'});
     value = relativetimefmt.format(1, 'quarter');
     arktest.assertEQ(value, '1个季度后');
     arktest.assertEQ(relativetimefmt.resolvedOptions().numeric, 'always');
