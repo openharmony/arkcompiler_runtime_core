@@ -112,10 +112,10 @@ export class AsyncLock {
                 return l.wrapper<T, U>(callback, callerCID, mode, options, asyncLockInfo, pendingRequest!);
             }
         }
-        return AsyncLock.launchPromise(wrapped, this);
+        return AsyncLock.launchPromise<T>(wrapped, this);
     }
 
-    private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
+    private canAcquireLock(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
             if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
