@@ -12,30 +12,33 @@
 # limitations under the License.
 ---
 cases:
-  # Equality (==)
-  - { desc: "bigint == variable (true)", b: '1n', op: '==', operand_val: '1', expected_bool: 'true' }
-  - { desc: "bigint == variable (false)", b: '1n', op: '==', operand_val: '2', expected_bool: 'false' }
-  - { desc: "bigint == variable (negative, true)", b: '-1n', op: '==', operand_val: '-1', expected_bool: 'true' }
-  - { desc: "bigint == variable (negative, false)", b: '-1n', op: '==', operand_val: '1', expected_bool: 'false' }
-  - { desc: "bigint == variable (float, true)", b: '1n', op: '==', operand_val: '1.0', expected_bool: 'true' }
-  - { desc: "bigint == variable (float, false)", b: '1n', op: '==', operand_val: '2.0', expected_bool: 'false' }
-  - { desc: "bigint == variable (zero)", b: '0n', op: '==', operand_val: '0', expected_bool: 'true' }
-  - { desc: "bigint == variable (float with non-zero fraction, false)", b: '1n', op: '==', operand_val: '2.5', expected_bool: 'false' }
+  # Same value pairs (per spec, bigint == numeric is always false)
+  - pairs:
+      - { b: '1n', n: '1' }
+      - { b: '-1n', n: '-1' }
+      - { b: '1n', n: '1.0' }
+      - { b: '0n', n: '0' }
+      - { b: 'new BigInt(10)', n: '10' }
 
-  # Inequality (!=)
-  - { desc: "bigint != variable (true)", b: '1n', op: '!=', operand_val: '2', expected_bool: 'true' }
-  - { desc: "bigint != variable (false)", b: '1n', op: '!=', operand_val: '1', expected_bool: 'false' }
-  - { desc: "bigint != variable (negative, true)", b: '-1n', op: '!=', operand_val: '1', expected_bool: 'true' }
-  - { desc: "bigint != variable (negative, false)", b: '-1n', op: '!=', operand_val: '-1', expected_bool: 'false' }
-  - { desc: "bigint != variable (float, true)", b: '1n', op: '!=', operand_val: '2.0', expected_bool: 'true' }
-  - { desc: "bigint != variable (float, false)", b: '1n', op: '!=', operand_val: '1.0', expected_bool: 'false' }
-  - { desc: "bigint != variable (zero)", b: '0n', op: '!=', operand_val: '1', expected_bool: 'true' }
-  - { desc: "bigint == variable (float with non-zero fraction, true)", b: '1n', op: '!=', operand_val: '2.5', expected_bool: 'true' }
+  # Different value pairs
+  - pairs:
+      - { b: '1n', n: '2' }
+      - { b: '-1n', n: '1' }
+      - { b: '1n', n: '2.0' }
+      - { b: '1n', n: '2.5' }
+      - { b: '0n', n: '1' }
+      - { b: 'new BigInt(10)', n: '20' }
+      - { b: 'new BigInt(10)', n: '10.5' }
 
-  # With BigInt constructor
-  - { desc: "new BigInt == variable (true)", b: 'new BigInt(10)', op: '==', operand_val: '10', expected_bool: 'true' }
-  - { desc: "new BigInt == variable (false)", b: 'new BigInt(10)', op: '==', operand_val: '20', expected_bool: 'false' }
-  - { desc: "new BigInt == variable (float with non-zero fraction, false)", b: 'new BigInt(10)', op: '==', operand_val: '10.5', expected_bool: 'false' }
-  - { desc: "new BigInt != variable (true)", b: 'new BigInt(10)', op: '!=', operand_val: '20', expected_bool: 'true' }
-  - { desc: "new BigInt != variable (false)", b: 'new BigInt(10)', op: '!=', operand_val: '10', expected_bool: 'false' }
-  - { desc: "new BigInt != variable (float with non-zero fraction, true)", b: 'new BigInt(10)', op: '!=', operand_val: '10.5', expected_bool: 'true' }
+  # NaN comparisons
+  - pairs:
+      - { b: '0n', n: 'NaN' }
+      - { b: '1n', n: 'NaN' }
+      - { b: '-1n', n: 'NaN' }
+
+  # Infinity comparisons
+  - pairs:
+      - { b: '0n', n: 'Infinity' }
+      - { b: '0n', n: '-Infinity' }
+      - { b: '9223372036854775807n', n: 'Infinity' }
+      - { b: '-9223372036854775808n', n: '-Infinity' }
