@@ -57,9 +57,6 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
-#30239 first match overload
-03.types/19.union_types/02.access_to_common_union_members/overload/overload_6.ets
-
 #30677
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
@@ -780,9 +777,6 @@
 
 #31411
 13.modules_and_namespaces/03.import_directives/03.selective_binding/import_conflict_neg.ets
-
-#29656
-13.modules_and_namespaces/03.import_directives/04.import_type_directive/export_type_with_bind.ets
 
 #32039 CTE oveload oveloaded function
 13.modules_and_namespaces/03.import_directives/03.selective_binding/original_binding_name.ets

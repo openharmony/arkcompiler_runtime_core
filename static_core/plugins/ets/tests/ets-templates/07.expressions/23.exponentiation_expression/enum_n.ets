@@ -15,6 +15,8 @@
 
 /*---
 desc: Exponentiation with Enum
+expected_out: "Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type."
+tags: [negative, compile-only]
 ---*/
 
 enum Enm { A = -2, B = 3, C = 8 }
