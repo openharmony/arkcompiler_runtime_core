@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. * You may obtain a copy of the License at
  *
@@ -17,20 +17,20 @@ function dummyReplacer(key: string, value: Any): Any {
 }
 
 function toStringReplacer(key: string, value: Any): Any {
-    if (key == "") {
+    if (key == '') {
         return value
     }
 
-    return "" + value
+    return '' + value
 }
 
 function toFnReplacer(key: string, value: Any): Any {
-    return key == "id" ? () => {} : value
+    return key == 'id' ? () => {} : value
 }
 
 class A {
-    id: int = 1
-    name = "A"
+    public id: int = 1
+    public name = 'A'
 
     constructor(id: int = 1) {
         this.id = id
@@ -42,19 +42,19 @@ class A {
 }
 
 class R {
-    a = new A()
+    public a = new A()
 }
 
 class E {}
 
 class N {
-    n = null
-    u = undefined
+    public n = null
+    public u = undefined
 }
 
 class C {
-    age: number = 0
-    name: string = ""
+    public age: number = 0
+    public name: string = ''
 }
 
 class O<T> implements JsonReplacer {
@@ -83,8 +83,8 @@ class O<T> implements JsonReplacer {
 }
 
 class D<T> {
-    value: O<T>
-    capacity: int
+    public value: O<T>
+    public capacity: int
 
     constructor(capacity: int) {
         this.capacity = capacity
@@ -98,7 +98,7 @@ class D<T> {
 
 function jsonStringifyObjectWithFunctionReplacer(): void {
     arktest.assertEQ(JSON.stringify(new A(), dummyReplacer), `{"id":1,"name":"A"}`)
-    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, "\t"), `{\n\t"id": 1,\n\t"name": "A"\n}`)
+    arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, '\t'), `{\n\t"id": 1,\n\t"name": "A"\n}`)
     arktest.assertEQ(JSON.stringify(new A(), dummyReplacer, 1), `{\n "id": 1,\n "name": "A"\n}`)
     arktest.assertEQ(JSON.stringify(new A(), toStringReplacer), `{"id":"1","name":"A"}`)
     arktest.assertEQ(JSON.stringify(new N(), toStringReplacer), `{"n":"null","u":"undefined"}`)
@@ -106,7 +106,7 @@ function jsonStringifyObjectWithFunctionReplacer(): void {
 }
 
 function jsonStringifyRecordWithFunctionReplacer(): void {
-    const record: Record<string, Any> = { "id": 1, "name": "R" }
+    const record: Record<string, Any> = { 'id': 1, 'name': 'R' }
     arktest.assertEQ(JSON.stringify(record, dummyReplacer), `{"id":1,"name":"R"}`)
     arktest.assertEQ(JSON.stringify(record, toFnReplacer), `{"name":"R"}`)
 }
@@ -126,7 +126,7 @@ function arrayReverser(key: string, value: Any): Any {
 
 function jsonStringifyArrayWithFunctionReplacer(): void {
     const replacer = (key: string, value: Any): Any => {
-        if (key == "" || key == "0") {
+        if (key == '' || key == '0') {
             return value
         } else {
             return undefined
@@ -264,7 +264,7 @@ function jsonStringifyWithReplacer(): void {
 
 function jsonStringifyStringArrayReplacer(): void {
     let arr = Array.of<TestClass1>(new TestClass1(), new TestClass1(), new TestClass1());
-    let b = Array.of<string>("param1","param4")
+    let b = Array.of<string>('param1','param4')
     let ret = JSON.stringify(arr,b);
     let objArray : Array<TestClass1> = parseJsonString(ret)
     arktest.assertEQ(objArray[0].param1, '"test1"')
@@ -292,10 +292,10 @@ function main(): int {
 }
 
 class TestClass1 {
-    param1: string = "test1";
-    param2: string = "test2";
-    param3: string = "test3";
-    param4: string = "test4";
+    public param1: string = 'test1';
+    public param2: string = 'test2';
+    public param3: string = 'test3';
+    public param4: string = 'test4';
 }
 
 function parseJsonString(jsonStr: string): Array<TestClass1>  {
