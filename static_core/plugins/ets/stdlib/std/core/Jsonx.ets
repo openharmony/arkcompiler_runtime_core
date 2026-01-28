@@ -159,6 +159,7 @@ export namespace jsonx {
         private maybeStringValue?:  string
         private maybeDoubleValue?:  double
         private maybeLongValue?:    long
+        private maybeBigIntValue?:  bigint
         private maybeBoolValue?:    boolean
         private maybeObjectValues?: Map<string, JsonElement>
         private maybeArrayValues?:  Array<JsonElement>
@@ -184,6 +185,9 @@ export namespace jsonx {
                 return JsonType.JsonNumber
             }
             if (this.maybeLongValue != undefined) {
+                return JsonType.JsonNumber
+            }
+            if (this.maybeBigIntValue != undefined) {
                 return JsonType.JsonNumber
             }
             if (this.maybeBoolValue != undefined) {
@@ -284,6 +288,17 @@ export namespace jsonx {
         static createLong(value: long): JsonElement {
             const element = new JsonElement()
             element.maybeLongValue = value
+            return element
+        }
+
+        /**
+         * Creates a new JSON element containing an bigint value.
+         * @param {bigint} value - The bigint value to store
+         * @returns {JsonElement} A new JsonElement containing the bigint value
+         */
+        static createBigInt(value: bigint): JsonElement {
+            const element = new JsonElement()
+            element.maybeBigIntValue = value
             return element
         }
 
@@ -511,6 +526,28 @@ export namespace jsonx {
         }
 
         /**
+         * Gets an bigint value from an object by key and ensures it is an bigint.
+         * @param {string} key - The key to look up
+         * @returns {bigint} The bigint value
+         * @throws {JsonTypeError} If the value is not an bigint or if this element is not an object
+         * @throws {RangeError} If the key is not found
+         */
+        getBigInt(key: string): bigint {
+            return this.getElement(key).asBigInt()
+        }
+
+        /**
+         * Attempts to get an bigint value from an object by key.
+         * Returns the fallback value if the key is not found or if the value is not an bigint.
+         * @param {string} key - The key to look up
+         * @param {bigint} [fallback=0n] - The fallback value to return if the key is not found
+         * @returns {bigint} The bigint value if found, fallback value otherwise
+         */
+        tryGetBigInt(key: string, fallback: bigint = 0n): bigint {
+            return this.tryGetElement(key)?.tryAsBigInt() ?? fallback
+        }
+
+        /**
          * Gets a string value from an object by key.
          * @param {string} key - The key to look up
          * @returns {string} The string value
@@ -624,7 +661,7 @@ export namespace jsonx {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
             if (this.maybeDoubleValue != undefined) {
-                throw new JsonTypeError("Expected integer, but elementcontains a double value.")
+                throw new JsonTypeError("Expected integer, but element contains a double value.")
             }
             if (this.maybeLongValue! > Int.MAX_VALUE || this.maybeLongValue! < Int.MIN_VALUE) {
                 throw new RangeError(`'${this.maybeLongValue!}' is not a int`)
@@ -660,7 +697,10 @@ export namespace jsonx {
                 throw new JsonTypeError("This value's ValueKind is not Number.")
             }
             if (this.maybeDoubleValue != undefined) {
-                throw new JsonTypeError("Expected long, but elementcontains a double value.")
+                throw new JsonTypeError("Expected long, but element contains a double value.")
+            }
+            if (this.maybeLongValue == undefined) {
+                throw new JsonTypeError("Expected long, but element stores different value type.")
             }
             return this.maybeLongValue!
         }
@@ -676,6 +716,40 @@ export namespace jsonx {
                 return undefined
             }
             return this.maybeLongValue
+        }
+
+        /**
+         * Gets an bigint value from an object by key.
+         * @param {string} key - The key to look up
+         * @returns {bigint} The integer value
+         * @throws {JsonTypeError} If the value is not an bigint or if this element is not an object
+         */
+        asBigInt(): bigint {
+            if (this.jsonType != JsonType.JsonNumber) {
+                throw new JsonTypeError("This value's ValueKind is not Number.")
+            }
+            if (this.maybeLongValue != undefined) {
+                return BigInt(this.maybeLongValue!)
+            }
+            if (this.maybeBigIntValue == undefined) {
+                throw new JsonTypeError("Element is not BigInt value.")
+            }
+            return this.maybeBigIntValue!
+        }
+
+        /**
+         * Attempts to get an bigint value from an object by key.
+         * Returns undefined if the key is not found or if the value is not an bigint.
+         * @param {string} key - The key to look up
+         * @returns {bigint} The integer value if found, undefined otherwise
+         */
+        tryAsBigInt(): bigint | undefined {
+            if (this.maybeLongValue != undefined) {
+                return BigInt(this.maybeLongValue!)
+            }
+            return this.jsonType == JsonType.JsonNumber
+                ? this.maybeBigIntValue
+                : undefined
         }
 
         /**
@@ -832,6 +906,14 @@ export namespace jsonx {
         }
 
         /**
+         * Sets a current JsonElement to a bigint value.
+         */
+        setBigInt(value: bigint): void {
+            this.setUndefined()
+            this.maybeBigIntValue = value
+        }
+
+        /**
          * Sets a current JsonElement to an undefined value.
          */
         setUndefined(): void {
@@ -842,6 +924,7 @@ export namespace jsonx {
             this.maybeArrayValues  = undefined
             this.maybeNullValue    = undefined
             this.maybeLongValue    = undefined
+            this.maybeBigIntValue  = undefined
         }
 
         /**
@@ -854,8 +937,9 @@ export namespace jsonx {
             this.maybeStringValue = source.maybeStringValue
             this.maybeDoubleValue = source.maybeDoubleValue
             this.maybeLongValue = source.maybeLongValue
-            this.maybeNullValue = source.maybeNullValue
             this.maybeBoolValue = source.maybeBoolValue
+            this.maybeNullValue = source.maybeNullValue
+            this.maybeBigIntValue = source.maybeBigIntValue
 
             // Deep copy object values recursively
             if (source.maybeObjectValues) {
