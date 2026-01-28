@@ -1,4 +1,3 @@
-std/core/JsonReplacerTest.ets
 std/core/JsonTest.ets
 regression/function_params_optional_union.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/issue13991.ets

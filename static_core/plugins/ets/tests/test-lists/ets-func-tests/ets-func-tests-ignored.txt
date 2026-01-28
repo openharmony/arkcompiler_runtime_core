@@ -368,7 +368,6 @@ spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
 spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
 std/core/TypeCreateErasedBodyTest.ets
-std/core/JsonReplacerTest.ets
 std/core/NumberTest.ets
 regression/15278_0.ets
 
