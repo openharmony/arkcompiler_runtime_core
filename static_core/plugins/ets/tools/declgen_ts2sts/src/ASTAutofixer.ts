@@ -106,7 +106,8 @@ export class Autofixer {
       [
         this[FaultID.MergeOverloadedMethods].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
-        this[FaultID.CallorOptionFuncs].bind(this)
+        this[FaultID.CallorOptionFuncs].bind(this),
+        this[FaultID.NoConstructorInInterface].bind(this)
       ]
     ],
     [ts.SyntaxKind.Identifier, [this[FaultID.WrapperToPrimitive].bind(this)]],
@@ -1193,6 +1194,37 @@ export class Autofixer {
       this.context.factory.createIdentifier(JSValue),
       undefined
     );
+  }
+
+  /**
+   * Rule: `arkts-no-constructor-in-interface`
+   */
+  private [FaultID.NoConstructorInInterface](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * Remove constructor method signatures from interface declarations
+     */
+
+    if (ts.isInterfaceDeclaration(node)) {
+      const updatedMembers: Array<ts.TypeElement> = [];
+      for (const member of node.members) {
+        if (ts.isMethodSignature(member) &&
+            ts.isIdentifier(member.name) &&
+            member.name.text === 'constructor') {
+          continue;
+        }
+        updatedMembers.push(member);
+      }
+      return this.context.factory.updateInterfaceDeclaration(
+        node,
+        node.modifiers,
+        node.name,
+        node.typeParameters,
+        node.heritageClauses,
+        updatedMembers
+      );
+    }
+
+    return node;
   }
 
   /**

@@ -157,6 +157,7 @@ export enum FaultID {
   MergeOverloadedConstructors,
   BooleanLiteral,
   NoImportType,
+  NoConstructorInInterface,
   // this should always be last enum
   LAST_ID
 }
