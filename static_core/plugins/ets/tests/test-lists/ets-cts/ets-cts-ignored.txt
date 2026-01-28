@@ -1490,10 +1490,10 @@
 #30498
 16.concurrency/02.asynchronous_api/05.promise/promise_negative.ets
 
-#29982
-16.concurrency/02.asynchronous_api/03.async_methods/async_method17.ets
-
 #30547
+16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_6.ets
+16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_7.ets
+16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_5.ets
 16.concurrency/02.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/negative/async_function_await_call_not_from_async_negative_0.ets
 16.concurrency/02.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/negative/async_function_await_call_not_from_async_negative_1.ets
 16.concurrency/02.asynchronous_api/01.async_functions/return_type_is_promise/no_input_params/negative/async_function_await_call_not_from_async_negative_2.ets
@@ -1524,11 +1524,6 @@
 16.concurrency/02.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/negative/async_method_await_call_not_from_async_negative_7.ets
 16.concurrency/02.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/negative/async_method_await_call_not_from_async_negative_8.ets
 16.concurrency/02.asynchronous_api/03.async_methods/return_type_is_promise/no_input_params/negative/async_method_await_call_not_from_async_negative_9.ets
-
-#29165
-16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_6.ets
-16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_7.ets
-16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_5.ets
 
 #29157
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con1_16.ets
