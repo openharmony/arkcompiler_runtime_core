@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    Assign generic to Awaited type
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Awaited<T>'"
 ---*/
 
-async function foo<T>(awaited: Awaited<T>, expected: T) {
-    arktest.assertEQ(awaited, expected)
+function foo<T> (p: T) {
+  let x: Awaited<T> = p
 }
-
-function main() {
-    waitForCompletion(() => foo<string>({{c.awaited_param}}, {{c.expected_param}}))
-}
-
-{% endfor %}

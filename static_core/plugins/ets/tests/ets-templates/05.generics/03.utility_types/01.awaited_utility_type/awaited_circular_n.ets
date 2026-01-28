@@ -13,19 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    Circular dependency in Awaited should return an error
+tags: [compile-only, negative]
+expected_out: "Type alias 'D' circularly references itself."
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
-}
-
-function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
-}
-
-{% endfor %}
+type D = Awaited<Promise<E>>
+type E = Awaited<Promise<D>>

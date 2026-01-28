@@ -161,6 +161,15 @@
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_0.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_12.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/scope_n_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_2.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_3.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_4.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_incomplete_n_5.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_0.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_1.ets
+05.generics/03.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_3.ets
 07.expressions/04.named_reference/01.function_reference/overload_function_reference_3.ets
 07.expressions/04.named_reference/01.function_reference/overload_function_reference_4.ets
 07.expressions/07.spread_expression/spex_meth_13.ets

@@ -17,15 +17,24 @@
 /*---
 desc: >-
     Type Awaited<T> constructs a type which has no type Promise in it.
+tags: [no-warmup]
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+async function foo<T, G>(awaited: Awaited<T>, expected: G) {
+    arktest.assertEQ(awaited, expected)
+    arktest.assertTrue(awaited instanceof {{c.G}})
+}
+
+async function bar() {
+    foo<{{c.T}},{{c.G}}>(await new Promise<{{c.promiseT}}>((resolve) => {
+            setTimeout(() => {
+                resolve({{c.val}})
+            }, 1000)
+        }), {{c.check}})
 }
 
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+    waitForCompletion(bar)
 }
 
 {% endfor %}

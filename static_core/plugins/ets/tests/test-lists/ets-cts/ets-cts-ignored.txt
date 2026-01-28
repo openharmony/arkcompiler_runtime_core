@@ -193,6 +193,12 @@
 05.generics/03.utility_types/incorrect_utility_type_usage_1_3.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_1_6.ets
 
+#32226 missing CTE for circular dependency
+05.generics/03.utility_types/01.awaited_utility_type/awaited_circular_n.ets
+
+#32457 CTE makes compiler to fail when specifying new object at awaited parameters
+05.generics/03.utility_types/01.awaited_utility_type/awaited_unsupported_char_n_2.ets
+
 #31615 RTE for partial class field assignment
 05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 

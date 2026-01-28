@@ -14,18 +14,25 @@
  */
 
 {% for c in cases %}
+
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    If type Promise is not a part of a type T declaration, then Awaited<T> leaves T intact.
+    promise type: {{c.type}}
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+
+async function foo(i: Awaited<{{c.expectedType}}>, j: {{c.expectedType}}) {
+  arktest.assertEQ(i, j)
+  arktest.assertTrue(i instanceof {{c.expectedType}})
+}
+
+async function bar() {
+  foo(await Promise.resolve({{c.expectedVal}}), {{c.expectedVal}})
 }
 
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+  waitForCompletion(bar)
 }
 
 {% endfor %}

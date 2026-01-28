@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    Type Awaited<T> constructs a type which has no type Promise in it.
+    Any occurrence of type Promise is recursively removed until a generic, a
+    function, an array, or a tuple type is detected.
 ---*/
 
-function foo<T>(): Awaited<T> {
-    return {{c.return_value}}
+class MyArray<T> extends Array<T> {}
+
+async function foo(i: Awaited<Promise<MyArray<Promise<number>>>>) {
+  i.push(new Promise<number>((resolve)=> resolve(5.0) ))
+  arktest.assertEQ(await i[0], 5.0)
+  arktest.assertTrue(i instanceof MyArray)
+}
+
+async function bar() {
+  foo(await Promise.resolve(new MyArray<Promise<number>>()))
 }
 
 function main() {
-    let actual = foo<string>()
-    arktest.assertEQ(actual, {{c.expected_value}})
+  waitForCompletion(bar)
 }
-
-{% endfor %}
