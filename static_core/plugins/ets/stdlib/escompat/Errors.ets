@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,109 +13,254 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the commonly used Errors for ArkTS
+ * @kit ArkTS
+ */
+
 package escompat;
 
 /**
- * @class Represents an error that occurs when global eval() function fails
+ * Represents an evaluation error
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class EvalError extends Error {
+    /**
+     * Constructs a new EvalError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("EvalError", message, options)
     }
 
+    /**
+     * Constructs a new EvalError instance with provided message and options
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { EvalError } - Newly created EvalError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): EvalError {
         return new EvalError(message, options)
     }
 }
 
 /**
- * @class Represents an error that occurs when a numeric types conversion is performed on an index expression, and the fractional part differs from 0.
+ * Represents an error that occurs when a numeric types conversion is performed on an index expression, and the fractional part differs from 0.
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class NonIntegralIndexError extends Error {
+    /**
+     * Constructs a new NonIntegralIndexError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("NonIntegralIndexError", message, options)
     }
 
+    /**
+     * Constructs a new NonIntegralIndexError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { NonIntegralIndexError } - Newly created NonIntegralIndexError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): NonIntegralIndexError {
         return new NonIntegralIndexError(message, options)
     }
 }
 
 /**
- * @class Represents an error that occurs when an operation could not be performed, typically (but not exclusively) when a value is not of the expected type
+ * Represents an error that occurs when an operation could not be performed, typically (but not exclusively) when a value is not of the expected type
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class TypeError extends Error {
+    /**
+     * Constructs a new TypeError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("TypeError", message, options)
     }
 
+    /**
+     * Constructs a new TypeError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { TypeError } - Newly created TypeError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): TypeError {
         return new TypeError(message, options)
     }
 }
 
 /**
- * @class Represents an error that occurs when a variable that doesn't exist (or hasn't yet been initialized) in the current scope is referenced
+ * Represents an error that occurs when a variable that doesn't exist (or hasn't yet been initialized) in the current scope is referenced
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class ReferenceError extends Error {
+    /**
+     * Constructs a new ReferenceError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("ReferenceError", message, options)
     }
 
+    /**
+     * Constructs a new ReferenceError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { ReferenceError } - Newly created ReferenceError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
         return new ReferenceError(message, options)
     }
 }
 
 /**
- * @class Represents an error that occurs when a global URI handling function was used in a wrong way
+ * Represents an error that occurs when a global URI handling function was used in a wrong way
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class URIError extends Error {
+    /**
+     * Constructs a new URIError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("URIError", message, options)
     }
 
+    /**
+     * Constructs a new URIError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { URIError } - Newly created URIError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): URIError {
         return new URIError(message, options)
     }
 }
 
 /**
- * The AggregateError object represents an error when several errors
+ * AggregateError object represents an error when several errors
  * need to be wrapped in a single error.
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class AggregateError extends Error {
+    /**
+     * Defines an array with aggregated errors
+     *
+     * @type { Array<Error> }
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     errors: Array<Error>
 
     /**
-     * The AggregateError() constructor creates AggregateError
-     * object.
+     * Constructs a new AggregateError instance with provided errors, message and error specific information
      *
-     * @param errors An iterable of errors, may not actually be Error
-     * instances.
-     *
-     * @param s An human-readable description of the aggregate error.
-     *
-     * @param cause A property indicating the specific cause of the
-     * error. When catching and re-throwing an error with a
-     * more-specific or useful error message, this property can be
-     * used to pass the original error.
-     *
+     * @param { Iterable<Error> } errors - Errors to be aggregated
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
      */
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
         this.errors = Array.from<Error>(errors)
     }
 
+    /**
+     * Constructs a new AggregateError instance with provided errors, message and error specific information
+     *
+     * @param { Error[] } errors - Errors to be aggregated
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(errors: Error[], message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
         this.errors = Array.from<Error>(errors)
     }
 
+    /**
+     * Constructs a new AggregateError instance with provided message and error specific information
+     *
+     * @param { Iterable<Error> } errors - Errors to be aggregated
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { AggregateError } - Newly created AggregateError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
     }
 
+    /**
+     * Constructs a new AggregateError instance with provided message and error specific information
+     *
+     * @param { Error[] } errors - Errors to be aggregated
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { AggregateError } - Newly created AggregateError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
     }
@@ -123,13 +268,34 @@ export class AggregateError extends Error {
 }
 
 /**
- * @class Represents an error that occurs when an input string contains invalid or incorrectly formatted data.
+ * Represents an error that occurs when an input string contains invalid or incorrectly formatted data.
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24 static
  */
 export class FormatError extends Error {
+    /**
+     * Constructs a new FormatError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("FormatError", message, options)
     }
 
+    /**
+     * Constructs a new FormatError instance with provided message and error specific information
+     *
+     * @param { String | undefined } message - Error text
+     * @param { ErrorOptions | undefined } options - Error options
+     * @returns { FormatError } - Newly created FormatError instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24 static
+     */
     static $_invoke(message?: String, options?: ErrorOptions): FormatError {
         return new FormatError(message, options)
     }
