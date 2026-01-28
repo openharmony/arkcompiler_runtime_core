@@ -23,6 +23,8 @@ name: chaining_import_2
 import * as Test from "./chaining_import_1"
 import {default as DefaultExportedClass} from "../04.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
 
+export {default as SomeExp} from "./chaining_import_0"
+
 function main() {
 arktest.assertEQ(new Test.SomeExportedClass1().hello('hello'), 'hello_world')
     arktest.assertEQ(Test.testvar, 1)

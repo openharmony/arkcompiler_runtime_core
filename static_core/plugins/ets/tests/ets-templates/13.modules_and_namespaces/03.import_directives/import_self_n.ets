@@ -20,5 +20,5 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-import foo from "./import_self"
+import foo from "./import_self_n"
 export function foo() { }
