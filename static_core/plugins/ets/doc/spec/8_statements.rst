@@ -928,6 +928,8 @@ following:
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` (see
   :ref:`Types void or undefined`);
+- Asynchronous function, method or lambda body with return type
+  ``Promise<void>`` (see :ref:`Asynchronous execution`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
@@ -1380,9 +1382,8 @@ can be performed while leaving the ``try-catch``:
 
 #. If no ``catch`` clause is in place, then the error is propagated to the
    surrounding and caller scopes until reaching the scope with the ``catch``
-   clause to handle the error. If there is no such scope, then the whole
-   coroutine stack (see :ref:`Coroutines (Experimental)`) is discarded.
-   Subsequent steps are then defined by the execution environment.
+   clause to handle the error. Subsequent steps are then defined by the
+   execution environment.
 
 #. If ``finally`` clause is in place, and its execution completes abruptly, then
    the ``try`` statement also completes abruptly.
@@ -1403,7 +1404,6 @@ can be performed while leaving the ``try-catch``:
    surrounding scope
    caller scope
    scope
-   coroutine stack
    environment
 
 .. raw:: pdf

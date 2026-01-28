@@ -1727,7 +1727,7 @@ the following conditions:
    (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
    :ref:`Type never`).
 -  If a function, a method, or a lambda is ``async`` (see
-   :ref:`Asynchronous Features`), a return type is inferred by applying
+   :ref:`Asynchronous execution`), a return type is inferred by applying
    the above rules, and the return type ``T`` is not ``Promise``, then the return
    type is assumed to be ``Promise<T>``.
 
@@ -4363,7 +4363,7 @@ initialization* is terminated due to an exception thrown. A repeated attempt to
 execute the *static initialization* can throw an exception again.
 
 If a *static initialization* invokes a concurrent execution (see
-:ref:`Coroutines (Experimental)`), then all *coroutines* that try to invoke it
+:ref:`Execution model`), then all |C_JOBS| that try to invoke it
 are synchronized. The synchronization is to ensure that the initialization
 is performed only once, and that the operations requiring the *static
 initialization* to be performed are executed after the initialization completes.
@@ -4386,7 +4386,6 @@ circularly dependent, then a deadlock can occur.
    exception
    invocation
    concurrent execution
-   coroutine
    synchronization
    deadlock
 

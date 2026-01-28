@@ -19,14 +19,12 @@ Expressions
     frontend_status: Partly
 
 This Chapter describes the meanings of expressions and the rules for the
-evaluation of expressions, except the expressions related to coroutines and
-expressions described as experimental (see :ref:`Coroutines (Experimental)` and
-:ref:`Lambda Expressions with Receiver` respectively).
+evaluation of expressions, except the expressions described as experimental (see
+:ref:`Lambda Expressions with Receiver`).
 
 .. index::
    evaluation
    expression
-   coroutine
    lambda expression with receiver
 
 The syntax of *expression* is presented below:

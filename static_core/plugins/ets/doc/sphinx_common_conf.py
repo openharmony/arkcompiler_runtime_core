@@ -52,6 +52,12 @@ rst_epilog = '''
 .. |LANG| replace:: {lang}
 .. |UIFW| replace:: ArkUI
 .. |TS| replace:: TypeScript
+.. |C_JOB| replace:: Job
+.. |C_JOBS| replace:: Jobs
+.. |C_CORO| replace:: Suspendable Job
+.. |C_COROS| replace:: Suspendable Jobs
+.. |C_WORKER| replace:: Worker Thread
+.. |C_WORKERS| replace:: Worker Threads
 '''.format(lang=project)
 
 #

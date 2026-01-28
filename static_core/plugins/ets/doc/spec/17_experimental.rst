@@ -97,7 +97,7 @@ with ``enums``.
    functionality
 
 The |LANG| language supports writing concurrent applications in the form of
-*coroutines* (see :ref:`Coroutines (Experimental)`) that allow executing
+|C_JOBS| (see :ref:`Execution model`) that allow executing
 functions concurrently.
 
 There is a basic set of language constructs that support concurrency. A function
@@ -114,7 +114,6 @@ the standard library.
    async modifier
    lambda expression
    concurrency
-   launch function
    asynchronous launch
 
 |

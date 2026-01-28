@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2025 Huawei Device Co., Ltd.
+    Copyright (c) 2025-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -10,9 +10,30 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Concurrency Requirements for Interop:
+.. _Interoperability:
 
-Concurrency Requirements for Interop
-************************************
+Interoperability
+****************
 
-Any coroutine which trying to call JS can have CTE or RTE if it is executed not on the Main or EA domains.
+.. meta:
+    frontend_status: Done
+
+.. _Interoperability chapter name:
+
+``Interoperability`` chapter name
+================
+
+.. meta:
+    frontend_status: Done
+
+Chapter text.
+
+.. note::
+   A note.
+
+.. index::
+   term1
+   term 2
+
+|
+

@@ -20,11 +20,12 @@ Concurrency
     frontend_status: Done
 
 .. include:: ../concurrency/01_concurrency_overview.rst
-.. include:: ../concurrency/02_concurrency_features.rst
-.. include:: ../concurrency/03_concurrency_coroutines.rst
-.. include:: ../concurrency/04_concurrency_stdlib.rst
-.. include:: ../concurrency/05_concurrency_runtime.rst
-.. include:: ../concurrency/06_concurrency_requirements_for_interop.rst
+.. include:: ../concurrency/02_concurrency_async.rst
+.. include:: ../concurrency/03_concurrency_parallel.rst
+.. include:: ../concurrency/04_concurrency_synchronization.rst
+.. include:: ../concurrency/05_concurrency_apis.rst
+.. include:: ../concurrency/06_concurrency_runtime.rst
+.. include:: ../concurrency/08_concurrency_glossary.rst
 
 
 .. raw:: pdf
