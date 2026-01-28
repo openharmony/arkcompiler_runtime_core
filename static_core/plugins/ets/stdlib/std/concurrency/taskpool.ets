@@ -492,19 +492,14 @@ export namespace taskpool {
                     result.then(() => {
                         executionSucceeded = true;
                     }).catch((e) => {
-                        try {
-                            this.onFailCallback?.(e as Error);
-                        } catch (callbackError) {}
+                        this.handleTaskFailure(e as Error);
                         throw e;
                     });
                 } else {
                     executionSucceeded = true;
                 }
             } catch (e) {
-                try {
-                    // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                    this.onFailCallback?.(e as Error);
-                } catch (callbackError) {}
+                this.handleTaskFailure(e as Error);
                 throw e;
             } finally {
                 // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
@@ -534,11 +529,19 @@ export namespace taskpool {
                     if (this.state.get() != State.CANCELED) {
                         this.state.set(InternalState.FINISHED.valueOf());
                     }
-                    try { 
+                    try {
                         if (this.state.get() == State.CANCELED) {
                             this.throwCancelTaskError();
                         } else if (executionSucceeded) {
-                            this.callUserCallback(this.onSuccessCallback);
+                            if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
+                                let group: TaskGroup | undefined = allGroups.get(this.groupId);
+                                if (group !== undefined) {
+                                    let callback: CallbackFunction = this.onSuccessCallback as CallbackFunction;
+                                    GroupState.of(group).successCallbacks.add(callback);
+                                }
+                            } else {
+                                this.callUserCallback(this.onSuccessCallback);
+                            }
                         }
                     } catch (e) {
                         try {
@@ -578,6 +581,19 @@ export namespace taskpool {
             try {
                 callback?.();
             } catch (e) {}
+        }
+
+        private handleTaskFailure(error: Error): void {
+            if (this.groupId != 0) {
+                let group: TaskGroup | undefined = allGroups.get(this.groupId);
+                if (group !== undefined) {
+                    GroupState.of(group).hasFailedTask.set(1);
+                }
+            }
+            try {
+                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
+                this.onFailCallback?.(error);
+            } catch (callbackError) {}
         }
 
         /// The task is added to taskpool for execution
@@ -656,6 +672,13 @@ export namespace taskpool {
                     GroupState.of(group).state_.set(InternalState.RUNNING.valueOf());
                 }
                 if (GroupState.of(group).taskCount.get() == 0) {
+                    if (GroupState.of(group).hasFailedTask.get() == 0) {
+                        GroupState.of(group).successCallbacks.forEach((callback: CallbackFunction) => {
+                                try {
+                                    callback();
+                                } catch (e) {}
+                        });
+                    }
                     GroupState.of(group).state_.set(InternalState.FINISHED.valueOf());
                     allGroups.delete(this.groupId);
                 }
@@ -1066,6 +1089,8 @@ export namespace taskpool {
         isTaskAlreadySubmitted: boolean = false;
         state_: AtomicInt = new AtomicInt(InternalState.NOT_FOUND);
         taskCount: AtomicInt = new AtomicInt(0);
+        hasFailedTask: AtomicInt = new AtomicInt(0);
+        successCallbacks: containers.ConcurrentSet<CallbackFunction> = new containers.ConcurrentSet<CallbackFunction>();
     }
 
     /**
@@ -1579,6 +1604,11 @@ export namespace taskpool {
             return Promise.resolve<Array<Any>>(new Array<Any>());
         }
         taskGroupSubmitted(GroupState.of(group).id, tasksCount);
+        if (GroupState.of(group).isTaskAlreadySubmitted) {
+            GroupState.of(group).taskCount.set(tasksCount);
+            GroupState.of(group).hasFailedTask.set(0);
+            GroupState.of(group).successCallbacks.clear();
+        }
         GroupState.of(group).isTaskAlreadySubmitted = true;
         const promises: Array<Promise<Any>> = new Array<Promise<Any>>();
         allGroups.set(GroupState.of(group).id, group);
@@ -1647,6 +1677,7 @@ export namespace taskpool {
                         pendingDelayedCanceled.delete(task);
                     });
                     reject(new Error("taskpool:: task has been canceled"));
+                    return;
                 }
                 if (isTaskPoolUseLaunch) {
                     launchImpl(task, priority).then((res: Any) => {

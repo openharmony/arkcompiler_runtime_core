@@ -1387,6 +1387,29 @@ async function cancelAsyncRunnerWaittingTask(){
     arktest.assertEQ(catchCalled, true);
 }
 
+async function cancelExecuteDelayedTaskBeforeExecute(){
+    let isCancel = false
+    let isExecute = false
+    let event = new Event();
+
+    let delayedTask = (): void => {
+        isExecute = true;
+        return;
+    }
+
+    let task = new taskpool.Task(delayedTask);
+    taskpool.executeDelayed(100, task).catch((e: Error) => {
+        isCancel = true
+        arktest.assertEQ(e.message, 'taskpool:: task has been canceled');
+        event.fire();
+    });
+
+    taskpool.cancel(task);
+    event.wait();
+    arktest.assertTrue(isCancel);
+    arktest.assertFalse(isExecute);
+}
+
 function main(): int {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1441,6 +1464,7 @@ function main(): int {
     commonTaskSuite.addAsyncTest('executeOneTaskThreetimes', executeOneTaskThreetimes);
     commonTaskSuite.addAsyncTest('executeDelayedOneTaskThreetimes',executeDelayedOneTaskThreetimes);
     commonTaskSuite.addAsyncTest('cancelAsyncRunnerWaittingTask', cancelAsyncRunnerWaittingTask);
+    commonTaskSuite.addAsyncTest('cancelExecuteDelayedTaskBeforeExecute', cancelExecuteDelayedTaskBeforeExecute);
     let res = commonTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
