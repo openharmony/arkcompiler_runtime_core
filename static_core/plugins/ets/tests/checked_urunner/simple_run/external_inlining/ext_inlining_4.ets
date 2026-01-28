@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,9 @@ import { sum_array } from './ext_funcs_3.ets';
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::A,ext_funcs_3.ETSGLOBAL::B,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main0,ext_funcs_3.ETSGLOBAL::A,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main0" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_4.ETSGLOBAL::main0"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::A.*\[file=\d+\]/
 
 function main0(): int { 
     if (A(5) == 6) {
@@ -42,6 +45,9 @@ function main0(): int {
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main1,ext_funcs_3.ETSGLOBAL::risky,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_4.ETSGLOBAL::main1"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::risky.*\[file=\d+\]/
 
 function main1(): int {
     let a: int[] = [1, 2, 3];
@@ -59,6 +65,9 @@ function main1(): int {
 //! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main2,.*,IFRAME/
+//! METHOD     "ext_inlining_4.ETSGLOBAL::main2"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::risky.*\[file=\d+\]/
 
 function main2(): int {
     let a: int[] = [1, 0, 3];
@@ -76,6 +85,9 @@ function main2(): int {
 //! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main3,.*,IFRAME/
+//! METHOD     "ext_inlining_4.ETSGLOBAL::main3"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::maybe_throw.*\[file=\d+\]/
 
 function main3(): int {
     let total = 0;
@@ -99,6 +111,9 @@ function main3(): int {
 //! RUN        options: "--panda-files=../../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testing
 //! EVENT      /DeoptimizationReason,ext_funcs_3.ETSGLOBAL::sum_array,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main4,.*,IFRAME/
+//! METHOD     "ext_inlining_4.ETSGLOBAL::main4"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::sum_array.*\[file=\d+\]/
 
 function main4(): int {
     let arr: int[] = [1, 2, 3];

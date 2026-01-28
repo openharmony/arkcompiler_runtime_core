@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@ import { top2 } from './ext_funcs_5.ets';
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top,ext_funcs_4_1.ETSGLOBAL::compute,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main1,ext_funcs_5.ETSGLOBAL::top,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_6.ETSGLOBAL::main1"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_5\.ETSGLOBAL::top.*\[file=\d+\]/
 
 function main1(): int {
     let total = top(3); // inlining: main → top → compute
@@ -40,6 +43,9 @@ function main1(): int {
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top2,ext_funcs_4_1.ETSGLOBAL::compute2,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main2,ext_funcs_5.ETSGLOBAL::top2,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_6_ext_funcs_5.ets.abc:../../ext_inlining_6_ext_funcs_4.ets.abc:../../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_6.ETSGLOBAL::main2"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_5\.ETSGLOBAL::top2.*\[file=\d+\]/
 
 function main2(): int {
     let total = top2(3); // Expect: 0²+1 + 1²+1 + 2²+1 = 1 + 2 + 5 = 8

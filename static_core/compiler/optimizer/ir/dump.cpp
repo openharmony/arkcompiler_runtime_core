@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -835,6 +835,24 @@ void Inst::DumpOpcode(std::ostream *out) const
     (*out) << std::setw(INDENT_OPCODE) << opcode + space + flags;
 }
 
+namespace {
+inline std::optional<uint32_t> GetMethodFileIdIfAotMode(const Graph *graph, RuntimeInterface::MethodPtr method)
+{
+    if (method != nullptr && graph->IsAotMode()) {
+        return graph->GetRuntime()->GetAOTBinaryFileSnapshotIndexForMethod(method);
+    }
+    return std::nullopt;
+}
+
+void DumpMethodFileInfo(std::ostream *out, std::optional<uint32_t> fileId)
+{
+    if (fileId.has_value()) {
+        (*out) << " [file=" << fileId.value() << ']';
+    }
+    (*out) << ' ';
+}
+}  // unnamed namespace
+
 void ResolveStaticInst::DumpOpcode(std::ostream *out) const
 {
     auto graph = GetBasicBlock()->GetGraph();
@@ -844,10 +862,11 @@ void ResolveStaticInst::DumpOpcode(std::ostream *out) const
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     if (GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method;
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId;
     }
+    DumpMethodFileInfo(out, GetMethodFileIdIfAotMode(graph, GetCallMethod()));
 }
 
 void ResolveVirtualInst::DumpOpcode(std::ostream *out) const
@@ -859,10 +878,11 @@ void ResolveVirtualInst::DumpOpcode(std::ostream *out) const
     ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method;
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId;
     }
+    DumpMethodFileInfo(out, GetMethodFileIdIfAotMode(graph, GetCallMethod()));
 }
 
 void InitStringInst::DumpOpcode(std::ostream *out) const
@@ -892,10 +912,11 @@ void CallInst::DumpOpcode(std::ostream *out) const
     ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (!IsUnresolved() && GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId + ' ' + method << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId + ' ' + method;
     } else {
-        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId << ' ';
+        (*out) << std::setw(INDENT_OPCODE) << opcode + inlined + methodId;
     }
+    DumpMethodFileInfo(out, GetMethodFileIdIfAotMode(graph, GetCallMethod()));
 }
 
 void DeoptimizeInst::DumpOpcode(std::ostream *out) const

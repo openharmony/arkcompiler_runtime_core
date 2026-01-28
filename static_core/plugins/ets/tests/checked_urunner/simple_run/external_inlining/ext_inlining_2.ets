@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@ import { get_element } from './ext_funcs_1.ets';
 //! EVENT      /Inline,ext_funcs_1.ETSGLOBAL::get_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
 //! EVENT_NEXT /Inline,ext_inlining_2.ETSGLOBAL::main,ext_funcs_1.ETSGLOBAL::get_element,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../../ext_inlining_2_ext_funcs.ets.abc:../../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
+//! METHOD     "ext_inlining_2.ETSGLOBAL::main"
+//! PASS_BEFORE "Inline"
+//! INST       /CallStatic.*ext_funcs_1\.ETSGLOBAL::get_element.*\[file=\d+\]/
 
 function main(): int {
     let arr: int[] = [1, 2, 3, 4];
