@@ -20,9 +20,9 @@ Statements
 
 *Statements* are designed to control execution.
 
-Some statements are simple like a single *expressionStatement*
-(see :ref:`Expression Statements`), while others like :ref:`Block` or
-:ref:`if Statements` take several lines of program code.
+Some statements are simple like a single *expressionStatement* (see
+:ref:`Expression Statements`), while others take several lines of program code
+like :ref:`Block` or :ref:`if Statements`.
 
 .. code-block:: typescript
 
@@ -39,7 +39,7 @@ Some statements are simple like a single *expressionStatement*
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
 
-   From the viewpoint of the grammar rules, any expression ending in the
+   From the viewpoint of grammar rules, any expression ending in the
    semicolon '``;``' forms an *expressionStatement*. A missing semicolon is added
    automatically to an expression used as a statement.
 
@@ -594,8 +594,9 @@ statement, or in a body block:
     frontend_status: Partly
     todo: type of element for strings
 
-A ``for-of`` loop iterates elements of ``array`` or ``string``, or an instance
-of *iterable* class or interface (see :ref:`Iterable Types`).
+A ``for-of`` loop iterates elements of an instance of an *iterable type*
+(see :ref:`Iterable Types`) and executes the loop body having these elements
+avaialble.
 
 The syntax of *for-of statements* is presented below:
 
@@ -609,14 +610,13 @@ The syntax of *for-of statements* is presented below:
         identifier | ('let' | 'const') identifier (':' type)?
         ;
 
-A :index:`compile-time error` occurs if the type of an expression is not
-``array``, ``string``, or an iterable type.
+If type of an expression is not iterable, then a :index:`compile-time error`
+occurs.
 
 The execution of a ``for-of`` loop starts from the evaluation of ``expression``.
-If the evaluation is successful, then the resultant expression is used for
-loop iterations (execution of the ``statement``). On each iteration,
-*forVariable* is set to successive elements of the ``array``, ``string``, or
-the result of class iterator advancement.
+Then, if the evaluation is successful, for every loop iteration *forVariable*
+is set to the successive element as a result of iterator advancement, and the
+loop body (i.e., ``statement``) is executed.
 
 .. index::
    for-of statement
@@ -632,15 +632,15 @@ the result of class iterator advancement.
    for-of loop
    evaluation
    loop iteration
-   class iterator
    iteration
    statement
 
-If *forVariable* has the modifiers ``let`` or ``const``, then a new variable
-is declared in the loop scope. The new variable is accessible only inside the
-loop body. Otherwise, the variable is as declared above.
-The modifier ``const`` prohibits assignments into *forVariable*,
-while ``let`` allows modifications.
+If *forVariable* contains modifiers ``let`` or ``const``, then *forVariable*
+declares a new variable accessible inside the loop body only. Otherwise, the
+variable declared elsewhere is used.
+
+The modifier ``const`` forbids assignment into *forVariable*,
+while ``let`` allows modifications. 
 
 The type of *forVariable* declared inside the loop is inferred to be that
 of the *iterated* elements, namely:
@@ -928,6 +928,8 @@ following:
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` (see
   :ref:`Types void or undefined`);
+- Asynchronous function, method or lambda body with return type
+  ``Promise<void>`` (see :ref:`Asynchronous execution`);
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
@@ -1380,9 +1382,8 @@ can be performed while leaving the ``try-catch``:
 
 #. If no ``catch`` clause is in place, then the error is propagated to the
    surrounding and caller scopes until reaching the scope with the ``catch``
-   clause to handle the error. If there is no such scope, then the whole
-   coroutine stack (see :ref:`Coroutines (Experimental)`) is discarded.
-   Subsequent steps are then defined by the execution environment.
+   clause to handle the error. Subsequent steps are then defined by the
+   execution environment.
 
 #. If ``finally`` clause is in place, and its execution completes abruptly, then
    the ``try`` statement also completes abruptly.
@@ -1403,7 +1404,6 @@ can be performed while leaving the ``try-catch``:
    surrounding scope
    caller scope
    scope
-   coroutine stack
    environment
 
 .. raw:: pdf

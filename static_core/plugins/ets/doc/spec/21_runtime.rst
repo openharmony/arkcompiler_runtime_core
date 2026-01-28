@@ -24,12 +24,12 @@ Runtime System
    and approaches followed.
 
 .. include:: ../runtime/01_intro.rst
-.. include:: ../runtime/02_bytecode.rst
-.. include:: ../runtime/03_file_format.rst
-.. include:: ../runtime/04_names.rst
-.. include:: ../runtime/05_imports.rst
-.. include:: ../runtime/06_runtime_class.rst
-.. include:: ../runtime/07_verifier.rst
+.. include:: ../runtime/02_fully_qualified_name.rst
+.. include:: ../runtime/03_binary_file_format.rst
+.. include:: ../runtime/04_runtime_type_system.rst
+.. include:: ../runtime/05_runtime_name.rst
+.. include:: ../runtime/06_language_representation_in_binary_file.rst
+.. include:: ../runtime/07_verification.rst
 
 
 

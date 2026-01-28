@@ -53,7 +53,7 @@ The syntax of *ambient declaration* is presented below:
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantDeclaration
+        ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | explicitFunctionOverload
         | ambientClassDeclaration
@@ -95,35 +95,36 @@ context that is already ambient:
 
 |
 
-.. _Ambient Constant Declarations:
+.. _Ambient Constant or Variable Declarations:
 
-Ambient Constant Declarations
-*****************************
+Ambient Constant or Variable Declarations
+*****************************************
 
 .. meta:
     frontend_status: Done
 
-The syntax of *ambient constant declaration* is presented below:
+The syntax of *ambient constant* or *variable declaration* is presented below:
 
 .. code-block:: abnf
 
-    ambientConstantDeclaration:
-        'const' ambientConstList ';'
+    ambientConstantOrVariableDeclaration:
+        'const'|'let' ambientConstantOrVariableList ';'
         ;
 
-    ambientConstList:
-        ambientConst (',' ambientConst)*
+    ambientConstantOrVariableList:
+        ambientConstantOrVariable (',' ambientConstantOrVariable)*
         ;
 
-    ambientConst:
+    ambientConstantOrVariable:
         identifier ':' type
         ;
 
 .. index::
    ambient constant
+   ambient variable
    constant declaration
+   variable declaration
    declaration
-   ambient constant
    non-ambient declaration
 
 |
@@ -650,7 +651,7 @@ The syntax of *ambient namespace declaration* is presented below:
 
     ambientNamespaceElementDeclaration:
         'export'?
-        ( ambientConstantDeclaration
+        ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
@@ -786,14 +787,14 @@ Ambient Accessor Declarations
     frontend_status: None
     
 *Ambient accessor declaration* is an ambient version of
-:ref:`Accessor Declarations`. The syntax of an *ambient accessor declaration*
-is presented below:
+:ref:`Accessor Declarations` or :ref:`Accessors with Receiver`. The syntax of
+an *ambient accessor declaration* is presented below:
 
 .. code-block:: abnf
 
     ambientAccessorDeclaration:
-        ( 'get' identifier '(' ')' returnType
-        | 'set' identifier '(' requiredParameter ')'
+        ( 'get' identifier '(' receiverParameter? ')' returnType
+        | 'set' identifier '(' (receiverParameter ',')? requiredParameter ')'
         )
         ;
 
@@ -806,7 +807,7 @@ declaration is not specified.
     declare get name(): string // ok
     declare get age() // compile-time error, return type must be specified
 
-See :ref:`Accessor Declarations` for details.
+See :ref:`Accessor Declarations` and :ref:`Accessors with Receiver` for details.
 
 .. raw:: pdf
 

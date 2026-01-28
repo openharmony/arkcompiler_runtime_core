@@ -10,22 +10,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Overview:
+.. _RT Overview:
 
 Overview
 ********
 
-Runtime specification presents complete information on the structure of the |LANG|
-runtime system with the detailed description of runtime data structures used
-and approaches followed. The runtime system is designed to run multi-language
-module-based applications on microcontrollers and mobile devices.
-
-The Design Principles
-=====================
-
--  Simple and portable design,
--  Minimalist and lightweight implementation,
--  Documented design, rationales, and public API,
--  Buildable and tested master,
--  Explicit maintenance and development process.
-
+Runtime specification presents complete information on the structure of the
+|LANG| runtime system with the detailed description of its binary file
+structure, type system and public interfaces.

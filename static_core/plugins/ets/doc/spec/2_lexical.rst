@@ -865,9 +865,9 @@ String Literals
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* comprizes of zero or more characters enclosed between
+*String literals* comprize zero or more characters enclosed between
 single or double quotes. A *multiline string* literal (see
-:ref:`Multiline String Literal`) is а special form of a string literal.
+:ref:`Multiline String Literal`) is a special form of a string literal.
 
 *String literals* are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
@@ -1030,7 +1030,7 @@ A multiline string is represented in the example below:
                     which should be enclosed in
                     backticks`
 
-*MultilineString* literals are of literal types corresponding to the literals.
+*MultilineString* literals are of literal types corresponding to literals.
 If an operator is applied to a literal, then the literal type is replaced for
 ``string`` (see :ref:`Type String`).
 

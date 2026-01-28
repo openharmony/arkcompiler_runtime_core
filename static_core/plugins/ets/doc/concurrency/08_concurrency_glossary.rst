@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2025 Huawei Device Co., Ltd.
+    Copyright (c) 2025-2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -10,29 +10,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Spec Refs:
+.. _Concurrency Glossary:
 
-Spec Refs
-#########
+Concurrency Glossary
+********************
 
-Temporarily: for refs to big spec.
+.. note::
+   The list of terms is to be revised.
 
-.. _Standard Library:
+``AsyncLock``
+  A class that implements an asynchronous lock and allows asynchronous
+  operations to be performed under a lock.
 
-Standard Library
-****************
-
-.. _Return Type Inference:
-
-Return Type Inference
-*********************
-
-.. _Lambda Expressions:
-
-Lambda Expressions
-******************
-
-.. _Method Declarations:
-
-Method Declarations
-*******************
+Coroutine
+  Part of computer program which execution can be suspended and resumed.

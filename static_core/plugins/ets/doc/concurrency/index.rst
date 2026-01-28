@@ -10,11 +10,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. STS Concurrency documentation master file, created by
-   sphinx-quickstart on Tue Jan 16 17:40:57 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to STS Concurrency's documentation!
 ===========================================
 

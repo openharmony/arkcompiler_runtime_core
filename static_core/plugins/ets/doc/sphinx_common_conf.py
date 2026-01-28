@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ project = u'ArkTS'
 # CC-OFFNXT(G.NAM.01): project code style
 author = u''
 
-copyright = u'2021-2024 Huawei Device Co., Ltd.'
+copyright = u'2021-2026 Huawei Device Co., Ltd.'
 
 # The short X.Y version
 # CC-OFFNXT(G.NAM.01): project code style
@@ -35,7 +35,7 @@ version = u'1.2.1'
 
 # The full version, including alpha/beta/rc tags
 # CC-OFFNXT(G.NAM.01): project code style
-release = u'1.2.1-alpha TECHNICAL PREVIEW 2'
+release = u'1.2.1-alpha TECHNICAL PREVIEW 3'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''
@@ -52,6 +52,12 @@ rst_epilog = '''
 .. |LANG| replace:: {lang}
 .. |UIFW| replace:: ArkUI
 .. |TS| replace:: TypeScript
+.. |C_JOB| replace:: Job
+.. |C_JOBS| replace:: Jobs
+.. |C_CORO| replace:: Suspendable Job
+.. |C_COROS| replace:: Suspendable Jobs
+.. |C_WORKER| replace:: Worker Thread
+.. |C_WORKERS| replace:: Worker Threads
 '''.format(lang=project)
 
 #

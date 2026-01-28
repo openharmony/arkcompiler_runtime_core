@@ -550,6 +550,21 @@ numeric types to ``bigint`` occurs. The methods of class ``BigInt``
 (which is a part of :ref:`Standard Library`) must be used to create
 ``bigint`` values from numeric type values.
 
+*Numeric types* are represented by classes of the :ref:`Standard Library`. It
+means that *numeric types* are of the class type nature, that all of them are
+subtypes of ``Object``, and therefore can be used at any place where a class
+name is expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_number = new number
+    let a_byte = new byte
+    let an_integer = new int
+    console.log (a_number, a_byte, an_integer)
+    // Output is: 0 0 0
+
+
 .. index::
    integer type
    floating-point type
@@ -718,7 +733,7 @@ discussed in :ref:`Error Handling`.
    additive expression
    error
    integer operator
-   
+
 
 Predefined constructors, methods, and constants for *integer types*
 are parts of the |LANG| :ref:`Standard Library`.
@@ -891,7 +906,7 @@ Any floating-point type value can be cast to or from any numeric type (see
 
 Conversions between floating-point types and type ``boolean`` are
 not allowed. However, the value of floating-point type can be used
-as a logical condition in some cases 
+as a logical condition in some cases
 (see :ref:`Extended Conditional Expressions`)
 
 Operators on floating-point numbers, except the remainder operator (see
@@ -1003,6 +1018,18 @@ The boolean operators are as follows:
    ``false``), and then creates a concatenation of the two strings as a new
    ``string``.
 
+Type ``boolean`` is a class type that is a part of the :ref:`Standard Library`.
+It means that type ``boolen  is a subtype of ``Object``, and therefore can be
+used at any place where a class name is expected.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_boolean = new boolean
+    console.log (a_boolean)
+    // Output is: false
+    let o: Object = a_boolean // OK
+
 
 .. index::
    boolean
@@ -1066,8 +1093,8 @@ Reference Types
    void type
    type parameter
 
-The term *Objects* is used further in this document to denote any instances
-pointed at by variables and constants of reference types
+The term *Object* is used further in this document to denote any instance
+pointed at by a variable or constant of a reference type
 (see :ref:`Variable and Constant Declarations`).
 
 Multiple references to an object are possible.
@@ -1079,7 +1106,7 @@ its elements.
 
 If two variables of a reference type contain references
 to the same object, and either variable modifies the state of that object,
-then the change of the state is also visible in the other variable.
+then the change of state is also visible in the other variable.
 
 .. index::
    object
@@ -1106,9 +1133,9 @@ supertype of :ref:`Types void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
-.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any 
+.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any
    non-nullable object returning a string representation of that object. This is
-   used in the examples in this document. 
+   used in the examples in this document.
 
 |
 
@@ -1212,22 +1239,22 @@ Types ``void`` or ``undefined``
     frontend_status: Done
 
 Type names ``void`` and ``undefined`` in fact refer to the same type with the
-single value named ``undefined`` (see :ref:`Undefined Literal`). 
+single value named ``undefined`` (see :ref:`Undefined Literal`).
 
 .. code-block:: typescript
    :linenos:
 
     function f1 (): void {
         return undefined // OK
-    } 
+    }
 
     function f2 (): undefined {
         return // OK
-    } 
+    }
 
     function f3 () {
         return undefined // OK
-    } 
+    }
 
     let v: void = undefined
     let u: undefined = undefined
@@ -1281,7 +1308,7 @@ function, or method as follows:
    const f1: F1<void> = (): void => {}
    const f2: F1<void> = () => {}
    const f3: F1<void> = (): undefined => { return undefined }
-   
+
    // Array literals can be assigned to the array of void type in any form
    type A1<T> = T[]
    type A2<T> = Array<T>
@@ -1375,6 +1402,22 @@ Type ``string`` has dual semantics, i.e.:
    ``string`` operations (see :ref:`String Concatenation`,
    :ref:`Equality Expressions`, and :ref:`String Relational Operators`).
 
+As a result, reference type semantics of type ``string`` highlights that this
+type is a class type. The appropriate class is a part of the
+:ref:`Standard Library`, and type ``string`` is a subtype of ``Object``, and
+can be used at any place where a class name is expected.
+
+Moreover, type ``string`` is iterable (see :ref:`Iterable Types`),
+and can be used at any place where an iterable type is expected. 
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_string = new string
+    console.log (a_string)
+    // Output is: <empty_string>
+    let o: Object = a_string // OK
+
 .. index::
    type string
    value
@@ -1445,8 +1488,20 @@ Type ``bigint``
 |LANG| has the built-in ``bigint`` type that allows handling theoretically
 arbitrary large integers. Values of type ``bigint`` can hold numbers that are
 larger than the maximum value of type ``long``. Type ``bigint`` uses
-the arbitrary-precision arithmetic. Values of type ``bigint`` can be created
-from the following:
+the arbitrary-precision arithmetic. Type ``bigint`` does not belong to the
+hierarchy of :ref:`Numeric Types`.
+The consequences are as follows:
+
+- No implicit conversion between ``bigint`` type and numeric types.
+- Relational operators that use an operand of type ``bigint`` along with an
+  operand of another type are illegal. Attempting to use such a relational
+  operator produces a :index:`compile-time error`.
+- Binary arithmetic expressions that use an operand of type ``bigint`` along
+  with an operand of another type are illegal and produce a :index:`compile-time error`.
+- The equality expression with ``bigint`` against non-``bigint`` always returns
+  ``false``, and causes a compile-time warning.
+
+Values of type ``bigint`` can be created from the following:
 
 - *Bigint literals* (see :ref:`Bigint Literals`); or
 - Numeric type values, by using a call to the standard library class ``BigInt``
@@ -1461,14 +1516,29 @@ Similarly to ``string``, ``bigint`` type has dual semantics:
   :ref:`Integer Types and Operations`.
 
 Using ``bigint`` is recommended in all cases, although the name ``BigInt``
-also refers to type ``bigint``. Using ``BigInt`` creates new objects and calls
-to static methods in order to improve |TS| compatibility.
+also refers to type ``bigint``. For |TS| compatibility, objects of type
+``bigint`` can be created with help of ``BigInt`` static methods.
 
 .. code-block:: typescript
    :linenos:
 
    let b1: bigint = new BigInt(5) // for Typescript compatibility
    let b2: bigint = 123n
+
+Type ``bigint`` is a class type that has an appropriate class as a part of the
+:ref:`Standard Library`. It means that type ``bigint`` is a subtype of
+``Object``, and therefore can be used at any place where a class name is
+expected.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_bigint = new bigint
+    console.log (a_bigint)
+    // Output is: 0
+    let o: Object = a_bigint // OK
+
 
 .. index::
    bigint type
@@ -1568,9 +1638,9 @@ Array Types
 .. meta:
     frontend_status: Partly
 
-*Array type* is a data structure intended to comprise any number of same-type
-elements, including zero elements. |LANG| supports the following two predefined
-array types:
+*Array type* represents a data structure intended to comprize any non-negative
+number of elements of types that are subtypes of the type specified in the
+array declaration. |LANG| supports the following two predefined array types:
 
 - :ref:`Resizable Array Types`; and
 
@@ -1585,6 +1655,13 @@ requirement.
 - *Fixed-size arrays* have their length set only once to achieve a better
   performance.
 - *Fixed-Size arrays* have no methods defined.
+
+Any array type is a class type that has an appropritate class in the
+:ref:`Standard Library`. It means that array types are subtypes of
+``Object``, and that they can be used at any place where a class
+name is expected. 
+Moreover, array types are iterable (see :ref:`Iterable Types`), and can be
+used at any place where an iterable type is expected. 
 
 
 .. note::
@@ -1852,28 +1929,16 @@ access to tuple elements:
    tuple[0] = 42
    console.log (tuple[0], tuple[4]) // `42 42` be printed
 
-A tuple has no property ``length``, and the following code legal in |TS|
-causes a :index:`compile-time error` in |LANG|:
+The number of elements of a tuple is known as *tuple length*, and can
+be accessed by using the property ``length``:
 
 .. code-block:: typescript
    :linenos:
 
-   let tuple : [number, string]  = [1, "" ]
-   for (let index = 0; index < tuple.length; index++ ) {  // compile-time error
-                                                          // no 'length' property
-      let element: Object = tuple[index]
-      // do something with the element
-   }
+   let tuple: [number, string]  = [1, "" ]
+   console.log(tuple.length) // output: 2
 
-Any tuple type is assignable (see :ref:`Assignability`) to class
-``Object`` (see :ref:`Type Object`).
-
-An empty tuple is a corner case. It is only added to support |TS| compatibility:
-
-.. code-block:: typescript
-   :linenos:
-
-   let empty: [] = [] // empty tuple with no elements in it
+Using the property ``length`` make sense for :ref:`Type Tuple`.
 
 .. index::
    tuple type
@@ -1892,6 +1957,10 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
    square bracket
    compatibility
    access
+
+Any tuple type is subtype of type ``Tuple``
+(see :ref:`Type Tuple`). Subtyping for tuples is discussed
+in :ref:`Subtyping for Tuple Types`.
 
 |
 
@@ -1928,6 +1997,67 @@ call. Otherwise, a :index:`compile-time error` occurs as follows:
 
 |
 
+.. _Type Tuple:
+
+Type ``Tuple``
+==============
+
+.. meta:
+    frontend_status: None
+
+Type ``Tuple`` is a predefined type that is an *abstract superclass*
+of any tuple type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let pair: [number, string] = [1, "abc"]
+
+    let a: Tuple = pair // ok, subtyping
+
+An empty tuple type is identical to ``Tuple``:
+
+.. code-block:: typescript
+   :linenos:
+
+    let empty: [] = [] // empty tuple with no elements in it
+
+Type ``Tuple`` is preserved by :ref:`Type Erasure`, so it can be used
+in :ref:`InstanceOf Expression` and :ref:`Cast Expression`.
+
+An element of a ``Tuple`` value cannot be accessed directly. A developer must use the
+``unsafeGet`` or  ``unsafeSet`` methods instead, which has the following signatures:
+
+.. code-block:: typescript
+   :linenos:
+
+    unsafeGet(index: int): Any
+    unsafeSet(index: int, value: Any): void
+
+A runtime error error is caused in calls of these methods, if:
+
+-  ``index`` value is less than zero; or
+-  ``index`` value is greater or equal than tuple length.
+
+Methods usage is illustrated below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function modify(x: Object) {
+        if (x instanceof Tuple) {
+            console.log(x.unsafeGet(0))
+            x.unsafeSet(1, "aa")
+        }
+    }
+
+    let a: [string, string] = ["aa", "bb"]
+    modify(a) // ok
+
+    let b: [string] = ["aa"]
+    modify(b)     // runtime error in the 'modify' body
+
+|
 
 .. _Function Types:
 
@@ -2169,11 +2299,11 @@ The syntax of *union type* is as follows:
 The values of a *union* type are valid values of all types the union is created
 from.
 
-A :index:`compile-time error` occurs if the type in the right-hand side of a
+A :index:`compile-time error` occurs if type in the right-hand side of a
 union type declaration leads to a circular reference.
 
-A :index:`compile-time error` occurs if the *type* is a function type (see
-:ref:`Function Types`) and is used without parenthesis around.
+A :index:`compile-time error` occurs if *type* is a function type (see
+:ref:`Function Types`) not enclosed in parentheses.
 
 
 .. index::

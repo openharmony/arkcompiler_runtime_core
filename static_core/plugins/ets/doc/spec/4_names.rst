@@ -1042,6 +1042,10 @@ from the initializer expression as follows:
 If the type of the initializer expression cannot be inferred, then a
 :index:`compile-time error` occurs (see :ref:`Object Literal`):
 
+The presence of an initializer for ambient declarations of variables and constants 
+causes a :index:`compile-time error`.
+
+
 .. index::
    type
    declaration
@@ -1093,12 +1097,12 @@ If the type of the initializer expression cannot be inferred, then a
     let f = {name: "aa"} // compile-time error: type unknown
 
     declare let   x1 = 1 // compile-time error: ambient variable cannot have initializer
-    declare const x2 = 1 // type of 'x2' is int
+    declare const x2 = 1 // compile-time error: ambient constant cannot have initializer
     let           x3 = 1 // type of 'x3' is int
     const         x4 = 1 // type of 'x4' is int
 
     declare let   s1 = "1" // compile-time error: ambient variable cannot have initializer
-    declare const s2 = "1" // type of 's2' is "1"
+    declare const s2 = "1" // compile-time error: ambient constant cannot have initializer
     let           s3 = "1" // type of 's3' is string
     const         s4 = "1" // type of 's4' is "1"
 
@@ -1319,9 +1323,9 @@ Optional Parameters
         ;
 
 The first form contains an ``expression`` that specifies a *default value*.
-It is called a *parameter with default value*, and acts as an optional parameter
+It is called *parameter with default value*, and acts as an optional parameter
 of the type of a function and of its call sites. If a corresponding argument
-value is `undefined`` (i.e., a parameter is omitted, or `undefined` is
+value is ``undefined`` (i.e., a parameter is omitted, or ``undefined`` is
 passed explicitly), then the default value is used:
 
 .. index::
