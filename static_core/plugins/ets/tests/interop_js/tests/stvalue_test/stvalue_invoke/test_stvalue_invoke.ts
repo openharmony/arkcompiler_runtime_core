@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -658,6 +658,58 @@ function testNspVoidInvokeFunction(): void {
     nsp.namespaceInvokeFunction('VoidEmptyInvoke', ':', []);
 }
 
+function testLambdaFunInvokeFunction(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
+    let staLam = nsp.namespaceGetVariable('lambdaFun', SType.REFERENCE);
+    let res = nsp.namespaceInvokeFunction('testLambdaParam', 'C{std.core.Function0}:z', [staLam]);
+    ASSERT_TRUE(res.unwrapToBoolean());
+}
+
+function testDefaultParamInvoke(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
+
+    let strValue = STValue.wrapString('xxx');
+    let result1 = nsp.namespaceInvokeFunction('testDefaultParam', 'C{std.core.String}:C{std.core.String}', [strValue]);
+    ASSERT_TRUE(result1.unwrapToString() === 'Hello_xxx');
+    
+    let strValue2 = STValue.getUndefined();
+    let result2 = nsp.namespaceInvokeFunction('testDefaultParam', 'C{std.core.String}:C{std.core.String}', [strValue2]);
+    ASSERT_TRUE(result2.unwrapToString() === 'Hello_World');
+}
+
+function testRestParamInvoke(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
+
+    let result0 = nsp.namespaceInvokeFunction('testRestParam', 'C{std.core.Array}:C{std.core.String}', [STValue.getUndefined()]);
+    ASSERT_TRUE(result0.unwrapToString() === '');
+
+    // Test with single argument
+    let arg1 = STValue.wrapString('abc');
+    let strArray = STValue.newArray(1, arg1);
+    let result1 = nsp.namespaceInvokeFunction('testRestParam', 'C{std.core.Array}:C{std.core.String}', [strArray]);
+    ASSERT_TRUE(result1.unwrapToString() === 'abc');
+
+    // Test with multiple arguments
+    let arg2 = STValue.wrapString('def');
+    let arg3 = STValue.wrapString('ghi');
+    strArray.arrayPush(arg2);
+    strArray.arrayPush(arg3);
+    let result2 = nsp.namespaceInvokeFunction('testRestParam', 'C{std.core.Array}:C{std.core.String}', [strArray]);
+    ASSERT_TRUE(result2.unwrapToString() === 'abc,def,ghi');
+}
+
+function testOptionalParamInvoke(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
+
+    let arg = STValue.wrapString('abc');
+    let result1 = nsp.namespaceInvokeFunction('testOptionalParam', 'C{std.core.String}:C{std.core.String}', [arg]);
+    ASSERT_TRUE(result1.unwrapToString() === 'got-abc');
+
+    let arg2 = STValue.getUndefined();
+    let result2 = nsp.namespaceInvokeFunction('testOptionalParam', 'C{std.core.String}:C{std.core.String}', [arg2]);
+    ASSERT_TRUE(result2.unwrapToString() === 'got-no-arg');
+}
+
 function testNamespaceInvokeFunction(): void {
     testNspFunctionMismatch();
     testNspFunctionInvalidParam();
@@ -673,6 +725,10 @@ function testNamespaceInvokeFunction(): void {
     testNspStringInvokeFunction();
     testNspBigIntInvokeFunction();
     testNspVoidInvokeFunction();
+    testLambdaFunInvokeFunction();
+    testDefaultParamInvoke();
+    testRestParamInvoke();
+    testOptionalParamInvoke();
 }
 
 function funJsFullGC(): void {
@@ -703,12 +759,140 @@ function testSTValueDestruct(): void {
     ASSERT_TRUE(dyWeakRef.deref() === undefined);
 }
 
+// Constructor invocation tests
+function testConstructorInvoke(): void {
+    let constructorCls = STValue.findClass('stvalue_invoke.ConstructorTest');
+
+    let obj1 = constructorCls.classInstantiate(':', []);
+    let val1 = obj1.objectInvokeMethod('getValue', ':i', []);
+    ASSERT_TRUE(val1.unwrapToNumber() === 0);
+
+    let obj2 = constructorCls.classInstantiate('i:', [STValue.wrapInt(42)]);
+    let val2 = obj2.objectInvokeMethod('getValue', ':i', []);
+    ASSERT_TRUE(val2.unwrapToNumber() === 42);
+
+    let obj3 = constructorCls.classInstantiate('iC{std.core.String}:', [STValue.wrapInt(100), STValue.wrapString('test')]);
+    let val3 = obj3.objectInvokeMethod('getValue', ':i', []);
+    ASSERT_TRUE(val3.unwrapToNumber() === 100);
+
+    let res = false;
+    try {
+        constructorCls.classInstantiate('d:', [STValue.wrapNumber(1.5)]);
+    } catch (e: Error) {
+        res = true
+        res = res && e.message.includes('Unknown ANI error occurred');
+    }
+    ASSERT_TRUE(res);
+}
+
+// Method overload tests
+function testMethodOverload(): void {
+    let overloadCls = STValue.findClass('stvalue_invoke.OverloadTest');
+    let obj = overloadCls.classInstantiate(':', []);
+
+    let res1 = obj.objectInvokeMethod('process', 'i:C{std.core.String}', [STValue.wrapInt(123)]);
+    ASSERT_TRUE(res1.unwrapToString() === 'int:123');
+
+    let res2 = obj.objectInvokeMethod('process', 'd:C{std.core.String}', [STValue.wrapNumber(45.67)]);
+    ASSERT_TRUE(res2.unwrapToString() === 'double:45.67');
+
+    let res3 = obj.objectInvokeMethod('process', 'C{std.core.String}:C{std.core.String}', [STValue.wrapString('hello')]);
+    ASSERT_TRUE(res3.unwrapToString() === 'string:hello');
+
+    let res4 = obj.objectInvokeMethod('process', 'ii:C{std.core.String}', [STValue.wrapInt(10), STValue.wrapInt(5)]);
+    ASSERT_TRUE(res4.unwrapToString() === 'int,scale:50');
+
+    let nsp = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
+    let overloadRes1 = nsp.namespaceInvokeFunction('invokeOverloadTest', 'i:C{std.core.String}', [STValue.wrapInt(123)]);
+    ASSERT_TRUE(overloadRes1.unwrapToString() === 'int:123');
+    let overloadRes2 = nsp.namespaceInvokeFunction('invokeOverloadTest', 'C{std.core.String}:C{std.core.String}', [STValue.wrapString('hello')]);
+    ASSERT_TRUE(overloadRes2.unwrapToString() === 'string:hello');
+    let overloadRes3 = nsp.namespaceInvokeFunction('invokeOverloadTest', 'iC{std.core.String}:C{std.core.String}', [STValue.wrapInt(123), STValue.wrapString('hello')]);
+    ASSERT_TRUE(overloadRes3.unwrapToString() === 'int,string:123,hello');
+}
+
+// Boundary value tests
+function testBoundaryValues(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
+
+    let maxVal = nsp.namespaceInvokeFunction('TestBoundaryMax', ':i', []);
+    ASSERT_TRUE(maxVal.unwrapToNumber() === 2147483647);
+
+    let minVal = nsp.namespaceInvokeFunction('TestBoundaryMin', ':i', []);
+    ASSERT_TRUE(minVal.unwrapToNumber() === -2147483648);
+
+    let a1 = STValue.wrapInt(2147483647);
+    let b1 = STValue.wrapInt(0);
+    let sum1 = nsp.namespaceInvokeFunction('TestBoundaryAdd', 'ii:i', [a1, b1]);
+    ASSERT_TRUE(sum1.unwrapToNumber() === 2147483647);
+
+    let a2 = STValue.wrapInt(0);
+    let b2 = STValue.wrapInt(0);
+    let sum2 = nsp.namespaceInvokeFunction('TestBoundaryAdd', 'ii:i', [a2, b2]);
+    ASSERT_TRUE(sum2.unwrapToNumber() === 0);
+
+    let a3 = STValue.wrapInt(-100);
+    let b3 = STValue.wrapInt(-200);
+    let sum3 = nsp.namespaceInvokeFunction('TestBoundaryAdd', 'ii:i', [a3, b3]);
+    ASSERT_TRUE(sum3.unwrapToNumber() === -300);
+}
+
+// null and undefined handling tests
+function testNullUndefinedHandling(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
+
+    let nullResult = nsp.namespaceInvokeFunction('TestNullParam', 'X{C{std.core.Null}C{stvalue_invoke.Student}}:C{std.core.String}', [STValue.getNull()]);
+    ASSERT_TRUE(nullResult.unwrapToString() === 'null');
+
+    let studentCls = STValue.findClass('stvalue_invoke.Student');
+    let studentObj = studentCls.classInstantiate('i:', [STValue.wrapInt(18)]);
+    let validResult = nsp.namespaceInvokeFunction('TestNullParam', 'X{C{std.core.Null}C{stvalue_invoke.Student}}:C{std.core.String}', [studentObj]);
+    ASSERT_TRUE(validResult.unwrapToString() === 'valid');
+
+    let unResult = nsp.namespaceInvokeFunction('TestUndefinedParam', 'C{std.core.Object}:C{std.core.String}', [STValue.getUndefined()]);
+    ASSERT_TRUE(unResult.unwrapToString() === 'processed');
+}
+
+// Exception handling tests
+function testExceptionHandling(): void {
+    let nsp = STValue.findNamespace('stvalue_invoke.ETSGLOBAL');
+
+    // Test throwing exception
+    let res = false;
+    try {
+        nsp.namespaceInvokeFunction('TestThrowException', ':i', []);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Test exception');
+    }
+    ASSERT_TRUE(res);
+
+    // Test divide by zero exception
+    res = false;
+    try {
+        nsp.namespaceInvokeFunction('TestDivideByZero', 'ii:i', [STValue.wrapInt(10), STValue.wrapInt(0)]);
+    } catch (e: Error) {
+        res = true;
+        res = res && e.message.includes('Division by zero');
+    }
+    ASSERT_TRUE(res);
+
+    // Test normal division (no exception)
+    let normalResult = nsp.namespaceInvokeFunction('TestDivideByZero', 'ii:i', [STValue.wrapInt(20), STValue.wrapInt(4)]);
+    ASSERT_TRUE(normalResult.unwrapToNumber() === 5);
+}
+
 function main(): void {
     testFunctionalObjectInvoke();
     testObjectInvokeMethod();
     testClassInvokeStaticMethod();
     testNamespaceInvokeFunction();
     testSTValueDestruct();
+    testConstructorInvoke();
+    testMethodOverload();
+    testBoundaryValues();
+    testNullUndefinedHandling();
+    testExceptionHandling();
 }
 
 main();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1120,6 +1120,162 @@ function testFindEnum(): void {
     testEnumAll();
 }
 
+// Test interface implementation
+function testInterfaceImplementation(): void {
+    let circleClass = STValue.findClass('stvalue_accessor.Circle');
+    let circleInstance = circleClass.classInstantiate(':', []);
+
+    let printResult = circleInstance.objectInvokeMethod('print', ':C{std.core.String}', []);
+    ASSERT_TRUE(printResult.unwrapToString().includes('Circle'));
+    ASSERT_TRUE(printResult.unwrapToString().includes('radius'));
+
+    let radius = circleInstance.objectGetProperty('radius', SType.INT).unwrapToNumber();
+    ASSERT_TRUE(radius === 10);
+
+    circleInstance.objectSetProperty('radius', STValue.wrapInt(20), SType.INT);
+    let newRadius = circleInstance.objectGetProperty('radius', SType.INT).unwrapToNumber();
+    ASSERT_TRUE(newRadius === 20);
+}
+
+// Test primitive types
+function testPrimitiveTypes(): void {
+    let primitiveClass = STValue.findClass('stvalue_accessor.PrimitiveTypes');
+    let primitiveInstance = primitiveClass.classInstantiate(':', []);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('byteValue', SType.BYTE).unwrapToNumber() === 0x0A);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('shortValue', SType.SHORT).unwrapToNumber() === 1000);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('intValue', SType.INT).unwrapToNumber() === 100000);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('longValue', SType.LONG).unwrapToNumber() === 10000000000);
+
+    let floatValue = primitiveInstance.objectGetProperty('floatValue', SType.FLOAT).unwrapToNumber();
+    ASSERT_TRUE(Math.abs(floatValue - 3.14159) < 0.001);
+
+    let doubleValue = primitiveInstance.objectGetProperty('doubleValue', SType.DOUBLE).unwrapToNumber();
+    ASSERT_TRUE(Math.abs(doubleValue - 2.718281828) < 0.000001);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('charValue', SType.CHAR).unwrapToNumber() === 88);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('booleanValue', SType.BOOLEAN).unwrapToBoolean() === true);
+
+    primitiveInstance.objectSetProperty('byteValue', STValue.wrapByte(0x0B), SType.BYTE);
+    primitiveInstance.objectSetProperty('shortValue', STValue.wrapShort(2000), SType.SHORT);
+    primitiveInstance.objectSetProperty('intValue', STValue.wrapInt(200000), SType.INT);
+    primitiveInstance.objectSetProperty('booleanValue', STValue.wrapBoolean(false), SType.BOOLEAN);
+
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('byteValue', SType.BYTE).unwrapToNumber() === 0x0B);
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('shortValue', SType.SHORT).unwrapToNumber() === 2000);
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('intValue', SType.INT).unwrapToNumber() === 200000);
+    ASSERT_TRUE(primitiveInstance.objectGetProperty('booleanValue', SType.BOOLEAN).unwrapToBoolean() === false);
+}
+
+// Test null and undefined handling
+function testNullAndUndefined(): void {
+    let nullableClass = STValue.findClass('stvalue_accessor.NullableClass');
+    let nullableInstance = nullableClass.classInstantiate(':', []);
+
+    ASSERT_TRUE(nullableInstance.objectGetProperty('name', SType.REFERENCE).isNull());
+    ASSERT_TRUE(nullableInstance.objectGetProperty('age', SType.REFERENCE).isUndefined());
+
+    let stringParam = STValue.wrapString('Alice');
+    nullableInstance.objectSetProperty('name', stringParam, SType.REFERENCE);
+
+    let nameResult = nullableInstance.objectInvokeMethod('getName', ':C{std.core.String}', []);
+    ASSERT_TRUE(nameResult.unwrapToString() === 'Alice');
+
+    nullableInstance.objectSetProperty('name', STValue.getNull(), SType.REFERENCE);
+    ASSERT_TRUE(nullableInstance.objectInvokeMethod('getName', ':C{std.core.String}', []).unwrapToString() === 'Unknown');
+
+    nullableInstance.objectSetProperty('age', STValue.getUndefined(), SType.REFERENCE);
+    ASSERT_TRUE(nullableInstance.objectGetProperty('age', SType.REFERENCE).isUndefined());
+}
+
+// Test access control
+function testAccessControl(): void {
+    let accessControlClass = STValue.findClass('stvalue_accessor.AccessControl');
+    let accessInstance = accessControlClass.classInstantiate(':', []);
+
+    let publicValue = accessInstance.objectGetProperty('publicValue', SType.INT).unwrapToNumber();
+    ASSERT_TRUE(publicValue === 20);
+
+    let privateValue = accessInstance.objectInvokeMethod('getPrivateValue', ':i', []).unwrapToNumber();
+    ASSERT_TRUE(privateValue === 10);
+
+    let publicValueGetter = accessInstance.objectInvokeMethod('getPublicValue', ':i', []).unwrapToNumber();
+    ASSERT_TRUE(publicValueGetter === 20);
+
+    let privateValueResult = accessInstance.objectGetProperty('privateValue', SType.INT);
+    ASSERT_TRUE(privateValueResult.unwrapToNumber() === 10);
+}
+
+// Test method invocation with object parameters
+function testMethodWithObjectParams(): void {
+    let pointClass = STValue.findClass('stvalue_accessor.Point');
+
+    let point1 = pointClass.classInstantiate('ii:', [STValue.wrapInt(0), STValue.wrapInt(0)]);
+    let point2 = pointClass.classInstantiate('ii:', [STValue.wrapInt(3), STValue.wrapInt(4)]);
+
+    let distance = point1.objectInvokeMethod('distanceTo', 'C{stvalue_accessor.Point}:d', [point2]);
+    ASSERT_TRUE(Math.abs(distance.unwrapToNumber() - 5.0) < 0.001);
+
+    let point1Str = point1.objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString();
+    ASSERT_TRUE(point1Str.includes('Point'));
+    ASSERT_TRUE(point1Str.includes('0'));
+
+    let point2Str = point2.objectInvokeMethod('toString', ':C{std.core.String}', []).unwrapToString();
+    ASSERT_TRUE(point2Str.includes('Point'));
+    ASSERT_TRUE(point2Str.includes('3'));
+    ASSERT_TRUE(point2Str.includes('4'));
+
+    let geometryClass = STValue.findClass('stvalue_accessor.Geometry');
+    let staticDistance = geometryClass.classInvokeStaticMethod('calculateDistance',
+        'C{stvalue_accessor.Point}C{stvalue_accessor.Point}:d',
+        [point1, point2]);
+    ASSERT_TRUE(Math.abs(staticDistance.unwrapToNumber() - 5.0) < 0.001);
+}
+
+// Test class instantiation
+function testClassInstantiation(): void {
+    let calculatorClass = STValue.findClass('stvalue_accessor.Calculator');
+    let calcInstance = calculatorClass.classInstantiate(':', []);
+    ASSERT_TRUE(calcInstance.objectInvokeMethod('getResult', ':i', []).unwrapToNumber() === 100);
+
+    let pointClass = STValue.findClass('stvalue_accessor.Point');
+    let pointInstance = pointClass.classInstantiate('ii:', [STValue.wrapInt(10), STValue.wrapInt(20)]);
+    let xValue = pointInstance.objectGetProperty('x', SType.INT).unwrapToNumber();
+    let yValue = pointInstance.objectGetProperty('y', SType.INT).unwrapToNumber();
+    ASSERT_TRUE(xValue === 10);
+    ASSERT_TRUE(yValue === 20);
+}
+
+// Test newArray creation
+function testNewArray(): void {
+    let emptyArray = STValue.newArray(0, STValue.findClass('std.core.Int'));
+    ASSERT_TRUE(emptyArray.arrayGetLength() === 0);
+
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj1 = intClass.classInstantiate('i:', [STValue.wrapInt(1)]);
+    let intObj2 = intClass.classInstantiate('i:', [STValue.wrapInt(2)]);
+    let intObj3 = intClass.classInstantiate('i:', [STValue.wrapInt(3)]);
+
+    let arrayWithElements = STValue.newArray(3, intObj1);
+    ASSERT_TRUE(arrayWithElements.arrayGetLength() === 3);
+
+    let elem0 = arrayWithElements.arrayGet(0);
+    let elem1 = arrayWithElements.arrayGet(1);
+    let elem2 = arrayWithElements.arrayGet(2);
+    ASSERT_TRUE(elem0.objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 1);
+    ASSERT_TRUE(elem1.objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 1);
+    ASSERT_TRUE(elem2.objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 1);
+
+    arrayWithElements.arraySet(1, intObj2);
+    arrayWithElements.arraySet(2, intObj3);
+    ASSERT_TRUE(arrayWithElements.arrayGet(1).objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 2);
+    ASSERT_TRUE(arrayWithElements.arrayGet(2).objectInvokeMethod('toInt', ':i', []).unwrapToNumber() === 3);
+}
+
 function stvalueAccessor() {
     testClassGetSuperClass();
     testFixedArrayGetLength();
@@ -1137,6 +1293,13 @@ function stvalueAccessor() {
     testFindClass();
     testFindNamespace();
     testFindEnum();
+    testInterfaceImplementation();
+    testPrimitiveTypes();
+    testNullAndUndefined();
+    testAccessControl();
+    testMethodWithObjectParams();
+    testClassInstantiation();
+    testNewArray();
 }
 
 const result = stvalueAccessor();
