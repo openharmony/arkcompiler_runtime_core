@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,7 +96,7 @@ public:
 
     ::ark::mem::BarrierType GetPreReadType() const override
     {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
         return ::ark::mem::BarrierType::PRE_CMC_READ_BARRIER;
 #else
         return ::ark::mem::BarrierType::PRE_RB_NONE;
@@ -105,7 +105,7 @@ public:
 
     ::ark::mem::BarrierType GetPreType() const override
     {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
         return ::ark::mem::BarrierType::PRE_WRB_NONE;
 #else
         return ::ark::mem::BarrierType::PRE_SATB_BARRIER;
@@ -114,7 +114,7 @@ public:
 
     ::ark::mem::BarrierType GetPostType() const override
     {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
         return ::ark::mem::BarrierType::POST_CMC_WRITE_BARRIER;
 #else
         return ::ark::mem::BarrierType::POST_INTERREGION_BARRIER;

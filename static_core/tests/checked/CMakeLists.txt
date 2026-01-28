@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -112,7 +112,7 @@ function(panda_add_checked_test)
         set(ARCHITECTURE "arm32")
     endif()
 
-    if (ARK_HYBRID OR NOT PANDA_32_BIT_MANAGED_POINTER)
+    if (ARK_USE_COMMON_RUNTIME OR NOT PANDA_32_BIT_MANAGED_POINTER)
         set (CHECKER_BUILD_CONFIG "Hybrid")
     else()
         set (CHECKER_BUILD_CONFIG "Static")

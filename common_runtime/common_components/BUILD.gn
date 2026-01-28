@@ -125,17 +125,10 @@ ohos_source_set("libarkcommon_runtime") {
 }
 
 config("common_components_public_config") {
-  configs = []
-  defines = []
   ldflags = []
-
-  if (ark_hybrid) {
-    defines += [ "ARK_HYBRID" ]
-
-    if (current_cpu == "amd64" || current_cpu == "x64" ||
-        current_cpu == "x86_64") {
-      ldflags += [ "-latomic" ]
-    }
+  if (current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") {
+    ldflags += [ "-latomic" ]
   }
 }
 

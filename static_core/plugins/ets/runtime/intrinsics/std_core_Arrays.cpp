@@ -150,7 +150,7 @@ static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, const void *
 template <typename T>
 static auto GetCopy([[maybe_unused]] const void *srcAddr)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
     bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
 

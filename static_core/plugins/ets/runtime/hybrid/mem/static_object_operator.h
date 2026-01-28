@@ -16,17 +16,17 @@
 #ifndef PLUGINS_ETS_RUNTIME_HYBRID_MEM_STATIC_OBJECT_OPERATOR_H
 #define PLUGINS_ETS_RUNTIME_HYBRID_MEM_STATIC_OBJECT_OPERATOR_H
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_object_operator.h"
 #include "runtime/include/object_header.h"
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::ets {
 class PandaEtsVM;
 }  // namespace ark::ets
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
 
 namespace ark::mem {
 
@@ -71,5 +71,5 @@ public:
 };
 }  // namespace ark::mem
 
-#endif  // ARK_HYBRID
+#endif  // !ARK_USE_COMMON_RUNTIME
 #endif  // PLUGINS_ETS_RUNTIME_HYBRID_MEM_STATIC_OBJECT_OPERATOR_H

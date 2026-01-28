@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,7 @@ void FixHeapWorker::FixRegion(RegionDesc *region)
         if (collector_->IsSurvivedObject(object)) {
             collector_->FixObjectRefFields(object);
         } else {
-            if constexpr (type == FixHeapWorker::FILL_FREE) {
-                FillFreeObject(object, RegionalHeap::GetAllocSize(*object));
-            } else if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
+            if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
                 result_.monoSizeNonMovableGarbages.emplace_back(region, object, cellCount);
             } else if constexpr (type == FixHeapWorker::COLLECT_POLYSIZE_NONMOVABLE) {
                 result_.polySizeNonMovableGarbages.emplace_back(object, RegionalHeap::GetAllocSize(*object));
@@ -86,9 +84,7 @@ void FixHeapWorker::FixRecentRegion(RegionDesc *region)
         if (region->IsNewObjectSinceMarking(object) || collector_->IsSurvivedObject(object)) {
             collector_->FixObjectRefFields(object);
         } else {  // handle dead objects in tl-regions for concurrent gc.
-            if constexpr (type == FixHeapWorker::FILL_FREE) {
-                FillFreeObject(object, RegionalHeap::GetAllocSize(*object));
-            } else if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
+            if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
                 result_.monoSizeNonMovableGarbages.emplace_back(region, object, cellCount);
             } else if constexpr (type == FixHeapWorker::COLLECT_POLYSIZE_NONMOVABLE) {
                 result_.polySizeNonMovableGarbages.emplace_back(object, RegionalHeap::GetAllocSize(*object));
@@ -160,9 +156,6 @@ void PostFixHeapWorker::PostClearTask()
 {
     for (auto [region, object, cellCount] : result_.monoSizeNonMovableGarbages) {
         region->CollectNonMovableGarbage(object, cellCount);
-    }
-    for (auto [object, size] : result_.polySizeNonMovableGarbages) {
-        FillFreeObject(object, size);
     }
     DLOG(FIX, "Fix heap worker processed %d Regions, %d monoSizeNonMovableGarbages, %d polySizeNonMovableGarbages",
          result_.numProcessedRegions, result_.monoSizeNonMovableGarbages.size(),

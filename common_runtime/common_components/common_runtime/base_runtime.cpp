@@ -90,16 +90,6 @@ void BaseRuntime::Init()
 
 void BaseRuntime::Init(const RuntimeParam &param)
 {
-    CheckAndInitBaseRuntime(param);
-}
-
-void BaseRuntime::InitFromDynamic()
-{
-    InitFromDynamic(BaseRuntimeParam::DefaultRuntimeParam());
-}
-
-void BaseRuntime::InitFromDynamic(const RuntimeParam &param)
-{
     std::unique_lock<std::mutex> lock(vmCreationLock_);
     if (initialized_) {
         LOG_COMMON(FATAL) << "BaseRuntime has been initialized and don't need init again.";
@@ -132,11 +122,6 @@ void BaseRuntime::InitFromDynamic(const RuntimeParam &param)
 }
 
 void BaseRuntime::Fini()
-{
-    CheckAndFiniBaseRuntime();
-}
-
-void BaseRuntime::FiniFromDynamic()
 {
     std::unique_lock<std::mutex> lock(vmCreationLock_);
     if (!initialized_) {
@@ -276,8 +261,4 @@ void BaseRuntime::NotifyHighSensitive(bool isStart)
     Heap::GetHeap().NotifyHighSensitive(isStart);
 }
 
-void BaseRuntime::FillFreeObject(void *object, size_t size)
-{
-    common::FillFreeObject(object, size);
-}
 }  // namespace common

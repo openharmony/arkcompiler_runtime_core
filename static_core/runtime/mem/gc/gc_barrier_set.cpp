@@ -25,9 +25,9 @@
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/object_helpers-inl.h"
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
 
@@ -199,10 +199,10 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] void *storedValAddr)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
                                       storedValAddr);
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 class GCCMCBarrierSet::CMCWriteBarrierHandle {
@@ -225,7 +225,7 @@ private:
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] size_t count)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> visitor = [](ObjectHeader *obj,
                                                                                      ObjectHeader *ref, uint32_t off) {
         common::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
@@ -235,14 +235,14 @@ void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_
     GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(
         reinterpret_cast<ObjectHeader *>(const_cast<void *>(objAddr)), handler, ToVoidPtr(ToUintPtr(objAddr) + offset),
         ToVoidPtr(ToUintPtr(objAddr) + offset + count));
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void *GCCMCBarrierSet::PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     return nullptr;
 }
 

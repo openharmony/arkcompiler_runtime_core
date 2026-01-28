@@ -116,7 +116,7 @@ function(panda_add_checked_test_ets)
         set(ARCHITECTURE "arm32")
     endif()
 
-    if (ARK_HYBRID OR NOT PANDA_32_BIT_MANAGED_POINTER)
+    if (ARK_USE_COMMON_RUNTIME OR NOT PANDA_32_BIT_MANAGED_POINTER)
         set (CHECKER_BUILD_CONFIG "Hybrid")
     else()
         set (CHECKER_BUILD_CONFIG "Static")

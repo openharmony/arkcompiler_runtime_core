@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ public:
     {
     }
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     void MarkFromObject([[maybe_unused]] napi_ref obj, [[maybe_unused]] const common::RefFieldVisitor &visitor) override
     {
         std::stringstream err;

@@ -61,13 +61,6 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     "$abckit_root/include/",
   ]
 
-  if (ark_hybrid) {
-    include_dirs += [ "$ark_root_static/../common_interfaces" ]
-  }
-
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
-
   configs = [
     "$ark_root_static/:ark_config",
     "$ark_root_static/assembler:arkassembler_public_config",
@@ -77,6 +70,12 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     "$ark_root_static/runtime:profiling_gen_public_config",
     "$abckit_root:abckit_config",
   ]
+  if (ark_use_common_runtime) {
+    configs += [ "//arkcompiler/runtime_core/common_runtime:common_runtime_public_config" ]
+  }
 
   deps = [ "$ark_root_static/compiler:libarktscompiler" ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

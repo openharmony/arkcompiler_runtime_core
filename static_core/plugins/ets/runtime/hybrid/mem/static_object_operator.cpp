@@ -19,11 +19,8 @@
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 
-#if defined(ARK_HYBRID)
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
-#endif
 
 namespace ark::mem {
 
@@ -81,9 +78,9 @@ private:
 
 void StaticObjectOperator::Initialize()
 {
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     common::BaseObject::RegisterStatic(&instance_);
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void StaticObjectOperator::ForEachRefField(const common::BaseObject *object,

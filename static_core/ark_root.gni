@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,8 +17,8 @@ if (!defined(ark_static_standalone_build)) {
 if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
-if (!defined(ark_hybrid)) {
-  ark_hybrid = false
+if (!defined(ark_use_common_runtime)) {
+  ark_use_common_runtime = false
 }
 if (!defined(support_jsapi)) {
   support_jsapi = false

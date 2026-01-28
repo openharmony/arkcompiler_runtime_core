@@ -295,7 +295,7 @@ static void MemAtomicSwapReadBarrier(mem::GCBarrierSet *barrierSet, const void *
 template <typename T>
 static auto GetSwap([[maybe_unused]] void *arrAddr, [[maybe_unused]] mem::GCBarrierSet *readBarrierSet)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
 
     return [usePreReadBarrier, readBarrierSet, arrAddr](T *aPtr, T *bPtr) {

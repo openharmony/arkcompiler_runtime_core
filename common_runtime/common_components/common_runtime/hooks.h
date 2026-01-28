@@ -61,7 +61,6 @@ PUBLIC_API void RemoveXRefFromDynamicRoots();
 PUBLIC_API void SynchronizeGCPhaseToJSThread(void *jsThread, GCPhase gcPhase);
 
 // CMC-GC dependent interface
-PUBLIC_API void FillFreeObject(void *object, size_t size);
 PUBLIC_API void SetBaseAddress(uintptr_t base);
 PUBLIC_API void JSGCCallback(void *ecmaVM);
 PUBLIC_API bool IsPostForked();

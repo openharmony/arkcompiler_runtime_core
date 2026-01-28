@@ -58,13 +58,6 @@ ohos_source_set("abckit_ir_builder_dynamic_source_set") {
     "$ark_root_static/../libabckit/include",
   ]
 
-  if (ark_hybrid) {
-    include_dirs += [ "$ark_root_static/../common_interfaces" ]
-  }
-
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
-
   configs = [
     "$ark_root_static/:ark_config",
     "$ark_root_static/compiler:arkcompiler_public_config",
@@ -74,9 +67,16 @@ ohos_source_set("abckit_ir_builder_dynamic_source_set") {
     "$abckit_root:abckit_config",
   ]
 
+  if (ark_use_common_runtime) {
+    configs += [ "//arkcompiler/runtime_core/common_runtime:common_runtime_public_config" ]
+  }
+
   deps = [
     ":abckit_ir_builder_dynamic_source_set_header_deps",
     "$ark_root_static/compiler:libarktscompiler",
     "templates:abckit_isa_gen_inst_builder_dyn_gen_cpp",
   ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }

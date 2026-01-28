@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ MutatorLock *Locks::NewMutatorLock()
 
 void MutatorLock::ReadLock()
 {
-#ifndef ARK_HYBRID
+#if !defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(!HasLock());
 #endif
     LockT::ReadLock();
@@ -66,7 +66,7 @@ void MutatorLock::ReadLock()
 
 void MutatorLock::WriteLock()
 {
-#ifndef ARK_HYBRID
+#if !defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(!HasLock());
 #endif
     LockT::WriteLock();
@@ -96,7 +96,7 @@ bool MutatorLock::TryWriteLock()
 
 void MutatorLock::Unlock()
 {
-#ifndef ARK_HYBRID
+#if !defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(HasLock());
 #endif
     LockT::Unlock();

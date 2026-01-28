@@ -21,16 +21,16 @@
 #include "runtime/coroutines/coroutine_worker.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/thread/mutator.h"
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 using CommonRootVisitor = common::CommonRootVisitor;
 
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 class CoroutineContext;
 class CompletionEvent;
@@ -325,12 +325,12 @@ public:
     virtual void OnContextSwitchedTo();
     virtual void OnChildCoroutineCreated([[maybe_unused]] Coroutine *child) {};
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     void Visit(CommonRootVisitor visitor)
     {
         visitor(nullptr);
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
     void LinkToExternalMutator(bool useSharedMutator, CoroutineWorker *w = nullptr);
 
