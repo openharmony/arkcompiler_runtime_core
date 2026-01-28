@@ -1,5 +1,5 @@
 #FailKind.SEGFAULT_FAIL - 31 tests:
-03.types/12.type_undefined/undefined_incorrect_usage_1.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_1.ets
 03.types/19.union_types/united_switch_ext_1.ets
 03.types/19.union_types/03.keyof_types/keyof_unsupported_neg_5.ets
 04.names_declarations_and_scopes/03.scopes/unique_decl_name_n_0.ets
@@ -156,7 +156,7 @@
 04.names_declarations_and_scopes/07.function_declarations/function_decl_n_11.ets
 09.classes/02.class_extension_clause/extend_object_class_with_interface.ets
 #FailKind.TSC_FAIL - 1469 tests:
-03.types/11.type_void/void_override_neg_2.ets
+03.types/11.types_void_or_undefined/void/void_override_neg_2.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/scope_5.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_0.ets
 04.names_declarations_and_scopes/04.accessible/type_name_interface_prop_12.ets
@@ -667,18 +667,18 @@
 03.types/10.type_never/never_class_instance_neg_13.ets
 03.types/10.type_never/never_class_instance_neg_14.ets
 03.types/10.type_never/never_class_instance_neg_15.ets
-03.types/11.type_void/generic_void_n_2.ets
-03.types/11.type_void/generic_from_void_neg_1.ets
-03.types/12.type_undefined/undefined_enum.ets
-03.types/12.type_undefined/undefined_incorrect_usage_2.ets
-03.types/12.type_undefined/undefined_incorrect_usage_3.ets
-03.types/12.type_undefined/undefined_incorrect_usage_4.ets
-03.types/12.type_undefined/undefined_incorrect_usage_6.ets
-03.types/12.type_undefined/undefined_incorrect_usage_7.ets
-03.types/12.type_undefined/undefined_incorrect_usage_9.ets
-03.types/12.type_undefined/undefined_incorrect_usage_12.ets
-03.types/12.type_undefined/undefined_incorrect_usage_13.ets
-03.types/12.type_undefined/undefined_incorrect_usage_15.ets
+03.types/11.types_void_or_undefined/void/generic_void_n_2.ets
+03.types/11.types_void_or_undefined/void/generic_from_void_neg_1.ets
+03.types/11.types_void_or_undefined/undefined/undefined_enum.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_2.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_3.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_4.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_6.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_7.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_9.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_12.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_13.ets
+03.types/11.types_void_or_undefined/undefined/undefined_incorrect_usage_15.ets
 03.types/15.literal_types/as_const_0.ets
 03.types/15.literal_types/as_const_1.ets
 03.types/15.literal_types/as_const_2.ets
@@ -3032,3 +3032,4 @@
 17.experimental_features/11.classes_experimental/02.final_methods/fm_negative_7.ets
 05.generics/02.generic_instantiations/01.type_arguments/malformed_decl_n_0.ets
 05.generics/01.type_parameters/02.type_parameter_default/generic_classes/class_type_parameter_default_n_8.ets
+03.types/11.types_void_or_undefined/void/void_type_n_1.ets

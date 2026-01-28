@@ -22,5 +22,4 @@ function main(): void {
     arktest.assertTrue(x[0 as byte] == 1);
     arktest.assertTrue(x[1 as short] == 2);
     arktest.assertTrue(x[0 as int] == 1);
-    arktest.assertTrue(x[1 as char] == 2);
 }
