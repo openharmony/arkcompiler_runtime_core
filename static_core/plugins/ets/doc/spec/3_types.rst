@@ -515,6 +515,12 @@ Value Types
 The values of such types do *not* share state with other
 values.
 
+.. note::
+
+   Tables in :ref:`Unary Expressions` and :ref:`Binary Expressions Overview`
+   summarize information about valid combinations of operand types and result
+   type for unary and binary operations.
+
 .. index::
    value type
    predefined type
@@ -608,6 +614,11 @@ Integer Types and Operations
 +------------+--------------------------------------------------------------------+
 | ``bigint`` | All integers with no limits                                        |
 +------------+--------------------------------------------------------------------+
+
+.. note::
+
+   The :ref:`type bigint` is not a numeric type yet it operates with integer values
+   of arbitrary precision. That is the reason, why it is mentioned in that subsection.
 
 |LANG| provides a number of operators to act on integer values as discussed
 below.

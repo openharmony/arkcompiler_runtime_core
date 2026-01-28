@@ -4525,8 +4525,48 @@ decrement operators) group right-to-left for ``'~+x'`` to have the same meaning
 as ``'~(+x)'``.
 
 The type of *unaryExpression* is not necessarily the same as the type
-of the *expression* provided. Further in the text, the type of
-*unaryExpression* is stated explicitly for each *unary operator*.
+of the operand provided. The following table states explicitly the type of
+*unaryExpression* for each *unary operator*:
+
++------------------------+-------------------------+---------------------------+
+| *unary operator*       | type of operand         | type of result            |
++========================+=========================+===========================+
+| '++', '--'             | byte                    | byte                      |
+| (unary, prefix and     +-------------------------+---------------------------+
+| ostfix)                | short                   | short                     |
+|                        +-------------------------+---------------------------+
+|                        | int                     | int                       |
+|                        +-------------------------+---------------------------+
+|                        | long                    | long                      |
+|                        +-------------------------+---------------------------+
+|                        | float                   | float                     |
+|                        +-------------------------+---------------------------+
+|                        | double                  | double                    |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '+', '-' (unary)       | byte, short, int        | int                       |
+|                        +-------------------------+---------------------------+
+|                        | long                    | long                      |
+|                        +-------------------------+---------------------------+
+|                        | float                   | float                     |
+|                        +-------------------------+---------------------------+
+|                        | double                  | double                    |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '~'                    | byte, short, int, float | int                       |
+| (bitwise complement)   +-------------------------+---------------------------+
+|                        | long, double            | long                      |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '!'                    | boolean or type         | boolean                   |
+| (logical complement)   | mentioned in            |                           |
+|                        | :ref:`extended          |                           | 
+|                        | conditional             |                           |
+|                        | expressions`            |                           |
++------------------------+-------------------------+---------------------------+
 
 .. index::
    unary expression
@@ -5075,6 +5115,135 @@ converted) operand value is ``false``, and ``false`` if the operand value
 
 |
 
+.. _Binary Expressions Overview:
+
+Binary Expressions Overview
+***************************
+
+The syntax of *binary expression* is presented below:
+
+.. code-block:: abnf
+
+    binaryExpression:
+        multiplicativeExpression
+        | exponentiationExpression
+        | additiveExpression
+        | shiftExpression
+        | relationalExpression
+        | equalityExpression
+        | bitwiseAndLogicalExpression
+        | conditionalAndExpression
+        | conditionalOrExpression
+        ;
+
+Every *binaryExpression* has a form *expression 1* ``op`` *expression 2*,
+where ``op`` is a binary operator (operator sign) and *expression 1* and
+*expression 2* are its operands.
+
+The subgroups of binary expressions are described further in that chapter.
+
+The possible combinations of types of the *expression 1* and *expression 2*
+as well as the type of the resulting *binaryExpression*  is given in the
+following table. Type combinations not listed in the table issue either a
+compile-time error when it is detected at compile time, or run-time error
+otherwise.
+
++----------------+--------------------------------+-------------------------------+-------------------------+
+|                | type of                        | type of                       | type of                 |
+|    *Operator*  | 1st/2nd *operand*              | 2nd/1st *operand*             | result                  |
++================+================================+===============================+=========================+
+| '*', '/', '%'  | byte, short, int               |  byte, short, int             |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long                           | any numeric except float      |    long                 |
+|                |                                | or double                     |                         |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | float                          |  any numeric except double    |    float                |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | double                         |  any numeric                  |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '**'           | any numeric type               |  any numeric type             |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '+'            | string                         |  converted to a string        |    string               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '+', '-'       | byte, short, int               |  byte, short, int             |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long                           |  any numeric except float     |    long                 |
+|                |                                |  or double                    |                         |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | float                          |  any numeric except double    |    float                |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | double                         |  any numeric                  |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<<', '>>'     | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<<', '>>',    | *1st* is byte, short, int,     |  *2nd* is any numeric         |    int                  |
+|                | float                          |                               |                         |      
+| '>>>'          +--------------------------------+-------------------------------+-------------------------+
+|                | *1st* is long, double          |  *2nd* is any numeric         |    long                 |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<', '<=',     | string, string literal         |  string, string literal       |    boolean              |
+| '>', '>='      +--------------------------------+-------------------------------+-------------------------+
+|                | boolean                        |  boolean                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | numeric                        |  numeric                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum (numeric value)           |  enum (numeric value)         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum (string value)            |  enum (string value)          |    boolean              |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '==', '===',   | string, string literal         |  string, string literal       |    boolean              |
+| '!=',  '!=='   +--------------------------------+-------------------------------+-------------------------+
+|                | boolean                        |  boolean                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | numeric                        |  numeric                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | char                           |  char                         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum                           |  enum                         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | function                       |  function                     |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | null, undefined                |  null, undefined              |    boolean              |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '&', '^', '|'  | boolean                        | boolean                       |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | byte, short, int, float        | byte, short, int, float       |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long, double                   | long, double                  |    long                 |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         | bigint                        |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '&&', '||'     | boolean or type mentioned      | boolean or type mentioned     | boolean                 |
+|                | in extended conditional        | in extended conditional       | (except cases with      |
+|                | expressions.                   | expressions.                  | extended semantics)     |
++----------------+--------------------------------+-------------------------------+-------------------------+
+
+.. note::
+   In the table above
+
+   -  For shift operators '<<', '>>', '>>>' with operands of numeric types, the
+      type of result depends on the type of the 1st (left) operand and does not
+      depend on the type of the second (right) operand. 
+   -  Equality operators '==', '===', '!=',  '!==' are defined for any types but
+      combinations explicitly listed in the table have specific behavior.
+   -  Equality operators for types containing ``null`` or ``undefined``, are
+      described in :ref:`Extended Equality with null or undefined`.
+   -  Extended semantics for logical operators '&&', '||' is described in
+      :ref:`Extended Conditional Expressions`.
+
+
+.. meta:
+    frontend_status: Done
+
+
 .. _Multiplicative Expressions:
 
 Multiplicative Expressions
@@ -5303,8 +5472,9 @@ Bigint division rounds toward *0*, i.e., the quotient of bigint operands
 *n* and *d* is the ``bigint`` value *q* with the largest possible magnitude that
 satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
-If the divisor value of the ``bigint`` division operator is *0n*, then a
-:index:`runtime error` is thrown during execution.
+If the divisor value of the ``bigint`` division operator is *0n*, then either
+a compile-time error occurs (when detected at compile time), or a :index:`runtime error`
+is thrown during exection.
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
@@ -5461,7 +5631,9 @@ If the divisor value of the ``bigint`` remainder operator is *0n*, then a
 
 The remainder operation on integer operands produces a result value, i.e.,
 :math:`(a/b)*b+(a\%b)` equals *a*. Numeric type conversion on remainder
-operation is discussed in :ref:`Widening Numeric Conversions`.
+operation is discussed in :ref:`Widening Numeric Conversions`. The result of
+remainder operation produces value of type ``int`` for byte, short or float, or
+``long`` for value of types `long` or `double`
 
 .. index::
    binary operator
@@ -5622,8 +5794,11 @@ both operands are as follows:
 
 Any other combination of operand types causes a :index:`compile-time error`.
 
-If the second operand of type ``bigint`` is negative, then a
-:index:`runtime error` is thrown.
+The result of raising to power `0n`` is always `1n`, including case `0n**0n`.
+
+If the second operand of type ``bigint`` is negative, then either a compile-time
+error occurs (when detected at compile time), or a :index:`runtime error` is
+thrown during exection.
 
 Both variants of the operator ``'**'`` are represented in example below:
 
@@ -5637,7 +5812,7 @@ Both variants of the operator ``'**'`` are represented in example below:
 
    let v = a ** 2n // OK 'bigint' ** 'bigint'
    let u = a ** 0n // OK 'bigint' ** 'bigint'
-   let w = a ** -1n // Runtime error, exponent must be non-negative
+   let w = a ** -1n // compile-time error, exponent must be non-negative
 
    let x = a ** c // compile-time error, 'c' is not 'bigint'
    let y = b ** d // 'd' is converted to 'double'
@@ -6430,6 +6605,8 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
 
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
+
+- Both operands are of the same type and refer to the same object;
 
 .. index::
    operand
