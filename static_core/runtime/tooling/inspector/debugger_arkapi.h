@@ -41,7 +41,7 @@ public:
     static bool StopDebugger(void *vm);
     static bool IsDebugModeEnabled();
 
-    static bool StartProfiling(const std::string &filepath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
+    static bool StartProfiling(const std::string &filePath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
     static bool StopProfiling();
 
     ArkDebugNativeAPI() = delete;
