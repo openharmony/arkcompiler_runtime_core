@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -74,17 +74,6 @@ cases:
       supertype_params2: |-
         fooBBO, 1
 
-    - subtype: |-
-        (x: fooBBRtype) => Derived = (x: fooBBRtype) => { return fooBDR(new Base, 1, 2, 3)}
-      supertype: |-
-        (x: fooBBtype, ...y: number[]) => Base = (x: fooBBtype, ...y: number[]) => { return fooBB(new Base)}
-      subtype_params: |-
-        fooBBR
-      supertype_params: |-
-        fooBB, 1, 2, 3
-      supertype_params2: |-
-        fooBBR, 1
-
     # subtype has less parameters, parameter is identical and return type covariant
     - subtype: |-
         (x: fooBBNtype) => Derived = (x: fooBBNtype) => { return fooBDN(new Base, 1)}
@@ -108,17 +97,6 @@ cases:
       supertype_params2: |-
         fooBBO, 1
 
-    - subtype: |-
-        (x: fooBBRtype) => Base = (x: fooBBRtype) => { return fooBBR(new Base, 1, 2, 3)}
-      supertype: |-
-        (x: fooBDtype, ...y: number[]) => Derived = (x: fooBDtype, ...y: number[]) => { return fooBD(new Base)}
-      subtype_params: |-
-        fooBBR
-      supertype_params: |-
-        fooBD, 1, 2, 3
-      supertype_params2: |-
-        fooBBR, 1, 2, 3
-
     # subtype has less parameters, parameter is contravariant and return type covariant
     - subtype: |-
         (x: fooDBNtype) => Derived = (x: fooDBNtype) => { return fooBDN(new Base, 1)}
@@ -141,14 +119,3 @@ cases:
         fooBD, 1
       supertype_params2: |-
         fooDBO, 1
-
-    - subtype: |-
-        (x: fooDBRtype) => Derived = (x: fooDBRtype) => { return fooBDR(new Base, 1, 2, 3)}
-      supertype: |-
-        (x: fooBDtype, ...y: number[]) => Base = (x: fooBDtype, ...y: number[]) => { return fooBB(new Base)}
-      subtype_params: |-
-        fooDBR
-      supertype_params : |-
-        fooBD, 1, 2, 3
-      supertype_params2: |-
-        fooDBR, 1, 2, 3

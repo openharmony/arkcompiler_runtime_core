@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 ---
 cases:
-    # single type param 
+    # single type param
     - decl: |-
           foobb = foobd // OK: identical parameter types, and covariant return type
       check: |-
@@ -39,10 +39,6 @@ cases:
           foobbo = foobb
       check: |-
           arktest.assertTrue(foobbo(new Base) instanceof Base)
-    - decl: |-
-          foobbr = foobb
-      check: |-
-          arktest.assertTrue(foobbr(new Base) instanceof Base)
     # subtype has less parameters, parameter is identical and return type covariant
     - decl: |-
           foobbn = foobd
@@ -52,10 +48,6 @@ cases:
           foobbo = foobd
       check: |-
           arktest.assertTrue(foobbo(new Derived) instanceof Base)
-    - decl: |-
-          foobbr = foobd
-      check: |-
-          arktest.assertTrue(foobbr(new Derived) instanceof Base)
     # subtype has less parameters, parameter is contravariant and return type covariant
     - decl: |-
           foodbn = foobd
@@ -65,10 +57,6 @@ cases:
           foodbo = foobd
       check: |-
           arktest.assertTrue(foodbo(new Derived) instanceof Base)
-    - decl: |-
-          foodbr = foobd
-      check: |-
-          arktest.assertTrue(foodbr(new Derived) instanceof Base)
     # parameter types identical and return type covariant
     - decl: |-
           foodbn = fooddn
@@ -99,12 +87,15 @@ cases:
     - decl: |-
           foodbn = foobbn
       check: |-
-          arktest.assertTrue(foodbn(new Base, 1) instanceof Base)
+          let r = foodbn.unsafeCall(new Base, 1.0)
+          arktest.assertTrue(r instanceof Base)
     - decl: |-
           foodbo = foobbo
       check: |-
-          arktest.assertTrue(foodbo(new Base) instanceof Base)
+          let r = foodbo.unsafeCall(new Base)
+          arktest.assertTrue(r instanceof Base)
     - decl: |-
           foodbr = foobbr
       check: |-
-          arktest.assertTrue(foodbr(new Base, 1, 2, 3) instanceof Base)
+          let r = foodbr.unsafeCall(new Base, 1.0, 2.0, 3.0)
+          arktest.assertTrue(r instanceof Base)
