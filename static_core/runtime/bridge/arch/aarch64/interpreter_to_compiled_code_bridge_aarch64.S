@@ -179,9 +179,9 @@ PrepareArgStack:
     ret
 
 // void InterpreterToCompiledCodeBridge(const BytecodeInstruction* insn, const Frame *iframe, const Method *method, ManagedThread* thread)
-.global InterpreterToCompiledCodeBridge
-.type InterpreterToCompiledCodeBridge, %function
-InterpreterToCompiledCodeBridge:
+.global MAKE_ASM_NAME(InterpreterToCompiledCodeBridge)
+TYPE_FUNCTION(InterpreterToCompiledCodeBridge)
+MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
     CFI_STARTPROC
 
     stp fp, lr, [sp, #-16]!
@@ -347,9 +347,9 @@ InterpreterToCompiledCodeBridge:
     CFI_ENDPROC
 
 // int64_t InvokeCompiledCodeWithArguments(const int64_t* args, const Frame *iframe, const Method *method, ManagedThread* thread)
-.global InvokeCompiledCodeWithArgArray
-.type InvokeCompiledCodeWithArgArray, %function
-InvokeCompiledCodeWithArgArray:
+.global MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray)
+TYPE_FUNCTION(InvokeCompiledCodeWithArgArray)
+MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     CFI_STARTPROC
 
     stp fp, lr, [sp, #-16]!

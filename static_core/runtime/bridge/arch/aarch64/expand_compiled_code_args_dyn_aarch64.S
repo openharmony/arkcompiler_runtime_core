@@ -14,11 +14,9 @@
  */
 
 #include "arch/asm_support.h"
-#include "arch/amd64/helpers_amd64.S"
 
-.global ExpandCompiledCodeArgsDyn
-TYPE_FUNCTION(ExpandCompiledCodeArgsDyn)
-ExpandCompiledCodeArgsDyn:
+.global MAKE_ASM_NAME(ExpandCompiledCodeArgsDyn)
+MAKE_ASM_NAME(ExpandCompiledCodeArgsDyn):
     //x0   - method, preserved
     //x1   - num_actual, preserved
     //x2   - num_expected, tmp1

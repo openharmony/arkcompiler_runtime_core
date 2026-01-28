@@ -16,9 +16,9 @@
 #include "arch/asm_support.h"
 
 // T InvokeEntryPointImpl(const uint8_t* gprs, const uint8_t* fprs, const uint8_t* stack, size_t stack_size, ManagedThread* thread);
-.global InvokeHelper
+.global MAKE_ASM_NAME(InvokeHelper)
 .type InvokeHelper, %function
-InvokeHelper:
+MAKE_ASM_NAME(InvokeHelper):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -75,9 +75,9 @@ InvokeHelper:
 .comm I2CBridgeTestDynCallee, 8, 8
 
 // I2CBridgeTestDynWrapper, follows DynamicMethod calling convention
-.global I2CBridgeTestDynWrapper
+.global MAKE_ASM_NAME(I2CBridgeTestDynWrapper)
 TYPE_FUNCTION(I2CBridgeTestDynWrapper)
-I2CBridgeTestDynWrapper:
+MAKE_ASM_NAME(I2CBridgeTestDynWrapper):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
     stp fp, lr, [sp, -16]!

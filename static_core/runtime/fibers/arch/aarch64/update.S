@@ -16,9 +16,13 @@
 #include "runtime/fibers/arch/asm_macros.h"
 #include "runtime/fibers/arch/aarch64/context_layout.h"
 
-.extern abort
+.extern MAKE_ASM_NAME(abort)
 
-LOCAL_FUNCTION_START(FiberExitBridge)
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
+TYPE_FUNCTION(FiberExitBridge)
+.balign FUNC_ALIGNMENT_BYTES
+MAKE_ASM_NAME(FiberExitBridge):
     // indicate abnormal exit by calling exit(-1)
     // because fibers should not return from FiberProc
     // mov x0, #-1
@@ -26,7 +30,7 @@ LOCAL_FUNCTION_START(FiberExitBridge)
 
     // let's make the exit more violent than exit(-1) for now
     // TODO(konstanting, #IAD5MH): revert to exit() when everything is tested and works
-    bl abort
+    bl MAKE_ASM_NAME(abort)
 FUNCTION_END(FiberExitBridge)
 
 #define GPR_O(reg) FCTX_GPR_OFFSET_BYTES_ ## reg
@@ -40,11 +44,16 @@ FUNCTION_END(FiberExitBridge)
  * x3: uint8_t* stack
  * x4: size_t stack_size_bytes
  */
-FUNCTION_START(UpdateContext)
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
+.globl MAKE_ASM_NAME(UpdateContext)
+TYPE_FUNCTION(UpdateContext)
+.balign FUNC_ALIGNMENT_BYTES
+MAKE_ASM_NAME(UpdateContext):
     // context->PC = func
     str x1, [x0, GPR_O(PC)]
     // context->LR = FiberExitBridge (for the case when Fiber returns)
-    adr x8, FiberExitBridge
+    adr x8, MAKE_ASM_NAME(FiberExitBridge)
     str x8, [x0, GPR_O(LR)]
     // context->X0 = argument
     str x2, [x0, GPR_O(R0)]
@@ -74,7 +83,12 @@ FUNCTION_END(UpdateContext)
  * x1: void (*func)(void*)
  * x2: void* argument
  */
-FUNCTION_START(UpdateContextKeepStack)
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
+.globl MAKE_ASM_NAME(UpdateContextKeepStack)
+TYPE_FUNCTION(UpdateContextKeepStack)
+.balign FUNC_ALIGNMENT_BYTES
+MAKE_ASM_NAME(UpdateContextKeepStack):
     // %x8 = context->PC
     ldr x8, [x0, GPR_O(PC)]
     // context->PC = func
@@ -95,4 +109,6 @@ FUNCTION_END(UpdateContextKeepStack)
 #undef FP_O
 
 // we don't need executable stack.
+#ifndef PANDA_TARGET_MACOS
 .section .note.GNU-stack,"",%progbits
+#endif

@@ -17,7 +17,7 @@
 #include "arch/aarch64/helpers_aarch64.S"
 #include "shorty_values.h"
 
-.extern InvokeInterpreter
+.extern MAKE_ASM_NAME(InvokeInterpreter)
 
 .macro CFRAME_COPY_LR fpreg
     ldr lr, [\fpreg, #(-CFRAME_FLAGS_SLOT * 8)]
@@ -53,9 +53,9 @@
 
 // ============================================================================
 
-.global DeoptimizeAfterCFrame
-.type DeoptimizeAfterCFrame, %function
-DeoptimizeAfterCFrame:
+.global MAKE_ASM_NAME(DeoptimizeAfterCFrame)
+TYPE_FUNCTION(DeoptimizeAfterCFrame)
+MAKE_ASM_NAME(DeoptimizeAfterCFrame):
     CFI_STARTPROC
 
     // Parameters:
@@ -157,7 +157,7 @@ DeoptimizeAfterCFrame:
 
     mov x3, x4
     // Arguments are already lie in the registers, because signature of DeoptimizeAfterCFrame is similar to InvokeInterpreter
-    bl InvokeInterpreter
+    bl MAKE_ASM_NAME(InvokeInterpreter)
 
     // Restore used registers, but not x0 which holds result of the invoked method and should survive to the end
     // So we use r7 instead of r0 for restoring THRED_REG
@@ -203,9 +203,9 @@ DeoptimizeAfterCFrame:
     CFI_ENDPROC
 
 
-.global DeoptimizeAfterIFrame
-.type DeoptimizeAfterIFrame, %function
-DeoptimizeAfterIFrame:
+.global MAKE_ASM_NAME(DeoptimizeAfterIFrame)
+TYPE_FUNCTION(DeoptimizeAfterIFrame)
+MAKE_ASM_NAME(DeoptimizeAfterIFrame):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 #ifdef PANDA_COMPILER_DEBUG_INFO
@@ -277,7 +277,7 @@ DeoptimizeAfterIFrame:
     mov sp, fp
 
     mov x3, x4
-    bl InvokeInterpreter
+    bl MAKE_ASM_NAME(InvokeInterpreter)
     // InvokeInterpreter returns int64 value, but result can be double, so we copy value to vector register
     fmov d0, x0
 
@@ -289,9 +289,9 @@ DeoptimizeAfterIFrame:
     CFI_ENDPROC
 
 
-.global DropCompiledFrameAndReturn
-.type DropCompiledFrameAndReturn, %function
-DropCompiledFrameAndReturn:
+.global MAKE_ASM_NAME(DropCompiledFrameAndReturn)
+TYPE_FUNCTION(DropCompiledFrameAndReturn)
+MAKE_ASM_NAME(DropCompiledFrameAndReturn):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 #ifdef PANDA_COMPILER_DEBUG_INFO

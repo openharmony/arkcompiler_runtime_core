@@ -20,6 +20,10 @@
 
 .macro PROXY_ENTRYPOINT name, entry, skip_c2i_bridge
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -28,6 +32,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -85,6 +90,7 @@
 
     mov x1, sp
     add x2, fp, #24
+
     bl \entry
 
     ldr x1, [sp]
@@ -170,7 +176,7 @@
     ldp x16, x17, [fp, #-CALLER_REG0_OFFSET+8*16]
     ldr x18, [fp, #-CALLER_REG0_OFFSET+8*18]
 
-    b ThrowNativeExceptionBridge
+    b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
 
 3:
     ret

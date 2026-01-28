@@ -19,6 +19,11 @@
 
 .macro BRIDGE_SELECTOR name, notcompiled_entry, compiled_entry
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \notcompiled_entry
+.private_extern \compiled_entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \notcompiled_entry
@@ -29,6 +34,7 @@
 .protected \compiled_entry
 #endif
 .type \name, %function
+#endif
 \name:
     ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     cbz w17, 1f
@@ -39,6 +45,10 @@
 
 .macro RUNTIME_CALL_CHECKER name, entry
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -47,6 +57,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -75,6 +86,10 @@
 
 .macro ENTRYPOINT name, entry, paramsnum, ret_type
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -83,6 +98,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -94,6 +110,10 @@
 
 .macro ENTRYPOINT_ODD_SAVED name, entry, paramsnum, ret_type
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -102,6 +122,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -113,6 +134,10 @@
 
 .macro ENTRYPOINT_SLOW_PATH name, entry, paramsnum, ret_type
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -121,6 +146,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -130,8 +156,12 @@
     CFI_ENDPROC
 .endm
 
-.macro MethodEntrypointStub name, entry, notcompiled
+.macro MethodEntrypointStub name, entry
 .global \name
+#ifdef PANDA_TARGET_MACOS
+.private_extern \name
+.private_extern \entry
+#else
 #ifdef PANDA_WITH_HIDDEN_SYMBOLS
 .hidden \name
 .hidden \entry
@@ -140,6 +170,7 @@
 .protected \entry
 #endif
 .type \name, %function
+#endif
 \name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
@@ -148,7 +179,7 @@
     // and return back after its execution
     ldrb w17, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     tst w17, w17
-    beq .L\notcompiled
+    beq 1f
     CFI_REMEMBER_STATE
 
     str lr, [sp, #-8]
@@ -204,14 +235,16 @@
     bl \entry
     // we're not going to return back here
 
-.L\notcompiled:
+1:
     CFI_RESTORE_STATE
     CFI_DEF_CFA(sp, 0)
     str lr, [sp, #-8]
     CFI_REL_OFFSET(lr, -(1 * 8))
     sub sp, sp, #16
     CFI_ADJUST_CFA_OFFSET(16)
+
     bl \entry
+    
     add sp, sp, #16
     CFI_ADJUST_CFA_OFFSET(-16)
     ldr lr, [sp, #-8]
@@ -223,6 +256,6 @@
 #include "entrypoints_gen.S"
 #include "entrypoints_bridge_asm_macro.inl"
 
-MethodEntrypointStub AbstractMethodStub AbstractMethodErrorEntrypoint ame_not_compiled
+MethodEntrypointStub MAKE_ASM_NAME(AbstractMethodStub), MAKE_ASM_NAME(AbstractMethodErrorEntrypoint)
 
-MethodEntrypointStub DefaultConflictMethodStub IncompatibleClassChangeErrorForMethodConflictEntrypoint icce_not_compiled
+MethodEntrypointStub MAKE_ASM_NAME(DefaultConflictMethodStub), MAKE_ASM_NAME(IncompatibleClassChangeErrorForMethodConflictEntrypoint)

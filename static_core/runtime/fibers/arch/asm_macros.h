@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,9 @@
     .balign FUNC_ALIGNMENT_BYTES; \
     name##:
 
+// This part needs to be rewritten for MacOS to call a multiline NASM macro
+// NOTE(korobeinikovevgeny, #314 (new)): the macro body has been manually expanded here to speed up
+// the MacOS target support. Should be optimized in future.)
 #define FUNCTION_START(name) FUNCTION_HEADER(name)
 #define LOCAL_FUNCTION_START(name) \
     .hidden name;                  \

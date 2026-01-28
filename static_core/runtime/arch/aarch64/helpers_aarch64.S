@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+#include "arch/asm_support.h"
 
 #define CALLEE_SAVED_GP_REGS_COUNT 10
 
@@ -151,7 +153,7 @@
         LARG0 \fmt
         ARG1 \arg1
         ARG2 \arg2
-    END_CALL LogEntrypoint
+    END_CALL MAKE_ASM_NAME(LogEntrypoint)
 .endm
 
 .macro ABORT

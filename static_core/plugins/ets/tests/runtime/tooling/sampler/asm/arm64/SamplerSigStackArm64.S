@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "runtime/arch/asm_support.h"
+
 // int SumEightElements(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8) {    
 //     int sum = 0;
 //     sum += a1;
@@ -26,9 +28,9 @@
 //     return sum;
 // }
 
-.global SumEightElements
+.global MAKE_ASM_NAME(SumEightElements)
 .type SumEightElements, %function
-SumEightElements:
+MAKE_ASM_NAME(SumEightElements):
     sub     sp, sp, #16     // Move stack upper than is should be (originally sub 48)
     str     w0, [sp, -4]    // to enable writing under stack pointer.
     str     w1, [sp, -8]    // It is needed to enable signal stack frame override 
