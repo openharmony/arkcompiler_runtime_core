@@ -201,7 +201,7 @@ export namespace taskpool {
 
         // For managerWorker to shrink.
         private triggerShrink(): void {
-            let shrinkJob = this.run<Any>((): Any => {
+            let shrinkJob = this.run<void>((): void => {
                 this.timerId = setInterval(() => {
                     let runningWorkersNum: int = 0;
                     ConcurrencyHelpers.lockGuard(workersMutex, () => {
@@ -599,7 +599,7 @@ export namespace taskpool {
          * @see taskpool.SequenceRunner.execute
          * @see taskpool.AsyncRunner.execute
          */
-     
+
         /// trigger next runner task to execute
         tryTriggerRunner(): void {
             // handle sequenceRunner
@@ -1345,14 +1345,14 @@ export namespace taskpool {
          * Execute a concurrent function.
          * @param task The task to be executed
          * @param priority Task execution priority, MEDIUM is default.
-         * @returns 
+         * @returns
          */
         execute(task: Task, priority?: Priority): Promise<Any> {
             initWorkerPoolSync();
             this.checkExecution(task);
-            
+
             InternalTask.of(task).runnerAsyncImpl = this.impl;
-            InternalTask.of(task).asyncId = this.impl.id; 
+            InternalTask.of(task).asyncId = this.impl.id;
             taskSubmitted(task);
             InternalTask.of(task).isSubmitted = true;
 
@@ -1398,7 +1398,7 @@ export namespace taskpool {
         }
 
         private static native generateAsyncRunnerId(): int;
- 
+
         private static getOrCreateAsyncRunnerImpl(name: string | undefined, runningCapacity: int, waitingCapacity: int): AsyncRunnerImpl {
             if (name == AsyncRunner.ANONYMOUS_NAME) {
                 return new AsyncRunnerImpl(AsyncRunner.generateAsyncRunnerId(), runningCapacity, waitingCapacity);
@@ -1602,7 +1602,7 @@ export namespace taskpool {
     export function executeDelayed(delayTime: int, task: Task, priority: Priority): Promise<Any> {
         return executeDelayedImpl(delayTime, task, priority);
     }
-    
+
     function executeDelayedImpl(delayTime: int, task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
         InternalTask.of(task).checkExecutionForDelayedTask(delayTime);
@@ -2104,13 +2104,13 @@ export namespace taskpool {
                 if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                     return;
                 }
-    
+
                 if (managerWorker === undefined) {
                     // Create managerWorker, and start to trigger shrink.
                     managerWorker = new GlobalQueueWorker();
                     managerWorker.retriggerShrink();
                 }
-    
+
                 // Init taskpool worker pool.
                 for (let i = 0; i < initialWorkersNumber; ++i) {
                     let w = new GlobalQueueWorker(isTaskpoolSupportInterop);
