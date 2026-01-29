@@ -203,7 +203,7 @@ namespace ark::ets::test {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nLayout([[maybe_unused]] ark::Method *m,
                                                               [[maybe_unused]] long ptr /*KNativePointer*/,
-                                                              [[maybe_unused]] float width)
+                                                              [[maybe_unused]] long width)
 {
 }
 [[maybe_unused]] static void SkoalaParagraphParagraph1nPaint([[maybe_unused]] ark::Method *m,

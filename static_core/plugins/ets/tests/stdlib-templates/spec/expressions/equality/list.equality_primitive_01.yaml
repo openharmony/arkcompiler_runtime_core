@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -130,12 +130,12 @@
 
 # Compare bytes
 - {
-    type1: "Byte", value1: "255",
-    type2: "Byte", value2: "254",
+    type1: "Byte", value1: "127",
+    type2: "Byte", value2: "126",
     result: "false"
   }
 - {
-    type1: "Byte", value1: "255",
-    type2: "Byte", value2: "255",
+    type1: "Byte", value1: "127",
+    type2: "Byte", value2: "127",
     result: "true"
   }

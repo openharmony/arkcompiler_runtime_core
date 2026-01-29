@@ -203,7 +203,7 @@ extern "C" void SkoalaParagraphFontCollection1nSetDefaultFontManager(
 }
 extern "C" void SkoalaParagraphParagraph1nLayout([[maybe_unused]] ani_env *env,
                                                  [[maybe_unused]] ani_long ptr /*KNativePointer*/,
-                                                 [[maybe_unused]] ani_float width)
+                                                 [[maybe_unused]] ani_long width)
 {
 }
 extern "C" void SkoalaParagraphParagraph1nPaint([[maybe_unused]] ani_env *env,
