@@ -783,6 +783,18 @@
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_37_n.ets
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_39_n.ets
 
+#32429
+11.enumerations/enum_cte_n_37.ets
+11.enumerations/enum_cte_n_38.ets
+11.enumerations/enum_cte_n_52.ets
+
+#32430
+11.enumerations/enum_cte_n_39.ets
+11.enumerations/enum_cte_n_40.ets
+11.enumerations/enum_cte_n_41.ets
+11.enumerations/enum_cte_n_42.ets
+11.enumerations/enum_cte_n_43.ets
+
 #26714
 13.modules_and_namespaces/03.import_directives/test.ets
 
