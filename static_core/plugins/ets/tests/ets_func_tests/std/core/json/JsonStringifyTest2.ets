@@ -39,6 +39,10 @@ function main(): int {
     suite.addTest("Stringify Interface", testStringifyInterface04);
     suite.addTest("Stringify Interface", testStringifyInterface05);
 
+    // DataView and ArrayBuffer tests
+    suite.addTest('Stringify DataView', testStringifyDataView);
+    suite.addTest('Stringify ArrayBuffer', testStringifyArrayBuffer);
+
     return suite.run()
 }
 
@@ -450,4 +454,16 @@ function testStringifyInterface05(): void {
     arktest.assertEQ(jsonElement.getString('str1'), 'str')
     arktest.assertEQ(jsonElement.getString('str2'), 'yes')
     arktest.assertEQ(jsonElement.getInteger('num2'), 1)
+}
+
+function testStringifyDataView(): void {
+    const buffer = new ArrayBuffer(8);
+    const dv = new DataView(buffer);
+    dv.setInt32(0, 12345);
+    arktest.assertEQ(JSON.stringify(dv), '{}');
+}
+
+function testStringifyArrayBuffer(): void {
+    const buffer = new ArrayBuffer(8);
+    arktest.assertEQ(JSON.stringify(buffer), '{}');
 }

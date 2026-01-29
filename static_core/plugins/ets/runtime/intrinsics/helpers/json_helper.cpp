@@ -715,7 +715,8 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         }
         coro->ManagedCodeBegin();
     } else if (value->IsInstanceOf(platformTypes->corePromise) || value->IsInstanceOf(platformTypes->coreSet) ||
-               valueCls == platformTypes->coreMap) {
+               value->IsInstanceOf(platformTypes->coreDataView) ||
+               value->IsInstanceOf(platformTypes->coreArrayBuffer) || valueCls == platformTypes->coreMap) {
         // Instead of checking subtyping between `value` and `Map`, we check that classes exactly match.
         // Such behavior is required to correctly fall back in case of user-extended `Record`, which is
         // also subtype of `Map`

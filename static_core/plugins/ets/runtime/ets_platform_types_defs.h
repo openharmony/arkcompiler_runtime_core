@@ -99,6 +99,7 @@
     I("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                         \
     /* ArrayBuffer */                                                                                                \
     T("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
+    T("Lstd/core/DataView;", coreDataView)                                                                           \
     T("Lescompat/Int8Array;", escompatInt8Array)                                                                     \
     T("Lescompat/Uint8Array;", escompatUint8Array)                                                                   \
     T("Lescompat/Uint8ClampedArray;", escompatUint8ClampedArray)                                                     \

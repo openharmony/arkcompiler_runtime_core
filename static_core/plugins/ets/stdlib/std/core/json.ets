@@ -978,7 +978,7 @@ class JSONWriter {
             this.buffer.append(obj.toJSON())
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
-        } else if (obj instanceof ArrayBuffer) {
+        } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Function) {
             this.buffer.append("undefined")
