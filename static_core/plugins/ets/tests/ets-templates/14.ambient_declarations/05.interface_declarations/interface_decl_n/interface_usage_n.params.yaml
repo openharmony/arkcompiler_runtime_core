@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,21 +20,23 @@ cases:
         a: string = 'b'
       }
     use: |-
-      const b: A  = new B
-      arktest.assertEQ(b.a, 'b')
+      const b: B  = new B
+      arktest.assertTrue(b.a instanceof number) // should fail on verifier
+      arktest.assertEQ(b.a, 'b') //  should be unreachable
   - import: |-
       B
     decl: |-
       class C implements B {
         a: int = 1
         b: float = 1.0f
-        c: Byte[] = [0]
+        c: String[] = ["c"]
       }
     use: |-
-      const c: B  = new C
+      const c: C  = new C
       arktest.assertEQ(c.a, 1)
       arktest.assertEQ(c.b, 1.0)
-      arktest.assertEQ(c.c[0], 0)
+      arktest.assertTrue(c.c[0] instanceof Byte) // should fail on verifier
+      arktest.assertEQ(c.c[0], "c") // should be unreachable
   - import: |-
       C
     decl: |-
@@ -44,8 +46,8 @@ cases:
         }
       }
     use: |-
-      const d: C  = new D
-      arktest.assertEQ(d.foo(1, '1', [1]), '111')
+      const d: D  = new D
+      arktest.assertEQ(d.foo(1, '1', [1]), '111')  // should fail on verifier
   - import: |-
       D
     decl: |-
@@ -54,9 +56,10 @@ cases:
         b: number = 1
       }
     use: |-
-      const e: D<string, number> = new E
+      const e: E = new E
       arktest.assertEQ(e.a, 'a')
-      arktest.assertEQ(e.b, 1)
+      arktest.assertTrue(e.b instanceof Number) // should fail on verifier
+      arktest.assertEQ(e.b, 1) // should be unreachable
   - import: |-
       E
     decl: |-
@@ -66,17 +69,18 @@ cases:
         }
       }
     use: |-
-      const f: E<number,number,string> = new F
-      arktest.assertEQ(f.foo(1,1), '2')
+      const f: F = new F
+      arktest.assertEQ(f.foo(1,1), '2') // should fail on verifier
   - import: |-
       M,F
     decl: |-
       class C implements M {
-        a: string = 'a'
+        f: string = 'a'
       }
     use: |-
-      const c: F = new C
-      arktest.assertEQ(c.a, 'a')
+      const c: C = new C
+      arktest.assertTrue(c.f instanceof Number) // should fail on verifier
+      arktest.assertEQ(c.f, 'a')
   - import: |-
       K
     decl: |-
@@ -86,8 +90,9 @@ cases:
         set foo(v: int) { this.a = v}
       }
     use: |-
-      const b: K = new B
-      arktest.assertEQ(b.a, 1)
+      const b: B = new B
+      arktest.assertTrue(b.a instanceof String) // should fail on verifier
+      arktest.assertEQ(b.a, 1) // should be unreachable
       b.a = 2
       arktest.assertEQ(b.a, 2)
   - import: |-
@@ -95,5 +100,5 @@ cases:
     decl: |-
       class I implements J {}
     use: |-
-      const i: J = new I
-      arktest.assertEQ(i.foo(1), '1')
+      const i: I = new I
+      arktest.assertEQ(i.foo(1), '1') // should fail on verifier
