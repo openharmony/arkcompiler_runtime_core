@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,11 @@ enum T {
     a = 1,
     b = 1 + 1,
     c = T.b
+}
+enum Z {
+    a = -1,
+    b = -2,
+    c = 0
 }
 function enumReturnFunc(): Color {
     return Color.Red;

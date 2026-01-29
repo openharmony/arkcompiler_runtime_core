@@ -2505,11 +2505,22 @@ function findMixedEnums(sourceFile: ts.SourceFile): { mixedEnumNames: string[]; 
   return { mixedEnumNames, firstPassStatements };
 }
 
+/**
+ * For enum member initializers that are prefix unary expressions such as `-1`,
+ * return the kind of the operand; otherwise, return the kind of the initializer itself.
+ */
+function decayEnumMemberInitializerKind(initializer: ts.Expression): ts.SyntaxKind {
+  if (ts.isPrefixUnaryExpression(initializer)) {
+    return initializer.operand.kind;
+  }
+  return initializer.kind;
+}
+
 function hasMixedTypes(enumDeclaration: ts.EnumDeclaration): boolean {
   let firstKind: ts.SyntaxKind | null = null;
   for (const member of enumDeclaration.members) {
     if (member.initializer) {
-      const currentKind = member.initializer.kind;
+      const currentKind = decayEnumMemberInitializerKind(member.initializer);
       if (firstKind === null) {
         firstKind = currentKind;
       } else if (currentKind !== firstKind) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,12 @@ declare enum T {
     b = 2,
     c = 2
 }
+declare enum Z {
+    a = -1,
+    b = -2,
+    c = 0
+}
+
 declare function enumReturnFunc(): Color;
 declare function enumParmFunc(role: UserRole): boolean;
 declare function enumXAsParam(param: X): string;
