@@ -677,7 +677,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If arg can not be parsed into a number, NaN is returned
      *
      * @remark
-     * Implemented as native function,  @see `parseFloat()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#653).
+     * Implemented as native function,  @see `parseFloat()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parsefloat
      *
@@ -700,7 +700,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
+     * Implemented as native function,  @see `parseInt()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
@@ -735,7 +735,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
+     * Implemented as native function,  @see `parseInt()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
@@ -764,7 +764,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * etc.
      *
      * @remark
-     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
+     * Implemented as native function,  @see `parseInt()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
@@ -797,7 +797,7 @@ export final class Double extends Floating implements Comparable<Double> {
      *                                                                     '-Infinity' for negative
      *
      * @remark
-     * Implemented as native function,  @see `toExponential()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#673).
+     * Implemented as native function,  @see `toExponential()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/doubles-and-dates.html#sec-double.prototype.toexponential
      *
@@ -842,7 +842,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(12345.123455); d.toPrecision(10) -> '12345.12346'
      *
      * @remark
-     * Implemented as native function,  @see `toPrecision()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#683).
+     * Implemented as native function,  @see `toPrecision()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.toprecision
      *
@@ -878,7 +878,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeError
      *
      * @remark
-     * Implemented as native function,  @see `toFixed()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#693).
+     * Implemented as native function,  @see `toFixed()` intrinsic.
      *
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.prototype.tofixed
      *

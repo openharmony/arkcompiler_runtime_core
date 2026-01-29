@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ export native function abs(v: float): float;
  * @returns Absolute value of `v`
  *
  * @remark
- * Implemented as native function,  @see `abs()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L76).
+ * Implemented as native function,  @see `abs()` intrinsic.
  *
  * @example
  * ```
@@ -97,7 +97,7 @@ export native function abs(v: double): double;
  * @returns Hyperbolic arccosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `acosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `acosh()` intrinsic.
  *
  * @example
  * ```
@@ -115,7 +115,7 @@ export native function acosh(v: float): float;
  * @returns Hyperbolic arccosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `acosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `acosh()` intrinsic.
  *
  * @example
  * ```
@@ -133,7 +133,7 @@ export native function acosh(v: double): double;
  * @returns Arccosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `acos()` intrinsic.
  *
  * @example
  * ```
@@ -151,7 +151,7 @@ export native function acos(v: float): float;
  * @returns Arccosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `acos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `acos()` intrinsic.
  *
  * @example
  * ```
@@ -169,7 +169,7 @@ export native function acos(v: double): double;
  * @returns Hyperbolic arcsine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `asinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `asinh()` intrinsic.
  *
  * @example
  * ```
@@ -187,7 +187,7 @@ export native function asinh(v: float): float;
  * @returns Hyperbolic arcsine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `asinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `asinh()` intrinsic.
  *
  * @example
  * ```
@@ -211,7 +211,7 @@ export native function asinh(v: double): double;
  * asin(doubleNaN) = nan
  *
  * @remark
- * Implemented as native function,  @see `asin()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `asin()` intrinsic.
  */
 export native function asin(v: float): float;
 
@@ -229,7 +229,7 @@ export native function asin(v: float): float;
  * asin(doubleNaN) = nan
  *
  * @remark
- * Implemented as native function,  @see `asin()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `asin()` intrinsic.
  */
 export native function asin(v: double): double;
 
@@ -273,7 +273,7 @@ export native function atan2(y: double, x: double): double;
  * @returns Hyperbolic arctangent of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `atanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `atanh()` intrinsic.
  *
  * @example
  * ```
@@ -291,7 +291,7 @@ export native function atanh(v: float): float;
  * @returns Hyperbolic arctangent of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `atanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `atanh()` intrinsic.
  *
  * @example
  * ```
@@ -309,7 +309,7 @@ export native function atanh(v: double): double;
  * @returns Arctangent of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `atan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `atan()` intrinsic.
  *
  * @example
  * ```
@@ -327,7 +327,7 @@ export native function atan(v: float): float;
  * @returns Arctangent of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `atan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `atan()` intrinsic.
  *
  * @example
  * ```
@@ -383,7 +383,7 @@ export native function cbrt(v: double): double;
  * @returns Smallest integer greater or equal to v
  *
  * @remark
- * Implemented as native function,  @see `ceil()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `ceil()`.
  *
  * @example
  * ```
@@ -474,7 +474,7 @@ export native function clz32Double(v: double): double;
  * @returns Hyperbolic cosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `cosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `cosh()` intrinsic.
  *
  * @example
  * ```
@@ -492,7 +492,7 @@ export native function cosh(v: float): float;
  * @returns Hyperbolic cosine of angle `v`
  *
  * @remark
- * Implemented as native function,  @see `cosh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `cosh()` intrinsic.
  *
  * @example
  * ```
@@ -510,7 +510,7 @@ export native function cosh(v: double): double;
  * @returns Cosine of angle in radians
  *
  * @remark
- * Implemented as native function,  @see `cos()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L43).
+ * Implemented as native function,  @see `cos()` intrinsic.
  *
  * @example
  * ```
@@ -611,7 +611,7 @@ export native function exp(v: double): double;
  * floor(doubleNegInf) = -inf
  *
  * @remark
- * Implemented as native function,  @see `floor()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L104).
+ * Implemented as native function,  @see `floor()` intrinsic.
  */
 export native function floor(v: double): double;
 
@@ -624,7 +624,7 @@ export native function floor(v: double): double;
  * @returns The square root of the sum of squares of its arguments
  *
  * @remark
- * Implemented as native function,  @see `hypot()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L540).
+ * Implemented as native function,  @see `hypot()` intrinsic.
  *
  * @example
  * hypot(doubleInf) = inf
@@ -642,7 +642,7 @@ export native function hypot(u: float, v: float): float;
  * @returns The square root of the sum of squares of its arguments
  *
  * @remark
- * Implemented as native function,  @see `hypot()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L540).
+ * Implemented as native function,  @see `hypot()` intrinsic.
  *
  * @example
  * hypot(doubleInf) = inf
@@ -763,7 +763,7 @@ export function log2(v: double): double {
  * log(doubleNegInf) = -nan
  *
  * @remark
- * Implemented as native function,  @see `log()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `log()` intrinsic.
  */
 export native function log(v: float): float;
 
@@ -781,7 +781,7 @@ export native function log(v: float): float;
  * log(doubleNegInf) = -nan
  *
  * @remark
- * Implemented as native function,  @see `log()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `log()` intrinsic.
  */
 export native function log(v: double): double;
 
@@ -1024,7 +1024,7 @@ export function min(v: double, u: double): double {
  * @returns The remainder of the division of `v` by `u`.
  *
  * @remark
- * Implemented as native function,  @see `power()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L54).
+ * Implemented as native function,  @see `power()` intrinsic.
  *
  * @example
  * ```
@@ -1043,7 +1043,7 @@ export native function mod(u: double, v: double): double;
  * @returns The value of a base `u` raised to a power `v`
  *
  * @remark
- * Implemented as native function,  @see `power()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L54).
+ * Implemented as native function,  @see `power()` intrinsic.
  *
  * @example
  * ```
@@ -1062,7 +1062,7 @@ export native function power(v: double, u: double): double;
  * @returns The remainder of `v / u`, reunded to nearest
  *
  * @remark
- * Implemented as native function,  @see `rem()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `rem()` intrinsic.
  */
 export native function rem(v: double, u: double): double;
 
@@ -1074,7 +1074,7 @@ export native function rem(v: double, u: double): double;
  * @returns `v` rounded to nearest integer
  *
  * @remark
- * Implemented as native function,  @see `rem()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `rem()` intrinsic.
  *
  * @example
  * ```
@@ -1093,7 +1093,7 @@ export native function round(v: double): double;
  * @returns The result of `v * 2 ** n`, computed as a floating-point number.
  *
  * @remark
- * Implemented as a native function, @see [scalbn intrinsic](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as a native function, @see [scalbn intrinsic].
  *
  * @example
  * ```
@@ -1111,7 +1111,7 @@ export function scalbn(v: double, n: int): double {
  * @returns true if arg is negative, false otherwise
  *
  * @remark
- * Implemented as native function,  @see `signbit()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `signbit()` intrinsic.
  *
  * @example
  * ```
@@ -1153,7 +1153,7 @@ export function sign(v: double): int {
  * @returns Returns the hyperbolic sine of a number.
  *
  * @remark
- * Implemented as native function,  @see `sinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `sinh()` intrinsic.
  *
  * @example
  * ```
@@ -1171,7 +1171,7 @@ export native function sinh(v: float): float;
  * @returns Returns the hyperbolic sine of a number.
  *
  * @remark
- * Implemented as native function,  @see `sinh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `sinh()` intrinsic.
  *
  * @example
  * ```
@@ -1189,7 +1189,7 @@ export native function sinh(v: double): double;
  * @returns Sine of angle in radians
  *
  * @remark
- * Implemented as native function,  @see `sin()` intrinsic [declration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L32).
+ * Implemented as native function,  @see `sin()` intrinsic.
  *
  * @example
  * ```
@@ -1208,7 +1208,7 @@ export native function sin(v: double): double;
  * If x is less than zero, returns NaN.
  *
  * @remark
- * Implemented as native function,  @see `sqrt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L65).
+ * Implemented as native function,  @see `sqrt()` intrinsic.
  *
  * @example
  * ```
@@ -1227,7 +1227,7 @@ export native function sqrt(v: double): double;
  * @returns Returns the hyperbolic tangent of a number.
  *
  * @remark
- * Implemented as native function,  @see `tanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `tanh()` intrinsic.
  * @example
  * ```
  * tanh(doubleInf) = 1.0
@@ -1244,7 +1244,7 @@ export native function tanh(v: float): float;
  * @returns Returns the hyperbolic tangent of a number.
  *
  * @remark
- * Implemented as native function,  @see `tanh()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `tanh()` intrinsic.
  * @example
  * ```
  * tanh(doubleInf) = 1.0
@@ -1261,7 +1261,7 @@ export native function tanh(v: double): double;
  * @returns Returns the tangent of a number.
  *
  * @remark
- * Implemented as native function,  @see `tan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `tan()` intrinsic.
  *
  * @example
  * ```
@@ -1279,7 +1279,7 @@ export native function tan(v: float): float;
  * @returns Returns the tangent of a number.
  *
  * @remark
- * Implemented as native function,  @see `tan()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml).
+ * Implemented as native function,  @see `tan()` intrinsic.
  *
  * @example
  * ```
@@ -1302,7 +1302,7 @@ export native function tan(v: double): double;
  * If arg is NaN, NaN is returned
  *
  * @remark
- * Implemented as native function,  @see `trunc()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L115).
+ * Implemented as native function,  @see `trunc()` intrinsic.
  */
 export native function trunc(v: double): double;
 
@@ -1316,7 +1316,7 @@ export function seedRandom(value: long): void {}
  * Initial seed to the random number generator algorithm can be given using {@link seedRandom()} function.
  *
  * @remark
- * Implemented as native function,  @see `random()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#???).
+ * Implemented as native function,  @see `random()` intrinsic.
  */
 export native function random(): double;
 
@@ -1334,7 +1334,7 @@ export native function random(): double;
  *
  * @remark
  * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.imul
- * Implemented as native function,  @see `imul()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L327).
+ * Implemented as native function,  @see `imul()` intrinsic.
  *
  * @example
  * ```
@@ -1359,6 +1359,6 @@ export native function imul(a: double, b: double): int;
  * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-math.fround
   *
  * @remark
- * Implemented as native function,  @see `fround()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L338).
+ * Implemented as native function,  @see `fround()` intrinsic.
  */
 export native function fround(doubleVal: double): double;
