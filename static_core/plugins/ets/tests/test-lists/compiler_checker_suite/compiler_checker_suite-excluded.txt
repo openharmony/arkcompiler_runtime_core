@@ -1,44 +1,41 @@
 # Disabled as this test needs to reimplement. issue 28520
-simple_run/escape_analysis_casted.ets
+ets_tests/escape_analysis_casted.ets
 
 #Disabled as stdlib API was required to change.issue 25232
-simple_run/ets_escape_array.ets
+ets_tests/ets_escape_array.ets
 
 #NOTE(vpukhov) : #16340 requires ets.equals profiling
-simple_run/ets_inline_intrinsics.ets
+ets_tests/ets_inline_intrinsics.ets
 
 #Disabled as stdlib API was required to change.issue 25232
-simple_run/ets_string_concat_func.ets
+ets_tests/ets_string_concat_func.ets
 
 #triggers an OOM segfault in ReallocateBuffer
-ets_strings_concat/ets_stringbuilder_oom.ets
-
-#Issue : 25424
-simple_run/ets_pea_loads_upward_propagation.ets
+ets_tests/ets_stringbuilder_oom.ets
 
 #NOTE : #21521 typeof peephole for numeric types
-simple_run/ets_typeof_compare1.ets
-simple_run/ets_typeof_compare5.ets
-simple_run/ets_typeof_compare2.ets
-simple_run/ets_typeof_compare3.ets
-simple_run/ets_typeof_compare4.ets
-simple_run/ets_typeof_compare6.ets
+ets_tests/ets_typeof_compare1.ets
+ets_tests/ets_typeof_compare5.ets
+ets_tests/ets_typeof_compare2.ets
+ets_tests/ets_typeof_compare3.ets
+ets_tests/ets_typeof_compare4.ets
+ets_tests/ets_typeof_compare6.ets
 
 # 24004 jit assert
-simple_run/ets_promise_launch.ets
+ets_tests/ets_promise_launch.ets
 
 #Disabled - Replace typedarray length LoadObject with constant with external inlining support.issue 28689
-simple_run/typedarray_get_length_loadobject.ets
+ets_tests/typedarray_get_length_loadobject.ets
 
 #NOTE(pantos) Issue #17103 reassign readonly property
-simple_run/optimize_load_readonly_static.ets
-simple_run/optimize_load_readonly_instance.ets
+ets_tests/optimize_load_readonly_static.ets
+ets_tests/optimize_load_readonly_instance.ets
 
 #Disabled as stdlib API was required to change.issue 25232
-simple_run/memory_coalescing3.ets
+ets_tests/memory_coalescing3.ets
 
 #issue #25345
-simple_run/checks_elimination_no_hoist.ets
+ets_tests/checks_elimination_no_hoist.ets
 
 # 31351 Excluded due to instruction reordering and LSE is not able to process this case anymore
-simple_run/lse_load_global_var.ets
+ets_tests/lse_load_global_var.ets

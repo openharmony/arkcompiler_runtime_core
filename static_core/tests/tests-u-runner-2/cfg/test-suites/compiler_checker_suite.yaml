@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,47 +21,23 @@ parameters:
     extension: ets
     load-runtimes: ets
     command-token: "//!"
+    build: ${PANDA_BUILD}
     work-dir: ${WORK_DIR}/${suite-name}
+    checker-frontend-relpath: "bin/es2panda"
+    checker-frontend-relpath-pa: "bin/ark_asm"
 
 collections:
-    simple_run:
+    ets_tests:
         parameters:
             extension: ets
-            es2panda-test-suite-args:
-                - "--extension=${parameters.extension}"
-                - "--opt-level=2"
             checker-test-suite-args:
                 - "--command-token=${parameters.command-token}"
-    simple_run/optimize_doubled_xor.ets:
-        parameters:
-            extension: ets
-            es2panda-test-suite-args:
-                - "--extension=${parameters.extension}"
-                - "--opt-level=0"
-            checker-test-suite-args:
-                - "--command-token=${parameters.command-token}"
-    ets_strings_concat:
-        parameters:
-            extension: ets
-            es2panda-test-suite-args:
-                - "--extension=${parameters.extension}"
-                - "--opt-level=2"
-                - "--ets-strings-concat=false"
-            checker-test-suite-args:
-                - "--command-token=${parameters.command-token}"
-    ets_strings_concat/ets_stringbuilder_loop_branch.ets:
-        parameters:
-            extension: ets
-            es2panda-test-suite-args:
-                - "--extension=${parameters.extension}"
-                - "--opt-level=1"
-                - "--ets-strings-concat=false"
-            checker-test-suite-args:
-                - "--command-token=${parameters.command-token}"
-    pa_folder:
+                - "--frontend ${parameters.build}/${parameters.checker-frontend-relpath}"
+                - "--frontend-options --thread=0,--extension=ets"
+    pa_tests:
         parameters:
             extension: pa
-            es2panda-test-suite-args:
-                - "--extension=${parameters.extension}"
             checker-test-suite-args:
                 - "--command-token=#!"
+                - "--frontend ${parameters.build}/${parameters.checker-frontend-relpath-pa}"
+                - "--frontend-options --log-file,${parameters.build}/build.log"

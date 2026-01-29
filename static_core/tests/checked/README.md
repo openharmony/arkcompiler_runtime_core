@@ -38,6 +38,7 @@ Each command is a valid code in the `ruby` language.
 * **RUN_LLVM** - runs paoc application on the compiled panda file with LLVM AOT backend. Requires LLVM support at `paoc` and passing `--with-llvm` to `checker.rb`
 * **RUN_AOT** - runs paoc application on the compiled panda file with various AOT modes. Currently, command creates separate checkes for `RUN_PAOC` and `RUN_LLVM` backends
 * **RUN_BCO** - runs frontend with bytecode optimizer
+* **RUN_FRONTEND** - runs frontend with specified options. If no options specified, `--opt-level=2 --ets-strings-concat=true` is used
 * **EVENT** (event: pattern) search event within all events
 * **EVENT_NEXT** (event: pattern) ordered search event, i.e. search from position of the last founded event
 * **EVENT_NOT** (event: pattern) ensure event is not occurred
@@ -59,3 +60,103 @@ If none of these checks were specified, then search will be applied in the whole
 * **IN_BLOCK** (block: pattern) limits the search for instructions to one block. The block is defined by lines "props: ..." and "succs: ...". The search pattern is found in the first line "props: rest\_of\_line\_for\_matching". You can define only one block for searching and you can't return to the search in the entire method after in the currently analized compiler pass.
 
 *pattern* can be a string(surrounded by quotes) or regex(surrounded by slashes): string - `"SearchPattern"`, regex - `/SearchPattern/`.
+
+To reduce code repetition, a check grouping feature is implemented. Each check group begins with the command `CHECK_GROUP` and ends with a line without a command token at position zero. Inside the group, you list the commands that are common to multiple checkers. Within an individual checker, you then specify the `CHECK_GROUP` command instead of repeating those common commands.
+
+Example of check group usage:
+```rb
+
+// Before using CHECK_GROUP: both checkers contain identical checks:
+
+//! CHECKER      IR Builder inlining max int
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_i32.*'", entry: "ets_max.ETSGLOBAL::test_i32"
+//! METHOD       "ets_max.ETSGLOBAL::test_i32"
+//! PASS_AFTER   "IrBuilder"
+//! INST_COUNT    /Max/, 6
+//! INST_NEXT_NOT /Intrinsic/
+
+//! CHECKER       AOT IR Builder inlining max int
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_AOT       options: "--compiler-regex='.*test_i32.*'"
+//! METHOD        "ets_max.ETSGLOBAL::test_i32"
+//! PASS_AFTER    "IrBuilder"
+//! INST_COUNT    /Max/, 6
+//! INST_NEXT_NOT /Intrinsic/
+//! RUN           entry: "ets_max.ETSGLOBAL::test_i32"
+
+// After using CHECK_GROUP:
+
+// Common commands are defined once in a check group:
+//! CHECK_GROUP             CheckGroup1
+//! METHOD       "ets_max.ETSGLOBAL::test_i32"
+//! PASS_AFTER   "IrBuilder"
+//! INST_COUNT    /Max/, 6
+//! INST_NEXT_NOT /Intrinsic/
+
+// Individual checkers now reference the group instead of repeating the checks:
+//! CHECKER      IR Builder inlining max int
+//! RUN          force_jit: true, options: "--compiler-regex='.*test_i32.*'", entry: "ets_max.ETSGLOBAL::test_i32"
+//! CHECK_GROUP             CheckGroup1
+
+//! CHECKER       AOT IR Builder inlining max int
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_AOT       options: "--compiler-regex='.*test_i32.*'"
+//! CHECK_GROUP             CheckGroup1
+//! RUN           entry: "ets_max.ETSGLOBAL::test_i32"
+```
+
+The script `checker.rb` is capable of executing compilation. By default, tests are compiled with the options `--opt-level=2 --ets-strings-concat=true --thread=0 --extension=ets`. If a test needs to be compiled with other options, a frontend definition can be used. Each frontend definition starts with the command `DEFINE_FRONTEND_OPTIONS` and ends with a line without a command token at position zero. Inside the frontend definition, one or more `RUN_FRONTEND` commands should be specified. If a frontend definition is used to compile several sources, the last `RUN_FRONTEND` command should specify the options for the current file. To compile dependency files, the path relative to the current file should be used in the `inputs` option. For the current file itself, the `inputs` option is not needed.
+
+A `RUN_FRONTEND` command can overwrite the default options if specified with the name "DEFAULT ARGS". If some checkers within a test file need to be compiled with other options, a frontend definition with a custom name can be used. In this case, the `DEFINE_FRONTEND_OPTIONS` command must be specified inside the checker block.
+
+Compilation is performed on an "as needed" basis, meaning it is executed when a checker runs. If a frontend definition with a given name has already been compiled, the compilation is skipped, and the previous .abc file is reused.
+
+Example of frontend definition usage with `RUN_FRONTEND`:
+```rb
+// Changing compilation default options:
+//! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
+//! RUN_FRONTEND            options: "--ets-strings-concat=false"
+
+// Will be compiled with new default options (no DEFINE_FRONTEND_OPTIONS specified):
+//! CHECKER     Concat loop with length access unoptimized loop AOT
+//! RUN_PAOC    options: "--compiler-regex='.*reuse_concat_loop1' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN         options: "--compiler-regex='.*reuse_concat_loop1'",  entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
+
+// Custom compilation options
+//! DEFINE_FRONTEND_OPTIONS            BCO compiler-simplify-string-builder=false
+//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+
+// Will be compiled with custom options (DEFINE_FRONTEND_OPTIONS specified):
+//! CHECKER      AOT, StringBuilder getStringLength calls optimized
+//! DEFINE_FRONTEND_OPTIONS            BCO compiler-simplify-string-builder=false
+//! RUN_PAOC     options: "--compiler-inlining=false --compiler-optimize-string-concat=false  --compiler-simplify-string-builder=true --compiler-check-final=false"
+//!
+//! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
+//! PASS_AFTER  "BranchElimination"
+
+// If the test has dependencies, several files should be compiled. The last RUN_FRONTEND should specify the current file:
+//! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
+//! RUN_FRONTEND            options: "--ets-strings-concat=false", inputs: "ets_string_builder_merge_uber_export.ets", output: "ets_string_builder_merge_uber_part6_ets_string_builder_merge_uber_export.ets.abc"
+//! RUN_FRONTEND            options: "--ets-strings-concat=false"
+```
+
+The `RUN_FRONTEND` command can be used inside a checker, and similarly, `RUN_BCO` can be used inside a frontend definition. In this case, the first checker that uses a frontend definition with `RUN_BCO` will generate dump files for testing. Subsequent checkers will be able to reuse the `.abc` file, but not the dump files.
+
+Example of frontend definition usage with `RUN_BCO`:
+```rb
+// Custom compilation options with --bco-compiler --compiler-dump: 
+//! DEFINE_FRONTEND_OPTIONS     RUN_BCO reuse .abc
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
+
+// Will be compiled with custom options, generated dump files will be used for testing (the first checker to call DEFINE_FRONTEND_OPTIONS):
+//! CHECKER     BCO, StringBuilder length field access BCO optimized
+//! DEFINE_FRONTEND_OPTIONS     RUN_BCO reuse .abc
+//!
+//! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
+//! PASS_AFTER  "BranchElimination"
+
+// Will reuse previously compiled .abc file. No acess to previously generated dump file:
+//! CHECKER       INTERP-IRTOC, StringBuilder length field access BCO optimized
+//! DEFINE_FRONTEND_OPTIONS     RUN_BCO reuse .abc
+//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
+```
