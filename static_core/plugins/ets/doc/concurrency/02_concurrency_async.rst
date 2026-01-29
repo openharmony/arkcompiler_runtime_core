@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+    Copyright (c) 2026 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -124,9 +124,9 @@ Asynchronous Lambdas
 .. meta:
     frontend_status: Done
 
-A lambda can have the ``async`` modifier (see :ref:`Lambda Expressions`). 
+A lambda can have the ``async`` modifier (see :ref:`Lambda Expressions`).
 
-With regard to concurrency, ``async`` lambdas have the same semantics and 
+With regard to concurrency, ``async`` lambdas have the same semantics and
 follow the same rules as :ref:`Async Functions`.
 
 .. index::
@@ -145,10 +145,10 @@ Asynchronous Methods
 .. meta:
     frontend_status: Done
 
-A static or instance class method can have the ``async`` modifier 
+A static or instance class method can have the ``async`` modifier
 (see :ref:`Method Declarations`).
 
-With regard to concurrency, ``async`` methods have the same semantics and 
+With regard to concurrency, ``async`` methods have the same semantics and
 follow the same rules as :ref:`Async Functions`.
 
 .. index::
@@ -177,11 +177,11 @@ function body. The syntax of the ``await`` expression is as follows:
         'await' expression
         ;
 
-The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of 
+The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of
 ``awaitExpression`` depends on the type of the ``expression``:
 
 - If the ``expression`` type is a subtype of :ref:`Concurrency Promise Class`,
-  then ``await`` defines a suspension point. 
+  then ``await`` defines a suspension point.
 - Otherwise, the ``await`` does not define a suspension point and the type and
   value of the ``awaitExpression`` match those of the ``expression``.
 
@@ -197,7 +197,7 @@ If ``awaitExpression`` defines a suspension point, then:
 
 Under certain circumstances, the |C_CORO| that has been suspended on ``await``
 can be moved to another |C_WORKER| upon resumption, i.e. rescheduled (see
-:ref:`Scheduling rules`). 
+:ref:`Scheduling rules`).
 
 A :index:`compile-time error` occurs if ``await`` is used outside of an
 asynchronous function, method or lambda body.
@@ -258,7 +258,7 @@ is to apply the :ref:`await Expression` to the ``Promise`` instance.
    root coroutine
 
 In general, the ``Promise`` instances are safe to be accessed concurrently.
-The exceptions for this rule and the detailed API is described in the 
+The exceptions for this rule and the detailed API is described in the
 :ref:`API details and restrictions` section.
 
 |
