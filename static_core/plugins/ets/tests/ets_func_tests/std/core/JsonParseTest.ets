@@ -248,6 +248,103 @@ function jsonParseUnicodeString(): void {
     arktest.expectThrow(() => {JSON.parse<String>('"\\u4f6g"', type)}, (e) => { return e instanceof SyntaxError})
 }
 
+function jsonParseEscapedChar(): void {
+    let type = Class.from<String>()
+    let arr: FixedArray<String> = ['"\\""', '"\\\\"', '"\\/"','"\\b"', '"\\f"', '"\\n"', '"\\r"', '"\\t"']
+    let res: FixedArray<String> = ['"', '\\', '/', '\b', '\f', '\n', '\r', '\t']
+    for (let i = 0; i < arr.length; i++) {
+        arktest.assertEQ(JSON.parse<String>(arr[i], type), res[i]);
+    }
+
+    let str = '"\\"\\\\\\/\\b\\f\\n\\r\\t123abc"'
+    arktest.assertEQ(JSON.parse<String>(str, type), '"\\/\b\f\n\r\t123abc');
+}
+
+class Test {}
+
+class TestObject {
+    public a: int = 123
+    public b: number = 123.45
+    public c: string = 'test'
+    public d: boolean = true
+    public e: boolean = false
+    public g: Test = new Test()
+    public h: FixedArray<Test> = [new Test()]
+}
+
+function checkSyntaxError(e: Error): string | boolean {
+    return e instanceof SyntaxError
+}
+
+function jsonParseEnd1(): void {
+    arktest.expectThrow(() => {
+        JSON.parse<String>('"\\', Class.from<String>())
+    }, checkSyntaxError)
+
+    arktest.expectThrow(() => {
+        JSON.parse<String>('"\\"', Class.from<String>())
+    }, checkSyntaxError)
+
+    arktest.expectThrow(() => {
+        JSON.parse<String>('"\\d"', Class.from<String>())
+    }, checkSyntaxError)
+
+    arktest.expectThrow(() => {
+        JSON.parse<FixedArray<Test>>('[]]', Class.from<FixedArray<Test>>())
+    }, checkSyntaxError)
+
+    arktest.expectThrow(() => {
+        JSON.parse<Test>('{}}', Class.from<Test>())
+    }, checkSyntaxError)
+
+    arktest.expectThrow(() => {
+        JSON.parse<String>('"""', Class.from<String>())
+    }, checkSyntaxError)
+}
+
+function jsonParseEnd2(): void {
+    let str = `
+        { \t
+            "a": 100 \t, \t
+            "b": 15.5 \t, \t
+            "c": "test123" \t, \t
+            "d": false \t, \t
+            "e": true \t, \t
+            "g": {} \t, \t
+            "h": [ \t
+                { \t} \t
+            ] \t
+        } \t
+    `
+    let obj = JSON.parse<TestObject>(str, Class.from<TestObject>()) as TestObject
+    arktest.assertEQ(obj.a, 100)
+    arktest.assertEQ(obj.b, 15.5)
+    arktest.assertEQ(obj.c, 'test123')
+    arktest.assertFalse(obj.d)
+    arktest.assertTrue(obj.e)
+    arktest.assertEQ(JSON.stringify(obj.g), '{}')
+    arktest.assertEQ(JSON.stringify(obj.h), '[{}]')
+}
+
+function jsonParseString(): void {
+    let type = Class.from<String>()
+    let str = '"test\\btest"'
+    arktest.assertEQ(JSON.parse<string>(str, type), 'test\btest')
+
+    str = '""'
+    arktest.assertEQ(JSON.parse<string>(str, type), '')
+
+    str = '"\\n123"'
+    arktest.assertEQ(JSON.parse<string>(str, type), '\n123')
+
+    str = '"test"'
+    arktest.assertEQ(JSON.parse<string>(str, type), 'test')
+
+    str = '"\\u4F60test\\u597D"'
+    arktest.assertEQ(JSON.parse<string>(str, type), '你test好')
+}
+
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('JSON.parse tests');
 
@@ -263,6 +360,10 @@ function main(): int {
     suite.addTest('JSON.parse BigInt', jsonParseWithBigInt)
     suite.addTest('JSON.parse specialToken', jsonParseWithSpecialToken)
     suite.addTest('JSON.parse unicode', jsonParseUnicodeString)
+    suite.addTest('JSON.parse escaped char', jsonParseEscapedChar)
+    suite.addTest('JSON.parse end 1', jsonParseEnd1)
+    suite.addTest('JSON.parse end 2', jsonParseEnd2)
+    suite.addTest('JSON.parse string', jsonParseString)
 
     return suite.run();
 }
