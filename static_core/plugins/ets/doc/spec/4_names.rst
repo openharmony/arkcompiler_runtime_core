@@ -705,7 +705,7 @@ information about the defined alias:
     type F = string | F // compile-time error
     type C<T> = T
     type A = C<A>       // compile-time error
-    
+
 
 .. index::
    type alias
@@ -777,7 +777,7 @@ of the same generic.
 .. code-block:: typescript
    :linenos:
 
-    type X<T, S extends T> = T | S 
+    type X<T, S extends T> = T | S
 
 A :index:`compile-time error` occurs if a type parameter in the type parameter
 section depends on itself directly or indirectly:
@@ -1027,24 +1027,22 @@ from the initializer expression as follows:
    :ref:`Subtyping for Literal Types`), and then normalized (see
    :ref:`Union Types Normalization`).
 
--  Otherwise, the type of a declaration is inferred from the initializer
+-  Otherwise, type of a declaration is inferred from its initializer
    expression.
 
--  For an expression with ternary operator `condition ? expr1 : expr2`
-   (see :ref:`Ternary Conditional Expressions`), the type is inferred as follows:
+-  Type of an expression with ternary operator ``condition ? expr1 : expr2``
+   (see :ref:`Ternary Conditional Expressions`) is inferred as follows:   
 
-   - If *condition* can be evaluated at compile time, the type of the whole expression
-     is inferred from the *expression1* (when *condition* is *true*) or *expression2*
-     (when *condition* is *false*) according to rules described above.
-   - Otherwise, the type of the ternary expression is a normalized union of
-     inferred types for *expression1* and *expression2*.
+   - If ``condition`` can be evaluated at compile time, then the type of the
+     entire expression is inferred from ``expr1`` (where ``condition`` is
+     ``true``) or ``expr2`` (where ``condition`` is ``false``) in accordance
+     with the rules above.
 
-If the type of the initializer expression cannot be inferred, then a
-:index:`compile-time error` occurs (see :ref:`Object Literal`):
+   - Otherwise, type of the ternary expression is a normalized union of
+     the inferred types of ``expr1`` and ``expr2``.
 
-The presence of an initializer for ambient declarations of variables and constants 
-causes a :index:`compile-time error`.
-
+If type of an initializer expression cannot be inferred, then a
+:index:`compile-time error` occurs.
 
 .. index::
    type
@@ -1070,41 +1068,43 @@ causes a :index:`compile-time error`.
     let aa = undefined          // type of 'aa' is undefined
     let arr = [null, undefined] // type of 'arr' is (null | undefined)[]
 
-    let b = cond() ? 1 : 2         // type of 'b' is int
+    let b = cond() ? 1 : 2    // type of 'b' is int
 
-    let c = cond() ? 3 : 3.14       // type of 'c' is int | double
-    let c1 = true ? 3 : 3.14      // type of 'c1' is int
-    let c2 = false ? 3 : 3.14     // type of 'c1' is double
+    let c = cond() ? 3 : 3.14 // type of 'c' is int | double
+    let c1 = true ? 3 : 3.14  // type of 'c1' is int
+    let c2 = false ? 3 : 3.14 // type of 'c1' is double
 
     let d = cond() ? "one" : "two" // type of 'd' is string
 
-    let e = cond() ? 1 : "one"     // type of 'e' is int | string
-    let e1 = true ? 1 : "one"    // type of 'e1' is int
+    let e = cond() ? 1 : "one" // type of 'e' is int | string
+    let e1 = true ? 1 : "one"  // type of 'e1' is int
     let e2 = false ? 1 : "one" // type of 'e2' is string
 
-    const bb  = cond() ? 1 : 2        // type of 'bb' is int
+    const bb  = cond() ? 1 : 2     // type of 'bb' is int
 
-    const cc  = cond() ? 1 : 3.14      // type of 'cc' is int | double
-    const cc1 = true   ? 1 : 3.14      // type of 'cc1' is int
-    const cc2 = false  ? 1 : 3.14      // type of 'cc2' is double
+    const cc  = cond() ? 1 : 3.14  // type of 'cc' is int | double
+    const cc1 = true   ? 1 : 3.14  // type of 'cc1' is int
+    const cc2 = false  ? 1 : 3.14  // type of 'cc2' is double
 
     const dd  = cond() ? "one" : "two" // type of 'dd'  is "one" | "two"
     const dd1 = true   ? "one" : "two" // type of 'dd1' is "one"
     const dd2 = cond() ? "one" : "two" // type of 'dd2' is "two"
 
-    const ee = cond() ? 1 : "one"     // type of 'ee' is int | "one"
+    const ee = cond() ? 1 : "one" // type of 'ee' is int | "one"
 
-    let f = {name: "aa"} // compile-time error: type unknown
+    let f = {name: "aa"} // compile-time error: type of object literal is not inferred
 
-    declare let   x1 = 1 // compile-time error: ambient variable cannot have initializer
-    declare const x2 = 1 // compile-time error: ambient constant cannot have initializer
-    let           x3 = 1 // type of 'x3' is int
-    const         x4 = 1 // type of 'x4' is int
+    let   x1 = 1 // type of 'x1' is int
+    const x2 = 1 // type of 'x2' is int
 
-    declare let   s1 = "1" // compile-time error: ambient variable cannot have initializer
-    declare const s2 = "1" // compile-time error: ambient constant cannot have initializer
-    let           s3 = "1" // type of 's3' is string
-    const         s4 = "1" // type of 's4' is "1"
+    let   s1 = "1" // type of 's1' is string
+    const s2 = "1" // type of 's2' is "1"
+
+.. note::
+
+    The presence of an initializer for
+    :ref:`Ambient Constant or Variable Declarations`
+    causes a :index:`compile-time error`.
 
 |
 
