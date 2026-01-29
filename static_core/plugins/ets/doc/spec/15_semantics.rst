@@ -1385,16 +1385,16 @@ no spread expression is left at the call site.
 **Step 2**: The following checks are performed on all arguments from left to
 right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
 
-   if parameter at position ``par_pos`` is of non-rest form, then
+   if parameter at position ``par_pos`` is of non-rest form then
 
-      if `T`:sub:`arg_pos` <: `T`:sub:`par_pos`, then increment ``arg_pos`` and ``par_pos``
+      if `T`:sub:`arg_pos` <: `T`:sub:`par_pos` then increment ``arg_pos`` and ``par_pos``
       else a :index:`compile-time error` occurs, exit Step 2
 
    else // parameter is of rest form (see :ref:`Rest Parameter`)
 
-      if parameter is of rest_array_form, then
+      if parameter is of rest_array_form then
 
-         if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type`, then increment ``arg_pos``
+         if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type` then increment ``arg_pos``
          else increment ``par_pos``
 
       else // parameter is of rest_tuple_form
@@ -1468,11 +1468,6 @@ The checks are represented in the examples below:
     function foo4 (...p: number[]) {}
     foo4 (1, ...[2, 3])  //
               // p becomes array [1, 2, 3]
-
-    function foo5 (p1: number, ...p2: number[]) {}
-    foo5 (...[1, 2, 3])  //
-              // p1 becomes 1, p2 becomes array [2, 3]
-
 
 .. index::
    check
