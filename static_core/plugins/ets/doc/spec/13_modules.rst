@@ -641,7 +641,7 @@ There are two forms of *default import binding*:
     export default SomeClass
 
    // Module 4
-   export default from "Module 2" // Module 4 re-exports default export of Modue 2
+   export {default} from "Module 2" // Module 4 re-exports default export of Modue 2
    export {default as SomeClassNewName} from "Module 2" 
       // Module 4 re-exports default export of Modue 2 as a new exprted name
 
