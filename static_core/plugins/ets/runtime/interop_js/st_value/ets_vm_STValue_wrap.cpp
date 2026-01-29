@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -210,16 +210,6 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         }
         res = static_cast<ani_long>(result);
     } else if (value_type == napi_bigint) {
-        /*  // note: better use this approach, but "napi_get_value_bigint_int64" will lead to compile error
-        int64_t result;
-        bool lossless = false;
-        NAPI_CHECK_FATAL(napi_get_value_bigint_int64(env, input, &result, &lossless));
-        if (!lossless) {
-            STValueThrowJSError(env, "Value is out of range for safe long type.");
-            return nullptr;
-        }
-        res = static_cast<ani_long>(result);
-       */
         std::string bigIntString = BigIntToStringJS(env, input);
         static constexpr const char *className = "std.core.BigInt";
         ani_class bigIntClass;
