@@ -2784,7 +2784,7 @@ the superinterface, then the following semantic rules apply:
 - If a method is ``private`` in  superinterface but ``public`` in subinterface,
   then a :index:`compile-time error` occurs;
 
-- If signatures not are *override-compatible* (see
+- If signatures are not *override-compatible* (see
   :ref:`Override-Compatible Signatures`) and signatures formed by using
   *effective signature types* of original signatures are *override-compatible*, then a
   :index:`compile-time error` occurs.
