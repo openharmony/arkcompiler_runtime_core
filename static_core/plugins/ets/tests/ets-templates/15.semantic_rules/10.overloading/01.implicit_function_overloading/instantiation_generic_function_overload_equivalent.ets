@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,18 +16,15 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Overload function from imported functions
-files: [./modules/function_export_all.ets]
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
+desc: >-
+    An implicit overload with instantiation of a generic function and overload-equivalent 
+    non-generic function causes no CTE, and the textually first function is used.
 ---*/
 
-import {{c.import}} from "./modules/function_export_all.ets";
+{{c.decl}}
 
-overload foo { {{c.list}} };
-
-function main(): void {
-    arktest.assertEQ({{c.res}}, {{c.call}});
+function main() {
+    {{c.call|indent}}
 }
 
 {% endfor %}

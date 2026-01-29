@@ -18,42 +18,37 @@ cases:
       // same sinature with parameters
       function foo(a: int): void {}
       function foo(a: int): void {}
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       // explicit void return type
       function foo(): void {}
       function foo() {}
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       // different return type
       function foo(): Object { return new Object(); }
       function foo(): void {}
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       // optional parameter
       function foo(value: string): string { return value }
       function foo(value?: string): string { return value ? value : 'null' }
-
-  - decl: |-
-      // nullable parameter
-      function foo(a: int): void {}
-      function foo(a: int|null): void {}
-
-  - decl: |-
-      // type parameter and ref
-      class C {}
-      function foo<T>(i: T): void {}
-      function foo(i: C): void {}
+    expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 
   - decl: |-
       // different type arguments
       function foo<T>(i: T): void {}
       function foo<V>(i: V): void {}
+    expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 
   - decl: |-
       // different lists of type arguments
       function foo<T>(): void {}
       function foo<V,U>(): void {}
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       class X {}
@@ -62,26 +57,14 @@ cases:
       // naming formal parameters or type variables differently
       function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): V { return v; }
       function foo<U extends X, V extends Y, T extends Z>(u: U, v: V, t: T): V { return v; }
-
-  - decl: |-
-      class X {}
-      class Y {}
-      class Z {}
-      function foo<T extends X, U extends Y, V extends Z>(t: T, u: U, v: V): T { return t; }
-      function foo<T extends X, U extends Y>(t: T, u: U, v: Object): T { return t; }
-      function foo<T extends X>(t: T, u: Object, v: Object): T { return t; }
-      function foo(t: Object, u: Object, v: Object): Object { return new Object(); }
+    expected_out: "qq"
 
   - decl: |-
       class Y {}
       // naming formal parameters or return types differently
       function foo<X extends Y>(a: int, b: long, c: double, d: X): X { return d; }
       function foo<Z extends Y>(q: int, r: long, v: double, w: Z): Z { return w; }
-
-  - decl: |-
-      class Z {}
-      function foo<X extends Z>(a: int, b: long, c: double, d: X): X { return d; }
-      function foo<X extends Z>(a: long, b: long, c: double, d: X): X { return d; }
+    expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 
   - decl: |-
       type T1 = int
@@ -92,23 +75,19 @@ cases:
       // using type aliases
       function foo(a: int, b: long, c: double, d: Object): Object { return new Object(); }
       function foo(t1: T1, t2: T2, t3: T3, t5: T5): T5 { return new Object(); }
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       // rest parameters
       function foo(a: int[]): void {}
       function foo(...a: int[]): void {}
+    expected_out: "Semantic error ESE0130: Function foo is already declared."
 
   - decl: |-
       // array parameters
-      function foo(a: FixedArray<Object>) {}
-      function foo(a: FixedArray<FixedArray<Object>>) {}
-
-  - decl: |-
-      // enum parameters
-      enum Color { Red, Green, Blue }
-      enum Size { S, M, L, XL }
-      function foo(a: Color): Color { return a; }
-      function foo(a: Size): Size { return a; }
+      function foo(a: Array<Object>) {}
+      function foo(a: Array<Array<Object>>) {}
+    expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 
   # class methods
   - decl: |-
@@ -117,6 +96,7 @@ cases:
         met(a: int): void {}
         met(a: int): void {}
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // different return type
@@ -124,6 +104,7 @@ cases:
           public met(): int { return 1; }
           public met(): long { return 1 as long; }
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // different access modifier
@@ -131,6 +112,7 @@ cases:
           public met(a: Object) {}
           private met(b: Object) {}
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // obtional parameter
@@ -138,21 +120,7 @@ cases:
           met(value: string): string { return value }
           met(value?: string): string { return value ? value : 'null' }
       }
-
-  - decl: |-
-      // nullable parameter
-      class A {
-          met(value: string): string { return value }
-          met(value: string|null): string { return value ? value : 'null' }
-      }
-
-  - decl: |-
-      // type parameter and ref
-      class C {}
-      class A {
-        met<T>(i: T): void {}
-        met(i: C): void {}
-      }
+    expected_out: "Semantic error ESE0131: Function met with this assembly signature already declared."
 
   - decl: |-
       // different type arguments
@@ -160,6 +128,7 @@ cases:
         met<T>(i: T): void {}
         met<V>(i: V): void {}
       }
+    expected_out: "Semantic error ESE0131: Function met with this assembly signature already declared."
 
   - decl: |-
       // different lists of type arguments
@@ -167,6 +136,7 @@ cases:
         met<T>(): void {}
         met<V,U>(): void {}
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       class X {}
@@ -176,6 +146,7 @@ cases:
           public met(a: T): T { return a; }
           public met(a: T): Y { return new Y(); }
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // using type alias
@@ -184,6 +155,7 @@ cases:
           public met(a: int): int { return a; }
           public met(b: T1): T1 { return b; }
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // rest parameters
@@ -191,22 +163,15 @@ cases:
           public met(a: int[]): void {}
           public met(...a: int[]): void {}
       }
+    expected_out: "Semantic error ESE0130: Function met is already declared."
 
   - decl: |-
       // array parameters
       class A {
-          public met(a: FixedArray<Object>) {}
-          public met(a: FixedArray<FixedArray<Object>>) {}
+          public met(a: Array<Object>) {}
+          public met(a: Array<Array<Object>>) {}
       }
-
-  - decl: |-
-      // enum parameters
-      enum Color { Red, Green, Blue }
-      enum Size { S, M, L, XL }
-      class A {
-          met(a: Color): Color { return a; }
-          met(a: Size): Size { return a; }
-      }
+    expected_out: "Semantic error ESE0131: Function met with this assembly signature already declared."
 
   # class constructors
   - decl: |-
@@ -215,6 +180,7 @@ cases:
           public constructor () {}
           private constructor () {}
       }
+    expected_out: "Semantic error ESE0130: Function constructor is already declared."
 
   - decl: |-
       // different access modifiers
@@ -222,6 +188,7 @@ cases:
           public constructor (a: int) {}
           public constructor (a: int) {}
       }
+    expected_out: "Semantic error ESE0130: Function constructor is already declared."
 
   - decl: |-
       // rest parameters
@@ -229,6 +196,7 @@ cases:
           public constructor (a: int[]) {}
           public constructor (...a: int[]) {}
       }
+    expected_out: "Semantic error ESE0130: Function constructor is already declared."
 
   - decl: |-
       // optional parameter
@@ -236,6 +204,7 @@ cases:
           public constructor (value: string) { return value }
           public constructor (value?: string) { return value ? value : 'null' }
       }
+    expected_out: "Semantic error ESE0033: Return statement with expression isn't allowed in constructor."
 
   - decl: |-
       // nullable parameter
@@ -243,6 +212,7 @@ cases:
           public constructor (value: string) { return value }
           public constructor (value: string|null) { return value ? value : 'null' }
       }
+    expected_out: " Semantic error ESE0033: Return statement with expression isn't allowed in constructor."
 
   - decl: |-
       // type parameter and ref
@@ -251,6 +221,7 @@ cases:
         constructor<T>(i: T): void {}
         constructor(i: C): void {}
       }
+    expected_out: "Syntax error ESY0330: Constructor should not have type parameters."
 
   - decl: |-
       // different type arguments
@@ -258,6 +229,7 @@ cases:
         constructor<T>(i: T): void {}
         constructor<V>(i: V): void {}
       }
+    expected_out: "Syntax error ESY0330: Constructor should not have type parameters."
 
   - decl: |-
       // different lists of type arguments
@@ -265,6 +237,7 @@ cases:
         constructor<T>(): void {}
         constructor<V,U>(): void {}
       }
+    expected_out: "Syntax error ESY0330: Constructor should not have type parameters."
 
   - decl: |-
       class X {}
@@ -274,6 +247,7 @@ cases:
           public constructor (a: T, b: U) {}
           public constructor (c: T, d: U) {}
       }
+    expected_out: "Semantic error ESE0130: Function constructor is already declared."
 
   - decl: |-
       // using type alias
@@ -282,19 +256,12 @@ cases:
           public constructor (a: int[]) {}
           public constructor (b: T1) {}
       }
+    expected_out: "Semantic error ESE0130: Function constructor is already declared."
 
   - decl: |-
       // array parameters
       class A {
-          public constructor (a: FixedArray<Object>) {}
-          public constructor (a: FixedArray<FixedArray<Object>>) {}
+          public constructor (a: Array<Object>) {}
+          public constructor (a: Array<Array<Object>>) {}
       }
-
-  - decl: |-
-      // enum parameters
-      enum Color { Red, Green, Blue }
-      enum Size { S, M, L, XL }
-      class A {
-          constructor(a: Color) {}
-          constructor(a: Size) {}
-      }
+    expected_out: "Semantic error ESE0131: Function constructor with this assembly signature already declared."

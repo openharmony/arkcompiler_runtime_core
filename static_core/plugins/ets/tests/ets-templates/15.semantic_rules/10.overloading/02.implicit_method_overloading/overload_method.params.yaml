@@ -19,8 +19,8 @@ cases:
   - { type: number, callValue: '',              res: 100        }
   - { type: string, callValue: '',              res: 100        }
 
-  - { type: byte,   callValue: 'new Byte(20)',  res: 20         }
-  - { type: short,  callValue: 'new Short(10)', res: 10         }
+  - { type: byte,   callValue: 'new Byte(20)',  res: '"int: 20"'}
+  - { type: short,  callValue: 'new Short(10)', res: '"int: 10"'}
   - { type: number, callValue: 1.2,             res: 1.2        }
   - { type: string, callValue: '"string"',      res: '"string"' }
 

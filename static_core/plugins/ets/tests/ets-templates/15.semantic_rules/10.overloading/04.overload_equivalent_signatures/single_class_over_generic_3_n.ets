@@ -3,9 +3,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,30 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: Check incorrect overload code. Class method overload
+desc: >-
+    A compile-time error occurs, if signatures of two constructors are overload-equivalent.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0131: Function constructor with this assembly signature already declared."
 ---*/
 
-final class FuncTest {
-    foo(): int {
-        return 100;
-    }
-
-    foo(x: int): string {
-        return 'int: ' +  x;
-    }
-
-    foo(x: {{c.type}}): {{c.type}} {
-        return x;
-    }
+class Base<T> {
+  constructor(i: Base<T>) {}
+  constructor(i: Base<Number>) {}
 }
-
-function main(): void {
-    let ft: FuncTest = new FuncTest();
-    arktest.assertEQ({{c.res}}, ft.foo({{c.callValue}}));
-}
-
-{% endfor %}

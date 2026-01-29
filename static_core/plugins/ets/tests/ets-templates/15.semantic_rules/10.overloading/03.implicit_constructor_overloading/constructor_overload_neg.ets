@@ -20,6 +20,7 @@ desc: >-
      Constructor is defined in a subclass.
      All base class constructors are available for call in all derived class constructors.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0124: Expected 0 arguments, got 1."
 ---*/
 
 let res: number = 0;
