@@ -14,38 +14,38 @@
  */
 
 function main(): int {
-    let suite = new arktest.ArkTestsuite("Intl. NumberFormat supportedLocalesOf");
-    suite.addTest("supportedLocalesOf", testSupportedLocalesOf);
-    suite.addTest("supportedLocalesOfEmpty", testSupportedLocalesOfEmpty);
-    suite.addTest("supportedLocalesOfUndefined", testSupportedLocalesOfUndefined);
+    let suite = new arktest.ArkTestsuite('Intl. NumberFormat supportedLocalesOf');
+    suite.addTest('supportedLocalesOf', testSupportedLocalesOf);
+    suite.addTest('supportedLocalesOfEmpty', testSupportedLocalesOfEmpty);
+    suite.addTest('supportedLocalesOfUndefined', testSupportedLocalesOfUndefined);
     // Tests are from https://gitee.com/openharmony/xts_acts/tree/master/commonlibrary/ets_utils/codeparsingtest/builtinstest/entry/src/ohosTest/ets/test/Intl/Intl.test.ets
-    suite.addTest("testSupportedLocalesOf0002", testSupportedLocalesOf0002);
-    suite.addTest("testSupportedLocalesOf0003", testSupportedLocalesOf0003);
-    suite.addTest("testSupportedLocalesOf0003", testSupportedLocalesOf0004);
+    suite.addTest('testSupportedLocalesOf0002', testSupportedLocalesOf0002);
+    suite.addTest('testSupportedLocalesOf0003', testSupportedLocalesOf0003);
+    suite.addTest('testSupportedLocalesOf0003', testSupportedLocalesOf0004);
     return suite.run();
 }
 
 function testSupportedLocalesOf() {
-    let en_US: string = Intl.intlBestFitLocale("en-US");
-    let zh_CN: string = Intl.intlBestFitLocale("zh-CN");
-    let ru_RU: string = Intl.intlBestFitLocale("ru-RU");
-    let localeList: string[] = [ru_RU, zh_CN, en_US];
-    let expected: string[] = [ru_RU, zh_CN, en_US];
+    let en: string = Intl.intlBestFitLocale('en-US');
+    let cn: string = Intl.intlBestFitLocale('zh-CN');
+    let ru: string = Intl.intlBestFitLocale('ru-RU');
+    let localeList: string[] = [ru, cn, en];
+    let expected: string[] = [ru, cn, en];
     let result: string[] = Intl.NumberFormat.supportedLocalesOf(localeList);
-    arktest.assertEQ(expected[0], result[0], "Error. Got: " + result[0] + ". Expected: " + expected[0]);
-    arktest.assertEQ(expected[1], result[1], "Error. Got: " + result[1] + ". Expected: " + expected[1]);
-    arktest.assertEQ(expected[2], result[2], "Error. Got: " + result[2] + ". Expected: " + expected[2]);
+    arktest.assertEQ(expected[0], result[0], 'Error. Got: ' + result[0] + '. Expected: ' + expected[0]);
+    arktest.assertEQ(expected[1], result[1], 'Error. Got: ' + result[1] + '. Expected: ' + expected[1]);
+    arktest.assertEQ(expected[2], result[2], 'Error. Got: ' + result[2] + '. Expected: ' + expected[2]);
 }
 
 function testSupportedLocalesOfEmpty() {
-    let locales: string = ""
-    let expectedError = new Error("Incorrect locale information provided");
+    let locales: string = ''
+    let expectedError = new Error('Incorrect locale information provided');
     arktest.expectError((): void => { Intl.NumberFormat.supportedLocalesOf(locales); }, expectedError);
 }
 
 function testSupportedLocalesOfUndefined() {
-    let locales: string = ""
-    let expectedError = new Error("Incorrect locale information provided");
+    let locales: string = ''
+    let expectedError = new Error('Incorrect locale information provided');
     arktest.expectError((): void => { Intl.NumberFormat.supportedLocalesOf(locales, undefined); }, expectedError);
 }
 
