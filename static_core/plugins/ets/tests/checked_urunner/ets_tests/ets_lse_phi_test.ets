@@ -14,8 +14,7 @@
  */
 
 //! CHECKER       Check LSE with PHI in JIT
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "", entry: "ets_lse_phi_test.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::main'", entry: "ets_lse_phi_test.ETSGLOBAL::main"
 //! METHOD        "ets_lse_phi_test.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /StoreObject .* ets_lse_phi_test.C0.x0/, 2

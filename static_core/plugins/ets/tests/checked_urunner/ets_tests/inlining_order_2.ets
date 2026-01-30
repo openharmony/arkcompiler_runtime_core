@@ -14,8 +14,7 @@
  */
 
 //! CHECKER      Check inlining sequence without profiling
-//! SKIP_IF      @architecture == "arm32"
-//! RUN          options: "--compiler-profiling-threshold=100 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_2.ETSGLOBAL::main"
+//! RUN          options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=100 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_2.ETSGLOBAL::main"
 //! EVENT        /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::if_4th,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::if_not_4th,.*,STATIC,SUCCESS/
@@ -24,8 +23,7 @@
 //! EVENT_NEXT   /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
 
 //! CHECKER      Check inlining sequence with profiling
-//! SKIP_IF      @architecture == "arm32"
-//! RUN          options: "--compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_2.ETSGLOBAL::main"
+//! RUN          options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_2.ETSGLOBAL::main"
 //! EVENT        /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::if_not_4th,.*,STATIC,SUCCESS/
 //! EVENT_NEXT   /Inline,inlining_order_2.ETSGLOBAL::test_loops,inlining_order_2.ETSGLOBAL::if_2nd,.*,STATIC,SUCCESS/

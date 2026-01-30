@@ -14,8 +14,7 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT optimize with nested catches
-//! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ets_try_catch8.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex='.*(multipleCatch|wrapper|main)' --compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ets_try_catch8.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch8.MultipleCatch::multipleCatch,.*,COMPILED/
 //! EVENT        /Compilation,ets_try_catch8.MultipleCatch::wrapper,.*,COMPILED/
 //! EVENT        /Inline,ets_try_catch8.ETSGLOBAL::main,ets_try_catch8.MultipleCatch::wrapper,.*,SUCCESS/

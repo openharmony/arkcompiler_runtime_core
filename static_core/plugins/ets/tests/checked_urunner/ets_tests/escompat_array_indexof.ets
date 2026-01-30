@@ -17,7 +17,6 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       ArrayInt indexOf
-//! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true , options: "--compiler-dump:final --compiler-regex='.*::test_array_.*_index_of'", entry: "escompat_array_indexof.ETSGLOBAL::main"
 //!
 //! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_index_of"
