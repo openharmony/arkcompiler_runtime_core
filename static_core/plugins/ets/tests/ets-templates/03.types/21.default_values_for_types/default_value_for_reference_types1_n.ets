@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,11 +14,19 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Accessing the length property returns the string length as int type value
+desc: >-
+    Reference types and enumeration types have no default values.
+    Variables of such types must be initialized explicitly with a value before the first use of a type.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0375: Variable 'en' is used before being assigned."
 ---*/
 
+enum Direction {
+    Up,
+    Down
+}
+
 function main(): void {
-    let a: string = "012 \n3456789\n ABCDEFGHIJKLMNOPQRSTUVWXYZ\u0000\u03e9\u07d2\u0bbb\u0fa4\u138d\u1776\u1b5f\u1f48\u2331\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19"
-    arktest.assertEQ(a.length, 60)
-    arktest.assertTrue(a.length instanceof int)
+    let en: Direction
+    en === Direction.Up
 }

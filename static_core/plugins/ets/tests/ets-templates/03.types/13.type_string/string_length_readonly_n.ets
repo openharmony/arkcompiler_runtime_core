@@ -15,10 +15,12 @@ limitations under the License.
 
 /*---
 desc: Accessing the length property returns the string length as int type value
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
 function main(): void {
-    let a: string = "012 \n3456789\n ABCDEFGHIJKLMNOPQRSTUVWXYZ\u0000\u03e9\u07d2\u0bbb\u0fa4\u138d\u1776\u1b5f\u1f48\u2331\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19"
-    arktest.assertEQ(a.length, 60)
-    arktest.assertTrue(a.length instanceof int)
+    let a: string = "abcdefghijklmnopqrstuvwxyz"
+    arktest.assertEQ(a.length, 26)
+    a.length = 5
 }

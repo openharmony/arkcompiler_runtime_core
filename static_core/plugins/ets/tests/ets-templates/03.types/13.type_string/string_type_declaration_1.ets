@@ -17,6 +17,8 @@ limitations under the License.
 desc: String type
 ---*/
 
-let x: String;
+const x: String = '';
 
-function main(): void {}
+function main(): void {
+    arktest.assertTrue(x instanceof string)
+}

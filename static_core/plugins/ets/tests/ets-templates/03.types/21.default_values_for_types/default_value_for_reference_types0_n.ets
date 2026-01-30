@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,12 +14,18 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Accessing the length property returns the string length as int type value
-tags: [negative, compile-only]
+desc: >-
+    Reference types and enumeration types have no default values.
+    Variables of such types must be initialized explicitly with a value before the first use of a type.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0375: Variable 'cl' is used before being assigned."
 ---*/
 
+class A {
+    foo(): int { return 5; }
+}
+
 function main(): void {
-  let a: string = "abcdefghijklmnopqrstuvwxyz"
-  arktest.assertEQ(a.length, 26)
-  a.length = 5
+    let cl: A
+    cl.foo
 }

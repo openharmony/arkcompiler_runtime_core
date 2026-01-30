@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,12 +18,13 @@ desc: If a function has the return type of never, it means that it never returns
 ---*/
 
 function f(): never {
-    throw new Error()
+    throw new Error('test')
 }
 
 function main() {
     try {
         f();
     } catch (e) {
+        arktest.assertEQ(e.message,'test');
     }
 }
