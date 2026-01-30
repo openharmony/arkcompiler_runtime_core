@@ -453,6 +453,7 @@ bool Runtime::Create(const RuntimeOptions &options)
 #ifdef PANDA_OHOS_GET_PARAMETER
 void Runtime::SetRuntimeOptions(RuntimeOptions &options)
 {
+    SetInterpreterTypeOptions(options);
     SetDebuggerOptions(options);
     SetUseLargerYoungSpaceOptions(options);
     SetEnableClassLinkerTraceOptions(options);
@@ -467,6 +468,22 @@ void Runtime::SetDebuggerOptions(RuntimeOptions &options)
         options.SetDebuggerEnable(true);
         options.SetDebuggerLibraryPath(debugLibraryPathMode);
         options.SetDebuggerBreakOnStart(true);
+    }
+}
+
+void Runtime::SetInterpreterTypeOptions(RuntimeOptions &options)
+{
+    if (options.WasSetInterpreterType()) {
+        return;
+    }
+    std::string interpreterType = OHOS::system::GetParameter("persist.sta.ark.InterpreterType", "");
+    if (interpreterType.empty()) {
+        return;
+    }
+    if (interpreterType == "cpp" || interpreterType == "irtoc" || interpreterType == "llvm") {
+        options.SetInterpreterType(interpreterType);
+    } else {
+        LOG(WARNING, RUNTIME) << "Invalid persist.sta.ark.InterpreterType: " << interpreterType;
     }
 }
 
@@ -491,6 +508,7 @@ void Runtime::SetEnableClassLinkerTraceOptions(RuntimeOptions &options)
 #else
 void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetInterpreterTypeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetEnableClassLinkerTraceOptions([[maybe_unused]] RuntimeOptions &options) {}
 #endif

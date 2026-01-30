@@ -189,6 +189,8 @@ public:
 
     static void SetDebuggerOptions(RuntimeOptions &options);
 
+    static void SetInterpreterTypeOptions(RuntimeOptions &options);
+
     static void SetUseLargerYoungSpaceOptions(RuntimeOptions &options);
 
     static void SetEnableClassLinkerTraceOptions(RuntimeOptions &options);
