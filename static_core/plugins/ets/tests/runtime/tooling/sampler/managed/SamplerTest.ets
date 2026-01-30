@@ -16,33 +16,30 @@
 export namespace ns {
 
 export function main(): int {
-    // By providing the upper-bound execution time of the test functions we ensure that
-    // enough profiler samples are collected while preventing timeouts in CI
-    const repetitions: int = 10000000
-    const functionExecTimeMs: int = 3000
-    return executeTest(repetitions, functionExecTimeMs)
+    const repetitions: int = 1000000
+    return executeTest(repetitions)
 }
 
-function executeTest(repetitions: int, functionExecTimeMs: int): int {
+function executeTest(repetitions: int): int {
     let res: double = 0
     let pi: double = 3.14158
 
-    res = callSlowFunction(1, repetitions, functionExecTimeMs)
-    if (absolute(res - pi) > 0.001) {
-        console.println("Pi calculation went wrong")
-        return 1
-    }
-    res = callSlowFunction(2, repetitions, functionExecTimeMs)
+    res = callSlowFunction(1, repetitions)
     if (absolute(res - pi) > 0.0001) {
         console.println("Pi calculation went wrong")
         return 1
     }
-    res = callSlowFunction(3, repetitions, functionExecTimeMs)
+    res = callSlowFunction(2, repetitions)
     if (absolute(res - pi) > 0.0001) {
         console.println("Pi calculation went wrong")
         return 1
     }
-    res = callSlowFunction(4, repetitions, functionExecTimeMs)
+    res = callSlowFunction(3, repetitions)
+    if (absolute(res - pi) > 0.0001) {
+        console.println("Pi calculation went wrong")
+        return 1
+    }
+    res = callSlowFunction(4, repetitions)
     if (absolute(res - pi) > 0.0001) {
         console.println("Pi calculation went wrong")
         return 1
@@ -58,77 +55,61 @@ function absolute(val: double): double {
     return val
 }
 
-function callSlowFunction(foo: int, repetitions: int, functionExecTimeMs: int): double {
+function callSlowFunction(foo: int, repetitions: int): double {
     let res: double = 0
     if (foo == 1) {
-        res = slowFunction(repetitions, functionExecTimeMs)
+        res = slowFunction(repetitions)
     } else if (foo == 2) {
-        res = slowFunctionCopy1(repetitions, functionExecTimeMs)
+        res = slowFunctionCopy1(repetitions)
     } else if (foo == 3) {
-        res = slowFunctionCopy2(repetitions, functionExecTimeMs)
+        res = slowFunctionCopy2(repetitions)
     } else if (foo == 4) {
-        res = slowFunctionCopy3(repetitions, functionExecTimeMs)
+        res = slowFunctionCopy3(repetitions)
     }
     return res
 }
 
 // Doing copypaste because of compiler optimisations
-function slowFunction(repetitions: int, functionExecTimeMs: int): double {
+function slowFunction(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
-
-        if ((Date.now() - startTime) > functionExecTimeMs) {
-            break
-        }
     }
     return 4 * ret
 }
 
-function slowFunctionCopy1(repetitions: int, functionExecTimeMs: int): double {
+function slowFunctionCopy1(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
-
-        if ((Date.now() - startTime) > functionExecTimeMs) {
-            break
-        }
     }
     return 4 * ret
 }
 
-function slowFunctionCopy2(repetitions: int, functionExecTimeMs: int): double {
+function slowFunctionCopy2(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
-
-        if ((Date.now() - startTime) > functionExecTimeMs) {
-            break
-        }
     }
     return 4 * ret
 }
 
-function slowFunctionCopy3(repetitions: int, functionExecTimeMs: int): double {
+function slowFunctionCopy3(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
     for (let i: int = 0; i < repetitions; i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
-
-        if ((Date.now() - startTime) > functionExecTimeMs) {
-            break
-        }
     }
     return 4 * ret
 }
