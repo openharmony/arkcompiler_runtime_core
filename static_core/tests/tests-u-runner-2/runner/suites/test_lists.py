@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,8 @@ from runner.enum_types.configuration_kind import (
 )
 from runner.enum_types.params import TestEnv
 from runner.logger import Log
-from runner.options.step import Step, StepKind
+from runner.options.options_step import Step, StepKind
+from runner.options.root_dir import RootDir
 from runner.utils import correct_path, detect_architecture, detect_operating_system
 
 _LOGGER = Log.get_logger(__file__)
@@ -42,16 +43,42 @@ _CMAKE_BUILD_PROPERTIES_FILE_NAME = "CMakeCache.txt"
 
 
 class TestLists:
-    def __init__(self, list_root: Path, test_env: TestEnv, jit_repeats: int | None):
+    """Manages test list discovery, filtering, and configuration for test execution.
+    
+    This class is responsible for discovering and managing test list files based on
+    build configuration, test environment, and various filtering criteria. It handles
+    different build systems (GN/CMAKE), sanitizers, architectures, and test configurations
+    to locate appropriate test lists for execution.
+    
+    The class supports:
+    - Automatic detection of build properties and configuration
+    - Pattern-based test list filtering and matching
+    - Exclusion and ignored test list management
+    - Multiple test configuration kinds (AOT, JIT, Interpreter)
+    - Architecture and OS-specific test list selection
+    - Sanitizer-aware test list discovery
+    
+    Attributes:
+        list_roots: List of RootDir objects containing test list directories
+        config: TestEnv configuration object with test settings
+        explicit_list: Optional Path to a specific test list file
+        excluded_lists: List of Path objects for excluded test lists
+        ignored_lists: List of Path objects for ignored test lists
+        build_properties: List of build configuration properties
+        build_system: BuildSystem enum (GN or CMAKE)
+        is_jit_with_repeats: Boolean indicating JIT with repeat execution
+        sanitizer: SanitizerKind enum (ASAN, TSAN, NONE)
+        architecture: Detected target architecture
+        operating_system: Detected target operating system
+        build_type: BuildTypeKind enum (debug, release, fast-verify)
+        conf_kind: ConfigurationKind enum (AOT, JIT, INT, etc.)
+    """
+
+    def __init__(self, list_roots: list[RootDir], test_env: TestEnv, jit_repeats: int | None):
         load_dotenv()
-        self.list_root = list_root
+        self.list_roots = list_roots
         self.config = test_env.config
-        self.explicit_list: Path | None = (
-            correct_path(self.list_root, self.config.test_suite.test_lists.explicit_list)
-            if self.config.test_suite.test_lists.explicit_list is not None and self.list_root is not None
-            else None
-        )
-        self.explicit_test: Path | None = None
+        self.explicit_list: Path | None = self._get_explicit_list()
         self.excluded_lists: list[Path] = []
         self.ignored_lists: list[Path] = []
         self.build_properties: list[str] = []
@@ -110,74 +137,68 @@ class TestLists:
             return None
         return bool_map[result_value]
 
-    def collect_excluded_test_lists(self, extra_list: list[str] | None = None,
-                                    test_name: str | None = None) -> None:
-        self.excluded_lists.extend(self.collect_test_lists("excluded", extra_list, test_name))
+    def collect_excluded_test_lists(self, extra_list: list[str] | None = None) -> None:
+        self.excluded_lists.extend(self.collect_test_lists("excluded", extra_list))
 
-    def collect_ignored_test_lists(self, extra_list: list[str] | None = None,
-                                   test_name: str | None = None) -> None:
-        exclude_test_lists = self.config.test_suite.test_lists.exclude_ignored_test_lists
+    def collect_ignored_test_lists(self, extra_list: list[str] | None = None) -> None:
+        exclude_test_lists = list(res) if (res := self.config.test_suite.test_lists.exclude_ignored_test_lists) else []
         exclude_all_ignored_lists = self.config.test_suite.test_lists.exclude_ignored_tests
 
         if exclude_all_ignored_lists:
-            self.excluded_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+            self.excluded_lists.extend(self.collect_test_lists("ignored", extra_list))
         elif exclude_test_lists:
 
-            self.excluded_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
-                                                               test_name, filter_list=True))
-            self.ignored_lists.extend(self.collect_test_lists("ignored", list(exclude_test_lists),
-                                                              test_name, filter_list=False))
+            self.excluded_lists.extend(self.collect_test_lists("ignored", exclude_test_lists, filter_list=True))
+            self.ignored_lists.extend(self.collect_test_lists("ignored", exclude_test_lists, filter_list=False))
         else:
-            self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list, test_name))
+            self.ignored_lists.extend(self.collect_test_lists("ignored", extra_list))
 
     def collect_test_lists(
             self,
             kind: str, extra_lists: list[str] | None = None,
-            test_name: str | None = None, filter_list: bool | None = None
+            filter_list: bool | None = None
     ) -> list[Path]:
+        """Collect and filter test list files based on configuration and patterns.
+        
+        This method discovers test list files from configured root directories by matching
+        filenames against a generated pattern that incorporates build configuration,
+        architecture, OS, and other test parameters. It supports optional filtering
+        based on additional pattern lists.
+        
+        Args:
+            kind: Type of test lists to collect (e.g., "excluded", "ignored").
+                  Used to generate the appropriate filename pattern.
+            extra_lists: Optional list of pattern strings for additional filtering.
+                        If provided with filter_list, these patterns are used to
+                        include/exclude specific test lists.
+            filter_list: Optional boolean controlling filtering behavior:
+                        - None: No filtering, return all discovered test lists
+                        - True: Return only test lists matching extra_lists patterns
+                        - False: Return test lists excluding those matching extra_lists patterns
+        
+        Returns:
+            List of Path objects representing discovered and filtered test list files.
+            The behavior depends on the filter_list parameter:
+            - None: All matching test lists from all root directories
+            - True: Only test lists matching patterns in extra_lists
+            - False: All test lists except those matching patterns in extra_lists
+            
+        Note:
+            - Uses _get_test_list_pattern() to generate regex patterns based on test configuration
+            - Searches for .txt files in all configured root directories recursively
+            - Pattern matching includes root directory name in the regex
+            - Logs discovered test lists for debugging purposes
+        """
 
         test_lists: list[Path] = []
-        test_name = test_name if test_name else self.config.test_suite.suite_name
+        full_pattern = self._get_test_list_pattern(kind)
+        for root in self.list_roots:
+            full_pattern_root = re.compile(f"{root.name}.*-{full_pattern}")
+            _LOGGER.default(f"Test lists searching: {full_pattern_root.pattern}")
+            test_lists.extend([file for file in root.root_dir.glob("**/*.txt")
+                               if full_pattern_root.match(file.name) is not None])
 
-        short_template_name = f"{test_name}*-{kind}*.txt"
-        conf_kind = self.conf_kind.value.upper()
-        interpreter = self.get_interpreter().upper()
-        full_template_name = f"{test_name}.*-{kind}" + \
-                             f"(-{self.operating_system.value})?" \
-                             f"(-{self.architecture.value})?" \
-                             f"(-{conf_kind})?" \
-                             f"(-{interpreter})?"
-        if self.sanitizer != SanitizerKind.NONE:
-            full_template_name += f"(-{self.sanitizer.value})?"
-        if self.opt_level() is not None:
-            full_template_name += f"(-OL{self.opt_level()})?"
-        if self.debug_info():
-            full_template_name += "(-DI)?"
-        if self.is_full_ast_verifier():
-            full_template_name += "(-FULLASTV)?"
-        if self.is_simultaneous():
-            full_template_name += "(-SIMULTANEOUS)?"
-        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats:
-            full_template_name += "(-(repeats|REPEATS))?"
-        gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
-        full_template_name += f"(-({gc_type}))?"
-        full_template_name += f"(-{self.build_type.value})?"
-        full_template_name += ".txt"
-        _LOGGER.default(f"Test lists searching: template = {full_template_name}")
-        full_pattern = re.compile(full_template_name)
-
-        def is_matched(file: Path) -> bool:
-            file_name = file.name
-            match = full_pattern.match(file_name)
-            return match is not None
-
-        glob_expression = f"**/{short_template_name}"
-        test_lists.extend(filter(
-            is_matched,
-            self.list_root.glob(glob_expression)
-        ))
-
-        _LOGGER.all(f"Loading {kind} test lists: {test_lists}")
+        _LOGGER.short(f"Loading {kind} test lists: {[test_list.as_posix() for test_list in test_lists]}")
 
         if filter_list is not None and extra_lists:
             found_test_lists = TestLists.matched_test_lists(test_lists,
@@ -299,6 +320,41 @@ class TestLists:
     def cmake_build_properties(self) -> list[str]:
         file_name = os.getenv('CMAKE_BUILD_PROPERTIES_FILE_NAME', _CMAKE_BUILD_PROPERTIES_FILE_NAME)
         return self.__get_build_properties_from_file(file_name)
+
+    def _get_explicit_list(self) -> Path | None:
+        if self.config.test_suite.test_lists.explicit_list is None:
+            return None
+        for root in self.list_roots:
+            if (corrected := correct_path(root.root_dir, self.config.test_suite.test_lists.explicit_list)).exists():
+                return corrected
+        return None
+
+    def _get_test_list_pattern(self, kind: str) -> str:
+        conf_kind = self.conf_kind.value.upper()
+        interpreter = self.get_interpreter().upper()
+        full_template_name = f"{kind}" + \
+                             f"(-{self.operating_system.value})?" \
+                             f"(-{self.architecture.value})?" \
+                             f"(-{conf_kind})?" \
+                             f"(-{interpreter})?"
+        if self.sanitizer != SanitizerKind.NONE:
+            full_template_name += f"(-{self.sanitizer.value})?"
+        if self.opt_level() is not None:
+            full_template_name += f"(-OL{self.opt_level()})?"
+        if self.debug_info():
+            full_template_name += "(-DI)?"
+        if self.is_full_ast_verifier():
+            full_template_name += "(-FULLASTV)?"
+        if self.is_simultaneous():
+            full_template_name += "(-SIMULTANEOUS)?"
+        if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats:
+            full_template_name += "(-(repeats|REPEATS))?"
+        gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()
+        full_template_name += f"(-({gc_type}))?"
+        full_template_name += f"(-{self.build_type.value})?"
+        full_template_name += ".txt"
+
+        return full_template_name
 
     def __search_in_build_properties(self, property_name: str) -> str | None:
         for prop in self.build_properties:

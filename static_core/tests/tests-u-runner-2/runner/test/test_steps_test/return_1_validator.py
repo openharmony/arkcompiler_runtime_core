@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow

@@ -20,7 +20,7 @@ from runner.extensions.flows.test_flow_registry import ITestFlow
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options import IOptions
-from runner.options.step import Step
+from runner.options.options_step import Step
 from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import StandardFlowUtils

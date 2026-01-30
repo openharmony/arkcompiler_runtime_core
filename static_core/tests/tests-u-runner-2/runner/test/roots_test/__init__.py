@@ -13,26 +13,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from abc import ABC, abstractmethod
-from pathlib import Path
-
-from runner.extensions.flows.test_flow_registry import ConfigRegistry, ITestFlow
-from runner.options.root_dir import RootDir
-
-
-class ITestSuite(ABC):
-    excluded: int
-    excluded_tests: list[Path]
-
-    @property
-    @abstractmethod
-    def list_roots(self) -> list[RootDir]:
-        ...
-
-    @abstractmethod
-    def process(self, force_generate: bool) -> list[ITestFlow]:
-        ...
-
-
-suite_registry: ConfigRegistry[ITestSuite] = ConfigRegistry()

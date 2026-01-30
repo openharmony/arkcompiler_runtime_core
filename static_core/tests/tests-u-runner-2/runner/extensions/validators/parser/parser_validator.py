@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 
 if TYPE_CHECKING:
     from runner.suites.test_standard_flow import TestStandardFlow

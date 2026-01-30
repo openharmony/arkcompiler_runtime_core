@@ -29,7 +29,7 @@ from runner.enum_types.params import TestEnv
 from runner.extensions.suites.test_suite_registry import suite_registry
 from runner.logger import Log
 from runner.options.config import Config
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 from runner.runner_file_based import RunnerFileBased
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
@@ -65,7 +65,7 @@ class RunnerStandardFlow(RunnerFileBased):
         self.tests = set(cast(list[Test], test_suite.process(self.config.test_suite.ets.force_generate)))
         self.excluded = test_suite.excluded
         self.excluded_tests.update(test_suite.excluded_tests)
-        self.list_root = test_suite.list_root
+        self.list_roots = test_suite.list_roots
         self.test_root = self.test_env.work_dir.gen
 
         cpu_mask = self.config.test_suite.get_parameter("mask")
