@@ -316,10 +316,10 @@ The usage of namespaces is represented in the example below:
             A.C.moo()
         }
         //export function foo(): void {  }
-        // Compile-time error as foo() was already defined
+        // compile-time error as foo() was already defined
 
         // function foo() { console.log ("2nd A.foo() non-exported") }
-        // Compile-time error as foo() was already defined as exported
+        // compile-time error as foo() was already defined as exported
     }
 
     namespace A.C {
@@ -339,7 +339,7 @@ The usage of namespaces is represented in the example below:
 
     namespace A {
         function goo() { bar() }  // exported bar() is accessible in the same namespace
-        export function foo(): void { ... }  // Compile-time error as foo() was already defined
+        export function foo(): void { ... }  // compile-time error as foo() was already defined
     }
 
 .. index::
@@ -813,7 +813,7 @@ are represented by the following code:
     import type {Class2} from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // Compile-time error in Typescript, OK in ArkTS
+    let c2 = new Class2() // compile-time error in Typescript, OK in ArkTS
 
 Another form of *type import* is used  when ``type`` is attached to a name
 binding. This allows mixing general import and ``type`` import.
@@ -833,7 +833,7 @@ binding. This allows mixing general import and ``type`` import.
     import {Class1, type Class2 } from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // Compile-time error in Typescript, OK in ArkTS
+    let c2 = new Class2() // compile-time error in Typescript, OK in ArkTS
 
 .. index::
    import binding
@@ -1252,30 +1252,243 @@ constant variable that is exported by using this export directive. Otherwise, a
     import {default as a} from "File1"
 
     a.foo()  // Calling method foo() of class A where 'a' is an instance of type A
-    a = new A // Compile-time error as 'a' is a constant variable
+    a = new A // compile-time error as 'a' is a constant variable
 
     // File3
-    import * as a from "File1" /* Compile-time error: such form of import
+    import * as a from "File1" /* compile-time error: such form of import
                                   cannot be used for the default export */
 
 
-If a function, a variable, a constant, or an accessor is exported, or an
-exported class field or method is public, then any type declared in the current
-module and used in their declaration must be exported likewise. If an annotation
-is applied to the declaration, then the types used in the annotation must be
-exported likewise. Otherwise, a :index:`compile-time error` occurs.
+|LANG| forbids any exported declaration which, when
+imported into a code, causes a module to access an unexported entity.
+It applies to both global and namespace declarations.
+Types of exported functions, variables, constants, public and protected members
+of classes, default interface methods, interface getters and setters must be
+set explicitly where applicable.  Any entity declared in
+the current module and used in an accessible part of an exported declaration must be
+either directly available in |LANG| (e.g., built-in type), or also be exported.
+Otherwise, a :index:`compile-time error` occurs.
 
-.. code-block:: typescript
-   :linenos:
+.. note:: By an `accessible part of an exported declaration` we mean a set of entities
+   which can be used in another module after importing the declaration.
+   For example, public and protected members of an exported class belong to that
+   set while the private members do not belong.  
 
-    // Module
-    export function foo (p: SomeType): SomeType { ... } // Type 'SomeType' is not exported
-    export let v: SomeType // Type 'SomeType' is not exported
-    export class SomeClass {
-       field: SomeType // Type 'SomeType' is not exported
-       foo (p: SomeType): SomeType { ... } // Type 'SomeType' is not exported
-    }
-    class SomeType {}
+.. note:: The above requirements of explicit type and explicit export are
+   also applied to :ref:`ambient declarations`.
+
+Here is a number of examples which violate the above rules and therefore
+trigger a compile-time error:
+
+-  Exported constants and variables, or non-private fields of exported classes
+   do not have explicit types. Exported functions, or methods of exported interfaces,
+   or non-private methods of exported classes do not have explicit return types.
+   Exported getters (see :ref:`Accessor declarations`) at the top level or in a
+   namespace do not have an explicit return types;
+
+-  An exported function or an accessor uses an unexported entity in its signature.
+   An exported variable, or constant uses an unexported entity as a type.
+   Note, that use of an unexported entity as a default for an
+   :ref:`optional parameters` is allowed.
+
+-  An exported generic entity uses an unexported declaration as a type
+   argument, type parameter constraint or a type parameter default (including cases
+   when the type argument is not used elsewhere in exported the declaration);
+
+-  An unexported class or interface is used in ``extends`` clause of exported
+   class or interface, or an unexported interface is used in ``implements`` clause
+   of an exported class. A public or protected class field uses an unexported
+   entity as a type. A public or protected method of exported class uses an
+   unexported entity in its signature;
+
+-  An exported type alias declaration uses unexported type;
+
+-  An annotation which is applied to the exported declaration is not exported or
+   uses an unexported type;
+
+-  An exported overload contains one or more unexported entities;
+
+
+Here is the series of examples representing that cases:
+
+1. An exported  declarations without explicit types or explicit return types.
+
+   .. code-block:: typescript
+      :linenos:
+
+      // // functions, variables, constants
+      export let a: int = 1 // OK
+      export let b = 1 // compile-time error - no explicit type
+
+      export const c: int = 1 // OK
+      export const d = 1 // compile-time error - no explicit type
+
+      export function foo(): void {} // OK
+
+      function bar() {}  // compile-time error, no return type
+
+      // // Fields and methods
+      export class C {
+         // static and instance fields and methods (public and protected)
+         x = 1   // compile-time error, no explicit type for a public field
+         protected xx = 1   // compile-time error, no explicit type for a protected field
+         static v = 1 // compile-time error, no explicit type for public field
+         y: int = 1   // OK
+         private z = 1 // OK - not a public/protected field
+
+         foo() { return 1 } // compile-time error, no explicit return type 
+                          // for a public method
+
+         static bar() {} // compile-time error, no explicit
+                         // return type for a public static method
+         static bar_ok(): void {} // OK
+
+
+         protected i_bar() { return 1 } // compile-time error, no return
+                                      // type for a protected method
+         protected bar_ok(): int { return 1 } // OK
+
+         private baz() { return "hello" } // OK, baz() is private
+      }
+
+      // // Interfaces
+      // OK
+      export interface I {
+         get_count(): number { return 1; }
+         set_count(n: number): void {}
+      }
+
+      // compile-time error, no explicit return types for get_count and set_count
+      export interface J {
+         get_count() { return 1; }
+         set_count(n: number) {}
+      }
+
+      // // getters
+      let _counter: int = 1  // OK
+      let _name = "empty"         // OK
+      export get counter() { return _counter } // compile-time error, no return type
+      export get name(): string { return _name } // OK
+
+      export namespace NS {
+         get name() { return "Bob" } // OK since not exported
+         export get age(): int { return 1 }  // OK
+         export get sex() { return "male" } // compile-time error, no explicit
+                                            // return type
+      }
+
+
+2. An exported function, a variable, a constant, or an accessor with unexported
+   entity.
+
+   .. code-block:: typescript
+      :linenos:
+
+      class A { constructor(a: A) {}; };
+
+      // The folowing declarations cause compile-time errors
+      // because 'A' is not exported
+      export let v: A
+      export function foo (p: A): A { return p; }
+      export const x3: A = new A()
+      export get val(): A { return new A() }
+      export set val(a: A) {}
+
+      export class B { constructor(B: B) {}; };
+      class C extends B {};
+
+      // Next is OK, can use an unexported default as an optional parameter
+      export function bar(p: B = new C() ) {}
+
+  |
+
+
+3. An exported generic uses an unexported entity.
+
+   .. code-block:: typescript
+      :linenos:
+
+      class Arg {};
+
+      // OK since T is a type parameter
+      export class G<T> {}
+
+      // compile-time error, type parameter default 'Arg' not exported
+      export function foo<T = Arg>(): void {}
+      // compile-time error, type parameter constraint 'Arg' not exported
+      export function foo<T extends Arg>(): void {}
+
+  |
+
+4. An exported class or interface uses an unexported entity as a type of a public
+   or protected field or in a signature of public or protected method.
+
+   .. code-block:: typescript
+      :linenos:
+
+      class C { constructor() {} ; };
+      interface I {};
+
+      // // unexported type in extends/implements
+      // compile-time error: 'C' and 'I' must be exported
+      export class C1 extends C implements I {}
+      // compile-time error: 'I' must be exported
+      export interface I1 extends I {}
+
+      // // unexported entity inside a declaration
+      export class C1 {
+         // // compile-time errors due to unexported 'C'
+         f: C = new C;
+         doit(): C { return new C(); }
+         protected tryme(): C { return new C(); }
+
+         // // OK, unexported 'C' can be used in private members/fields
+         private secret(): C { return new C(); }
+      }
+
+  |
+
+
+5. An exported type alias declaration refers to an unexported type.
+
+   .. code-block:: typescript
+     :linenos:
+
+      class C {};
+      
+      // compile-time error: 'C' must be exported
+      export type A = C
+
+   |
+
+6. An annotation applied to an exported declaration not exported or uses an unexported type.
+
+   .. code-block:: typescript
+      :linenos:
+
+      type Version = number[];
+
+      // compile time error, ``Version`` not exported
+      export @interface deprecated {
+                        fromVersion: Version;
+                     }
+
+      export @deprecated([1, 1]) function bar() {};
+
+      |
+
+7. One or more unexported entities in an exported overload:
+
+   .. code-block:: typescript
+      :linenos:
+
+      function foo(): void  {};
+      export function bar(): void  {};
+
+      // compile-time error, `foo` not exported
+      export overload baz { foo, bar }
+
+   |
 
 
 .. index::
@@ -1335,78 +1548,10 @@ and such a new name clashes with the name of another exported declaration.
 
     export function foo(): void {}
     function bar(): void {}
-    export {bar as foo} // Compile-time error: 'foo' is already exported
+    export {bar as foo} // compile-time error: 'foo' is already exported
 
-All types in declarations of exported functions, variables, constants, public
-and protected class members, default interface methods, interface getters and
-setters must be declared explicitly. Otherwise, a :index:`compile-time error`
-occurs.
-
-This situation is represented in the examples below.
-
-- Exported constants and variables must have explicit types. Exported functions
-  must have explicit return types:
-
-  .. code-block:: typescript
-     :linenos:
-
-     export let a: int = 1 // OK
-     export let b = 1 // compile-time error - no explicit type
-
-     export const c: int = 1 // OK
-     export const d = 1 // compile-time error - no explicit type
-
-     export function foo(): void {} // OK
-     function bar() {}  // compile-time error - no return type
-
-- Exported classes must explicitly declare method and field types, both static
-  and instance, of its public and protected members.
-
-  .. code-block:: typescript
-     :linenos:
-
-     export class C {
-       // Public and protected static and instance fields and methods
-       x = 1   // compile-time-error - no explicit type for public field
-       static v = 1 // compile-time-error - no explicit type for public field
-       y: int = 1   // OK
-       private z = 1 // OK - not a public/protected field
-
-       foo() { return 1 } // compile-time error - no explicit return type 
-                          // for public method
-
-       static bar() {} // compile time error - no return type for public static
-       static bar_ok(): void {} // OK
-
-
-       protected i_bar() { return 1 } // compile-time error - no explicit return
-                                      // type for protected method
-       protected bar_ok(): int { return 1 } // OK
-
-       private nevermind() {} // private - no return type but OK
-
-       private baz() { return "hello" } // OK - baz() is private
-     }
-
-- Exported getters (see :ref:`Accessor declarations`) at the top level
-  or in a namespace must have an explicit return types.
-
-  The internal storage variable, if used, can have or not have an explicit type:
-  
-  .. code-block:: typescript
-     :linenos:
-
-     let _counter: int = 1  // OK
-     let _name = "empty"         // OK
-     export get counter() { return _counter } // compile-time error, no return type
-     export get name(): string { return _name } // OK
-
-     export namespace NS {
-       get name() { return "Bob" } // OK since not exported
-       export get age(): int { return 1 }  // OK
-       export get sex() { return "male" } // compile-time error, no explicit
-                                          // return type
-     }
+Limitations on exported declarations are described with examples in
+:ref:`Exported declarations`.
 
 .. index::
    export directive
@@ -1418,31 +1563,6 @@ This situation is represented in the examples below.
    re-exporting declaration
    module
    syntax
-
-
-- Default methods of exported interfaces must have explicit return types.
-
-  .. code-block:: typescript
-     :linenos:
-
-     interface I {
-       get_count(): number { return 1; }
-       set_count(n: number): void {}
-     }
-
-     interface J {
-       get_count() { return 1; }
-       set_count(n: number) {}
-     }
-
-     export I   // OK
-     export J   // Compile-time error: no explicit types for get_count and set_count
-
-
-- *Modules with ambient declarations*.
-
-  The limitations for modules with ambient declarations imply requirements
-  of explicit type as described in :ref:`ambient declarations`.
 
 .. index::
    default method
@@ -1615,7 +1735,7 @@ The *export type directive* syntax is presented below:
 |LANG| supports no additional semantic checks for entities exported by using
 *export type* directives.
 
-If a binding uses ``type``, then a :index:`compile-time error` occurs.
+If a binding refers to something other than ``type``, then a :index:`compile-time error` occurs.
 
 .. index::
    export

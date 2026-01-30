@@ -308,9 +308,6 @@ A :index:`compile-time error` occurs if:
 -  ``typeReference`` names a class type that is not accessible (see
    :ref:`Accessible`).
 
--  Current class is exported but ``typeReference`` refers to a non-exported
-   class.
-
 -  ``extends`` clause appears in the declaration of the class ``Object``.
 
 -  ``extends`` graph has a cycle.
@@ -376,12 +373,6 @@ superclass.
          }
        }
 
-       class B {}
-       export class D extends B {}
-          /* Compile-time error as the derived class is exported but
-             the base one is not */
-
-
 
 The transitive closure of a *direct subclass* relationship is the *subclass*
 relationship. Class ``A`` can be a subclass of class ``C`` if:
@@ -437,18 +428,6 @@ If ``typeReference`` fails to name an accessible interface type (see
 
     // File2
     class C implements I {} // Compile-time error I is not accessible
-
-If the current class is exported but ``typeReference`` refers to a non-exported
-interface, then a :index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I { } // Not exported
-    export class C implements I {}
-       /* Compile-time error as the current class is expoprted but the
-          interface it implements is not */
-
 
 If some interface is repeated as a direct superinterface in a single
 ``implements`` clause (even if that interface is named differently), then all

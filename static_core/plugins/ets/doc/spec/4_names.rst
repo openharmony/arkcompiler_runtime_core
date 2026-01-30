@@ -758,15 +758,6 @@ a type argument:
    type alias
    type parameter
 
-A :index:`compile-time error` occurs if a type alias is exported but the type
-alias it refers to is not exported:
-
-.. code-block:: typescript
-   :linenos:
-
-    class B {}
-    export type A = B // compile-time error as B is not exported
-
 A type parameter of a type alias can *depend* on another type parameter
 of the same generic.
 
