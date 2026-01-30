@@ -18,11 +18,11 @@ const fail    : int = 1;
 
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array .from API tests ")
+    const suite = new arktest.ArkTestsuite('Array .from API tests ')
 
-    suite.addTest("Test method from builtin array and () => U callback", testFromBuiltinArray0);
-    suite.addTest("Test method from builtin array and (value: T) => U callback", testFromBuiltinArray1);
-    suite.addTest("Test method from builtin array and (value: T, index: int) => U callback", testFromBuiltinArray2);
+    suite.addTest('Test method from builtin array and () => U callback', testFromBuiltinArray0);
+    suite.addTest('Test method from builtin array and (value: T) => U callback', testFromBuiltinArray1);
+    suite.addTest('Test method from builtin array and (value: T, index: int) => U callback', testFromBuiltinArray2);
 
     return suite.run()
 }
@@ -42,7 +42,7 @@ function testF(
     const expected = args[2]
     const a = fromCallFn(args[0], args[1])
     console.log(expected, a);
-    arktest.assertEQ(a.length, expected.length, "Source and final array length mismatch")
+    arktest.assertEQ(a.length, expected.length, 'Source and final array length mismatch')
     let r = success
     for (let i = 0; i < a.length; ++i) {
         arktest.assertEQ(
@@ -54,12 +54,12 @@ function testF(
 
 
 const testFromBuiltinArray0 = parametrize<NumberToStringCase>(
-    "testBuiltinArray0",
+    'testBuiltinArray0',
     [
         [
             [new Number(1), new Number(2)],
-            (): String => new String("foo"),
-            [new String("foo"), new String("foo")]
+            (): String => 'foo',
+            ['foo', 'foo']
         ] as NumberToStringCase,
     ],
     (args: NumberToStringCase) =>
@@ -68,12 +68,12 @@ const testFromBuiltinArray0 = parametrize<NumberToStringCase>(
 )
 
 const testFromBuiltinArray1 = parametrize<NumberToStringCase>(
-    "testBuiltinArray1",
+    'testBuiltinArray1',
     [
         [
             [new Number(1), new Number(2)],
-            (x: Number): String => new String(x),
-            [new String("1"), new String("2")]
+            (x: Number): String => x.toString(),
+            ['1', '2']
         ] as NumberToStringCase,
     ],
     (args: NumberToStringCase) =>
@@ -82,12 +82,12 @@ const testFromBuiltinArray1 = parametrize<NumberToStringCase>(
 )
 
 const testFromBuiltinArray2 = parametrize<NumberToStringCase>(
-    "testBuiltinArray2",
+    'testBuiltinArray2',
     [
         [
             [new Number(1), new Number(2)],
-            (x: Number, i: int): String => new String(`${x}:${i}`),
-            [new String("1:0"), new String("2:1")]
+            (x: Number, i: int): String => `${x}:${i}`,
+            ['1:0', '2:1']
         ] as NumberToStringCase,
     ],
     (args: NumberToStringCase) =>

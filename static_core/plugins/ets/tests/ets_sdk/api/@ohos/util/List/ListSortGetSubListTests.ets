@@ -14,26 +14,26 @@
  */
 
 import {List} from '@ohos.util.List';
-import {BusinessError} from "@ohos.base";
+import {BusinessError} from '@ohos.base';
 
 const OutOfBoundsErrorCodeId: int = 10200001;
 
 function main() {
-    const suite = new arktest.ArkTestsuite("LinkedList API tests");
+    const suite = new arktest.ArkTestsuite('LinkedList API tests');
 
-    suite.addTest("List sort with different types in ascending order", testSortDifferentTypesAscending);
-    suite.addTest("List sort with object in ascending order", testSortObjectAscending);
-    suite.addTest("List sort with different types in descending order", testSortDifferentTypesDescending);
-    suite.addTest("List sort with object in descending order", testSortObjectDescending);
-    suite.addTest("List getSubList", testGetSubList);
-    suite.addTest("List getSubList with start index out of range", testGetSubListStartIndexOutOfRange);
-    suite.addTest("List getSubList with end index out of range", testGetSubListEndIndexOutOfRange);
-    suite.addTest("List getSubList with end index smaller than start index",
+    suite.addTest('List sort with different types in ascending order', testSortDifferentTypesAscending);
+    suite.addTest('List sort with object in ascending order', testSortObjectAscending);
+    suite.addTest('List sort with different types in descending order', testSortDifferentTypesDescending);
+    suite.addTest('List sort with object in descending order', testSortObjectDescending);
+    suite.addTest('List getSubList', testGetSubList);
+    suite.addTest('List getSubList with start index out of range', testGetSubListStartIndexOutOfRange);
+    suite.addTest('List getSubList with end index out of range', testGetSubListEndIndexOutOfRange);
+    suite.addTest('List getSubList with end index smaller than start index',
         testGetSubListEndIndexSmallerThanStartIndex);
-    suite.addTest("List getSubList with change getSubList", testGetSubListWithChange);
-    suite.addTest("List getSubList with empty container", testGetSubListEmptyContainer);
-    suite.addTest("List getSubList with start index = 0 and end index = length", testGetSubListFullRange);
-    suite.addTest("List getSubList with start index = end index", testGetSubListWithEqualStartAndEndIndex);
+    suite.addTest('List getSubList with change getSubList', testGetSubListWithChange);
+    suite.addTest('List getSubList with empty container', testGetSubListEmptyContainer);
+    suite.addTest('List getSubList with start index = 0 and end index = length', testGetSubListFullRange);
+    suite.addTest('List getSubList with start index = end index', testGetSubListWithEqualStartAndEndIndex);
 
     return suite.run();
 }
@@ -45,33 +45,33 @@ function initializeList<T>(list: List<T>, sourceArray: Array<T>) {
 }
 
 class Temp {
-    age: double = 0;
-    name: string = "";
+    public age: double = 0;
+    public name: string = '';
 }
 
 class TestData {
-    static readonly testNumber1: int = 1;
-    static readonly testNumber3: int = 3;
-    static readonly testNumber5: int = 5;
-    static readonly testNumber8: int = 8;
-    static readonly testObject1: Temp = { age: 10, name: "zhang" };
-    static readonly testObject2: Temp = { age: 8, name: "li" };
-    static readonly testObject3: Temp = { age: 12, name: "wang" };
-    static readonly testObject4: Temp = { age: 1, name: "liu" };
-    static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
-    static readonly arrayForNumber = Array.from<double>(TestData.forNumber);
-    static readonly forString: String[] = ["ssss", "2", "%", "Z"];
-    static readonly arrayForString = Array.from<String>(TestData.forString);
-    static readonly forBoolean: Boolean[] = [true, false, false, true];
-    static readonly arrayForBoolean = Array.from<boolean>(TestData.forBoolean);
-    static readonly forObject: Object[] = [[1], [2, 3, 4], [1, 2], [5]];
-    static readonly arrayForObject = Array.from<Object>(TestData.forObject);
-    static readonly result1: Number[] = [5, 4, 3, 2, 1];
-    static readonly arrayResult1 = Array.from<double>(TestData.result1);
-    static readonly result6: Number[] = [2, 3, 4];
-    static readonly arrayResult6 = Array.from<double>(TestData.result6);
-    static readonly result7: Number[] = [2, 3, 4, 5];
-    static readonly arrayResult7 = Array.from<double>(TestData.result7);
+    public static readonly testNumber1: int = 1;
+    public static readonly testNumber3: int = 3;
+    public static readonly testNumber5: int = 5;
+    public static readonly testNumber8: int = 8;
+    public static readonly testObject1: Temp = { age: 10, name: 'zhang' };
+    public static readonly testObject2: Temp = { age: 8, name: 'li' };
+    public static readonly testObject3: Temp = { age: 12, name: 'wang' };
+    public static readonly testObject4: Temp = { age: 1, name: 'liu' };
+    public static readonly forNumber: Number[] = [1, 2, 3, 4, 5];
+    public static readonly arrayForNumber = Array.from<double>(TestData.forNumber);
+    public static readonly forString: String[] = ['ssss', '2', '%', 'Z'];
+    public static readonly arrayForString = Array.from<String>(TestData.forString);
+    public static readonly forBoolean: Boolean[] = [true, false, false, true];
+    public static readonly arrayForBoolean = Array.from<boolean>(TestData.forBoolean);
+    public static readonly forObject: Object[] = [[1], [2, 3, 4], [1, 2], [5]];
+    public static readonly arrayForObject = Array.from<Object>(TestData.forObject);
+    public static readonly result1: Number[] = [5, 4, 3, 2, 1];
+    public static readonly arrayResult1 = Array.from<double>(TestData.result1);
+    public static readonly result6: Number[] = [2, 3, 4];
+    public static readonly arrayResult6 = Array.from<double>(TestData.result6);
+    public static readonly result7: Number[] = [2, 3, 4, 5];
+    public static readonly arrayResult7 = Array.from<double>(TestData.result7);
 }
 
 function testSortDifferentTypesAscending() {
@@ -102,14 +102,14 @@ function testSortDifferentTypesAscending() {
 }
 
 let arrStrCmp = (a: object, b: object): int => {
-    let sa = new String(a);
-    let sb = new String(b);
+    let sa = a.toString();
+    let sb = b.toString();
     return sb.compareTo(sa);
 }
 
 let listStrCmp = (a: object, b: object): double => {
-    let sa = new String(a);
-    let sb = new String(b);
+    let sa = a.toString();
+    let sb = b.toString();
     return sb.compareTo(sa);
 }
 
@@ -203,8 +203,8 @@ function testGetSubListStartIndexOutOfRange() {
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message ==
-                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 4. Received value is: -1" &&
+            return e.name == 'BusinessError' && e.message ==
+                'The value of "fromIndex" is out of range. It must be >= 0 && <= 4. Received value is: -1' &&
                 e.code == OutOfBoundsErrorCodeId;
         }
         return false;
@@ -218,8 +218,8 @@ function testGetSubListEndIndexOutOfRange() {
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message ==
-                "The value of \"toIndex\" is out of range. It must be > 0 && <= 5. Received value is: 8" &&
+            return e.name == 'BusinessError' && e.message ==
+                'The value of "toIndex" is out of range. It must be > 0 && <= 5. Received value is: 8' &&
                 e.code == OutOfBoundsErrorCodeId;
         }
         return false;
@@ -233,8 +233,8 @@ function testGetSubListEndIndexSmallerThanStartIndex() {
     initializeList(list, TestData.arrayForNumber);
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message ==
-                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 5" &&
+            return e.name == 'BusinessError' && e.message ==
+                'The value of "fromIndex" is out of range. It must be >= 0 && <= 0. Received value is: 5' &&
                 e.code == OutOfBoundsErrorCodeId;
         }
         return false;
@@ -260,7 +260,7 @@ function testGetSubListEmptyContainer() {
     let list = new List<double>();
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message == "Container is empty";
+            return e.name == 'BusinessError' && e.message == 'Container is empty';
         }
         return false;
     }
@@ -283,8 +283,8 @@ function testGetSubListWithEqualStartAndEndIndex() {
     initializeList(list, TestData.forNumber);
     let exceptionCheck = (e: Error): boolean | string => {
         if (e instanceof BusinessError) {
-            return e.name == "BusinessError" && e.message ==
-                "The value of \"fromIndex\" is out of range. It must be >= 0 && <= 0. Received value is: 1" &&
+            return e.name == 'BusinessError' && e.message ==
+                'The value of "fromIndex" is out of range. It must be >= 0 && <= 0. Received value is: 1' &&
                 e.code == OutOfBoundsErrorCodeId;
         }
         return false;
