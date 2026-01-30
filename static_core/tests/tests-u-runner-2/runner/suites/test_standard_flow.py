@@ -34,7 +34,7 @@ from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
-from runner.options.step import Step, StepKind
+from runner.options.options_step import Step, StepKind
 from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test

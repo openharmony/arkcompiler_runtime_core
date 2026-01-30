@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,7 @@ from runner.options.options_ets import ETSOptions
 from runner.options.options_general import GeneralOptions
 from runner.options.options_groups import GroupsOptions
 from runner.options.options_test_lists import TestListsOptions
+from runner.options.root_dir import RootDir
 from runner.utils import check_int, convert_underscore, extract_parameter_name
 
 _LOGGER = Log.get_logger(__file__)
@@ -40,8 +41,6 @@ class TestSuiteOptions(IOptions):
 
     __PROPERTIES = "properties"
     __COLLECTIONS = "collections"
-    __LIST_ROOT = "list-root"
-    __TEST_ROOT = "test-root"
 
     __PARAMETERS = "parameters"
     __EXTENSION = "extension"
@@ -71,12 +70,15 @@ class TestSuiteOptions(IOptions):
         self._parent: GeneralOptions = parent
         self.__parameters: dict[str, Any] = self.__process_parameters(args)  # type: ignore[explicit-any]
         self.__data = args[f"{self.__name}.data"]
-        self.__default_list_root: Path = self._parent.static_core_root / 'tests' / 'tests-u-runner' / 'test-lists'
-        self.__list_root: str | None = self.__data[self.__LIST_ROOT] \
-            if self.__data[self.__LIST_ROOT] else str(self.__default_list_root)
-        self.__test_root: str | None = self.__data[self.__TEST_ROOT] \
-            if self.__data[self.__TEST_ROOT] else None
+        self.default_list_root: RootDir = RootDir(
+            root_dir=self._parent.static_core_root / 'tests' / 'test-lists',
+            name=self.__name,
+            options=self
+        )
         self.__collections: list[CollectionsOptions] = []
+        self.__list_roots: list[RootDir] = []
+        self.__test_root: RootDir = RootDir("", "", IOptions())
+        self.init_root()
         self.test_lists = TestListsOptions(self.__parameters)
         self.ets = ETSOptions(self.__parameters)
         self.groups = GroupsOptions(self.__parameters)
@@ -88,16 +90,12 @@ class TestSuiteOptions(IOptions):
         return self._to_str(indent=1)
 
     @property
-    def list_root(self) -> Path:
-        if self.__list_root is None:
-            raise InvalidConfiguration("List-root is not specified")
-        return Path(self.__list_root)
+    def list_roots(self) -> list[RootDir]:
+        return self.__list_roots
 
     @property
     def test_root(self) -> Path:
-        if self.__test_root is None:
-            raise InvalidConfiguration("Test-root is not specified")
-        return Path(self.__test_root)
+        return self.__test_root()
 
     @property
     def work_dir(self) -> str:
@@ -189,6 +187,15 @@ class TestSuiteOptions(IOptions):
     def skip_compile_only_neg(self) -> bool:
         return cast(bool, self.get_parameter(self.__SKIP_COMPILE_ONLY_NEG, self.__DEFAULT_SKIP_COMPILE_ONLY))
 
+    def init_root(self) -> None:
+        self.__test_root = RootDir.get_test_root(self.__data, options=self)
+        self.__list_roots.clear()
+        self.__list_roots.extend(RootDir.get_list_roots(
+            obj=self.__data,
+            default_name=self.__name,
+            default_list_roots=[self.default_list_root],
+            options=self))
+
     def extension(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__EXTENSION, self.__DEFAULT_EXTENSION, collection))
 
@@ -198,7 +205,7 @@ class TestSuiteOptions(IOptions):
     def load_runtimes(self, collection: CollectionsOptions | None = None) -> str:
         return str(self.get_parameter(self.__LOAD_RUNTIMES, self.__DEFAULT_LOAD_RUNTIMES, collection))
 
-    def get_parameter(self, key: str, default: Any | None = None,   # type: ignore[explicit-any]
+    def get_parameter(self, key: str, default: Any | None = None,  # type: ignore[explicit-any]
                       collection: CollectionsOptions | None = None) -> Any | None:
         if collection is not None:
             value = collection.get_parameter(key, None)
@@ -214,11 +221,9 @@ class TestSuiteOptions(IOptions):
         return False
 
     def get_command_line(self) -> str:
-        options = [
-            f'--test-root={self.test_root}' if self.test_root is not None else '',
-            f'--list-root={self.list_root}' if self.list_root is not None else '',
-        ]
-        return ' '.join(options)
+        list_root_options = [f'--list-root={root}' if root else '' for root in self.list_roots]
+        test_root_options = [f'--test-root={self.test_root}' if self.test_root is not None else '']
+        return ' '.join(test_root_options + list_root_options)
 
     def __fill_collections(self) -> None:
         if self.__COLLECTIONS not in self.__data:
@@ -249,10 +254,6 @@ class TestSuiteOptions(IOptions):
         return result
 
     def __expand_macros_in_parameters(self) -> None:
-        if self.__list_root is not None:
-            self.__list_root = Macros.expand_macros_in_path(self.__list_root, self)
-        if self.__test_root is not None:
-            self.__test_root = Macros.expand_macros_in_path(self.__test_root, self)
         for param_name, param_value in self.__parameters.items():
             if isinstance(param_value, str):
                 self.__parameters[param_name] = Macros.correct_macro(param_value, self)

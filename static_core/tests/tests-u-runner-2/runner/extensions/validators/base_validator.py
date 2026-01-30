@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 from runner.utils import normalize_str
 
 if TYPE_CHECKING:
