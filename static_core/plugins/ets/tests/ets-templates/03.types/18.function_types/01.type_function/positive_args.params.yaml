@@ -59,10 +59,10 @@ cases:
     use: "'abc'"
     assert: string
   - type: "FixedArray<number> | FixedArray<string>"
-    use: "['abc']"
+    use: "['abc'] as FixedArray<string>"
     assert: FixedArray<string>
   - type: "FixedArray<number> | FixedArray<string>"
-    use: "[1]"
+    use: "[1] as FixedArray<number> "
     assert: FixedArray<number>
   - type: "Array<number> | Array<string>"
     use: "['abc']"

@@ -380,8 +380,8 @@ cases:
       use: |-
         let x: TRR<string> = {'k1': 'String 1'}
         let y: object = x;
-        let xr: TRR<string> = {'k1': 'String 1', 'k2': x, 'k3': y, 'k4': undefined, 'k5': {'l2': 'String 2'}}
-        let ok = false
+        let xr: TRR<string> = {'k1': 'String 1', 'k2': x, 'k3': y, 'k4': undefined}
+        let ok = xr['k1'] === 'String 1' && xr['k2'] === x && xr['k3'] === y && xr['k4'] === undefined
 
     # recursive type aliases with Promise
     - defs: |-

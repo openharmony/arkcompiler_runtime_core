@@ -19,7 +19,7 @@
 desc: >-
     The compiler imports the module that the import path refers to. The source code of the module is the
     file with the extension provided within the import path, or, if none is so provided, appended by the compiler.
-files: [./module_a.ets, ./nesteddir/module_a.ets, ../module_a.ets]
+files: [./module_same.ets, ./nesteddir/module_nested.ets, ../module_parent.ets]
 ---*/
 
 {{stmt.import}}

@@ -16,7 +16,10 @@
 {% for c in cases %}
 {% for t in c['rhs_types'] %}
 /*---
-desc: Check instanceof behaviour for function types with regard to function subtyping (15.2.5)
+desc: >-
+    Check instanceof behaviour for function types with type erasure (15.12).
+    Parameter types are erased to Any, return type to never.
+    Signature structure (mandatory/optional/rest pattern) is preserved.
 ---*/
 
 {{c.decl or ""}}

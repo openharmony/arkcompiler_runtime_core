@@ -21,11 +21,10 @@
 #31766
 03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.lets_const_hex.ets
 
-#615 3.11 Type void inconsistency
-03.types/11.type_void_or_undefined/void/generic_void_2.ets
-
-#28399 Possible to create a void array
-03.types/11.type_void_or_undefined/void/generic_void_n_3.ets
+#33401 Verifier rejects arrays with void component type
+03.types/11.type_void_or_undefined/void/generic_void_array.ets
+03.types/11.type_void_or_undefined/void/generic_void_function.ets
+03.types/11.type_void_or_undefined/void/generic_void_class.ets
 
 #31484
 02.lexical_elements/09.literals/09.undefined_literal/undefined_literal_void.ets
@@ -40,10 +39,6 @@
 
 #31489
 03.types/11.type_void_or_undefined/void/void_generics_4.ets
-
-#30705 Can't use unsafeCall for Function object with union of FixedArrays param
-03.types/18.function_types/01.type_function/positive_args_15.ets
-03.types/18.function_types/01.type_function/positive_args_16.ets
 
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
@@ -63,9 +58,6 @@
 #27159
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_27.ets
-
-#30697
-04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_gen_37.ets
 
 #32775
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_41.ets
@@ -130,10 +122,6 @@
 
 #33178
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/cannot_infer_type_arg_n.ets
-
-#20213 Generic instantiation depends on arguments order
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_8.ets
-05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets
 
 #30718
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_n_4.ets
@@ -357,25 +345,12 @@
 07.expressions/15.new_expressions/constructor_param_array_optional_lambda_n.ets
 07.expressions/15.new_expressions/constructor_param_optional_lambda_n.ets
 
-#31779 Params contravariance not checked for function type
-07.expressions/16.instanceof_expression/instanceof_func_2.ets
-07.expressions/16.instanceof_expression/instanceof_func_3.ets
-07.expressions/16.instanceof_expression/instanceof_func_10.ets
-07.expressions/16.instanceof_expression/instanceof_func_11.ets
-07.expressions/16.instanceof_expression/instanceof_func_17.ets
-07.expressions/16.instanceof_expression/instanceof_func_28.ets
-07.expressions/16.instanceof_expression/instanceof_func_31.ets
-
-#730 (spec)
-07.expressions/16.instanceof_expression/instanceof_func_9.ets
-
 #31822 Optional parameters count are not considered for function type subtyping
 07.expressions/16.instanceof_expression/instanceof_func_15.ets
 07.expressions/16.instanceof_expression/instanceof_func_16.ets
 
 #31808 Optional params in supertype should be optonal, if they are optional in subtype
 07.expressions/16.instanceof_expression/instanceof_func_18.ets
-07.expressions/16.instanceof_expression/instanceof_func_19.ets
 
 #31788 Default value for optional params
 07.expressions/16.instanceof_expression/instanceof_func_20.ets
@@ -385,6 +360,9 @@
 
 #31831 Rest parameter checked with last, not with the same place
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
+
+#32103
+07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
 
 #31769 Tuples and derived types can't be used as instanceof rhs
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_0.ets
@@ -397,8 +375,8 @@
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
 
-#32103
-07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
+#30891
+07.expressions/23.exponentiation_expression/enum.ets
 
 #33285
 07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
@@ -729,6 +707,9 @@
 07.expressions/35.lambda_expression/01.lambda_signature/positive_3.ets
 07.expressions/35.lambda_expression/01.lambda_signature/positive_4.ets
 07.expressions/35.lambda_expression/01.lambda_signature/positive_5.ets
+07.expressions/35.lambda_expression/01.lambda_signature/positive_6.ets
+07.expressions/35.lambda_expression/01.lambda_signature/positive_7.ets
+07.expressions/35.lambda_expression/01.lambda_signature/positive_8.ets
 
 #29160
 07.expressions/36.constant_expression/check_enum/constant_number_conversion_5.ets
@@ -1126,18 +1107,12 @@
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_5.ets
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_6.ets
 
-#31384
-14.ambient_declarations/07.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
-
 # 33423
 14.ambient_declarations/08.accessor_declarations/accessor_declarations.ets
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_receiver.ets
 
 #33339
 14.ambient_declarations/08.accessor_declarations/accessor_declarations_n.d.ets
-
-#33238
-15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping.ets
 
 #33508
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping_with_readonly.ets
@@ -1283,7 +1258,7 @@
 #26512 regex literals not implemented
 15.semantic_rules/06.compatibility_call_args/same_type_compat_no_implicit_case/same_type_compat_no_implicit_case_13.ets
 
-#30451
+#33189
 15.semantic_rules/06.compatibility_call_args/spec_examples2_1.ets
 15.semantic_rules/06.compatibility_call_args/spec_examples2_3.ets
 
@@ -2429,11 +2404,11 @@
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/13_n.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/14_n.ets
 
-#28758 new overloaded functions with receiver don't work with numeric types
-17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
+#33192 function with the same name as global doesn't work as receiver
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_4.ets
 
-#31072
-17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_negative_9.ets
+#28758 new overloaded functions with receiver don't work with numeric types
+17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_24.ets
 
 #31311
 17.experimental_features/13.adding_functionality_to_existing_types/03.accessors_with_receiver/accessors_with_receiver_negative_8.ets

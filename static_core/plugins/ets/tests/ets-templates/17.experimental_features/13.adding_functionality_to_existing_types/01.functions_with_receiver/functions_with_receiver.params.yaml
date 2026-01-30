@@ -37,6 +37,15 @@ cases:
       a.f()
   - decl: |
       class A {}
+      function foo(): string {return 'global'}
+      function foo(this: A): string {return 'receiver'}
+    use: |
+      arktest.assertEQ(foo(), 'global')
+      let a: A = new A()
+      arktest.assertEQ(foo(a), 'receiver')
+      arktest.assertEQ(a.foo(), 'receiver')
+  - decl: |
+      class A {}
       function f(this: A, n: number) {}
     use: |
       let a: A = new A()

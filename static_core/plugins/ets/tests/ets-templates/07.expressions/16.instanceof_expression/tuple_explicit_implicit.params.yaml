@@ -14,44 +14,37 @@
 ---
 cases:
   - type: '[Any, undefined]'
-    effective_type: '[Any, undefined]'
     decl: 'let elem: Any = null'
     init: '[elem, undefined]'
 
   - type: '[null, byte]'
-    effective_type: '[null, byte]'
     decl: 'let elem: byte = 1'
     init: '[null, elem]'
 
   - type: '[int, long]'
-    effective_type: '[int, long]'
     decl: |-
       let elem1: int = 1
       let elem2: long = 2147483648
     init: '[elem1, elem2]'
 
   - type: '[double, bigint]'
-    effective_type: '[double, bigint]'
     init: '[1.0, 1n]'
 
   - type: '[boolean, char]'
-    effective_type: '[boolean, char]'
     init: "[true, c'a']"
 
   - type: '[string, Object]'
-    effective_type: '[string, Object]'
     decl: 'let elem: Object = new Object()'
     init: '["string", elem]'
 
   - type: "['aa', A]"
-    effective_type: '[string, A]'
     decl: |-
       class A {}
       let elem: A = new A
     init: "['aa', elem]"
 
   - type: '[A<int>, I<int>]'
-    effective_type: '[A, I]'
+    instanceof_type: '[A, I]'
     decl: |-
       class A<T> {}
       let elem1: A<int> = new A<int>
@@ -61,7 +54,6 @@ cases:
     init: '[elem1, elem2]'
 
   - type: '[Color, foo_type]'
-    effective_type: '[Color, foo_type]'
     decl: |-
       type foo_type = (a: string) => string
       let elem: foo_type = (a: string) => a

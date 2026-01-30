@@ -14,13 +14,19 @@
 --- # Lambda Signature examples
 cases:
   - call: |-
+      foo (e => e)
+  - call: |-
       foo ((e1, e2) => e1)
   - call: |-
       foo ((e1, e2: Object) => e1)
   - call: |-
       foo ((e1: Object, e2) => e1)
   - call: |-
+      foo ((e1: Object, e2, e3) => e1)
+  - call: |-
       foo ((e1: Object, ...e2) => e1)
+  - call: |-
+      foo ((e1: Object, e2: Object) => e1)
   - call: |-
       bar ((...e) => e)
   - call: |-

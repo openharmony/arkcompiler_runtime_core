@@ -15,14 +15,11 @@
 
 /*---
 desc: The base URL setting is used to resolve a path that starts with /
-files:
-    - module_a.ets
-    - nesteddir/module_a.ets
-    - ../module_a.ets
+files: [./module_same.ets, ./nesteddir/module_nested.ets, ../module_parent.ets]
 ---*/
 
-import * as all from "/../plugins/ets/tests/ets-templates/13.modules_and_namespaces/03.import_directives/05.import_path/file/module_a.ets"
+import * as all from "/../plugins/ets/tests/ets-templates/13.modules_and_namespaces/03.import_directives/05.import_path/file/module_same.ets"
 
 function main() {
-  arktest.assertEQ(all.importedFromFile(), "module_a.ets")
+  arktest.assertEQ(all.importedFromFile(), "./module_same.ets")
 }
