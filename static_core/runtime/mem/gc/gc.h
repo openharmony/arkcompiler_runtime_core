@@ -244,7 +244,7 @@ public:
         gcListenerManager_->RemoveListener(listener);
     }
 
-    GCBarrierSet *GetBarrierSet()
+    ALWAYS_INLINE GCBarrierSet *GetBarrierSet() const
     {
         ASSERT(gcBarrierSet_ != nullptr);
         return gcBarrierSet_;

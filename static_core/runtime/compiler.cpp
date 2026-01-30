@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -845,23 +845,23 @@ RuntimeInterface::FieldId PandaRuntimeInterface::GetFieldId(FieldPtr field) cons
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPreReadType() const
 {
-    return Thread::GetCurrent()->GetBarrierSet()->GetPreReadType();
+    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreReadType();
 }
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPreType() const
 {
-    return Thread::GetCurrent()->GetBarrierSet()->GetPreType();
+    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPreType();
 }
 
 ark::mem::BarrierType PandaRuntimeInterface::GetPostType() const
 {
-    return Thread::GetCurrent()->GetBarrierSet()->GetPostType();
+    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetPostType();
 }
 
 ark::mem::BarrierOperand PandaRuntimeInterface::GetBarrierOperand(ark::mem::BarrierPosition barrierPosition,
                                                                   std::string_view operandName) const
 {
-    return Thread::GetCurrent()->GetBarrierSet()->GetBarrierOperand(barrierPosition, operandName);
+    return Thread::GetCurrent()->GetVM()->GetGC()->GetBarrierSet()->GetBarrierOperand(barrierPosition, operandName);
 }
 
 uint32_t PandaRuntimeInterface::GetFunctionTargetOffset([[maybe_unused]] Arch arch) const

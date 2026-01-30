@@ -583,6 +583,11 @@ public:
     /// Collect TLAB metrics for memstats
     void CollectTLABMetrics();
 
+    ALWAYS_INLINE mem::GCBarrierSet *GetBarrierSet() const
+    {
+        return barrierSet_;
+    }
+
     void InitForStackOverflowCheck(size_t nativeStackReservedSize, size_t nativeStackProtectedSize);
     virtual void DisableStackOverflowCheck();
     virtual void EnableStackOverflowCheck();
@@ -725,7 +730,17 @@ protected:
      */
     virtual void CleanUp();
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    ThreadId internalId_ {0};
+    void *object_ {nullptr};
+    void *stringClassPtr_ {nullptr};    // ClassRoot::LINE_STRING
+    void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
+    void *arrayU8ClassPtr_ {nullptr};   // ClassRoot::ARRAY_U8
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+
 private:
+    void FreePreBuffer();
+    void InitCardTableData(mem::GCBarrierSet *barrier);
     PandaString LogThreadStack(ThreadState newState) const;
 
 #ifdef PANDA_WITH_QUICKENER
@@ -757,6 +772,19 @@ private:
     std::atomic<ThreadId> id_;
 
     static mem::TLAB *zeroTlab_;
+    EntrypointsTable *entrypointsTable_ {nullptr};
+    Frame *frame_ {nullptr};
+    uintptr_t nativePc_ {};
+    bool isCompiledFrame_ {false};
+    ObjectHeader *exception_ {nullptr};
+    void *cardTableAddr_ {nullptr};
+    void *cardTableMinAddr_ {nullptr};
+    // keeps IRtoC GC PostWrb impl for storing one object
+    void *postWrbOneObject_ {nullptr};
+    // keeps IRtoC GC PostWrb impl for storing two objects
+    void *postWrbTwoObjects_ {nullptr};
+    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
+    void *languageExtensionData_ {nullptr};
     PandaVector<ObjectHeader **> localObjects_;
     WeightedAdaptiveTlabAverage *weightedAdaptiveTlabAverage_ {nullptr};
 
@@ -768,6 +796,8 @@ private:
     // NOTE(konstanting): this is to be moved once we decouple Thread from ManagedThread
     ObjectHeader *flattenedStringCache_ {nullptr};
 
+    mem::TLAB *tlab_ {nullptr};
+    mem::GCBarrierSet *barrierSet_ {nullptr};
     mem::GCG1BarrierSet::G1PostBarrierRingBufferType *g1PostBarrierRingBuffer_ {nullptr};
     // Keep these here to speed up interpreter
     mem::BarrierType preBarrierType_ {mem::BarrierType::PRE_WRB_NONE};
@@ -823,6 +853,10 @@ private:
     HandleStorage<ObjectHeader *> *objectHeaderHandleStorage_ {nullptr};
 
     PandaStack<ThreadState> threadFrameStates_;
+
+#if !defined(NDEBUG)
+    uintptr_t runtimeCallEnabled_ {1};
+#endif  // !NDEBUG
 
     // Boolean which is safe to access after runtime is destroyed
     bool isManagedScope_ {false};
