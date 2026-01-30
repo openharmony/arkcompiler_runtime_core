@@ -2274,6 +2274,26 @@ or for the *rest parameter*:
    }
 
 
+If a *spread expression* is used to pass arguments (see :ref:`Rest Parameter`),
+then the sequence of spread expressions passed as sequential arguments yields 
+a single sequence of values.
+
+.. code-block:: typescript
+   :linenos:
+
+   function accept_spreads_with_rest_parameter (...args: number[]) {
+       console.log (args)
+   }
+   let arr = [1, 2, 3]
+   accept_spreads_with_rest_parameter (...arr, ...arr)
+      // Output: 1 2 3 1 2 3
+
+   function g1() { return [1, 2] }
+   function g2() { return [3, 4, 5] }
+   accept_spreads_with_rest_parameter (...g1(), ...g2())
+      // Output: 1 2 3 4 5
+
+
 A spread expression for tuples is represented in the example below:
 
 .. code-block:: typescript
