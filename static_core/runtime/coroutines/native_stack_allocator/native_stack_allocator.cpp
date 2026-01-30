@@ -115,14 +115,16 @@ uint8_t *NativeStackAllocator::StacksHolder::AllocStack()
     for (int i = 0; i < STACK_COUNT_IN_POOL; i++) {
         if (!bitset[i]) {
             bitset[i] = true;
-            return mem + (size / STACK_COUNT_IN_POOL) * i;
+            return mem + (size / STACK_COUNT_IN_POOL) * i;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
     }
     return nullptr;
 }
 
+// NOLINTNEXTLINE(readability-non-const-parameter)
 bool NativeStackAllocator::StacksHolder::TryFreeStack(uint8_t *stack)
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (stack < mem || stack >= (mem + size)) {
         return false;
     }

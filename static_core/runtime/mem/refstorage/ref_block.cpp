@@ -60,7 +60,7 @@ void RefBlock::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType ro
         for (size_t index = 0; index < REFS_IN_BLOCK; index++) {
             if (block->IsBusyIndex(index)) {
                 ObjectPointerType *objectPointer = &(block->refs_[index].GetPointer());
-                ObjectHeader *obj = block->refs_[index].ReinterpretCast<ObjectHeader *>();
+                [[maybe_unused]] auto *obj = block->refs_[index].ReinterpretCast<ObjectHeader *>();
                 ASSERT(obj->ClassAddr<BaseClass>() != nullptr);
                 LOG(DEBUG, GC) << " Found root from ref-storage: " << mem::GetDebugInfoAboutObject(obj);
                 gcRootVisitor({rootType, objectPointer});

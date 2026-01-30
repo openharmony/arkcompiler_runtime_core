@@ -318,10 +318,11 @@ TEST_F(G1GCTest, CheckRemsetAfterPostBarrier)
     size_t arraySize = CardTable::GetCardSize();
     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
     size_t arrayLength = arraySize / elemSize + 1;
-    // objectNum needs to be large enough to ensure that the thread's g1PostBarrierRingBuffer is fully filled
-    constexpr size_t objectNum = 1024 * 12 + 1;
+    // OBJECT_NUM needs to be large enough to ensure that the thread's g1PostBarrierRingBuffer is fully filled
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    constexpr size_t OBJECT_NUM = 1024 * 12 + 1;
     std::vector<VMHandle<coretypes::Array>> arrays;
-    for (size_t i = 0; i < objectNum; i++) {
+    for (size_t i = 0; i < OBJECT_NUM; i++) {
         arrays.emplace_back(thread, ObjectAllocator::AllocArray(arrayLength, ClassRoot::ARRAY_STRING, false));
     }
 
@@ -355,7 +356,7 @@ TEST_F(G1GCTest, CheckRemsetAfterPostBarrier)
 
     // dirty cards corresponding to dirty_regions_objects should be reenqueued
     ProcessDirtyCards(static_cast<G1GC<PandaAssemblyLanguageConfig> *>(gc));
-    for (size_t i = 0; i < objectNum; i++) {
+    for (size_t i = 0; i < OBJECT_NUM; i++) {
         auto &array = arrays[i];
         auto &str = strings[i];
         bool found = false;
@@ -1090,6 +1091,7 @@ TEST_F(G1GCPromotionTest, TestFullCollectionSetPromotionRemsets)
     Runtime *runtime = Runtime::GetCurrent();
     LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *arrayClass = runtime->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_STRING);
+    // NOLINTNEXTLINE(clang-analyzer-core.DivideZero, readability-magic-numbers)
     size_t youngLength = ((DEFAULT_REGION_SIZE - sizeof(coretypes::Array)) / arrayClass->GetComponentSize()) - 32;
 
     // Setting FastGC flag = true - means that G1-GC should only promote all young regions

@@ -2030,8 +2030,8 @@ void ClassLinker::AddBootClassFilter(const panda_file::File *bootPandaFile)
     auto classes = bootPandaFile->GetClasses();
     LOG(DEBUG, CLASS_LINKER) << "number of class in [" << bootPandaFile->GetFilename() << "] is " << classes.size();
 
-    for (size_t i = 0; i < classes.size(); ++i) {
-        panda_file::File::EntityId classId = panda_file::File::EntityId(classes[i]);
+    for (unsigned int classe : classes) {
+        auto classId = panda_file::File::EntityId(classe);
         const uint8_t *className = bootPandaFile->GetStringData(classId).data;
         bootClassFilter_.Add(className);
     }

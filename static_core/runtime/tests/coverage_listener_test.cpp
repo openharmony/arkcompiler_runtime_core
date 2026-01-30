@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
 
-using namespace std::chrono;
+using namespace std::chrono;  // NOLINT(google-build-using-namespace)
 
 namespace ark::tooling::test {
 constexpr uint32_t TEST_BUFFER_SIZE = 200;
@@ -156,7 +156,7 @@ TEST_F(BytecodeCounterTest, BytecodeCounterGetRemainingQueueTest)
 
     std::optional<std::queue<BytecodeCountMap>> queueOpt;
     std::thread writeThread([&queueOpt, &counter]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(BytecodeCounter::maxDumpIntervalMs + 1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(BytecodeCounter::MAX_DUMP_INTERVAL_MS + 1));
         queueOpt = counter.GetQueue();
     });
     for (uint32_t i = 0; i < TEST_BUFFER_SIZE / MAP_COUNT; i++) {

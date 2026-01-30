@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,9 +101,8 @@ static std::variant<Field *, uint32_t> GetFieldFromOffset([[maybe_unused]] const
         auto objectCls = ark::Class::FromClassObject(objectHeader);
         if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
             return GetFieldFromOffsetForClass<LANG_TYPE>(objectCls, offset);
-        } else {
-            return nullptr;
         }
+        return nullptr;
     }
     return GetFieldFromOffsetForObject<LANG_TYPE>(objectHeader, cls, offset);
 }
@@ -120,8 +119,8 @@ static PandaString GetFieldInfo(const ObjectHeader *obj, const uint32_t offset)
     if (field == nullptr) {
         return "unresolved field";
     }
-    auto field_name = PandaString(utf::Mutf8AsCString(field->GetName().data));
-    return "field: " + field_name;
+    auto fieldName = PandaString(utf::Mutf8AsCString(field->GetName().data));
+    return "field: " + fieldName;
 }
 
 // Should be called only with MutatorLock held
@@ -159,7 +158,7 @@ bool HeapReferenceVerifier<LANG_TYPE>::operator()(ObjectHeader *objectHeader, Ob
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                               << " references a dead object at " << referent;
         } else {
-            Class *cls = objectHeader->template ClassAddr<Class>();
+            auto *cls = objectHeader->template ClassAddr<Class>();
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
                               << " (class: " << cls->GetName() << ") references a dead object at " << referent
                               << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
@@ -170,7 +169,7 @@ bool HeapReferenceVerifier<LANG_TYPE>::operator()(ObjectHeader *objectHeader, Ob
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                               << " references a forwarded object at " << referent;
         } else {
-            Class *cls = objectHeader->template ClassAddr<Class>();
+            auto *cls = objectHeader->template ClassAddr<Class>();
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
                               << " (class: " << cls->GetName() << ") references a forwarded object at " << referent
                               << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
@@ -457,7 +456,7 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
                     LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " references a dead object "
                                       << referent << " after collection";
                 } else {
-                    Class *cls = objectHeader->template ClassAddr<Class>();
+                    auto *cls = objectHeader->template ClassAddr<Class>();
                     ASSERT(cls != nullptr);
                     LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << "(class: " << cls->GetName()
                                       << ") references a dead object " << referent << " after collection (with "

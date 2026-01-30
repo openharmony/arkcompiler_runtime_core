@@ -19,7 +19,7 @@
 # TODO: Retry once we upgrade the checker.
 
 # Split huge static_core and ets2panda folders on several subsets
-set(CTIDY_CORE_PART1 "tools|tests|compiler")  #|runtime")
+set(CTIDY_CORE_PART1 "tools|tests|compiler|runtime")
 set(CTIDY_CORE_PART2 "plugins/ets/tests/ani")
 set(CTIDY_CORE_PART3 "?!(${CTIDY_CORE_PART1}|${CTIDY_CORE_PART2})")
 set(CTIDY_ETS_PART1  "test")

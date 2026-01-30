@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ public:
                                           ark::Logger::ComponentMask().set(ark::Logger::Component::CLASS_LINKER));
     }
 
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
     void SetPandaFile(const ark::arg_list_t abcPaths)
     {
         options_.SetPandaFiles(abcPaths);

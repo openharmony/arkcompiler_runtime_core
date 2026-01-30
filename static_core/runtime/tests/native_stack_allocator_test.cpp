@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ TEST_F(NativeStackAllocatorTest, SequentialAllocationAndDeallocation)
     {
         uint8_t *firstStack = sm.AcquireStack();
         uint8_t *secondStack = sm.AcquireStack();
-        ASSERT_EQ(secondStack, firstStack + SIZE_OF_POOL);
+        ASSERT_EQ(secondStack, firstStack + SIZE_OF_POOL);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
         sm.ReleaseStack(firstStack);
         uint8_t *thirdStack = sm.AcquireStack();
@@ -52,7 +52,7 @@ TEST_F(NativeStackAllocatorTest, SequentialAllocationAndDeallocation)
         sm.ReleaseStack(thirdStack);
     }
     {
-        std::array<uint8_t *, NativeStackAllocator::STACK_COUNT_IN_POOL> stackArray;
+        std::array<uint8_t *, NativeStackAllocator::STACK_COUNT_IN_POOL> stackArray {};
         for (size_t i = 0; i < NativeStackAllocator::STACK_COUNT_IN_POOL; i++) {
             stackArray[i] = sm.AcquireStack();
         }

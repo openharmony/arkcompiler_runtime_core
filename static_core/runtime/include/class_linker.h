@@ -345,6 +345,7 @@ public:
                                  panda_file::SourceLang language);
 
 private:
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     struct ClassInfo {
         PandaUniquePtr<VTableBuilder> vtableBuilder;
         PandaUniquePtr<ITableBuilder> itableBuilder;

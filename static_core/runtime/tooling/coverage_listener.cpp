@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 namespace ark::tooling {
 
+// NOLINTNEXTLINE(modernize-pass-by-value)
 CoverageListener::CoverageListener(const std::string &fileName) : fileName_(fileName)
 {
     delegate_ = MakePandaUnique<BytecodeCounter>();
@@ -110,7 +111,7 @@ BytecodeCounter::BytecodeCounter(uint32_t bufferSize) : bufferSize_(bufferSize)
     lastDumpTime_.store(std::chrono::system_clock::now(), std::memory_order_release);
 }
 
-BytecodeCounter::~BytecodeCounter() {}
+BytecodeCounter::~BytecodeCounter() = default;
 
 void BytecodeCounter::BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset)
 {
@@ -139,7 +140,7 @@ std::optional<std::queue<BytecodeCountMap>> BytecodeCounter::GetQueue()
     // Atomic with acquire order reason: ensure we see the latest store from the releasing thread.
     auto timeSinceLastDump = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now() - lastDumpTime_.load(std::memory_order_acquire));
-    if (timeSinceLastDump.count() > maxDumpIntervalMs) {
+    if (timeSinceLastDump.count() > MAX_DUMP_INTERVAL_MS) {
         LOG(INFO, RUNTIME) << "timeSinceLastDump > 1000, trigger dump";
         TriggerDump();
         os::memory::LockHolder lock(queueMutex_);
@@ -147,7 +148,7 @@ std::optional<std::queue<BytecodeCountMap>> BytecodeCounter::GetQueue()
     }
     os::memory::LockHolder lock(queueMutex_);
     if (dumpQueue_.empty()) {
-        if (queueConditionalVar_.TimedWait(&queueMutex_, queueWaitTimeoutMs)) {
+        if (queueConditionalVar_.TimedWait(&queueMutex_, QUEUE_WAIT_TIMEOUT_MS)) {
             LOG(INFO, RUNTIME) << "TimedWait timeout, return empty queue";
             return std::nullopt;
         }

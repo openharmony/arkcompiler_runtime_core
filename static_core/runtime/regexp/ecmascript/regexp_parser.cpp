@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1573,7 +1573,7 @@ int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool inver
         return -1;
     }
     // 1. Parsing attribute names/values between { and }
-    uint8_t *start = pc_ - 1;
+    uint8_t *start = pc_ - 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     while (c0_ != '}' && c0_ != KEY_EOF) {
         Advance();
     }
@@ -1581,7 +1581,7 @@ int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool inver
         ParseError("Unterminated Unicode property escape");
         return -1;
     }
-    uint8_t *propEnd = pc_ - 1;
+    uint8_t *propEnd = pc_ - 1;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     PandaString property(reinterpret_cast<const char *>(start), propEnd - start);
 
     // 2. Creating a UnicodeSet from attribute strings using ICU,
@@ -1595,7 +1595,7 @@ int RegExpParser::ParseUnicodePropertyValueCharacters(RangeSet *atom, bool inver
     UErrorCode status = U_ZERO_ERROR;
     icu::UnicodeSet icuSet(icu::UnicodeString::fromUTF8(icuPattern.c_str()), status);
 
-    if (U_FAILURE(status)) {
+    if (U_FAILURE(status) != 0) {
         ParseError("Invalid or unsupported Unicode property");
         return -1;
     }
