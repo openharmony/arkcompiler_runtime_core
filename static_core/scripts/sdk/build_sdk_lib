@@ -38,6 +38,7 @@ function build_panda() {
         -DPANDA_WITH_CANGJIE=OFF \
         -DPANDA_WITH_HZ_ECMASCRIPT=OFF \
         -DPANDA_WITH_TESTS_JAVA_ECMASCRIPT=OFF \
+        -DPANDA_STRICT_MODE=true \
         -DPANDA_TS_BINDINGS=ON"
 
     # shellcheck disable=SC2086
