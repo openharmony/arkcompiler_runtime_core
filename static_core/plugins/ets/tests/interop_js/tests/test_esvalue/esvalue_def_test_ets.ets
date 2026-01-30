@@ -369,19 +369,19 @@ function checkInstanceOfNullOrUndefined(): boolean {
     try {
         res = res && undefValue.instanceOf(nullValue);
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = res && e.message.includes('Need object');
     }
     try {
         res = res && nullValue.instanceOf(undefValue);
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = res && e.message.includes('Need object');
     }
     try {
         res = res && undefValue.instanceOf(undefValue);
         res = false;
-    } catch (e: Error) {
+    } catch (e) {
         res = res && e.message.includes('Need object');
     }
     return res;
