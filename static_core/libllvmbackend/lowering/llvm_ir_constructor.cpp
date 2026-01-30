@@ -152,12 +152,11 @@ namespace ark::compiler {
 
 #include <can_compile_intrinsics_gen.inl>
 
+namespace {
 class MemCharSimdLowering {
 public:
-    MemCharSimdLowering(MemCharSimdLowering &&) = delete;
-    MemCharSimdLowering(const MemCharSimdLowering &) = delete;
-    MemCharSimdLowering &operator=(const MemCharSimdLowering &) = delete;
-    MemCharSimdLowering &operator=(MemCharSimdLowering &&) = delete;
+    NO_COPY_SEMANTIC(MemCharSimdLowering);
+    NO_MOVE_SEMANTIC(MemCharSimdLowering);
     MemCharSimdLowering() = delete;
     ~MemCharSimdLowering() = default;
 
@@ -217,10 +216,8 @@ private:
 
 class MemLastCharSimdLowering {
 public:
-    MemLastCharSimdLowering(MemLastCharSimdLowering &&) = delete;
-    MemLastCharSimdLowering(const MemLastCharSimdLowering &) = delete;
-    MemLastCharSimdLowering &operator=(const MemLastCharSimdLowering &) = delete;
-    MemLastCharSimdLowering &operator=(MemLastCharSimdLowering &&) = delete;
+    NO_COPY_SEMANTIC(MemLastCharSimdLowering);
+    NO_MOVE_SEMANTIC(MemLastCharSimdLowering);
     MemLastCharSimdLowering() = delete;
     ~MemLastCharSimdLowering() = default;
 
@@ -552,6 +549,60 @@ llvm::Value *MemLastCharSimdLowering::Generate(llvm::VectorType *vecTy)
     vcmpeq1_ = nullptr;
     return result;
 }
+class CharsCaseConversionSimdLowering final {
+public:
+    llvm::VectorType *GetU8X8Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt8Ty(), VECTOR_SIZE_8, false);
+    }
+    llvm::VectorType *GetU8X16Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt8Ty(), VECTOR_SIZE_16, false);
+    }
+
+    NO_COPY_SEMANTIC(CharsCaseConversionSimdLowering);
+    NO_MOVE_SEMANTIC(CharsCaseConversionSimdLowering);
+
+    CharsCaseConversionSimdLowering() = delete;
+    ~CharsCaseConversionSimdLowering() = default;
+
+    CharsCaseConversionSimdLowering(llvm::Value *src, llvm::Value *dst, llvm::IRBuilder<> *builder);
+
+    void Generate(llvm::VectorType *vecTy, uint8_t begin, uint8_t end) const;
+
+private:
+    llvm::Value *src_;
+    llvm::Value *dst_;
+    llvm::IRBuilder<> *builder_;
+};
+
+CharsCaseConversionSimdLowering::CharsCaseConversionSimdLowering(llvm::Value *src, llvm::Value *dst,
+                                                                 llvm::IRBuilder<> *builder)
+    : src_(src), dst_(dst), builder_(builder)
+{
+    ASSERT(src_ != nullptr);
+    ASSERT(dst_ != nullptr);
+    ASSERT(builder_ != nullptr);
+}
+
+void CharsCaseConversionSimdLowering::Generate(llvm::VectorType *vecTy, uint8_t begin, uint8_t end) const
+{
+    constexpr uint32_t UINT8_SIZE = 8U;                     // CC-OFF(G.NAM.03-CPP) project code style
+    constexpr uint8_t CASE_CONVERSION_FLIP_BIT = 1U << 5U;  // CC-OFF(G.NAM.03-CPP) project code style
+    ASSERT(vecTy == GetU8X16Ty() || vecTy == GetU8X8Ty());
+    auto ld = builder_->CreateLoad(vecTy, src_);
+    auto flipper = llvm::Constant::getIntegerValue(vecTy, llvm::APInt(UINT8_SIZE, CASE_CONVERSION_FLIP_BIT));
+    auto minAscii = llvm::Constant::getIntegerValue(vecTy, llvm::APInt(UINT8_SIZE, begin));
+    auto comparing = builder_->CreateSub(ld, minAscii);
+    auto maxAllowed = llvm::Constant::getIntegerValue(vecTy, llvm::APInt(UINT8_SIZE, end - begin));
+    auto xored = builder_->CreateXor(ld, flipper);
+    auto cond = builder_->CreateICmpULE(comparing, maxAllowed);
+    auto res = builder_->CreateSelect(cond, xored, ld);
+    builder_->CreateStore(res, dst_);
+}
+
+}  // namespace
+
 static void MarkNormalBlocksRecursive(BasicBlock *block, Marker normal)
 {
     [[maybe_unused]] size_t expected = 0;
@@ -1220,6 +1271,51 @@ bool LLVMIrConstructor::EmitMemLastCharU16X8UsingSimd(Inst *inst)
     auto addr = GetInputValue(inst, 1);
     MemLastCharSimdLowering memLastCharLowering(ch, addr, GetBuilder(), GetFunc());
     ValueMapAdd(inst, memLastCharLowering.Generate(memLastCharLowering.GetU16X8Ty()));
+    return true;
+}
+
+template <uint32_t VECTOR_SIZE>
+void LLVMIrConstructor::CreateCharsToCaseU8UsingSimd(Inst *inst, uint8_t begin, uint8_t end)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputsCount() == 2U);
+    ASSERT(inst->GetInputType(0) == DataType::POINTER);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");
+
+    CharsCaseConversionSimdLowering charsCaseConversionLowering(GetInputValue(inst, 0), GetInputValue(inst, 1),
+                                                                GetBuilder());
+    auto vecTy = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
+    charsCaseConversionLowering.Generate(vecTy, begin, end);
+}
+
+bool LLVMIrConstructor::EmitCharsToUpperCaseU8X16UsingSimd(Inst *inst)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    CreateCharsToCaseU8UsingSimd<VECTOR_SIZE_16>(inst, 0x61U, 0x7aU);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCharsToUpperCaseU8X8UsingSimd(Inst *inst)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    CreateCharsToCaseU8UsingSimd<VECTOR_SIZE_8>(inst, 0x61U, 0x7aU);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCharsToLowerCaseU8X16UsingSimd(Inst *inst)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    CreateCharsToCaseU8UsingSimd<VECTOR_SIZE_16>(inst, 0x41U, 0x5aU);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCharsToLowerCaseU8X8UsingSimd(Inst *inst)
+{
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    CreateCharsToCaseU8UsingSimd<VECTOR_SIZE_8>(inst, 0x41U, 0x5aU);
     return true;
 }
 

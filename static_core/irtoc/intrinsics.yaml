@@ -469,6 +469,70 @@ intrinsics:
       args: [ u8, u8* ]
   description: find the last occurrence of u8 char in 16-byte block of memory addressed by the second operand
 
+- name: CharsToUpperCaseU8X16UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCharsToUpperCaseU8X16UsingSimd
+  signature:
+      ret: void
+      args: [ u8*, u8* ]
+  description: Convert to the upper case u8 chars in 16-byte block of memory addressed by the first operand and writes it by the second operand
+
+- name: CharsToUpperCaseU8X8UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCharsToUpperCaseU8X8UsingSimd
+  signature:
+      ret: void
+      args: [ u8*, u8* ]
+  description: Convert to the upper case u8 chars in 8-byte block of memory addressed by the first operand and writes it by the second operand
+
+- name: CharsToLowerCaseU8X16UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCharsToLowerCaseU8X16UsingSimd
+  signature:
+      ret: void
+      args: [ u8*, u8* ]
+  description: Convert to the lower case u8 chars in 16-byte block of memory addressed by the first operand and writes it by the second operand
+
+- name: CharsToLowerCaseU8X8UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCharsToLowerCaseU8X8UsingSimd
+  signature:
+      ret: void
+      args: [ u8*, u8* ]
+  description: Convert to the lower case u8 chars in 8-byte block of memory addressed by the first operand and writes it by the second operand
+
 - name: JsCastDoubleToChar
   class_name: Irtoc
   method_name:

@@ -62,6 +62,10 @@ private:
     bool EmitMemCharU16X16UsingSimd(Inst *inst);
     bool EmitMemLastCharU8X16UsingSimd(Inst *inst);
     bool EmitMemLastCharU16X8UsingSimd(Inst *inst);
+    bool EmitCharsToUpperCaseU8X16UsingSimd(Inst *inst);
+    bool EmitCharsToUpperCaseU8X8UsingSimd(Inst *inst);
+    bool EmitCharsToLowerCaseU8X16UsingSimd(Inst *inst);
+    bool EmitCharsToLowerCaseU8X8UsingSimd(Inst *inst);
     bool EmitReverseBytes(Inst *inst);
     bool EmitMemoryFenceFull(Inst *inst);
     bool EmitMemoryFenceRelease(Inst *inst);
@@ -187,6 +191,8 @@ private:
     llvm::CallInst *CreateTailCallInterpreter(Inst *inst);
     template <uint32_t VECTOR_SIZE>
     void CreateCompressUtf16ToUtf8CharsUsingSimd(Inst *inst);
+    template <uint32_t VECTOR_SIZE>
+    void CreateCharsToCaseU8UsingSimd(Inst *inst, uint8_t begin, uint8_t end);
 
     // Getters
     llvm::FunctionType *GetEntryFunctionType();

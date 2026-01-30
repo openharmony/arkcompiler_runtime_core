@@ -709,6 +709,30 @@ void Encoder::EncodeMemLastCharU8X16UsingSimd([[maybe_unused]] Reg dst, [[maybe_
     SetFalseResult();
 }
 
+void Encoder::EncodeCharsToUpperCaseU8X16UsingSimd([[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg dstAddr,
+                                                   [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeCharsToUpperCaseU8X8UsingSimd([[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg dstAddr,
+                                                  [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeCharsToLowerCaseU8X16UsingSimd([[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg dstAddr,
+                                                   [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeCharsToLowerCaseU8X8UsingSimd([[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg dstAddr,
+                                                  [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeUnsignedExtendBytesToShorts([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
 {
     SetFalseResult();
