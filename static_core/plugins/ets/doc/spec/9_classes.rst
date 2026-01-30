@@ -2004,6 +2004,30 @@ initialization is normally performed in the context of *superclass* constructors
    overriding
    field
 
+The term *same-type* in case of generic classes means that the type of a field
+in a derived class must be the same as in the base class instantiated with a
+parameter of the same type as the type of the field in the derived class.
+
+The situation is represented in the example below:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class B<T> {
+       f1: T
+       f2: T
+       constructor (v: T) { this.f1 = v; this.f2 = v }
+    }
+    class D<U, V> extends B<U>  {
+       f1: U // valid overriding as D extends B<U>, and type of f1 in B<U> is U
+       f2: V // compile-time error, wrong overriding
+       constructor (v: U) {
+           super (v)
+       }
+    }
+
+
 A :index:`compile-time error` occurs if a field is not declared as ``readonly``
 in a superclass, while an overriding field is marked as ``readonly``:
 
