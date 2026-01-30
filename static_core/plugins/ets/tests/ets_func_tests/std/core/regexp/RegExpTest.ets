@@ -758,16 +758,6 @@ function RegExpTest() {
         arktest.assertEQ(matches1!.toString(), "");
     }
 
-    {
-        let str = new RegExp("^\s*([^;\s]*)");
-        str.test("text/html");
-        arktest.assertEQ(RegExp.$1, 'text/html');
-        str.test("text/plain");
-        arktest.assertEQ(RegExp.$1, 'text/plain');
-        str.test("text/html");
-        arktest.assertEQ(RegExp.$1, 'text/html');
-    }
-
     // test getFlags
     {
         const res = new RegExp("abc", "giymsud");

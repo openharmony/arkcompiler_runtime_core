@@ -64,11 +64,10 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this
     }
 
-    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean,
-                              indecesUpdater: (length: int, index: int, str: String) => void): void {
+    public postExecProcessing(res: RegExpResultArray, input: String, index: int, hasIndices: boolean): void {
         // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
         this.updateGroups()
-        this.updateIndicesAndResult(hasIndices, indecesUpdater)
+        this.updateIndicesAndResult(hasIndices)
         this.wasProcessed = true
     }
 
@@ -131,8 +130,7 @@ export class RegExpResultArray extends Array<String | undefined> {
         return this.wasProcessed
     }
 
-    private updateIndicesAndResult(hasIndices: boolean,
-                                   indecesUpdater: (length: int, index: int, str: String) => void): void {
+    private updateIndicesAndResult(hasIndices: boolean): void {
         const data = this.resultRaw_.split(',')
         const n: int = (data.length / 2)
 
@@ -154,7 +152,6 @@ export class RegExpResultArray extends Array<String | undefined> {
                     this.indices_[pos] = [index, endIndex]
                     const str = this.input_.substring(index, endIndex)
                     this.$_set(pos, str)
-                    indecesUpdater(this.length, pos, str)
                 }
             }
         } else {
@@ -166,7 +163,6 @@ export class RegExpResultArray extends Array<String | undefined> {
                 if (index != -1 && endIndex != -1) {
                     const str = this.input_.substring(index, endIndex)
                     this.$_set(pos, str)
-                    indecesUpdater(this.length, pos, str)
                 }
             }
         }
@@ -394,21 +390,6 @@ export class RegExp extends Object {
     private source_: String = ""
     private flags_: String = ""
 
-    private static input_: String = ""
-    private static lastMatch_: String = ""
-    private static lastParen_: String = ""
-    private static leftContext_: String = ""
-    private static rightContext_: String = ""
-    private static $1_: String = ""
-    private static $2_: String = ""
-    private static $3_: String = ""
-    private static $4_: String = ""
-    private static $5_: String = ""
-    private static $6_: String = ""
-    private static $7_: String = ""
-    private static $8_: String = ""
-    private static $9_: String = ""
-
     /** Flags */
     get flags(): String {
         return this.flags_
@@ -482,109 +463,6 @@ export class RegExp extends Object {
     }
 
     /**
-     * Returns the string against which a regular expression is matched
-     */
-    static get input(): String {
-        return RegExp.input_
-    }
-
-    /**
-     * Returns the string against which a regular expression is matched
-     */
-    static get $_(): String {
-        return RegExp.input_
-    }
-
-    /**
-     * Returns the last matched substring
-     */
-    static get lastMatch(): String {
-        return RegExp.lastMatch_
-    }
-
-    /**
-     * Returns the last parenthesized substring match, if any
-     */
-    static get lastParen(): String {
-        return RegExp.lastParen_
-    }
-
-    /**
-     * Returns the substring preceding the most recent match
-     */
-    static get leftContext(): String {
-        return RegExp.leftContext_
-    }
-
-    /**
-     * Returns the substring following the most recent match
-     */
-    static get rightContext(): String {
-        return RegExp.rightContext_
-    }
-
-    /**
-     * Returns different aliased properties
-     */
-    static $_get(key: String): String {
-        if (key == "$_") {
-            return RegExp.input_
-        }
-        if (key == "$'") {
-            return RegExp.rightContext_
-        }
-        if (key == "$`") {
-            return RegExp.leftContext_
-        }
-        if (key == "$+") {
-            return RegExp.lastParen_
-        }
-        if (key == "$&") {
-            return RegExp.lastMatch_
-        }
-        throw new Error("unsupported field name")
-    }
-
-    /**
-     * Static accessor properties return parenthesized substring matches
-     */
-    static get $1(): String {
-        return RegExp.$1_
-    }
-
-    static get $2(): String {
-        return RegExp.$2_
-    }
-
-    static get $3(): String {
-        return RegExp.$3_
-    }
-
-    static get $4(): String {
-        return RegExp.$4_
-    }
-
-    static get $5(): String {
-        return RegExp.$5_
-    }
-
-    static get $6(): String {
-        return RegExp.$6_
-    }
-
-    static get $7(): String {
-        return RegExp.$7_
-    }
-
-    static get $8(): String {
-        return RegExp.$8_
-    }
-
-    static get $9(): String {
-        return RegExp.$9_
-    }
-
-    /**
      * Constructs a new RegExp using pattern and flags
      *
      * @param pattern description of a pattern
@@ -654,15 +532,8 @@ export class RegExp extends Object {
         const res = this.execImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            RegExp.lastMatch_ = ""
-            RegExp.lastParen_ = ""
-            let indecesUpdater = (length: int, index: int, value: String) => {
-                RegExp.updateStaticFields(length, index, value)
-            }
             if (!res.getWasProcessed() && res.isCorrect) {
-                RegExp.resetStaticFields();
-                res.postExecProcessing(res, str, res.index, this.hasIndices, indecesUpdater)
-                RegExp.postExecProcessing(res, str, res.index)
+                res.postExecProcessing(res, str, res.index, this.hasIndices)
             }
             return res
         } else {
@@ -688,13 +559,8 @@ export class RegExp extends Object {
         const res = this.matchImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, index, hasSlashU)
         if (res.isCorrect) {
             res.input = str
-            let indecesUpdater = (length: int, index: int, value: String) => {
-                RegExp.updateStaticFields(length, index, value)
-            }
             if (!res.getWasProcessed() && res.isCorrect) {
-                RegExp.resetStaticFields();
-                res.postExecProcessing(res, str, res.index!, this.hasIndices, indecesUpdater)
-                RegExp.postExecProcessing(res, str, res.index!)
+                res.postExecProcessing(res, str, res.index!, this.hasIndices)
             }
             return res
         } else {
@@ -970,48 +836,6 @@ export class RegExp extends Object {
 
     public static $_invoke(pattern: RegExp | String) : RegExp {
         return new RegExp(pattern)
-    }
-
-    private static resetStaticFields() {
-        RegExp.$1_ = ""
-        RegExp.$2_ = ""
-        RegExp.$3_ = ""
-        RegExp.$4_ = ""
-        RegExp.$5_ = ""
-        RegExp.$6_ = ""
-        RegExp.$7_ = ""
-        RegExp.$8_ = ""
-        RegExp.$9_ = ""
-    }
-
-    private static postExecProcessing(res: RegExpResultArray, input: String, index: int): void {
-        // NOTE(ekaterinazaytseva): temp solution - will be fixed in #20259
-        RegExp.input_ = input
-        RegExp.leftContext_ = input.substring(0, index)
-        RegExp.rightContext_ = input.substring(index + res.result[0]!.length)
-    }
-
-    // NOTE(@mgroshev): Need to redesign. This approach is used to avoid private field access violation
-    private static updateStaticFields(length: int, index: int, value: String): void {
-        if (index == 0) {
-            RegExp.lastMatch_ = value
-        }
-        if (index == length - 1) {
-            RegExp.lastParen_ = value
-        }
-
-        if (index > 9 || index <= 0) {
-            return
-        }
-        if (index == 1) RegExp.$1_ = value
-        else if (index == 2) RegExp.$2_ = value
-        else if (index == 3) RegExp.$3_ = value
-        else if (index == 4) RegExp.$4_ = value
-        else if (index == 5) RegExp.$5_ = value
-        else if (index == 6) RegExp.$6_ = value
-        else if (index == 7) RegExp.$7_ = value
-        else if (index == 8) RegExp.$8_ = value
-        else if (index == 9) RegExp.$9_ = value
     }
 
     private static escapePattern(pattern: String): String {
