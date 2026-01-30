@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,8 +44,8 @@ args = {
                 'timeout': '30'
                 },
             'ark_js_napi_cli': {
-                'executable-path': Path(__file__).parent.parent.parent.parent /
-                                   'extensions/generators/ets_arkjs_xgc/ark_js_napi_cli_runner.sh',
+                'executable-path': (Path(__file__).parent.parent.parent.parent /
+                                   'extensions/generators/ets_arkjs_xgc/ark_js_napi_cli_runner.sh').as_posix(),
                 'args': [
                     '--work-dir ${parameters.work-dir}/intermediate',
                     '--build-dir .',

@@ -171,8 +171,8 @@ class OptionsTest(TestCase):
         for step in test_env.config.workflow.steps:
             match step.step_kind:
                 case StepKind.RUNTIME:
-                    flags = test.expand_last_call_macros(step)
-                    self.assertListEqual(flags, expected_args)
+                    expanded_step = test.expand_last_call_macros(step)
+                    self.assertListEqual(expanded_step.args, expected_args)
 
         # clear up
         shutil.rmtree(work_dir.root, ignore_errors=True)

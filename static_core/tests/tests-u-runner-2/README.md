@@ -218,6 +218,23 @@ steps:
         timeout: ${parameters.es2panda-timeout} # in seconds
         enabled: ${parameters.enable-es2panda} # switches on or off the step execution
         step-type: compiler
+        # path to file with contents of the standard output after the binary has completed
+        stdout: "${parameters.work-dir}/gen/${test-id}.output.txt" 
+        # path to file with contents of the standard error after the binary has completed
+        stderr: "${parameters.work-dir}/gen/${test-id}.error.txt" 
+        validator: Python path to class with custom validator (inherited from IValidator or BaseValidator)
+        pre-reqs:  # check before the binary is executed
+            - req: FileExist  # the file specified in the value must exist
+              value: "${parameters.work-dir}/gen/simple_co.ets"
+            - req: FolderExist  # the folder specified in the value must exist
+              value: "${parameters.work-dir}/gen"
+            - req: ParentExistCreate # make sure that the parent of the path specified in the value exists. If not it's created.
+              value: "${parameters.output-file}"
+        post-reqs:  # check after the binary has executed
+            - req: FileExist  # the file specified in the value must exist
+              value: "${parameters.work-dir}/gen/simple_co.ets"
+            - req: FolderExist  # the folder specified in the value must exist
+              value: "${parameters.work-dir}/gen"
         args: # a list of options to transfer to the binary
             - "${parameters.es2panda-full-args}"
             - "${parameters.work-dir}/gen/${test-id}"
