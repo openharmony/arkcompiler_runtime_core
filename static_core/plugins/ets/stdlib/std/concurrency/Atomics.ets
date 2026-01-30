@@ -138,7 +138,7 @@ export namespace Atomics {
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAddU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicAddU64(index, byteOffset, value.getULong()))
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         } else {
@@ -192,9 +192,9 @@ export namespace Atomics {
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicAndU64(index, byteOffset, value.getLong()))
+            return BigInt.fromULong(buffer.atomicAndU64(index, byteOffset, value.getULong()))
         } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getULong()))
+            return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getLong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -252,9 +252,9 @@ export namespace Atomics {
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicCompareExchangeU64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
+            return BigInt.fromULong(buffer.atomicCompareExchangeU64(index, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
         } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
+            return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -311,7 +311,7 @@ export namespace Atomics {
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicExchangeI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -376,7 +376,7 @@ export namespace Atomics {
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
-        return new BigInt(buffer.atomicLoadU64(index, byteOffset))
+        return BigInt.fromULong(buffer.atomicLoadU64(index, byteOffset))
     }
 
     /**
@@ -427,7 +427,7 @@ export namespace Atomics {
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicOrI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicOrU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -481,7 +481,7 @@ export namespace Atomics {
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicStoreI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -535,7 +535,7 @@ export namespace Atomics {
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicSubI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicSubU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
@@ -589,7 +589,7 @@ export namespace Atomics {
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicXorI64(index, byteOffset, value.getLong()))
         } else if (typedArray instanceof BigUint64Array) {
-            return new BigInt(buffer.atomicXorU64(index, byteOffset, value.getULong()))
+            return BigInt.fromULong(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         } else {
             throw new Error("Unhandled array type!")
         }
