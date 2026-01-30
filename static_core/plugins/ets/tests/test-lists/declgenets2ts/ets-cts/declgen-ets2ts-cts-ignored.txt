@@ -1423,6 +1423,9 @@
 09.classes/02.class_extension_clause/invalid_type_reference_7.ets
 09.classes/02.class_extension_clause/invalid_type_reference_8.ets
 09.classes/02.class_extension_clause/invalid_type_reference_9.ets
+09.classes/02.class_extension_clause/extension_clause_positive_0.ets
+09.classes/02.class_extension_clause/extension_clause_positive_1.ets
+09.classes/02.class_extension_clause/extension_clause_positive_2.ets
 09.classes/02.class_extension_clause/method_return_value/method_return_value_8.ets
 09.classes/02.class_extension_clause/method_return_value/method_return_value_9.ets
 09.classes/02.class_extension_clause/valid_type_reference_2.ets
