@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
 #include "runtime/include/stack_walker.h"
-#include "runtime/include/thread.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
@@ -37,19 +36,35 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
 
     EtsMethod *method = EtsMethod::FromRuntimeMethod(stack->GetMethod());
     auto className = EtsHandle<EtsString>(coroutine, method->GetClass()->GetName());
+    if (UNLIKELY(className.GetPtr() == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return nullptr;
+    }
     auto methodName = EtsHandle<EtsString>(coroutine, method->GetNameString());
+    if (UNLIKELY(methodName.GetPtr() == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return nullptr;
+    }
+
     const auto lineNumber = method->GetLineNumFromBytecodeOffset(stack->GetBytecodePc());
     auto *sourceFile = reinterpret_cast<const char *>(method->GetClassSourceFile().data);
     if (sourceFile == nullptr) {
         sourceFile = "<unknown>";
     }
     auto *stackTraceElement = EtsStackTraceElement::Create(coroutine);
-    ASSERT(stackTraceElement != nullptr);
+    if (UNLIKELY(stackTraceElement == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return nullptr;
+    }
     auto element = EtsHandle<EtsStackTraceElement>(coroutine, stackTraceElement);
     element->SetClassName(className.GetPtr());
     element->SetMethodName(methodName.GetPtr());
 
     EtsString *sourceFileName = EtsString::CreateFromMUtf8(sourceFile);
+    if (UNLIKELY(sourceFileName == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return nullptr;
+    }
     element->SetSourceFileName(sourceFileName);
     element->SetLineNumber(lineNumber);
     return element.GetPtr();
@@ -60,22 +75,27 @@ extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
 
-    auto linker = coroutine->GetPandaVM()->GetClassLinker();
-    auto stackTraceElementClass = linker->GetClass(panda_file_items::class_descriptors::STACK_TRACE_ELEMENT.data());
+    auto stackTraceElementClass = PlatformTypes(coroutine)->coreStackTraceElement;
 
-    auto thread = ManagedThread::GetCurrent();
-    auto walker = StackWalker::Create(thread);
+    auto walker = StackWalker::Create(coroutine);
 
     PandaVector<EtsHandle<EtsStackTraceElement>> stackTraceElements;
-    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(coroutine); stack.HasFrame(); stack.NextFrame()) {
         auto element = EtsHandle<EtsStackTraceElement>(coroutine, CreateStackTraceElement(&stack));
+        if (UNLIKELY(element.GetPtr() == nullptr)) {
+            ASSERT(coroutine->HasPendingException());
+            return nullptr;
+        }
         stackTraceElements.push_back(element);
     }
 
     const auto linesSize = static_cast<uint32_t>(stackTraceElements.size());
 
     auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize);
-    ASSERT(resultArray != nullptr);
+    if (UNLIKELY(resultArray == nullptr)) {
+        ASSERT(coroutine->HasPendingException());
+        return nullptr;
+    }
     EtsHandle<EtsObjectArray> resultArrayHandle(coroutine, resultArray);
     for (uint32_t i = 0; i < linesSize; i++) {
         resultArrayHandle.GetPtr()->Set(i, stackTraceElements[i]->AsObject());

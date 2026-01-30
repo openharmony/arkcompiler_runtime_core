@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,6 +49,14 @@ endif()
 panda_add_gtest_with_ani(entrypoint_return_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.ets
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    LIBRARIES arkbase arkfile arkruntime
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
+panda_add_gtest_with_ani(ets_vm_oom_test
+    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_outofmemory_test.cpp
+    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_outofmemory_test.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     LIBRARIES arkbase arkfile arkruntime
     TEST_GROUP ets_tests_runtime_gtests
