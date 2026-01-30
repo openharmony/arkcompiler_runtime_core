@@ -119,7 +119,7 @@ export namespace containers {
         */
         public override popFront(): Int {
             if (this.curSize === 0) {
-                throw new AssertionError("No data to popFront from ArrayAsList!")
+                throw new RangeError("No data to popFront from ArrayAsList!")
             }
             let res: Int = this.data[0];
             for (let i = 1; i < this.curSize; ++i) {
@@ -153,7 +153,7 @@ export namespace containers {
         */
         public override popBack(): Int {
             if (this.curSize === 0) {
-                throw new AssertionError("No data to popBack from ArrayAsList!")
+                throw new RangeError("No data to popBack from ArrayAsList!")
             }
             --this.curSize;
             return this.data[this.curSize];

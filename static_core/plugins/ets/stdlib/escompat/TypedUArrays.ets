@@ -802,7 +802,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Uint8ClampedArray } - A new Uint8ClampedArray
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -815,7 +815,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafeClamp(i, x.value!.toInt())
         }
@@ -2596,7 +2596,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Uint8Array } - A new Uint8Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -2609,7 +2609,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafeClamp(i, x.value!.toInt())
         }
@@ -4384,7 +4384,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Uint16Array } - A new Uint16Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -4397,7 +4397,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafeClamp(i, x.value!.toInt())
         }
@@ -6212,7 +6212,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param { Set<int> } set - A set object to convert to an array.
      * @returns { Uint32Array } - A new Uint32Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -6225,7 +6225,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafeClamp(i, x.value!.toLong())
         }
@@ -8061,7 +8061,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      *
      * @param { Set<BigInt> } set - A set object to convert to an array.
      * @returns { BigUint64Array } - A new BigUint64Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -8074,7 +8074,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             result.setUnsafeClamp(i, x.value!.getULong())
         }

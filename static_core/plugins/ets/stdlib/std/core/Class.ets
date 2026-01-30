@@ -162,7 +162,7 @@ export final class Class {
 
     public static from<T>(): Class {
         //should never be executed
-        throw new AssertionError("Class.from call will be casted by frontend")
+        throw new InternalError("Class.from call will be casted by frontend")
     }
 
     /**

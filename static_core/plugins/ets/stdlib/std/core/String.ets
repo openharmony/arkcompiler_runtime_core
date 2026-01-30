@@ -271,18 +271,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      * indexes. Characters outside the range are not counted, even if
      * the range ends in the middle of a surrogate pair.
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns the amount of completed codepoints
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { RangeError } if begin > end
+     * @returns { int } the amount of completed codepoints
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
-            throw new AssertionError('Begin idx must be less than end idx')
+            throw new RangeError('Begin idx must be less than end idx')
         }
         let counter: int = 0;
         for (let i: int = begin; i < end; i++) {
@@ -301,14 +300,14 @@ export final class String extends Object implements Comparable<String>, Iterable
      * indexes. Characters outside the range are not counted, even if
      * the range ends in the middle of a surrogate pair.
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns the amount of completed codepoints
+     * @param { number } begin index to start from
+     * @param { number } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { RangeError } if begin > end
+     * @returns { number } the amount of completed codepoints
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public codePointCount(begin: number, end: number): number {
         return this.codePointCount(begin.toInt(), end.toInt())
@@ -358,14 +357,14 @@ export final class String extends Object implements Comparable<String>, Iterable
      * this string between begin and end indexes. The range is
      * a half-interview [begin, end).
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns byte[] array
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { RangeError } if begin > end
+     * @returns { byte[] } byte[] array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -1383,7 +1382,13 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /*
      * The slice() method extracts a section of a string and returns it as a new string,
-     * without modifying the original string.
+     *     without modifying the original string.
+     * @param { int } [begin] Start index
+     * @param { int } [end] End index
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public slice(begin?: int, end?: int): String {
         begin = normalizeIndex(begin ?? 0, this.getLength())
@@ -1394,11 +1399,26 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.substring(begin, end)
     }
 
+    /**
+     * getSubstitution
+     *
+     * @param { String } matched string
+     * @param { String } str string
+     * @param { int } position int
+     * @param { String[] } captures string array
+     * @param { Record<String, String | undefined> | undefined } namedCaptures captures
+     * @param { String } replacement string
+     * @throws { StringIndexOutOfBoundsError } - Input parameter error.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {
-            throw new AssertionError('Position ' + position + ' has to be in range 0..' + stringLength)
+            throw new StringIndexOutOfBoundsError('Position ' + position + ' has to be in range 0..' + stringLength)
         }
         let tailPos = position + matchLength
         let m = captures.length

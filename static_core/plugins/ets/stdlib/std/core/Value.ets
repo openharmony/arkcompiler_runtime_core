@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -361,7 +361,7 @@ export final class ClassValue extends reflect.Value {
             } else if (ft instanceof LongType) {
                 return new LongValue(ft as LongType, ValueAPIGetFieldByNameLong(this.data, name))
             }
-            throw new AssertionError("Type " + f.getType() + " is not a (un)boxed primitive")
+            throw new TypeError("Type " + f.getType() + " is not a (un)boxed primitive")
         }
         return reflect.Value.of(ValueAPIGetFieldByNameObject(this.data, name))
     }
@@ -615,7 +615,7 @@ export final class ArrayValue extends reflect.Value {
             } else if (et instanceof LongType) {
                 return new LongValue(et as LongType, ValueAPIGetElementLong(this.data, i))
             }
-            throw new AssertionError("Type " + et + " is not a (un)boxed primitive")
+            throw new TypeError("Type " + et + " is not a (un)boxed primitive")
         }
         return reflect.Value.of(ValueAPIGetElementObject(this.data, i))
     }
