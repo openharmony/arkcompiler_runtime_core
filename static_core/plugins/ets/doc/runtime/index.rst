@@ -19,12 +19,12 @@
     :maxdepth: 3
 
     /01_intro
-    /02_bytecode
-    /03_file_format
-    /04_names
-    /05_imports
-    /06_runtime_class
-    /07_verifier
+    /02_fully_qualified_name
+    /03_binary_file_format
+    /04_runtime_type_system
+    /05_runtime_name
+    /06_language_representation_in_binary_file
+    /07_verification
 
 
 

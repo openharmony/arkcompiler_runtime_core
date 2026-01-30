@@ -10,12 +10,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-|
+.. _RT Fully Qualified Name:
 
-.. _Platform Bytecode:
+Fully Qualified Name
+********************
 
-Platform Bytecode
-*****************
-
-For details, see https://gitee.com/openharmony/arkcompiler_runtime_core/blob/master/static_core/isa/isa.yaml
-
+*Fully qualified name* is used to create unique identifiers for different types
+and entities at runtime and in binary files. A *Fully qualified name* of an
+entity is generated from its *unqualified name* by a build system, and
+specific rules vary from one build system to another. However, the |LANG|
+runtime expects concrete *fully qualified name* for some predefined types.
+Such cases are described in
+:ref:`Language Representation In Binary File <RT Language Representation In Binary File>`.

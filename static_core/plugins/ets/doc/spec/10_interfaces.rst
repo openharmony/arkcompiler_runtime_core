@@ -180,7 +180,7 @@ A :index:`compile-time error` occurs if:
    alias of non-interface type.
 -  Interface type named by ``typeReference`` is not :ref:`Accessible`.
 -  Current interface is exported but the ``typeReference`` refers to a
-   non-exported one.
+   non-exported interface.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).
@@ -252,63 +252,6 @@ There is no single interface to which all interfaces are extensions (unlike
 class ``Object`` to which every class is an extension).
 
 A :index:`compile-time error` occurs if an interface depends on itself.
-
-If superinterfaces have default implementations (see
-:ref:`Default Interface Method Declarations`) for some method ``m``, then
-the following occurs:
-
-.. index::
-   interface
-   extension
-   Object
-   class
-   superinterface
-   implementation
-
-- Method ``m`` with an override-compatible signature (see
-  :ref:`Override-Compatible Signatures`) declared within the current interface
-  overrides all other ``m`` methods inherited from superinterfaces; or
-- All methods inherited from superinterfaces refer to the same implementation,
-  and this default implementation is the current interface method; or
-- One method ``m`` in some superinterface overrides all other methods from
-  other superinterfaces.
-
-Otherwise, a :index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I1 { foo () {} }
-    interface I2 { foo () {} }
-    interface II1 extends I1, I2 {
-       foo () {} // foo() from II1 overrides both foo() from I1 and foo() from I2
-    }
-    interface II2 extends I1, I2 {
-       // Compile-time error as foo() from I1 and foo() from I2 have different implementations
-    }
-    interface I3 extends I1 {}
-    interface I4 extends I1 {}
-    interface II3 extends I3, I4 {
-       // OK, as foo() from I3 and foo() from I4 refer to the same implementation
-    }
-
-    class Base {}
-    class Derived extends Base {}
-
-    interface II1 {
-        foo (p: Base) {}
-    }
-    interface II2 {
-        foo (p: Derived) {}
-    }
-    interface II3 extends II1, II2 {}
-        // foo() from II1 overrides foo() from II2
-
-
-    interface BI {}
-    export interface DI extends BI {}
-         /* Compile-time error as the derived interface is exported
-            while the base one is not */
 
 .. index::
    interface

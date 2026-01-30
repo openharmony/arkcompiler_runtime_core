@@ -1760,10 +1760,10 @@ Do not use JSX since no alternative is provided to rewrite it.
 
 |CB_ERROR|
 
-|LANG| allows unary operators to work on numeric types only. A compile-time
-error occurs if these operators are applied to a non-numeric type. Unlike |TS|,
-|LANG| does not support implicit casting of strings. Use explicit casting for
-strings instead  in |LANG|.
+|LANG| allows unary operators to work on bigint and numeric types only. A
+compile-time error occurs if these operators are applied to other types. Unlike
+|TS|, |LANG| does not support implicit casting for strings. Use explicit casting
+for strings instead  in |LANG|.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1777,6 +1777,7 @@ strings instead  in |LANG|.
     let e = ~5        // -6 as number
     let f = ~"5"      // -6 as number
     let g = +"string" // NaN as number
+    let h:bigint = -5n // -5n as bigint
 
     function returnTen(): string {
         return "-10"
@@ -1801,6 +1802,7 @@ strings instead  in |LANG|.
     let e = ~5        // -6 as number
     let f = ~"5"      // Compile-time error
     let g = +"string" // Compile-time error
+    let h:bigint = -5n // -5n as bigint
 
     function returnTen(): string {
         return "-10"
@@ -2784,8 +2786,8 @@ appropriate type before use.
 
 .. _R099:
 
-|CB_R| Only arrays, tuples or objects with iteators can be spread into the rest parameter or array literals
------------------------------------------------------------------------------------------------------------
+|CB_R| Only arrays, tuples, or iterable objects can be spread into a rest parameter or array literal
+----------------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-spread``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2795,19 +2797,19 @@ appropriate type before use.
 
 |CB_ERROR|
 
-The |TS| supports a wide number of scenarios where
-the *spread operator* can be used. In  |LANG|, the *spread expression* can be
-used only within an array literal or in argument passing, and the expression
-must be of  array type, tuple type, or a type with an iterator defined. When
-porting legacy |TS| code to |LANG|, you must rework such unsupported scenarios,
-for example, by unpacking data manually.
+|TS| supports a broad range of scenarios in which the *spread operator* can be
+used.
+A *spread expression* in |LANG| can be used only within an array literal,
+or in an argument passing. The expression must be of array type, tuple type, or
+a type with an iterator defined. When porting legacy |TS| code to |LANG|,
+unsupported scenarios must be reworked, e.g., by unpacking data manually.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    // OK, function receivig array of numbers into `rest`
+    // OK, function receiving array of numbers into `rest`
     function sum(...data: number[])  {
         let d : number = 0
         for (let n of data) {
@@ -2844,7 +2846,7 @@ for example, by unpacking data manually.
 
 .. code-block:: typescript
 
-    // OK, function receivig array of numbers into `rest`
+    // OK, function receiving array of numbers into `rest`
     function sum(...data: number[])  {
         let d : number = 0
         for (let n of data) {
@@ -3148,8 +3150,8 @@ extend interfaces.
 
 .. _R111:
 
-|CB_R| Enumeration members can be initialized only with compile time expressions of the same type
--------------------------------------------------------------------------------------------------
+|CB_R| Enumeration members can be initialized only with same-type compile-time expressions
+------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-enum-mixed-types``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4336,7 +4338,7 @@ not a value in the language.
 |CB_ERROR|
 
 All ``import`` directives in |LANG| must precede any other directives,
-declarations and statements in a program.
+declarations, and statements in a program.
 
 |CB_BAD|
 ~~~~~~~~

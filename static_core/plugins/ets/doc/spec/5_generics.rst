@@ -660,10 +660,10 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-in which a generic is referred. If type arguments can not be inferred then
+in which a generic is referred. If type arguments cannot be inferred, then
 a :index:`compile-time error` occurs.
 
-Different cases type argument inference are represented in the examples below:
+Different cases of type argument inference are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -680,42 +680,37 @@ Different cases type argument inference are represented in the examples below:
     process (123, () => {}) // P is inferred as 'int', while R is 'void'
 
     function bar <T> (p: number) {}
-    bar (1) // Compile-time error: type argument can not be inferred
-
+    bar (1) // Compile-time error: type argument cannot be inferred
 
 Implicit instantiation is only possible for generic functions and methods.
 
-In case when the generic class or interface method has its own type parameter
-with the its type parameter default (see :ref:`Type Parameter Default`) equal
-to the class or interface type parameter, the implicit generic instantiation of
-such method will use the argument types for the method type argument inference
-and class or interface type argument when the context, defined by parameter
-types, has no information how to infer the type argument.
+If a method of a generic class or interface
+*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with
+default type (see :ref:`Type Parameter Default`) that equals ``T``:sub:`i`,
+and an implicit generic instantion of this method provides no information
+to infer a type argument, then the type argument correspondent to ``T``:sub:`i`
+is used as the type argument for ``U``.
 
-Example below illustartes that:
+This situation is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
 
     class A <T> {  // T is the class type parameter
-        foo<U = T> (p: U) {} /* Method 'foo' has its own type parameter with
-                                   the default type parameter */
-        bar<U = T> () { // No parameters - no context
-           let l: U = this.field
-        } 
-        
+        foo<U = T> (p: U) {} // U is own type paramater with default T
+        bar<V = T> () {}     // V is own type paramater with default T
     }
 
-    // T1 and T2  are two distinct types
+    // Assume that X1 and X2 are two distinct types
+    let a = new A<X1>
 
-    (new A<T1>).foo (new T2) // implicit instantiation of 'foo', type of argument is used
-    // The same as explicit instantiation
-    (new A<T1>).foo<T2> (new T2)
+    // implicit instantiation:
+    a.foo(new X2) // type argument is inferred from ``new X2``
+    a.bar()       // class type argument X1 is used as no other information is provided
 
-
-    (new A<T1>).bar()  // bar is instantiated as bar<T1>, type of class type argument is used
-    (new A<T1>).bar<T2> () // explicit instantiation
-
+    // explicit instantiation:
+    a.foo<X2> (new X2) // explicit type argument is used
+    a.bar<X2> ()       // explicit type argument is used
 
 .. index::
    instantiation
@@ -861,11 +856,12 @@ Partial Utility Type
 .. meta:
     frontend_status: Done
 
-Type ``Partial<T>`` constructs a type with all properties of ``T`` set to
-optional. ``T`` must be a class or an interface type. Otherwise, a
-:index:`compile-time error` occurs. No method (not even any getter or setter)
-of ``T`` is a part of the ``Partial<T>`` type. The use is represented in the
-example below:
+Type ``Partial<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to optional. ``T`` must be a class or
+an interface type. Otherwise, a :index:`compile-time error` occurs. No method
+(not even any getter or setter) of ``T`` is a part of the ``Partial<T>`` type.
+The use is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -968,10 +964,12 @@ Required Utility Type
     frontend_status: Done
 
 Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
-all properties of ``T`` set to required (i.e., not optional). ``T`` must be a
-class or an interface type, otherwise a :index:`compile-time error` occurs. No
-method (not even any getter or setter) of ``T`` is part of the ``Required<T>``
-type. Its usage is represented in the example below:
+all fields (see :ref:`Field Declarations`) and properties in their field form
+(see :ref:`Interface Properties`) of ``T`` set to required (i.e., not optional).
+``T`` must be a class or an interface type, otherwise a
+:index:`compile-time error` occurs. No method (not even any getter or setter)
+of ``T`` is part of the  ``Required<T>`` type. Its usage is represented in the
+example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1029,12 +1027,13 @@ Readonly Utility Type
 .. meta:
     frontend_status: Done
 
-Type ``Readonly<T>`` constructs a type with all properties of ``T`` set to
-``readonly``. It means that the properties of the constructed value cannot be
-reassigned. ``T`` must be a class or an interface type, otherwise a
-:index:`compile-time error` occurs. No method (not even any getter or setter)
-of ``T`` is part of the ``Readonly<T>`` type. Its usage is represented in the
-example below:
+Type ``Readonly<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to ``readonly``. It means that such
+fields and properties of the constructed type cannot be reassigned. ``T`` must
+be a class or an interface type, otherwise a :index:`compile-time error`
+occurs. No method (not even any getter or setter) of ``T`` is part of the
+``Readonly<T>`` type. Its usage is represented in the example below:
 
 .. code-block:: typescript
    :linenos:

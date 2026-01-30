@@ -308,8 +308,8 @@ A :index:`compile-time error` occurs if:
 -  ``typeReference`` names a class type that is not accessible (see
    :ref:`Accessible`).
 
--  if current class is exported but the ``typeReference`` refers to a
-   non-exported class.
+-  Current class is exported but ``typeReference`` refers to a non-exported
+   class.
 
 -  ``extends`` clause appears in the declaration of the class ``Object``.
 
@@ -426,8 +426,8 @@ The syntax of *class implementation clause* is presented below:
         typeReference (',' typeReference)*
         ;
 
-A :index:`compile-time error` occurs if ``typeReference`` fails to name an
-accessible interface type (see :ref:`Accessible`).
+If ``typeReference`` fails to name an accessible interface type (see
+:ref:`Accessible`), then a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -438,8 +438,8 @@ accessible interface type (see :ref:`Accessible`).
     // File2
     class C implements I {} // Compile-time error I is not accessible
 
-A :index:`compile-time error` occurs if current class is exported but the
-``typeReference`` refers to a non-exported interface.
+If the current class is exported but ``typeReference`` refers to a non-exported
+interface, then a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -654,11 +654,22 @@ a :index:`compile-time error` occurs for any other combinations:
    getter and setter           field, or getter and setter
    =========================== ======================================================
 
-If a property is implemented as a class field, then accessing the field via
-a class instance always means accessing an ordinary class field.
-To provide access to a field via interface instance, additional getter and
-setter are implictly implemented in the class as represented
-in the following example:
+If a class field is used to implement an interface property in any form, then:
+
+- The field is represented as an instance data member
+  (see :ref:`Field Declarations`);
+
+- Accessing the field via a class instance always means accessing
+  an ordinary class field;
+
+- Accessing a property via a reference of an interface type always means calling
+  a getter or a setter;
+
+- If an interface property is defined in a field form, then a getter and
+  a setter (if the property is not ``readonly``) are generated implictly
+  in the class by the compiler.
+
+This is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -674,19 +685,25 @@ in the following example:
     c.n = 1 // class field write
 
     let i: I = c
-    console.log(c.n) // implicitly implemented getter is called
-    i.n = 2          // implicitly implemented setter is called
+    console.log(c.n) // implicitly generated getter is called
+    i.n = 2          // implicitly generated setter is called
 
-Implicitly implemented getter and setter for the code above look as follows:
+Getter and setter generated implicitly look as follows:
 
 .. code-block:: typescript
 
     get n(): number  { return this.n }
     set n(x: number) { this.n = x }
 
-As ``this`` in the body of a getter and a setter refers to an instance
-of a class but not of an interface, such ``this.n`` constitutes
-an access to a class field but not a call to a getter or a setter.
+.. note::
+
+    - ``this.n`` in the pseudocode above is generated to provide
+      access to the class field but not as a call to a getter or a
+      setter;
+
+    - Attempting to explicitly declare a getter or a setter with the same name
+      as a field causes a :index:`compile-time error` because class members
+      must be *distinguishable* (see :ref:`Declarations`).
 
 An interface property implemented as accessor is represented
 in the example below:
@@ -699,16 +716,16 @@ in the example below:
         readonly r: string
     }
     class C implements I {
-        // 'n' is implemented as getter and setter
+        // 'n' is explicitly implemented as getter and setter
         get n(): number  { return 1 }
         set n(x: number) { /*some body*/ }
-        // 'r' is implemented as getter
+        // 'r' is explicitly implemented as getter
         get r(): string { return "abc" }
         // a setter can be defined for 'r', but it is not mandatory
         set r(x: string) { /*some body*/ }
     }
 
-A :index:`compile-time error` occurs if
+A :index:`compile-time error` occurs if:
 
     - Interface property is ``readonly``, and the getter is not defined;
     - Interface property is not ``readonly``, and either a getter or a setter
@@ -741,7 +758,7 @@ The errors are represented in the example below:
 
 If an interface property is defined in the form of an accessor
 (a getter, a setter, or both) and implemented by a class field, then
-implicit implementation is added to the class but only for the accessors
+implicit accessor bodies are generated in the class but only for accessors
 defined in the interface. The situation is represented below:
 
 .. code-block:: typescript
@@ -751,10 +768,10 @@ defined in the interface. The situation is represented below:
       get n(): number
     }
     class C implements I {
-        n: number = 1 // property implemented as a field
-        // getter is implicitly implemented
-        // setter is not implemented
-    }  
+        n: number = 1 // property is implemented as a field
+        // getter body is implicitly generated
+        // setter is not defined and not generated
+    }
 
     function foo(i: I) {
       console.log(i.n) // OK, getter is used
@@ -766,22 +783,23 @@ defined in the interface. The situation is represented below:
       set n(x: number)
     }
     class D implements J {
-        n: number = 1 // property implemented as a field
-        // getter is implicitly implemented
-        // setter is implicitly implemented
-    }  
+        n: number = 1 // property is implemented as a field
+        // getter body is implicitly generated
+        // setter body is implicitly generated
+    }
 
     function bar(j: J) {
       console.log(j.n) // OK, getter is used
       j.n = 1          // OK, setter is used
     }
 
-A :index:`compile-time error` occurs if all of the following conditions
-are met:
+A :index:`compile-time error` occurs if **all** of the following conditions
+are fulfilled:
 
     - Interface defines both a getter and a setter that have the same name;
     - Class implements a property by a field;
-    - Return type of a getter and parameter type of a setter are not of the same type.
+    - Return type of a getter and parameter type of a setter are not of the
+      same type.
 
 This situation is represented by the example below:
 
@@ -794,9 +812,9 @@ This situation is represented by the example below:
     }
     class D implements J {
         n: number = 1 // compile-time error: types mismatch
-    }  
+    }
 
-If a property defines both a getter and a setter with different types,
+If a property defines both a getter and a setter of different types,
 then the property can be implemented by accessors:
 
 .. code-block:: typescript
@@ -815,14 +833,14 @@ then the property can be implemented by accessors:
 
     let e = new E
     e.n = "123"
-    console.log(e.n) 
+    console.log(e.n)
 
 If a superclass implements an interface property, then all derived classes
 inherit the property in the same form. A :index:`compile-time error` occurs
 on an attempt to do one of the following:
 
-    - Override a superclass field by an accessor or accessors;
-    - Override a superclass accessor by a field.
+    - Overriding a superclass field by an accessor or accessors;
+    - Overriding a superclass accessor by a field.
 
 Such error situations are represented by the example below:
 
@@ -863,8 +881,8 @@ type defined in a superclass:
         n: number = 2 // ok, 'n' overrides 'n' from A and implements 'n' from I
     }
 
-A :index:`compile-time error` occurs if types mismatch as represented
-in the example below:
+If types mismatch as represented in the example below, then a
+:index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -883,13 +901,13 @@ in the example below:
     }
     class C extends B implements I { // compile-time error: types mismatch
     }
-    
+
     class C implements I {
         get n(): string { return "aa" } // compile-time error: types mismatch
-    }    
-    
+    }
+
 If a property is defined as ``readonly``, then the implementation of
-the property can either be ``readonly`` or not ``readonly`` as follows:
+the property can be ``readonly`` or not ``readonly`` as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -914,8 +932,8 @@ the property can either be ``readonly`` or not ``readonly`` as follows:
         }
     }
 
-A :index:`compile-time error` occurs if a writeble interface properties is implemented
-as ``readonly`` as represented in the example below:
+If a writeble interface property is implemented as ``readonly`` as represented
+in the example below, then a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -1515,18 +1533,44 @@ A :index:`compile-time error` occurs if:
    static field
    non-static field
 
-Any static field can be accessed only with the qualification of a class
-name (see :ref:`Field Access Expression`).
+Any static field can be accessed only with the qualification of a class name,
+while an instance field can be accessed with the object reference qualification
+(see :ref:`Field Access Expression`).
 
-A class can inherit more than one field or property with the same name from
-its superinterfaces, or from both its superclass (see :ref:`Inheritance`)
-and superinterfaces (see :ref:`Interface Inheritance`). However,
-an attempt to refer to such a field or property by its simple name within the
-class body causes a :index:`compile-time error`.
 
-The same field or property declaration can be inherited from an interface in
-more than one way. In that case, the field or property is considered
-to be inherited only once.
+If a field declaration is an implemention of one or more properties inherited
+from superinterfaces (see :ref:`Interface Inheritance`) then the types of the
+field and all propeties must be the same.
+Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    // Two unrelated interfaces
+    interface B1 {}
+    interface B2 {}
+    // Interface which extends both of them
+    interface B3 extends B1, B2 {}
+    // Class which implements B3
+    class BB3 implements B3 {}
+
+    interface II1 { f: B1 }
+    interface II2 { f: B2 } // Different property 'f' type as in II1
+    interface II3 { f: B1 } // The same property 'f' type as in II1
+
+    class CC1 implements II1, II2 {
+        f: B1  = new BB3 /* Compile-time error: field and all inherited properties
+                            must be of the same type */
+    }
+    class CC2 implements II1, II3 {
+        f: B3 = new BB3 /* Compile-time error: field and all inherited properties
+                           must be of the same type */
+    }
+    class CC3 implements II1, II3 {
+        f: B1 = new BB3 // OK, correct properties implementation
+    }
+
+
 
 .. index::
    static field
@@ -1563,6 +1607,9 @@ There are two categories of class fields as follows:
 
   Static fields are always accessed by using a qualified name notation
   wherever the class name is accessible (see :ref:`Accessible`).
+
+  A :index:`compile-time error` occurs if the name of a type parameter of the
+  surrounding declaration is used as the type of a static field.
 
 - Instance, or non-static fields
 
@@ -1806,9 +1853,9 @@ Initialization of this field can be performed in a constructor
    constructor
    constructor declaration
 
-*Field with late initialization* cannot have *field initializers* or be an
-*optional field* (see :ref:`Optional Fields`). Otherwise, a
-:index:`compile-time error` occurs.
+*Field with late initialization* cannot have *field initializers*, and can be
+neither ``readonly`` (see :ref:`Readonly Constant Fields`) nor ``optional``
+(see :ref:`Optional Fields`). Otherwise, a :index:`compile-time error` occurs.
 *Field with late initialization* must be initialized explicitly, even though
 its type has a *default value* which is ignored at the point of declaration.
 
@@ -1994,7 +2041,7 @@ accessors can be implemented as a field in a class.
         get num(): number
         set num(x: number)
     }
-    class D extends C {
+    class D implements C {
         num: number = 2 // OK!
     }
 
@@ -2951,24 +2998,30 @@ The high-level sequence of a *primary constructor* body includes the following:
 1. Optional arbitrary code that uses neither ``this`` nor ``super``.
 
 2. Mandatory call to a superconstructor (see :ref:`Explicit Constructor Call`)
-   if a class has an extension clause (see :ref:`Class Extension Clause`) on all
-   execution paths of the constructor body.
+   if a class has an extension clause (see :ref:`Class Extension Clause`).
+   A :index:`compile-time error` occurs if:
+
+   - The call is not a root-level statement within a constructor;
+
+   - An argument of the call uses ``this`` or ``super``.
+
 
 3. Mandatory execution of field initializers (if any) in the order they appear
    in a class body implicitly added by the compiler.
 
 4. Optional arbitrary code that avoids using non-initialized fields.
 
-5. Optional code that ensures all object fields to be initialized.
+5. Code that ensures all object fields to be initialized.
 
 6. Optional arbitrary code.
 
 As step 4 above cannot be guaranteed at compile time in all possible cases, the
 following strategy is to be taken:
 
-  - If the compiler can detect that a non-initialized field is accessed
-    during compilation, then a :index:`compile-time error` occurs;
-  - Otherwise, the behavior is determined by the implementation.
+  - Compiler can detect that a non-initialized field is accessed
+    during compilation, and if the check is possible in the current
+    compilation context, then a :index:`compile-time error` occurs;
+  - Otherwise, the execution-time behavior is determined by the implementation.
 
 .. code-block:: typescript
    :linenos:
@@ -2995,8 +3048,8 @@ following strategy is to be taken:
           }
     }
 
-Example below illustrates how new expressions (see :ref:`New Expressions`) work
-together with the constructor body execution sequence:
+The manner new expressions (see :ref:`New Expressions`) work together with a
+constructor body execution sequence is represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3067,7 +3120,7 @@ together with the constructor body execution sequence:
    field with late initialization
    object field
 
-The example below represents *primary constructors*:
+*Primary constructors* are represented by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3105,9 +3158,13 @@ The high-level sequence of a *secondary constructor* body includes the following
 
 1. Optional arbitrary code that does not use ``this`` or ``super``.
 
-2. Call to another same-class constructor that uses the keyword ``this`` (see
-   :ref:`Explicit Constructor Call`) on all execution paths of the constructor
-   body.
+2. Mandatory call to another same-class constructor that uses the keyword
+   ``this`` (see :ref:`Explicit Constructor Call`).
+   A :index:`compile-time error` occurs if:
+
+   - The call is not a root-level statement within a constructor;
+
+   - An argument of the call uses ``this`` or ``super``.
 
 3. Optional arbitrary code.
 

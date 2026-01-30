@@ -814,6 +814,38 @@ itself.
 
 |
 
+.. _Subtyping for Tuple Types:
+
+Subtyping for Tuple Types
+=========================
+
+.. meta:
+    frontend_status: None
+
+Any tuple type is a subtype of type ``Tuple`` (see :ref:`Type Tuple`).
+
+Tuple type ``T`` (``P``:sub:`1` ``, ... , P``:sub:`n`) is a subtype of
+type ``S`` (``P``:sub:`1` ``, ... , P``:sub:`m`), where ``n`` :math:`\geq` ``m``.
+I.e., a tuple type is a subtype of a tuple type with fewer identical
+constituent types  (:ref:`Type Identity`).
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(t1: [number], t2: [string, number]) {
+        let a: [] = t1       // ok
+        let b: [string] = t2 // ok
+
+        t1 = t2 // compile-time error
+        t2 = t1 // compile-time error
+
+        let d: [string, number, boolean] = ["a", 1, true]
+        let t2 = d // ok
+        let d = t2 // compile-time error
+    }
+
+|
+
 .. _Subtyping for Union Types:
 
 Subtyping for Union Types
@@ -892,9 +924,9 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
        let u: "abc" | "cde" | string // type of 'u' is string
 
 .. note::
-   A case of two union types is clarified as follows: union type
-   ``U2``(``U2``:sub:`1` ``| ... | U2``:sub:`n`) is a subtype of union type
-   ``U1`` (``U1``:sub:`1` ``| ... | U1``:sub:`m`) if Step 1 applies first,
+   A case of two union types is clarified as follows: union type ``U2``
+   (``U2``:sub:`1` ``| ... | U2``:sub:`n`) is a subtype of union type ``U1``
+   (``U1``:sub:`1` ``| ... | U1``:sub:`m`) if Step 1 applies first,
    followed by Step 2 applied to every type of ``U2``.
 
 
@@ -1519,8 +1551,8 @@ Type Inference for Numeric Literals
 .. meta:
     frontend_status: Partly
 
-The type of a numeric literal (see :ref:`Numeric Literals`) is firstly
-inferred from the context, if the context allows it.
+The type of a numeric literal (see :ref:`Numeric Literals`) is first
+inferred from the context, if the context allows.
 The following contexts allow inference:
 
 - :ref:`Assignment-like Contexts`;
@@ -1543,7 +1575,7 @@ a literal is not inferred:
 
     let x: b = 1 as short // compile-time error as type of expression is 'short'
 
-Type inference is used only where the *target type* is one of the two cases:
+Type inference is used only where the *target type* is one of the following two:
 
 - Case 1: *Numeric type* (see :ref:`Numeric Types`); or
 - Case 2: Union type (see :ref:`Union Types`) containing at least one
@@ -1566,7 +1598,7 @@ Where a *target type* is numeric, the type of a literal is inferred from the
    A *floating-point suffix* if present declares a ``floating-point literal``,
    and no type inference occurs.
 
-If none of the conditions above is met means that the *target type* is not a
+If none of the conditions above is met, then the *target type* is not a
 valid type for the literal, and a :index:`compile-time error` occurs.
 
 Type inference for a numeric *target type* is represented in the examples below:
@@ -1601,15 +1633,15 @@ i.e., a supertype of a numeric type:
 
 In the case the *target type* is a union type
 (``N``:sub:`1` ``| ... | N``:sub:`k` ``| ... | U``:sub:`n`), where ``k``
-:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, the inferred literal
-type is determined as follows:
+:math:`\geq` ``1`` and ``N``:sub:`i` is a numeric type, then the inferred
+literal type is determined as follows:
 
 #. If no ``N``:sub:`i` suits the literal, then the default literal type is used;
 
 #. If only a single ``N``:sub:`i` suits the literal, then ``N``:sub:`i` is the
    inferred type;
 
-#. If several ``N``'s types suit the literal, then the following checks are
+#. If several ``N`` types suit the literal, then the following checks are
    performed:
 
    - If the literal is an *integer literal*, and only one suitable *integer*
@@ -1695,7 +1727,7 @@ the following conditions:
    (see :ref:`Throw Statements`), then the lambda return type is ``never`` (see
    :ref:`Type never`).
 -  If a function, a method, or a lambda is ``async`` (see
-   :ref:`Asynchronous Features`), a return type is inferred by applying
+   :ref:`Asynchronous execution`), a return type is inferred by applying
    the above rules, and the return type ``T`` is not ``Promise``, then the return
    type is assumed to be ``Promise<T>``.
 
@@ -2667,14 +2699,20 @@ A :index:`compile-time error` occurs if an attempt is made to do the following:
          // or implement the private methods with default implementation
    }
 
-If an *instance method* is defined in a subclass with the same name as the
-*instance method* in a superclass, then the following semantic rules are
+If an *instance method* is defined or inherited by a subclass with the same name as the
+*instance method* in a superclass or superinterface, then the following semantic rules are
 applied:
 
 - If signatures are *override-compatible* (see
-  :ref:`Override-Compatible Signatures`), then *overriding* is used.
+  :ref:`Override-Compatible Signatures`), then the subclass method *overrides*
+  the superclass or superinterface method *in* the subclass.
 
-- Otherwise, :ref:`Implicit Method Overloading` is used.
+- If signatures formed using *effective signature types*
+  of original signatures are *override-compatible*, then
+  a :index:`compile-time error` occurs.
+
+- Otherwise, :ref:`Implicit Method Overloading` is used and the method is
+  inherited by the class.
 
 .. note::
    A single method in a subclass can override several methods of a superclass.
@@ -2699,6 +2737,20 @@ applied:
    class Derived extends Base {
       override method_1() {} // overriding
       method_2(p: string) {} // compile-time error
+   }
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Itf {
+      m(): void
+   }
+
+   class Base {
+      m() { }
+   }
+   class Derived extends Base implements Itf {
+      // method m inherited from Base overrides m defined in Itf
    }
 
 If more than one method of the subclass overrides the same method of the
@@ -2729,16 +2781,34 @@ Overriding in Interfaces
 If a method is defined in a subinterface with the same name as the method in
 the superinterface, then the following semantic rules apply:
 
-- A :index:`compile-time error` occurs if a method is ``private`` in
-  superinterface, but ``public`` in subinterface;
+- If a method is ``private`` in  superinterface but ``public`` in subinterface,
+  then a :index:`compile-time error` occurs;
+
+- If signatures not are *override-compatible* (see
+  :ref:`Override-Compatible Signatures`) and signatures formed by using
+  *effective signature types* of original signatures are *override-compatible*, then a
+  :index:`compile-time error` occurs.
 
 - If signatures are *override-compatible* (see
-  :ref:`Override-Compatible Signatures`), then *overriding* is used.
+  :ref:`Override-Compatible Signatures`), then the method of subinterface overrides
+  the method of superinterface *in* the subinterface.
 
-- Otherwise, :ref:`Implicit Method Overloading` is used.
+- Otherwise, if the superinterface is direct, the superinterface method is
+  inherited by the subinterface
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Base {
+      m(p: string): void  // overridden method
+      m(p: number): void  // inherited method
+   }
+   interface Derived extends Base {
+      m(p: object): void  // overriding method
+   }
 
 .. note::
-   Several methods of superinterface can be overriden by a single method in
+   Several methods of superinterface can be overridden by a single method in
    a subinterface.
 
 .. index::
@@ -3149,9 +3219,9 @@ called.
    overload set
    call
 
-If signatures of two non-generic implicitly overloaded functions are
-overload-equivalent (see :ref:Overload-Equivalent Signatures), then a
-:index:compile-time error occurs. However, an implicit overload with
+If signatures of two implicitly overloaded non-generic functions are
+overload-equivalent (see :ref:`Overload-Equivalent Signatures`), then a
+:index:`compile-time error` occurs. However, an implicit overload with
 instantiation of a generic and overload-equivalent non-generic
 function causes no compile-time error, and the textually first function is
 used:
@@ -3160,7 +3230,7 @@ used:
    :linenos:
 
      function goo(x: int): void {}
-     function goo(x: int): void {}  // compile-time error, overload-equivalent 
+     function goo(x: int): void {}  // compile-time error, overload-equivalent
                                     // non-generic functions
 
      function foo<T>(x: T) {}
@@ -3275,14 +3345,13 @@ Implicit Constructor Overloading
 .. meta:
     frontend_status: None
 
-Two or more unnamed constructors within a class are *implicitly overloaded*.
+Two or more unnamed constructors within a class are *implicitly overloaded*. If
+signatures of two overloaded constructors are *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`), then a :index:`compile-time error`
+occurs.
 
-A :index:`compile-time error` occurs, if signatures of two overloaded constructors
-are *overload-equivalent*  (see :ref:`Overload-Equivalent Signatures`).
-
-In a class instance creation expression (see :ref:`New Expressions`)
-:ref:`Overload Resolution` is used to determine exactly which one
-constructor is to be called.
+:ref:`Overload Resolution` is used to determine exactly which one constructor is
+to be called in a class instance creation expression (see :ref:`New Expressions`).
 
 .. index::
    constructor overloading
@@ -3317,7 +3386,7 @@ Signatures *S1* and *S2* are *overload-equivalent* if:
 
 - Both have the same number of parameters;
 
-- *Effective types* (see :ref:`Type Erasure`) of each parameter type in *S1*
+- *Effective signature types* (see :ref:`Type Erasure`) of each parameter type in *S1*
   and *S2* are equal.
 
 Return types of *S1* and *S2* do not affect *overload-equivalence*.
@@ -3648,14 +3717,13 @@ the following:
 
 - Explicitly overloaded methods listed in :ref:`Explicit Class Method Overload`;
 
-- Methods from a direct superclass, if any;
+- Methods from a direct superclass, if any.
 
-- Methods from direct superclasses, if any.
 
 The following steps are taken to form an overload set:
 
 #. Explicitly and implicitly overloaded methods defined
-   in a given class are added into the overload set in the order
+   in a given class are added into an overload set in the order
    described in :ref:`Forming an Overload Set`, including the
    methods that override or implement methods from supertypes.
 
@@ -3713,7 +3781,7 @@ in the example below:
         */
     }
 
-That only direct supertypes are considered for overload sets is represented in
+Only direct supertypes are considered for overload sets. It is represented in
 the example below:
 
 .. code-block:: typescript
@@ -3846,7 +3914,7 @@ with receiver* (not ordinary functions) are considered for *overload resolution*
     function foo(c: C, n: number) {}    // #3
 
     let c = new C()
-    c.foo() // only function #1, #2 are considered here, but not #1
+    c.foo() // only function #1, #2, but not #3 are considered here
 
     foo(c) // all three functions are considered here
 
@@ -3960,6 +4028,88 @@ second calls.
 
 |
 
+.. _Dynamic resolution of method calls:
+
+Dynamic resolution of method calls
+==================================
+
+.. meta:
+    frontend_status: Done
+
+The actual method to be invoked during the :ref:`Method Call Expression` evaluation is
+determined in the runtime with respect to the method statically resolved
+during the compile time (see :ref:`Overload Set at Method Call`) and the actual
+*type* of the ``objectReference``.
+
+The resolution depends on the form of the call expression:
+
+- For *static method calls*, overriding is not used and the statically
+  determined method is the one to be invoked
+
+- For *super calls*, overriding is not used and the statically resolved
+  method of superclass is the one to be invoked
+
+- For *instance method calls*, the actual type of the ``objectReference``
+  referred to as *T* is used to determine the method to be invoked.
+
+For the statically resolved method *M* defined in the type *D*, let the type *C* be
+
+- *D* if the method *M* is found in the type *D* during the execution.
+
+- The *closest* superclass of *C* that defines the method of the signature of *M*.
+
+- The *closest* superinterface of *C* that defines the method of the signature of *M*.
+
+Note: For the set of programs compiled without source code updates *C* is always *D*
+
+Type *T* (which is always a class) and the statically
+determined method *M* defined in the type *C* (where *T* is necessarily a subtype of
+*C*) are used to perform the resolution, which is defined as follows:
+
+- If *T* is *C*, the result of the resolution is *M*.
+
+- If *T* has a superclass and the resolution of the method *M*
+  for the superclass of *T* succeeds and the resolved method is defined in
+  class, let *Ms* be the result of the resolution:
+
+  - If the type *T* defines several method declarations that override the method *Ms*
+    in *T*:
+
+    - If the set of such methods contains exactly one method, this method is the
+      result of the resolution.
+
+    - Otherwise, the method resolution fails for type *T*.
+
+  - Otherwise, *Ms* is the result of the resolution.
+
+- Otherwise, the set of the *superinterfaces* of *T* is searched for a matching method:
+  
+  - Each considered method should be declared in the superinterface of *T*
+    and should override the method *M* in *C*.
+
+  - For each considered method *Mi*, there should be no other method *Mio*
+    satisfying the previous criterion that overrides *Mi* in the interface
+    that defines *Mio*.
+
+  Note: That means, all considerered method belong to subinterfaces of
+  the declaring interface of *M*.
+
+  If the set contains exactly one default method, this method is the result of
+  the resolution. Otherwise, the set either
+
+  - has multiple default methods
+
+  - has no default methods
+
+  In these cases, the resolution fails for type *T*.
+
+If the method resolution fails, a runtime error is thrown. 
+
+Note: For the set of programs compiled without source code updates
+the resolution always results in method resolved and does never throw.
+
+|
+
 .. _Type Erasure:
 
 Type Erasure
@@ -3968,25 +4118,34 @@ Type Erasure
 .. meta:
     frontend_status: Done
 
-*Type erasure* is the compilation technique which provides a special handling
-of certain language *types*, primarily :ref:`Generics`, when applied to the
-semantics of the following expressions:
+*Type erasure* is the concept that refers to a special handling of some language
+*types*, primarily :ref:`Generics`, as members of a smaller subset of the language
+*type system* when considering certain parts of the language semantics.
+The subset defined via type mapping is referred to as *effective type*.
+*Effective type* mapping satisfies the following properties:
+
+- For arbitrary types ``A`` and ``B``, if ``A`` is a subtype of ``B``, then an
+  ``EffectiveType(A)`` is a subtype of ``EffectiveType(B)``
+
+- For arbitrary types ``A`` and ``B``, ``EffectiveType(A | B)`` is identical to
+  ``EffectiveType(A) | EffectiveType(B)``
+
+- For an arbitrary type ``A``, ``A | undefined`` is a subtype of ``EffectiveType(A | undefined)``
+
+  - In particular, for an arbitrary type ``A``, ``undefined`` is a subtype of ``EffectiveType(A)``
+
+An original type and an *effective type* can have relationships of two kinds:
+
+-  If *Effective type* of ``T`` is identical to ``T``, then type ``T`` is *preserved by type erasure*;
+-  Otherwise, the type is considered as *affected by type erasure*.
+
+If ``T | undefined`` is *preserved by type erasure*, then type ``T`` is *preserved
+up to undefined*.
+
+This property limits the possible applications of type-checking expressions:
 
 -  :ref:`InstanceOf Expression`;
 -  :ref:`Cast Expression`.
-
-As a result, special types must be used for the execution of such expressions.
-Certain *types* in such expressions are handled as their corresponding
-*effective types*, while the *effective type* is defined as type mapping.
-The *effective type* of a specific type ``T`` is always a supertype of ``T``.
-As a result, the relationship of an original type and an *effective type* can
-have the following two kinds:
-
--  *Effective type* of ``T`` is identical to ``T``, and *type erasure* has no
-   effect. So, type ``T`` is *retained*.
-
--  If *effective type* of ``T`` is not identical to ``T``, then the type ``T``
-   is considered affected by *type erasure*, i.e., *erased*.
 
 .. index::
    type erasure
@@ -4001,7 +4160,8 @@ have the following two kinds:
    type mapping
    supertype
 
-Type mapping determines the *effective types* as follows:
+Type mapping determines *effective types* as follows (the ``undefined`` union
+member is excluded in the right-hand-side column for brevity):
 
 .. list-table::
    :width: 100%
@@ -4009,26 +4169,28 @@ Type mapping determines the *effective types* as follows:
    :header-rows: 1
 
    * - **Original Type**
-     - **Effective Type**
+     - **Effective Type (undefined member excluded)**
+   * - ``Any``
+     - ``Any``
+   * - ``never``
+     - ``never``
+   * - ``undefined``
+     - ``undefined``
+   * - ``null``
+     - ``null``
    * - *Generic types* (see :ref:`Generics`)
      - Instantiation of the same generic type
        (see :ref:`Explicit Generic Instantiations`) with type arguments selected
        in accordance with :ref:`Type Parameter Variance`:
-   * -
-     -
+
        - *Covariant* type parameters are instantiated with the constraint type;
-   * -
-     -
        - *Contravariant* type parameters are instantiated with type ``never``;
-   * -
-     -
        - *Invariant* type parameters are instantiated with no type argument,
          i.e., ``Array<T>`` is instantiated as ``Array<>``.
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
-     - Union type constructed from effective types
-       ``T1 | T2 ... Tn`` within the original union type.
+     - Union of effective types of each constituent type of ``T1 ... Tn``.
    * - :ref:`Array Types` in the form ``T[]``
      - Same as for a generic type ``Array<T>``.
    * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)
@@ -4044,13 +4206,41 @@ Type mapping determines the *effective types* as follows:
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
-   * - undefined
-     - ``undefined``
-   * - null
-     - ``null``
-   * - Any
-     - ``Any``
+   * - Awaited<T>
+     - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then
+         the Effective type (Awaited<T>) is the Effective type (T);
+       - If ``T`` is a ``Promise<U>``, then the Effective type (Awaited<T>)
+         is the Effective type (U);
+       - If ``T`` is a type parameter with ``in`` variance, then the Effective
+         type (Awaited<T>) is ``never``;
+       - If ``T`` is a type parameter with ``out`` variance or no variance
+         specified, then the Effective type (Awaited<T>) is the Effective type
+         (upper-bound(T)).
+   * - NonNullable<T>
+     - Effective type (T) - ``null``
+   * - Partial<T>
+     - Special runtime partial class
+   * - Required<T>
+     - ``Effective type (T)``
+   * - Readonly<T>
+     - ``Effective type (T)``
+   * - Record<K, V>
+     - ``Map <Effective type (K), Effective type (V)>``
+   * - ReturnType<F>
+     - ``Effective type (return type of F)``
 
+Additional type mapping defines an *effective signature type*, i.e.,
+an *effective type* of a corresponding type except the following:
+
+.. list-table::
+   :width: 100%
+   :widths: 45 55
+   :header-rows: 1
+
+   * - **Original Type**
+     - **Effective signature type**
+   * - Return type ``never``
+     - ``never``
 
 Otherwise, the original type is *preserved*.
 
@@ -4078,32 +4268,33 @@ Otherwise, the original type is *preserved*.
    parameter type
    type preservation
 
-In addition, accessing a value of type ``T``, particularly by
-:ref:`Field Access Expression`, :ref:`Method Call Expression`, or
-:ref:`Function Call Expression`, can cause ``ClassCastError`` thrown if
-type ``T`` and the ``target`` type are both affected by *type erasure*, and the
-value is produced by a :ref:`Cast Expression`.
+A program that uses types not *preserved* by erasure, and relies
+on certain cast expressions (see :ref:`Cast Expression`) which narrow
+values to types not *preserved up to undefined*,
+can cause ``ClassCastError`` thrown during the evaluation of
+:ref:`Field Access Expression`, :ref:`Method Call Expression`,
+or :ref:`Function Call Expression`. Checks that result in the above-mentioned
+runtime errors ensure type safety of program execution:
 
 .. code-block:: typescript
    :linenos:
 
     class A<T> {
-      field?: T
+      field: T
 
-      test(value: Object) {
-        return value instanceof T  // CTE, T is erased
-      }
-
-      cast(value: Object) {
-        return value as T          // OK, but check is done during execution
+      constructor(value: T) {
+        this.field = value
       }
     }
 
-    function castToA(p: Object) {
-      p instanceof A<number> // CTE, A<number> is erased
-
-      return p as A<number>  // OK, but check is performed against type A, but not A<number>
+    function unsafe(p: Object): A<number> {
+      return p as A<number>  // OK, but check is performed against type A<>, but not against A<number>
+                             // thus it can cause exception later during execution
     }
+
+    let a: A<number> = unsafe(new A<string>("a")) // A<string> resides in A<number>
+
+    let n = a.field // An exception is raised as the expected type is number but the actual type is string
 
 .. index::
    access
@@ -4160,19 +4351,19 @@ executed for the first time:
 - Calling a function or accessing a variable of a namespace or a module.
 
 .. note::
-   None of the operations above invokes an *static initialization* recursively
-   if the *static initialization* of the same entity is not complete.
+   None of the operations above invokes a *static initialization* of the same
+   entity recursively if it is not completed.
 
-   For namespaces, the code in a static block is executed only when
-   namespace members are used in the program (an example is provided in
+   The code in a static block of a namespace is executed only if namespace
+   members are used in a program (an example is provided in
    :ref:`Namespace Declarations`).
 
-An initialization is not complete if the execution of an *static
+An initialization is not complete if the execution of a *static
 initialization* is terminated due to an exception thrown. A repeated attempt to
 execute the *static initialization* can throw an exception again.
 
-If an *static initialization* invokes a concurrent execution (see
-:ref:`Coroutines (Experimental)`), then all *coroutines* that try to invoke it
+If a *static initialization* invokes a concurrent execution (see
+:ref:`Execution model`), then all |C_JOBS| that try to invoke it
 are synchronized. The synchronization is to ensure that the initialization
 is performed only once, and that the operations requiring the *static
 initialization* to be performed are executed after the initialization completes.
@@ -4195,7 +4386,6 @@ circularly dependent, then a deadlock can occur.
    exception
    invocation
    concurrent execution
-   coroutine
    synchronization
    deadlock
 
@@ -4240,53 +4430,6 @@ runtime evaluation is performed as follows:
    default value
    value
    type
-
-|
-
-.. _Dispatch:
-
-Dispatch
-********
-
-.. meta:
-    frontend_status: Done
-
-As a result of assignment (see :ref:`Assignment`) to a variable or call (see
-:ref:`Method Call Expression` or :ref:`Function Call Expression`), the actual
-runtime type of a parameter of class or interface can become different from the
-type explicitly specified or inferred at the point of declaration.
-
-In this situation method calls are dispatched during program execution based on
-their actual type.
-
-This mechanism is called *dynamic dispatch*. Dynamic dispatch is used in
-OOP languages to provide greater flexibility and the required level of
-abstraction. Unlike *static dispatch* where the particular method to be called
-is known at compile time, *dynamic dispatch* requires additional action during
-program code execution. Compilation tools can optimize dynamic to static dispatch.
-
-.. index::
-   dispatch
-   assignment
-   variable
-   call
-   method call expression
-   method
-   method call
-   function call
-   function
-   runtime
-   runtime type
-   parameter
-   class
-   specified type
-   inferred type
-   point of declaration
-   dynamic dispatch
-   object-oriented programming (OOP)
-   static dispatch
-   compile time
-   compilation tool
 
 |
 
