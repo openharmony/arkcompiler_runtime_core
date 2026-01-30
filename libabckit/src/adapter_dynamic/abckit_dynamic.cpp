@@ -1215,6 +1215,13 @@ void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         file->strings.insert({sImpl, std::move(s)});
     }
 }
+
+void ClearProgramDebugInfo(pandasm::Program &program)
+{
+    for (auto &[name, func] : program.function_table) {
+        func.local_variable_debug.clear();
+    }
+}
 }  // namespace
 
 namespace libabckit {
@@ -1235,6 +1242,7 @@ AbckitFile *OpenAbcDynamic(const char *path, size_t len)
         return nullptr;
     }
     auto &prog = const_cast<pandasm::Program &>(abc2program->GetProgram());
+    ClearProgramDebugInfo(prog);
     auto file = new AbckitFile();
     file->frontend = Mode::DYNAMIC;
     CreateWrappers(&prog, file);
