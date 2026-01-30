@@ -194,7 +194,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns true if strings are equal and false otherwise
      *
      * @remarks
-     * Implemented as native function,  @see `equals()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L596).
+     * Implemented as native function,  @see `equals()` intrinsic.
      */
     public native equals(to: Any): boolean;
 
@@ -204,7 +204,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns length of this string
      *
      * @remarks
-     * Implemented as native function,  @see `getLength()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L563).
+     * Implemented as native function,  @see `getLength()` intrinsic.
      */
     public native getLength(): int;
 
@@ -227,7 +227,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @remarks
-     * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
+     * Implemented as native function,  @see `charAt()` intrinsic.
      */
     public native charAt(index: int): char;
 
@@ -236,7 +236,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns true if empty and false otherwise
      * @remarks
-     * Implemented as native function,  @see `length()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L574).
+     * Implemented as native function,  @see `length()` intrinsic.
      */
     public native isEmpty(): boolean;
 
@@ -338,7 +338,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns char[] array
      *
      * @remark
-     * Implemented as native function,  @see `getChars()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L231).
+     * Implemented as native function,  @see `getChars()` intrinsic.
      */
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
