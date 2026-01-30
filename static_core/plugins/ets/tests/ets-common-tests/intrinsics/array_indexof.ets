@@ -211,8 +211,8 @@ function testArrayOfMixedTypes() {
     arktest.assertEQ(a.indexOf(""), 99999, 'a.indexOf("")');
     arktest.assertEQ(a.indexOf("0"), 123450, 'a.indexOf("0")');
     arktest.assertEQ(a.indexOf(+0), 123451, 'a.indexOf(0) +0, +0===+0');
-    arktest.assertEQ(a.indexOf(0), 123452, 'a.indexOf(0) -0, 0===-0');
-    arktest.assertEQ(a.indexOf(-0), 123452, 'a.indexOf(-0) -0, -0===-0');
+    arktest.assertEQ(a.indexOf(0), 123451, 'a.indexOf(0) -0, 0===-0');
+    arktest.assertEQ(a.indexOf(-0), 123451, 'a.indexOf(-0) -0, -0===-0');
     
     arktest.assertEQ(a.indexOf(5.5), 5555, 'a.indexOf(5.5)');
     arktest.assertEQ(a.indexOf(-(4 / 3)), 14, 'a[14]=_float===-(4/3)');
