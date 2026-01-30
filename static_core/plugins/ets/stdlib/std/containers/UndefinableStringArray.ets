@@ -185,13 +185,13 @@ export namespace containers {
         /**
          * Pops a value from the end of the List
          * @returns { UndefinableString } Popped value
-         * @throws { AssertionError } When the array is empty
+         * @throws { RangeError } When the array is empty
          * @syscap SystemCapability.Utils.Lang
          * @since 24
          */
         public popBack(): UndefinableString {
             if (this.curSize === 0) {
-                throw new AssertionError("No data to popBack from UndefinableStringArray!")
+                throw new RangeError("No data to popBack from UndefinableStringArray!")
             }
             --this.curSize
             return this.data[this.curSize]

@@ -1338,7 +1338,7 @@ class DataFrame {
             res.append(join(arrObj, ", "))
         } else {
             const arrType = Class.of(arrObj)
-            throw new AssertionError(`unexpected FixedArray type: ${arrType.getName()}`)
+            throw new TypeError(`unexpected FixedArray type: ${arrType.getName()}`)
         }
         res.append("]")
         return res.toString()

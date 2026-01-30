@@ -948,7 +948,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      *
      * @param { Set<{{updatedSubsetType}}> } set - A set object to convert to an array.
      * @returns { {{element['name']}}Array } - A new {{element['name']}}Array
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { RangeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -961,7 +961,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         for (let i:int = 0; i < length; ++i) {
             const x = iter.next()
             if (x.done) {
-                throw new AssertionError('Wrong Length')
+                throw new RangeError('Wrong Length')
             }
             {%- if element.get('name') == 'BigUint64' %}
             result.setUnsafeClamp(i, x.value!{{numberBigIntToPrimitive}})

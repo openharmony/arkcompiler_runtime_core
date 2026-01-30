@@ -330,7 +330,7 @@ export abstract class Type extends Object {
             case TypeKind.ENUM:
                 return new EnumType(td, contextLinker)
             default:
-                throw new AssertionError("Unexpected TypeKind " + kind)
+                throw new TypeError("Unexpected TypeKind " + kind)
         }
     }
 
@@ -338,7 +338,7 @@ export abstract class Type extends Object {
      * from
      *
      * @returns {Type}
-     * @throws {AssertionError} - Input parameter error.
+     * @throws { TypeError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -346,7 +346,7 @@ export abstract class Type extends Object {
      */
     public static from<T>(): Type {
         //should never be executed since FE lowering this
-        throw new AssertionError("Type.from call will be casted by frontend")
+        throw new TypeError("Type.from call will be casted by frontend")
     }
 
     /**
@@ -3312,7 +3312,7 @@ export final class ArrayType extends Type {
      * @param {Class} arrayClass Array class
      * @param {RuntimeTypeDescriptor} [elemTD] Optional element type descriptor
      * @returns {ArrayType} ArrayType instance
-     * @throws { AssertionError } Unexpected TypeKind
+     * @throws { TypeError } Unexpected TypeKind
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -3348,7 +3348,7 @@ export final class ArrayType extends Type {
             case TypeKind.UNION:
                 return new ArrayType(arrayClass, elemTD)
             default:
-                throw new AssertionError("Unexpected TypeKind " + ek)
+                throw new TypeError("Unexpected TypeKind " + ek)
         }
     }
 
