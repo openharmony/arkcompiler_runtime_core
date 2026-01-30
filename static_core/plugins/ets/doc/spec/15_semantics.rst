@@ -973,15 +973,12 @@ and return type ``FR``  is a *subtype* of function type ``S`` with parameters
 ``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
 following conditions are met:
 
--  ``m`` :math:`\leq` ``n``;
-
+-  ``m`` :math:`\leq` ``n``.
 -  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
-   subtype of parameter type of ``FP``:sub:`i` (contravariance),
-   and ``SP``:sub:`i` is:
-
-   -  Rest parameter where ``FP``:sub:`i` is a rest parameter;
-   -  Optional parameter where ``FP``:sub:`i` is an optional parameter.
-
+   subtype of parameter type of ``FP``:sub:`i` (contravariance).
+-  ``SP``:sub:`i` is a rest parameter where ``FP``:sub:`i` is a rest parameter.
+-  ``SP``:sub:`i` is an optional parameter where ``FP``:sub:`i` is an optional
+   parameter.
 -  Type ``FR`` is a subtype of ``SR`` (covariance).
 
 .. index::
