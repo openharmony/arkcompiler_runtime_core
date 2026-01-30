@@ -1713,10 +1713,6 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return EscapeStringBuilder.process(elem.asString())
 
         case jsonx.JsonType.JsonNumber:
-            const bigintValue = elem.tryAsBigInt()
-            if (bigintValue != undefined) {
-                return bigintValue.toString()
-            }
             const longValue = elem.tryAsLong()
             if (longValue != undefined) {
                 return longValue.toString()
@@ -1724,6 +1720,10 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             const doubleValue = elem.tryAsDouble()
             if (doubleValue != undefined) {
                 return doubleValue.toString()
+            }
+            const bigintValue = elem.tryAsBigInt()
+            if (bigintValue != undefined) {
+                return bigintValue.toString()
             }
             return "null"
 
@@ -2412,16 +2412,13 @@ class JsonElementParser
     tokens: Array<JsonToken>
     position: int
     reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
-    bigIntOpt: int = 0
+    bigIntOpt: jsonx.BigIntMode = jsonx.BigIntMode.DEFAULT
 
     constructor(source: string, options?: jsonx.ParseOptions) {
         this.source = source
         this.tokens = JsonLexer.fromString(source).tokenize()
         this.position = 0
-        this.bigIntOpt = options ? options.bigIntMode : 0
-        if (this.bigIntOpt > 2 || this.bigIntOpt < 0) {
-            throw new Error("bigIntMode value should be from 0 to 2, current value is " + this.bigIntOpt)
-        }
+        this.bigIntOpt = options ? options.bigIntMode : jsonx.BigIntMode.DEFAULT
     }
 
     constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement, options?: jsonx.ParseOptions) {
@@ -2429,10 +2426,7 @@ class JsonElementParser
         this.tokens = JsonLexer.fromString(source).tokenize()
         this.position = 0
         this.reviver = reviver
-        this.bigIntOpt = options ? options.bigIntMode : 0
-        if (this.bigIntOpt > 2 || this.bigIntOpt < 0) {
-            throw new Error("bigIntMode value should be from 0 to 2, current value is" + this.bigIntOpt)
-        }
+        this.bigIntOpt = options ? options.bigIntMode : jsonx.BigIntMode.DEFAULT
     }
 
     public lookahead(offset: int): JsonToken | undefined
@@ -2555,10 +2549,10 @@ class JsonElementParser
         if (token.value.includes(".")) {
             return jsonx.JsonElement.createDouble(Double.parseFloat(token.value))
         }
-        if (this.bigIntOpt == 2) {
+        if (this.bigIntOpt == jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT) {
             return jsonx.JsonElement.createBigInt(BigInt(token.value))
         }
-        if (this.bigIntOpt == 1) {
+        if (this.bigIntOpt == jsonx.BigIntMode.PARSE_AS_BIGINT) {
             try {
                 return jsonx.JsonElement.createLong(Long.parseInt(token.value, 10))
             } catch (e) {
