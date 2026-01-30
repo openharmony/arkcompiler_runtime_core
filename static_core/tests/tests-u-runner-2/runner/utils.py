@@ -49,6 +49,7 @@ from runner.common_exceptions import (
 from runner.enum_types.base_enum import BaseEnum, EnumT
 from runner.enum_types.configuration_kind import ArchitectureKind, OSKind
 from runner.enum_types.qemu import QemuKind
+from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
@@ -389,6 +390,15 @@ def get_class_by_name(clazz: str) -> type:
     class_name = clazz[last_dot + 1:]
     class_module_runner: ModuleType = importlib.import_module(class_path)
     class_obj: type = getattr(class_module_runner, class_name)
+    return class_obj
+
+
+def get_validator_class(clazz: str) -> type[IValidator]:
+    class_obj = get_class_by_name(clazz)
+    if not issubclass(class_obj, IValidator):
+        raise InvalidConfiguration(
+            f"Validator class '{clazz}' not found. "
+            f"Check value of 'validator' parameter")
     return class_obj
 
 
