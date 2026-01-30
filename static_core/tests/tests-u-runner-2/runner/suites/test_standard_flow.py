@@ -402,6 +402,21 @@ class TestStandardFlow(ITestFlow, Test):
 
         return passed
 
+    def expand_last_call_macros(self, step: Step) -> list[str]:
+        flags = step.args[:]
+        while utils.list_has_macros(flags):
+            flags = self.__expand_last_call_in_args(flags)
+        if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
+            if 'dynamic-ast' in self.metadata.es2panda_options:
+                index = flags.index("--dump-ast")
+                flags[index] = "--dump-dynamic-ast"
+            if 'module' in self.metadata.es2panda_options:
+                flags.insert(0, "--module")
+        if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
+            prepend_options = self.__add_options(self.metadata.ark_options)
+            flags = utils.prepend_list(prepend_options, flags)
+        return flags
+
     def _continue_after_process_dependent_files(self) -> bool:
         """
         Processes dependent files
@@ -488,7 +503,7 @@ class TestStandardFlow(ITestFlow, Test):
         assert step.executable_path is not None
         params = BinaryParams(
             executor=step.executable_path,
-            flags=self.__expand_last_call_macros(step),
+            flags=self.expand_last_call_macros(step),
             env=cmd_env,
             timeout=step.timeout,
             use_qemu=not step.skip_qemu
@@ -547,7 +562,7 @@ class TestStandardFlow(ITestFlow, Test):
     def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
         flags: list[str] = []
         for arg in self.__fix_entry_point(args):
-            flag = utils.replace_macro(str(arg), "test-id", self.test_id)
+            flag = Macros.process_special_macros(str(arg), self.test_id)
             if utils.has_macro(flag):
                 flag_expanded: str | list[str] = ""
                 try:
@@ -560,21 +575,6 @@ class TestStandardFlow(ITestFlow, Test):
                     flags.extend(flag_expanded.split())
             else:
                 flags.extend(flag.split())
-        return flags
-
-    def __expand_last_call_macros(self, step: Step) -> list[str]:
-        flags = step.args[:]
-        while utils.list_has_macros(flags):
-            flags = self.__expand_last_call_in_args(flags)
-        if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
-            if 'dynamic-ast' in self.metadata.es2panda_options:
-                index = flags.index("--dump-ast")
-                flags[index] = "--dump-dynamic-ast"
-            if 'module' in self.metadata.es2panda_options:
-                flags.insert(0, "--module")
-        if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
-            prepend_options = self.__add_options(self.metadata.ark_options)
-            flags = utils.prepend_list(prepend_options, flags)
         return flags
 
     def __add_panda_files(self) -> str:
@@ -636,7 +636,7 @@ class ValidatorUtils:
                                             step_validator_result.kind,
                                             step_validator_result.description)
                 if step_validator_result.stop_runtime_validation:
-                    # we have a comparison result for runtime step - no need in output comparision with expected for
+                    # we have a comparison result for runtime step - no need in output comparison with expected for
                     # further steps
                     self._delete_runtime_validator(step.step_kind.value)
             return ValidationResult(True, ValidatorFailKind.NONE, "")
