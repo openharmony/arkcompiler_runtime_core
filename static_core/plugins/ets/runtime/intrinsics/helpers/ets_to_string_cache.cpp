@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -301,12 +301,12 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
 template <typename T, typename Derived, typename Hash>
 std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOrCacheImpl(EtsCoroutine *coro, T number)
 {
+    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     // NOTE(ipetrov): hack for 128 bit ObjectHeader
 #if !defined(PANDA_32_BIT_MANAGED_POINTER)
     UNUSED_VAR(coro);
     return {ToString(number), ToStringResult::STORE_NEW};
 #else
-    EVENT_ETS_CACHE("Fastpath: create string from number with cache");
     auto index = GetIndex(number);
     // Atomic with acquire order reason: write of `elem` to array is dependency-ordered before reads from loaded `elem`
     auto *elem = Base::Get(index, std::memory_order_acquire);

@@ -15,7 +15,10 @@
 
 //! CHECKER       std.core Array fill intrinsic
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--heap-size-limit=12345678 --compiler-hotness-threshold=0 --compiler-regex='.*escompat_array_fill.ETSGLOBAL::test_array.*'", entry: "escompat_array_fill.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "escompat_array_fill.ETSGLOBAL::main",
+//!                options: "--heap-size-limit=#{is_managed_ptr_64_bit_config? ? 20000000 : 12345678} \
+//!                  --compiler-hotness-threshold=0 --compiler-regex='.*ETSGLOBAL::test_array.*'"
+//!
 //! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*std.core.Array::fill/

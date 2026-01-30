@@ -89,6 +89,9 @@ OptionParser.new do |opts|
   opts.on('--is-release=ISRELEASE', 'Uranner option if --release should be added') do |v|
     options.release = v.eql?("true") ? true : false
   end
+  opts.on('--use-managed-ptr-64-bit=ISMANAGEDPTR64BIT', 'Use 64 bit managed pointer') do |v|
+    options.use_managed_ptr_64_bit = v.eql?("true") ? true : false
+  end
   opts.on('--interop', 'Do interop-specific actions')
     options.interop = true
 end.parse!(into: options)
@@ -306,6 +309,10 @@ class Checker
 
   def is_hybrid_config?
     @options.build_config == BuildConfig::Hybrid
+  end
+
+  def is_managed_ptr_64_bit_config?
+    @options.use_managed_ptr_64_bit
   end
 
   def append_line(line)
