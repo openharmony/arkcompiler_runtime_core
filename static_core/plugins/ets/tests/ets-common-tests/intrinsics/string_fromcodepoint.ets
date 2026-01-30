@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,11 +32,6 @@ function testFromCodePoint() {
     arktest.expectError(() => { String.fromCodePoint(-1) });
     // Bigger than 0x10FFFF
     arktest.expectError(() => { String.fromCodePoint(0x10FFFF + 1) });
-    // Not Integer
-    arktest.expectError(() => { String.fromCodePoint(3.14) });
-    // special values
-    arktest.expectError(() => { String.fromCodePoint(Infinity) });
-    arktest.expectError(() => { String.fromCodePoint(NaN) });
 }
 
 function main(): void {

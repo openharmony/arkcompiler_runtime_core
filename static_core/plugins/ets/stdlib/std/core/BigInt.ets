@@ -303,9 +303,10 @@ export final class BigInt {
     public toStringAsBinary(): string {
         let reversedInts = BigInt.reverse(this.bytes)
         let intToBinaryString = (value: Long) => { return value.toString(2) }
-        let result = new StringBuilder(intToBinaryString((reversedInts[0]!).toLong() & BigInt.maskSys))
+        const str = (i: int) => { return intToBinaryString((reversedInts[i]!).toLong() & BigInt.maskSys) }
+        let result = new StringBuilder(str(0))
         for (let i = 1; i < reversedInts.length; ++i) {
-            result = result.append(intToBinaryString((reversedInts[i]).toLong() & BigInt.maskSys).padStart(BigInt.shiftSys, '0'))
+            result = result.append(str(i).padStart(BigInt.shiftSys.toInt(), '0'))
         }
         return result.toString()
     }
@@ -338,8 +339,8 @@ export final class BigInt {
     }
 
     public toStringAsPowerOfTwoRadix(radix: int): string {
-        let chunkSize: Number = Math.log2(radix)
-        if (!chunkSize.isInteger() || radix < 2) {
+        let chunkSize: int = Math.ceil(Math.log2(radix)).toInt()
+        if (radix < 2) {
             throw new Error("BigInt::toStringAsPowerOfTwoRadix(): invalid radix: " + radix)
         }
         let result = new StringBuilder
@@ -350,10 +351,10 @@ export final class BigInt {
         return result.toString()
     }
 
-    private sliceToBinaryChunks(chunkSize: Number): FixedArray<string> {
+    private sliceToBinaryChunks(chunkSize: int): FixedArray<string> {
         let binaryRepresentation: string = this.toStringAsBinary()
         if (binaryRepresentation.length % chunkSize != 0) {
-            let requiredLength: Number = binaryRepresentation.length + (chunkSize - binaryRepresentation.length % chunkSize)
+            const requiredLength: int = binaryRepresentation.length + (chunkSize - binaryRepresentation.length % chunkSize)
             binaryRepresentation = binaryRepresentation.padStart(requiredLength, '0')
         }
         let chunksCount: int = (binaryRepresentation.length / chunkSize).toInt()

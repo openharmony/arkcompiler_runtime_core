@@ -2747,7 +2747,7 @@ export class JsonLexer
         }
 
         let codePoint = Double.parseInt(codeStr.toString(), 16).toInt()
-        return String.fromCharCode(codePoint.toDouble())
+        return String.fromCharCode(codePoint)
     }
 
     /**

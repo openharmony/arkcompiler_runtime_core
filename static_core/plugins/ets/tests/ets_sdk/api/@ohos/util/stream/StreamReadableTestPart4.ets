@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ function testReadablePushAndReadWithUtf8EncodingOption() {
     let input = new Uint8Array([0xE4, 0xBD, 0xA0, 0xE5, 0xA5, 0xBD]);
     const stringdecoder = new StringDecoderReadable(enc);
     stringdecoder.push(input);
-    let res = stringdecoder.read(input.length.toInt());
+    let res = stringdecoder.read(input.length);
     arktest.assertEQ(res, null);
 }
 

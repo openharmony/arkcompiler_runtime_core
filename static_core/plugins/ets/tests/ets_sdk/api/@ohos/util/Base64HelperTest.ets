@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ function testEncodeDecodeBasicSync() {
     let encodedBytes: Uint8Array = helper.encodeSync(input, util.Type.BASIC);
     let encodedStr: String = "";
     for (let i: int = 0; i < encodedBytes.length; i++) {
-        encodedStr += String.fromCharCode(encodedBytes[i]);
+        encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
     let decoded: Uint8Array = helper.decodeSync(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
@@ -177,7 +177,7 @@ function testNoOptionsEncodeDecodeSync(): void {
     let encodedBytes: Uint8Array = helper.encodeSync(input);
     let encodedStr: String = "";
     for (let i: int = 0; i < encodedBytes.length; i++) {
-        encodedStr += String.fromCharCode(encodedBytes[i]);
+        encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
     let decoded: Uint8Array = helper.decodeSync(encodedStr);
     arktest.assertEQ(decoded.length, input.length);
@@ -210,7 +210,7 @@ async function testEncodeDecodeAsyncBytes(): Promise<void> {
     let encodedBytes: Uint8Array = await helper.encode(input, util.Type.BASIC);
     let encodedStr: string = "";
     for (let i: int = 0; i < encodedBytes.length; i++) {
-        encodedStr += String.fromCharCode(encodedBytes[i]);
+        encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
     let decoded: Uint8Array = await helper.decode(encodedStr, util.Type.BASIC);
     arktest.assertEQ(decoded.length, input.length);
@@ -253,7 +253,7 @@ async function testNoOptionsEncodeDecodeAsyncBytes(): Promise<void> {
     let encodedBytes: Uint8Array = await helper.encode(input);
     let encodedStr: string = "";
     for (let i: int = 0; i < encodedBytes.length; i++) {
-        encodedStr += String.fromCharCode(encodedBytes[i]);
+        encodedStr += String.fromCharCode(encodedBytes[i].toInt());
     }
     let decoded: Uint8Array = await helper.decode(encodedStr);
     arktest.assertEQ(decoded.length, input.length);

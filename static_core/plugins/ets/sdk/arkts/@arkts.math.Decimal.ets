@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1352,13 +1352,13 @@ export class Decimal {
             r = new Decimal(s);
         }
 
-        let sd = (e = Decimal.precision) + 3;
+        let sd: int = (e = Decimal.precision).toInt() + 3;
         let rep: int = 0;
         let m: boolean = false;
         while (true) {
             let t = r;
             r = t.add(Utils.divide(x, t, sd + 2, 1)).mul(0.5);
-            if (Utils.digitsToString(t.d!).slice(0, sd) === (n = Utils.digitsToString(r.d!)).slice(0, sd)) {
+            if (this.isDigitsEqual(t.d!, r.d!, 0, sd)) {
                 n = n.slice(sd - 3, sd + 1);
                 if (n == '9999' || !rep && n == '4999') {
                     if (!rep) {
@@ -1430,7 +1430,7 @@ export class Decimal {
             r = new Decimal(s);
         }
 
-        let sd = (e = Decimal.precision) + 3;
+        let sd: int = (e = Decimal.precision).toInt() + 3;
 
         // Halley's method. Compare Newton's method.
         let rep: int = 0;
@@ -1441,7 +1441,8 @@ export class Decimal {
             let t3plusx = t3.add(x);
             r = Utils.divide(t3plusx.add(x).mul(t), t3plusx.add(t3), sd + 2, 1);
             // Replace with for-loop and checkRoundingDigits.
-            if (Utils.digitsToString(t.d!).slice(0, sd) === (n = Utils.digitsToString(r.d!)).slice(0, sd)) {
+            if (this.isDigitsEqual(t.d!, r.d!, 0, sd)) {
+                n = Utils.digitsToString(r.d!).slice(0, sd)
                 n = n.slice(sd - 3, sd + 1);
                 // The 4th rounding digit may be in error by -1 so if the 4 rounding digits are 9999 or 4999
                 // , i.e. approaching a rounding boundary, continue the iteration.
@@ -1589,7 +1590,7 @@ export class Decimal {
             return x;
         }
 
-        let pr = Decimal.precision;
+        let pr = Decimal.precision.toInt()
         let rm = Decimal.rounding;
         if (y.equals(1)) {
             return Utils.finalise(x, pr, rm);
@@ -1638,7 +1639,7 @@ export class Decimal {
             if (Utils.checkRoundingDigits(r.d!, pr, rm)) {
                 e = pr + 10;
                 r = Utils.finalise(this.naturalExponential(y.mul(this.naturalLogarithm(x, e + k)), e), e + 5, 1);
-                if (Utils.toNumber(Utils.digitsToString(r.d!).slice(pr + 1, pr + 15)) + 1 == 1e14) {
+                if (this.check14Nines(r.d!, pr)) {
                     r = Utils.finalise(r, pr + 1, 0);
                 }
             }
@@ -1658,6 +1659,13 @@ export class Decimal {
      */
     public exp(): Decimal {
         return this.naturalExponential(this);
+    }
+
+   /**
+    * Check for 14 nines from the 2nd rounding digit, as the first may be 4.
+    */
+    private check14Nines(d: Array<double>, k: int) {
+        return (Utils.toNumber(Utils.digitsToString(d).slice(k + 1, k + 15)) + 1 == 1e14)
     }
 
     /**
@@ -1732,8 +1740,7 @@ export class Decimal {
                 r = Utils.divide(num, denominator, sd, 1);
 
                 if (!inf) {
-                    // Check for 14 nines from the 2nd rounding digit, as the first may be 4.
-                    if (+Utils.toNumber(Utils.digitsToString(r.d!).slice(k + 1, k + 15)) + 1 == 1e14) {
+                    if (this.check14Nines(r.d!, k.toInt())) {
                         r = Utils.finalise(r, pr + 1, 0);
                     }
                     break;
@@ -2611,8 +2618,8 @@ export class Decimal {
 
     private parseDecimal(str: String): void {
         let e: double;
-        let i: double;
-        let len: double;
+        let i: int;
+        let len: int;
         if ((e = str.indexOf('.')) > -1) {
             str = str.replace('.', '');
         }
@@ -2635,7 +2642,7 @@ export class Decimal {
             len -= i;
             this.exponent = e = e - i - 1;
             this.digits = new Array<double>();
-            i = (e + 1) % LOG_BASE;
+            i = ((e + 1) % LOG_BASE).toInt()
             if (e < 0) {
                 i += LOG_BASE;
             }
@@ -2816,12 +2823,13 @@ export class Decimal {
         if (!this.isFinite()) {
             return this.nonFiniteToString();
         }
-        let k: double;
+        let k: int;
         let e = this.exponent;
         let str: string = Utils.digitsToString(this.d!);
-        let len: double = str.length;
+        let len: int = str.length;
+        const kIfSd = (sd != undefined) ? (sd! - len).toInt() : 0
         if (isExp) {
-          if (sd && (k = sd - len) > 0) {
+          if (sd && (k = kIfSd) > 0) {
             str = str.charAt(0) + '.' + str.slice(1) + Utils.getZeroString(k);
           } else if (len > 1) {
             str = str.charAt(0) + '.' + str.slice(1);
@@ -2829,13 +2837,19 @@ export class Decimal {
           str = str + (this.e < 0 ? 'e' : 'e+') + this.e;
         } else if (e < 0) {
           str = '0.' + Utils.getZeroString(-e - 1) + str;
-          if (sd && (k = sd - len) > 0) str += Utils.getZeroString(k);
+          if (sd && (k = kIfSd) > 0) {
+            str += Utils.getZeroString(k);
+          }
         } else if (e >= len) {
           str += Utils.getZeroString(e + 1 - len);
-          if (sd && (k = sd - e - 1) > 0) str = str + '.' + Utils.getZeroString(k);
+          if (sd && (k = (sd - e - 1).toInt()) > 0) {
+            str = str + '.' + Utils.getZeroString(k);
+          }
         } else {
-          if ((k = e + 1) < len) str = str.slice(0, k) + '.' + str.slice(k);
-          if (sd && (k = sd - len) > 0) {
+          if ((k = (e + 1).toInt()) < len) {
+            str = str.slice(0, k) + '.' + str.slice(k);
+          }
+          if (sd && (k = kIfSd) > 0) {
             if (e + 1 === len) str += '.';
             str += Utils.getZeroString(k);
           }
@@ -2845,6 +2859,10 @@ export class Decimal {
 
     private nonFiniteToString(): String {
         return String(Number.isNaN(this.sign) ? NaN : this.sign * this.sign * Infinity);
+    }
+
+    private isDigitsEqual(digits1: Array<double>, digits2: Array<double>, start: int, end: int) {
+        return (Utils.digitsToString(digits1).slice(start, end) === Utils.digitsToString(digits2).slice(start, end))
     }
 
     private naturalExponential(x: Decimal, sd?: double): Decimal {
@@ -2884,7 +2902,7 @@ export class Decimal {
             pow = Utils.finalise(pow.mul(x), wpr, 1);
             denominator = denominator.mul(++i);
             t = sum.add(Utils.divide(pow, denominator, wpr, 1));
-            if (Utils.digitsToString(t.d!).slice(0, wpr) === Utils.digitsToString(sum.d!).slice(0, wpr)) {
+            if (this.isDigitsEqual(t.d!, sum.d!, 0, wpr.toInt())) {
                 let j = k;
                 while (j--) {
                     sum = Utils.finalise(sum.mul(sum), wpr, 1);
@@ -2960,7 +2978,7 @@ export class Decimal {
         while (true) {
             numerator = Utils.finalise(numerator.mul(x2), wpr, 1);
             let t = sum.add(Utils.divide(numerator, new Decimal(denominator), wpr, 1));
-            if (Utils.digitsToString(t.d!).slice(0, wpr) === Utils.digitsToString(sum.d!).slice(0, wpr)) {
+            if (this.isDigitsEqual(t.d!, sum.d!, 0, wpr.toInt())) {
                 sum = sum.mul(2);
                 if (e !== 0) {
                     sum = sum.add(this.getLn10(wpr + 2, pr).mul(e + ''));
@@ -3185,8 +3203,8 @@ export class Decimal {
         return len;
     }
 
-    private digitsToString(digits: Array<double>, start: int, orgStr: string, length?: double): string {
-        let len: double;
+    private digitsToString(digits: Array<double>, start: int, orgStr: string, length?: int): string {
+        let len: int;
         let str: string = orgStr;
         if (length != undefined) {
             len = length;
@@ -3228,7 +3246,7 @@ export class Decimal {
                     str += '0';
                 }
             } else if (exp < len) {
-                str = str.slice(0, exp) + '.' + str.slice(exp);
+                str = str.slice(0, exp.toInt()) + '.' + str.slice(exp.toInt())
             }
         }
         return str;

@@ -230,14 +230,14 @@ export namespace url {
         }
         let pos: int = temp.indexOf("%");
         while ((pos != -1) && (pos < len - 2)) {
-            if (Char.isHexDigit(temp.charAt(pos.toInt() + 1)) && Char.isHexDigit(temp.charAt(pos.toInt() + 2))) {
+            if (Char.isHexDigit(temp.charAt(pos + 1)) && Char.isHexDigit(temp.charAt(pos + 2))) {
                 let subStr = temp.substring(pos + 1, pos + 3);
                 let octNum: number = parseInt(subStr, 16);
                 if (isNaN(octNum)) {
                     return temp;
                 }
 
-                let convertedChar = String.fromCharCode(octNum);
+                let convertedChar = String.fromCharCode(octNum.toInt());
                 temp = temp.slice(0, pos) + convertedChar + temp.slice(pos + 3);
                 len = len - 2;
             }
@@ -493,7 +493,7 @@ export namespace url {
 
         private analysizeFilePath(input: string) {
             let temp = new Array<string>();
-            let pos: number = 0;
+            let pos: int = 0;
             while ((pos = input.indexOf('/')) != -1 || (pos = input.indexOf('\\')) != -1) {
                 temp.push(input.substring(0, pos));
                 input = input.substring(pos + 1);
@@ -533,7 +533,7 @@ export namespace url {
             }
         }
 
-        private analysizeSpecialFile(input: string, pos: number) {
+        private analysizeSpecialFile(input: string, pos: int) {
             let strHost: string = input.substring(0, pos);
             let strPath: string = input.substring(pos + 1);
             let special: boolean = true;
@@ -556,7 +556,7 @@ export namespace url {
                 this.flags[INDEX_INVALID] = true;
                 return;
             }
-            let pos: number = input.indexOf('.');
+            let pos: int = input.indexOf('.');
             if (pos != -1) {
                 input = dealIPv4(input);
             }
@@ -728,7 +728,7 @@ export namespace url {
                 (secondChar == c'/' || secondChar == c'\\'))
             {
                 let temp: string = input.substring(2);
-                let pos: number = 0;
+                let pos: int = 0;
                 if (((pos = temp.indexOf('/')) != -1 || (pos = temp.indexOf('\\')) != -1) && pos == 0) {
                     temp = temp.substring(1);
                     this.analysizeFilePath(temp);
@@ -753,7 +753,7 @@ export namespace url {
         private analysizeUsernameAndPasswd(strHost: string): string {
             let pos: int = strHost.length - 1;
             for (; pos >= 0; pos--) {
-                if (strHost.charAt(pos.toInt()) == c'@') {
+                if (strHost.charAt(pos) == c'@') {
                     break;
                 }
             }
@@ -764,7 +764,7 @@ export namespace url {
             }
             if (userAndPasswd.indexOf('@') != -1) {
                 while (true) {
-                    let posTemp: number = userAndPasswd.indexOf('@');
+                    let posTemp = userAndPasswd.indexOf('@');
                     if (posTemp != -1) {
                         userAndPasswd = userAndPasswd.replace('@', "%40");
                     } else {
@@ -773,7 +773,7 @@ export namespace url {
                 }
             }
             if (userAndPasswd.indexOf(':') != -1) {
-                let position: number = userAndPasswd.indexOf(':');
+                let position: int = userAndPasswd.indexOf(':');
                 let user: string = userAndPasswd.substring(0, position);
                 let keyWord: string = userAndPasswd.substring(position + 1);
                 if (user.length != 0) {
@@ -825,7 +825,7 @@ export namespace url {
 
         analysizePath(path: string, special: boolean) {
             let temp = new Array<string>();
-            let pos: number = 0;
+            let pos: int = 0;
             while ((pos = path.indexOf('/')) != -1 || ((pos = path.indexOf('\\')) != -1 && special)) {
                 temp.push(path.substring(0, pos));
                 path = path.substring(pos + 1);
@@ -863,11 +863,11 @@ export namespace url {
             }
         }
 
-        private parsingHostAndPath(input: string, pos: number) {
+        private parsingHostAndPath(input: string, pos: int) {
             let special: boolean = true;
             let inputLen: int = input.length;
             for (pos = 0; pos < inputLen; pos++) {
-                if (input.charAt(pos.toInt()) == c'/' || input.charAt(pos.toInt()) == c'\\') {
+                if (input.charAt(pos) == c'/' || input.charAt(pos) == c'\\') {
                     break;
                 }
             }
@@ -880,7 +880,7 @@ export namespace url {
                 this.flags[INDEX_INVALID] = true;
                 return;
             }
-            if (strHost.charAt(strHost.length.toInt() - 1) != c']' && (strHost.lastIndexOf(':') != -1)) {
+            if (strHost.charAt(strHost.length - 1) != c']' && (strHost.lastIndexOf(':') != -1)) {
                 pos = strHost.lastIndexOf(':');
                 if (pos != -1) {
                     let port: string = strHost.substring(pos + 1);
@@ -888,7 +888,7 @@ export namespace url {
                     this.analysizePort(port);
                 }
             }
-            if (strHost.charAt(strHost.length.toInt() - 1) != c']' && strHost.lastIndexOf(':') != -1 &&
+            if (strHost.charAt(strHost.length - 1) != c']' && strHost.lastIndexOf(':') != -1 &&
                 this.flags[INDEX_INVALID]) 
             {
                 return;
@@ -897,7 +897,7 @@ export namespace url {
             this.analysizePath(strPath, special);
         }
 
-        private analysizeOnlyHost(input: string, pos: number) {
+        private analysizeOnlyHost(input: string, pos: int) {
             let strHost: string = input;
             if (strHost.indexOf('@') != -1) {
                 strHost = this.analysizeUsernameAndPasswd(strHost);
@@ -906,7 +906,7 @@ export namespace url {
                 this.flags[INDEX_INVALID] = true;
                 return;
             }
-            if (strHost.charAt(strHost.length.toInt() - 1) != c']') {
+            if (strHost.charAt(strHost.length - 1) != c']') {
                 if ((pos = strHost.lastIndexOf(':')) != -1) {
                     let port: string = strHost.substring(pos + 1);
                     strHost = strHost.substring(0, pos);
@@ -937,8 +937,8 @@ export namespace url {
         }
 
         private analysizeHostPath(input: string): string {
-            let pos: number = 0;
-            if (input.charAt(input.length.toInt() - 1) != c']' && (pos = input.lastIndexOf(':')) != -1) {
+            let pos: int = 0;
+            if (input.charAt(input.length - 1) != c']' && (pos = input.lastIndexOf(':')) != -1) {
                 let port: string = input.substring(pos + 1);
                 input = input.substring(0, pos);
                 this.analysizePort(port);
@@ -969,7 +969,7 @@ export namespace url {
                 if (hostAndPath.length == 0) {
                     return;
                 }
-                let i: number = 0;
+                let i: int = 0;
                 let special: boolean = false;
                 let strHost: string = "";
                 if (hostAndPath.indexOf('/') != -1) {
@@ -983,13 +983,13 @@ export namespace url {
                         this.flags[INDEX_INVALID] = true;
                         return;
                     }
-                    let pos: number = 0;
-                    if (strHost.charAt(strHost.length.toInt() - 1) != c']' && (pos = strHost.lastIndexOf(':')) != -1) {
+                    let pos: int = 0;
+                    if (strHost.charAt(strHost.length - 1) != c']' && (pos = strHost.lastIndexOf(':')) != -1) {
                         let port: string = strHost.substring(pos + 1);
                         strHost = strHost.substring(0, pos);
                         this.analysizePort(port);
                     }
-                    if (strHost.charAt(strHost.length.toInt() - 1) != c']' && (pos = strHost.lastIndexOf(':')) != -1 &&
+                    if (strHost.charAt(strHost.length - 1) != c']' && (pos = strHost.lastIndexOf(':')) != -1 &&
                         this.flags[INDEX_INVALID])
                     {
                         return;
@@ -1015,7 +1015,7 @@ export namespace url {
                 let pos: int = 0;
                 let inputLen: int = input.length;
                 while (pos < inputLen) {
-                    if (input.charAt(pos.toInt()) == c'/' || input.charAt(pos.toInt()) == c'\\') {
+                    if (input.charAt(pos) == c'/' || input.charAt(pos) == c'\\') {
                         pos++;
                         continue;
                     }
@@ -1049,9 +1049,9 @@ export namespace url {
             }
             let tempInput = input;
             if (tempInput.indexOf(':') != -1) {
-                let pos = tempInput.indexOf(':').toInt();
+                let pos = tempInput.indexOf(':')
                 pos++;
-                this.flags[INDEX_DOUBLE_SLASH] = (pos.toInt() +1 < tempInput.length && input.charAt(pos.toInt()) == c'/' && input.charAt(pos.toInt() + 1) == c'/');
+                this.flags[INDEX_DOUBLE_SLASH] = ((pos + 1 < tempInput.length) && (input.charAt(pos) == c'/') && (input.charAt(pos + 1) == c'/'));
                 let scheme: string = tempInput.substring(0, pos);
                 if (!this.analysizeScheme(scheme)) {
                     return tempInput;
@@ -1082,7 +1082,7 @@ export namespace url {
         }
 
         analysizeInput(input: string): string {
-            let pos: number = 0;
+            let pos: int = 0;
             if (input.indexOf('#') != -1) {
                 pos = input.indexOf('#');
                 let fragment: string = input.substring(pos);
@@ -1135,11 +1135,11 @@ export namespace url {
                 return;
             }
             let strHost: string = input;
-            let len: number = strHost.length;
+            let len = strHost.length
             for (let pos = 0; pos < len; pos++) {
-                if ((strHost.charAt(pos.toInt()) == c':') || (strHost.charAt(pos.toInt()) == c'?') ||
-                    (strHost.charAt(pos.toInt()) == c'#') ||
-                    (strHost.charAt(pos.toInt()) == c'/' || strHost.charAt(pos.toInt()) == c'\\'))
+                if ((strHost.charAt(pos) == c':') || (strHost.charAt(pos) == c'?') ||
+                    (strHost.charAt(pos) == c'#') ||
+                    (strHost.charAt(pos) == c'/' || strHost.charAt(pos) == c'\\'))
                 {
                     strHost = strHost.substring(0, pos);
                     break;
@@ -1250,13 +1250,13 @@ export namespace url {
             let strHost: string = input;
             let port: string = "";
             // splitString
-            let strLen: number = input.length;
+            let strLen = input.length
             for (let pos = 0; pos < strLen; pos++) {
-                if ((input.charAt(pos.toInt()) == c':') || (input.charAt(pos.toInt()) == c'?') ||
-                    (input.charAt(pos.toInt()) == c'#') || (input.charAt(pos.toInt()) == c'/') || (input.charAt(pos.toInt()) == c'\\'))
+                if ((input.charAt(pos) == c':') || (input.charAt(pos) == c'?') ||
+                    (input.charAt(pos) == c'#') || (input.charAt(pos) == c'/') || (input.charAt(pos) == c'\\'))
                 {
                     strHost = input.substring(0, pos);
-                    if (input.charAt(pos.toInt()) == c':') {
+                    if (input.charAt(pos) == c':') {
                         pos++;
                         port = input.substring(pos);
                     }
@@ -1280,10 +1280,10 @@ export namespace url {
                 return;
             }
             if (port.length > 0) {
-                let portLen: number = port.length;
+                let portLen = port.length
                 for (let pos = 0; pos < portLen; pos++) {
-                    if (port.charAt(pos.toInt()) == c'?' || port.charAt(pos.toInt()) == c'#' ||
-                        port.charAt(pos.toInt()) == c'/' || port.charAt(pos.toInt()) == c'\\')
+                    if (port.charAt(pos) == c'?' || port.charAt(pos) == c'#' ||
+                        port.charAt(pos) == c'/' || port.charAt(pos) == c'\\')
                     {
                         port = port.substring(0, pos);
                         break;
@@ -1302,10 +1302,10 @@ export namespace url {
 
         setPort(input: string) {
             let port: string = input;
-            let portLen: number = port.length;
+            let portLen = port.length
             for (let pos = 0; pos < portLen; pos++) {
-                if ((port.charAt(pos.toInt()) == c'?') || (port.charAt(pos.toInt()) == c'#') ||
-                    (port.charAt(pos.toInt()) == c'/') || (port.charAt(pos.toInt()) == c'\\'))
+                if ((port.charAt(pos) == c'?') || (port.charAt(pos) == c'#') ||
+                    (port.charAt(pos) == c'/') || (port.charAt(pos) == c'\\'))
                 {
                     port = port.substring(0, pos);
                     break;
@@ -2582,8 +2582,8 @@ export namespace url {
                 }
                 //  (110xxxxx 10xxxxxx)
                 const byte2 = uint8Array[i + 1];
-                const codePoint = ((byte1 & UNICODE_0x1F) << 6) | (byte2 & UNICODE_0x3F);
-                result += String.fromCharCode(codePoint);
+                const codePoint = ((byte1 & UNICODE_0x1F) << 6) | (byte2 & UNICODE_0x3F)
+                result += String.fromCharCode(codePoint)
                 i += 2;
             } else if ((byte1 & UNICODE_0xF0) === UNICODE_0xE0) {
                 if (i + 2 >= uint8Array.length) {
@@ -2594,8 +2594,8 @@ export namespace url {
                 //  (1110xxxx 10xxxxxx 10xxxxxx)
                 const byte2 = uint8Array[i + 1];
                 const byte3 = uint8Array[i + 2];
-                const codePoint = ((byte1 & UNICODE_0x0F) << 12) | ((byte2 & UNICODE_0x3F) << 6) | (byte3 & UNICODE_0x3F);
-                result += String.fromCharCode(codePoint);
+                const codePoint = ((byte1 & UNICODE_0x0F) << 12) | ((byte2 & UNICODE_0x3F) << 6) | (byte3 & UNICODE_0x3F)
+                result += String.fromCharCode(codePoint)
                 i += 3;
             } else if ((byte1 & 0xF8) === UNICODE_0xF0) {
                 // (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
@@ -2608,8 +2608,8 @@ export namespace url {
                 const byte2 = uint8Array[i + 1];
                 const byte3 = uint8Array[i + 2];
                 const byte4 = uint8Array[i + 3];
-                const codePoint = ((byte1 & UNICODE_0x07) << 18) | ((byte2 & UNICODE_0x3F) << 12) | ((byte3 & UNICODE_0x3F) << 6) | (byte4 & UNICODE_0x3F);
-                result += String.fromCodePoint(codePoint);
+                const codePoint = ((byte1 & UNICODE_0x07) << 18) | ((byte2 & UNICODE_0x3F) << 12) | ((byte3 & UNICODE_0x3F) << 6) | (byte4 & UNICODE_0x3F)
+                result += String.fromCodePoint(codePoint.toInt());
                 i += 4;
             } else {
                 result += String.fromCharCode(UNICODE_0XFFFD);

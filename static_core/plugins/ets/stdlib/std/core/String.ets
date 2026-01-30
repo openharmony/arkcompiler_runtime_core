@@ -265,6 +265,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         }
         return Char.charsToCodePoint(highValue, lowValue);
     }
+
     /**
      * Returns the amount of full codepoints between begin and end
      * indexes. Characters outside the range are not counted, even if
@@ -420,8 +421,8 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns the comparison result
      */
-    public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): number {
-        return new Intl.Collator(locale, options).compare(this, that);
+    public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
+        return new Intl.Collator(locale, options).compare(this, that).toInt()
     }
 
     /**
@@ -435,12 +436,12 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns true if the substring begins with prefix
      */
-    public native startsWith(prefix: String, fromIndex: int): boolean;
-    public startsWith(prefix: String, fromIndex?: Number): boolean {
+    private native startsWithImpl(prefix: String, fromIndex: int): boolean;
+    public startsWith(prefix: String, fromIndex?: int): boolean {
         if (fromIndex == undefined) {
-            return this.startsWith(prefix, 0)
+            return this.startsWithImpl(prefix, 0)
         }
-        return this.startsWith(prefix, fromIndex.toInt())
+        return this.startsWithImpl(prefix, fromIndex!)
     }
 
     /**
@@ -453,9 +454,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns true if this string ends with suffix
      */
-    public native endsWith(suffix: String, endPosition: int): boolean;
-    public endsWith(suffix: String, endPosition?: Number): boolean {
-        return this.endsWith(suffix, asIntOrDefault(endPosition, this.getLength()));
+    private native endsWithImpl(suffix: String, endPosition: int): boolean;
+    public endsWith(suffix: String, endPosition?: int): boolean {
+        return this.endsWithImpl(suffix, endPosition ?? this.getLength());
     }
 
     /**
@@ -488,10 +489,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
     public indexOf(str: String, fromIndex?: int): int {
-        if (fromIndex == undefined) {
-            return this.indexOfImpl(str, 0)
-        }
-        return this.indexOfImpl(str, fromIndex.toInt())
+        return this.indexOfImpl(str, fromIndex ?? 0)
     }
 
     /**
@@ -539,10 +537,10 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
     public lastIndexOf(str: String, fromIndex?: int): int {
-        if (fromIndex == undefined || isNaN(fromIndex)) {
+        if (fromIndex == undefined) {
             return this.lastIndexOfImpl(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOfImpl(str, fromIndex.toInt())
+        return this.lastIndexOfImpl(str, fromIndex)
     }
 
     /**
@@ -555,18 +553,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
     private native lastIndexOfImpl(str: String, fromIndex: int): int;
-
-    /**
-     * Selects a substring of this String, starting at a specified index
-     * and ending at the end of this String.
-     *
-     * @param begin to start substring
-     *
-     * @returns new String which is a substring of this String
-     */
-    public substring(begin: int): String {
-        return this.substring(begin, this.getLength());
-    }
 
     /**
      * Selects a substring of this String, starting at a specified index
@@ -584,6 +570,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns new String which is a substring of this String
      */
+    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public native substring(begin: int, end: int): String;
 
     /**
@@ -595,8 +582,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns new String which is a substring of this String
      */
-    public substring(begin: number, end?: Number): String {
-        return this.substring(begin.toInt(), asIntOrDefault(end, this.getLength()))
+    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
+    public substring(begin: number, end?: int): String {
+        return this.substring(begin.toInt(), end ?? this.getLength())
     }
 
     /**
@@ -749,20 +737,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         return out;
     }
 
-    /**
-     * Splits this String by separator and returns an ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the passage of
-     * this String from beginning to end. The pattern is excluded from substrings.
-     * The array is limited by some specified value.
-     *
-     * @param separator - String or RegExp to split by
-     * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
-     *
-     * @throws NullPointerError if pattern param is null
-     *
-     * @returns string array contains substrings from this String
-     */
-    public split(separator: String, limit: Int): String[] {
+    private splitImpl(separator: String, limit: Int): String[] {
         if (limit == 0) {
             return new String[0];
         }
@@ -803,27 +778,34 @@ export final class String extends Object implements Comparable<String>, Iterable
         return out;
     }
 
-    public split(separator: String, limit?: Number): String[] {
+    /**
+     * Splits this String by separator and returns an ordered array of substrings.
+     * The order of the resulted array corresponds to the order of the passage of
+     * this String from beginning to end. The pattern is excluded from substrings.
+     * The array is limited by some specified value.
+     *
+     * @param separator - String or RegExp to split by
+     * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
+     *
+     * @throws NullPointerError if pattern param is null
+     *
+     * @returns string array contains substrings from this String
+     */
+    public split(separator: String, limit?: int): String[] {
         let maxSize = limit == undefined ? Int.MAX_VALUE : limit.toInt();
         if (separator.getLength() != 1) {
-            return this.split(separator, maxSize);
+            return this.splitImpl(separator, maxSize);
         }
         return this.split(separator.charAt(0), maxSize);
     }
 
-    public split(separator: RegExp, limit?: Number): String[] {
-        if (limit == undefined) {
-            return separator.split(this, undefined);
-        }
-        return separator.split(this, limit!.toInt());
+    public split(separator: RegExp, limit?: int): String[] {
+        return separator.split(this, limit);
     }
 
-    public split(separator: StringOrRegExp, limit?: Number): String[] {
+    public split(separator: StringOrRegExp, limit?: int): String[] {
         if (separator instanceof RegExp) {
-            if (limit == undefined) {
-                return (separator as RegExp).split(this, undefined);
-            }
-            return (separator as RegExp).split(this, limit!.toInt());
+            return (separator as RegExp).split(this, limit);
         }
         return this.split(separator as String, limit);
     }
@@ -1061,21 +1043,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     public native repeat(count: int): String;
 
     /**
-     * Repeats this string count times, i.e.
-     *    a = 'A',
-     *    a.repeat(2) == 'AA'
-     *
-     * @param count number of repetitions of this String
-     *
-     * @throws ArgumentOutOfRangeError if count < 0
-     *
-     * @returns this string that is repeated count times
-     */
-    public repeat(count: number): String {
-        return this.repeat(count.toInt())
-    }
-
-    /**
      * The `toString()` method returns the string representation of the given String
      * in the form of a copy of the original object.
      *
@@ -1102,10 +1069,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns A String consisting of the single UTF-16 code unit located at the specified position.
      * Returns undefined if the given index can not be found.
      */
-    public at(index: number): string | undefined {
-        if (isNaN(index)) {
-            index = 0;
-        }
+    public at(index: int): string | undefined {
         const n = this.getLength();
         if (index < 0) {
             index += n;
@@ -1113,7 +1077,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         if (index < 0 || index >= n) {
             return undefined;
         }
-        return new String(this.charAt(index.toInt()).toString());
+        return new String(this.charAt(index).toString())
     }
 
     private CreateHTMLString(tag: String, param: String): String{
@@ -1216,13 +1180,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /*
-     * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
-     */
-    public fontsize(size: number): String {
-        return this.CreateHTMLString('font', ' size=\"' + size + '\"')
-    }
-
-    /*
      * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be used as a hypertext link to another URL.
      */
     public link(link: String): String{
@@ -1232,20 +1189,14 @@ export final class String extends Object implements Comparable<String>, Iterable
     /*
      * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
      */
-    public charCodeAt(index: int): number {
+    public charCodeAt(index: int): int {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             throw new RangeError(`Invalid index: ${index}`);
         }
-        return this.charAt(index).toDouble();
+        return this.charAt(index).toInt()
     }
 
-    /*
-     * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
-     */
-    public charCodeAt(index: number): number {
-        return this.charCodeAt(index.toInt());
-    }
-
+    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public static native fromCharCodeImpl(codes: Array<number>): String;
 
     /**
@@ -1256,6 +1207,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns string consisting of the specified UTF-16 code unit.
      *
      */
+    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public static native fromCharCode(code: number): String;
 
     /**
@@ -1291,11 +1243,8 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns true if the search string is found anywhere within the given string,
      *  including when searchString is an empty string; otherwise, false
      */
-    public includes(searchString: String, position?: Number): boolean {
-        if (position == undefined) {
-            return this.indexOf(searchString) == -1 ? false : true;
-        }
-        return this.indexOf(searchString, position.toInt()) == -1 ? false : true;
+    public includes(searchString: String, position?: int): boolean {
+        return this.indexOf(searchString, position) != -1
     }
 
     public padEnd(end: int): String {
@@ -1321,7 +1270,19 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr)
     }
 
-    public padEnd(end: int, str: String): String {
+    /**
+     * The padEnd() method pads the current string with a given string (repeated, if needed)
+     * so that the resulting string reaches a given length.
+     * The padding is applied from the end of the current string.
+     *
+     * @param end of the resulting string once the current str has been padded
+     *
+     * @param fillString to pad the current str with
+     *
+     * @returns string with the padString applied at the end of the current str
+     */
+    public padEnd(end: int, fillString?: String): String {
+        const str = fillString ?? '\u0020'
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
@@ -1338,37 +1299,6 @@ export final class String extends Object implements Comparable<String>, Iterable
             arr[i] = arr[i - strLength];
         }
         return new String(arr);
-    }
-
-    /**
-     * The padEnd() method pads the current string with a given string (repeated, if needed)
-     * so that the resulting string reaches a given length.
-     * The padding is applied from the end of the current string.
-     *
-     * @param maxLength of the resulting string once the current str has been padded
-     *
-     * @param fillString to pad the current str with
-     *
-     * @returns string with the padString applied at the end of the current str
-     */
-    public padEnd(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? '\u0020' : fillString
-        return this.padEnd(maxLength.toInt(), str)
-    }
-
-     /**
-     * The padStart() method pads the current string with another string (multiple times, if needed)
-     * until the resulting string reaches the given length.
-     * The padding is applied from the start of the resulting string.
-     *
-     * @param maxLength of the resulting string once the current str has been padded
-     *
-     * @param fillString to pad the current str with
-     *
-     * @returns string with the padString applied at the end of the current str
-     */
-    public padStart(end: int): String {
-        return this.padStart(end, ' ')
     }
 
     /*
@@ -1391,7 +1321,8 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr)
     }
 
-    public padStart(end: int, str: String): String {
+    public padStart(end: int, fillString?: String): String {
+        const str = (fillString == undefined) ? '\u0020' : fillString
         if (this.getLength() >= end || str.getLength() == 0) {
             return this;
         }
@@ -1410,19 +1341,6 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr);
     }
 
-    public padStart(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? '\u0020' : fillString
-        return this.padStart(maxLength.toInt(), str)
-    }
-
-    /*
-     * The substr() method returns a portion of the string, starting at the specified
-     * index and extending for a given number of characters afterwards.
-     */
-    public substr(begin: int): String {
-        return this.substr(begin, this.getLength() as int);
-    }
-
     /**
      * The substr() method returns a portion of the string, starting at the specified
      * index and extending for a given number of characters afterwards.
@@ -1433,8 +1351,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns new string containing the specified part of the given string
      */
-    public substr(begin: int, length: int): String {
+    public substr(begin: int, length?: int): String {
         begin = normalizeIndex(begin, this.getLength());
+        length = length ?? this.getLength()
         let end = begin + length
         if (length > this.getLength() - begin) {
             end = this.getLength()
@@ -1443,10 +1362,6 @@ export final class String extends Object implements Comparable<String>, Iterable
             return '';
         }
         return this.substring(begin, end);
-    }
-
-    public substr(begin: number, length?: Number): String {
-        return this.substr(begin.toInt(), asIntOrDefault(length, this.getLength()));
     }
 
 
@@ -1470,25 +1385,13 @@ export final class String extends Object implements Comparable<String>, Iterable
      * The slice() method extracts a section of a string and returns it as a new string,
      * without modifying the original string.
      */
-    public slice(begin: int): String {
-        return this.substring(normalizeIndex(begin, this.getLength()))
-    }
-
-    public slice(begin: int, end: int): String {
-        begin = normalizeIndex(begin, this.getLength())
-        end = normalizeIndex(end, this.getLength())
+    public slice(begin?: int, end?: int): String {
+        begin = normalizeIndex(begin ?? 0, this.getLength())
+        end = normalizeIndex(end ?? this.getLength(), this.getLength())
         if (end <= begin) {
             return '';
         }
         return this.substring(begin, end)
-    }
-
-    /*
-     * The slice() method extracts a section of a string and returns it as a new string,
-     * without modifying the original string.
-     */
-    public slice(begin?: Number, end?: Number): String {
-        return this.slice(asIntOrDefault(begin, 0), asIntOrDefault(end, this.getLength()))
     }
 
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
@@ -1599,13 +1502,13 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     public replace(searchValue: String, replaceValue: String) : String {
         let searchLength = searchValue.getLength()
-        let position = this.indexOf(searchValue)
+        let position: int = this.indexOf(searchValue)
         if (position == -1) {
             return this
         }
         let preceding = this.substring(0, position)
         let following = this.substring(position + searchLength)
-        let replacement = String.getSubstitution(searchValue, this, position.toInt(), new String[0], undefined, replaceValue)
+        let replacement = String.getSubstitution(searchValue, this, position, new String[0], undefined, replaceValue)
         return preceding + replacement + following
     }
 
@@ -1670,7 +1573,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let matchPositions = new containers.ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
-            matchPositions.pushBack(position.toInt())
+            matchPositions.pushBack(position)
             if (position == this.getLength()) {
                 break;
             }
@@ -1725,7 +1628,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let matchPositions = new containers.ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
         while (position != -1) {
-            matchPositions.pushBack(position.toInt())
+            matchPositions.pushBack(position)
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
@@ -1766,15 +1669,15 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns the index of the first match between the regular expression and the given string,
      * or -1 if no match was found.
      */
-    public search(implicitRegExp: String): number {
+    public search(implicitRegExp: String): int {
         return new RegExp(implicitRegExp).search(this)
     }
 
-    public search(regexp: RegExp): number {
+    public search(regexp: RegExp): int {
         return regexp.search(this)
     }
 
-    public search(regexp: StringOrRegExp): number {
+    public search(regexp: StringOrRegExp): int {
         if (regexp instanceof String) {
             return new RegExp(regexp as String).search(this)
         }
@@ -1921,7 +1824,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let res = new StringBuilder();
         let length = this.getLength();
         for (let i = 0; i < length; i++) {
-            let codeUnit = this.charCodeAt(i).toInt();
+            let codeUnit = this.charCodeAt(i);
             // Currently, it is a high-level proxy item
             if (codeUnit >= HIGH_SURROGATE_MIN && codeUnit <= HIGH_SURROGATE_MAX) {
                 // Check if low level proxy items are paired
@@ -1956,10 +1859,10 @@ export final class String extends Object implements Comparable<String>, Iterable
      *
      * @returns string created by using the specified sequence of code points
      */
-    public static fromCodePoint(...codePoints: number[]): String {
+    public static fromCodePoint(...codePoints: int[]): String {
         let res = new StringBuilder();
         for (const cp of codePoints) {
-            if (cp < 0 || cp > MAX_CODE_POINT || isNaN(cp) || !Number.isInteger(cp)) {
+            if (cp < 0 || cp > MAX_CODE_POINT) {
                 throw new RangeError('Invalid code point: ' + new Number(cp).toString())
             }
             let chrs = String.codePointToChar(cp.toInt());
@@ -1991,7 +1894,7 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 }
 
-class StringIterator implements IterableIterator<string> {
+class StringIterator implements IterableIterator<String> {
     private s: String
     private idx: int = 0
 
@@ -2006,14 +1909,14 @@ class StringIterator implements IterableIterator<string> {
         let highValue: char = this.s.charAt(this.idx);
         this.idx += 1
         if (!Char.isHighSurrogate(highValue) || this.idx == this.s.getLength()) {
-            return new IteratorResult<String>(String.fromCharCode(highValue.toDouble()));
+            return new IteratorResult<String>(String.fromCharCode(highValue.toInt()));
         }
         let lowValue: char = this.s.charAt(this.idx);
         if (!Char.isLowSurrogate(lowValue)) {
-            return new IteratorResult<String>(String.fromCharCode(highValue.toDouble()));
+            return new IteratorResult<String>(String.fromCharCode(highValue.toInt()));
         }
         this.idx += 1
-        return new IteratorResult<String>(String.fromCharCode(highValue.toDouble(), lowValue.toDouble()));
+        return new IteratorResult<String>(String.fromCharCode(highValue.toInt(), lowValue.toInt()));
     }
 }
 

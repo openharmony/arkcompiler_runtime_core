@@ -63,23 +63,21 @@
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 
-function fromCharCodes(code1: number, code2: number): string {
+function fromCharCodes(code1: int, code2: int): string {
     return string.fromCharCode(code1, code2);
 }
 
 function fromLargeCharCode(code: int): string {
-    return string.fromCharCode(Int.toDouble(code << 8 | code));
+    return string.fromCharCode(code << 8 | code);
 }
 
 function fromOneByteCharCode(code: int): string {
     arktest.assertLT(code, 128);
-    return string.fromCharCode(Int.toDouble(code));
+    return string.fromCharCode(code);
 }
 
 function main() {
     arktest.assertEQ(fromCharCodes(0xd842, 0xdfb7), '𠮷');
-    console.log((0x42 << 8 | 0x42));
-    console.log(string.fromCharCode(Int.toDouble(0x42 << 8 | 0x42)));
     arktest.assertEQ(fromLargeCharCode(0x42), '䉂'); // 0x4242
     arktest.assertEQ(fromOneByteCharCode(0x41), 'A');
 }

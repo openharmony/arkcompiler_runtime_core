@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ function performXmlTest(serializerOperation: (serializer: xml.XmlSerializer) => 
     let view = new Uint8Array(arrayBuffer);
     let result = '';
     for (let i = 0; i < expectedResult.length; ++i) {
-        result += String.fromCodePoint(view[i]);
+        result += String.fromCodePoint(view[i].toInt());
     }
     arktest.assertEQ(result, expectedResult);
 }

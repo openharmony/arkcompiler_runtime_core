@@ -157,8 +157,8 @@ export class RegExpResultArray extends Array<String | undefined> {
         } else {
             this.indices_ = []
             for (let i = 0; i < data.length; i += 2) {
-                const index = Number.parseInt(data[i])
-                const endIndex = Number.parseInt(data[i + 1])
+                const index = Number.parseInt(data[i]).toInt()
+                const endIndex = Number.parseInt(data[i + 1]).toInt()
                 const pos: int = (i / 2);
                 if (index != -1 && endIndex != -1) {
                     const str = this.input_.substring(index, endIndex)
@@ -239,8 +239,8 @@ export class RegExpMatchArray extends RegExpResultArray {
             if (unitData.length != 3) {
                 throw new Error("internal error: invalid group data")
             }
-            let index = Double.parseInt(unitData[1])
-            let endIndex = Double.parseInt(unitData[2])
+            let index = Double.parseInt(unitData[1]).toInt()
+            let endIndex = Double.parseInt(unitData[2]).toInt()
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
@@ -305,11 +305,12 @@ export class RegExpExecArray extends RegExpResultArray {
             if (unitData.length != 3) {
                 throw new Error("internal error: invalid group data")
             }
-            let index = Double.parseInt(unitData[1])
-            let endIndex = Double.parseInt(unitData[2])
+            let index = Double.parseInt(unitData[1]).toInt()
+            let endIndex = Double.parseInt(unitData[2]).toInt()
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
-                    throw new Error("internal error: incorrect substring indexes")
+                    throw new Error("internal error: incorrect substring indexes index = " + index + " endIndex = " + endIndex + 
+                    " length = " + this.input_.length)
                 }
                 result.set(unitData[0], this.input.substring(index, endIndex))
             } else {

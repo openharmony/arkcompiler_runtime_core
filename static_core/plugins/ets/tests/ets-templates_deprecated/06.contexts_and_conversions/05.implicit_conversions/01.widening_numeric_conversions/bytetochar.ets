@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 desc: Casting conversions byte to char.
 ---*/
 
-let byteArray: number[] = [0x48, 0x65, 0x6C, 0x6C, 0x6F];
+let byteArray: int[] = [0x48, 0x65, 0x6C, 0x6C, 0x6F];
 let charArray: string = '';
 for (let i = 0; i < byteArray.length; i++) {
   charArray += String.fromCharCode(byteArray[i]);

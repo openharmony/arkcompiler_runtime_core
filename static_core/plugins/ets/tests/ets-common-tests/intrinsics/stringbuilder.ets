@@ -89,10 +89,10 @@ function main(): int {
         let cpsActual = '';
         for (let i = 12; i < 0x10FFFF; i += 30009) {
             if (Char.codeUnitsToEncode(i) == 1) {
-                cpsActual += String.fromCharCode(i.toDouble());
+                cpsActual += String.fromCharCode(i);
             } else {
-                cpsActual += String.fromCharCode(Char.getHighSurrogate(i).toDouble());
-                cpsActual += String.fromCharCode(Char.getLowSurrogate(i).toDouble());
+                cpsActual += String.fromCharCode(Char.getHighSurrogate(i).toInt());
+                cpsActual += String.fromCharCode(Char.getLowSurrogate(i).toInt());
             }
         }
         if (cpsActual != cpsGolden) {

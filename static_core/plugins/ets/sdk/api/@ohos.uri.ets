@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -749,7 +749,7 @@ export namespace uri {
       this.data = "";
     }
 
-    private analysisFragment(pos: number) {
+    private analysisFragment(pos: int) {
       if (pos == 0) {
         this.errStr = "#It can't be the first.";
         return;
@@ -763,7 +763,7 @@ export namespace uri {
       this.data = this.data.substring(0, pos);
     }
 
-    private analysisQuery(pos: number) {
+    private analysisQuery(pos: int) {
       let query = this.data.substring(pos + 1);
       if (!this.checkCharacter(query, UriEntry.uriRules.g_ruleUrlcLookup, true)) {
         this.errStr = "Query does not conform to the rule.";
@@ -773,7 +773,7 @@ export namespace uri {
       this.data = this.data.substring(0, pos);
     }
 
-    private analysisScheme(pos: number) {
+    private analysisScheme(pos: int) {
       let slashPos = this.data.indexOf('/');
       if (slashPos != -1 && slashPos < pos) {
         this.specialPath();
@@ -799,7 +799,7 @@ export namespace uri {
     private analysisHost(isLawfulPort: boolean) {
       // find ipv4 or ipv6 or host
       if (this.data.length > 0 && this.data.charAt(0) == c'[') {
-        if (this.data.charAt(this.data.length.toInt() - 1) == c']') {
+        if (this.data.charAt(this.data.length - 1) == c']') {
           // IPV6
           if (!isLawfulPort) {
             this.errStr = "Port does not conform to the rule.";
@@ -854,7 +854,7 @@ export namespace uri {
       this.analysisHost(isLawfulPort);
     }
 
-    private analysisPath(pos: number) {
+    private analysisPath(pos: int) {
       let path = this.data.substring(pos);
       if (!this.checkCharacter(path, UriEntry.uriRules.g_rulePathLookup, true)) {
         this.errStr = "Path does not conform to the rule.";
@@ -864,7 +864,7 @@ export namespace uri {
       this.data = this.data.substring(0, pos);
     }
 
-    private analysisUserInfo(pos: number) {
+    private analysisUserInfo(pos: int) {
       let userInfo = this.data.substring(0, pos);
       if (!this.checkCharacter(userInfo, UriEntry.uriRules.g_ruleUserInfoLookup, true)) {
         this.errStr = "UserInfo does not conform to the rule.";
@@ -874,7 +874,7 @@ export namespace uri {
       this.data = this.data.substring(pos + 1);
     }
 
-    private analysisPort(pos: number) {
+    private analysisPort(pos: int) {
       let portStr = this.data.substring(pos + 1);
       if (!this.checkCharacter(portStr, UriEntry.uriRules.g_rulePortLookup, true)) {
         this.errStr = "Port does not conform to the rule.";
@@ -884,7 +884,7 @@ export namespace uri {
       if (portStr == '') {
         return false;
       }
-      if(pos > 0 && this.data.substring(pos-1, pos) == ':') {
+      if(pos > 0 && this.data.substring(pos - 1, pos) == ':') {
         return false;
       }
       let port = new Number(portStr);
@@ -1240,7 +1240,7 @@ export namespace uri {
         return;
       }
       let temp: string = "";
-      const pos: number = scheme.indexOf(':');
+      const pos: int = scheme.indexOf(':');
       if (pos !== -1) {
         temp = scheme.substring(0, pos);
       } else {

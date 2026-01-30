@@ -159,10 +159,10 @@
     init_object_type: String,
     init_object_init_value: '""',
     init_object_data: '["", " ", "123", "a", "ф", "dф", "你好", "a你", "", " ", "123", "a", "ф", "dф", "你好", "a你"]',
-    param_init_data_types: {"param1": "FixedArray<number>"},
-    param_types: {"param1": number},
+    param_init_data_types: {"param1": "FixedArray<int>"},
+    param_types: {"param1": int},
     param_nature: {"param1": primitive},
-    param_list: {"param1": "[1,1.0,1,1,1.5,1,1,1.9,3,3,3,3,3.2,3,3.8,3]"},
+    param_list: {"param1": "[1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3]"},
     method_return_type: String,
     expected_data_item_type: String,
     expected_data_type: "FixedArray<String>",
@@ -232,10 +232,10 @@
     init_object_type: String,
     init_object_data: '[" abc", "abcde", "abcdefghij", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "aBcdefghijbc", "abcdABCD", "abcd ", " abcd"]',
 
-    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<number>"},
-    param_types: {"param1": String, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<int>"},
+    param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": '["a", "c", "abc", "bc", "cd", "bb", "B", "A", " ", "d"]', "param2": "[2, 3.8, 5.9, 3.9, -2, -2.6, -1, 5.0, 5, 5]"},
+    param_list: {"param1": '["a", "c", "abc", "bc", "cd", "bb", "B", "A", " ", "d"]', "param2": "[2, 3, 5, 3, -2, -2, -1, 5, 5, 5]"},
 
     method_return_type: boolean,
     expected_data_type: "FixedArray<boolean>",
@@ -368,13 +368,13 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[c'a', c'к', c'世', c'世', c'a', c'к']"},
 
-    method_return_type: Double,
-    expected_data_item_type: double,
-    expected_data_type: "FixedArray<double>",
+    method_return_type: int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
 
     expected_test_data: "[0, 4, 2, -1, -1, -1]",
-    verify_test_result_function: compareFloatPointValue,
+    verify_test_result_function: compareIntPointValue,
   }
 
 - {
@@ -404,14 +404,14 @@
     init_object_type: String,
     init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk", "☃★♲"]',
 
-    param_init_data_types: {"param1": "FixedArray<number>", "param2": "FixedArray<number>"},
-    param_types: {"param1": number, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<int>", "param2": "FixedArray<int>"},
+    param_types: {"param1": int, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": "[0, 1, 0, 0]", "param2": "[0, 1, 11, 3]"},
 
-    method_return_type: number,
-    expected_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
     expected_test_data:  "[0, 0, 11, 3]",
     verify_test_result_function: comparePrimitiveValue,
@@ -429,12 +429,12 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": '["bcd", "xyz", "", "", "a"]'},
 
-    method_return_type: Double,
-    expected_data_item_type: double,
-    expected_data_type: "FixedArray<double>",
+    method_return_type: Int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
     expected_test_data: "[1, -1, 0, 0, -1]",
-    verify_test_result_function: compareFloatPointValue,
+    verify_test_result_function: compareIntPointValue,
   }
 
 - {
@@ -449,12 +449,12 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[c'g', c'к', c'界', c'界', c'g', c'к']"},
 
-    method_return_type: Double,
-    expected_data_item_type: double,
-    expected_data_type: "FixedArray<double>",
+    method_return_type: Int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
     expected_test_data: "[6, 9, 7, -1, -1, -1]",
-    verify_test_result_function: compareFloatPointValue,
+    verify_test_result_function: compareIntPointValue,
   }
 
 - {
@@ -469,12 +469,12 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": '["bcd", "xyz"]'},
 
-    method_return_type: Double,
-    expected_data_item_type: double,
-    expected_data_type: "FixedArray<double>",
+    method_return_type: Int,
+    expected_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
 
     expected_test_data: "[6, -1]",
-    verify_test_result_function: compareFloatPointValue,
+    verify_test_result_function: compareIntPointValue,
   }
 
 - {
@@ -605,10 +605,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcd", "abcd", "abcd", "abcd", "abcd", "abcd", "abcd"]',
 
-    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<number>"},
-    param_types: {"param1": String, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<int>"},
+    param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": '["abc", "cde", "abc", "cde", "abc", "abce", "", "", "", "d", "d"]', "param2": "[0, 2.2, 5.9, 8, -2, -2.6, -2, 2, 10.1, 3, 4]"},
+    param_list: {"param1": '["abc", "cde", "abc", "cde", "abc", "abce", "", "", "", "d", "d"]', "param2": "[0, 2, 5, 8, -2, -2, -2, 2, 10, 3, 4]"},
 
     method_return_type: boolean,
 
@@ -643,10 +643,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
 
-    param_init_data_types: {"param1": "FixedArray<number>", "param2": "FixedArray<number>"},
-    param_types: {"param1": number, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<int>", "param2": "FixedArray<int>"},
+    param_types: {"param1": int, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": "[0.9, 1.1, 2.5]", "param2": "[3, 4.2, 5]"},
+    param_list: {"param1": "[0, 1, 2]", "param2": "[3, 4, 5]"},
 
     method_return_type: String,
 
@@ -683,10 +683,10 @@
     init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk",
     "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
 
-    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<number>"},
-    param_types: {"param1": String, "param2": number},
+    param_init_data_types: {"param1": "FixedArray<String>", "param2": "FixedArray<int>"},
+    param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
-    param_list: {"param1": '["abc", "ijk", "ijkab", "", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]', "param2": "[0, 4, 9, 100.8, -100.2, 1]"},
+    param_list: {"param1": '["abc", "ijk", "ijkab", "", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]', "param2": "[0, 4, 9, 100, -100, 1]"},
 
     method_return_type: boolean,
 
@@ -729,11 +729,11 @@
     param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]', "param2": "[0, 2, 8, 12, 0, 2, 8, 12, 23, -2, -2, 22, 23]"},
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, 11, 11, -1,  8, 8, 8, 19, -1, 8, 0, 22, 22]",
-    verify_test_result_function: compareFloatPointValue
+    verify_test_result_function: compareIntPointValue
  }
 
 - {
@@ -748,11 +748,11 @@
     param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]', "param2": "[0, 2, 8, 12, 0, 2, 8, 12, 23, -2, -2, 22, 23]"},
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, 11, 11, -1,  8, 8, 8, 19, -1, 8, 0, 22, 22]",
-    verify_test_result_function: compareFloatPointValue
+    verify_test_result_function: compareIntPointValue
  }
 
   # Finds the first occurrence of a character in this String. The search starts from the specified index.
@@ -769,11 +769,11 @@
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": "[c'a', c'a', c'a', c'h', c'h', c'h', c'h', c'h', c'c', c'c', c'c']", "param2": "[0, 2, 8, 0, 2, 8, 14, 15, 0, 2, 8]"},
 
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, -1, -1, 6, 6, 13, -1, -1, 2, 2, 8]",
-    verify_test_result_function: compareFloatPointValue
+    verify_test_result_function: compareIntPointValue
  }
 
   #Finds the last occurrence of another String in this String. The search starts from the specified index and goes backward.
@@ -791,11 +791,11 @@
     param_types: {"param1": String, "param2": int},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijkl", "eabc", "", "", "", ""]', "param2": "[4, 14, 100, -1, 8, 15, 18, 19, 40, 40, 40, 28, 22, 14, -5]"},
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, 11, 11, 0,  8, 8, 8, 19, 19, -1, -1, 22, 22, 14, 0]",
-    verify_test_result_function: compareFloatPointValue
+    verify_test_result_function: compareIntPointValue
  }
 
 - {
@@ -832,11 +832,11 @@
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": "[c'a', c'a', c'a', c'h', c'h', c'h', c'h', c'c', c'c', c'c']", "param2": "[0, 5, -3, 5, 6, 12, 13, 3, 2, 8]"},
 
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
+    expected_data_type: "FixedArray<int>",
     expected_test_data: "[0, 0, -1, -1, 6, 6, 13, 2, 2, 8]",
-    verify_test_result_function: compareFloatPointValue
+    verify_test_result_function: compareIntPointValue
  }
 
   # Gets the byte sequence that is representing the part of this string between begin and end indexes.
@@ -1120,9 +1120,9 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Click me", "Click me", ""]',
 
-    param_types: {nameParam: number},
+    param_types: {nameParam: int},
     param_nature: {nameParam: primitive},
-    param_init_data_types: {nameParam: "FixedArray<number>"},
+    param_init_data_types: {nameParam: "FixedArray<int>"},
     param_list: {nameParam: "[0, 1, 2]"},
 
     method_return_type: String,
@@ -1158,9 +1158,9 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Click me", "Click me", "", "Click him"]',
 
-    param_types: {inputs1: String, inputs2: number},
+    param_types: {inputs1: String, inputs2: int},
     param_nature: {inputs1: primitive, inputs2: primitive},
-    param_init_data_types: {inputs1: "FixedArray<String>", inputs2: "FixedArray<number>"},
+    param_init_data_types: {inputs1: "FixedArray<String>", inputs2: "FixedArray<int>"},
     param_list: {inputs1: '["me", "me", "Him", ""]', inputs2: '[0, 7, 0, 4]'},
 
     method_return_type: boolean,
@@ -1182,9 +1182,9 @@
     param_init_data_types: {inputs: "FixedArray<int>"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: number,
-    expected_test_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
     expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -1196,14 +1196,14 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Click me", "Клик тут"]',
 
-    param_types: {inputs: number},
+    param_types: {inputs: int},
     param_nature: {inputs: primitive},
-    param_init_data_types: {inputs: "FixedArray<number>"},
+    param_init_data_types: {inputs: "FixedArray<int>"},
     param_list: {inputs: '[0, 0]'},
 
-    method_return_type: number,
-    expected_test_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
     expected_test_data: '[67, 1050]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -1276,9 +1276,9 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
-    param_types: {fillLength: number, fillStr: string},
+    param_types: {fillLength: int, fillStr: string},
     param_nature: {fillLength: primitive, fillStr: primitive},
-    param_init_data_types: {fillLength: "FixedArray<number>", fillStr: "FixedArray<string>"},
+    param_init_data_types: {fillLength: "FixedArray<int>", fillStr: "FixedArray<string>"},
     param_list: {fillLength: '[11, 11, 5, -2]', fillStr: '["be", "*", "be", "be"]'},
 
     method_return_type: "String",
@@ -1316,10 +1316,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
-    param_types: {fillLength: number},
+    param_types: {fillLength: int},
     param_nature: {fillLength: primitive},
-    param_init_data_types: {fillLength: "FixedArray<number>"},
-    param_list: {fillLength: '[10, 10.9, 5, -2]'},
+    param_init_data_types: {fillLength: "FixedArray<int>"},
+    param_list: {fillLength: '[10, 10, 5, -2]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
@@ -1376,10 +1376,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
-    param_types: {fillLength: number, fillStr: string},
+    param_types: {fillLength: int, fillStr: string},
     param_nature: {fillLength: primitive, fillStr: primitive},
-    param_init_data_types: {fillLength: "FixedArray<number>", fillStr: "FixedArray<string>"},
-    param_list: {fillLength: '[11, 11, 5.2, -2]', fillStr: '["be", "*", "be", "be"]'},
+    param_init_data_types: {fillLength: "FixedArray<int>", fillStr: "FixedArray<string>"},
+    param_list: {fillLength: '[11, 11, 5, -2]', fillStr: '["be", "*", "be", "be"]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
@@ -1416,10 +1416,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["Pad me", "", "Do not pad", "Do not pad"]',
 
-    param_types: {fillLength: number},
+    param_types: {fillLength: int},
     param_nature: {fillLength: primitive},
-    param_init_data_types: {fillLength: "FixedArray<number>"},
-    param_list: {fillLength: '[10, 10, 5.2, -2]'},
+    param_init_data_types: {fillLength: "FixedArray<int>"},
+    param_list: {fillLength: '[10, 10, 5, -2]'},
 
     method_return_type: "String",
     expected_test_data_item_type: "String",
@@ -1457,8 +1457,8 @@
     init_object_type: String,
     init_object_data: '["abcdefhghijk", "abcdefhghijk", "abcdefhghijk", "abcdefhghijk"]',
 
-    param_init_data_types: {"begin": "FixedArray<number>"},
-    param_types: {"begin": number},
+    param_init_data_types: {"begin": "FixedArray<int>"},
+    param_types: {"begin": int},
     param_nature: {"begin": primitive},
     param_list: {"begin": "[0, 1, 10, 11]"},
     method_return_type: String,
@@ -1497,10 +1497,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk", "abcdefhgijkabcdefghijk"]',
 
-    param_init_data_types: {"begin": "FixedArray<number>", "length": "FixedArray<number>"},
-    param_types: {"begin": number, "length": number},
+    param_init_data_types: {"begin": "FixedArray<int>", "length": "FixedArray<int>"},
+    param_types: {"begin": int, "length": int},
     param_nature: {"begin": primitive, "length": primitive},
-    param_list: {"begin": "[0, 1, 2.2]", "length": "[3, 3.2, 3]"},
+    param_list: {"begin": "[0, 1, 2]", "length": "[3, 3, 3]"},
 
     method_return_type: String,
 
@@ -1573,8 +1573,8 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
 
-    param_init_data_types: {"begin": "FixedArray<number>", "end": "FixedArray<number>"},
-    param_types: {"begin": number, "end": number},
+    param_init_data_types: {"begin": "FixedArray<int>", "end": "FixedArray<int>"},
+    param_types: {"begin": int, "end": int},
     param_nature: {"begin": primitive, "end": primitive},
     param_list: {"begin": "[4, -9]", "end": "[19, -5]"},
 
@@ -1592,8 +1592,8 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog."]',
 
-    param_init_data_types: {"begin": "FixedArray<Number>", "end": "FixedArray<Number>"},
-    param_types: {"begin": Number, "end": Number},
+    param_init_data_types: {"begin": "FixedArray<int>", "end": "FixedArray<int>"},
+    param_types: {"begin": int, "end": int},
     param_nature: {"begin": primitive, "end": primitive},
     param_list: {"begin": '[4, -9, 0x00, 0x01]', "end": '[19, 0x68, 4, 8]'},
 
@@ -1794,11 +1794,11 @@
     param_types: {"param1": String},
     param_nature: {"param1": object },
     param_list: {"param1": '["ab", "ab", "ab", "ab", "ijk", "ijk", "ijk", "ijk", "ijk", "ijk", "", "", ""]'},
-    method_return_type: double,
+    method_return_type: int,
 
-    expected_data_type: "FixedArray<double>",
-    expected_test_data: "[0 as double, 0 as double, 0 as double, 0 as double,  8 as double, 8 as double, 8 as double, 8 as double, 8 as double, 8 as double, 0 as double, 0 as double, 0 as double]",
-    verify_test_result_function: compareFloatPointValue
+    expected_data_type: "FixedArray<int>",
+    expected_test_data: "[0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 0, 0, 0]",
+    verify_test_result_function: compareIntPointValue
  }
 
 - {
@@ -2105,10 +2105,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "value0", "value0", "empty", "empty"]',
 
-    param_types: {separator: String, limit: Number},
+    param_types: {separator: String, limit: int},
     param_nature: {separator: primitive, limit: object},
-    param_init_data_types: {separator: "FixedArray<String>", limit: "FixedArray<Number>"},
-    param_list: {separator: [ "*", "*", "*", "*", "8", "*", "", ""], limit: "[new Number(0), new Number(1), new Number(2), new Number(-2), new Number(1), new Number(10), new Number(3), new Number(10)]"},
+    param_init_data_types: {separator: "FixedArray<String>", limit: "FixedArray<int>"},
+    param_list: {separator: [ "*", "*", "*", "*", "8", "*", "", ""], limit: "[new int(0), new int(1), new int(2), new int(-2), new int(1), new int(10), new int(3), new int(10)]"},
 
     method_return_type: "String[]",
     result_nature: "array",
@@ -2185,9 +2185,9 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["empty", "empty", "empty"]',
 
-    param_types: {pattern: RegExp, limit: Number},
+    param_types: {pattern: RegExp, limit: int},
     param_nature: {pattern: object, limit: primitive},
-    param_init_data_types: {pattern: "FixedArray<String>", limit: "FixedArray<Number>"},
+    param_init_data_types: {pattern: "FixedArray<String>", limit: "FixedArray<int>"},
     param_list: {pattern: ["", "", ""], limit: [-1, 0, 1]},
 
     method_return_type: "String[]",
@@ -2205,10 +2205,10 @@
     init_object_data_type: "FixedArray<String>",
     init_object_data: '["*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "*value0*value1*value2*value3*value4*", "value0", "value0", "empty", "empty"]',
 
-    param_types: {pattern: String, limit: number},
+    param_types: {pattern: String, limit: int},
     param_nature: {pattern: primitive, limit: primitive},
-    param_init_data_types: {pattern: "FixedArray<String>", limit: "FixedArray<number>"},
-    param_list: {pattern: [ "*", "*", "*", "*", "8", "*", "", ""], limit: [0, 1.2, 2, -2, 1, 10.5, 3, 10]},
+    param_init_data_types: {pattern: "FixedArray<String>", limit: "FixedArray<int>"},
+    param_list: {pattern: [ "*", "*", "*", "*", "8", "*", "", ""], limit: [0, 1, 2, -2, 1, 10, 3, 10]},
 
     method_return_type: "String[]",
     result_nature: "array",
@@ -2247,9 +2247,9 @@
     param_init_data_types: {localeStr: "FixedArray<string>"},
     param_list: {localeStr: '["a", "pear", "apple"]'},
 
-    method_return_type: number,
-    expected_test_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
     expected_test_data: '[0, -1, 1]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -2265,9 +2265,9 @@
     param_init_data_types: {localeStr: "FixedArray<string>"},
     param_list: {localeStr: '["\x68", "\u0068", "h", "H", "h"]'},
 
-    method_return_type: number,
-    expected_test_data_item_type: number,
-    expected_data_type: "FixedArray<number>",
+    method_return_type: int,
+    expected_test_data_item_type: int,
+    expected_data_type: "FixedArray<int>",
     expected_test_data: '[0, 0, 0, -1, 1]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -2301,9 +2301,9 @@
     param_types: {str: String},
     param_list: {str: '["to", "[A-Z]"]'},
 
-    method_return_type: number,
-    expected_test_data_item_type: 'number',
-    expected_data_type: 'FixedArray<number>',
+    method_return_type: int,
+    expected_test_data_item_type: 'int',
+    expected_data_type: 'FixedArray<int>',
     expected_test_data: '[8, -1]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -2321,9 +2321,9 @@
     param_types: {str: RegExp},
     param_list: {str: ["to", "[A-Z]"]},
 
-    method_return_type: number,
-    expected_test_data_item_type: 'number',
-    expected_data_type: 'FixedArray<number>',
+    method_return_type: int,
+    expected_test_data_item_type: 'int',
+    expected_data_type: 'FixedArray<int>',
     expected_test_data: '[8, -1]',
     verify_test_result_function: comparePrimitiveValue
   }

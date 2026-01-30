@@ -1084,7 +1084,7 @@ export class DateTimeFormat {
                 if (optFractionalSecond < 1 || optFractionalSecond > 3) {
                     throw new RangeError("invalid digits value: " + optFractionalSecond)
                 }
-                pattern.append("S".repeat(optFractionalSecond))
+                pattern.append("S".repeat(optFractionalSecond.toInt()))
             }
         }
 
