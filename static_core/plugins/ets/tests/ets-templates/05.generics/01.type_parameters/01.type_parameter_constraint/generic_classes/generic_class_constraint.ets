@@ -32,7 +32,7 @@ params: >
 function main(): void {
 {% if "abstract" not in cm %}
     let x = new Point<{{c.use}}>()
-    arktest.assertTrue(x instanceof Point<{{c.assertion_type or c.type}}>)
+    arktest.assertTrue(x instanceof Point)
 {% endif %}
 }
 {% endfor %}

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ interface B<G extends X> extends A<X> {
 function main(): void {
     let instanceB: B<Y>  = {x: new X(), y: new Y()}
     let instanceA: A<X> = instanceB;
-    arktest.assertTrue(instanceA instanceof B<Y>)
+    arktest.assertTrue(instanceA instanceof B)
     arktest.assertTrue(instanceA.x instanceof X)
     arktest.assertTrue(instanceA.y instanceof Y)
 }

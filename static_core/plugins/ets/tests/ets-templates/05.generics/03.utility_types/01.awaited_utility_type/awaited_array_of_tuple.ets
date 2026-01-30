@@ -22,7 +22,7 @@ desc: >-
 async function foo(i: Awaited<(string|number)[]>, j: (string|number)[]) {
   arktest.assertEQ(i[0], j[0])
   arktest.assertEQ(i[1], j[1])
-  arktest.assertTrue(i instanceof (string|number)[])
+  arktest.assertTrue(i instanceof Array)
 }
 
 async function bar() {

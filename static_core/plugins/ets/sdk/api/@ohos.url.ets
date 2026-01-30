@@ -2480,7 +2480,7 @@ export namespace url {
                 this.head = input.head;
                 this.tail = input.tail;
                 this.cacheMap = input.cacheMap;
-            } else if (input instanceof [string, string][]) {
+            } else if (input instanceof Array) {
                 this.parseParamFromArray(input as [string, string][]);
             } else if (input instanceof Record) {
                 this.parseParamFromRecord(input as Record<string, string>)

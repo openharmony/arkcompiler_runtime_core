@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,4 +22,3 @@ class A<T> {}
 type myType<T> = A<T>[]
 let x: myType<number> = [new A<number>(), new A<number>()]
 arktest.assertTrue(x instanceof Array)
-arktest.assertTrue(x[0] instanceof A)

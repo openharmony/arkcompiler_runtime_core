@@ -72,7 +72,7 @@ cases:
     assert: Array
   - type: "int[]"
     use: "[1, 0]"
-    assert: "int[]"
+    assert: "Array"
   - type: "Array<int>"
     use: "[1]"
     assert: Array

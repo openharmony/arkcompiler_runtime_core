@@ -37,9 +37,9 @@ const f1: F1<void> = (): void => {}
 const f2: F1<void> = () => {}
 const f3: F1<void> = (): undefined => { return undefined }
 
-arktest.assertTrue(f1 instanceof F1<void>)
-arktest.assertTrue(f2 instanceof F1<void>)
-arktest.assertTrue(f3 instanceof F1<void>)
+arktest.assertTrue(f1 instanceof F1)
+arktest.assertTrue(f2 instanceof F1)
+arktest.assertTrue(f3 instanceof F1)
 
 type A1<T> = T[]
 type A2<T> = Array<T>

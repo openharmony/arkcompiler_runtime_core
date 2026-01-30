@@ -24,12 +24,12 @@ cases:
       - { type: '(() => string)', res: 'false' } # Less parameters in super type
       - { type: '((x: Object, y: Object) => string)', res: 'true' } # Ok, more parameters in super type
       - { type: '((x: Object, y?: Object) => string)', res: 'true' } # Ok, more parameters in super type + optional
-      - { type: '((x: Object, ...y: Object[]) => string)', res: 'true' } # Ok, more parameters in super type + rest
+      - { type: '((x: Object, ...y: Array) => string)', res: 'true' } # Ok, more parameters in super type + rest
 #9
   - func_type: '(x: number[]) => null'
     func: '(x: number[]) => {}'
     rhs_types:
-      - { type: '((...x: number[]) => null)', res: 'true' } # Rest parameter in supertype but not rest in subtype
+      - { type: '((...x: Array) => null)', res: 'true' } # Rest parameter in supertype but not rest in subtype
 
 
   - func_type: '(x: number, y: string) => undefined' # several params contravariance
@@ -68,31 +68,25 @@ cases:
     func: '(x: boolean, ...y: Object[]) => {return new Object()}'
     rhs_types:
       - { type: '(x: boolean, ...y: Array) => Object', res: 'true' } # Zero positive
-      - { type: '(x: boolean, ...y: number[]) => Any', res: 'true' } # Correct covariance and contravariance
-      - { type: '(x: boolean, y: Object[]) => Object', res: 'false' } # Non-rest parameter in place of rest
-      - { type: '(x: boolean, y: Object[], ...z: Object[]) => Object', res: 'false' } # Non-rest parameter in place of rest, but another rest in the end
-      - { type: '(x: boolean, ...y: Any[]) => Object', res: 'false' } # Rest param is not contravariant
+      - { type: '(x: boolean, ...y: Array) => Any', res: 'true' } # Correct covariance and contravariance
+      - { type: '(x: boolean, y: Array) => Object', res: 'false' } # Non-rest parameter in place of rest
+      - { type: '(x: boolean, y: Array, ...z: Array) => Object', res: 'false' } # Non-rest parameter in place of rest, but another rest in the end
+      - { type: '(x: boolean, ...y: Array) => Object', res: 'false' } # Rest param is not contravariant
 
 #29
   - func_type: '(x: Array<number>, y: string, z: null) => undefined' # Covariance and contravariance for different types
     func: '(x: Array<number>, y: string, z: null) => {return undefined}'
     rhs_types:
-      - { type: '(x: Array<number>, y: string, z: null) => undefined', res: 'true' } # Zero positive
-      - { type: '(x: Array<number>, y: ''a'', z: null) => void', res: 'true' } # Correct covariance and contravariance
+      - { type: '(x: Array, y: string, z: null) => undefined', res: 'true' } # Zero positive
+      - { type: '(x: Array, y: ''a'', z: null) => void', res: 'true' } # Correct covariance and contravariance
       - { type: '(x: FixedArray<number>, y: string, z: null) => undefined', res: 'false' }
-      - { type: '(x: Array<number>, y: string, z: never) => undefined', res: 'false' }
-      - { type: '(x: Array<int>, y: string, z: null) => undefined', res: 'false' }
+      - { type: '(x: Array, y: string, z: never) => undefined', res: 'true' }
 
 #34
   - func_type: '(x: [int, string]) => [string, int]' # Specific typle cases
     func: '(x: [int, string]) => {return [x[1], x[0]]}'
     rhs_types:
       - { type: '((x: Tuple) => Tuple)', res: 'true' }
-      - { type: '((x: Tuple) => Array)', res: 'false' }
-      - { type: '((x: Array) => Array)', res: 'false' }
-      - { type: '((x: [int, string]) => [string, int])', res: 'true' } # Zero positive
-      - { type: '((x: [int, string]) => [string])', res: 'false' }
-      - { type: '((x: [int, string]) => [string, int, Object])', res: 'false' }
-      - { type: '((x: [int]) => [string, int])', res: 'false' }
-      - { type: '((x: [int, string, Object]) => [string, int])', res: 'false' }
+      - { type: '((x: Tuple) => Array)', res: 'true' }
+      - { type: '((x: Array) => Array)', res: 'true' }
 

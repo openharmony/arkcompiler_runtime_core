@@ -36,8 +36,7 @@ function main() {
     {{c.decl}}
     let v: my_type = {{c.init}}
     // Note #738 spec is not quite clear yet if type param throws CTE or is ignored
-    arktest.assertTrue(v instanceof Array<my_type>, "Fail at Array<my_type>")
-    arktest.assertTrue(v instanceof Array<OtherType>, "Fail at Array<OtherType>")
+    arktest.assertTrue(v instanceof Array, "Fail at Array")
 }
 {% endfor %}
 {% endfor %}

@@ -23,6 +23,6 @@ desc: >-
 {{c.decl}}
 
 function main() {
-    arktest.assertTrue( {{c.val}} instanceof {{c.type}} )
+    arktest.assertTrue( {{c.val}} instanceof Array )
 }
 {% endfor %}
