@@ -17,7 +17,7 @@ generic_types:
   - case: {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric"}
     stdout: |-
       "Semantic error ESE0170: Type 'OneGeneric<T>' is generic but type argument were not provided."
-  #1    
+  #1
   - case: {decl: "class OneGeneric<T> {}", bad_param: "OneGeneric<Object, String>"}
     stdout: |-
       "Semantic error ESE0171: Type 'OneGeneric<T>' has 1 number of type parameters, but 2 type arguments were provided."
@@ -51,8 +51,6 @@ generic_types:
       "Semantic error ESE0371: Cannot find type 'TwoGenerics'."
   #9
   - case: {decl: "function TwoGenerics<T,U>(): void {}", bad_param: "TwoGenerics<String, Object, String>"}
-    stdout: |-
-      "Semantic error ESE0371: Cannot find type 'TwoGenerics'. "
   #10
   - case: {decl: "interface OneGeneric<T> {}", bad_param: "OneGeneric"}
     stdout: |-

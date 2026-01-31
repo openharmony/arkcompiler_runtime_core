@@ -18,7 +18,6 @@ desc: Restricting access classes by namespace.
 files:
 - ./named_reference_export4.ets
 tags:
-- positive
 - compile-only
 ---*/
 

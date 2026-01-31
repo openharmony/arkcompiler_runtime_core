@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 desc: Ambient declaration does not introduce a new annotation but provides type information
       to use an annotation that must be defined elsewhere
       A runtime error occurs if no annotation corresponds to the ambient annotation used in the program
+tags: [compile-only, negative]
 files: ['./ambient_annotations_n.ets']
 ---*/
 

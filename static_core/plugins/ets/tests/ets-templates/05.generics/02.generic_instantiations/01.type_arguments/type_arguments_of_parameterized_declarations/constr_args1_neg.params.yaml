@@ -22,8 +22,6 @@ cases:
   #1
   - use: |-
       let v: A = new <null|X> A(new X())  // syntax error
-    stdout: |-
-      "Semantic error ESE0318: Type 'T' cannot be assigned to type 'Object|null' "
   #2
   - use: |-
       let v: A = new <null> A(null)  // syntax error

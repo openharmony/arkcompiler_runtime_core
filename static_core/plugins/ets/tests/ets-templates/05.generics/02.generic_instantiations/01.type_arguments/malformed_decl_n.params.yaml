@@ -20,12 +20,11 @@ cases:
       let x: A<> = new A<>();
     stdout: |-
       "Semantic error ESE0169: Type 'A' is not generic."
-      
+
   - decl: |-
       class A {}
       class PA<T> {}
     use: |-
       let x: PA<int> = new PA<>();
     stdout: |-
-      "Semantic error ESE0171: Type 'PA<T>' has 1 number of type parameters, but 0 type arguments were provided. "
-
+      "Semantic error ESE0171: Type 'PA<T>' has 1 number of type parameters, but 0 type arguments were provided."

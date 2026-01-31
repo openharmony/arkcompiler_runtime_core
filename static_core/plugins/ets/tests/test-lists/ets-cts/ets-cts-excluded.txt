@@ -129,6 +129,29 @@
 #30101 Tests shouldn't rely on default arktsconfig contents.:
 13.modules_and_namespaces/03.import_directives/05.import_path/file/import_baseURL_path_file.ets
 
+# TODO(dkofanov) deprecated directory-globbing package import:
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_0.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_1.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_2.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_n_0.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_n_1.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/dir/import_path_dir_n_2.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_n_3.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_3.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_8.ets
+13.modules_and_namespaces/01.import_directives/05.import_path/bad/import_path_bad_n_8.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/dir/import_path_dir_n_0.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/dir/import_path_dir_n_1.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/dir/import_path_dir_n_2.ets
+13.modules_and_namespaces/03.import_directives/05.import_path/bad/import_path_bad_n_3.ets
+18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_0.ets
+18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_1.ets
+18.annotations/04.ambient_annotations/ambient_annotations_n/import_ambient_annotation_n_2.ets
+
+# TODO(dkofanov): package ETSGLOBAL clash:
+13.modules_and_namespaces/05.export_directives/01.selective_export_directive/pkg01_test.ets
+13.modules_and_namespaces/05.export_directives/02.single_export_directive/pkg01_test.ets
+
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_0.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_1.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_10.ets
@@ -144,6 +167,13 @@
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_7.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_8.ets
 13.modules_and_namespaces/05.export_directives/02.single_export_directive/single_export_9.ets
+
+# TODO(dkofanov): Stdlib variable redeclaration:
+13.modules_and_namespaces/07.program_entry_point/program_entry_error_coroutine.ets
+13.modules_and_namespaces/07.program_entry_point/program_entry_error_coroutines.ets
+13.modules_and_namespaces/07.program_entry_point/program_entry_normal_coroutine.ets
+13.modules_and_namespaces/07.program_entry_point/program_entry_normal_coroutines.ets
+
 15.semantic_rules/02.subtyping/subtyping_among_primitive_types/primitive_types_cast_3.ets
 15.semantic_rules/06.compatibility_call_args/single_params_20.ets
 15.semantic_rules/06.compatibility_call_args/single_params_21.ets

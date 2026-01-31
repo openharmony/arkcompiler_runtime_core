@@ -117,8 +117,8 @@ ani_add_gtest(ani_test_class_ops_class_set_static_field_ref
 )
 
 ani_add_gtest(ani_test_class_ops_class_find_method
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_test.ets
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_test_package/class_find_method_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/class_find_method_test_package/class_find_method_test.ets
 )
 
 ani_add_gtest(ani_test_class_ops_find_setter_getter

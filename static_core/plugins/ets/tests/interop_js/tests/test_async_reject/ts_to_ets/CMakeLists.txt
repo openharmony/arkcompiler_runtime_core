@@ -16,7 +16,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
 panda_ets_interop_js_gtest(ets_interop_js_reject_string
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reject_string.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reject_string.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reject_string_ets.ets
     TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/reject_string.ts
     ETS_CONFIG ${ETS_CONFIG}
 )

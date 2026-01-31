@@ -9,7 +9,7 @@
           "${PANDA_ROOT}/plugins/ets/stdlib/std"
         ],
         "@mytest": [
-          "${CMAKE_CURRENT_SOURCE_DIR}/mytest"
+          "${CMAKE_CURRENT_SOURCE_DIR}/mytest.ets"
         ]
       },
       "dependencies": {

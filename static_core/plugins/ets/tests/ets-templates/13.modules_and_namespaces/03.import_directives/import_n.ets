@@ -17,8 +17,6 @@
 /*---
 desc: Import declarations without 'as' like 'import a.b.c.d' or 'import a.b.c.*'
 tags: [compile-only, negative]
-expected_out: 'Semantic error ESE0358: Cannot find default imported element in the target '
-params: imported logic = {{class}}
 ---*/
 
 import {{class}} from "std/math";

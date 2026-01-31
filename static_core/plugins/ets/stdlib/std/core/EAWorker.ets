@@ -317,7 +317,7 @@ export class EAWorker {
     }
 };
 
-abstract class InternalWorker {
+export abstract class InternalWorker {
     private readonly name: string;
     protected workerId: int;
     private errorHandler: ErrorHandlerType | undefined = undefined;
