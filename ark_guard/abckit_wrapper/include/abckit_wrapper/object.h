@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <variant>
 #include <any>
+#include <vector>
 #include "err.h"
 #include "visitor/child_visitor.h"
 
@@ -87,6 +88,13 @@ public:
      */
     bool ChildrenAccept(ChildVisitor &visitor);
 
+protected:
+    /**
+     * @brief Invalidate cached fully qualified name for this object and all descendants. Call from SetName overrides.
+     */
+    void InvalidateFullyQualifiedNameCache();
+
+public:
     /**
      * object's owing module
      */
@@ -99,6 +107,10 @@ public:
      * object's parent object
      */
     std::optional<Object *> parent_ = std::nullopt;
+    /**
+     * cached fully qualified name, invalidated on SetName
+     */
+    mutable std::optional<std::string> cachedFullyQualifiedName_ = std::nullopt;
     /**
      * object's directly child
      */

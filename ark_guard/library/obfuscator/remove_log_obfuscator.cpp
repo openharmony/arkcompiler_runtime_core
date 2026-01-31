@@ -15,17 +15,13 @@
 
 #include "remove_log_obfuscator.h"
 
-#include <regex>
+#include <string_view>
 
 #include "abckit_wrapper/method.h"
 #include "logger.h"
 
 namespace {
-const std::vector<std::regex> LOG_PATTERNS = {
-    std::regex("^.*:std.core.Console;.*"),        std::regex("^debug:.*;std.core.Array;void;"),
-    std::regex("^info:.*;std.core.Array;void;"),  std::regex("^warn:.*;std.core.Array;void;"),
-    std::regex("^error:.*;std.core.Array;void;"), std::regex("^fatal:.*;std.core.Array;void;")};
-
+// Lightweight log detection: avoid regex, use simple string checks
 bool IsCallLog(const abckit::Instruction &instruction)
 {
     if (instruction.GetId() == 0 || !instruction.CheckIsCall()) {
@@ -33,8 +29,25 @@ bool IsCallLog(const abckit::Instruction &instruction)
     }
 
     const auto &functionName = instruction.GetFunction().GetName();
-    return std::any_of(LOG_PATTERNS.begin(), LOG_PATTERNS.end(),
-                       [&](const std::regex &re) { return std::regex_match(functionName, re); });
+    const std::string_view name(functionName);
+
+    // "^.*:std.core.Console;.*" -> contains ":std.core.Console;"
+    if (name.find(":std.core.Console;") != std::string_view::npos) {
+        return true;
+    }
+    // "^<level>:.*;std.core.Array;void;" -> starts with "<level>:" and contains ";std.core.Array;void;"
+    constexpr std::string_view ARRAY_VOID_SUFFIX = ";std.core.Array;void;";
+    // 5 is length of "debug:" or "info:" etc.
+    if (name.find(ARRAY_VOID_SUFFIX) != std::string_view::npos && name.size() >= 5) {
+        if (name.substr(0, 6) == "debug:" ||  // 6 is length of "debug:" etc.
+            name.substr(0, 5) == "info:" ||   // 5 is length of "info:" etc.
+            name.substr(0, 5) == "warn:" ||   // 5 is length of "warn:" etc.
+            name.substr(0, 6) == "error:" ||  // 6 is length of "error:" etc.
+            name.substr(0, 6) == "fatal:") {  // 6 is length of "fatal:" etc.
+            return true;
+        }
+    }
+    return false;
 }
 
 bool RemoveConsoleLog(const abckit_wrapper::Method *method)

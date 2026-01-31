@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "abckit_wrapper/method.h"
-#include <regex>
 #include <numeric>
 #include "abckit_wrapper/modifiers.h"
 #include "string_util.h"
@@ -23,11 +22,25 @@ namespace {
 constexpr std::string_view RAW_NAME_AND_TYPE_NAME_SEP = ":";
 constexpr size_t RAW_NAME_AND_TYPE_NAME_SIZE = 2;
 constexpr std::string_view TYPE_NAME_SEP = ";";
-const std::regex SETTER_GETTER_PATTERN(R"(%%(set|get)-)");
+constexpr std::string_view GET_PREFIX = "%%get-";
+constexpr std::string_view SET_PREFIX = "%%set-";
 
 bool IsSetterOrGetterMethod(const std::string &methodRawName)
 {
-    return std::regex_search(methodRawName, SETTER_GETTER_PATTERN);
+    return methodRawName.find(GET_PREFIX) != std::string::npos || methodRawName.find(SET_PREFIX) != std::string::npos;
+}
+
+std::string StripSetterGetterPrefix(const std::string &name)
+{
+    const size_t getPos = name.find(GET_PREFIX);
+    if (getPos != std::string::npos) {
+        return name.substr(0, getPos) + name.substr(getPos + GET_PREFIX.size());
+    }
+    const size_t setPos = name.find(SET_PREFIX);
+    if (setPos != std::string::npos) {
+        return name.substr(0, setPos) + name.substr(setPos + SET_PREFIX.size());
+    }
+    return name;
 }
 }  // namespace
 
@@ -85,6 +98,7 @@ std::string abckit_wrapper::Method::GetName() const
 
 bool abckit_wrapper::Method::SetName(const std::string &name)
 {
+    InvalidateFullyQualifiedNameCache();
     const auto function = this->GetArkTsImpl<abckit::arkts::Function>();
     if (function.IsAnonymous() || function.IsExternal()) {
         return true;
@@ -119,7 +133,7 @@ AbckitWrapperErrorCode abckit_wrapper::Method::InitSignature()
 
     // setter or getter method descriptor is the field name
     if (IsSetterOrGetterMethod(rawNameAndTypeName[0])) {
-        this->rawName_ = std::regex_replace(rawNameAndTypeName[0], SETTER_GETTER_PATTERN, "");
+        this->rawName_ = StripSetterGetterPrefix(rawNameAndTypeName[0]);
         this->descriptor_ = "";
         return ERR_SUCCESS;
     }

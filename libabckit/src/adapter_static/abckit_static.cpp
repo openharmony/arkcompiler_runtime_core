@@ -35,7 +35,6 @@
 #include <unordered_set>
 #include <unordered_set>
 #include <functional>
-#include <regex>
 
 // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
@@ -47,8 +46,8 @@ constexpr std::string_view ETS_ANNOTATION_MODULE = "ets.annotation.Module";
 constexpr std::string_view ETS_EXTENDS = "ets.extends";
 constexpr std::string_view ETS_IMPLEMENTS = "ets.implements";
 constexpr std::string_view ENUM_BASE = "std.core.BaseEnum";
-constexpr std::string_view INTERFACE_GET_FUNCTION_PATTERN = ".*%%get-(.*)";
-constexpr std::string_view INTERFACE_SET_FUNCTION_PATTERN = ".*%%set-(.*)";
+constexpr std::string_view INTERFACE_GET_MARKER = "%%get-";
+constexpr std::string_view INTERFACE_SET_MARKER = "%%set-";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view ARRAY_ENUM_SUFFIX = "[]";
 constexpr std::string_view OBJECT_CLASS = "std.core.Object";
@@ -813,26 +812,28 @@ static void AssignInstance(const std::unordered_map<std::string, std::unique_ptr
     }
 }
 
-static bool IsInterfaceGetFunction(const std::string &functionName, std::smatch &match)
+// Lightweight extraction: get field name after %%get- or %%set- (to next ':' or end)
+static bool ExtractInterfaceFieldName(const std::string &functionName, std::string_view marker, std::string &outName)
 {
-    return std::regex_match(functionName, match, std::regex(INTERFACE_GET_FUNCTION_PATTERN.data()));
-}
-
-static bool IsInterfaceSetFunction(const std::string &functionName, std::smatch &match)
-{
-    return std::regex_match(functionName, match, std::regex(INTERFACE_SET_FUNCTION_PATTERN.data()));
+    const size_t pos = functionName.find(marker);
+    if (pos == std::string::npos) {
+        return false;
+    }
+    const size_t start = pos + marker.size();
+    const size_t end = functionName.find(':', start);
+    outName = std::string(INTERFACE_FIELD_PREFIX) +
+              functionName.substr(start, end != std::string::npos ? end - start : std::string::npos);
+    return true;
 }
 
 static void CreateAndAssignInterfaceField(const std::unique_ptr<AbckitCoreInterface> &interface,
                                           AbckitCoreFunction *function, const std::string &functionName)
 {
-    std::smatch match;
-    if (IsInterfaceGetFunction(functionName, match)) {
-        const auto &fieldName = INTERFACE_FIELD_PREFIX.data() + match[1].str();
+    std::string fieldName;
+    if (ExtractInterfaceFieldName(functionName, INTERFACE_GET_MARKER, fieldName)) {
         LIBABCKIT_LOG(DEBUG) << "Found interface Field: " << fieldName << "\n";
         interface->fields.emplace(fieldName, CreateInterfaceField(interface, function, fieldName));
-    } else if (IsInterfaceSetFunction(functionName, match)) {
-        const auto &fieldName = INTERFACE_FIELD_PREFIX.data() + match[1].str();
+    } else if (ExtractInterfaceFieldName(functionName, INTERFACE_SET_MARKER, fieldName)) {
         // Handle case where only setter exists without getter
         if (interface->fields.find(fieldName) == interface->fields.end()) {
             LIBABCKIT_LOG(DEBUG) << "Found interface Field (setter only): " << fieldName << "\n";

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 #include "abckit_wrapper/field.h"
 
-#include <regex>
 #include "logger.h"
 
 std::string abckit_wrapper::Field::GetName() const
@@ -64,6 +63,7 @@ bool abckit_wrapper::Field::SetFieldName(const std::string &name) const
 
 bool abckit_wrapper::Field::SetName(const std::string &name)
 {
+    InvalidateFullyQualifiedNameCache();
     if (!this->SetFieldName(name)) {
         return false;
     }
@@ -100,7 +100,9 @@ AbckitWrapperErrorCode abckit_wrapper::Field::Init()
 AbckitWrapperErrorCode abckit_wrapper::Field::InitSignature()
 {
     const auto cachedName = this->GetName();
-    this->rawName_ = std::regex_replace(cachedName, std::regex("%%property-"), "");
+    const size_t pos = cachedName.find("%%property-");
+    // 11 is length of "%%property-"
+    this->rawName_ = (pos != std::string::npos) ? cachedName.substr(0, pos) + cachedName.substr(pos + 11) : cachedName;
     this->descriptor_ = "";
     this->cachedName_ = cachedName;
     return ERR_SUCCESS;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "configuration.h"
 
 #include <algorithm>
-#include <regex>
 
 #include "error.h"
 #include "logger.h"
@@ -31,10 +30,8 @@ bool IsReserved(const std::vector<std::string> &reservedNames, const std::vector
         return true;
     }
 
-    return std::any_of(universalReservedNames.begin(), universalReservedNames.end(), [str](const auto &field) {
-        std::regex pattern(field, std::regex_constants::ECMAScript);
-        return std::regex_match(str, pattern);
-    });
+    return std::any_of(universalReservedNames.begin(), universalReservedNames.end(),
+                       [&str](const auto &field) { return ark::guard::StringUtil::RegexMatch(str, field); });
 }
 
 std::string FindLongestReservedPath(const std::vector<std::string> &reservedNames,
@@ -153,4 +150,52 @@ bool ark::guard::Configuration::HasKeepConfiguration() const
     const bool hasClassSpecs = !GetClassSpecifications().empty();
 
     return hasFileNameKeep || hasPathKeep || hasClassSpecs;
+}
+
+void ark::guard::Configuration::WarmupRegexCache() const
+{
+    std::vector<std::string> patternsForIsMatch;
+    std::vector<std::string> patternsRaw;
+
+    const auto &fileNameOption = obfuscationRules.fileNameOption;
+    patternsRaw.insert(patternsRaw.end(), fileNameOption.universalReservedFileNames.begin(),
+                       fileNameOption.universalReservedFileNames.end());
+
+    const auto &pathOption = obfuscationRules.keepOptions.pathOption;
+    patternsRaw.insert(patternsRaw.end(), pathOption.universalReservedPaths.begin(),
+                       pathOption.universalReservedPaths.end());
+
+    for (const auto &spec : obfuscationRules.keepOptions.classSpecifications) {
+        for (const auto *p : {&spec.className_, &spec.extensionClassName_, &spec.annotationName_,
+                              &spec.extensionAnnotationName_}) {
+            if (!p->empty()) {
+                patternsForIsMatch.push_back(*p);
+            }
+        }
+        for (const auto &field : spec.fieldSpecifications_) {
+            if (!field.memberName_.empty()) {
+                patternsForIsMatch.push_back(field.memberName_);
+            }
+            if (!field.memberType_.empty()) {
+                patternsForIsMatch.push_back(field.memberType_);
+            }
+            if (!field.memberValue_.empty()) {
+                patternsForIsMatch.push_back(field.memberValue_);
+            }
+        }
+        for (const auto &method : spec.methodSpecifications_) {
+            if (!method.memberName_.empty()) {
+                patternsForIsMatch.push_back(method.memberName_);
+            }
+            if (!method.memberType_.empty()) {
+                patternsForIsMatch.push_back(method.memberType_);
+            }
+            if (!method.memberValue_.empty()) {
+                patternsForIsMatch.push_back(method.memberValue_);
+            }
+        }
+    }
+
+    StringUtil::WarmupRegexCache(patternsRaw);
+    StringUtil::WarmupRegexCacheForIsMatch(patternsForIsMatch);
 }

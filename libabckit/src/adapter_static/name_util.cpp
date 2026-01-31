@@ -15,8 +15,6 @@
 
 #include "name_util.h"
 
-#include <regex>
-
 #include "helpers_static.h"
 #include "metadata_inspect_static.h"
 #include "static_core/assembler/assembly-program.h"
@@ -128,7 +126,12 @@ std::string libabckit::NameUtil::GetFieldFullName(const ark::pandasm::Record *ow
 std::string libabckit::NameUtil::ObjectLiteralGetFullName(const AbckitCoreClass *objectLiteral,
                                                           const std::string &newName)
 {
-    auto objectLiteralName = std::regex_replace(newName, std::regex(R"(\.)"), "$") + OBJECT_LITERAL_SUFFIX.data();
+    std::string objectLiteralName;
+    objectLiteralName.reserve(newName.size() + OBJECT_LITERAL_SUFFIX.size());
+    for (char c : newName) {
+        objectLiteralName += (c == '.') ? '$' : c;
+    }
+    objectLiteralName += OBJECT_LITERAL_SUFFIX.data();
 
     // Preserve gensym suffix when multiple object literals implement the same interface
     const auto *record = GetStaticImplRecord(const_cast<AbckitCoreClass *>(objectLiteral));

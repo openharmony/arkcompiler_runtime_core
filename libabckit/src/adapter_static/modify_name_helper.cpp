@@ -20,7 +20,6 @@
 #include <map>
 #include <memory>
 #include <variant>
-#include <regex>
 #include "libabckit/src/logger.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
@@ -38,7 +37,6 @@ constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view FUNCTION_DELIMITER = ":";
 constexpr std::string_view INTERFACE_FIELD_PREFIX = "%%property-";
-constexpr std::string_view ASYNC_PATTERN = "(%%async-)(.+):(.+)";
 constexpr std::string_view ASYNC_PREFIX = "%%async-";
 constexpr std::string_view GETTER_PREFIX = "%%get-";
 constexpr std::string_view SETTER_PREFIX = "%%set-";
@@ -85,19 +83,41 @@ std::string AddGetSetPrefix(const std::string &input, const std::string &name)
     return name;
 }
 
-std::string GetSetPattern(const std::string &name)
+// Lightweight async name replace: "%%async-oldName:rest" -> "%%async-newName:rest"
+static std::string AsyncReplaceFast(const std::string &oldFunctionKeyName, const std::string &newName)
 {
-    return "%%([gs]et)-(" + name + "):(.+)";
+    constexpr std::string_view ASYNC_MARKER = "%%async-";
+    const size_t pos = oldFunctionKeyName.find(ASYNC_MARKER);
+    if (pos == std::string::npos) {
+        return oldFunctionKeyName;
+    }
+    const size_t nameStart = pos + ASYNC_MARKER.size();
+    const size_t colonPos = oldFunctionKeyName.find(':', nameStart);
+    if (colonPos == std::string::npos) {
+        return oldFunctionKeyName;
+    }
+    return oldFunctionKeyName.substr(0, nameStart) + newName + oldFunctionKeyName.substr(colonPos);
 }
 
-std::string GetSetReplace(const std::string &name)
+// Lightweight getter/setter match and replace without regex
+static bool GetSetMatchAndReplace(const std::string &oldFunctionKeyName, const std::string &fieldName,
+                                  const std::string &newName, std::string &outNewFunctionKeyName)
 {
-    return "%%$1-" + name + ":$3";
-}
-
-std::string AsyncReplace(const std::string &name)
-{
-    return "$1" + name + ":$3";
+    const std::string getPrefix = std::string(GETTER_PREFIX) + fieldName + ":";
+    const std::string setPrefix = std::string(SETTER_PREFIX) + fieldName + ":";
+    if (oldFunctionKeyName.find(getPrefix) != std::string::npos) {
+        const size_t pos = oldFunctionKeyName.find(getPrefix);
+        outNewFunctionKeyName = oldFunctionKeyName.substr(0, pos) + std::string(GETTER_PREFIX) + newName + ":" +
+                                oldFunctionKeyName.substr(pos + getPrefix.size());
+        return true;
+    }
+    if (oldFunctionKeyName.find(setPrefix) != std::string::npos) {
+        const size_t pos = oldFunctionKeyName.find(setPrefix);
+        outNewFunctionKeyName = oldFunctionKeyName.substr(0, pos) + std::string(SETTER_PREFIX) + newName + ":" +
+                                oldFunctionKeyName.substr(pos + setPrefix.size());
+        return true;
+    }
+    return false;
 }
 
 // Generic function to update annotation element value
@@ -1057,8 +1077,7 @@ void libabckit::ModifyNameHelper::GenerateNewFunctionNames(AbckitCoreFunction *f
         newFunctionKeyName = libabckit::NameUtil::GetFullName(function);
         newFunctionName = Split(newFunctionKeyName, std::string(FUNCTION_DELIMITER))[0];
     } else if (oldFunctionKeyName.find(std::string(ASYNC_PREFIX)) != std::string::npos) {
-        newFunctionKeyName =
-            std::regex_replace(oldFunctionKeyName, std::regex(std::string(ASYNC_PATTERN)), AsyncReplace(newName));
+        newFunctionKeyName = AsyncReplaceFast(oldFunctionKeyName, newName);
         newFunctionName = Split(newFunctionKeyName, std::string(FUNCTION_DELIMITER))[0];
     } else {
         auto newFuncName = AddGetSetPrefix(oldFunctionKeyName, newName);
@@ -1899,8 +1918,6 @@ bool libabckit::ModifyNameHelper::GetSetMethodRefreshName(
     if (fieldName.find(INTERFACE_FIELD_PREFIX) != std::string::npos) {
         fieldName = fieldName.substr(INTERFACE_FIELD_PREFIX.size());
     }
-    std::regex re(GetSetPattern(fieldName));
-    std::string replacement = GetSetReplace(newName);
 
     const auto funcName = StringUtil::GetFuncNameWithSquareBrackets(__func__);
     return std::visit(
@@ -1909,11 +1926,10 @@ bool libabckit::ModifyNameHelper::GetSetMethodRefreshName(
                 auto *funcImpl = function->GetArkTSImpl()->GetStaticImpl();
                 auto oldFunctionKeyName =
                     ark::pandasm::MangleFunctionName(funcImpl->name, funcImpl->params, funcImpl->returnType);
-                if (!std::regex_search(oldFunctionKeyName, re)) {
+                std::string newFunctionKeyName;
+                if (!GetSetMatchAndReplace(oldFunctionKeyName, fieldName, newName, newFunctionKeyName)) {
                     continue;
                 }
-
-                std::string newFunctionKeyName = std::regex_replace(oldFunctionKeyName, re, replacement);
                 std::string newFunctionName = Split(newFunctionKeyName, std::string(FUNCTION_DELIMITER))[0];
                 LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "old function key name:" << oldFunctionKeyName << std::endl;
                 LIBABCKIT_LOG_NO_FUNC(DEBUG) << funcName << "new function key name:" << newFunctionKeyName << std::endl;

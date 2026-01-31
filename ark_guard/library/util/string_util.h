@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,14 @@ public:
     static bool IsMatch(const std::string &inputStr, const std::string &pattern);
 
     /**
+     * @brief ECMAScript regex match with cached compilation (for config pattern matching)
+     * @param str The input string
+     * @param regexPattern The ECMAScript regex pattern
+     * @return true if full match
+     */
+    static bool RegexMatch(const std::string &str, const std::string &regexPattern);
+
+    /**
      * @brief Convert wildcard patterns to C++ regular expressions. Used for name conversion (class name/member name).
      * Support wildcard characters:
      * - ? Match a single non-package delimiter character
@@ -94,7 +102,7 @@ public:
      * @return if inputStr matched the prefix, return a string with prefix-removed,
      * @return if inputStr not match the prefix, return the origin inputString content
      */
-    static std::string RemovePrefixIfMatches(const std::string& inputStr, const std::string& prefix);
+    static std::string RemovePrefixIfMatches(const std::string &inputStr, const std::string &prefix);
 
     /**
      * @brief ensure inputStr start with specific prefix
@@ -102,7 +110,7 @@ public:
      * @param prefix prefix part
      * @return check if the string start with prefix; if not, add prefix.
      */
-    static std::string EnsureStartWithPrefix(const std::string& inputStr, const std::string& prefix);
+    static std::string EnsureStartWithPrefix(const std::string &inputStr, const std::string &prefix);
 
     /**
      * @brief ensure inputStr end with specific suffix
@@ -110,7 +118,7 @@ public:
      * @param suffix suffix part
      * @return check if the string ends with suffix; if not, append suffix.
      */
-    static std::string EnsureEndWithSuffix(const std::string& inputStr, const std::string& suffix);
+    static std::string EnsureEndWithSuffix(const std::string &inputStr, const std::string &suffix);
 
     /**
      * @brief find the length of the longest prefix that matches the input string.
@@ -118,7 +126,7 @@ public:
      * @param input the string to be processed
      * @return the length of the longest prefix
      */
-    static size_t FindLongestMatchedPrefix(const std::vector<std::string>& prefixes, const std::string& input);
+    static size_t FindLongestMatchedPrefix(const std::vector<std::string> &prefixes, const std::string &input);
 
     /**
      * @brief find the length of the longest regular expression prefix that matches the input string.
@@ -127,14 +135,30 @@ public:
      * @attention ensure expression start with '^'
      * @return the length of the longest prefix
      */
-    static size_t FindLongestMatchedPrefixReg(const std::vector<std::string>& prefixes, const std::string& input);
+    static size_t FindLongestMatchedPrefixReg(const std::vector<std::string> &prefixes, const std::string &input);
 
-     /**
+    /**
      * @brief remove all spaces in the string
      * @param input the string to be processed
      * @return the string with no spaces
      */
     static std::string RemoveAllSpaces(const std::string &input);
+
+    /**
+     * @brief Pre-compile regex patterns to warm the cache (call after config load)
+     * @param patterns regex pattern strings to pre-compile (used as-is, for RegexMatch/FindLongestMatchedPrefixReg)
+     */
+    static void WarmupRegexCache(const std::vector<std::string> &patterns);
+
+    /**
+     * @brief Pre-compile patterns for IsMatch (applies RemoveSpaces + EscapeParentheses before caching)
+     */
+    static void WarmupRegexCacheForIsMatch(const std::vector<std::string> &patterns);
+
+    /**
+     * @brief Prepare pattern for IsMatch (RemoveSpaces + EscapeParentheses)
+     */
+    static std::string PreparePatternForMatch(const std::string &pattern);
 };
 }  // namespace ark::guard
 
