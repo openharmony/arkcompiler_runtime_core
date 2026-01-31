@@ -308,6 +308,7 @@ _libarkruntime_calculated_sources = [
   "time_utils.cpp",
   "timing.cpp",
   "tooling/backtrace/backtrace.cpp",
+  "tooling/backtrace/symbol_extractor.cpp",
   "tooling/coverage_listener.cpp",
   "tooling/debug_inf.cpp",
   "tooling/debugger.cpp",

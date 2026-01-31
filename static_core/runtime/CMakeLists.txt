@@ -29,6 +29,7 @@ set(SOURCES
     class_linker_extension.cpp
     class_initializer.cpp
     tooling/backtrace/backtrace.cpp
+    tooling/backtrace/symbol_extractor.cpp
     tooling/coverage_listener.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp
