@@ -817,14 +817,28 @@ export class RegExp extends Object {
      * @returns new index
      */
     public static advanceStringIndex(s: String, index: int, unicode: boolean): int {
+        const HIGH_SURROGATE_START = 0xD800;
+        const HIGH_SURROGATE_END   = 0xDBFF;
+        const LOW_SURROGATE_START  = 0xDC00;
+        const LOW_SURROGATE_END    = 0xDFFF;
+        const length = s.getLength();
         if (!unicode) {
-            return index + 1
+            return index + 1;
         }
-        let length = s.getLength();
         if (index + 1 >= length) {
-            return index + 1
+            return index + 1;
         }
-        return index + s.codePointCount(index, index + 1);
+
+        const hi = s.charCodeAt(index);
+        if (hi < HIGH_SURROGATE_START || hi > HIGH_SURROGATE_END) {
+            return index + 1;
+        }
+        
+        const lo = s.charCodeAt(index + 1);
+        if (lo >= LOW_SURROGATE_START && lo <= LOW_SURROGATE_END) {
+            return index + 2;
+        }
+        return index + 1;
     }
 
     public static $_invoke(pattern: String, flags?: String) : RegExp {
