@@ -1595,3 +1595,56 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_037, TestSize.Level1)
 
     this->VerifyObfuscated();
 }
+
+/*
+ * @tc.name: obfuscator_test_038
+ * @tc.desc: interface with multiple object literals (gensym ObjectLiteral), verifies no duplicate record name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_038, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/interface_object_literal_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/interface_object_literal_demo.updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/interface_object_literal_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    AddModuleElement("interface_object_literal_demo", "interface_object_literal_demo");
+    AddElement<abckit_wrapper::Class>("interface_object_literal_demo.I", "I");
+    AddElement<abckit_wrapper::Method>(
+        "interface_object_literal_demo.I.method:interface_object_literal_demo.I;f64;", "method");
+    AddElement<abckit_wrapper::Field>("interface_object_literal_demo.i1", "i1");
+    AddElement<abckit_wrapper::Field>("interface_object_literal_demo.i2", "i2");
+
+    this->VerifyObfuscated();
+}
+
+/*
+ * @tc.name: obfuscator_test_039
+ * @tc.desc: FixedArray with union types (nested union records), verifies IsUnion/openAbc works
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ObfuscatorTest, obfuscator_test_039, TestSize.Level1)
+{
+    std::string abcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/fixed_array_union_demo.abc";
+    std::string obfAbcFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/fixed_array_union_demo.updated.abc";
+    std::string nameCacheFilePath =
+        ARK_GUARD_ABC_FILE_DIR "ut/obfuscator/code_sample/fixed_array_union_demo.json";
+
+    this->Init(abcFilePath, obfAbcFilePath, nameCacheFilePath);
+    AddModuleElement("fixed_array_union_demo", "fixed_array_union_demo");
+    AddElement<abckit_wrapper::Class>("fixed_array_union_demo.A", "A");
+    AddElement<abckit_wrapper::Class>("fixed_array_union_demo.B", "B");
+    AddElement<abckit_wrapper::Field>("fixed_array_union_demo.supArr", "supArr");
+    AddElement<abckit_wrapper::Field>("fixed_array_union_demo.subArr", "subArr");
+    AddElement<abckit_wrapper::Field>("fixed_array_union_demo.sup", "sup");
+    AddElement<abckit_wrapper::Field>("fixed_array_union_demo.sub", "sub");
+
+    this->VerifyObfuscated();
+}

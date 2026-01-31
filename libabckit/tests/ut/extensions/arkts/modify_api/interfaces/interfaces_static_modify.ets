@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,3 +28,23 @@ class Class1 implements Interface1 {
 }
 
 function foo(i: Interface1) {}
+interface I1 {
+    set attr (attr: number)
+}
+const a: I1 = {attr: 42}
+interface I {
+method(): number { return 1 }
+}
+
+// Valid literal of anonymous class type using interface method
+const i1: I = {}
+
+// Valid literal of anonymous class type using own metod declaration
+const i2: I = {
+method(): number { return 2 }
+}
+
+function main(): void {
+console.log('testCase',i1.method(), 1)
+console.log('testCase',i2.method(), 2)
+}

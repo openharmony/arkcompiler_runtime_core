@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,8 +55,15 @@ TEST_F(LibAbcKitArkTSModifyApiInterfacesTest, InterfaceSetNameStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
     auto module = ctxFinder.module;
+    auto arkModule = g_implArkI->coreModuleToArktsModule(module);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arkModule, nullptr);
 
-    helpers::InterfaceByNameContext interfaceFinder = {nullptr, "Interface1"};
+    g_implArkM->moduleSetName(arkModule, NEW_NAME);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arkModule, nullptr);
+
+    helpers::InterfaceByNameContext interfaceFinder = {nullptr, "I"};
     g_implI->moduleEnumerateInterfaces(module, &interfaceFinder, helpers::InterfaceByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(interfaceFinder.iface, nullptr);
@@ -69,7 +76,7 @@ TEST_F(LibAbcKitArkTSModifyApiInterfacesTest, InterfaceSetNameStatic)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     helpers::AssertOpenAbc(OUTPUT_PATH, &file);
-    helpers::ModuleByNameContext newFinder = {nullptr, "interfaces_static_modify"};
+    helpers::ModuleByNameContext newFinder = {nullptr, NEW_NAME};
     g_implI->fileEnumerateModules(file, &newFinder, helpers::ModuleByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(newFinder.module, nullptr);
@@ -83,7 +90,7 @@ TEST_F(LibAbcKitArkTSModifyApiInterfacesTest, InterfaceSetNameStatic)
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(helpers::ExecuteStaticAbc(INPUT_PATH, "interfaces_static_modify", "main"),
-              helpers::ExecuteStaticAbc(OUTPUT_PATH, "interfaces_static_modify", "main"));
+              helpers::ExecuteStaticAbc(OUTPUT_PATH, NEW_NAME, "main"));
 }
 
 // Test: test-kind=api, api=ArktsModifyApiImpl::createInterface, abc-kind=ArkTS2, category=positive, extension=c

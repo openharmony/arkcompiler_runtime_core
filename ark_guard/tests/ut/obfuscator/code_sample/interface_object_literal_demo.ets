@@ -1,0 +1,34 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF THE KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+interface I {
+    method(): number {
+        return 1;
+    }
+}
+
+// Multiple object literals implementing the same interface (gensym suffix in abc)
+const i1: I = {};
+const i2: I = {
+    method(): number {
+        return 2;
+    }
+};
+
+function main(): void {
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.log('testCase', i1.method(), 1);
+    // CC-OFFNXT(G.AOD.03) for test purposes
+    console.log('testCase', i2.method(), 2);
+}

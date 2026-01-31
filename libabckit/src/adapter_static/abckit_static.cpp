@@ -114,7 +114,7 @@ static bool IsUnion(const std::string &name)
     if (name.size() < UNION_PREFIX.size()) {
         return false;
     }
-    return name.rfind(UNION_PREFIX) == 0;
+    return name.find(UNION_PREFIX) == 0;
 }
 static bool IsLazyImport(const std::string &recordName)
 {
@@ -722,6 +722,67 @@ static void AssignPartial(AbckitFile *file)
     }
 }
 
+static void UpdateNameToClass(AbckitFile *file, Container *container, AbckitCoreClass *from, AbckitCoreClass *to)
+{
+    if (from == nullptr || to == nullptr || from == to) {
+        return;
+    }
+    for (auto &[_, ref] : file->nameToClass) {
+        if (auto *p = std::get_if<AbckitCoreClass *>(&ref); p != nullptr && *p == from) {
+            ref = to;
+            break;
+        }
+    }
+    for (auto &[_, ptr] : container->nameToClass) {
+        if (ptr == from) {
+            ptr = to;
+            break;
+        }
+    }
+}
+
+template <typename Owner>
+static void InsertClassInstance(AbckitFile *file, Container *container, Owner *owner, const std::string &name,
+                                std::unique_ptr<AbckitCoreClass> &&instance)
+{
+    AbckitCoreClass *incoming = instance.get();
+    AbckitCoreClass *existing = nullptr;
+    if (auto it = owner->ct.find(name); it != owner->ct.end()) {
+        existing = it->second.get();
+    }
+    owner->InsertInstance(name, std::move(instance));
+    if (existing != nullptr) {
+        UpdateNameToClass(file, container, incoming, existing);
+    }
+}
+
+static void AssignClassInstances(const std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
+                                 const std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
+                                 std::vector<std::unique_ptr<AbckitCoreClass>> &instances, AbckitFile *file)
+{
+    auto *container = static_cast<Container *>(file->data);
+    for (auto &instance : instances) {
+        std::string fullName = GetStaticImplRecord(instance.get())->name;
+        auto [moduleName, instanceName] = ClassGetNames(fullName);
+        if (IsUnion(fullName)) {
+            LIBABCKIT_LOG(DEBUG) << "assign union class: " << fullName << '\n';
+            InsertClassInstance(file, container, nameToModule.at(STD_CORE_MODULE).get(), instanceName,
+                                std::move(instance));
+            continue;
+        }
+        if (nameToNamespace.find(moduleName) != nameToNamespace.end()) {
+            LIBABCKIT_LOG(DEBUG) << "namespaceName, className, fullName: " << moduleName << ", " << instanceName << ", "
+                                 << fullName << '\n';
+            instance->parentNamespace = nameToNamespace.at(moduleName);
+            InsertClassInstance(file, container, nameToNamespace.at(moduleName), instanceName, std::move(instance));
+            continue;
+        }
+        LIBABCKIT_LOG(DEBUG) << "moduleName, className, fullName: " << moduleName << ", " << instanceName << ", "
+                             << fullName << '\n';
+        InsertClassInstance(file, container, nameToModule.at(moduleName).get(), instanceName, std::move(instance));
+    }
+}
+
 template <typename AbckitCoreType>
 static void AssignInstance(const std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
                            const std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
@@ -924,11 +985,26 @@ static void AssignFunctions(AbckitFile *file,
     }
 }
 
-static void MoveUnion(Container *container)
+static void MoveUnionProp(AbckitFile *file, Container *container, AbckitCoreModule *stdModule,
+                          const std::string &className, std::unique_ptr<AbckitCoreClass> &klass)
+{
+    LIBABCKIT_LOG(DEBUG) << "Union prop: " << className << '\n';
+    AbckitCoreClass *existing = nullptr;
+    if (auto stdIt = stdModule->ct.find(className); stdIt != stdModule->ct.end()) {
+        existing = stdIt->second.get();
+    }
+    stdModule->ct[className] = std::move(klass);
+    if (existing != nullptr) {
+        UpdateNameToClass(file, container, existing, stdModule->ct[className].get());
+    }
+}
+
+static void MoveUnion(AbckitFile *file)
 {
     LIBABCKIT_LOG_FUNC;
 
-    const auto &stdModule = container->nameToModule.at(STD_CORE_MODULE);
+    auto *container = static_cast<Container *>(file->data);
+    auto &stdModule = container->nameToModule.at(STD_CORE_MODULE);
     for (auto &[_, module] : container->nameToModule) {
         if (module->isExternal) {
             continue;
@@ -937,14 +1013,12 @@ static void MoveUnion(Container *container)
         auto it = module->ct.begin();
         while (it != module->ct.end()) {
             const auto &[className, klass] = *it;
-            if (IsUnionProp(className)) {
-                LIBABCKIT_LOG(DEBUG) << "Union prop: " << className << '\n';
-                // 将union_prop类移动到std.core module中
-                stdModule->ct[className] = std::move(it->second);
-                it = module->ct.erase(it);
-            } else {
+            if (!IsUnionProp(className)) {
                 ++it;
+                continue;
             }
+            MoveUnionProp(file, container, stdModule.get(), className, it->second);
+            it = module->ct.erase(it);
         }
     }
 }
@@ -1475,7 +1549,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignSuperInterface(containerPtr->nameToInterface, containerPtr->interfaces);
     AssignObjectLiteral(file, containerPtr->objectLiterals, containerPtr->nameToClass, containerPtr->nameToInterface,
                         containerPtr->nameToPartials);
-    AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->classes);
+    AssignClassInstances(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->classes, file);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->interfaces);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->annotationInterfaces);
     AssignInstance(containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->enums);
@@ -1483,7 +1557,7 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     AssignPartial(file);
     AssignFunctions(file, containerPtr->nameToModule, containerPtr->nameToNamespace, containerPtr->nameToObjectLiteral,
                     containerPtr->functions);
-    MoveUnion(containerPtr);
+    MoveUnion(file);
 
     // NOTE: AbckitCoreExportDescriptor
     // NOTE: AbckitModulePayload
