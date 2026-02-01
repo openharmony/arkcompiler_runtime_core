@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@ python-dotenv==0.20.0
 pytz==2025.2
 Jinja2==3.1.2
 MarkupSafe==2.1.1
-PyYaml==6.0
+PyYaml==6.0.1
 tqdm==4.64.0
 PyPDF2==3.0.1
 jinja2-cli==0.8.2
@@ -36,7 +36,7 @@ types-pytz==2025.2.0.20250326
 
 # pylint
 astroid==3.3.9
-dill==0.3.6
+dill==0.4.1
 isort==6.0.1
 lazy-object-proxy==1.11.0
 mccabe==0.7.0

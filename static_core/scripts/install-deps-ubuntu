@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -295,6 +295,9 @@ function install_python_dependencies
 
     local REQUIREMENTS_BASE_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-base-python3
     local REQUIREMENTS_ALL_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-python3
+    if [[ $VERSION_ID == "24.04" ]]; then
+        REQUIREMENTS_ALL_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-python3-24-04
+    fi
     local REQUIREMENTS_VENV_PYTHON3_NAME=$SCRIPT_DIR/dep-lists/requirements-venv-python3
 
     echo "Installing pip packages for all"
@@ -562,9 +565,7 @@ then
 fi
 
 if [[ "x$INSTALL_TEST" == "xyes" ]]; then
-    if [[ $VERSION_ID != "24.04" ]]; then
-        install_python_dependencies
-    fi
+    install_python_dependencies
 fi
 
 
