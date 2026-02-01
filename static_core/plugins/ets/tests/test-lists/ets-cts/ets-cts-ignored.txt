@@ -1323,10 +1323,8 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_3.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_4.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_5.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_7.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_8.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_10.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_11.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
@@ -1357,12 +1355,6 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_25.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
-
-#30721 No CTE when using overloads with import_all_from_reexport_0
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_1.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_2.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_4.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_and_decl_3.ets
 
 #31858 overriding conflict between superclass and superinterface implementations
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_15.ets
