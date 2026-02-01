@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1233,6 +1233,65 @@ TEST_F(RegAccAllocTest, Const_Phi)
 
     EXPECT_NE(INS(6U).GetDstReg(), compiler::ACC_REG_ID);
     EXPECT_EQ(INS(4U).GetDstReg(), compiler::ACC_REG_ID);
+}
+
+TEST_F(RegAccAllocTest, LoopHeaderPhiAccNotUndefined)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTNEXTLINE(google-build-using-namespace)
+        using namespace compiler::DataType;
+        PARAMETER(0U, 0U).ref();
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            CONSTANT(14U, 1).s32();
+            CONSTANT(2U, 0).s32();
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::SaveStateDeoptimize).NoVregs();
+        }
+
+        BASIC_BLOCK(3U, 5U, 4U)
+        {
+            INST(4U, Opcode::Phi).s32().Inputs({{2U, 2U}, {4U, 35U}});
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).s32().Inputs({{REFERENCE, 0U}, {INT32, 4U}, {NO_TYPE, 7U}});
+            INST(9U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallVirtual).s32().Inputs({{REFERENCE, 0U}, {NO_TYPE, 9U}});
+            INST(34U, Opcode::If).SrcType(compiler::DataType::INT32).CC(compiler::CC_LE).Inputs(11U, 8U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(15U, Opcode::SaveState).NoVregs();
+            INST(16U, Opcode::LoadAndInitClass).ref().TypeId(42U).Inputs(15U);
+            INST(19U, Opcode::SaveState).NoVregs();
+            INST(36U, Opcode::InitObject).ref().TypeId(486U).Inputs({{REFERENCE, 16U}, {INT32, 14U}, {NO_TYPE, 19U}});
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(21U, Opcode::LoadAndInitClass).ref().TypeId(43U).Inputs(20U);
+            INST(24U, Opcode::SaveState).NoVregs();
+            INST(37U, Opcode::InitObject).ref().TypeId(467U).Inputs({{REFERENCE, 21U}, {INT32, 2U}, {NO_TYPE, 24U}});
+            INST(25U, Opcode::SaveState).NoVregs();
+            INST(27U, Opcode::CallVirtual)
+                .ref()
+                .Inputs({{REFERENCE, 0U}, {INT32, 8U}, {REFERENCE, 36U}, {REFERENCE, 37U}, {NO_TYPE, 25U}});
+            INST(28U, Opcode::SaveState).NoVregs();
+            INST(29U, Opcode::LoadClass).ref().TypeId(46U).Inputs(28U);
+            INST(30U, Opcode::CheckCast).Inputs(27U, 29U, 28U);
+            INST(35U, Opcode::AddI).s32().Imm(1).Inputs(8U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(32U, Opcode::SaveState).NoVregs();
+            INST(33U, Opcode::ReturnVoid).v0id();
+        }
+    }
+
+    EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
+
+    EXPECT_NE(INS(4U).GetDstReg(), compiler::ACC_REG_ID);
 }
 
 // NOLINTEND(readability-magic-numbers)
