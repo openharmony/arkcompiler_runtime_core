@@ -710,7 +710,12 @@ using RegionNonmovableLargeObjectAllocator =
 class RegionNonmovableLargeObjectAllocatorTest
     : public RegionAllocatorTestBase<RegionNonmovableLargeObjectAllocator, false> {};
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #33036)
+TEST_F(RegionNonmovableObjectAllocatorTest, DISABLED_AllocatorTest)
+#else
 TEST_F(RegionNonmovableObjectAllocatorTest, AllocatorTest)
+#endif
 {
     mem::MemStatsType memStats;
     RegionNonmovableObjectAllocator allocator(&memStats, &spaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
@@ -719,7 +724,12 @@ TEST_F(RegionNonmovableObjectAllocatorTest, AllocatorTest)
     }
 }
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #33036)
+TEST_F(RegionNonmovableObjectAllocatorTest, DISABLED_MTAllocatorTest)
+#else
 TEST_F(RegionNonmovableObjectAllocatorTest, MTAllocatorTest)
+#endif
 {
 #if defined(PANDA_TARGET_ARM64) || defined(PANDA_TARGET_32)
     // We have an issue with QEMU during MT tests. Issue 2852

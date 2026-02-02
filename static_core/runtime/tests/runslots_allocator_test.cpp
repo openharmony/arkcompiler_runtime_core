@@ -366,7 +366,12 @@ TEST_F(RunSlotsAllocatorTest, MTAllocIterateTest)
     }
 }
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #33026)
+TEST_F(RunSlotsAllocatorTest, DISABLED_MTAllocCollectTest)
+#else
 TEST_F(RunSlotsAllocatorTest, MTAllocCollectTest)
+#endif
 {
     static constexpr size_t MIN_ELEMENTS_COUNT = 1500;
     static constexpr size_t MAX_ELEMENTS_COUNT = 3000;

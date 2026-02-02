@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,12 @@ TEST_F(WeakReferenceGetReferenceTest, from_object_ref)
     }
 }
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #33051)
+TEST_F(WeakReferenceGetReferenceTest, DISABLED_freed_wref)
+#else
 TEST_F(WeakReferenceGetReferenceTest, freed_wref)
+#endif
 {
     ani_ref objectRef;
     ASSERT_EQ(env_->String_NewUTF8("x", 1, reinterpret_cast<ani_string *>(&objectRef)), ANI_OK);

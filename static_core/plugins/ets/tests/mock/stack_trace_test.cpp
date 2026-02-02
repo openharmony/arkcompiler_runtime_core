@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,12 @@ TEST_F(StackTraceTest, PrintStackTrace)
     ASSERT_NE(pos, std::string::npos);
 }
 
+#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
+// NOTE(verkinamaria, #33052)
+TEST_F(StackTraceTest, DISABLED_ErrorDescribe)
+#else
 TEST_F(StackTraceTest, ErrorDescribe)
+#endif
 {
     ani_class klass {};
     auto status = env->FindClass("StackTraceTest.StackTraceTest", &klass);
