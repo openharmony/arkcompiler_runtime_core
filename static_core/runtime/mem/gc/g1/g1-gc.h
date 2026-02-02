@@ -184,13 +184,14 @@ private:
                             PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector);
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void CollectNonRegularObjects();
+    std::pair<PandaVector<Region *>, PandaVector<Region *>> CollectNonRegularObjects();
 
     template <bool ATOMIC, bool CONCURRENTLY>
     void CollectEmptyRegions(GCTask &task, PandaVector<Region *> &&emptyTenuredRegions);
 
     template <bool ATOMIC, bool CONCURRENTLY>
-    void ClearEmptyTenuredMovableRegions(PandaVector<Region *> &&emptyTenuredRegions);
+    void ClearEmptyRegions(PandaVector<Region *> &&emptyTenuredRegions, PandaVector<Region *> &&nonmovableFreeRegions,
+                           PandaVector<Region *> &&humongousFreeRegions);
 
     bool NeedToPromote(const Region *region) const;
 
@@ -257,6 +258,10 @@ private:
     void MergeRemSet(RemSet<> *remset);
     void HandleReferences(const GCTask &task);
     void ResetRegionAfterMixedGC();
+
+    template <bool CONCURRENTLY>
+    void ResetRegions(PandaVector<Region *> &&emptyTenuredRegions, PandaVector<Region *> &&nonmovableFreeRegions,
+                      PandaVector<Region *> &&humongousFreeRegions);
 
     /// GC for tenured generation.
     void RunTenuredGC(const GCTask &task);

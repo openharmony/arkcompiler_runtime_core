@@ -664,12 +664,22 @@ void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Coll
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
-void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::VisitAndRemoveFreeRegions(
-    const RegionsVisitor &regionVisitor)
+template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK,
+          typename Container>
+void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::ResetSeveralSpecificRegions(
+    const Container &regions)
+{
+    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(this->regionLock_);
+    for (Region *region : regions) {
+        ASSERT(region->HasFlag(RegionFlag::IS_NONMOVABLE));
+        this->GetSpace()->template FreeRegion<REGIONS_RELEASE_POLICY, OS_PAGES_POLICY>(region);
+    }
+}
+
+template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
+PandaVector<Region *> RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::VisitAndRemoveFreeRegions()
 {
     os::memory::LockHolder lock(this->regionLock_);
-    // Add free region into vector to not do extra work with region_visitor
-    // inside object_allocator_.
     PandaVector<Region *> freeRegions;
 
     objectAllocator_.VisitAndRemoveFreePools([&freeRegions](void *mem, [[maybe_unused]] size_t size) {
@@ -679,13 +689,7 @@ void RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::Visi
         freeRegions.push_back(region);
     });
 
-    if (!freeRegions.empty()) {
-        regionVisitor(freeRegions);
-
-        for (auto i : freeRegions) {
-            this->GetSpace()->FreeRegion(i);
-        }
-    }
+    return freeRegions;
 }
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
@@ -781,8 +785,20 @@ void *RegionHumongousAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-void RegionHumongousAllocator<AllocConfigT, LockConfigT>::CollectAndRemoveFreeRegions(
-    const RegionsVisitor &regionVisitor, const GCObjectVisitor &deathChecker)
+template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK,
+          typename Container>
+void RegionHumongousAllocator<AllocConfigT, LockConfigT>::ResetSeveralSpecificRegions(const Container &regions)
+{
+    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(this->regionLock_);
+    for (Region *region : regions) {
+        ASSERT(region->HasFlag(RegionFlag::IS_LARGE_OBJECT));
+        this->GetSpace()->template FreeRegion<REGIONS_RELEASE_POLICY, OS_PAGES_POLICY>(region);
+    }
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+PandaVector<Region *> RegionHumongousAllocator<AllocConfigT, LockConfigT>::CollectFreeRegions(
+    const GCObjectVisitor &deathChecker)
 {
     // Add free region into vector to not do extra work with region_visitor during region iteration
     PandaVector<Region *> freeRegions;
@@ -797,14 +813,7 @@ void RegionHumongousAllocator<AllocConfigT, LockConfigT>::CollectAndRemoveFreeRe
         });
     }
 
-    if (!freeRegions.empty()) {
-        regionVisitor(freeRegions);
-
-        for (auto i : freeRegions) {
-            os::memory::LockHolder lock(this->regionLock_);
-            ResetRegion(i);
-        }
-    }
+    return freeRegions;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
