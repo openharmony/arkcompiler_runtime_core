@@ -1938,6 +1938,7 @@ export class JSONParser {
         do {
             ++this.curPos.index
             if (this.curPos.index >= this.json.getLength()) {
+                this.curChar = c'\0'
                 return false
             }
             this.curChar = this.json.charAt(this.curPos.index)
@@ -1984,26 +1985,55 @@ export class JSONParser {
 
     private parse(res: JSONString): JSONString {
         let resBuilder: StringBuilder = new StringBuilder()
-        let hasMetEscape: boolean = false
         this.escapeWhitespaces = false
-        while (this.getNextChar() && ((this.curChar != JSONString.END_CHAR) || (this.curChar == JSONString.END_CHAR && hasMetEscape))) {
-            if (!hasMetEscape) {
-                if (this.curChar != c'\\') {
-                    resBuilder.append(this.curChar)
-                }
-            } else if (this.curChar == c'u') {
-                resBuilder.append(this.readUnicodeEscape())
-            } else {
-                let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar, 0)
-                if (escapedCharIndex != -1) {
-                    resBuilder.append(JSONParser.ESCAPED_CHARS[escapedCharIndex])
-                } else {
-                    throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
-                }
+        let begin: int = this.curPos.index + 1
+        while (this.getNextChar() && this.curChar != JSONString.END_CHAR) {
+            if (this.curChar != c'\\') {
+                continue
             }
-            hasMetEscape = hasMetEscape ? false : this.curChar == c'\\'
+            if (begin < this.curPos.index) {
+                resBuilder.append(this.json.substring(begin, this.curPos.index))
+            }
+            if (!this.getNextChar()) {
+                throw new SyntaxError(`Unexpected end of String at ${this.getCurPosDescr()}`)
+            }
+            switch (this.curChar) {
+                case c'"':
+                    resBuilder.append("\"")
+                    break
+                case c'\\':
+                    resBuilder.append("\\")
+                    break
+                case c'/':
+                    resBuilder.append("/")
+                    break
+                case c'b':
+                    resBuilder.append("\b")
+                    break
+                case c'f':
+                    resBuilder.append("\f")
+                    break
+                case c'n':
+                    resBuilder.append("\n")
+                    break
+                case c'r':
+                    resBuilder.append("\r")
+                    break
+                case c't':
+                    resBuilder.append("\t")
+                    break
+                case c'u':
+                    resBuilder.append(this.readUnicodeEscape())
+                    break
+                default:
+                    throw new SyntaxError(`Bad escape sequence \\${this.curChar} at ${this.getCurPosDescr()}`)
+            }
+            begin = this.curPos.index + 1
         }
         if (this.curChar == JSONString.END_CHAR) {
+            if (begin < this.curPos.index) {
+                resBuilder.append(this.json.substring(begin, this.curPos.index))
+            }
             res.value = resBuilder.toString()
         } else {
             throw new SyntaxError("Unexpected end of String at " + this.getCurPosDescr())
@@ -2029,7 +2059,11 @@ export class JSONParser {
     static parse(json: String): JSONValue {
         let parser = new JSONParser(json)
         let res: JSONValue = new JSONValue()
-        return parser.parse(res)
+        const val = parser.parse(res)
+        if (parser.getNextChar()) {
+            throw new SyntaxError(`Unexpected char "${parser.curChar}"  at ${parser.getCurPosDescr()}`)
+        }
+        return val
     }
 
     private parse(res: JSONTrue): JSONTrue {
@@ -2160,9 +2194,6 @@ export class JSONParser {
         }
         return res
     }
-
-    private static readonly CAN_BE_ESCAPED_CHARS: FixedArray<char> = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
-    private static readonly ESCAPED_CHARS: FixedArray<char> = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
 }
 
 type Types = reflect.internals.Types
