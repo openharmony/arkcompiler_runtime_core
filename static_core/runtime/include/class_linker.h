@@ -386,6 +386,8 @@ private:
                      Span<Class *> interfaces, ClassLinkerContext *context, ClassLinkerExtension *ext,
                      ClassLinkerErrorHandler *errorHandler);
 
+    void FreeITableAndInterfaces(ITable itable, Span<Class *> interfaces);
+
     Class *LoadBaseClass(panda_file::ClassDataAccessor *cda, const LanguageContext &ctx, ClassLinkerContext *context,
                          ClassLinkerErrorHandler *errorHandler);
 
