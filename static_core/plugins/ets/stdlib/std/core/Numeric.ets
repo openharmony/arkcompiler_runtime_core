@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,117 +12,162 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Numeric for ArkTS
+ * @kit ArkTS
+ */
+
 
 package std.core;
 
 /**
- * Can be implemented by any type that represents a numeric value.
+ * The abstract interface for numeric types, which can be implemented by any type representing a numeric value.
+ *
+ * @extends Object
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export abstract class Numeric extends Object {
 
     /**
-     * Returns the value of an object as a byte
+     * Converts the value of the object to byte type and returns it.
      *
-     * @returns object's value
+     * @returns {byte} The byte type value of the object.
+     *
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toByte(): byte;
 
     /**
-     * Returns the value of an object as an int
+     * Converts the value of the object to int type and returns it.
      *
-     * @returns object's value
+     * @returns {int} The int type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toInt(): int;
 
     /**
-     * Returns the value of an object as a short
+     * Converts the value of the object to short type and returns it.
      *
-     * @returns object's value
+     * @returns {short} The short type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toShort(): short;
 
     /**
-     * Returns the value of an object as a long
+     * Converts the value of the object to long type and returns it.
      *
-     * @returns object's value
+     * @returns {long} The long type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toLong(): long;
 
     /**
-     * Returns the value of an object as a float
+     * Converts the value of the object to float type and returns it.
      *
-     * @returns object's value
+     * @returns {float} The float type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toFloat(): float;
 
     /**
-     * Returns the value of an object as a double
+     * Converts the value of the object to double type and returns it.
      *
-     * @returns object's value
+     * @returns {double} The double type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract toDouble(): double;
 
     /**
-     * Returns the value of an object as a byte
+     * Gets the byte type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {byte} The byte type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract byteValue(): byte;
 
     /**
-     * Returns the value of an object as an int
+     * Gets the int type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {int} The int type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract intValue(): int;
 
     /**
-     * Returns the value of an object as a short
+     * Gets the short type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {short} The short type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract shortValue(): short;
 
     /**
-     * Returns the value of an object as a long
+     * Gets the long type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {long} The long type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract longValue(): long;
 
     /**
-     * Returns the value of an object as a float
+     * Gets the float type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {float} The float type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract floatValue(): float;
 
     /**
-     * Returns the value of an object as a double
+     * Gets the double type value of the object, this is a compatibility interface.
      *
-     * Supportive interface
-     *
-     * @returns object's value
+     * @returns {double} The double type value of the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public abstract doubleValue(): double;
 }
 
 /**
- * Common class for all integral types
+ * The abstract base class for all integer types.
+ *
+ * @extends Numeric
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export abstract class Integral extends Numeric {}
 
 /**
- * Common class for all real number
+ * The abstract base class for all floating-point types.
+ *
+ * @extends Numeric
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export abstract class Floating extends Numeric {}

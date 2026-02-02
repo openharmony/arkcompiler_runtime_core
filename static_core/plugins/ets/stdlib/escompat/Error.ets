@@ -23,7 +23,7 @@ package escompat;
 /**
  * Defines an interface for Error options
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export interface ErrorOptions {
     /**
@@ -32,7 +32,7 @@ export interface ErrorOptions {
      * @type { Object | undefined }
      * @default undefined
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     cause?: Object
 }
@@ -42,7 +42,7 @@ export interface ErrorOptions {
  *
  * @implements ErrorOptions
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class ErrorOptionsImpl implements ErrorOptions {
     /**
@@ -51,7 +51,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      * @type { Object | undefined }
      * @default undefined
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     cause_?: Object
 
@@ -60,7 +60,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      *
      * @returns { Object | undefined } - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     override get cause(): Object | undefined {
         return this.cause_
@@ -71,7 +71,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      *
      * @param { Object | undefined } cause - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set cause(cause: Object | undefined) {
         this.cause_ = cause
@@ -82,7 +82,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      *
      * @param { Object | undefined } cause - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(cause?: Object) {
         this.cause_ = cause
@@ -93,7 +93,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
  * Stores information about stacktrace and cause in case of an error.
  * Serves as a base class for all error classes.
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class Error {
     private name_: string
@@ -110,7 +110,7 @@ export class Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(code: int, message?: String, options?: ErrorOptions) {
         this("Error", code, message, options)
@@ -122,7 +122,7 @@ export class Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         this("Error", 0, message, options)
@@ -136,7 +136,7 @@ export class Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(name: String, code: int, message?: String, options?: ErrorOptions) {
         this.code_ = code
@@ -153,7 +153,7 @@ export class Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(name: String, message: String | undefined, options?: ErrorOptions) {
         this(name, 0, message, options)
@@ -164,7 +164,7 @@ export class Error {
      *
      * @returns { String } - Current error name
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     get name(): string {
         return this.name_
@@ -175,7 +175,7 @@ export class Error {
      *
      * @param { String } val - New name for the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set name(val: string) {
         this.name_ = val
@@ -186,7 +186,7 @@ export class Error {
      *
      * @returns { int } - Current error code
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     get code(): int {
         return this.code_
@@ -197,7 +197,7 @@ export class Error {
      *
      * @param { int } val - New code for the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set code(val: int) {
         this.code_ = val
@@ -208,7 +208,7 @@ export class Error {
      *
      * @returns { String } - Current error message
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     get message(): string {
         return this.message_
@@ -219,7 +219,7 @@ export class Error {
      *
      * @param { String } val - New message for the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set message(val: string) {
         this.message_ = val
@@ -230,7 +230,7 @@ export class Error {
      *
      * @returns { Object | undefined } - Current error cause
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     get cause(): Object | undefined {
         return this.cause_
@@ -241,7 +241,7 @@ export class Error {
      *
      * @param { Object | undefined } val - New cause for the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set cause(val: Object | undefined) {
         this.cause_ = val
@@ -255,7 +255,7 @@ export class Error {
      * @returns { Error } - Newly created Error instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): Error {
         return new Error(message, options)
@@ -266,7 +266,7 @@ export class Error {
      *
      * @returns { string } - String representation of the Error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     override toString(): String {
         return this.name + ((this.name !== "" && this.message) ? ": " + this.message : this.message);
@@ -277,7 +277,7 @@ export class Error {
      *
      * @returns { String | undefined } - Current error stacktrace
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     get stack(): String | undefined {
         this.formStack()
@@ -289,7 +289,7 @@ export class Error {
      *
      * @param { String | undefined } newStack - New stacktrace for the error
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     set stack(newStack: String | undefined) {
         this.stack_ = newStack
