@@ -722,7 +722,7 @@ export class JSON {
       * @throws {JsonParseError} If the JSON string is invalid
       */
     static parseJsonElement(text: string, options?: jsonx.ParseOptions): jsonx.JsonElement {
-        return new JsonElementParser(text, options).parse()
+        return new JsonElementParserOptimized(text, options).parse()
     }
 
     /**
@@ -733,7 +733,7 @@ export class JSON {
       * @throws {JsonParseError} If the JSON string is invalid
       */
     static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement, options?: jsonx.ParseOptions): jsonx.JsonElement {
-        return new JsonElementParser(text, reviver, options).parse()
+        return new JsonElementParserOptimized(text, reviver, options).parse()
     }
 }
 
@@ -2586,6 +2586,401 @@ class JsonElementParser
     {
         this.expect(JsonTokenKind.Null)
         return jsonx.JsonElement.createNull()
+    }
+}
+
+/**
+ * Optimized JSON parser using streaming parsing (no intermediate token array).
+ * Implements:
+ * - Scheme 1: Stream parsing (single pass, no token array)
+ * - Scheme 2: Zero-copy string parsing (substring without escape)
+ * - Scheme 3: Fast path for common literals (null, true, false)
+ */
+class JsonElementParserOptimized {
+    private source: string
+    private index: int
+    private length: int
+    private reviver?: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement
+    private bigIntOpt: jsonx.BigIntMode = jsonx.BigIntMode.DEFAULT
+
+    constructor(source: string, options?: jsonx.ParseOptions) {
+        this.source = source
+        this.index = 0
+        this.length = source.length
+        this.bigIntOpt = options ? options.bigIntMode : jsonx.BigIntMode.DEFAULT
+    }
+
+    constructor(source: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement, options?: jsonx.ParseOptions) {
+        this.source = source
+        this.index = 0
+        this.length = source.length
+        this.reviver = reviver
+        this.bigIntOpt = options ? options.bigIntMode : jsonx.BigIntMode.DEFAULT
+    }
+
+    public parse(): jsonx.JsonElement {
+        this.skipWhitespace()
+        if (this.isAtEnd()) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        let result = this.parseValue()
+        if (this.reviver != undefined) {
+            return this.reviver!("", result)
+        }
+        return result
+    }
+
+    private peek(): char {
+        if (this.index >= this.length) {
+            return c'\0'
+        }
+        return this.source.charAt(this.index)
+    }
+
+    private advance(): char {
+        if (this.index >= this.length) {
+            return c'\0'
+        }
+        return this.source.charAt(this.index++)
+    }
+
+    private isAtEnd(): boolean {
+        return this.index >= this.length
+    }
+
+    private parseValue(): jsonx.JsonElement {
+        let ch = this.peek()
+
+        // Fast path for common literals (Scheme 3)
+        // If fast path fails, immediately throw error to avoid unnecessary checks
+        if (ch == c'n') {
+            // Check "null" directly
+            if (this.index + 4 <= this.length &&
+                this.source.charAt(this.index + 1) == c'u' &&
+                this.source.charAt(this.index + 2) == c'l' &&
+                this.source.charAt(this.index + 3) == c'l') {
+                this.index += 4
+                return jsonx.JsonElement.createNull()
+            }
+            throw new JsonParseError("Unexpected character, expect null", this.index, this.index + 3)
+        }
+
+        if (ch == c't') {
+            // Check "true" directly
+            if (this.index + 4 <= this.length &&
+                this.source.charAt(this.index + 1) == c'r' &&
+                this.source.charAt(this.index + 2) == c'u' &&
+                this.source.charAt(this.index + 3) == c'e') {
+                this.index += 4
+                return jsonx.JsonElement.createBoolean(true)
+            }
+            throw new JsonParseError("Unexpected character, expect true", this.index, this.index + 3)
+        }
+
+        if (ch == c'f') {
+            // Check "false" directly
+            if (this.index + 5 <= this.length &&
+                this.source.charAt(this.index + 1) == c'a' &&
+                this.source.charAt(this.index + 2) == c'l' &&
+                this.source.charAt(this.index + 3) == c's' &&
+                this.source.charAt(this.index + 4) == c'e') {
+                this.index += 5
+                return jsonx.JsonElement.createBoolean(false)
+            }
+            throw new JsonParseError("Unexpected character, expect false", this.index, this.index + 4)
+        }
+
+        // General path
+        switch (ch) {
+            case c'"':
+                return this.parseString()
+            case c'{':
+                return this.parseObject()
+            case c'[':
+                return this.parseArray()
+            case c'-':
+            case c'0': case c'1': case c'2': case c'3': case c'4':
+            case c'5': case c'6': case c'7': case c'8': case c'9':
+                return this.parseNumber()
+            default:
+                throw new JsonParseError("Unexpected character", this.index, this.index)
+        }
+    }
+
+    // Zero-copy string parsing (Scheme 2)
+    private parseString(): jsonx.JsonElement {
+        this.advance()  // Skip opening quote
+        let start = this.index
+
+        // First pass: check for escape sequences
+        while (this.index < this.length) {
+            let ch = this.source.charAt(this.index)
+            if (ch == c'\\') {
+                // Has escape, need to process
+                return this.parseStringWithEscape(start)
+            }
+            if (ch == c'"') {
+                // No escape, zero-copy substring
+                let result = this.source.substring(start, this.index)
+                this.index++  // Skip closing quote
+                return jsonx.JsonElement.createString(result)
+            }
+            this.index++
+        }
+
+        throw new JsonParseError("Unterminated string", start, this.index)
+    }
+
+    private parseStringWithEscape(start: int): jsonx.JsonElement {
+        // Direct string concatenation
+        let result = ""
+        let lastEnd = start
+
+        // Process escape sequences
+        while (this.index < this.length) {
+            let ch = this.source.charAt(this.index)
+            if (ch == c'\0') {
+                throw new JsonParseError("Unterminated string", start, this.index)
+            }
+            this.index++
+
+            if (ch == c'\\') {
+                // Flush content before escape using concat
+                if (lastEnd < this.index - 1) {
+                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+                }
+                result = result.concat(this.parseEscape())
+                lastEnd = this.index
+            } else if (ch == c'"') {
+                // Flush remaining content
+                if (lastEnd < this.index - 1) {
+                    result = result.concat(this.source.substring(lastEnd, this.index - 1))
+                }
+                return jsonx.JsonElement.createString(result)
+            }
+            // Normal character - continue, will be flushed with next escape or end
+        }
+
+        throw new JsonParseError("Unterminated string", start, this.index)
+    }
+
+    private parseEscape(): string {
+        if (this.index >= this.length) {
+            throw new JsonParseError("Incomplete escape sequence", this.index, this.index)
+        }
+
+        let ch = this.advance()
+        switch (ch) {
+            case c'"':
+                return "\""
+            case c'\\':
+                return "\\"
+            case c'/':
+                return "/"
+            case c'b':
+                return "\b"
+            case c'f':
+                return "\f"
+            case c'n':
+                return "\n"
+            case c'r':
+                return "\r"
+            case c't':
+                return "\t"
+            case c'u':
+                return this.parseUnicodeEscape()
+            default:
+                throw new JsonParseError(`Invalid escape sequence '\\${ch}'`, this.index - 1, this.index)
+        }
+    }
+
+    private parseUnicodeEscape(): string {
+        if (this.index + 4 > this.length) {
+            throw new JsonParseError("Incomplete Unicode escape sequence", this.index, this.index)
+        }
+
+        // Direct substring for 4 hex digits
+        let hexStr = this.source.substring(this.index, this.index + 4)
+        this.index += 4
+
+        let codePoint = Double.parseInt(hexStr, 16).toInt()
+        return String.fromCharCode(codePoint.toDouble())
+    }
+
+    // Optimized number parsing (Scheme 1 - direct from source)
+    private parseNumber(): jsonx.JsonElement {
+        let start = this.index
+        let isFloat = false
+
+        // Optional minus sign
+        if (this.peek() == c'-') {
+            this.index++
+        }
+
+        // Integer part
+        this.parseIntegerPart(start)
+
+        // Fractional part
+        isFloat = this.parseFractionalPart(start)
+
+        // Exponent part
+        isFloat = this.parseExponentPart(start) || isFloat
+
+        // Single substring operation
+        let numStr = this.source.substring(start, this.index)
+
+        if (isFloat) {
+            return jsonx.JsonElement.createDouble(Double.parseFloat(numStr))
+        } else {
+            return this.parseInterger(numStr)
+        }
+    }
+
+    private parseIntegerPart(start: int): void {
+        if (this.peek() == c'0') {
+            this.index++
+        } else if (Char.isDecDigit(this.peek())) {
+            while (Char.isDecDigit(this.peek())) {
+                this.index++
+            }
+        } else {
+            throw new JsonParseError("Invalid number format", start, this.index)
+        }
+    }
+
+    private parseFractionalPart(start: int): boolean {
+        if (this.peek() == c'.') {
+            this.index++
+            if (!Char.isDecDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format", start, this.index)
+            }
+            while (Char.isDecDigit(this.peek())) {
+                this.index++
+            }
+            return true
+        }
+        return false
+    }
+
+    private parseExponentPart(start: int): boolean {
+        let ch = this.peek()
+        if (ch == c'e' || ch == c'E') {
+            this.index++
+            ch = this.peek()
+            if (ch == c'+' || ch == c'-') {
+                this.index++
+            }
+            if (!Char.isDecDigit(this.peek())) {
+                throw new JsonParseError("Invalid number format", start, this.index)
+            }
+            while (Char.isDecDigit(this.peek())) {
+                this.index++
+            }
+            return true
+        }
+        return false
+    }
+
+    private parseInterger(numStr: string): jsonx.JsonElement {
+        if (this.bigIntOpt == jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT) {
+            return jsonx.JsonElement.createBigInt(BigInt(numStr))
+        }
+        if (this.bigIntOpt == jsonx.BigIntMode.PARSE_AS_BIGINT) {
+            try {
+                return jsonx.JsonElement.createLong(Long.parseInt(numStr, 10))
+            } catch (e) {
+                if (e instanceof FormatError) {
+                    return jsonx.JsonElement.createBigInt(BigInt(numStr))
+                }
+                throw e
+            }
+        }
+        return jsonx.JsonElement.createLong(Long.parseInt(numStr, 10))
+    }
+
+    private parseArray(): jsonx.JsonElement {
+        this.advance()  // '['
+        this.skipWhitespace()
+
+        let array: Array<jsonx.JsonElement> = new Array<jsonx.JsonElement>()
+        let index = 0
+        let hasReviver = this.reviver != undefined  // Cache for performance
+
+        while (this.peek() != c']') {
+            this.skipWhitespace()
+            let value = this.parseValue()
+
+            if (hasReviver) {
+                value = this.reviver!(`${index}`, value)
+            }
+
+            array.push(value)
+            index++
+
+            this.skipWhitespace()
+            if (this.peek() == c',') {
+                this.advance()
+            }
+        }
+
+        this.advance()  // ']'
+        return jsonx.JsonElement.createArray(array)
+    }
+
+    private parseObject(): jsonx.JsonElement {
+        this.advance()  // '{'
+        this.skipWhitespace()
+
+        // Directly create JsonElement and use setElement to avoid Map copy
+        let result = new jsonx.JsonElement()
+        let hasReviver = this.reviver != undefined  // Cache for performance
+        let isEmpty = true
+
+        while (this.peek() != c'}') {
+            this.skipWhitespace()
+
+            // Parse key
+            let key = this.parseString().asString()
+
+            this.skipWhitespace()
+            if (this.advance() != c':') {
+                throw new JsonParseError("Expected ':'", this.index - 1, this.index)
+            }
+            this.skipWhitespace()
+
+            // Parse value
+            let value = this.parseValue()
+
+            if (hasReviver) {
+                value = this.reviver!(key, value)
+            }
+
+            // Directly set element, avoids intermediate Map and copy
+            result.setElement(key, value)
+            isEmpty = false
+
+            this.skipWhitespace()
+            if (this.peek() == c',') {
+                this.advance()
+            }
+        }
+
+        this.advance()  // '}'
+        if (!isEmpty) {
+            return result
+        } else {
+            return jsonx.JsonElement.createObject(new Map<string, jsonx.JsonElement>())
+        }
+    }
+
+    private skipWhitespace(): void {
+        while (this.index < this.length) {
+            let ch = this.source.charAt(this.index)
+            if (!Char.isWhiteSpace(ch)) {
+                break
+            }
+            this.index++
+        }
     }
 }
 
