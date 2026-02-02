@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,16 @@
 .extern MAKE_ASM_NAME(EtsNapiBeginCritical)
 // void EtsNapiBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
 .extern MAKE_ASM_NAME(EtsNapiBegin)
+// void EtsNapiBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern MAKE_ASM_NAME(EtsNapiBeginVerify)
 // void EtsNapiEnd(Method *method)
 .extern MAKE_ASM_NAME(EtsNapiEnd)
+// void EtsNapiEndVerify(Method *method)
+.extern MAKE_ASM_NAME(EtsNapiEndVerify)
 // ObjectHeader *EtsNapiObjEnd(Method *method, Reference *ref)
 .extern MAKE_ASM_NAME(EtsNapiObjEnd)
+// ObjectHeader *EtsNapiObjEndVerify(Method *method, Reference *ref)
+.extern MAKE_ASM_NAME(EtsNapiObjEndVerify)
 // bool IsEtsMethodFastNative(Method *method)
 .extern MAKE_ASM_NAME(IsEtsMethodFastNative)
 
@@ -259,13 +265,14 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
 // +---+-------+------------+
 // |                        |
 
-// The entrypoint for EtsNapi method
+// Macro for generating an entrypoint for ANI methods
 // Each panda method accepts Method* in the first argument
 // The goal of this function is just drop this argument and
 // shift other arguments back
-.global MAKE_ASM_NAME(EtsNapiEntryPoint)
-TYPE_FUNCTION(EtsNapiEntryPoint)
-MAKE_ASM_NAME(EtsNapiEntryPoint):
+.macro ANI_ENTRY_POINT_GENERIC name, native_begin_fn, native_end_fn, native_object_end_fn
+.global \name
+.type \name, %function
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -345,20 +352,20 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     cmp w0, #6
     // reserve space for GPR and FPR args
     mov w0, #128
-    ble .Lprepare_stack
+    ble .Lprepare_stack\@
 
     mov x0, x19
     mov w1, #0
     bl MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
 
-.Lprepare_stack:
+.Lprepare_stack\@:
     mov x1, sp
     add x2, fp, #16
     sub sp, sp, x0
     mov x3, sp
     mov x0, x19
     mov x4, THREAD_REG
-    bl MAKE_ASM_NAME(EtsNapiBegin)
+    bl \native_begin_fn
 
     mov lr, x0
     // load the arguments
@@ -373,7 +380,7 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
 
 1:  // call the method
     ldr lr, [x19, #METHOD_NATIVE_POINTER_OFFSET]
-    cbz lr, .Lend
+    cbz lr, .Lend\@
     blr lr
 
     // handle the result
@@ -384,8 +391,8 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     mov x0, x19
     mov x1, THREAD_REG
     mov x2, x26
-    bl MAKE_ASM_NAME(EtsNapiEnd)
-    b .Lreturn
+    bl \native_end_fn
+    b .Lreturn\@
 
 1:  cmp w27, #SHORTY_REFERENCE
     bne 4f
@@ -394,8 +401,9 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     mov x2, THREAD_REG
     mov x1, x0
     mov x0, x19
-    bl MAKE_ASM_NAME(EtsNapiObjEnd)
-    b .Lreturn
+    bl \native_object_end_fn
+    b .Lreturn\@
+
 4:  sub w27, w27, #SHORTY_FIRST_FLOAT
     cmp w27, #(SHORTY_NUM_FLOAT_TYPES - 1)
     bls 2f
@@ -405,25 +413,26 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     mov x0, x1
     mov x1, THREAD_REG
     mov x2, x26
-    bl MAKE_ASM_NAME(EtsNapiEnd)
+    bl \native_end_fn
     mov x0, x19
-    b .Lreturn
+    b .Lreturn\@
+
 2:  mov x0, x19
     fmov x19, d0
     mov x1, THREAD_REG
     mov x2, x26
-    bl MAKE_ASM_NAME(EtsNapiEnd)
+    bl \native_end_fn
     fmov d0, x19
-    b .Lreturn
+    b .Lreturn\@
 
-.Lend:
+.Lend\@:
     mov x1, THREAD_REG
     mov x0, x19
     mov x2, x26
-    bl MAKE_ASM_NAME(EtsNapiEnd)
-    b .Lreturn
+    bl \native_end_fn
+    b .Lreturn\@
 
-.Lreturn:
+.Lreturn\@:
     // Restore callee registers, since GC may change its values while moving objects.
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
@@ -439,7 +448,7 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     CFI_RESTORE(x21)
     ldp x23, x24, [sp], #16
     CFI_RESTORE(x24)
-    CFI_RESTORE(x2)
+    CFI_RESTORE(x23)
     ldp x25, x26, [sp], #16
     CFI_RESTORE(x26)
     CFI_RESTORE(x25)
@@ -463,7 +472,7 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
     // check prev frame is true CFRAME and not BYPASS
     ldr x9, [fp, #(SLOT_SIZE * COMP_METHOD_OFFSET)]
     ccmp x9, #BYPASS_BRIDGE, 4, ne
-    beq .Lexit
+    beq .Lexit\@
 
     ldr x13, [fp, #(-CFRAME_FLAGS_SLOT * 8)]
     tbz x13, #CFRAME_HAS_FLOAT_REGS_FLAG_BIT, 2f
@@ -496,6 +505,13 @@ MAKE_ASM_NAME(EtsNapiEntryPoint):
 
     b MAKE_ASM_NAME(ThrowNativeExceptionBridge)
 
-.Lexit:
+.Lexit\@:
     ret
     CFI_ENDPROC
+.endm
+
+// Generate the entrypoint for ANI methods
+ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(EtsNapiEntryPoint), MAKE_ASM_NAME(EtsNapiBegin), MAKE_ASM_NAME(EtsNapiEnd), MAKE_ASM_NAME(EtsNapiObjEnd)
+
+// Generate the entrypoint for ANI methods in verifyANI mode
+ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(EtsNapiVerifyEntryPoint), MAKE_ASM_NAME(EtsNapiBeginVerify), MAKE_ASM_NAME(EtsNapiEndVerify), MAKE_ASM_NAME(EtsNapiObjEndVerify)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,16 @@
 .extern EtsNapiBeginCritical
 // void EtsNapiBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
 .extern EtsNapiBegin
+// void EtsNapiBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern EtsNapiBeginVerify
 // void EtsNapiEnd(Method *method)
 .extern EtsNapiEnd
+// void EtsNapiEndVerify(Method *method)
+.extern EtsNapiEndVerify
 // ObjectHeader *EtsNapiObjEnd(Method *method, Reference *ref)
 .extern EtsNapiObjEnd
+// ObjectHeader *EtsNapiObjEndVerify(Method *method, Reference *ref)
+.extern EtsNapiObjEndVerify
 // bool IsEtsMethodFastNative(Method *method)
 .extern IsEtsMethodFastNative
 
@@ -244,13 +250,14 @@ EtsNapiCriticalNativeEntryPoint:
 // +---+-------+------------+
 // |                        |
 
-// The entrypoint for EtsNapi method
+// Macro for generating an entrypoint for ANI methods
 // Each panda method accepts Method* in the first argument
 // The goal of this function is just drop this argument and
 // shift other arguments back
-.global EtsNapiEntryPoint
-.type EtsNapiEntryPoint, %function
-EtsNapiEntryPoint:
+.macro ANI_ENTRY_POINT_GENERIC name, native_begin_fn, native_end_fn, native_object_end_fn
+.global \name
+.type \name, %function
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(rsp, 8)
 
@@ -312,20 +319,20 @@ EtsNapiEntryPoint:
     cmp $4, %eax
     // reserve space for all GRP and float regs
     mov $112, %eax
-    jle .Lprepare_stack
+    jle .Lprepare_stack\@
 
     movq %rbx, %rdi
     xorq %rsi, %rsi
     callq EtsNapiCalcStackArgsSpaceSize@plt
 
-.Lprepare_stack:
+.Lprepare_stack\@:
     movq %rsp, %rsi
     leaq 16(%rbp), %rdx
     subq %rax, %rsp // %rsp % 16 == 0
     movq %rsp, %rcx
     movq %rbx, %rdi
     movq %THREAD_REG, %r8
-    callq EtsNapiBegin@plt
+    callq \native_begin_fn@plt
 
     // save SP
     movq %rsp, %r11
@@ -343,7 +350,7 @@ EtsNapiEntryPoint:
     // call the method
     movq METHOD_NATIVE_POINTER_OFFSET(%rbx), %rax
     testq %rax, %rax
-    je .Lend
+    je .Lend\@
     callq *%rax
 
     // handle the result
@@ -355,10 +362,10 @@ EtsNapiEntryPoint:
     movq %rbx, %rdi
     movq %THREAD_REG, %rsi
     movq %r13, %rdx
-    callq EtsNapiEnd@plt
-    jmp .Lreturn
+    callq \native_end_fn@plt
+    jmp .Lreturn\@
 
-1:  cmpl $SHORTY_REFERENCE, %r14d
+1: cmpl $SHORTY_REFERENCE, %r14d
     jne 4f
 
     // ref method
@@ -366,10 +373,10 @@ EtsNapiEntryPoint:
     movq %rax, %rsi
     movq %THREAD_REG, %rdx
     movq %r13, %rcx
-    callq EtsNapiObjEnd@plt
-    jmp .Lreturn
+    callq \native_object_end_fn@plt
+    jmp .Lreturn\@
 
-4:  subl $SHORTY_FIRST_FLOAT, %r14d
+4: subl $SHORTY_FIRST_FLOAT, %r14d
     cmpl $(SHORTY_NUM_FLOAT_TYPES - 1), %r14d
     jbe 2f
 
@@ -379,10 +386,10 @@ EtsNapiEntryPoint:
     movq %rbx, %rdi
     movq %THREAD_REG, %rsi
     movq %r13, %rdx
-    callq EtsNapiEnd@plt
+    callq \native_end_fn@plt
     addq $8, %rsp
     popq %rax
-    jmp .Lreturn
+    jmp .Lreturn\@
 
 2:
     subq $16, %rsp
@@ -390,18 +397,18 @@ EtsNapiEntryPoint:
     movq %rbx, %rdi
     movq %THREAD_REG, %rsi
     movq %r13, %rdx
-    callq EtsNapiEnd@plt
+    callq \native_end_fn@plt
     movsd (%rsp), %xmm0
     addq $16, %rsp
-    jmp .Lreturn
+    jmp .Lreturn\@
 
-.Lend:
+.Lend\@:
     movq %rbx, %rdi
     movq %THREAD_REG, %rsi
     movq %r13, %rdx
-    callq EtsNapiEnd@plt
+    callq \native_end_fn@plt
 
-.Lreturn:
+.Lreturn\@:
     movb %r12b, %r10b
 
     // Restore callee registers, since GC may change its values while moving objects.
@@ -425,15 +432,15 @@ EtsNapiEntryPoint:
     // check native exception
     movq MANAGED_THREAD_EXCEPTION_OFFSET(%THREAD_REG), %r11
     testq %r11, %r11
-    jz .Lexit
+    jz .Lexit\@
 
     // check frame is compiled
     testb %r10b, %r10b
-    jz .Lexit
+    jz .Lexit\@
 
     // check prev frame is true CFRAME and not BYPASS
     cmpq $BYPASS_BRIDGE, (SLOT_SIZE * COMP_METHOD_OFFSET)(%rbp)
-    je .Lexit
+    je .Lexit\@
 
     movq (-CALLER_REG0_OFFSET + 0)(%rbp), %rax
     movq (-CALLER_REG0_OFFSET + 8)(%rbp), %rcx
@@ -468,6 +475,13 @@ EtsNapiEntryPoint:
 1:
     jmp ThrowNativeExceptionBridge@plt
 
-.Lexit:
+.Lexit\@:
     retq
     CFI_ENDPROC
+.endm
+
+// Generate the entrypoint for ANI methods
+ANI_ENTRY_POINT_GENERIC EtsNapiEntryPoint, EtsNapiBegin, EtsNapiEnd, EtsNapiObjEnd
+
+// Generate the entrypoint for ANI methods in verifyANI mode
+ANI_ENTRY_POINT_GENERIC EtsNapiVerifyEntryPoint, EtsNapiBeginVerify, EtsNapiEndVerify, EtsNapiObjEndVerify

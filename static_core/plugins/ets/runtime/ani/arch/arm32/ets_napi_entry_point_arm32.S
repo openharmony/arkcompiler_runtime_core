@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,16 @@
 .extern EtsNapiBeginCritical
 // void EtsNapiBegin (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
 .extern EtsNapiBegin
+// void EtsNapiBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern EtsNapiBeginVerify
 // void EtsNapiEnd (Method *method)
 .extern EtsNapiEnd
+// void EtsNapiEndVerify(Method *method)
+.extern EtsNapiEndVerify
 // ObjectHeader *EtsNapiObjEnd (Method *method, Reference *ref)
 .extern EtsNapiObjEnd
+// ObjectHeader *EtsNapiObjEndVerify(Method *method, Reference *ref)
+.extern EtsNapiObjEndVerify
 // bool IsEtsMethodFastNative (Method *method)
 .extern IsEtsMethodFastNative
 
@@ -231,12 +237,14 @@ EtsNapiCriticalNativeEntryPoint:
 // +---+-------+------------+
 // |                        |
 
-// The entrypoint for EtsNapi method
-// Each panda method accepts *Method in the first argument
-// The goal of this function is just drop this argument and shift other arguments back
-.global EtsNapiEntryPoint
-.type EtsNapiEntryPoint, %function
-EtsNapiEntryPoint:
+// Macro for generating an entrypoint for ANI methods
+// Each panda method accepts Method* in the first argument
+// The goal of this function is just drop this argument and
+// shift other arguments back
+.macro ANI_ENTRY_POINT_GENERIC name, native_begin_fn, native_end_fn, native_object_end_fn
+.global \name
+.type \name, %function
+\name:
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -311,13 +319,13 @@ EtsNapiEntryPoint:
     cmp r0, #1 // max one long argument
     // reserve space for GPR and FPR args
     mov r0, #16
-    ble .Lprepare_stack
+    ble .Lprepare_stack\@
 
     mov r0, r4
     mov r1, #0
     blx EtsNapiCalcStackArgsSpaceSize
 
-.Lprepare_stack:
+.Lprepare_stack\@:
     mov r1, sp
     add r2, fp, #8
     sub sp, sp, r0
@@ -326,7 +334,7 @@ EtsNapiEntryPoint:
     // necessary for stack alignment
     sub sp, sp, #4
     push {THREAD_REG}
-    blx EtsNapiBegin
+    blx \native_begin_fn
     add sp, sp, #8
 
     // load the arguments
@@ -339,7 +347,7 @@ EtsNapiEntryPoint:
     // call the method
     ldr lr, [r4, #METHOD_NATIVE_POINTER_OFFSET]
     cmp lr, #0
-    beq .Lend
+    beq .Lend\@
     blx lr
 
     // handle the result
@@ -351,26 +359,26 @@ EtsNapiEntryPoint:
     mov r2, THREAD_REG
     mov r1, r0
     mov r0, r4
-    blx EtsNapiObjEnd
-    b .Lreturn
+    blx \native_object_end_fn
+    b .Lreturn\@
 
 2:  mov r5, r0
     mov r6, r1
     mov r0, r4
     mov r1, THREAD_REG
     mov r2, r8
-    blx EtsNapiEnd
+    blx \native_end_fn
     mov r0, r5
     mov r1, r6
-    b .Lreturn
+    b .Lreturn\@
 
-.Lend:
+.Lend\@:
     mov r0, r4
     mov r1, THREAD_REG
     mov r2, r8
-    bl EtsNapiEnd
+    bl \native_end_fn
 
-.Lreturn:
+.Lreturn\@:
     // Restore callee registers, since GC may change its values while moving objects.
     sub sp, fp, #(CFRAME_ARM_SOFTFP_CALLEE_REGS_OFFSET - 4)
 
@@ -433,4 +441,10 @@ EtsNapiEntryPoint:
     CFI_RESTORE(lr)
     bx lr
     CFI_ENDPROC
+.endm
 
+// Generate the entrypoint for ANI methods
+ANI_ENTRY_POINT_GENERIC EtsNapiEntryPoint, EtsNapiBegin, EtsNapiEnd, EtsNapiObjEnd
+
+// Generate the entrypoint for ANI methods in verifyANI mode
+ANI_ENTRY_POINT_GENERIC EtsNapiVerifyEntryPoint, EtsNapiBeginVerify, EtsNapiEndVerify, EtsNapiObjEndVerify

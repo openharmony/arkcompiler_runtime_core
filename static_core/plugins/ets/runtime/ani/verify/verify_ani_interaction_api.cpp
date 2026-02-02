@@ -50,6 +50,7 @@
             *(vresult) = static_cast<ResType>((venv)->AddLocalVerifiedRef(result)); \
         }                                                                           \
     } while (false)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace ark::ets::ani::verify {
 
