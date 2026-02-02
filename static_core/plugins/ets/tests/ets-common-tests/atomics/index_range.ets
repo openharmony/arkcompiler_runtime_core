@@ -36,26 +36,19 @@ let typeArrayList = [
     uint16array,
     uint32array
 ]
+const expectedAtomicsRangeError = (e: Error): boolean => {
+    return e instanceof RangeError &&
+        e.code == 401 &&
+        e.message == "Atomics:: Index out of bounds"
+}
 
 function testAdd() {
     for (let i = 0; i < typeArrayList.length; i++) {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.add(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.add(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.add(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.add(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -64,20 +57,8 @@ function testAnd() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.and(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.and(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.and(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.and(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -86,20 +67,8 @@ function testCompareExchange() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.compareExchange(ta, -1, 1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.compareExchange(ta, ta.length, 1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.compareExchange(ta, -1, 1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.compareExchange(ta, ta.length, 1, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -108,20 +77,8 @@ function testExchange() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.exchange(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.exchange(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.exchange(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.exchange(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -130,20 +87,8 @@ function testLoad() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.load(ta, -1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.load(ta, ta.length);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.load(ta, -1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.load(ta, ta.length); }, expectedAtomicsRangeError)
     }
 }
 
@@ -152,20 +97,8 @@ function testOr() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.or(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.or(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.or(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.or(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -174,20 +107,8 @@ function testStore() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.store(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.store(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.store(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.store(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -196,20 +117,8 @@ function testSub() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.sub(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.sub(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.sub(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.sub(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 
@@ -218,20 +127,8 @@ function testXor() {
         let ta = typeArrayList[i]
         arktest.assertEQ(ta.byteOffset, 0)
         let arraySize = ta.length
-
-        try {
-            Atomics.xor(ta, -1, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, "should throw RangeError for index -1");
-            arktest.assertEQ(e.message, "Index out of bounds", "should have correct error message");
-        }
-
-        try {
-            Atomics.xor(ta, ta.length, 1);
-        } catch (e) {
-            arktest.assertTrue(e instanceof RangeError, " should throw RangeError for index " + ta.length);
-            arktest.assertEQ(e.message, "Index out of bounds", " should have correct error message");
-        }
+        arktest.expectThrow(() => { Atomics.xor(ta, -1, 1); }, expectedAtomicsRangeError)
+        arktest.expectThrow(() => { Atomics.xor(ta, ta.length, 1); }, expectedAtomicsRangeError)
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ async function testWithoutInit() {
     let wl = new WorkerLocal<int>();
     arktest.expectError(() => {
         wl.get();
-    }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
+    }, new Error('WorkerLocal:: Value not initialized. Call set() first or provide an init function'))
     wl.set(1);
     arktest.assertEQ(wl.get(), 1);
     wl.set(wl.get() + 1);
@@ -45,7 +45,7 @@ async function testWithoutInit() {
     await taskpool.execute(() => {
         arktest.expectError(() => {
             wl.get();
-        }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
+        }, new Error('WorkerLocal:: Value not initialized. Call set() first or provide an init function'))
         wl.set(1);
         arktest.assertEQ(wl.get(), 1);
         wl.set(wl.get() + 1);
@@ -53,7 +53,7 @@ async function testWithoutInit() {
         wl.delete()
         arktest.expectError(() => {
             wl.get();
-        }, new Error('WorkerLocal value not initialized. Call set() first or provide an init function.'))
+        }, new Error('WorkerLocal:: Value not initialized. Call set() first or provide an init function'))
     })
     arktest.assertEQ(wl.get(), 2);
 }

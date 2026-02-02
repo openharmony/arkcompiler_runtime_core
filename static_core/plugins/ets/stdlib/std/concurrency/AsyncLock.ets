@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,7 +127,7 @@ export class AsyncLock {
         return Promise.resolve<T>(callback()).finally(() => {
              if (options.signal != null && options.signal!.aborted == true) {
                 this.fireCondEvent();
-                throw new Error('Aborted');
+                throw new Error('AsyncLock:: Operation aborted by signal');
             }
             this.unlock(asyncLockInfo);
         });
@@ -159,7 +159,7 @@ export class AsyncLock {
         this.lock<U>(callerCID, mode,  asyncLockInfo, options);
         return Promise.resolve<T>(callback()).finally(() => {if (options.signal != null && options.signal!.aborted == true ) {
             this.fireCondEvent();
-            throw new Error('Aborted');
+            throw new Error('AsyncLock:: Operation aborted by signal');
         }
             this.unlock(asyncLockInfo);
         });
@@ -182,14 +182,14 @@ export class AsyncLock {
 
              if (options.signal != null && options.signal!.aborted == true) {
                  this.fireCondEvent();
-                 throw new Error('Aborted');
+                 throw new Error('AsyncLock:: Operation aborted by signal');
             }
             if(isTimeoutExec == true) {
-                throw new Error (this.deadLockPrinter.toString('lockAsync timed out'));
+                throw new Error('AsyncLock:: ' + this.deadLockPrinter.toString('Operation timed out'));
             }
 
             if(options.isAvailable) {
-                throw new Error("AsyncLock is not available");
+                throw new Error('AsyncLock:: Lock is not available');
             }
 
             ConcurrencyHelpers.mutexLock(this.mutex);
@@ -302,7 +302,6 @@ export class AsyncLock {
     private condVar: Object = ConcurrencyHelpers.condVarCreate();
     private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
 }
-
 
 type StoreType  = [string, int, int];
 

@@ -1342,7 +1342,7 @@ export namespace taskpool {
             }
             const wcap: int = waitingCapacity == undefined ? 0 : waitingCapacity;
             if (waitingCapacity != undefined && wcap < 0) {
-                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: watingCapacity must be a non-negative number");
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: waitingCapacity must be a non-negative number");
             }
 
             this.impl = AsyncRunner.getOrCreateAsyncRunnerImpl(name, rcap, wcap);

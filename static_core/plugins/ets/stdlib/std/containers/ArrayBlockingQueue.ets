@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ export namespace containers {
         */
         constructor(capacity: int) {
             if (capacity <= 0) {
-                throw new RangeError("Invalid capacity for ArrayBlockingQueue's constructor.");
+                throw new RangeError("ArrayBlockingQueue:: Invalid capacity");
             }
             this.capacitySize = capacity;
             this.array = new Array<T>(this.capacitySize);
@@ -44,7 +44,7 @@ export namespace containers {
         */
         constructor(capacity: int, iterable: Iterable<T>) {
             if (capacity <= 0) {
-                throw new RangeError("Invalid capacity for ArrayBlockingQueue's constructor.");
+                throw new RangeError("ArrayBlockingQueue:: Invalid capacity");
             }
             this.capacitySize = capacity;
             this.array = new Array<T>(this.capacitySize);
@@ -222,7 +222,6 @@ export namespace containers {
         override remainingCapacity(): int {
             return this.capacitySize - this.size;
         }
-
 
         private waitUntilQueueIsNotEmpty() {
             while (this.isQueueEmpty) {

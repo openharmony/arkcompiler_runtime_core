@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,6 @@ export class WorkerLocal<T> {
      * using provided init function if value not exists.
      * 
      * @returns {T} Worker-specific stored value
-     * @throws {Error} When value not initialized and no init function provided
      */
     get(): T {
         let res : Any = undefined;
@@ -80,7 +79,7 @@ export class WorkerLocal<T> {
                 this.storage.set(workerId, new Wrapper<T>(value));
                 return value;
             } else {
-                throw new Error("WorkerLocal value not initialized. Call set() first or provide an init function.");
+                throw new Error('WorkerLocal:: Value not initialized. Call set() first or provide an init function');
             }
         } else {
             return wrapped!.get();

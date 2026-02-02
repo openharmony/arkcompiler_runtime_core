@@ -171,7 +171,7 @@ export class RangeError extends Error {
      * @since 24 static
      */
     constructor(message?: String, options?: ErrorOptions) {
-        super("RangeError", message, options)
+        super("RangeError", 401, message, options)
     }
 
     /**

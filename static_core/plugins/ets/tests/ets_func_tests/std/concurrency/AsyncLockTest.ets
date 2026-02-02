@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ function asyncLockQueryNonexistentNameTest(): int {
     try {
         AsyncLock.query(lockname);
     } catch (e) {
-        if(e.message != "AsyncLock " + lockname + " not found") {
+        if(e.message != "AsyncLock:: Lock '" + lockname + "' not found") {
             result += 1;
         }
     }
@@ -433,7 +433,7 @@ function abortTest(): boolean {
             throw new Error('Test failed. Promise is fulfilled.')
         },
         (err: Error): void => {
-             arktest.assertEQ(err.message, "Aborted", 'Test failed. Wrong error value.');
+             arktest.assertEQ(err.message, "AsyncLock:: Operation aborted by signal", 'Test failed. Wrong error value.');
     }
     );
     return waitForCompletion(() => check(p1, "abortTest"));
