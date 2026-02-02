@@ -14,22 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
 import re
 from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import replace
 from fnmatch import translate
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from typing_extensions import Self
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
-from runner.extensions.flows.test_flow_registry import ITestFlow
+from runner.extensions.flows.itest_flow import ITestFlow
+from runner.extensions.flows.test_flow_registry import workflow_registry
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.extensions.validators.ivalidator import IValidator
 from runner.logger import Log
@@ -39,6 +38,8 @@ from runner.options.options_step import Step, StepKind
 from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
+from runner.types.test_env import TestEnv
+from runner.types.test_report import TestReport
 from runner.utils import get_validator_class, to_bool
 
 if TYPE_CHECKING:
@@ -130,6 +131,11 @@ class StandardFlowUtils:
         return cmd_env
 
 
+@workflow_registry.register("ets")
+def make_test_standard_flow(test_env: TestEnv, test_path: Path, *, params: IOptions, test_id: str) -> ITestFlow:
+    return TestStandardFlow(test_env, test_path, params=params, test_id=test_id)
+
+
 class TestStandardFlow(ITestFlow, Test):
     __DEFAULT_ENTRY_POINT = "ETSGLOBAL::main"
     CTE_RETURN_CODE = 1
@@ -193,16 +199,16 @@ class TestStandardFlow(ITestFlow, Test):
 
         for file in self.metadata.files:
             new_test_file_path: Path = self.path.parent.joinpath(file).resolve()
-            new_test_id: Path = new_test_file_path.relative_to(test_root)
-            if new_test_id in dependent_tests:
-                continue
-            test = self.__class__(self.test_env, new_test_file_path,
-                                  params=self.test_extra_params,
-                                  test_id=str(new_test_id),
-                                  is_dependent=True,
-                                  parent_test_id=self.test_id)
-            dependent_tests.append(test)
-
+            new_test_id: str = new_test_file_path.relative_to(test_root).as_posix()
+            if (test := self.test_env.test_flow_registry.find(new_test_id)) is None:
+                test = self.__class__(test_env=self.test_env,
+                                      test_path=new_test_file_path,
+                                      params=self.test_extra_params,
+                                      test_id=new_test_id,
+                                      is_dependent=True,
+                                      parent_test_id=self.test_id)
+                test = self.test_env.test_flow_registry.register(test)
+            dependent_tests.append(cast(TestStandardFlow, test))
         return dependent_tests
 
     @property
@@ -235,18 +241,7 @@ class TestStandardFlow(ITestFlow, Test):
             return self._dependent_tests
 
         self._dependent_tests.extend(self.direct_dependent_tests)
-        current_test_id: Path = Path(self.test_id)
         for test in self._dependent_tests:
-            prefix = Path(self.parent_test_id).stem if self.parent_test_id else current_test_id.stem
-
-            test_abc_name = f'{prefix}_{Path(test.test_abc).name}'
-            test_an_name = f'{prefix}_{Path(test.test_an).name}'
-
-            test.test_abc = Path(test.test_abc).parent / Path(test_abc_name)
-            test.test_an = Path(test.test_abc).parent / Path(test_an_name)
-
-            os.makedirs(str(test.test_abc.parent), exist_ok=True)
-
             package = test.metadata.get_package_name()
             self.dependent_packages[package] = self.dependent_packages.get(package, False) or test.is_negative_compile
             if test.dependent_packages:
@@ -302,7 +297,10 @@ class TestStandardFlow(ITestFlow, Test):
         return '\n'.join(expected[:index_to_delete])
 
     def do_run(self) -> Self:
+        if self.is_completed:
+            return self
         if not self._continue_after_process_dependent_files():
+            self.is_completed = True
             return self
 
         self._log_invalid_tags_if_any()
@@ -319,6 +317,7 @@ class TestStandardFlow(ITestFlow, Test):
             if step.step_kind in allowed_steps:
                 allowed_steps.remove(step.step_kind)
             if not self.passed or (compile_only_test and not allowed_steps):
+                self.is_completed = True
                 return self
 
         if not steps:
@@ -326,6 +325,7 @@ class TestStandardFlow(ITestFlow, Test):
             self.passed = True
             self.fail_kind = 'PASSED'
 
+        self.is_completed = True
         return self
 
     def prepare_compiler_step(self, step: Step) -> Step:
@@ -396,22 +396,22 @@ class TestStandardFlow(ITestFlow, Test):
     def configure_step_last_call(self, step: Step) -> Step:
         """
         Configures and prepares a test step for execution by expanding macros and applying step-specific modifications.
-        
+
         This method performs the final configuration of a test step before execution:
         - Expands all macros in step arguments, stdout/stderr paths, and requirements
         - Applies compiler-specific options from test metadata (es2panda_options)
         - Applies runtime-specific options from test metadata (ark_options)
         - Handles dynamic AST dumping and module flags for compiler steps
         - Prepares environment variables for the step
-        
+
         Args:
             step (Step): The original step to configure. Contains arguments, paths, requirements,
                         environment variables, and step kind information.
-        
+
         Returns:
             Step: A new Step instance with all macros expanded and step-specific modifications applied.
                  The original step remains unchanged.
-        
+
         Note:
             - For compiler steps: applies es2panda_options like --dump-dynamic-ast and --module
             - For runtime steps: prepends ark_options to the argument list
@@ -447,7 +447,8 @@ class TestStandardFlow(ITestFlow, Test):
         False - break test run
         """
         for test in self.dependent_tests:
-            dependent_result = test.do_run()
+            with test.run_lock:
+                dependent_result = test.do_run()
             self.reproduce += dependent_result.reproduce
             simple_failed = not dependent_result.passed
             negative_compile = dependent_result.passed and dependent_result.is_negative_compile

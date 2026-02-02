@@ -33,9 +33,9 @@ from runner.common_exceptions import (
     InvalidGTestNameException,
     TestNotExistException,
 )
-from runner.enum_types.params import TestEnv
 from runner.enum_types.qemu import QemuKind
-from runner.extensions.flows.test_flow_registry import ITestFlow, workflow_registry
+from runner.extensions.flows.itest_flow import ITestFlow
+from runner.extensions.flows.test_flow_registry import workflow_registry
 from runner.extensions.suites.test_suite_registry import ITestSuite
 from runner.logger import Log
 from runner.options.options import IOptions
@@ -44,6 +44,7 @@ from runner.options.root_dir import RootDir
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
+from runner.types.test_env import TestEnv
 from runner.utils import correct_path, escape, get_group_number, get_test_id, is_executable_file
 
 _LOGGER = Log.get_logger(__file__)
@@ -177,14 +178,14 @@ class TestSuite(ITestSuite):
     def process(self, force_generate: bool) -> list[ITestFlow]:
         """
         Main processing method that orchestrates the entire test suite workflow.
-        
+
         This method follows a systematic pipeline to prepare, filter, and create test objects:
         1. Prepares test files (generates new ones or reuses existing)
         2. Resolves explicit test file if specified
         3. Filters test files based on execution criteria (excluded/ignored lists, filters, chapters) and
         by group number if group filtering is enabled
         4. Creates test objects from the filtered test files
-        
+
         :param force_generate: if True, forces regeneration of test files even if they exist.
                               If False, reuses existing test files when available.
         :return: list of ITestFlow objects ready for execution
@@ -352,7 +353,7 @@ class TestSuite(ITestSuite):
     def _resolve_test_files(self, original_test_files: list[Path]) -> list[Path]:
         """
         Resolves the final list of test files by processing explicit selections or applying comprehensive filtering.
-        
+
         :param original_test_files: full list of files with the specified extension that exist under the test_root
         :return: resolved list of test files ready for test object creation
         """
@@ -423,18 +424,17 @@ class TestSuite(ITestSuite):
         return None
 
     def _create_tests(self, test_files: list[Path]) -> list[ITestFlow]:
-        all_tests: set[ITestFlow] = set()
+        self._test_env.test_flow_registry.reset()
         for test_file in test_files:
-            all_tests.add(self._create_test(test_file, test_file in self.ignored_tests))
+            test_obj = self._create_test(test_file, test_file in self.ignored_tests)
+            self._test_env.test_flow_registry.register(test_obj)
 
-        not_tests = {t for t in all_tests if not t.is_valid_test}
-        valid_tests = all_tests - not_tests
         if self.config.test_suite.skip_compile_only_neg:
-            compile_only_tests_neg = {t for t in all_tests if t.is_negative_compile}
-            valid_tests = valid_tests - compile_only_tests_neg
-        _LOGGER.all(f"Loaded {len(valid_tests)} tests")
-
-        return list(valid_tests)
+            loaded = list(self._test_env.test_flow_registry.runtime_tests)
+        else:
+            loaded = list(self._test_env.test_flow_registry.valid_tests)
+        _LOGGER.all(f"Loaded {len(loaded)} tests")
+        return loaded
 
     def _get_test_root_pattern(self, mask: str) -> re.Pattern:
         return re.compile(f"{self.test_root / mask}")
@@ -715,20 +715,6 @@ class GTestSuite(TestSuite):
                     result.append(test_path)
         return result
 
-    def _process_tests(self, raw_set: list[Path], force_generate: bool, name: str, update_explicit: bool) -> None:
-        kind, explicit_name = GTestSuite._define_file_kind(name)
-        match kind:
-            case GTestSuite.TEST_FILE | GTestSuite.TEST_CLASS_NAME:
-                raw_set.extend(self._get_raw_set(force_generate, explicit_name))
-                if update_explicit:
-                    self._explicit_file = None
-            case GTestSuite.TEST_NAME:
-                path_to_test = correct_path(self.gtest_root, explicit_name)
-                if update_explicit:
-                    self._explicit_file = path_to_test
-                else:
-                    raw_set.append(path_to_test)
-
     def process(self, force_generate: bool) -> list[ITestFlow]:
         raw_set: list[Path] = []
         self._explicit_file = self._set_explicit_file()
@@ -749,6 +735,20 @@ class GTestSuite(TestSuite):
         _LOGGER.default(f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
                         f"Excluded {self.excluded} tests are not loaded.")
         return tests
+
+    def _process_tests(self, raw_set: list[Path], force_generate: bool, name: str, update_explicit: bool) -> None:
+        kind, explicit_name = GTestSuite._define_file_kind(name)
+        match kind:
+            case GTestSuite.TEST_FILE | GTestSuite.TEST_CLASS_NAME:
+                raw_set.extend(self._get_raw_set(force_generate, explicit_name))
+                if update_explicit:
+                    self._explicit_file = None
+            case GTestSuite.TEST_NAME:
+                path_to_test = correct_path(self.gtest_root, explicit_name)
+                if update_explicit:
+                    self._explicit_file = path_to_test
+                else:
+                    raw_set.append(path_to_test)
 
     def _create_test(self, test_file: Path, is_ignored: bool) -> ITestFlow:
 

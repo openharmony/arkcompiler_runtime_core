@@ -28,14 +28,15 @@ import pytz
 
 from runner import utils
 from runner.code_coverage.coverage_manager import CoverageManager
-from runner.enum_types.params import TestEnv
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options import IOptions
 from runner.options.options_step import StepKind
 from runner.suites.test_standard_flow import TestStandardFlow
+from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.suites.work_dir import WorkDir
 from runner.test import test_utils
+from runner.types.test_env import TestEnv
 
 
 class KeyValueType(NamedTuple):
@@ -72,7 +73,8 @@ class OptionsTest(TestCase):
             timestamp=timestamp,
             report_formats={config.general.report_format},
             work_dir=work_dir,
-            coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir, config.general.coverage)
+            coverage=CoverageManager(Path().cwd(), work_dir.coverage_dir, config.general.coverage),
+            test_flow_registry=TestFlowRegistry()
         )
         test_root = self.data_folder
         return test_env, test_root, work_dir
@@ -245,8 +247,8 @@ class OptionsTest(TestCase):
         self.assertEqual(dependent_test.test_id, "dependent_test2.ets")
         self.assertFalse(dependent_test.is_valid_test)
         self.assertEqual(dependent_test.parent_test_id, "test2.ets")
-        self.assertEqual(dependent_test.test_abc.name, "test2_dependent_test2.ets.abc")
-        self.assertEqual(dependent_test.test_an.name, "test2_dependent_test2.ets.an")
+        self.assertEqual(dependent_test.test_abc.name, "dependent_test2.ets.abc")
+        self.assertEqual(dependent_test.test_an.name, "dependent_test2.ets.an")
 
         self.assertTrue(test.is_panda)
         for step in test_env.config.workflow.steps:
@@ -260,7 +262,7 @@ class OptionsTest(TestCase):
                         if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
                         else ""
                     self.check_boot_panda_files(
-                        ['intermediate/test2_dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
+                        ['intermediate/dependent_test2.ets.abc', 'intermediate/test2.ets.abc'],
                         boot_panda_files)
                 case StepKind.AOT:
                     new_step = test.prepare_aot_step(step)
@@ -268,7 +270,7 @@ class OptionsTest(TestCase):
                         if len(arg := [arg for arg in new_step.args if arg.startswith("--boot-panda-files=")]) > 0 \
                         else ""
                     self.check_boot_panda_files([], boot_panda_files)
-                    self.check_parameter("--paoc-panda-files=intermediate/test2_dependent_test2.ets.abc", new_step.args)
+                    self.check_parameter("--paoc-panda-files=intermediate/dependent_test2.ets.abc", new_step.args)
                     self.check_parameter("--paoc-panda-files=intermediate/test2.ets.abc", new_step.args)
                 case StepKind.RUNTIME:
                     new_step = test.prepare_runtime_step(step)

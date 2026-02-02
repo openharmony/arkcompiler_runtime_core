@@ -16,8 +16,8 @@ from pathlib import Path
 
 from typing_extensions import Self
 
-from runner.enum_types.params import TestEnv, TestReport
-from runner.extensions.flows.test_flow_registry import ITestFlow
+from runner.extensions.flows.itest_flow import ITestFlow
+from runner.extensions.flows.test_flow_registry import workflow_registry
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
 from runner.options.options import IOptions
@@ -26,8 +26,16 @@ from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import StandardFlowUtils
 from runner.test_base import GTest
+from runner.types.test_env import TestEnv
+from runner.types.test_report import TestReport
 
 _LOGGER = Log.get_logger(__file__)
+
+
+@workflow_registry.register("gtest")
+def make_gtest_flow(test_env: TestEnv, test_path: Path, *, params: IOptions, test_id: str) -> ITestFlow:
+    precompiled_tests = True
+    return GTestFlow(test_env, test_path, params=params, test_id=test_id, precompiled_tests=precompiled_tests)
 
 
 class GTestFlow(ITestFlow, GTest):
@@ -61,6 +69,8 @@ class GTestFlow(ITestFlow, GTest):
         return self._is_negative_compile
 
     def do_run(self) -> Self:
+        if self.is_completed:
+            return self
         steps = list(self.test_env.config.workflow.steps)
         if not steps:
             self.passed = None
@@ -73,8 +83,10 @@ class GTestFlow(ITestFlow, GTest):
             self.fail_kind = fail_kind
 
             if not self.passed:
+                self.is_completed = True
                 return self
 
+        self.is_completed = True
         return self
 
     def _configure_step(self, step: Step) -> Step:

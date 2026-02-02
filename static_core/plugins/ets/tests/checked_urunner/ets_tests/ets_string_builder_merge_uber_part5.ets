@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-  files: [ets_string_builder_merge_uber_export.ets]
----*/
-
 // Source file must be last in the compile list
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND  options: "--ets-strings-concat=false",

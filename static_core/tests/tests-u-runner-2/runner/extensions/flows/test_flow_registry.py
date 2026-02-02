@@ -14,43 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
 from collections.abc import Callable
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
-from typing_extensions import Self
-
-from runner.enum_types.params import TestReport
+from runner.extensions.flows.itest_flow import ITestFlow
 
 if TYPE_CHECKING:
     from runner.extensions.suites.test_suite_registry import ITestSuite
-
-
-class ITestFlow(ABC):
-    passed: bool | None
-    path: Path
-    ignored: bool
-    last_failure: str
-    reproduce: str
-    fail_kind: str | None
-    report: TestReport | None
-    last_failure_check_passed: bool
-
-    @property
-    @abstractmethod
-    def is_valid_test(self) -> bool:
-        ...
-
-    @property
-    @abstractmethod
-    def is_negative_compile(self) -> bool:
-        ...
-
-    @abstractmethod
-    def do_run(self) -> Self:
-        ...
-
 
 T = TypeVar("T", "ITestFlow", "ITestSuite")
 FactoryClass = Callable[..., T]  # type: ignore[explicit-any]
