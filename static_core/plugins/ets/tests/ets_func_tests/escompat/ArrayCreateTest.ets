@@ -14,22 +14,22 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
-    suite.addTest("Array create instance with negative length ", testCreateNegLength);
-    suite.addTest("Array create instance with positivie length ", testCreatePosLength);
+    const suite = new arktest.ArkTestsuite('Array API tests for SDK');
+    suite.addTest('Array create instance with negative length ', testCreateNegLength);
+    suite.addTest('Array create instance with positivie length ', testCreatePosLength);
     return suite.run();
 }
 
 class TestData {
-    static readonly arrayLength1: int = -1234;
-    static readonly initialValue1: number = -1;
-    static readonly arrayLength2: int = 3;
-    static readonly initialValue2: number = -1;
-    static readonly expected2 = Array.of<number>(-1, -1, -1);
+    public static readonly arrayLength1: int = -1234;
+    public static readonly initialValue1: number = -1;
+    public static readonly arrayLength2: int = 3;
+    public static readonly initialValue2: number = -1;
+    public static readonly expected2 = Array.of<number>(-1, -1, -1);
 }
 
 function testCreateNegLength() {
-    const expectedError = new NegativeArraySizeError("size = " + TestData.arrayLength1);
+    const expectedError = new NegativeArraySizeError('size = ' + TestData.arrayLength1);
     arktest.expectError((): void => { Array.create<number>(TestData.arrayLength1, TestData.initialValue1) },
         expectedError);
 }
@@ -37,7 +37,7 @@ function testCreateNegLength() {
 function testCreatePosLength() {
     let a = Array.create<number>(TestData.arrayLength2, TestData.initialValue2);
     let result: boolean = equaled(TestData.expected2, a);
-    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
+    arktest.assertTrue(result, 'Error. Got: ' + a + '. Expected: ' + TestData.expected2);
 }
 
 function equaled(arr1: Array<number>, arr2: Array<number>): boolean {
