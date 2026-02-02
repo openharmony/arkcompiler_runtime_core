@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ package std.core;
 <{% for i in range(narg) -%}
 in P{{i + 1}}, {{""}}
 {%- endfor -%}
-{%- if rest %}in PR, {% endif %}{{rvar}}out R>
+{%- if rest %}in PR, {% endif %}out R>
 {%- endmacro %}
 
 {%- macro typeParamsList(narg, rest) -%}
@@ -101,7 +101,7 @@ function __lambdaUnsafeCallStub(fn: Function, r: FixedArray<Any>): Any {
 }
 
 {%- macro defineLambdaHelper(lambda, name, narg, gnarg) -%}
-export abstract class {{lambda}}{{narg}} implements {{name}}{{narg}}{{typeParamsList(gnarg)}}
+export abstract class {{lambda}}{{narg}} implements {{name}}{{narg}}{{typeParamsList(gnarg, None)}}
 {%- endmacro %}
 
 {% for narg in range(maxarity + 1) %}
@@ -110,10 +110,10 @@ export interface FunctionR{{ narg }}{{ typeParamsDeclList(narg, True) }}
 {
     {{invokeName(narg, "R")}}{{ signature(narg, True) }};
 }
-export interface Function{{ narg }}{{ typeParamsDeclList(narg) }}
+export interface Function{{ narg }}{{ typeParamsDeclList(narg, False) }}
     extends FunctionR{{narg}}{{ typeParamsList(narg, "Any") }}{% if not loop.last %}, Function{{narg + 1}}{{erasedTypeArgsList(narg + 1)}}{% endif %}
 {
-    {{invokeName(narg)}}{{ signature(narg) }};
+    {{invokeName(narg, "")}}{{ signature(narg, False) }};
 }
 
 export abstract class LambdaR{{narg}}{{typeParamsDeclList(narg, True)}}
@@ -139,20 +139,20 @@ export abstract class LambdaR{{narg}}{{typeParamsDeclList(narg, True)}}
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
 }
 export abstract class Lambda{{narg}}{{typeParamsDeclList(narg, False)}}
-    implements Function{{narg}}{{typeParamsList(narg)}} {
-    abstract {{invokeName(narg)}}{{erasedSignature(narg)}};
+    implements Function{{narg}}{{typeParamsList(narg, None)}} {
+    abstract {{invokeName(narg, "")}}{{erasedSignature(narg, False)}};
     final unsafeCall(...r: FixedArray<Any>): Any {
         if (r.length < {{narg}}) { return Runtime.lambdaUnsafeCallStub(this, r) }
-        return this.{{invokeName(narg)}}({{listArgArrayLoads(narg)}})
+        return this.{{invokeName(narg, "")}}({{listArgArrayLoads(narg)}})
     }
 {%- for extNarg in range(narg + 1, maxarity + 1) %}
-    final {{invokeName(extNarg)}} {{erasedSignature(extNarg, False)}} {
-        return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
+    final {{invokeName(extNarg, "")}} {{erasedSignature(extNarg, False)}} {
+        return this.{{invokeName(narg, "")}}({{listArgs(0, narg)}})
     }
 {%- endfor %}
 {%- for extNarg in range(narg, maxarity + 1) %}
     final {{invokeName(extNarg, "R")}}{{erasedSignature(extNarg, True) }} {
-        return this.{{invokeName(narg)}}({{listArgs(0, narg)}})
+        return this.{{invokeName(narg, "")}}({{listArgs(0, narg)}})
     }
 {%- endfor %}
     get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
