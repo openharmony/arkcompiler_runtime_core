@@ -2846,12 +2846,6 @@ for a subtype, but is available for a call in all derived class constructors via
 
     class D1 extends C {
         constructor (n: number) {
-            super("" + n)
-        }
-    }
-
-    class D1 extends C {
-        constructor (n: number) {
             super("" + n) // ok
         }
     }
