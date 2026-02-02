@@ -225,6 +225,19 @@ protected:
 };
 
 static_assert(sizeof(BaseObject) == sizeof(BaseClass::HeaderType));
+
+using ObjectPtr = BaseObject*;
+using ObjectVisitor = std::function<void(ObjectPtr)>;
+
+struct ObjectRef {
+    BaseObject* object;
+};
+
+using RawRefVisitor = std::function<void(ObjectRef&)>;
+using RootVisitor = RawRefVisitor;
+using StackPtrVisitor = RawRefVisitor;
+
+
 }  // namespace common
 #endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,

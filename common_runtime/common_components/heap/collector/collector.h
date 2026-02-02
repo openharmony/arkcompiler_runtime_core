@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,10 @@
 #include <set>
 #include <vector>
 
-#include "common_components/common/base_object.h"
+#include "common_interfaces/objects/base_object.h"
 #include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/collector/gc_stats.h"
-#include "common_interfaces/thread/mutator_base.h"
+#include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base/runtime_param.h"
 
 namespace common {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,10 +154,10 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
     }
 }
 
-void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder)
+void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder, [[maybe_unused]] CoroutineWorker *w)
 {
 #ifdef ARK_HYBRID
-    auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder);
+    auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder, w ? w->GetThreadHolder() : nullptr);
     if (wasCreated) {
         auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();
         GetThreadHolder()->RegisterCoroutine(this);

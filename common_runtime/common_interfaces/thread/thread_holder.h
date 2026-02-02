@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@
 
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/heap/heap_visitor.h"
-#include "common_interfaces/thread/mutator_base.h"
+#include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/thread/thread_state.h"
 
 namespace panda::ecmascript {
@@ -73,11 +73,11 @@ class PUBLIC_API ThreadHolder {
 public:
     using JSThread = panda::ecmascript::JSThread;
     using Coroutine = ark::Coroutine;
-    using MutatorBase = common::MutatorBase;
+    using Mutator = common::Mutator;
 
     // CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
     // NOLINTNEXTLINE(google-explicit-constructor)
-    ThreadHolder(MutatorBase *mutatorBase) : mutatorBase_(mutatorBase)
+    ThreadHolder(Mutator *mutator) : mutator_(mutator)
     {
         SetCurrent(this);
     }
@@ -121,12 +121,12 @@ public:
 
     bool HasSuspendRequest() const
     {
-        return mutatorBase_->HasAnySuspensionRequest();
+        return mutator_->HasAnySuspensionRequest();
     }
 
     bool IsInRunningState() const
     {
-        return !mutatorBase_->InSaferegion();
+        return !mutator_->InSaferegion();
     }
 
     // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
@@ -159,12 +159,12 @@ public:
 
     void *GetMutator() const
     {
-        return mutatorBase_->mutator_;
+        return mutator_;
     }
 
     GCPhase GetMutatorPhase() const
     {
-        return mutatorBase_->GetMutatorPhase();
+        return mutator_->GetMutatorPhase();
     }
 
     // Return if thread has already binded mutator.
@@ -179,16 +179,16 @@ public:
         ThreadHolder *holder_ {nullptr};
     };
 
-    static constexpr size_t GetMutatorBaseOffset()
+    static constexpr size_t GetMutatorOffset()
     {
-        return MEMBER_OFFSET_CC(ThreadHolder, mutatorBase_);
+        return MEMBER_OFFSET_CC(ThreadHolder, mutator_);
     }
 
 private:
     // Return false if thread has already binded mutator. Otherwise bind a mutator.
     bool TryBindMutator();
 
-    MutatorBase *mutatorBase_ {nullptr};
+    Mutator *mutator_ {nullptr};
 
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void* allocBuffer_ {nullptr};

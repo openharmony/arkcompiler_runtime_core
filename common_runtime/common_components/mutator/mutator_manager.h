@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,14 @@
 #include "common_components/base/globals.h"
 #include "common_components/base/rw_lock.h"
 #include "common_components/common/page_allocator.h"
-#include "common_components/mutator/mutator.h"
+#include "common_components/mutator/satb_buffer.h"
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
 #include "common_components/mutator/safepoint_page_manager.h"
 #endif
 #include "common_components/mutator/thread_local.h"
 #include "common_components/log/log.h"
+
+#include "common_interfaces/thread/mutator.h"
 
 namespace common {
 const uint64_t WAIT_LOCK_INTERVAL = 5000; // 5us
@@ -130,7 +132,7 @@ public:
     {
         VisitAllMutators([](Mutator& mutator) {
             mutator.SetSafepointActive(true);
-            mutator.SetSuspensionFlag(MutatorBase::SuspensionType::SUSPENSION_FOR_STW);
+            mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
         });
     }
 
@@ -138,7 +140,7 @@ public:
     {
         VisitAllMutators([](Mutator& mutator) {
             mutator.SetSafepointActive(false);
-            mutator.ClearSuspensionFlag(MutatorBase::SuspensionType::SUSPENSION_FOR_STW);
+            mutator.ClearSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_STW);
         });
     }
 
@@ -150,9 +152,6 @@ public:
 
     // Create and initialize the local mutator, then register to mutatorlist.
     Mutator* CreateMutator();
-
-    // Delete the thread-local mutator and unregister from mutatorlist before a mutator exit
-    void TransitMutatorToExit();
 
     void DestroyMutator(Mutator* mutator);
 

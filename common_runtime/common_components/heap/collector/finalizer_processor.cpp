@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,11 @@
 #include "common_components/heap/collector/finalizer_processor.h"
 
 #include "common_components/common/scoped_object_access.h"
-#include "common_components/mutator/mutator.h"
+#include "common_components/heap/heap.h"
+#include "common_components/heap/allocator/allocator.h"
+#include "common_components/mutator/mutator_manager.h"
+
+#include "common_interfaces/thread/mutator.h"
 
 namespace common {
 constexpr uint32_t DEFAULT_FINALIZER_TIMEOUT_MS = 2000;

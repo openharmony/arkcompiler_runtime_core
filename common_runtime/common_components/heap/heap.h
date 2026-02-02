@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,13 @@
 #include <functional>
 
 #include "common_components/base/immortal_wrapper.h"
-#include "common_components/common/base_object.h"
 #include "common_components/common/type_def.h"
 #include "common_components/heap/barrier/barrier.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/base_runtime.h"
+#include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/profiler/heap_profiler_listener.h"
 
 namespace common {

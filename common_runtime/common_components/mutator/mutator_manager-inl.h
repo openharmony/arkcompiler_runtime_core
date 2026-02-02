@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ void MutatorManager::FlipMutators(STWParam& param, STWFunction&& stwFunction, Fl
         // Hope process ui thread's flipFunction at last, so add the ui mutator at the end of undoeMuators list.
         VisitAllMutators([&undoneMutators, flipFunction](Mutator& mutator) {
                 mutator.SetFlipFunction(flipFunction);
-                mutator.SetSuspensionFlag(MutatorBase::SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK);
+                mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK);
                 undoneMutators.push_front(&mutator);
             }, ignoreFinalizer);
     }

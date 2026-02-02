@@ -382,7 +382,7 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
     newCoro->SetWorker(this);
     auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate);
+    newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate, this);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()

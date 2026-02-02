@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,8 @@
 #include "common_components/heap/collector/finalizer_processor.h"
 #include "common_components/heap/collector/marking_collector.h"
 #include "common_components/heap/heap.h"
-#include "common_components/mutator/mutator.inline.h"
+
+#include "common_interfaces/thread/mutator-inl.h"
 
 namespace common {
 bool g_enableGCTimeoutCheck = true;
@@ -87,19 +88,6 @@ Mutator* MutatorManager::CreateMutator()
     mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
     MutatorManagementRUnlock();
     return mutator;
-}
-
-void MutatorManager::TransitMutatorToExit()
-{
-    Mutator* mutator = Mutator::GetMutator();
-    LOGF_CHECK(mutator != nullptr) << "Mutator has not initialized or has been fini: " << mutator;
-    ASSERT_LOGF(!mutator->InSaferegion(), "Mutator to be fini should not be in saferegion");
-    // Enter saferegion to avoid blocking gc stw
-    mutator->MutatorLock();
-    mutator->ResetMutator();
-    mutator->MutatorUnlock();
-    (void)mutator->EnterSaferegion(false);
-    UnbindMutator(*mutator);
 }
 
 void MutatorManager::DestroyExpiredMutators()
