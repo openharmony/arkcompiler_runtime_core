@@ -18,9 +18,9 @@ desc: Type string values are all string literals, e.g., ‘abc’. Type string s
       UTF-16 code units.
       Character is not from Unicode UTF-16
 tags: [compile-only, negative]
+expected_out: "Syntax error ESY0091: Invalid Unicode escape."
 ---*/
 
 function main(): void {
-  let x = "\u{110000}";
-  arktest.assertTrue( x instanceof String)
+    let x = "\u{110000}";
 }

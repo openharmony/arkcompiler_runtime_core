@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: adding two strings
+desc: adding two strings with indexing
 ---*/
 
 function main(): void {
-  let a: string = "abc";
-  let b: string = "def";
-  let c: string = a + b;
+    let a: string = "abc";
+    let b: string = "def";
+    let c: string = a + b + a[0];
 
-  arktest.assertTrue( c == "abcdef")
+    arktest.assertEQ( c, "abcdefa" )
 }
