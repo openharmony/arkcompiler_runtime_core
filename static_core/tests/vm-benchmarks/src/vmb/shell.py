@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,8 +22,8 @@ import signal
 import time
 from typing import Union, Optional
 from pathlib import Path
-from subprocess import Popen, PIPE, CalledProcessError, check_output
-from threading import Thread, Timer
+from subprocess import Popen, PIPE, CalledProcessError, TimeoutExpired, check_output
+from threading import Thread
 from dataclasses import dataclass
 from tempfile import mktemp
 from vmb.helpers import Singleton
@@ -246,25 +246,31 @@ class ShellHost(ShellBase):
     def __exec_process(self, cmd: str, cwd: str = '',
                        timeout: Optional[float] = None) -> ShellResult:
         result = ShellResult()
+        out = err = b''
         log.debug(cmd)
         log.trace('CWD="%s" Timeout=[%s]', cwd, timeout)
         # pylint: disable-next=all
         with Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE,  # NOQA
                    cwd=(cwd if cwd else None),
                    preexec_fn=os.setsid) as proc:
-            if timeout is not None:
-                timer = Timer(timeout,
-                              lambda x: os.killpg(
-                                  os.getpgid(x.pid), signal.SIGKILL), [proc])
-                timer.start()
-            out, err = proc.communicate(timeout=timeout)
-            if timeout is not None:
-                timer.cancel()
-            ret_code = proc.poll()
-            if ret_code is not None:
-                result.ret = ret_code
-            result.out = str(out.decode('utf-8', errors='replace'))
-            result.err = str(err.decode('utf-8', errors='replace'))
+            try:
+                out, err = proc.communicate(timeout=timeout)
+            except TimeoutExpired as exc:
+                log.error('Shell timeout exceeded: %s, process will be killed', str(exc))
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except Exception as exc:  # pylint: disable=broad-except
+                log.error('Shell execution failed before timeout: %s', str(exc))
+            finally:
+                reminder_out, reminder_err = proc.communicate(timeout=timeout)
+                if reminder_out != out:
+                    out += reminder_out
+                if reminder_err != err:
+                    err += reminder_err
+                ret_code = proc.poll()
+                if ret_code is not None:
+                    result.ret = ret_code
+        result.out = str(out.decode('utf-8', errors='replace'))
+        result.err = str(err.decode('utf-8', errors='replace'))
         return result
 
     def __exec_process_win(self, cmd: str, cwd: str = '',

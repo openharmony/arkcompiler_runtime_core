@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,6 +36,42 @@ def posix_only(f):
         else:
             f(*args)
     return s
+
+
+@posix_only
+def test_unix_oserror() -> None:
+    py_script = "import os; os.remove('/none/existent/file.txt')"
+    res = sh.run(f'python3 -c "{py_script}"')
+    test = TestCase()
+    test.assertFalse(res.ret == 0)
+    test.assertIn('FileNotFoundError', res.err)
+
+
+@posix_only
+def test_unix_runtime_error() -> None:
+    py_script = "import threading; lock = threading.Lock(); lock.release()"
+    res = sh.run(f'python3 -c "{py_script}"')
+    test = TestCase()
+    test.assertFalse(res.ret == 0)
+    test.assertIn('RuntimeError', res.err)
+
+
+@posix_only
+def test_unix_timeout_check_err() -> None:
+    test = TestCase()
+    cmd = 'sleep 1 & pid=$!; echo "Process killed with error before timeout" | tee /dev/stderr; kill "$pid"; exit 13'
+    res = sh.run(cmd=cmd, timeout=5)
+    test.assertTrue(res.ret == 13)
+    test.assertIn('Process killed with error before timeout', res.err)    
+
+
+@posix_only
+def test_unix_timeout_check_no_err() -> None:
+    test = TestCase()
+    cmd = 'sleep 5 & pid=$!; echo "Process will be stopped by timeout" | tee /dev/stderr;'
+    res = sh.run(cmd=cmd, timeout=1) 
+    test.assertTrue(res.ret == 0)
+    test.assertIn('Process will be stopped by timeout', res.out)    
 
 
 @posix_only
