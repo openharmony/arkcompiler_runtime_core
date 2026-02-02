@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ bool BytecodeAnalysisResult::GetLocalExportInfo(uint32_t slot, uint32_t name_idx
         return false;
     }
     const auto &names = local_export_slot_external_names_[slot];
-    if (name_idx > names.size()) {
+    if (name_idx >= names.size()) {
         return false;
     }
     external_name = names[name_idx];
