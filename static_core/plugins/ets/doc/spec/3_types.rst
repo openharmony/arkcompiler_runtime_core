@@ -2022,8 +2022,8 @@ An empty tuple type is identical to ``Tuple``:
 
     let empty: [] = [] // empty tuple with no elements in it
 
-Type ``Tuple`` is preserved by :ref:`Type Erasure`, so it can be used
-in :ref:`InstanceOf Expression` and :ref:`Cast Expression`.
+Type ``Tuple`` is preserved by :ref:`Type Erasure`, and can be used
+in :ref:`instanceof Expression` and :ref:`Cast Expression`.
 
 An element of a ``Tuple`` value cannot be accessed directly. A developer must use the
 ``unsafeGet`` or  ``unsafeSet`` methods instead, which has the following signatures:

@@ -1906,10 +1906,10 @@ a runtime error occurs:
 
 |
 
-.. _Override Fields and Implement Properties:
+.. _Override Fields:
 
-Override Fields and Implement Properties
-========================================
+Override Fields
+===============
 
 .. meta:
     frontend_status: None
@@ -1918,6 +1918,12 @@ When extending a class, an instance field declared in a superclass can be
 overridden by a same-name, same-type field. The new declaration adds no new
 field to the class type but allows changing field initialization. Using the
 keyword ``override`` is not required.
+
+.. note::
+
+    Implementing interface properties by fields is discussed in detail
+    in :ref:`Implementing Required Interface Properties` and
+    :ref:`Implementing Optional Interface Properties`. 
 
 A :index:`compile-time error` occurs if:
 
@@ -2054,77 +2060,6 @@ both in a superclass:
     class D extends C {
         num: number = 2 // compile-time error, wrong overriding
     }
-
-If a single accessor or both accessors are defined in an interface, then the
-accessors can be implemented as a field in a class.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface C {
-        get num(): number
-        set num(x: number)
-    }
-    class D implements C {
-        num: number = 2 // OK!
-    }
-
-.. index::
-   accessor
-   field
-   implementing property
-   interface
-
-A property can be implemented as a field in different combinations:
-
-.. code-block:: typescript
-   :linenos:
-
-
-    interface I {
-        f: number // property is declared
-    }
-
-    class Base1 implements I {
-        f: number = 1 // field implements a property
-        // accessors for field 'f' are also provided
-    }
-
-    class Derived1 extends Base1 {
-        override f: number = 1 // field overrides a field
-    }
-
-    class Base2 {
-        f: number = 3 // field is declared
-    }
-
-    class Derived2 extends Base2 implements I {
-        // field inherited from Base2 implements a property coming from I
-        // accessors for field 'f' are also provided
-    }
-
-    // Usage
-    function foo (i: I) {
-        console.log ("Getter: ", i.f) // getter is used as i.f is a property
-    }
-    // Field access and getter returns the same value
-    let base1 = new Base1
-    foo (base1)
-    console.log ("Field access: ", base1.f)
-    let base2 = new Derived2
-    foo (base2)
-    console.log ("Field access: ", base2.f)
-
-    function bar (i: I) {
-        i.f = 123
-        console.log ("Setter: ", i.f) // setter has new value to i.f property
-    }
-    // Setters change the field
-    bar (base1)
-    console.log ("Field: ", base1.f)
-    bar (base2)
-    console.log ("Field: ", base2.f)
-
 
 Overriding a field by a single accessor or by both accessors causes a
 :index:`compile-time error` as follows:
@@ -3444,14 +3379,17 @@ The method of each inherited abstract method must be defined with
 Semantic checks performed while overriding inherited methods and accessors are
 described in :ref:`Overriding in Classes`.
 
+Semantic checks performed while overriding fields and
+implementing properties are described in the following sections:
+
+- :ref:`Override Fields`,
+- :ref:`Implementing Required Interface Properties`,
+- :ref:`Implementing Optional Interface Properties`.
+
 Constructors from the direct superclass of ``C``  are not subject of overriding
 because such constructors are not accessible (see :ref:`Accessible`) in ``C``
 directly, and can only be called from a constructor of ``C`` (see
 :ref:`Constructor Body`).
-
-Semantic checks performed while overriding fields and implementing properties
-are described in :ref:`Override Fields and Implement Properties`.
-
 
 .. index::
    class

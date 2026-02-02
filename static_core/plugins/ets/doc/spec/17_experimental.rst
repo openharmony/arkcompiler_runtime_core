@@ -143,7 +143,7 @@ Predefined constructors, methods, and constants for ``char`` type are
 parts of the |LANG| :ref:`Standard Library`.
 
 Type ``char`` is a class type that has an appropriate class as a part of the
-:ref:`Standard Library`. It means that type ``char`` is a subtype of 
+:ref:`Standard Library`. It means that type ``char`` is a subtype of
 ``Object``, and that it can be used at any place where a class name is
 expected.
 
@@ -3088,7 +3088,7 @@ Receiver Type
     frontend_status: Done
 
 *Receiver type* is the type of the *receiver parameter* in a function,
-function type, and lambda with receiver. 
+function type, and lambda with receiver.
 
 Using array type as a *receiver type* is presented in the example below:
 
@@ -4033,7 +4033,7 @@ first element (i.e., the element with the index ``0``) of an array or a tuple:
 
     function foo(x: string[]) {
         let a = ""
-        let b = ""
+        let b = "";
         [a, , b] = x
         // this line works the same as the previous line:
         a = x[0]; b = x[2]

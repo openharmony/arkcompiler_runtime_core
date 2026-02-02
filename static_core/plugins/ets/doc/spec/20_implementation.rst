@@ -186,7 +186,7 @@ Generic and Function Types Peculiarities
 The current compiler and runtime implementations use type erasure.
 Type erasure affects the behavior of generics and function types. It is
 expected to change in the future. A particular example is provided in the last
-bullet point in the list of compile-time errors in :ref:`InstanceOf Expression`.
+bullet point in the list of compile-time errors in :ref:`instanceof Expression`.
 
 .. index::
    generic

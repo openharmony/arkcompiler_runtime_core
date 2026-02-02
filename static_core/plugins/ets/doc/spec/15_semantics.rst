@@ -1894,7 +1894,7 @@ language features influence the computation:
 -  Variable declarations;
 -  Variable assignments (a variable initialization is handled as a variable
    declaration combined with an assignment);
--  :ref:`InstanceOf Expression` with variables;
+-  :ref:`instanceof Expression` with variables;
 -  Conditional statements and conditional expressions that include:
 
     -  :ref:`Equality Expressions` of a variable and an expression that
@@ -2513,7 +2513,7 @@ allows operations that are specific to the subtype:
    interface type
 
 Other examples are explicit calls to ``instanceof``
-(see :ref:`InstanceOf Expression`) or checks against ``null``
+(see :ref:`instanceof Expression`) or checks against ``null``
 (see :ref:`Equality Expressions`) as parts of ``if`` statements
 (see :ref:`if Statements`) or ternary conditional expressions
 (see :ref:`Ternary Conditional Expressions`):
@@ -4136,7 +4136,7 @@ up to undefined*.
 
 This property limits the possible applications of type-checking expressions:
 
--  :ref:`InstanceOf Expression`;
+-  :ref:`instanceof Expression`;
 -  :ref:`Cast Expression`.
 
 .. index::

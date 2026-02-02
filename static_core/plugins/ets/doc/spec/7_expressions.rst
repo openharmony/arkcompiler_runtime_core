@@ -1074,9 +1074,9 @@ Type of an *array literal expression* is inferred by the following rules:
 
 -  If a context is available, then type is inferred from the context. If
    successful, then type of an array literal is the inferred type. Otherwise,
-   a :index:`compile-time error` occurs.    
+   a :index:`compile-time error` occurs.
 -  If no context is available, then type is inferred from the types of array
-   literal elements (see :ref:`Array Type Inference from Types of Elements`). 
+   literal elements (see :ref:`Array Type Inference from Types of Elements`).
 
 More details of both cases are presented below.
 
@@ -1168,7 +1168,7 @@ is **not** one of the following:
 - Union type that contains at least one consitituent type from the above list.
 
 If type used in a context is ``Any`` or ``Object``, then
-:ref:`Array Type Inference from Types of Elements` is used: 
+:ref:`Array Type Inference from Types of Elements` is used:
 
 .. code-block:: typescript
    :linenos:
@@ -1180,7 +1180,7 @@ then it is inferred as an array literal type on the following conditions:
 
 - Number of expressions equals the number of constituent types;
 - Type of each expression in the array literal is assignable (see
-  :ref:`Assignability`) to the constituent type at the respective position. 
+  :ref:`Assignability`) to the constituent type at the respective position.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -1193,7 +1193,7 @@ Otherwise, a :index:`compile-time error` occurs.
 If type used in a context is a *fixed-size array type* (see
 :ref:`Fixed-size Array Types`), and type of each expression is
 assignable to an array element type, then an array literal is of
-the specified type. Otherwise, a :index:`compile-time error` occurs. 
+the specified type. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1423,7 +1423,7 @@ More details are here :ref:`Object Literal of Class Type` and
          m(): void
       }
       abstract class B {
-         m(): void
+         abstract m(): void
       }
       const a: A = { m(): void {} } // compile-time error: no m() in class A
       const i: I = { m(): void {} } // OK
@@ -2127,7 +2127,7 @@ Spread Expression
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing (see :ref:`Rest Parameter`).
 The *expression* must be of an iterable type (see :ref:`Iterable Types`)
-or a tuple type (see :ref:`Tuple Types`). 
+or of a tuple type (see :ref:`Tuple Types`).
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -3835,9 +3835,9 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 
 |
 
-.. _InstanceOf Expression:
+.. _instanceof Expression:
 
-``InstanceOf`` Expression
+``instanceof`` Expression
 *************************
 
 .. meta:
@@ -3891,7 +3891,7 @@ The approach is represented in the following example:
       console.log(x instanceof B)        // OK
       console.log(x instanceof B<T>)     // compile-time error, T was erased
 
-      if(a instanceof B) {  // OK, type of instanceOf will be used for smart
+      if(a instanceof B) {  // OK, type of instanceof will be used for smart
                             // cast in `if` clause
          let b = a as B<T>  // OK
       }
@@ -4114,7 +4114,7 @@ the usage of the resulting value can cause type violation, and ``ClassCastError`
 is thrown as a consequence (see :ref:`Type Erasure` for detail).
 
 Semantically, a *cast expression* of this kind is coupled tightly with
-:ref:`Instanceof Expression` as follows:
+:ref:`instanceof Expression` as follows:
 
 .. index::
    runtime check
@@ -4150,8 +4150,8 @@ This situation is represented in the following example:
     foo("aa") // OK
     foo(1)    // runtime error is thrown in foo by 'as' operator application
 
-:ref:`Instanceof Expression` can be used to prevent runtime errors. Moreover,
-the :ref:`Instanceof Expression` makes *cast conversion* unnecessary in many
+:ref:`instanceof Expression` can be used to prevent runtime errors. Moreover,
+the :ref:`instanceof Expression` makes *cast conversion* unnecessary in many
 cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
 
 .. code-block:: typescript
@@ -4198,9 +4198,9 @@ a :index:`compile-time warning` is issued:
 
 |
 
-.. _TypeOf Expression:
+.. _typeof Expression:
 
-``TypeOf`` Expression
+``typeof`` Expression
 *********************
 
 .. meta:
@@ -4224,7 +4224,7 @@ evaluation. If this evaluation causes an error, then the ``typeof`` expression
 evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
 is defined as follows:
 
-1. The value of a ``TypeOf`` expression is known at compile time
+1. The value of a ``typeof`` expression is known at compile time
 
 .. index::
    syntax
@@ -4236,7 +4236,7 @@ is defined as follows:
    value
 
 +---------------------------------+-------------------------+-----------------------------+
-|       Expression Type           |  TypeOf Result          |   Code Example              |
+|       Expression Type           |  typeof Result          |   Code Example              |
 +=================================+=========================+=============================+
 | ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
@@ -4300,7 +4300,7 @@ is defined as follows:
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 
-2. The value of a ``TypeOf`` expression is determined at runtime
+2. The value of a ``typeof`` expression is determined at runtime
 
 The result is the name of an actual type used at runtime for the following
 expression types:
@@ -5133,7 +5133,7 @@ This behavior is represented by the following example:
 
 |
 
-A numeric types conversion (see :ref:`Widening Numeric Conversions`) 
+A numeric types conversion (see :ref:`Widening Numeric Conversions`)
 of an expression with operands convertible (see :ref:`Numeric Operator Contexts`)
 to a numeric type is performed on both operands to ensure
 that the resultant type is the type of the multiplicative expression.
@@ -5737,7 +5737,7 @@ The following rules apply where the operator  ``'-'`` is used:
 
 Otherwise, a :index:`compile-time error` occurs.
 
-Type of an *additive expression* with a valid 
+Type of an *additive expression* with a valid
 combination of types is determined as follows:
 
 -  If any operand is of type ``string``, then ``string``;
@@ -7910,7 +7910,7 @@ If *lambda signature* return type is neither ``void`` (see
 :ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and the
 execution path of the lambda body has neither a return statement (see
 :ref:`Return Statements`) nor a single expression as a body, then a
-:index:`compile-time error` occurs. 
+:index:`compile-time error` occurs.
 
 .. index::
    lambda body
