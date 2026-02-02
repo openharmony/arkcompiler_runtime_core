@@ -18,21 +18,45 @@ desc: Alternate constructor calls that begin with the keyword this
 ---*/
 
 class A {
-    public x: int;
+    x: int = 0;
 
-    public constructor() {
-        this.fromInt(5);
+    constructor() {
+        this(5)
+        this.x++
     }
-
-    public constructor fromInt(a: int) {
-        this.x = a;
+    constructor(a: int) {
+        this(true)
+        this.x++
+    }
+    constructor(a: boolean) {
+        this('abc')
+        this.x++
+    }
+    constructor(a: string) {
+        this(1.0f)
+        this.x++
+    }
+    constructor(a: float) {
+        this(new Error)
+        this.x++
+    }
+    constructor(a: Error) {
+        this([1, 2, 3])
+        this.x++
+    }
+    constructor(a: Array<int>) {
+        this(() => {})
+        this.x++
+    }
+    constructor(a: () => void) {
+        this.x++
     }
 }
 
 function main(): void {
     let i1: A = new A();
-    let i2: A = new A.fromInt(7);
+    arktest.assertEQ(i1.x, 8)
 
-    arktest.assertEQ(i1.x, 5);
-    arktest.assertEQ(i2.x, 7);
+    i1 = new A(new Error);
+    arktest.assertEQ(i1.x, 3)
 }

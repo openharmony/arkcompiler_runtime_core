@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,12 @@
 
 {%- for c in cases %}
 /*---
-desc: >-
-    A compile-time error occurs if arguments of an explicit constructor call refer to one of the following:
-    - Any non-static field or instance method; or
-    - this or super.
-tags: [compile-only, negative]
-expected_out: |-
-    {{(c.expected_out or '')|indent}}
+desc: Semantic check for a super call is performed in accordance with "Compatibility of Call Arguments".
 ---*/
 
 {{c.decl}}
+
+function main() {
+    {{c.main|indent}}
+}
 {%- endfor %}

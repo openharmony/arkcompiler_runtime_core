@@ -20,21 +20,79 @@ desc: >-
 ---*/
 
 class A {
-  public x: int;
+    x: int = 0;
 
-  public constructor(a: int) {
-    this.x = a;
-  }
+    constructor() {
+        this(5)
+        this.x++
+    }
+    constructor(a: int) {
+        this(true)
+        this.x++
+    }
+    constructor(a: boolean) {
+        this('abc')
+        this.x++
+    }
+    constructor(a: string) {
+        this(1.0f)
+        this.x++
+    }
+    constructor(a: float) {
+        this(new Error)
+        this.x++
+    }
+    constructor(a: Error) {
+        this([1, 2, 3])
+        this.x++
+    }
+    constructor(a: Array<int>) {
+        this(() => {})
+        this.x++
+    }
+    constructor(a: () => void) {
+        this.x++
+    }
 }
 
 class B extends A {
-  public constructor() {
-    super(5);
-  }
+    constructor() {
+        super(5)
+        this.x++
+    }
+    constructor(a: int) {
+        super(true)
+        this.x++
+    }
+    constructor(a: boolean) {
+        super('abc')
+        this.x++
+    }
+    constructor(a: string) {
+        super(1.0f)
+        this.x++
+    }
+    constructor(a: float) {
+        super(new Error)
+        this.x++
+    }
+    constructor(a: Error) {
+        super([1, 2, 3])
+        this.x++
+    }
+    constructor(a: Array<int>) {
+        super(() => {})
+        this.x++
+    }
+    constructor(a: () => void) {
+        this.x++
+    }
 }
 
 function main(): void {
   let i1: B = new B();
+  arktest.assertEQ(i1.x, 8);
 
-  arktest.assertEQ(i1.x, 5);
+  i1 = new B(1.0f);
+  arktest.assertEQ(i1.x, 4);
 }

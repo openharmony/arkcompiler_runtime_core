@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,35 +17,35 @@ cases:
           // call another constructor in the same class
           class A {
               fld: string
-              constructor() {
-                  this('hello')
+              constructor noArgs() {
+                  this.fromString('hello')
               }
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.fld = p
               }
           }
       use: |-
-          arktest.assertEQ(new A('abc').fld, 'abc')
-          arktest.assertEQ(new A().fld, 'hello')
+          arktest.assertEQ(new A.fromString('abc').fld, 'abc')
+          arktest.assertEQ(new A.noArgs().fld, 'hello')
 
     - decl: |-
           // call constructors in the same class
           class A {
               fld: string
               constructor() {
-                  this(42.0)
+                  this.fromNumber(42.0)
               }
-              constructor(p: number) {
-                  this('' + p)
+              constructor fromNumber(p: number) {
+                  this.fromString('' + p)
               }
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.fld = p
               }
           }
       use: |-
-          arktest.assertEQ(new A('abc').fld, 'abc')
+          arktest.assertEQ(new A.fromString('abc').fld, 'abc')
           arktest.assertEQ(new A().fld, '42')
-          arktest.assertEQ(new A(3.14).fld, '3.14')
+          arktest.assertEQ(new A.fromNumber(3.14).fld, '3.14')
 
     - decl: |-
           // call constructor in superclass
@@ -54,58 +54,58 @@ cases:
               constructor(p: number) {
                   this.fld = '' + p
               }
-              constructor(p: boolean) {
+              constructor fromBoolean(p: boolean) {
                   this(p ? 1.0 : 0.0)
               }
           }
           class B extends A {
-              constructor(p: int) {
-                  this(p + 1.0)
+              constructor fromInt(p: int) {
+                  this.fromNumber(p + 1.0)
               }
-              constructor(p?: number) {
+              constructor fromNumber(p?: number) {
                   if (p == undefined) {
-                      super(false)
+                      super.fromBoolean(false)
                   } else {
                       super(p)
                   }
               }
           }
       use: |-
-          arktest.assertEQ(new B().fld, '0')
-          arktest.assertEQ(new B(42.0).fld, '42')
-          arktest.assertEQ(new B(12345).fld, '12346')
+          arktest.assertEQ(new B.fromNumber().fld, '0')
+          arktest.assertEQ(new B.fromNumber(42.0).fld, '42')
+          arktest.assertEQ(new B.fromInt(12345).fld, '12346')
 
     - decl: |-
           // call constructors in superclasses
           abstract class A {
               fld: string
-              constructor(p: string) {
+              constructor fromString(p: string) {
                   this.fld = p
               }
-              constructor(p: number) {
-                  this('' + p)
+              constructor fromNumber(p: number) {
+                  this.fromString('' + p)
               }
           }
           abstract class B extends A {
-              constructor(p?: string|number) {
+              constructor fromOptionalUnion(p?: string|number) {
                   if (p == undefined) {
-                      super('')
+                      super.fromString('')
                       return
                   } else if (p instanceof number) {
-                      super(++p)
+                      super.fromNumber(++p)
                       return
                   }
-                  super(p)
+                  super.fromString(p)
               }
           }
           class C extends B {
               constructor(p: Any) {
                   if (p instanceof string) {
-                      super(p)
+                      super.fromOptionalUnion(p)
                   } else if (p instanceof number) {
-                      super(p)
+                      super.fromOptionalUnion(p)
                   } else {
-                      super()
+                      super.fromOptionalUnion()
                   }
               }
           }
@@ -120,28 +120,28 @@ cases:
           // call super constructor with optional parameter
           class A {
               p: string|undefined
-              constructor(p?: string) {
+              constructor fromOptionalString(p?: string) {
                   this.p = p
               }
           }
           class B extends A {
               s: string[]
-              constructor(...s: string[]) {
-                  super()
+              constructor fromRest(...s: string[]) {
+                  super.fromOptionalString()
                   this.s = s
               }
           }
       use: |-
-          let b = new B()
+          let b = new B.fromRest()
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 0)
 
-          b = new B('a')
+          b = new B.fromRest('a')
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 1)
           arktest.assertEQ(b.s[0], 'a')
 
-          b = new B('a', 'b', 'c')
+          b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 3)
           arktest.assertEQ(b.s[0], 'a')
@@ -152,28 +152,28 @@ cases:
           // call super constructor with explicit 'undefined' for optional parameter
           class A {
               p: string|undefined
-              constructor(p?: string) {
+              constructor fromOptionalString(p?: string) {
                   this.p = p
               }
           }
           class B extends A {
               s: string[]
-              constructor(...s: string[]) {
-                  super(undefined)
+              constructor fromRest(...s: string[]) {
+                  super.fromOptionalString(undefined)
                   this.s = s
               }
           }
       use: |-
-          let b = new B()
+          let b = new B.fromRest()
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 0)
 
-          b = new B('a')
+          b = new B.fromRest('a')
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 1)
           arktest.assertEQ(b.s[0], 'a')
 
-          b = new B('a', 'b', 'c')
+          b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p, undefined)
           arktest.assertEQ(b.s.length, 3)
           arktest.assertEQ(b.s[0], 'a')
@@ -184,28 +184,28 @@ cases:
           // call super constructor with value for optional parameter
           class A {
               p: string|undefined
-              constructor(p?: string) {
+              constructor fromOptionalString(p?: string) {
                   this.p = p
               }
           }
           class B extends A {
               s: string[]
-              constructor(...s: string[]) {
-                  super('super')
+              constructor fromRest(...s: string[]) {
+                  super.fromOptionalString('super')
                   this.s = s
               }
           }
       use: |-
-          let b = new B()
+          let b = new B.fromRest()
           arktest.assertEQ(b.p, 'super')
           arktest.assertEQ(b.s.length, 0)
 
-          b = new B('a')
+          b = new B.fromRest('a')
           arktest.assertEQ(b.p, 'super')
           arktest.assertEQ(b.s.length, 1)
           arktest.assertEQ(b.s[0], 'a')
 
-          b = new B('a', 'b', 'c')
+          b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p, 'super')
           arktest.assertEQ(b.s.length, 3)
           arktest.assertEQ(b.s[0], 'a')
@@ -216,17 +216,17 @@ cases:
           // call super constructor with rest parameter
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor fromRest(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(p1: string, p2: string) {
-                  super(p1, p2)
+              constructor fromTwoStrings(p1: string, p2: string) {
+                  super.fromRest(p1, p2)
               }
           }
       use: |-
-          let b = new B('a', 'b')
+          let b = new B.fromTwoStrings('a', 'b')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'b')
@@ -235,27 +235,27 @@ cases:
           // call super constructor with rest parameter
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor fromRest(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(p1: string, p2?: string) {
-                  super(p1, p2 ?? 'b')
+              constructor fromOptionalStrings(p1: string, p2?: string) {
+                  super.fromRest(p1, p2 ?? 'b')
               }
           }
       use: |-
-          let b = new B('a')
+          let b = new B.fromOptionalStrings('a')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'b')
 
-          b = new B('a', undefined)
+          b = new B.fromOptionalStrings('a', undefined)
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'b')
 
-          b = new B('a', 'c')
+          b = new B.fromOptionalStrings('a', 'c')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'c')
@@ -264,27 +264,27 @@ cases:
           // call super constructor with rest parameter
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor fromRest(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(p1?: string, p2: string = 'b') {
-                  super(p1 ?? 'x', p2)
+              constructor fromOptionalStrings(p1?: string, p2: string = 'b') {
+                  super.fromRest(p1 ?? 'x', p2)
               }
           }
       use: |-
-          let b = new B()
+          let b = new B.fromOptionalStrings()
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'x')
           arktest.assertEQ(b.s[1], 'b')
 
-          b = new B('y')
+          b = new B.fromOptionalStrings('y')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'y')
           arktest.assertEQ(b.s[1], 'b')
 
-          b = new B('y', 'z')
+          b = new B.fromOptionalStrings('y', 'z')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'y')
           arktest.assertEQ(b.s[1], 'z')
@@ -293,17 +293,17 @@ cases:
           // call super constructor with spread expression for rest parameter
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor fromRest(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(p1: string, p2: string) {
-                  super(...[p1, p2])
+              constructor fromTwoStrings(p1: string, p2: string) {
+                  super.fromRest(...[p1, p2])
               }
           }
       use: |-
-          let b = new B('a', 'b')
+          let b = new B.fromTwoStrings('a', 'b')
           arktest.assertEQ(b.s.length, 2)
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'b')
@@ -312,20 +312,20 @@ cases:
           // call super constructor with spread expression for rest parameter
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor fromRest(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(...p: string[]) {
-                  super(...p)
+              constructor fromRest(...p: string[]) {
+                  super.fromRest(...p)
               }
           }
       use: |-
-          let b = new B()
+          let b = new B.fromRest()
           arktest.assertEQ(b.s.length, 0)
 
-          b = new B('a', 'b', 'c')
+          b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.s[0], 'a')
           arktest.assertEQ(b.s[1], 'b')
           arktest.assertEQ(b.s[2], 'c')
@@ -335,22 +335,22 @@ cases:
           class A {
               p1: string[]
               p2: string[]
-              constructor(p1: string[] = [], p2: string[] = []) {
+              constructor fromOptionalStringArrays(p1: string[] = [], p2: string[] = []) {
                   this.p1 = p1
                   this.p2 = p2
               }
           }
           class B extends A {
-              constructor(...p: string[]) {
-                  super(p)
+              constructor fromRest(...p: string[]) {
+                  super.fromOptionalStringArrays(p)
               }
           }
       use: |-
-          let b = new B('a', 'b', 'c')
+          let b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p1.length, 3)
           arktest.assertEQ(b.p2.length, 0)
 
-          b = new B()
+          b = new B.fromRest()
           arktest.assertEQ(b.p1.length, 0)
           arktest.assertEQ(b.p2.length, 0)
 
@@ -359,22 +359,22 @@ cases:
           class A {
               p1: string[]
               p2: string[]
-              constructor(p1: string[] = [], p2: string[] = []) {
+              constructor fromOptionalStringArrays(p1: string[] = [], p2: string[] = []) {
                   this.p1 = p1
                   this.p2 = p2
               }
           }
           class B extends A {
-              constructor(...p: string[]) {
-                  super(p, undefined)
+              constructor fromRest(...p: string[]) {
+                  super.fromOptionalStringArrays(p, undefined)
               }
           }
       use: |-
-          let b = new B('a', 'b', 'c')
+          let b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p1.length, 3)
           arktest.assertEQ(b.p2.length, 0)
 
-          b = new B()
+          b = new B.fromRest()
           arktest.assertEQ(b.p1.length, 0)
           arktest.assertEQ(b.p2.length, 0)
 
@@ -383,21 +383,21 @@ cases:
           class A {
               p1: string[]
               p2: string[]
-              constructor(p1: string[] = [], p2: string[] = []) {
+              constructor fromOptionalStringArrays(p1: string[] = [], p2: string[] = []) {
                   this.p1 = p1
                   this.p2 = p2
               }
           }
           class B extends A {
-              constructor(...p: string[]) {
-                  super(undefined, p)
+              constructor fromRest(...p: string[]) {
+                  super.fromOptionalStringArrays(undefined, p)
               }
           }
       use: |-
-          let b = new B('a', 'b', 'c')
+          let b = new B.fromRest('a', 'b', 'c')
           arktest.assertEQ(b.p1.length, 0)
           arktest.assertEQ(b.p2.length, 3)
 
-          b = new B()
+          b = new B.fromRest()
           arktest.assertEQ(b.p1.length, 0)
           arktest.assertEQ(b.p2.length, 0)

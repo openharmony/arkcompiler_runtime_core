@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@ cases:
               k3: string
               lambda1: (() => void)|undefined
               lambda2: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
+              constructor main(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
@@ -30,7 +30,7 @@ cases:
               }
           }
       use: |-
-          let a1 = new A('1', '2', '3')
+          let a1 = new A.main('1', '2', '3')
           arktest.assertEQ(a1.k1, '1')
           arktest.assertEQ(a1.k2, '2')
           arktest.assertEQ(a1.k3, '3')
@@ -45,20 +45,20 @@ cases:
               k3: string
               lambda1: (() => void)|undefined
               lambda2: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
+              constructor fromString(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
                   this.lambda1 = lambda1
                   this.lambda2 = lambda2
               }
-              constructor(k1: int, k2: int, k3: int, lambda1?: () => void, lambda2?: () => void) {
-                  this('' + k1, '' + k2, '' + k3, lambda1, lambda2)
+              constructor fromInt(k1: int, k2: int, k3: int, lambda1?: () => void, lambda2?: () => void) {
+                  this.fromString('' + k1, '' + k2, '' + k3, lambda1, lambda2)
               }
           }
       use: |-
           let x = ''
-          let a1 = new A(1, 2, 3, undefined, () => { x = 'x' })
+          let a1 = new A.fromInt(1, 2, 3, undefined, () => { x = 'x' })
           arktest.assertEQ(a1.k1, '1')
           arktest.assertEQ(a1.k2, '2')
           arktest.assertEQ(a1.k3, '3')
@@ -74,7 +74,7 @@ cases:
               k3: string
               lambda1: (() => void)|undefined
               lambda2: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
+              constructor fromString(k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
@@ -84,14 +84,14 @@ cases:
           }
           class B extends A {
               k0: string
-              constructor(k0: string, k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
-                  super(k1, k2, k3, lambda1, lambda2)
+              constructor fromString(k0: string, k1: string, k2: string, k3: string, lambda1?: () => void, lambda2?: () => void) {
+                  super.fromString(k1, k2, k3, lambda1, lambda2)
                   this.k0 = k0
               }
           }
       use: |-
           let x: string = ''
-          let b1 = new B('0', '1', '2', '3', () => { x = 'x' })
+          let b1 = new B.fromString('0', '1', '2', '3', () => { x = 'x' })
           arktest.assertEQ(b1.k0, '0')
           arktest.assertEQ(b1.k1, '1')
           arktest.assertEQ(b1.k2, '2')
@@ -109,7 +109,7 @@ cases:
               lambda1: () => void
               lambda2: (() => void)|undefined
               lambda3: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
+              constructor main(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
@@ -121,7 +121,7 @@ cases:
       use: |-
           let a1: A|undefined
           let v1: string = ''
-          let a2 = new A(
+          let a2 = new A.main(
               '1',
               '2',
               '3',
@@ -150,7 +150,7 @@ cases:
               lambda1: () => void
               lambda2: (() => void)|undefined
               lambda3: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
+              constructor cons1(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
@@ -158,14 +158,14 @@ cases:
                   this.lambda2 = lambda2
                   this.lambda3 = lambda3
               }
-              constructor(k1: (p: string) => string, k2: (p: int) => string, k3: (p: boolean) => string, lambda1: () => void) {
-                  this(k1('1'), k2(2), k3(true), lambda1, undefined)
+              constructor cons2(k1: (p: string) => string, k2: (p: int) => string, k3: (p: boolean) => string, lambda1: () => void) {
+                  this.cons1(k1('1'), k2(2), k3(true), lambda1, undefined)
               }
           }
       use: |-
           let a1: A|undefined
           let v1: string = ''
-          let a2 = new A(
+          let a2 = new A.cons2(
               (p: string) => '' + p,
               (p: int) => '' + p,
               (p: boolean) => '' + p,
@@ -190,7 +190,7 @@ cases:
               lambda1: () => void
               lambda2: (() => void)|undefined
               lambda3: (() => void)|undefined
-              constructor(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
+              constructor fromStrings(k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
                   this.k1 = k1
                   this.k2 = k2
                   this.k3 = k3
@@ -201,15 +201,15 @@ cases:
           }
           class B extends A {
               lambda0: (p: string) => string
-              constructor(lambda0: (p: string) => string, k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
-                  super(k1, k2, k3, lambda1, lambda2, lambda3)
+              constructor fromLambdas(lambda0: (p: string) => string, k1: string, k2: string, k3: string, lambda1: () => void, lambda2?: () => void, lambda3?: () => void) {
+                  super.fromStrings(k1, k2, k3, lambda1, lambda2, lambda3)
                   this.lambda0 = lambda0
               }
           }
       use: |-
           let a1: A|undefined
           let v1: string = ''
-          let b2 = new B(
+          let b2 = new B.fromLambdas(
               (p: string) => '@' + p,
               '1',
               '2',
@@ -246,7 +246,7 @@ cases:
               p9: Record<string, int>
               p10: Color
 
-              constructor(
+              constructor main(
                   p1: () => number,
                   p2: string,
                   p3: (p1: int) => [int, boolean, string],
@@ -272,7 +272,7 @@ cases:
           }
       use: |-
           let s: string = ''
-          let a = new A(
+          let a = new A.main(
               () => 42.0,
               'abc',
               (p: int) => [p, p > 0, '' + p],
@@ -317,7 +317,7 @@ cases:
               p9: Record<string, int>
               p10: Color
 
-              constructor(
+              constructor c1(
                   p1: () => number,
                   p2: string,
                   p3: (p1: int) => [int, boolean, string],
@@ -341,7 +341,7 @@ cases:
                   this.p10 = p10
               }
 
-              constructor(
+              constructor c2(
                   p1: (p1: int) => [int, boolean, string],
                   p2: FixedArray<byte>,
                   p3: [string, string],
@@ -351,7 +351,7 @@ cases:
                   p7?: () => number,
                   p8?: string,
               ) {
-                  this(
+                  this.c1(
                       p7 ?? () => 43.0,
                       p8 ?? 'abcdef',
                       p1,
@@ -366,7 +366,7 @@ cases:
           }
       use: |-
           let s: string = ''
-          let a = new A(
+          let a = new A.c2(
               (p: int) => [p, p > 0, '' + p],
               [127 as byte, -128 as byte],
               ['A', 'B'],
@@ -409,7 +409,7 @@ cases:
               p9: Record<string, int>
               p10: Color
 
-              constructor(
+              constructor main_A(
                   p1: () => number,
                   p2: string,
                   p3: (p1: int) => [int, boolean, string],
@@ -434,7 +434,7 @@ cases:
               }
           }
           class B extends A {
-              constructor(
+              constructor main_B(
                   p1: () => number,
                   p2: string,
                   p3: (p1: int) => [int, boolean, string],
@@ -445,12 +445,12 @@ cases:
                   p8?: () => void,
                   p9: Record<string, int> = { '1': 10 }
               ) {
-                  super(p1, p2, p3, p4, p5, p6, p7, p8, p9)
+                  super.main_A(p1, p2, p3, p4, p5, p6, p7, p8, p9)
               }
           }
       use: |-
           let s: string = ''
-          let b = new B(
+          let b = new B.main_B(
               () => 42.0,
               'abc',
               (p: int) => [p, p > 0, '' + p],
@@ -491,7 +491,7 @@ cases:
               p4: Record<string, number>
               p5: string[]|undefined
 
-              constructor(
+              constructor all_optional(
                   p1?: Array<() => string>,
                   p2: FixedArray<() => number> = [],
                   p3?: [string, number],
@@ -506,7 +506,7 @@ cases:
               }
           }
       use: |-
-        let a = new A(
+        let a = new A.all_optional(
             [() => 'abc']
         )
         arktest.assertEQ(a.p1![0](), 'abc')
@@ -515,7 +515,7 @@ cases:
         arktest.assertEQ(a.p4[''], 0)
         arktest.assertEQ(a.p5, undefined)
 
-        a = new A(
+        a = new A.all_optional(
             [() => 'abc'],
             [() => 1.0, () => 2.0, () => 3.0],
             ['abc', 3.5]
@@ -529,7 +529,7 @@ cases:
         arktest.assertEQ(a.p4[''], 0)
         arktest.assertEQ(a.p5, undefined)
 
-        a = new A(
+        a = new A.all_optional(
             undefined,
             [],
             undefined,
@@ -552,7 +552,7 @@ cases:
             p4: Record<string, number>
             p5: string[]|undefined
 
-            constructor(
+            constructor main(
                 p1?: Array<() => string>,
                 p2: FixedArray<() => number> = [],
                 p3?: [string, number],
@@ -566,12 +566,12 @@ cases:
                 this.p5 = p5
             }
 
-            constructor(...p5: string[]) {
-                this(undefined, undefined, undefined, undefined, p5)
+            constructor rest(...p5: string[]) {
+                this.main(undefined, undefined, undefined, undefined, p5)
             }
         }
       use: |-
-        let a = new A('a', 'b', 'c', 'd')
+        let a = new A.rest('a', 'b', 'c', 'd')
         arktest.assertEQ(a.p1, undefined)
         arktest.assertEQ(a.p2.length, 0)
         arktest.assertEQ(a.p3, undefined)
@@ -587,7 +587,7 @@ cases:
             p4: Record<string, number>
             p5: string[]|undefined
 
-            constructor(
+            constructor opts(
                 p1?: Array<() => string>,
                 p2: FixedArray<() => number> = [],
                 p3?: [string, number],
@@ -603,12 +603,12 @@ cases:
         }
 
         class B extends A {
-            constructor(...p5: string[]) {
-                super(undefined, undefined, undefined, undefined, p5)
+            constructor rest(...p5: string[]) {
+                super.opts(undefined, undefined, undefined, undefined, p5)
             }
         }
       use: |-
-        let b = new B('a', 'b', 'c', 'd')
+        let b = new B.rest('a', 'b', 'c', 'd')
         arktest.assertEQ(b.p1, undefined)
         arktest.assertEQ(b.p2.length, 0)
         arktest.assertEQ(b.p3, undefined)
@@ -618,17 +618,17 @@ cases:
     - decl: |-
           class A {
               s: string[]
-              constructor(...s: string[]) {
+              constructor in_A(...s: string[]) {
                   this.s = s
               }
           }
           class B extends A {
-              constructor(p1: string, ...p2: string[]) {
-                  super(p1 + p1, ...p2)
+              constructor in_B(p1: string, ...p2: string[]) {
+                  super.in_A(p1 + p1, ...p2)
               }
           }
       use: |-
-          let b = new B('a', 'b', 'c', 'd')
+          let b = new B.in_B('a', 'b', 'c', 'd')
           arktest.assertEQ(b.s[0], 'aa')
           arktest.assertEQ(b.s[1], 'b')
           arktest.assertEQ(b.s[2], 'c')
