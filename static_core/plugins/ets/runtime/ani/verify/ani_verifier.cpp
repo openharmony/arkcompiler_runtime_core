@@ -189,8 +189,8 @@ bool ANIVerifier::IsValidStackRef(VRef *vref)
             ASSERT(EtsReferenceStorage::IsUndefinedEtsObject(stackEtsObj));
             return true;
         }
-        uintptr_t argRefAddr = reinterpret_cast<uintptr_t>(vref);
-        uintptr_t stackRefAddr = reinterpret_cast<uintptr_t>(cframe.GetValuePtrFromSlot(regInfo.GetValue()));
+        auto argRefAddr = reinterpret_cast<uintptr_t>(vref);
+        auto stackRefAddr = reinterpret_cast<uintptr_t>(cframe.GetValuePtrFromSlot(regInfo.GetValue()));
         return (argRefAddr != stackRefAddr);
     });
     return !notEqual;

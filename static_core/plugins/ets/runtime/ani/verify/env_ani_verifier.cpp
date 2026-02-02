@@ -26,23 +26,29 @@ EnvANIVerifier::EnvANIVerifier(ANIVerifier *verifier, const __ani_interaction_ap
     DoPushNativeFrame();
 }
 
-VEnv *EnvANIVerifier::GetEnv(ani_env *env)
+VEnv *EnvANIVerifier::GetEnv()
 {
-    // NOTE: Use different ani_env * for each native frames, #28620
-    return reinterpret_cast<VEnv *>(env);
+    ASSERT(!frames_.empty());
+    return frames_.back().venv;
 }
 
-VEnv *EnvANIVerifier::AttachThread(ani_env *env)
+VEnv *EnvANIVerifier::AttachThread()
 {
-    // NOTE: Use different ani_env * for each native frames, #28620
-    return reinterpret_cast<VEnv *>(env);
+    ASSERT(!frames_.empty());
+    return frames_.back().venv;
 }
 
 void EnvANIVerifier::DoPushNativeFrame()
 {
-    Frame frame {
-        SubFrameType::NATIVE_FRAME, 0, {}, MakePandaUnique<ArenaAllocator>(SpaceType::SPACE_TYPE_INTERNAL), nullptr};
+    Frame frame {SubFrameType::NATIVE_FRAME,
+                 0,
+                 {},
+                 MakePandaUnique<ArenaAllocator>(SpaceType::SPACE_TYPE_INTERNAL),
+                 nullptr,
+                 VEnv::Create(),
+                 nullptr};
     frame.refsAllocator = frame.refsAllocatorHolder.get();
+    frame.venv = frame.venvHolder.get();
     frames_.push_back(std::move(frame));
 }
 
@@ -72,7 +78,8 @@ void EnvANIVerifier::CreateLocalScope()
 {
     ASSERT(!frames_.empty());
     ArenaAllocator *allocator = frames_.back().refsAllocator;
-    frames_.push_back(Frame {SubFrameType::LOCAL_SCOPE, 0, {}, {}, allocator});
+    VEnv *venv = frames_.back().venv;
+    frames_.push_back(Frame {SubFrameType::LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv});
 }
 
 std::optional<PandaString> EnvANIVerifier::DestroyLocalScope()
@@ -95,7 +102,8 @@ void EnvANIVerifier::CreateEscapeLocalScope()
 {
     ASSERT(!frames_.empty());
     ArenaAllocator *allocator = frames_.back().refsAllocator;
-    frames_.push_back(Frame {SubFrameType::ESCAPE_LOCAL_SCOPE, 0, {}, {}, allocator});
+    VEnv *venv = frames_.back().venv;
+    frames_.push_back(Frame {SubFrameType::ESCAPE_LOCAL_SCOPE, 0, {}, {}, allocator, {}, venv});
 }
 
 std::optional<PandaString> EnvANIVerifier::DestroyEscapeLocalScope([[maybe_unused]] VRef *vref)
@@ -175,10 +183,7 @@ bool EnvANIVerifier::IsValidRefInCurrentFrame(VRef *vref) const
             break;
         }
     }
-    if (IsValidStackRef(vref)) {
-        return true;
-    }
-    return false;
+    return IsValidStackRef(vref);
 }
 
 bool EnvANIVerifier::IsGlobalRef(VRef *vref) const

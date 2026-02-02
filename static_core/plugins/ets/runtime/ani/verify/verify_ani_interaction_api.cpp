@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ani/ani_checkers.h"
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
+#include "plugins/ets/runtime/ani/verify/types/venv-inl.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
 #include "plugins/ets/runtime/ets_napi_env.h"
@@ -787,45 +788,99 @@ NO_UB_SANITIZE static ani_status String_GetUTF8SubString(VEnv *venv, VString *vs
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_GetLength(VEnv *venv, ani_array array, ani_size *result)
+NO_UB_SANITIZE static ani_status Array_GetLength(VEnv *venv, VArray *varray, ani_size *result)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_GetLength(venv->GetEnv(), array, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArray(varray, "array"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Array_GetLength(venv->GetEnv(), varray->GetRef(), result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, ani_ref initial_element, ani_array *result)
+NO_UB_SANITIZE static ani_status Array_New(VEnv *venv, ani_size length, VRef *vinitialElement, VArray **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, initial_element, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForSize(length, "length"),
+        ANIArg::MakeForRef(vinitialElement, "initial_element"),
+        ANIArg::MakeForArrayStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_array result {};
+    ani_status status = GetInteractionAPI(venv)->Array_New(venv->GetEnv(), length, vinitialElement->GetRef(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_Set(VEnv *venv, ani_array array, ani_size index, ani_ref ref)
+NO_UB_SANITIZE static ani_status Array_Set(VEnv *venv, VArray *varray, ani_size index, VRef *vref)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_Set(venv->GetEnv(), array, index, ref);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArray(varray, "array"),
+        ANIArg::MakeForArrayIndex(index, "index"),
+        ANIArg::MakeForRef(vref, "ref")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Array_Set(venv->GetEnv(), varray->GetRef(), index, vref->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_Get(VEnv *venv, ani_array array, ani_size index, ani_ref *result)
+NO_UB_SANITIZE static ani_status Array_Get(VEnv *venv, VArray *varray, ani_size index, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_Get(venv->GetEnv(), array, index, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArray(varray, "array"),
+        ANIArg::MakeForArrayIndex(index, "index"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->Array_Get(venv->GetEnv(), varray->GetRef(), index, &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_Push(VEnv *venv, ani_array array, ani_ref ref)
+NO_UB_SANITIZE static ani_status Array_Push(VEnv *venv, VArray *varray, VRef *vref)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_Push(venv->GetEnv(), array, ref);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArray(varray, "array"),
+        ANIArg::MakeForRef(vref, "ref")
+    );
+    // clang-format on
+
+    return GetInteractionAPI(venv)->Array_Push(venv->GetEnv(), varray->GetRef(), vref->GetRef());
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status Array_Pop(VEnv *venv, ani_array array, ani_ref *result)
+NO_UB_SANITIZE static ani_status Array_Pop(VEnv *venv, VArray *varray, VRef **vresult)
 {
-    VERIFY_ANI_ARGS(ANIArg::MakeForEnv(venv, "env"), /* NOTE: Add checkers */);
-    return GetInteractionAPI(venv)->Array_Pop(venv->GetEnv(), array, result);
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForArray(varray, "array"),
+        ANIArg::MakeForRefStorage(vresult, "result")
+    );
+    // clang-format on
+
+    ani_ref result {};
+    ani_status status = GetInteractionAPI(venv)->Array_Pop(venv->GetEnv(), varray->GetRef(), &result);
+    ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
+    return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

@@ -58,6 +58,18 @@ public:
 
         return stringKlass->IsAssignableFrom(klass);
     }
+
+    static bool IsArray(ScopedManagedCodeFix &s, ani_ref ref)
+    {
+        if (ManagedCodeAccessor::IsUndefined(ref)) {
+            return false;
+        }
+        EtsClass *klass = s.ToInternalType(ref)->GetClass();
+        EtsClass *arrayKlass = PlatformTypes()->escompatArray;
+
+        return arrayKlass->IsAssignableFrom(klass);
+    }
+
     static bool IsObject(ScopedManagedCodeFix &s, ani_ref ref)
     {
         if (s.IsNullishValue(ref)) {
@@ -269,6 +281,8 @@ PandaString ANIArg::GetStringType() const
         case ValueType::UINT32:                           return "uint32_t";
         case ValueType::ANI_ERROR:                        return "ani_error";
         case ValueType::ANI_ERROR_STORAGE:                return "ani_error *";
+        case ValueType::ANI_ARRAY:                        return "ani_array";
+        case ValueType::ANI_ARRAY_STORAGE:                return "ani_array *";
         case ValueType::ANI_FIXED_ARRAY_BOOLEAN_STORAGE:  return "ani_fixedarray_boolean *";
         case ValueType::ANI_FIXED_ARRAY_CHAR_STORAGE:     return "ani_fixedarray_char *";
         case ValueType::ANI_FIXED_ARRAY_BYTE_STORAGE:     return "ani_fixedarray_byte *";
@@ -544,6 +558,36 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyArray(VArray *varray)
+    {
+        auto err = VerifyRef(varray);
+        if (err) {
+            return err;
+        }
+
+        ScopedManagedCodeFix s(venv_->GetEnv());
+        if (!ANIRefTypeChecker::IsArray(s, varray->GetRef())) {
+            PandaStringStream ss;
+            ss << "wrong reference type: " << ANIRefTypeToString(s, varray->GetRef());
+            return ss.str();
+        }
+
+        // Set as current array for subsequent index validation
+        currentArray_ = varray;
+        return {};
+    }
+
+    std::optional<PandaString> VerifyArrayIndex([[maybe_unused]] ani_size index)
+    {
+        if (currentArray_ == nullptr) {
+            PandaStringStream ss;
+            ss << "no array context for index validation";
+            return ss.str();
+        }
+
+        return {};
+    }
+
     std::optional<PandaString> VerifyDelLocalRef(VRef *vref)
     {
         EnvANIVerifier *envANIVerifier = GetEnvANIVerifier();
@@ -758,6 +802,7 @@ private:
     VEnv *venv_ {};
 
     EtsClass *class_ {};
+    VArray *currentArray_ {};  // For array index validation
 };
 
 using CheckerHandler = std::optional<PandaString> (*)(Verifier &, const ANIArg &);
@@ -844,6 +889,18 @@ static std::optional<PandaString> VerifyUTF16String(Verifier &v, const ANIArg &a
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_UTF16_STRING);
     return v.VerifyTypePtr(arg.GetValueUTF16String(), "const uint16_t *");
+}
+
+static std::optional<PandaString> VerifyArray(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY);
+    return v.VerifyArray(arg.GetValueArray());
+}
+
+static std::optional<PandaString> VerifyArrayIndex([[maybe_unused]] Verifier &v, [[maybe_unused]] const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_INDEX);
+    return v.VerifyArrayIndex(arg.GetValueSize());
 }
 
 static std::optional<PandaString> VerifyDelLocalRef(Verifier &v, const ANIArg &arg)
@@ -1000,6 +1057,12 @@ static std::optional<PandaString> VerifyErrorStorage(Verifier &v, const ANIArg &
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ERROR_STORAGE);
     return v.VerifyTypeStorage(arg.GetValueErrorStorage(), "ani_error");
+}
+
+static std::optional<PandaString> VerifyArrayStorage(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_ARRAY_STORAGE);
+    return v.VerifyTypeStorage(arg.GetValueArrayStorage(), "ani_array");
 }
 
 static std::optional<PandaString> VerifyFixedArrayBooleanStorage(Verifier &v, const ANIArg &arg)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 
 namespace ark::ets {
@@ -49,6 +50,9 @@ public:
 
     static PandaEtsNapiEnv *FromAniEnv(ani_env *env)
     {
+        // NOTE (#33071): re-implement untill error fixed
+        ASSERT(env != nullptr);
+        ASSERT(env->c_api != ani::verify::GetVerifyInteractionAPI());
         return static_cast<PandaEtsNapiEnv *>(env);
     }
 
