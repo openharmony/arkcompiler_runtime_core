@@ -258,6 +258,29 @@ function jsonStringifyEmptyRecord(): void {
     arktest.assertEQ(JSON.stringify(record), '{}')
 }
 
+enum EnumInt {
+    e1 = 22,
+    e2 = 11,
+}
+
+enum EnumString {
+    e1 = 'robot1',
+    e2 = 'robot2',
+}
+
+function jsonStringifyRecordWithEnumKey(): void {
+    const RED: EnumInt = EnumInt.e1;
+    const ROBOT: EnumString = EnumString.e1;
+
+    let record1: Record<EnumInt, string> = new Record<EnumInt, string>();
+    record1.$_set(RED, "red");
+    const record2: Record<EnumString, string> = new Record<EnumString, string>()
+    record2.$_set(ROBOT, "blue");
+
+    arktest.assertEQ(JSON.stringify(record1, undefined), '{"22":"red"}');
+    arktest.assertEQ(JSON.stringify(record2, undefined), '{"robot1":"blue"}');
+}
+
 function jsonStringifyRecordWithNumericKey(): void {
     let recordSimpleNumeric: Record<string | number, number | string | boolean> = { "1": 1, 2: "2", 3: true }
     arktest.assertEQ(JSON.stringify(recordSimpleNumeric), '{"1":1,"2":"2","3":true}')
@@ -389,6 +412,7 @@ function main(): int {
     suite.addTest('JSON.stringify for Record with null with space', jsonStringifyRecordWithNullWithSpace);
     suite.addTest('JSON.stringify for empty Record', jsonStringifyEmptyRecord);
     suite.addTest('JSON.stringify for Record with numeric key', jsonStringifyRecordWithNumericKey);
+    suite.addTest('JSON.stringify for Record with Enum key', jsonStringifyRecordWithEnumKey);
     suite.addTest('JSON.stringify for Record with same object as value', jsonStringifyRecordWithSameValue);
     suite.addTest("JSON.stringify for Record with empty", jsonStringifyRecordWithEmpty);
     suite.addTest('JSON.stringify for nested Map', jsonStringifyNestedMap);

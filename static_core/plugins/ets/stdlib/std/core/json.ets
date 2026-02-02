@@ -1335,7 +1335,8 @@ class JSONWriter {
         } else if(obj instanceof Tuple) {
             this.writeTupleValue(obj);
         } else if (obj instanceof Record) {
-            this.writeStdCoreRecord(obj)
+            this.writeStdCoreRecord(obj as Record<Numeric | string | BaseEnum<Int> | BaseEnum<Long> |
+                BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, Any>)
         } else if (obj instanceof JsonReplacer) {
             let temp: Record<String, Any> = obj.jsonReplacer()
             this.writeStdCoreRecord(temp)
@@ -1479,7 +1480,7 @@ class JSONWriter {
         return fieldDumped
     }
 
-    private writeStdCoreRecord<K extends Numeric | string, V>(record: Record<K, V>): void {
+    private writeStdCoreRecord<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(record: Record<K, V>): void {
         const currentBuffer = this.buffer
         this.buffer = new StringBuilder('{')
 
@@ -1522,7 +1523,7 @@ class JSONWriter {
         this.buffer = currentBuffer
     }
 
-    private getRecordWritableEntries<K extends Numeric | string, V>(record: Record<K, V>): Array<[K, V]> {
+    private getRecordWritableEntries<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(record: Record<K, V>): Array<[K, V]> {
         // 'entry name' -> output position index
         const entryNamePos = new Map<string, int>()
         for (let idx = 0; idx < this.fieldsFilter.length; idx++) {
@@ -1565,7 +1566,7 @@ class JSONWriter {
         return writableEntries
     }
 
-    private writeRecordEntry<K extends Numeric | string, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
+    private writeRecordEntry<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(entryKey: K, entryVal: V, entryDumped: boolean): boolean {
         const entryName = (entryKey as object).toString()
         const replacedVal = this.useReplacer ? this.replacer!(entryName, entryVal) : entryVal
         return this.writeField(entryName, replacedVal, entryDumped)
@@ -3681,4 +3682,3 @@ function createStringFromJSONValue(json: JSONValue): String {
     }
     throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
 }
-
