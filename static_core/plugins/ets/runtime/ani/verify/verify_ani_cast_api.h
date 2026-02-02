@@ -157,6 +157,11 @@ struct TypeMapping<VField **> {
 };
 
 template <>
+struct TypeMapping<VStaticField *> {
+    using Type = ani_static_field;
+};
+
+template <>
 struct TypeMapping<VStaticField **> {
     using Type = ani_static_field *;
 };

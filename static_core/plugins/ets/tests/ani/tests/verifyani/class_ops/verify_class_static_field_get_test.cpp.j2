@@ -1,0 +1,141 @@
+/**
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License"
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "plugins/ets/tests/ani/ani_gtest/verify_ani_gtest.h"
+
+namespace ark::ets::ani::verify::testing {
+
+class ClassStaticFieldGet{{ Type }}Test : public VerifyAniTest {
+public:
+    void SetUp() override
+    {
+        VerifyAniTest::SetUp();
+        ASSERT_EQ(env_->FindClass("@functionModule.ani_verify_test_class_static_field_get_{{ type }}.TestParent", &class_), ANI_OK);
+    }
+
+protected:
+    ani_class class_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+// Class_GetStaticField_{{ Type }} tests
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_success)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
+
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, &result), ANI_OK);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_env)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
+
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(nullptr, class_, field, &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *", "called from incorrect the native scope"},
+        {"class", "ani_class"},
+        {"static_field", "ani_static_field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticField_{{ Type }}", testLines);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_class)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
+
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, nullptr, field, &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class", "wrong reference"},
+        {"static_field", "ani_static_field", "wrong class for static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticField_{{ Type }}", testLines);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_field)
+{
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, nullptr, &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"static_field", "ani_static_field", "wrong static field"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticField_{{ Type }}", testLines);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_null_result)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
+
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, nullptr), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"static_field", "ani_static_field"},
+        {"result", "ani_{{ type }} *", "wrong pointer for storing 'ani_{{ type }}'"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticField_{{ Type }}", testLines);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_wrong_type)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ wrong_field }}", &field), ANI_OK);
+
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, &result), ANI_ERROR);
+    // clang-format off
+    std::vector<TestLineInfo> testLines {
+        {"env", "ani_env *"},
+        {"class", "ani_class"},
+        {"static_field", "ani_static_field", "wrong return type"},
+        {"result", "ani_{{ type }} *"},
+    };
+    // clang-format on
+    ASSERT_ERROR_ANI_ARGS_MSG("Class_GetStaticField_{{ Type }}", testLines);
+}
+
+TEST_F(ClassStaticFieldGet{{ Type }}Test, GetStaticField_{{ Type }}_local_scope)
+{
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(class_, "{{ field }}", &field), ANI_OK);
+
+    const int nr3 = 3;
+    ASSERT_EQ(env_->CreateLocalScope(nr3), ANI_OK);
+    ani_{{ type }} result;
+    ASSERT_EQ(env_->c_api->Class_GetStaticField_{{ Type }}(env_, class_, field, &result), ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+}  // namespace ark::ets::ani::verify::testing
