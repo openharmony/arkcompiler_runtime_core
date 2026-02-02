@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -124,14 +124,14 @@ class Runner(ABC):
         # or the current folder (where this python file is located!) parent
         self.test_root = config.general.test_root
         if self.test_root is not None:
-            Log.summary(_LOGGER, f"TEST_ROOT set to '{self.test_root}'")
+            Log.short(_LOGGER, f"TEST_ROOT set to '{self.test_root}'")
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
         self.default_list_root = Path(config.general.static_core_root) / 'plugins' / 'ets' / 'tests' / 'test-lists'
         self.list_root = config.general.list_root
         if self.list_root is not None:
-            Log.summary(_LOGGER, f"LIST_ROOT set to '{self.list_root}'")
+            Log.short(_LOGGER, f"LIST_ROOT set to '{self.list_root}'")
 
         # runner init time
         self.start_time = datetime.now(pytz.UTC)
@@ -148,7 +148,7 @@ class Runner(ABC):
         # excluded test is a test what should not be loaded and should be tried to run
         # excluded_list: either absolute path or path relative from list_root to the file with the list of such tests
         self.excluded_lists: List[str] = []
-        self.excluded_tests: Set[str] = set([])
+        self.excluded_tests: Set[str] = set()
         # ignored test is a test what should be loaded and executed, but its failure should be ignored
         # ignored_list: either absolute path or path relative from list_root to the file with the list of such tests
         # aka: kfl = known failures list
@@ -207,11 +207,12 @@ class Runner(ABC):
         main_counter = Counter(original)
         dupes = [test for test, frequency in main_counter.items() if frequency > 1]
         if len(dupes) > 0:
-            Log.summary(_LOGGER, f"There are {len(dupes)} duplicates in {kind} lists.")
+            Log.short(_LOGGER, f"There are {len(dupes)} duplicates in {kind} lists. "
+                                 f"To see the full list run with the option `--verbose=all`")
             for test in dupes:
-                Log.short(_LOGGER, f"\t{test}")
+                Log.all(_LOGGER, f"\t{test}")
         elif len(original) > 0:
-            Log.summary(_LOGGER, f"No duplicates found in {kind} lists.")
+            Log.short(_LOGGER, f"No duplicates found in {kind} lists.")
 
     def recalculate_explicit_list(self, explicit_list: str) -> Optional[str]:
         return correct_path(self.list_root, explicit_list) \
@@ -249,7 +250,7 @@ class Runner(ABC):
         tests = []
         for list_name in lists:
             list_path = correct_path(self.list_root, list_name)
-            Log.summary(_LOGGER, f"Loading tests from the list '{list_path}'")
+            Log.short(_LOGGER, f"Loading tests from the list '{list_path}'")
             TestCase().assertTrue(self.test_root, "TEST_ROOT not set to correct value")
             tests.extend(load_list(self.test_root, list_path, directory))
         return tests
@@ -332,8 +333,8 @@ class Runner(ABC):
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]
         if not already_excluded:
             return
-        Log.summary(_LOGGER, f"Found {len(already_excluded)} tests present both in excluded and ignored test "
-                             f"lists.")
+        Log.short(_LOGGER, f"Found {len(already_excluded)} tests present both in excluded and ignored test "
+                             f"lists. To see the full list run with the option `--verbose=all`")
         for test in already_excluded:
             Log.all(_LOGGER, f"\t{test}")
             self.ignored_tests.remove(test)
@@ -341,9 +342,10 @@ class Runner(ABC):
     def _search_not_used_ignored(self, found_tests: List[str]) -> None:
         ignored_absent = [test for test in self.ignored_tests if test not in found_tests]
         if ignored_absent:
-            Log.summary(_LOGGER, f"Found {len(ignored_absent)} tests in ignored lists but absent on the file system:")
+            Log.short(_LOGGER, f"Found {len(ignored_absent)} tests in ignored lists but absent on "
+                                 f"the file system. To see the full list run with the option `--verbose=all`")
             for test in ignored_absent:
-                Log.summary(_LOGGER, f"\t{test}")
+                Log.all(_LOGGER, f"\t{test}")
         else:
             Log.short(_LOGGER, "All ignored tests are found on the file system")
 

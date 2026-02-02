@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,12 +57,12 @@ def main() -> None:
 
     config.workflow.check_binary_artifacts()
     config.workflow.check_types()
-    logger.summary(f"Loaded configuration: {config}")
+    logger.all(f"Loaded configuration: {config}")
 
     if config.general.processes == 1:
-        Log.default(logger, "Attention: tests are going to take only 1 process. The execution can be slow. "
-                            "You can set the option `--processes` to wished processes quantity "
-                            "or use special value `all` to use all available cores.")
+        logger.default("Attention: tests are going to take only 1 process. The execution can be slow. "
+                       "You can set the option `--processes` to wished processes quantity "
+                       "or use special value `all` to use all available cores.")
     failed_tests = main_cycle(config, logger)
     sys.exit(0 if failed_tests == 0 else 1)
 
@@ -96,21 +96,21 @@ def main_cycle(config: Config, logger: Log) -> int:
             delta = round((current - before).total_seconds(), 1)
 
     finish = datetime.now(pytz.UTC)
-    Log.default(logger, f"Runner has been working for {round((finish - start).total_seconds())} sec")
+    logger.default(f"Runner has been working for {round((finish - start).total_seconds())} sec")
 
     return failed_tests
 
 
 def launch_runners(runner: Runner, logger: Log, config: Config, repeat: int, repeat_str: str) -> int:
     failed_tests = 0
-    Log.all(logger, f"{repeat_str}: Runner {runner.name} started")
+    logger.all(f"{repeat_str}: Runner {runner.name} started")
     runner.before_suite()
     runner.run_threads(repeat)
     runner.after_suite()
-    Log.all(logger, f"{repeat_str}: Runner {runner.name} finished")
-    Log.all(logger, pretty_divider())
+    logger.all(f"{repeat_str}: Runner {runner.name} finished")
+    logger.all(pretty_divider())
     failed_tests += runner.summarize()
-    Log.default(logger, f"{repeat_str}: Runner {runner.name}: {failed_tests} failed tests")
+    logger.default(f"{repeat_str}: Runner {runner.name}: {failed_tests} failed tests")
     if config.general.coverage.use_llvm_cov or config.general.coverage.use_lcov:
         runner.create_coverage_html()
     return failed_tests

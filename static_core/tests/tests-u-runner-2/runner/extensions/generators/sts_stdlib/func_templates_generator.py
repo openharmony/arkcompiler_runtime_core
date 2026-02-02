@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -114,5 +114,5 @@ class FuncTestsCodeGenerator(IGenerator):
     def _split_tests(self, content: str) -> list[str]:
         content = content.rstrip(self._TEST_SEPARATOR)
         content_list = content.split("---")
-        _LOGGER.summary(f"size : {len(content_list)}")
+        _LOGGER.all(f"size : {len(content_list)}")
         return content_list

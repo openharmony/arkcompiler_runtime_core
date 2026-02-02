@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,12 +17,11 @@
 
 import logging
 from pathlib import Path
-from typing import NoReturn, Type, Optional
+from typing import NoReturn, Optional, Type
 
 from runner.enum_types.verbose_format import VerboseKind
 from runner.path_utils import chown2user
 
-SUMMARY_LOG_LEVEL = 21
 NONE_LOG_LEVEL = 22
 
 
@@ -79,16 +78,9 @@ class Log:
     @staticmethod
     def short(logger: logging.Logger, message: str) -> None:
         """
-        Logs on the level verbose=SHORT
+        Logs on the level verbose=SHORT (sum)
         """
         logger.info(message)
-
-    @staticmethod
-    def summary(logger: logging.Logger, message: str) -> None:
-        """
-        Logs on the level verbose=SUMMARY (sum)
-        """
-        logger.log(SUMMARY_LOG_LEVEL, message)
 
     @staticmethod
     def default(logger: logging.Logger, message: str) -> None:

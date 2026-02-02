@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -118,14 +118,14 @@ class StandardView:
             else:
                 tests_by_time[-1].append(f"{test_result.test_id} # {round(test_result.time, 2)} sec")
 
-        _LOGGER.summary("Test execution time")
+        _LOGGER.short("Test execution time")
         time_report = ""
         for i, time_edge in enumerate(time_edges):
-            _LOGGER.summary(f"Less {time_edge} sec: {len(tests_by_time[i])}")
+            _LOGGER.short(f"Less {time_edge} sec: {len(tests_by_time[i])}")
             time_report += f"\nLess {time_edge} sec:\n"
             for tests_for_time in tests_by_time[i]:
                 time_report += f"{tests_for_time}\n"
-        _LOGGER.summary(f"More {time_edges[-1]} sec: {len(tests_by_time[-1])}")
+        _LOGGER.short(f"More {time_edges[-1]} sec: {len(tests_by_time[-1])}")
         time_report += f"\n{time_edges[-1]} sec or more:\n"
         for tests_for_time in tests_by_time[-1]:
             time_report += f"{tests_for_time}\n"

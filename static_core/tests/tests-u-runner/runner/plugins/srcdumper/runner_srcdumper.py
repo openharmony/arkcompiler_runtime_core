@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,15 +46,15 @@ class RunnerSRCDumper(RunnerJS):
         self.default_list_root = es2panda_test / 'test-lists'
 
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
-        Log.summary(_LOGGER, f'LIST_ROOT set to {self.list_root}')
+        Log.short(_LOGGER, f'LIST_ROOT set to {self.list_root}')
 
         self.test_root = es2panda_test if self.test_root is None else self.test_root
-        Log.summary(_LOGGER, f'TEST_ROOT set to {self.test_root}')
+        Log.short(_LOGGER, f'TEST_ROOT set to {self.test_root}')
 
         # Set up artifacts directory for dumped source files
         self.artifacts_root = self.get_work_dir(config) / 'dumped_src'
         self.artifacts_root.mkdir(parents=True, exist_ok=True)
-        Log.summary(_LOGGER, f'Artifacts directory set to {self.artifacts_root}')
+        Log.short(_LOGGER, f'Artifacts directory set to {self.artifacts_root}')
 
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
@@ -98,7 +98,7 @@ class RunnerSRCDumper(RunnerJS):
         for test_dir in test_dirs:
             source_dir = Path(self.test_root) / test_dir.directory
             if not source_dir.exists():
-                Log.summary(_LOGGER, f'Source directory {source_dir} does not exist, skipping')
+                Log.short(_LOGGER, f'Source directory {source_dir} does not exist, skipping')
                 continue
 
             target_dir = self.artifacts_root / test_dir.directory
@@ -118,4 +118,4 @@ class RunnerSRCDumper(RunnerJS):
                 target_file = target_dir / rel_path
                 target_file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source_file, target_file)
-                Log.summary(_LOGGER, f'Copied {source_file} to {target_file}')
+                Log.short(_LOGGER, f'Copied {source_file} to {target_file}')

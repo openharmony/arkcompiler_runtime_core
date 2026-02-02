@@ -440,8 +440,7 @@ class TestStandardFlow(ITestFlow, Test):
 
     def _log_invalid_tags_if_any(self) -> None:
         if len(self.invalid_tags) > 0:
-            Log.default(
-                _LOGGER,
+            _LOGGER.default(
                 f"\n{utils.FontColor.RED_BOLD.value}Invalid tags:{utils.FontColor.RESET.value} `"
                 f"{', '.join(self.invalid_tags)}` in test file: {self.test_id}")
 

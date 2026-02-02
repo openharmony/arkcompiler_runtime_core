@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -65,8 +65,7 @@ class CPUMask:
             for c in out if str(self.cpu_root) in c])
         _LOGGER.all(f"all_cores={all_cores}")
         if len(all_cores) > len(self.cpumask):
-            Log.short(
-                _LOGGER,
+            _LOGGER.all(
                 f'Wrong cpumask length for '
                 f'{len(all_cores)} cores: {self.cpumask}')
             self.cpumask += [False] * (len(all_cores) - len(self.cpumask))

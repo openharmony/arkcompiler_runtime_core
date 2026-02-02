@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -86,8 +86,8 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
             self.config.general.generate_only or self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root
 
-        Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
-        Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.collect_ignored_excluded_tests()
 
@@ -121,8 +121,8 @@ class RunnerDeclgenETS2TS(RunnerFileBased):
         return test
 
     def run_command(self, command: list, cwd: str, description: str, timeout: int = 60 * 10) -> None:
-        Log.summary(_LOGGER, f"Running command: {' '.join(command)}")
-        Log.summary(_LOGGER, description)
+        Log.short(_LOGGER, f"Running command: {' '.join(command)}")
+        Log.short(_LOGGER, description)
         with subprocess.Popen(
                 command,
                 cwd=cwd,
