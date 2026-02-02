@@ -13,10 +13,18 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the Class for ArkTS
+ * @kit ArkTS
+ */
+
 package std.core;
 
 /**
- * Unstable API, represents internal runtime type descriptor
+ * Class used to describe runtime types
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class Class {
     private name: string | undefined
@@ -27,52 +35,112 @@ export final class Class {
     private methodsNum: int
 
     /**
-     * Stores Class of boolean primitive type
+     * Store Class of boolean primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_BOOLEAN: Class = Class.of(null)
 
     /**
-     * Stores Class of byte primitive type
+     * Store Class of byte primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_BYTE: Class = Class.of(null)
 
     /**
-     * Stores Class of char primitive type
+     * Store Class of byte primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_CHAR: Class = Class.of(null)
 
     /**
-     * Stores Class of short primitive type
+     * Store Class of short primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_SHORT: Class = Class.of(null)
 
     /**
-     * Stores Class of int primitive type
+     * Store Class of int primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_INT: Class = Class.of(null)
 
     /**
-     * Stores Class of long primitive type
+     * Store Class of long primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_LONG: Class = Class.of(null)
 
     /**
-     * Stores Class of float primitive type
+     * Store Class of float primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_FLOAT: Class = Class.of(null)
 
     /**
-     * Stores Class of double primitive type
+     * Store Class of double primitive type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_DOUBLE: Class = Class.of(null)
 
     /**
-     * Stores Class of number primitive type (same as double)
+     * Store Class of number primitive type (same as double)
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_NUMBER: Class = Class.of(null)
 
     /**
-     * Stores Class of void type
+     * Store Class of void type
+     * @type { Class }
+     * @readonly
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static readonly PRIMITIVE_VOID: Class = Class.of(null)
 
@@ -96,9 +164,12 @@ export final class Class {
     private native getLinkerInternal(): RuntimeLinker | undefined
 
     /**
-     * Gets the name of a class in assembly
+     * Get the name of a class in assembly
      *
-     * @returns The name of a Class in assembly
+     * @returns { string } return class name
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getName(): string {
         if (this.name === undefined) {
@@ -108,16 +179,36 @@ export final class Class {
     }
 
     /**
-     * Gets the super class of a class
+     * Get the super class of a class
      *
-     * @returns The superclass of a class, or `undefined` if this is either Object or interface class
+     * @returns { Class | undefined } return the super class
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getSuper(): Class | undefined {
         return this.superClass
     }
 
+    /**
+     * Check if this class is a subtype of another class.
+     *
+     * @param { Class } other The class to check against.
+     * @returns { boolean } Returns true if this class is a subtype of the other class, false otherwise.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native final isSubtypeOf(other: Class): boolean
 
+    /**
+     * Get the runtime linker associated with this class.
+     *
+     * @returns { RuntimeLinker } the runtime linker for this class
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public getLinker(): RuntimeLinker {
         if (this.linker == undefined) {
             const linker = this.getLinkerInternal()
@@ -126,23 +217,55 @@ export final class Class {
         return this.linker!
     }
 
+    /** 
+     * Check if this class represents a namespace.
+     * 
+     * @returns { boolean } true if this class is a namespace, false otherwise.
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */
     public native isNamespace(): boolean;
 
     public getNamespace(): Class | undefined {
         throw new Error("not implemented")
     }
-
+    /** 
+     * Get the component type of this class if it is a fixed array.
+     * 
+     * @returns { Class | undefined } the component type of the fixed array, or undefined if this class is not a fixed array.
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */ 
     public native getFixedArrayComponentType(): Class | undefined
 
+    /** 
+     * Get the interfaces implemented by this class.
+     * 
+     * @returns { FixedArray<Class> } a fixed array of interfaces implemented by the class.
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */ 
     public native getInterfaces(): FixedArray<Class>
 
-    /**
-     * Invoke class initializer once if class is not initialized
+    /** 
+     * Invoke class initializer once if class is not initialized.
+     * 
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public native initialize(): void
 
     private static native ofObject(obj: Object): Class
 
+    /** 
+     * Get the class of an object of any type.
+     * 
+     * @param { Any } obj The object to get the class from.
+     * @returns { Class | undefined } the class of the object, or undefined if the object is not a class instance.
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */ 
     public static ofAny(obj: Any): Class | undefined {
         if (obj instanceof Object) {
             return Class.of(obj as Object)
@@ -153,6 +276,15 @@ export final class Class {
         return undefined
     }
 
+    /** 
+     * Get the class of an object.
+     * 
+     * @param { Object | null } obj The object to get the class from.
+     * @returns { Class } the class of the object.
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */ 
     public static of(obj: Object | null): Class {
         if (obj instanceof Object) {
             return Class.ofObject(obj)
@@ -164,57 +296,99 @@ export final class Class {
         //should never be executed
         throw new AssertionError("Class.from call will be casted by frontend")
     }
-
-    /**
-     * Get current class
-     */
+    /** 
+     * Get current class.
+     * 
+     * @returns { Class } the current class.
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
+     */ 
     public static native current(): Class
 
-    /**
-     * Get class of caller
+    /** 
+     * Get class of caller.
+     * 
+     * @returns { Class | undefined } the class of the caller, or undefined if there is no caller managed frame.
+     * @static 
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public static native ofCaller(): Class | undefined
-
+    /**
+     * Create a new instance of this class and invokes its public parameterless constructor.
+     *
+     * @returns { Object } a new instance of this class.
+     * @throws { Error } if the class is not instantiable or does not have a public default constructor.
+     * @throws { Error } if class was not previously initialized and initialization fails.
+     * @throws { Error } if constructor throws.
+     * @throws { OutOfMemoryError } if there is not enough memory to allocate the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native createInstance(): Object
 
-    /**
-     * Get internal string descriptor
-     */
     public native getDescriptor(): string
-
+    /**
+     * Check if this class is an enum.
+     *
+     * @returns { boolean } true if this class is an enum, false otherwise.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native isEnum(): boolean
-
+    /**
+     * Check if this class is an interface.
+     *
+     * @returns { boolean } true if this class is an interface, false otherwise.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native isInterface(): boolean
-
+    /**
+     * Check if this class is a fixed array.
+     *
+     * @returns { boolean } true if this class is a fixed array, false otherwise.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native isFixedArray(): boolean
 
     /**
-     * Check if class is union
+     * Check if this class is a union type.
      *
-     * @returns true if class is union
+     * @returns { boolean } true if this class is a union type, false otherwise.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isUnion(): boolean
 
-    /**
-     * Gets public instance methods (including default methods from implemented interfaces) declared in the class
-     *
-     * @returns Immutable array of instance {@link reflect.InstanceMethod} objects
+    /** 
+     * Get instance methods (including default methods from implemented interfaces) declared in the class.
+     * 
+     * @returns { FixedArray<reflect.InstanceMethod> } a fixed array of instance methods.
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public getInstanceMethods(): FixedArray<reflect.InstanceMethod> {
         return this.getInstanceMethodsInternal(true)
     }
 
-    /**
-     * Looks up a public instance method (including default methods from implemented interfaces)
-     * among the methods declared in the class
-     *
-     * @param name - The method name to search for
-     *
-     * @param signature - Array of parameter classes defining the method signature.
-     *
-     * @throws {Error} When signature is omitted and multiple overloads exist
-     *
-     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
+    /** 
+     * Look up a instance method (including default methods from implemented interfaces) among the methods 
+     * declared in the class.
+     * 
+     * @param { string } name The method name to search for.
+     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature. 
+     * @returns { reflect.InstanceMethod | undefined } the found instance method, or undefined if not found.
+     * @throws { Error } When signature is omitted and multiple overloads exist
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public getInstanceMethod(name: string, signature?: FixedArray<Class>): reflect.InstanceMethod | undefined {
         let methods = this.getInstanceMethods()
@@ -227,10 +401,12 @@ export final class Class {
         return Class.findInstanceMethodBySignatureUnchecked(methods, name, signature)
     }
 
-    /**
-     * Gets public static methods declared in the class
-     *
-     * @returns Immutable array of static {@link reflect.StaticMethod} objects
+    /** 
+     * Get static methods declared in the class.
+     * 
+     * @returns { FixedArray<reflect.StaticMethod> } a fixed array of static methods.
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public getStaticMethods(): FixedArray<reflect.StaticMethod> {
         if (this.isInterface()) {
@@ -239,16 +415,15 @@ export final class Class {
         return this.getStaticMethodsInternal(true)
     }
 
-    /**
-     * Looks up a public static method among the methods declared in the class
-     *
-     * @param name - The method name to search for
-     *
-     * @param signature - Array of parameter classes defining the method signature.
-     *
+    /** 
+     * Look up a static method among the methods declared in the class.
+     * 
+     * @param { string } name The method name to search for.
+     * @param { FixedArray<Class> | undefined } [ signature ] Array of parameter classes defining the method signature. 
+     * @returns { reflect.StaticMethod | undefined } the found static method, or undefined if not found.
      * @throws {Error} When signature is omitted and multiple overloads exist
-     *
-     * @returns The {@link reflect.StaticMethod} if found, `undefined` otherwise
+     * @syscap SystemCapability.Utils.Lang 
+     * @since 24 
      */
     public getStaticMethod(name: string, signature?: FixedArray<Class>): reflect.StaticMethod | undefined {
         let methods = this.getStaticMethods()
@@ -262,9 +437,12 @@ export final class Class {
     }
 
     /**
-     * Gets public instance fields declared in the class
+     * Get instance fields declared in the class.
      *
-     * @returns Immutable array of instance {@link reflect.InstanceField} objects
+     * @returns { FixedArray<reflect.InstanceField> } a fixed array of instance fields.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInstanceFields(): FixedArray<reflect.InstanceField> {
         if (this.isInterface()) {
@@ -274,20 +452,25 @@ export final class Class {
     }
 
     /**
-     * Looks up a public instance field by name among the fields declared in this class
+     * Look up a instance field by name among the fields declared in this class.
      *
-     * @param name - The field name to search for
-     *
-     * @returns The {@link reflect.InstanceField} if found, `undefined` otherwise
+     * @param { string } name The field name to search for.
+     * @returns { reflect.InstanceField | undefined } the found instance field, or undefined if not found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInstanceField(name: string): reflect.InstanceField | undefined {
         return this.getInstanceFieldByNameInternal(name, true)
     }
 
     /**
-     * Gets public static fields declared in this class
+     * Get static fields declared in this class.
      *
-     * @returns Immutable array of static {@link reflect.StaticField} objects
+     * @returns { FixedArray<reflect.StaticField> } a fixed array of static fields.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getStaticFields(): FixedArray<reflect.StaticField> {
         if (this.isInterface()) {
@@ -297,29 +480,38 @@ export final class Class {
     }
 
     /**
-     * Looks up a public static field by name among the fields declared in this class
+     * Look up a static field by name among the fields declared in this class.
      *
-     * @param name - The field name to search for
-     *
-     * @returns The {@link reflect.StaticField} if found, `undefined` otherwise
+     * @param { string } name The field name to search for.
+     * @returns { reflect.StaticField | undefined } the found static field, or undefined if not found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getStaticField(name: string): reflect.StaticField | undefined {
         return this.getStaticFieldByNameInternal(name, true)
     }
 
     /**
-     * Gets all public constructors of a class
+     * Get all constructors of a class.
      *
-     * @returns Immutable array of constructor {@link reflect.Constructor} objects
+     * @returns { FixedArray<reflect.Constructor> } a fixed array of constructors.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getConstructors(): FixedArray<reflect.Constructor> {
         return this.getConstructorsInternal(true)
     }
 
     /**
-     * Gets all constituent types of a union class
+     * Get all constituent types of a union class.
      *
-     * @returns Immutable array of Class objects or undefined if class is not union
+     * @returns { FixedArray<Class> | undefined } a fixed array of constituent types, 
+     * or undefined if this is not a union class.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUnionConstituentTypes(): FixedArray<Class> | undefined {
         if (!this.isUnion()) {
@@ -330,18 +522,31 @@ export final class Class {
 
     /**
      * Check the class is final
+     *
+     * @returns { boolean } true if the class is fianl
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isFinal(): boolean
 
     /**
      * Check the class is abstract
+     *
+     * @returns { boolean } true if the class is abstract
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isAbstract(): boolean
 
     /**
      * Check if class is primitive type
      *
-     * @returns true if class is primitive
+     * @returns { boolean } true if the class corresponds to a primitive type
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isPrimitive(): boolean
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,9 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @file Defines the DataView for ArkTS
+ * @kit ArkTS
+ */
 package std.core;
 
+/**
+ * DataView
+ * 
+ * @implements ArrayBufferView
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export final class DataView implements ArrayBufferView {
     /** Underlying buffer */
     private readonly buffer_: ArrayBuffer
@@ -23,14 +34,38 @@ export final class DataView implements ArrayBufferView {
     /** Offset from start of {@link buffer} */
     private readonly byteOffset_: int
 
+    /**
+     * buffer
+     * 
+     * @returns { ArrayBuffer } get the dateview's arraybuffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public get buffer(): ArrayBuffer {
         return this.buffer_
     }
 
+    /**
+     * byteLength
+     * 
+     * @returns { int } return the dateview's length
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public get byteLength(): int {
         return this.byteLength_
     }
 
+    /**
+     * byteOffset
+     * 
+     * @returns { int } return the dateview's byteoffset
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public get byteOffset(): int {
         return this.byteOffset_
     }
@@ -39,10 +74,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Constructs view
-     * @param buffer underlying buffer
-     * @param byteOffset offset to start from
-     * @param byteLength lenth of bytes to take
-     * @throws RangeError if provided indicies are invalid
+     *
+     * @param { ArrayBuffer } buffer underlying buffer
+     * @param { int } [ byteOffset ] offset to start from
+     * @param { int } [ byteLength ] lenth of bytes to take
+     * @throws { RangeError } RangeError if provided indicies are invalid
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(buffer: ArrayBuffer, byteOffset?: int, byteLength?: int) {
         this.buffer_ = buffer
@@ -65,8 +104,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Int8 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInt8(byteOffset: int): int {
         return this.getInt8Big(byteOffset)
@@ -74,7 +118,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { int } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt8(byteOffset: int, value: int): void {
         this.setInt8Big(byteOffset, value)
@@ -82,7 +132,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { number } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt8(byteOffset: int, value: number): void {
         this.setInt8Big(byteOffset, value)
@@ -129,8 +185,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Uint8 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUint8(byteOffset: int): int {
         return this.getUint8Big(byteOffset)
@@ -138,7 +199,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { int } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint8(byteOffset: int, value: int): void {
         this.setUint8Big(byteOffset, value)
@@ -146,7 +213,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { number } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint8(byteOffset: int, value: number): void {
         this.setUint8Big(byteOffset, value)
@@ -192,8 +265,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Int16 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInt16(byteOffset: int): int {
         return this.getInt16Big(byteOffset)
@@ -201,7 +279,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { int } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt16(byteOffset: int, value: int): void {
         this.setInt16Big(byteOffset, value)
@@ -209,8 +293,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { int } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt16(byteOffset: int, value: int, littleEndian: boolean): void {
         if (littleEndian) {
@@ -222,8 +311,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt16(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -235,9 +330,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { int }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInt16(byteOffset: int, littleEndian?: boolean): int {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -325,8 +425,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Uint16 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUint16(byteOffset: int): int {
         return this.getUint16Big(byteOffset)
@@ -334,7 +439,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { int } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint16(byteOffset: int, value: int): void {
         this.setUint16Big(byteOffset, value)
@@ -342,8 +453,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { int } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint16(byteOffset: int, value: int, littleEndian: boolean): void {
         if (littleEndian) {
@@ -355,8 +471,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint16(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -368,9 +490,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { int }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUint16(byteOffset: int, littleEndian?: boolean): int {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -456,8 +583,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Int32 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInt32(byteOffset: int): int {
         return this.getInt32Big(byteOffset)
@@ -465,7 +597,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { int } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt32(byteOffset: int, value: int): void {
         this.setInt32Big(byteOffset, value)
@@ -473,8 +611,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { int } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt32(byteOffset: int, value: int, littleEndian: boolean): void {
         if (littleEndian) {
@@ -486,8 +629,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setInt32(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -499,9 +648,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { int }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getInt32(byteOffset: int, littleEndian?: boolean): int {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -589,8 +743,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Uint32 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUint32(byteOffset: int): number {
         return this.getUint32Big(byteOffset)
@@ -598,7 +757,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { long } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint32(byteOffset: int, value: long): void {
         this.setUint32Big(byteOffset, value)
@@ -606,8 +771,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { long } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint32(byteOffset: int, value: long, littleEndian: boolean): void {
         if (littleEndian) {
@@ -619,8 +789,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUint32(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -632,9 +808,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { number }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUint32(byteOffset: int, littleEndian?: boolean): number {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -720,8 +901,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Float32 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getFloat32(byteOffset: int): number {
         return this.getFloat32Big(byteOffset)
@@ -729,7 +915,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { float } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFloat32(byteOffset: int, value: float): void {
         this.setFloat32Big(byteOffset, value)
@@ -737,8 +929,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { float } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFloat32(byteOffset: int, value: float, littleEndian: boolean): void {
         if (littleEndian) {
@@ -750,8 +947,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFloat32(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -763,9 +966,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { number }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getFloat32(byteOffset: int, littleEndian?: boolean): number {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -845,8 +1053,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's BigInt64 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBigInt64(byteOffset: int): bigint {
         return this.getBigInt64Big(byteOffset)
@@ -854,7 +1067,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { long } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigInt64(byteOffset: int, value: long): void {
         this.setBigInt64Big(byteOffset, value)
@@ -862,8 +1081,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { long } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigInt64(byteOffset: int, value: long, littleEndian: boolean): void {
         if (littleEndian) {
@@ -875,8 +1099,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { bigint } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigInt64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -888,9 +1118,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { bigint }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBigInt64(byteOffset: int, littleEndian?: boolean): bigint {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -968,8 +1203,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's BigUint64 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBigUint64(byteOffset: int): bigint {
         return this.getBigUint64Big(byteOffset)
@@ -977,7 +1217,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { long } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigUint64(byteOffset: int, value: long): void {
         this.setBigUint64Big(byteOffset, value)
@@ -985,8 +1231,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { long } value 
+     * @param { boolean } littleEndian read as little or big endian
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigUint64(byteOffset: int, value: long, littleEndian: boolean): void {
         if (littleEndian) {
@@ -998,8 +1249,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { bigint } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setBigUint64(byteOffset: int, value: bigint, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -1011,9 +1268,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { bigint }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBigUint64(byteOffset: int, littleEndian?: boolean): bigint {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -1091,8 +1353,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @returns read value (big endian)
+     *
+     * @param { int } byteOffset zero index to read
+     * @returns { int } return byteOffset's Float64 value
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getFloat64(byteOffset: int): number {
         return this.getFloat64Big(byteOffset)
@@ -1100,7 +1367,13 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write (big endian)
+     *
+     * @param { int } byteOffset zero index to write (big endian)
+     * @param { number } value 
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFloat64(byteOffset: int, value: number): void {
         this.setFloat64Big(byteOffset, value)
@@ -1108,8 +1381,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Sets bytes as they represent given type
-     * @param byteOffset zero index to write
-     * @param littleEndian read as little or big endian
+     *
+     * @param { int } byteOffset zero index to write
+     * @param { number } value 
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFloat64(byteOffset: int, value: number, littleEndian?: boolean): void {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {
@@ -1121,9 +1400,14 @@ export final class DataView implements ArrayBufferView {
 
     /**
      * Read bytes as they represent given type
-     * @param byteOffset zero index to read
-     * @param littleEndian read as little or big endian
-     * @returns read value
+     *
+     * @param { int } byteOffset zero index to read
+     * @param { boolean } [ littleEndian ] read as little or big endian
+     * @returns { number }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getFloat64(byteOffset: int, littleEndian?: boolean): number {
         if (littleEndian !== undefined && littleEndian.valueOf() == true) {

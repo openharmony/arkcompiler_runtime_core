@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Exceptions for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
-// TODO(orlovskiymaxim): what cause?
 /**
- * Represents error that is thrown in case of ?
+ * Represents an error thrown when data is expected but not provided.
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class NoDataError extends Error {
     // NOTE(kparshukov): #28318 move to std/core/Errors.ets
@@ -26,11 +34,24 @@ export final class NoDataError extends Error {
     }
 }
 
+
 /**
  * Represents exception that is thrown when provided argument have value outside the allowable range
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class ArgumentOutOfRangeError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    /**
+     * Constructs an ArgumentOutOfRangeError instance.
+     * @param { String } [ message ] The error message.
+     * @param { ErrorOptions } [ options ] Error options, usually containing the error stack information.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("ArgumentOutOfRangeError", message, options)
     }
@@ -38,9 +59,22 @@ export final class ArgumentOutOfRangeError extends Error {
 
 /**
  * Represents error that is thrown when a method has been invoked at an illegal or inappropriate time.
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export class IllegalStateError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    /**
+     * Constructs an IllegalStateError instance.
+     * @param { String } [ message ] The error message.
+     * @param { ErrorOptions } [ options ] Error options, 
+     * usually containing the error stack information.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalStateError", message, options)
     }
@@ -48,30 +82,68 @@ export class IllegalStateError extends Error {
 
 /**
  * Represents error that is thrown when the requested operation is not supported.
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class UnsupportedOperationError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    /**
+     * Constructs an UnsupportedOperationError instance.
+     * @param { String } [ message ] The error message.
+     * @param { ErrorOptions } [ options ] Error options, 
+     * usually containing the error stack information.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("UnsupportedOperationError", message, options)
     }
 }
 
 /**
- * @class Represents error that is thrown when
- * a method has been passed an illegal argument
+ * Represents an error thrown when a method is passed an illegal argument.
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class IllegalArgumentError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    /**
+     * Constructs an IllegalArgumentError instance.
+     * @param { String } [ message ] The error message.
+     * @param { ErrorOptions } [ options ] Error options, 
+     * usually containing the error stack information.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalArgumentError", message, options)
     }
 }
 
 /**
- * @class Represents runtime error 
+ * Represents an error that occurs during runtime.
+ * 
+ * @extends Error
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class RuntimeError extends Error {
-    // NOTE(kparshukov): #28318 move to std/core/Errors.ets
+    /**
+     * Constructs a RuntimeError instance.
+     * @param { String } [ message ] The error message.
+     * @param { ErrorOptions } [ options ] Error options, 
+     * usually containing the error stack information.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor(message?: String, options?: ErrorOptions) {
         super("RuntimeError", message, options)
     }

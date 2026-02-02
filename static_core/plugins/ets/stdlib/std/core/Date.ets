@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @file Defines the Date for ArkTS
+ * @kit ArkTS
+ */
 package std.core;
 
 // TODO To offer protection against timing attacks and fingerprinting, the precision of `Date.getTime()`,
@@ -422,6 +425,10 @@ function ecmaInLeapYear(year: int): byte {
 
 /**
  * Date JS API-compatible class
+ * 
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export class Date {
     private static readonly DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -528,25 +535,24 @@ export class Date {
     }
 
     /**
-     * Default constructor.
+     * Default constructor.Initializes Date instance with current time.
      *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initializes Date instance with current time.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor() {
         this.ms = Date.now();
     }
 
     /**
-     * `Date` constructor.
+     * `Date` constructor. NOTE: Dates before `1921-01-01T00:00:00 GMT` 
+     * can be represented as UTC milliseconds in different ways then TS do.
      *
-     * @param value
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initializes `Date` instance with `long` or `string` or another `Date` instance.
-     * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
+     * @param { long | string | Date } value 
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor(value: long | string | Date) {
         if (value instanceof Date) {
@@ -559,26 +565,19 @@ export class Date {
     }
 
     /**
-     * `Date` constructor.
+     * `Date` constructor. NOTE: Dates before `1921-01-01T00:00:00 GMT`
+     * can be represented as UTC milliseconds in different ways then TS do.
      *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @param seconds
-     *
-     * @param ms
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year, month, day, hours, minutes, seconds and milliseconds given.
-     * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
+     * @param { int } year
+     * @param { int } monthIndex
+     * @param { int } [ day ]
+     * @param { int } [ hours ]
+     * @param { int } [ minutes ]
+     * @param { int } [ seconds ]
+     * @param { int } [ ms ]
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor(year: int, monthIndex: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int) {
         this.ms = ecmaMakeDate(
@@ -591,7 +590,11 @@ export class Date {
     /**
      * Creates a new instance of a Date as a string
      *
-     * @returns A new Date instance as a string
+     * @returns { string } A new Date instance as a string
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(): string {
         return new Date().toString();
@@ -608,11 +611,16 @@ export class Date {
     }
 
     /**
-     * The `isDateValid()` method checks if constructed date is maximum of ±100,000,000
-     * (one hundred million) days relative to January 1, 1970 UTC
-     * (that is, April 20, 271821 BCE ~ September 13, 275760 CE) can be represented
-     * by the standard Date object (equivalent to ±8,640,000,000,000,000 milliseconds).
+     * The `isDateValid()` method checks if constructed date is maximum of 
+     * ±100,000,000 (one hundred million) days relative to January 1,
+     * 1970 UTC (that is, April 20, 271821 BCE ~ September 13, 275760 CE) 
+     * can be represented by the standard Date object 
+     * (equivalent to ±8,640,000,000,000,000 milliseconds).
      *
+     * @returns { boolean } return current date is valid date
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public isDateValid(): boolean {
         return this.isDateValid(this.ms);
@@ -621,9 +629,10 @@ export class Date {
     /**
      * The `valueOf()` method returns the primitive value of a `Date` object.
      *
-     * @see ECMA-262, 21.4.4.44
-     *
-     * @returns The number of milliseconds between 1 January 1970 00:00:00 UTC and the given date.
+     * @returns { long } return the primitive value of a `Date` object
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public valueOf(): long {
         return this.ms;
@@ -631,33 +640,48 @@ export class Date {
 
     /**
      * The `now()` static method returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     * which is defined as the midnight at the beginning of 
+     * January 1, 1970, UTC. which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @see ECMA-262, 21.4.3.1
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     * @returns { long }
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native now(): long;
 
     /**
      * Gets local time offset.
      *
-     * @returns local time offset.
+     * @param { long } ms 
+     * @returns { long }
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native getLocalTimezoneOffset(ms: long): long;
 
     /**
      * Gets time zone name.
      *
-     * @returns time zone name.
+     * @param { long } ms 
+     * @returns { String }
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native getTimezoneName(ms: long): String;
 
     /**
      * Gets a string with a language-sensitive representation of the time portion of the date.
      *
-     * @returns a language-sensitive representation of the time portion of the date.
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleTimeString(): string {
         return this.toLocaleTimeString(undefined)
@@ -708,11 +732,17 @@ export class Date {
     }
 
     /**
-     * Gets a string with a language-sensitive representation of the time portion of the date with respect to locale.
+     * Gets a string with a language-sensitive representation of
+     * the time portion of the date with respect to locale.
      *
-     * @param locale
-     *
-     * @returns a language-sensitive representation of the time portion of the date with respect to locale.
+     * @param { Intl.LocalesArgument } [ locales ]
+     * @param { Intl.DateTimeFormatOptions } [ options ]
+     * @returns { string } Gets a string with a language-sensitive representation of
+     *     the time portion of the date
+     * @throws { TypeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleTimeString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.dateStyle) {
@@ -726,9 +756,12 @@ export class Date {
     /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
      *
-     * @param locale
-     *
-     * @returns a language-sensitive representation of this date.
+     * @param { Intl.LocalesArgument } [ locales ] 
+     * @param { Intl.DateTimeFormatOptions } [ options ] 
+     * @returns { string } Gets a string with a language-sensitive representation of this date
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
@@ -738,18 +771,26 @@ export class Date {
     /**
      * Gets a string with a language-sensitive representation of this date.
      *
-     * @returns a language-sensitive representation of this date.
+     * @returns { string } Gets a string with a language-sensitive representation of this date
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleString(): string {
         return this.toLocaleString(undefined)
     }
 
     /**
-     * Gets a string with a language-sensitive representation
+     * Gets a string with a language-sensitive representation of 
+     * the date portion of the specified date
+     * in the user agent's timezone.
      * of the date portion of the specified date in the user agent's timezone.
      *
-     * @returns a string with a language-sensitive representation
-     * of the date portion of the specified date in the user agent's timezone.
+     * @returns { string } Gets a string with a language-sensitive representation of the date
+     * @throws { TypeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleDateString(): string {
         return this.toLocaleDateString(undefined)
@@ -771,11 +812,18 @@ export class Date {
     }
 
     /**
-     * Returns a string with a language-sensitive representation
+     * Returns a string with a language-sensitive representation of 
+     * the date portion of the specified date
+     * in the user agent's timezone.
      * of the date portion of the specified date in the user agent's timezone.
      *
-     * @returns a string with a language-sensitive representation
-     * of the date portion of the specified date in the user agent's timezone.
+     * @param { Intl.LocalesArgument } [ locales ] 
+     * @param { Intl.DateTimeFormatOptions } [ options ] 
+     * @returns { string }
+     * @throws { TypeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toLocaleDateString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
         if (options && options.timeStyle) {
@@ -790,9 +838,10 @@ export class Date {
     /**
      * The `getDate()` method returns the day of the month for the specified date according to local time.
      *
-     * @see ECMA-262, 21.4.4.2
-     *
-     * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
+     * @returns { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getDate(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -805,7 +854,11 @@ export class Date {
     /**
      * Changes the day of the month of a given Date instance, based on local time.
      *
-     * @param value new day.
+     * @param { int } value new day.
+     * @returns { long }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setDate(value: int): long {
         let day = this.getDate();
@@ -817,7 +870,10 @@ export class Date {
     /**
      * Returns the day of the month (from 1 to 31) in the specified date according to universal time.
      *
-     * @returns An integer number, between 1 and 31, representing the day of the month for the given date according to local time.
+     * @returns { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCDate(): int {
         let localTime = this.ms;
@@ -830,7 +886,11 @@ export class Date {
     /**
      * Changes the day of the month of a given Date instance, based on UTC time.
      *
-     * @param value new day.
+     * @param { int } value new day.
+     * @returns { long }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCDate(value: int): long {
         let day = this.getUTCDate();
@@ -842,7 +902,11 @@ export class Date {
     /**
      * Changes the day of the month of a given Date instance, based on UTC time.
      *
-     * @param value new day.
+     * @param { int } value new day.
+     * @returns { long } set UTCDay
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCDay(value: int): long {
         this.setUTCDate(value);
@@ -853,10 +917,10 @@ export class Date {
      * Returns the day of the week for the specified date according to local time,
      * where 0 represents Sunday. For the day of the month, see @link{getDayOfMonth}.
      *
-     * @see ECMA-262, 21.4.4.3
-     *
-     * @returns An integer number, between 0 and 6, corresponding to the day of the week
-     * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
+     * @returns { int } get day
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getDay(): int {
         return ecmaWeekDay(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -865,8 +929,10 @@ export class Date {
     /**
      * Returns the day of the week in the specified date according to universal time, where 0 represents Sunday.
      *
-     * @returns An integer number, between 0 and 6, corresponding to the day of the week
-     * for the given date, according to local time: 0 for Sunday, 1 for Monday, 2 for Tuesday, and so on.
+     * @returns { int } get UTCday
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCDay(): int {
         return ecmaWeekDay(this.ms);
@@ -875,11 +941,10 @@ export class Date {
     /**
      * Returns the year of the specified date according to local time.
      *
-     * @see ECMA-262, 21.4.4.4
-     * deprecated
-     * @note This function is an alias to @link{getFullYear} and left for compatibility with ECMA-262.
-     *
-     * @returns year
+     * @returns { int } get year
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getYear(): int {
         return this.getFullYear();
@@ -887,14 +952,12 @@ export class Date {
 
     /**
      * Returns the year of the specified date according to local time.
-     *
-     * @returns A year of the specified date according to local time.
-     *
-     * @description The value returned by `getUTCFullYear()` is an absolute number.
      * For dates between the years 1000 and 9999, `getUTCFullYear()` returns a four-digit number,
      * for example, 1995. Use this function to make sure a year is compliant with years after 2000.
-     *
-     * @returns year
+     * @returns { int } get the UTCYear
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCFullYear(): int {
         return ecmaYearFromTime(this.ms);
@@ -902,20 +965,14 @@ export class Date {
 
     /**
      * Returns the year of the specified date according to local time.
-     *
-     * @see ECMA-262, 21.4.4.4
-     *
-     * @returns A number corresponding to the year of the given date, according to local time.
-     *
-     * @description The value returned by `getFullYear()` is an absolute number.
      * For dates between the years 1000 and 9999, `getFullYear()` returns a four-digit number,
      * for example, 1995. Use this function to make sure a year is compliant with years after 2000.
+     * ```ets const today = new Date(); const year = today.getYearFull();
      *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const year = today.getYearFull();
-     * ```
+     * @returns { int } get fullyear
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getFullYear(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -925,7 +982,11 @@ export class Date {
     /**
      * Sets the full year for a specified date according to universal time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCFullYear(value: int): long {
         let currentYear = ecmaYearFromTime(this.ms);
@@ -938,7 +999,12 @@ export class Date {
     /**
      * Sets the full year for a specified date according to universal time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @param { int } month new month
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCFullYear(value: int, month: int): long {
         this.setUTCFullYear(value);
@@ -949,7 +1015,13 @@ export class Date {
     /**
      * Sets the full year for a specified date according to universal time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @param { int } month new month
+     * @param { int } date new date
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCFullYear(value: int, month: int, date: int): long {
         this.setUTCFullYear(value);
@@ -961,7 +1033,10 @@ export class Date {
     /**
      * This function is an alias to @link{setFullYear} and left for compatibility with ECMA-262.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setYear(value: int): void {
         this.setFullYear(value);
@@ -970,7 +1045,11 @@ export class Date {
     /**
      * Sets the full year for a specified date according to local time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFullYear(value: int): long {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond
@@ -984,7 +1063,12 @@ export class Date {
     /**
      * Sets the full year for a specified date according to local time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @param { int } month new month
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFullYear(value: int, month: int): long {
         this.setFullYear(value);
@@ -995,7 +1079,13 @@ export class Date {
     /**
      * Sets the full year for a specified date according to local time.
      *
-     * @param value new year
+     * @param { int } value new year
+     * @param { int } month new month
+     * @param { int } date new date
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setFullYear(value: int, month: int, date: int): long {
         this.setFullYear(value);
@@ -1005,17 +1095,12 @@ export class Date {
     }
 
     /**
-     * Returns the hour for the specified date, according to local time.
+     * Returns the hour for the specified date, according to local time. ```ets const today = new Date(); const hours = today.getHour(); ```
      *
-     * @see ECMA-262, 21.4.4.5
-     *
-     * @returns An integer number, between 0 and 23, representing the hour for the given date according to local time.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const hours = today.getHour();
-     * ```
+     * @returns { int } get new date hour value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getHours(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1025,7 +1110,10 @@ export class Date {
     /**
      * Returns the hours in the specified date according to universal time.
      *
-     * @returns An integer number, between 0 and 23, representing the hour for the given date according to UTC time.
+     * @returns { int } get new date hour value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCHours(): int {
         return ecmaHourFromTime(this.ms);
@@ -1034,7 +1122,11 @@ export class Date {
     /**
      * Sets the hours for a specified date according to local time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setHours(value: int): long {
         let hours = ecmaHourFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1046,7 +1138,12 @@ export class Date {
     /**
      * Sets the hours for a specified date according to local time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setHours(value: int, min: int): long {
         this.setHours(value);
@@ -1057,7 +1154,13 @@ export class Date {
     /**
      * Sets the hours for a specified date according to local time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @param { int } sec 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setHours(value: int, min: int, sec: int): long {
         this.setHours(value);
@@ -1069,7 +1172,14 @@ export class Date {
     /**
      * Sets the hours for a specified date according to local time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @param { int } sec 
+     * @param { int } ms 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setHours(value: int, min: int, sec: int, ms: int): long {
         this.setHours(value);
@@ -1082,7 +1192,11 @@ export class Date {
     /**
      * Sets the hour for a specified date according to universal time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCHours(value: int): long {
         let hours = ecmaHourFromTime(this.ms);
@@ -1094,7 +1208,12 @@ export class Date {
     /**
      * Sets the hour for a specified date according to universal time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCHours(value: int, min: int): long {
         this.setUTCHours(value);
@@ -1105,7 +1224,13 @@ export class Date {
     /**
      * Sets the hour for a specified date according to universal time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @param { int } sec 
+     * @returns { long }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCHours(value: int, min: int, sec: int): long {
         this.setUTCHours(value);
@@ -1117,7 +1242,14 @@ export class Date {
     /**
      * Sets the hour for a specified date according to universal time.
      *
-     * @param value new hours
+     * @param { int } value new hours
+     * @param { int } min 
+     * @param { int } sec 
+     * @param { int } ms 
+     * @returns { long }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCHours(value: int, min: int, sec: int, ms: int): long {
         this.setUTCHours(value);
@@ -1129,16 +1261,11 @@ export class Date {
 
     /**
      * Returns the milliseconds in the specified date according to local time.
-     *
-     * @see ECMA-262, 21.4.4.6
-     *
-     * @returns A number between 0 and 999 representing the milliseconds for the given date according to local time.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const milliseconds = today.getMilliseconds();
-     * ```
+     * 
+     * @returns { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getMilliseconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1147,14 +1274,14 @@ export class Date {
 
     /**
      * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     *     which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @param d to be converted to milliseconds.
-     *
-     * @see ECMA-262, 21.4.3.1
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     * @param { Date } d to be converted to milliseconds.
+     * @returns { long } get new date value
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static UTC(d: Date): long {
         return d.ms;
@@ -1164,10 +1291,12 @@ export class Date {
      * Returns the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @param year to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     * @param { int } year to be converted to milliseconds.
+     * @returns { long } get new date value
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static UTC(year: int): long {
         return ecmaMakeDate(ecmaMakeDay(ecmaMakeFullYear(year), 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0));
@@ -1177,22 +1306,18 @@ export class Date {
      * Returns the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @param hours to be converted to milliseconds.
-     *
-     * @param minutes to be converted to milliseconds.
-     *
-     * @param seconds to be converted to milliseconds.
-     *
-     * @param ms to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
+     * @param { int } year to be converted to milliseconds.
+     * @param { int } month to be converted to milliseconds.
+     * @param { int } day to be converted to milliseconds.
+     * @param { int } hours to be converted to milliseconds.
+     * @param { int } minutes to be converted to milliseconds.
+     * @param { int } seconds to be converted to milliseconds.
+     * @param { int } ms to be converted to milliseconds.
+     * @returns { long } get new date value
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static UTC(year: int, month: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int): long {
         return ecmaMakeDate(
@@ -1213,7 +1338,10 @@ export class Date {
     /**
      * Returns the milliseconds portion of the time object's value according to universal time.
      *
-     * @returns the milliseconds portion of the time object's value according to universal time.
+     * @returns { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCMilliseconds(): int {
         let localTime = this.ms;
@@ -1223,7 +1351,11 @@ export class Date {
     /**
      * Sets the milliseconds for a specified date according to local time.
      *
-     * @param value new ms
+     * @param { int } value new ms
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1235,7 +1367,11 @@ export class Date {
     /**
      * Sets the milliseconds for a specified date according to universal time.
      *
-     * @param value new ms
+     * @param { int } value new ms
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMilliseconds(value: int): long {
         let ms = ecmaMsFromTime(this.ms);
@@ -1247,15 +1383,11 @@ export class Date {
     /**
      * Returns the seconds in the specified date according to local time.
      *
-     * @see ECMA-262, 21.4.4.9
-     *
-     * @returns An integer number, between 0 and 59, representing the seconds in the given date according to local time.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const seconds = today.getSeconds();
-     * ```
+     * @returns { int } An integer number, between 0 and 59
+     *     representing the seconds in the given date according to local time.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getSeconds(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1265,7 +1397,10 @@ export class Date {
     /**
      * Returns the seconds in the specified date according to universal time.
      *
-     * @returns the seconds in the specified date according to universal time.
+     * @returns { int } the seconds in the specified date according to universal time.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCSeconds(): int {
         return ecmaSecFromTime(this.ms);
@@ -1274,7 +1409,11 @@ export class Date {
     /**
      * Sets the seconds for a specified date according to local time.
      *
-     * @param value new seconds
+     * @param { int } value new seconds
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setSeconds(value: int): long {
         let sec = ecmaSecFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1286,7 +1425,12 @@ export class Date {
     /**
      * Sets the seconds for a specified date according to local time.
      *
-     * @param value new seconds
+     * @param { int } value new seconds
+     * @param { int } ms 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setSeconds(value: int, ms: int): long {
         this.setSeconds(value);
@@ -1297,7 +1441,11 @@ export class Date {
     /**
      * Sets the seconds for a specified date according to universal time.
      *
-     * @param value new seconds
+     * @param { int } value new seconds
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCSeconds(value: int): long {
         let sec = ecmaSecFromTime(this.ms);
@@ -1309,7 +1457,12 @@ export class Date {
     /**
      * Sets the seconds for a specified date according to universal time.
      *
-     * @param value new seconds
+     * @param { int } value new seconds
+     * @param { int } ms 
+     * @returns { long }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCSeconds(value: int, ms: int): long {
         this.setUTCSeconds(value);
@@ -1320,15 +1473,11 @@ export class Date {
     /**
      * Returns the minutes in the specified date according to local time.
      *
-     * @see ECMA-262, 21.4.4.7
-     *
-     * @returns An integer number, between 0 and 59, representing the minutes in the given date according to local time.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const minutes = today.getMinutes();
-     * ```
+     * @returns { int } An integer number, between 0 and 59
+     *     representing the minutes in the given date according to local time.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getMinutes(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1338,7 +1487,11 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to universal time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMinutes(value: int): long {
         let min = ecmaMinFromTime(this.ms);
@@ -1350,7 +1503,12 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to universal time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @param { int } sec 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMinutes(value: int, sec: int): long {
         this.setUTCMinutes(value);
@@ -1361,7 +1519,13 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to universal time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @param { int } sec 
+     * @param { int } ms 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMinutes(value: int, sec: int, ms: int): long {
         this.setUTCMinutes(value);
@@ -1373,7 +1537,10 @@ export class Date {
     /**
      * Returns the minutes in the specified date according to universal time.
      *
-     * @returns the minutes in the specified date according to universal time.
+     * @returns { int } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCMinutes(): int {
         return ecmaMinFromTime(this.ms);
@@ -1382,7 +1549,11 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to local time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMinutes(value: int): long {
         let min = ecmaMinFromTime(this.ms - this.TZOffset * 60 * msPerSecond);
@@ -1394,7 +1565,12 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to local time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @param { int } sec 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMinutes(value: int, sec: int): long {
         this.setMinutes(value);
@@ -1405,7 +1581,13 @@ export class Date {
     /**
      * Sets the minutes for a specified date according to local time.
      *
-     * @param value new minutes
+     * @param { int } value new minutes
+     * @param { int } sec 
+     * @param { int } ms 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMinutes(value: int, sec: int, ms: int): long {
         this.setMinutes(value);
@@ -1418,16 +1600,10 @@ export class Date {
      * Returns the month in the specified date according to local time,
      * as a zero-based value (where zero indicates the first month of the year).
      *
-     * @see ECMA-262, 21.4.4.8
-     *
-     * @returns  An integer number, between 0 and 11, representing the month in the given date according to local time.
-     * 0 corresponds to January, 1 to February, and so on.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * const month = today.getMonth();
-     * ```
+     * @returns { int } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getMonth(): int {
         let localTime = this.ms - this.TZOffset * 60 * msPerSecond;
@@ -1435,10 +1611,13 @@ export class Date {
     }
 
     /**
-     * Returns the month of the specified date according to universal time, as a zero-based value (where zero indicates the first month of the year).
+     * Returns the month of the specified date according to universal time
+     *     as a zero-based value (where zero indicates the first month of the year).
      *
-     * @returns  An integer number, between 0 and 11, representing the month in the given date according to UTC time.
-     * 0 corresponds to January, 1 to February, and so on.
+     * @returns { int } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getUTCMonth(): int {
         return ecmaMonthFromTime(this.ms);
@@ -1447,7 +1626,11 @@ export class Date {
     /**
      * Sets the month for a specified date according to the currently set year.
      *
-     * @param month new month
+     * @param { int } month new month
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMonth(month: int): long {
         let yearsNow: int = this.getFullYear();
@@ -1469,7 +1652,12 @@ export class Date {
     /**
      * Sets the month for a specified date according to the currently set year.
      *
-     * @param month new month
+     * @param { int } month new month
+     * @param { int } date 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setMonth(month: int, date: int): long {
         this.setMonth(month);
@@ -1480,7 +1668,11 @@ export class Date {
     /**
      * Sets the month for a specified date according to universal time.
      *
-     * @param month new month
+     * @param { int } month new month
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMonth(month: int): long {
         let yearsNow: int = this.getUTCFullYear();
@@ -1503,7 +1695,12 @@ export class Date {
     /**
      * Sets the month for a specified date according to universal time.
      *
-     * @param month new month
+     * @param { int } month new month
+     * @param { int } date 
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setUTCMonth(month: int, date: int): long {
         this.setUTCMonth(month);
@@ -1515,9 +1712,10 @@ export class Date {
      * Returns the number of milliseconds since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @see ECMA-262, 21.4.4.10
-     *
-     * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getTime(): long {
         return this.ms;
@@ -1527,11 +1725,11 @@ export class Date {
      * Sets the number of milliseconds since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
-     * @param value new ms
-     *
-     * @see ECMA-262, 21.4.4.10
-     *
-     * @returns A number representing the milliseconds elapsed between 1 January 1970 00:00:00 UTC and the given date.
+     * @param { long } value new ms
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setTime(value: long): long {
         this.ms = value;
@@ -1549,14 +1747,13 @@ export class Date {
      * Other formats are implementation-defined and may not work across all browsers (targets).
      * A library can help if many different formats are to be accommodated.
      *
-     * @param dateStr to be parsed
-     *
-     * @see ECMA-262, 21.4.3.2
-     *
-     * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
-     * and the date obtained by parsing the given string representation of a date.
-     * 
-     * @throws {RangeError} if the argument doesn't represent a valid date.
+     * @param { string } dateStr to be parsed
+     * @returns { long } get new date value
+     * @throws { RangeError } if the argument doesn't represent a valid date.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static parse(dateStr: string): long {
         return Date.parseDateFromString(dateStr);
@@ -1566,8 +1763,10 @@ export class Date {
      * Returns the difference, in minutes, between a date as
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      *
-     * @returns the difference, in minutes, between a date as
-     * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getTimezoneOffset(): long {
         return this.TZOffset;
@@ -1577,7 +1776,11 @@ export class Date {
      * Sets the difference, in minutes, between a date as
      * evaluated in the UTC time zone, and the same date as evaluated in the local time zone.
      *
-     * @param value new timezone offset
+     * @param { int } value new timezone offset
+     * @returns { long } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public setTimezoneOffset(value: int): long {
         const diff = value - this.getTimezoneOffset();
@@ -1591,16 +1794,10 @@ export class Date {
      * ±YYYYYY-MM-DDTHH:mm:ss.sssZ, respectively). The timezone is always zero UTC offset,
      * as denoted by the suffix Z.
      *
-     * @see ECMA-262, 21.4.4.36
-     *
-     * @returns A string representing the given date in the ISO 8601 format according to universal time.
-     * It's the same format as the one required to be recognized by @link{parse()}.
-     *
-     * @example
-     * ```ets
-     * const today = new Date();
-     * console.println(today.toISOString()); // Returns 2023-02-05T14:48:00.000Z
-     * ```
+     * @returns { string } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toISOString(): string {
         let sb = new StringBuilder();
@@ -1667,7 +1864,10 @@ export class Date {
     /**
      * Returns a string representation of the Date object.
      *
-     * @returns JSON representation of the current instance
+     * @returns { string | null } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toJSON(): string | null {
         if (!this.isDateValid()) {
@@ -1679,15 +1879,10 @@ export class Date {
     /**
      * Returns the time portion of a `Date` object interpreted in the local timezone in English.
      *
-     * @see ECMA-262, 21.4.4.42
-     *
-     * @returns A string representing the time portion of the given date in human-readable form in English.
-     *
-     * @example
-     * ```
-     * let d = new Date(1979.0, 9.0, 27.0, 13.0, 12.8, 57.0, 444.1);
-     * console.println(d.toTimeString()); // 13:12:57 GMT
-     * ```
+     * @returns { string } get new date value
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toTimeString(): string {
         return this.timeString() + " " + this.timeZoneString();
@@ -1725,15 +1920,11 @@ export class Date {
     /**
      * Returns the date portion of a `Date` object interpreted in the local timezone in English.
      *
-     * @see ECMA-262, 21.4.4.35
-     *
-     * @returns A string representing the date portion of the given Date object in human-readable form in English.
-     *
-     * @example
-     * ```
-     * let d = new Date(1979.0, 9.0, 27.0, 13.0, 12.8, 57.0, 444.1);
-     * console.println(d.toDateString()); // Sat Oct 27 1979
-     * ```
+     * @returns { string } get new date value
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toDateString(): string {
         return this.dateString();
@@ -1803,15 +1994,11 @@ export class Date {
     /**
      * Returns a string representing the specified `Date` object interpreted in the local timezone.
      *
-     * @see ECMA-262, 21.4.4.41
-     *
-     * @returns A string representing the given date.
-     *
-     * @example
-     * ```
-     * let d = new Date(1979.0, 9.0, 27.0, 13.0, 12.8, 57.0, 444.1);
-     * console.println(d.toString()); // Sat Oct 27 1979 13:12:57 GMT
-     * ```
+     * @returns { string } get new date value
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public override toString(): string {
         let res: String = "Invalid Date";
@@ -1828,15 +2015,11 @@ export class Date {
     /**
      * Returns a string representing the specified `Date` object interpreted in UTC.
      *
-     * @see ECMA-262, 21.4.4.41
-     *
-     * @returns A string representing the given date.
-     *
-     * @example
-     * ```
-     * let d = new Date(1979.0, 9.0, 27.0, 13.0, 12.8, 57.0, 444.1);
-     * console.println(d.toUTCString()); // Sat Oct 27 1979 13:12:57 GMT
-     * ```
+     * @returns { stirng } get new UTC date value
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toUTCString(): string {
         if (!this.isDateValid()) {
