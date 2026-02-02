@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
-    Two instance methods, two static methods with the same name or, two constructors are defined in the same class
-    member. If signatures are overload-equivalent, then a compile-time error occurs. Otherwise, overloading is used.
+    A compile-time error occurs, if signatures of two implicitly overloaded functions, 
+    methods, or constructors are overload-equivalent.
+tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
-class Base<T> {
-  constructor(i: T) {}
-  constructor(i: Number) {}
-}
+{{c.decl}}
+
+{% endfor %}

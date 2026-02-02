@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,21 +16,22 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Overload function combination of local and imported functions
-files: [./modules/function_export_all.ets]
+desc: >-
+    If signatures of two non-generic implicitly overloaded functions
+    are overload-equivalent, then a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0131: Function foo with this assembly signature already declared."
 ---*/
 
-import {{c.import}} from "./modules/function_export_all.ets";
+type TPL = [boolean, string];
+type FUN = () => boolean;
 
-function foo0(): int {
-    return 0;
-}
-
-overload foo { {{c.list}} };
+function foo({{c.arg}}): void {}
+function foo({{c.arg}}): void {}
 
 function main(): void {
-    arktest.assertEQ({{c.res}}, foo({{c.call}}));
+  let c: TPL = [true, "some str"];
+  foo({{c.call}});
 }
 
 {% endfor %}

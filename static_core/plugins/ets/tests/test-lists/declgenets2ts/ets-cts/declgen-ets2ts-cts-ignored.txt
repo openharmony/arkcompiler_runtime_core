@@ -3060,3 +3060,9 @@
 05.generics/02.generic_instantiations/01.type_arguments/malformed_decl_n_0.ets
 05.generics/01.type_parameters/02.type_parameter_default/generic_classes/class_type_parameter_default_n_8.ets
 03.types/11.types_void_or_undefined/void/void_type_n_1.ets
+15.semantic_rules/10.overloading/04.overload_equivalent_signatures/overload_equivalent_signatures_negative_26.ets
+15.semantic_rules/10.overloading/04.overload_equivalent_signatures/overload_equivalent_signatures_negative_27.ets
+15.semantic_rules/10.overloading/04.overload_equivalent_signatures/overload_equivalent_signatures_negative_28.ets
+
+#FailKind.DECLGEN_ETS2TS_FAIL:
+15.semantic_rules/10.overloading/main_overload_neg.ets

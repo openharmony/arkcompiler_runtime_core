@@ -17,8 +17,10 @@ limitations under the License.
 
 /*---
 desc: >-
-    The correctness check for functions overloading is performed if two or more functions with the same name are accessible (see Accessible) in a scope (see Scopes).
+    If signatures of two non-generic implicitly overloaded functions
+    are overload-equivalent, then a compile-time error occurs.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0130: Function foo is already declared."
 ---*/
 
 type TPL = [boolean, string];

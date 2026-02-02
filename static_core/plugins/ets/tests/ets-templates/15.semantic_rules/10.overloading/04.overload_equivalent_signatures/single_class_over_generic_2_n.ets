@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
-    A compile-time error occurs if a package declares two functions with overload-equivalent signatures, a class declares
-    two methods with overload-equivalent signatures or two constructors with overload-equivalent signatures.
+    A compile-time error occurs, if signatures of two constructors are overload-equivalent.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0131: Function constructor with this assembly signature already declared."
 ---*/
 
-{{c.decl}}
-
-function main() {
-
-    
+class Base<T, S> {
+  constructor(i: T) {}
+  constructor(i: S) {}
 }
-{% endfor %}

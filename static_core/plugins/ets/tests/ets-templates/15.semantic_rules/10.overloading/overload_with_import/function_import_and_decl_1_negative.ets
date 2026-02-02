@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,7 +16,7 @@ limitations under the License.
 {% for c in cases %}
 
 /*---
-desc: Overload function from imported functions
+desc: Overload function combination of local and imported functions
 files: [./modules/function_export_all.ets]
 tags: [compile-only, negative]
 expected_out: "Semantic error ESE503573: All overloaded functions must be declared in the same module or namespace scope."
@@ -24,10 +24,14 @@ expected_out: "Semantic error ESE503573: All overloaded functions must be declar
 
 import {{c.import}} from "./modules/function_export_all.ets";
 
+function foo0(): int {
+    return 0;
+}
+
 overload foo { {{c.list}} };
 
 function main(): void {
-    arktest.assertEQ({{c.res}}, {{c.call}});
+    arktest.assertEQ({{c.res}}, foo({{c.call}}));
 }
 
 {% endfor %}
