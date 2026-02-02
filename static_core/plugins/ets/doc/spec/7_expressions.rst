@@ -1584,7 +1584,7 @@ field type:
 
 Only class fields that have default values (see :ref:`Default Values for Types`)
 or explicit initializers (see :ref:`Variable and Constant Declarations`) can be
-skipped in an object literal. Otherwise, a :index:`compile-time` error occurs.
+skipped in an object literal. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
