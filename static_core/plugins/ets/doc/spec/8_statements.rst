@@ -1343,7 +1343,7 @@ can be performed while leaving the ``try-catch``:
 .. code-block:: typescript
 
     class SomeResource {
-      // some API
+      // some class members
       // ...
       close() {}
     }

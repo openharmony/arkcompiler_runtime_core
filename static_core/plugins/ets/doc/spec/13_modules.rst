@@ -1337,10 +1337,12 @@ and such a new name clashes with the name of another exported declaration.
     function bar(): void {}
     export {bar as foo} // Compile-time error: 'foo' is already exported
 
-Types of exported functions, variables, constants, public and protected APIs
-of classes, default interface methods, interface getters and setters must be
-set explicitly where applicable as represented in the examples below.
-Otherwise, a :index:`compile-time error` occurs.
+All types in declarations of exported functions, variables, constants, public
+and protected class members, default interface methods, interface getters and
+setters must be declared explicitly. Otherwise, a :index:`compile-time error`
+occurs.
+
+This situation is represented in the examples below.
 
 - Exported constants and variables must have explicit types. Exported functions
   must have explicit return types:
@@ -1358,7 +1360,7 @@ Otherwise, a :index:`compile-time error` occurs.
      function bar() {}  // compile-time error - no return type
 
 - Exported classes must explicitly declare method and field types, both static
-  and instance, of its public and protected APIs.
+  and instance, of its public and protected members.
 
   .. code-block:: typescript
      :linenos:
@@ -1383,7 +1385,7 @@ Otherwise, a :index:`compile-time error` occurs.
 
        private nevermind() {} // private - no return type but OK
 
-       private baz() { return "hello" } // OK - baz() not in public/protected API
+       private baz() { return "hello" } // OK - baz() is private
      }
 
 - Exported getters (see :ref:`Accessor declarations`) at the top level
