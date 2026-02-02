@@ -245,6 +245,10 @@ public:
 
     bool CheckRegType(int reg, Type tgtType);
 
+    bool CheckRegTypeNotNullRef(int reg);
+
+    bool CheckRegTypes(std::initializer_list<int> const &regs, std::initializer_list<Type> const &tgtTypes);
+
     const AbstractTypedValue &GetReg(int regIdx);
 
     Type GetRegType(int regIdx);
@@ -3529,7 +3533,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
+
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3540,7 +3556,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3549,7 +3578,22 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallShort()
     {
-        // NOTE: handle properly
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3560,7 +3604,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
+
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3571,7 +3627,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3580,7 +3649,22 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleAnyCallThisShort()
     {
-        // NOTE: handle properly
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3591,7 +3675,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
+
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3602,7 +3698,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3613,7 +3722,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3719,7 +3841,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
         Sync();
+
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3730,9 +3864,21 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vd = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
-        uint16_t vOut = inst_.GetVReg<FORMAT, 0x0>();
-        SetReg(vOut, objectType_);
+
+        if (!CheckRegType(vs, refType_)) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
+        SetReg(vd, objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3742,7 +3888,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
         Sync();
+
+        if (!CheckRegTypes({vs, ACC}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3752,7 +3910,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3762,7 +3933,19 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
         Sync();
+
+        if (!CheckRegTypes({vs, ACC}, {refType_, f64_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3773,7 +3956,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2, ACC}, {refType_, f64_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3783,7 +3979,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
@@ -3794,7 +4003,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
         Sync();
+
+        if (!CheckRegTypes({vs1, vs2, ACC}, {refType_, refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs1)) {
+            SetAcc(top_);
+            return false;
+        }
+
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3804,9 +4026,20 @@ public:
     {
         LOG_INST();
         DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
         Sync();
-        SetAcc(i32_);
 
+        if (!CheckRegTypes({vs, ACC}, {refType_, refType_})) {
+            SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        if (!CheckRegTypeNotNullRef(vs)) {
+            SetAcc(top_);
+            return false;
+        }
+
+        SetAcc(i32_);
         MoveToNextInst<FORMAT>();
         return true;
     }

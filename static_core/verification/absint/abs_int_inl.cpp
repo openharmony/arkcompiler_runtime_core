@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "abs_int_inl.h"
+#include <algorithm>
 #include "handle_gen.h"
 
 namespace ark::verifier {
@@ -51,6 +52,27 @@ bool AbsIntInstructionHandler::CheckRegType(int reg, Type tgtType)
     LOG_VERIFIER_BAD_REGISTER_TYPE(RegisterName(reg, true), ToString(type), ToString(tgtType));
     END_SHOW_MSG();
     return false;
+}
+
+bool AbsIntInstructionHandler::CheckRegTypeNotNullRef(int reg)
+{
+    if (GetRegType(reg) == nullRefType_) {
+        SHOW_MSG(AlwaysNpe)
+        LOG_VERIFIER_ALWAYS_NPE(reg);
+        END_SHOW_MSG();
+        SET_STATUS_FOR_MSG(AlwaysNpe, OK);
+        return false;
+    }
+    return true;
+}
+
+bool AbsIntInstructionHandler::CheckRegTypes(std::initializer_list<int> const &regs,
+                                             std::initializer_list<Type> const &tgtTypes)
+{
+    bool result = std::equal(regs.begin(), regs.end(), tgtTypes.begin(),
+                             [this](int reg, Type tgtType) { return CheckRegType(reg, tgtType); });
+
+    return result;
 }
 
 const AbstractTypedValue &AbsIntInstructionHandler::GetReg(int regIdx)
