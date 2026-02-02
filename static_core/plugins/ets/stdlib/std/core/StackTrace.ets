@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the StackTrace for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
 // synchronize with mirror class in runtime
+/**
+ * synchronize with mirror class in runtime
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export class StackTraceElement {
     private className: String = ""
     private methodName: String = ""
@@ -26,10 +36,13 @@ export class StackTraceElement {
     private constructor () {}
 
     /**
-    * Packs data to single string and
-    *
-    * @returns data in formatted string
-    */
+     * Formats the stack trace element information into a string.
+     *
+     * @returns { String } data in formatted string.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public override toString(): String {
         return "\tat " + this.className + "." + this.methodName +
              // NOTE(@sandee, #24492): Extraction of column number is not implemented  
@@ -37,11 +50,21 @@ export class StackTraceElement {
     }
 }
 
+/**
+ * Provides functionality to obtain the current call stack trace.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export class StackTrace {
     /**
     * Method provides stack of methods at the place of a call
     *
-    * @returns stack trace
+    * @returns { FixedArray<StackTraceElement> } stack trace
+    * @static
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     static native provisionStackTrace(): FixedArray<StackTraceElement>
 }
