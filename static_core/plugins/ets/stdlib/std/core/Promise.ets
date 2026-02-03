@@ -123,6 +123,32 @@ export final class Promise<out T> implements PromiseLike<T> {
     }
 
     /**
+     * Schedule the default continuation after the promise is completed.
+     *
+     * When no fulfillment handler is provided (e.g. `then()` or `then(undefined)`),
+     * the returned promise is settled with the same value/reason as the current promise.
+     *
+     * @param [_onFulfilled] placeholder to accept `undefined`
+     * @returns { Promise } a new promise that forwards the original result
+     */
+    then(_onFulfilled?: undefined): Promise<Awaited<T>> {
+        let promise = new Promise<Awaited<T>>();
+        let fn: () => void = (): void => {
+            try {
+                if (this.state == Promise.STATE_RESOLVED) {
+                    promise.doResolve<T>(this.value as T);
+                } else {
+                    promise.rejectImpl(this.value as Error, false);
+                }
+            } catch (e) {
+                promise.rejectImpl(e as Error, false);
+            }
+        }
+        this.submitCallback(fn as Object);
+        return promise;
+    }
+
+    /**
      * Schedule callbacks to execute after the promise is completed
      *
      * @param onFulfilled callback that will be called after the promise is resolved
