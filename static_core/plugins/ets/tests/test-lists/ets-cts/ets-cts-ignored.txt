@@ -152,20 +152,6 @@
 #31615 RTE for partial class field assignment
 05.generics/03.utility_types/03.partial_utility_type/partial_inherit3.ets
 
-#24168
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_0.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_1.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_2.ets
-
-#24168 no methods should be inherited using required utility type
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_1.ets
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_5.ets
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_6.ets
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_7.ets
-05.generics/03.utility_types/04.required_utility_type/method_excluded_from_required_n_8.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_0.ets
-05.generics/03.utility_types/04.required_utility_type/required_getter_and_setter_neg_3.ets
-
 #28679
 05.generics/03.utility_types/06.record_utility_type/enum_record_0_n.ets
 
