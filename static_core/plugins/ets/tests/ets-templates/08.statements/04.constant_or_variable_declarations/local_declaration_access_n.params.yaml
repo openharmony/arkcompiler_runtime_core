@@ -13,7 +13,7 @@
 
 ---
 cases:
-    - { decl: 'let',   name: a }
-    - { decl: 'const', name: a }
-    - { decl: 'let',   name: k }
-    - { decl: 'const', name: k }
+    - { decl: 'let',   name: a, exp_out: "Semantic error ESE0143: Unresolved reference a" }
+    - { decl: 'const', name: a, exp_out: "Semantic error ESE0143: Unresolved reference a" }
+    - { decl: 'let',   name: k, exp_out: "Semantic error ESE0143: Unresolved reference k" }
+    - { decl: 'const', name: k, exp_out: "Semantic error ESE0143: Unresolved reference k" }

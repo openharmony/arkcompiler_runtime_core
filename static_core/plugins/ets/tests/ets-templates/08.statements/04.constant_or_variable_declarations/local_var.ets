@@ -17,7 +17,24 @@ limitations under the License.
 desc: Local declaration in statement (var)
 ---*/
 
-function main(): void {
-  let a: int = 0;
-  arktest.assertEQ(a, 0)
+function main(): int {
+    let testsuite = new arktest.ArkTestsuite("Variable declarations");
+    
+    testsuite.addTest("Explicit type", () => {
+      let a: int = 0;
+      arktest.assertEQ(a, 0);
+    });
+
+    testsuite.addTest("Implicit type", () => {
+      let a = "0";
+      arktest.assertEQ(a, "0");
+    });
+    
+    testsuite.addTest("Multiple declarations in same statement", () => {
+      let a: int = 1, b = 4;
+      arktest.assertEQ(a, 1);
+      arktest.assertEQ(b, 4);
+    });
+
+    return testsuite.run();
 }

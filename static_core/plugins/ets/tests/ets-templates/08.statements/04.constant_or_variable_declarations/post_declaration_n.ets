@@ -17,6 +17,7 @@ limitations under the License.
 /*---
 desc: Local declaration - use name before declaration.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0365: Variable 'a' is accessed before it's initialization."
 ---*/
 
 function main(): void {

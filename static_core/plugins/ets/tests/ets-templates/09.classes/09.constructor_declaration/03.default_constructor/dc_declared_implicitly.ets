@@ -17,7 +17,6 @@
 /*---
 desc: >-
     Class declarations with default constructors declared implicitly.
-tags: []
 ---*/
 
 class A {

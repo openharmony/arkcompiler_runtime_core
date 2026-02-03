@@ -13,12 +13,12 @@
 
 ---
 cases:
-  - { modifier: public,    constructor: ''                          }
-  - { modifier: public,    constructor: 'constructor() {}'          }
-  - { modifier: public,    constructor: 'constructor() { super() }' }
-  - { modifier: protected, constructor: ''                          }
-  - { modifier: protected, constructor: 'constructor() {}'          }
-  - { modifier: protected, constructor: 'constructor() { super() }' }
-  - { modifier: private,   constructor: ''                          }
-  - { modifier: private,   constructor: 'constructor() {}'          }
-  - { modifier: private,   constructor: 'constructor() { super() }' }
+  - { modifier: public,    constructor: '',                          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: public,    constructor: 'constructor() {}',          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: public,    constructor: 'constructor() { super() }', exp_out: "Semantic error ESE0128: No matching call signature" }
+  - { modifier: protected, constructor: '',                          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: protected, constructor: 'constructor() {}',          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: protected, constructor: 'constructor() { super() }', exp_out: "Semantic error ESE0128: No matching call signature" }
+  - { modifier: private,   constructor: '',                          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: private,   constructor: 'constructor() {}',          exp_out: "Semantic error ESE0192: Must call super constructor"}
+  - { modifier: private,   constructor: 'constructor() { super() }', exp_out: "Semantic error ESE0128: No matching call signature" }

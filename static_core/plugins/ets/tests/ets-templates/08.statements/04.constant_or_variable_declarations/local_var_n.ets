@@ -16,6 +16,7 @@ limitations under the License.
 /*---
 desc: Local declaration in statement (var)
 tags: [negative, compile-only]
+expected_out: "Semantic error ESE0143: Unresolved reference a"
 ---*/
 
 function main(): void {
