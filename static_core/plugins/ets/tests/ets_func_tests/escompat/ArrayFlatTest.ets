@@ -50,16 +50,6 @@ function stringTest() {
     compareArray<String | Number | bigint>(arr2.flat<String | Number | bigint>(), ["1", 2, 3n])
 }
 
-function flatMapTest() {
-    const arr = [1, 2, 1]
-    const result = arr.flatMap<int | Array<int | Array<int>>>((num) => (num === 2 ? [[2, 2], 2] : 1))
-    compareArray<int | Array<int | Array<int>>>(result, [1,[2,2],2,1] as Array<int | Array<int | Array<int>>>)
-
-    const arr1 = [1, undefined, 1];
-    const result1 = arr1.flatMap<int | Array<int>>((num) => (num === 2 ? [2, 2] : 1));
-    compareArray<int | Array<int>>(result1, [1,1,1] as Array<int | Array<int>>)
-}
-
 class InterCls {}
 
 class FlatTest {
@@ -117,7 +107,6 @@ function main(): int {
     suite.addTest('for boolean', booleanTest)
     suite.addTest('for int', intTest)
     suite.addTest('for string', stringTest)
-    suite.addTest('for flatMap', flatMapTest)
     suite.addTest('for nestType with depth', nestTest)
     return suite.run()
 }

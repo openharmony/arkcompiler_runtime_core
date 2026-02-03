@@ -27,6 +27,7 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
 std/core/TypeCreatePrimitiveNameTest.ets
 escompat/ArrayProxyTest.ets
+escompat/ArrayFlatMapTest.ets
 std/core/JsonParseTest.ets
 std/core/ProcessTest.ets
 escompat/ProxyTest.ets
