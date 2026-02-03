@@ -22,7 +22,6 @@ from pydantic import BaseModel, Field
 class VerificationMode(str, Enum):
     DISABLED = "disabled"
     AHEAD_OF_TIME = "ahead-of-time"
-    ON_THE_FLY = "on-the-fly"
 
 
 class ResponseLog(BaseModel):
@@ -54,10 +53,16 @@ class IrDumpOptions(BaseModel):
         return self.compiler_dump or self.disasm_dump
 
 
+class IrDumpFileItem(BaseModel):
+    """Individual IR dump file with name and content"""
+    name: str
+    content: str
+
+
 class IrDumpResponse(BaseModel):
     """Response containing IR dump data"""
     output: str | None = None
     error: str | None = None
-    compiler_dump: str | None = None
+    compiler_dump: list[IrDumpFileItem] | None = None
     disasm_dump: str | None = None
     exit_code: int | None = None

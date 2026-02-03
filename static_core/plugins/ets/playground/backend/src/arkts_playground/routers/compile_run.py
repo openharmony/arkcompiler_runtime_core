@@ -22,7 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from ..config import get_settings
 from ..deps.runner import Runner, get_runner
 from ..models.ast import AstRequestModel, AstResponse
-from ..models.common import VersionsResponse
+from ..models.common import IrDumpOptions, VersionsResponse
 from ..models.compile import CompileRequestModel, CompileResponse, RunResponse
 from ..models.features import FeaturesResponse
 
@@ -31,23 +31,29 @@ logger = structlog.stdlib.get_logger(__name__)
 router = APIRouter()
 
 
+def get_ir_dump_opts(ir_dump: IrDumpOptions | None) -> dict[str, bool] | None:
+    """Extract IR dump options into dictionary format"""
+    if not ir_dump:
+        return None
+    return {
+        "compiler_dump": ir_dump.compiler_dump,
+        "disasm_dump": ir_dump.disasm_dump,
+    }
+
+
 @router.post("/compile",
              response_model=CompileResponse,
              tags=["run"],
              description="Compile provided code and returns the result")
 async def compile_arkts_code(body: CompileRequestModel,
                              runner: Annotated[Runner, Depends(get_runner)]) -> CompileResponse:
-    ir_dump_opts = None
-    if body.ir_dump:
-        ir_dump_opts = {
-            "compiler_dump": body.ir_dump.compiler_dump,
-            "disasm_dump": body.ir_dump.disasm_dump,
-        }
+    ir_dump_opts = get_ir_dump_opts(body.ir_dump)
     result = await runner.compile_arkts(
         body.code,
         options=runner.parse_compile_options(body.options),
         disasm=body.disassemble,
         verifier=body.verifier,
+        aot_mode=body.aot_mode,
         ir_dump=ir_dump_opts
     )
     return CompileResponse(**result)
@@ -60,12 +66,8 @@ async def compile_arkts_code(body: CompileRequestModel,
 async def compile_run_arkts_code(body: CompileRequestModel,
                                  runner: Annotated[Runner, Depends(get_runner)]) -> RunResponse:
     logger.info("Run endpoint called", ir_dump_request=body.ir_dump)
-    ir_dump_opts = None
-    if body.ir_dump:
-        ir_dump_opts = {
-            "compiler_dump": body.ir_dump.compiler_dump,
-            "disasm_dump": body.ir_dump.disasm_dump,
-        }
+    ir_dump_opts = get_ir_dump_opts(body.ir_dump)
+    if ir_dump_opts:
         logger.debug("IR dump options parsed", ir_dump_opts=ir_dump_opts)
     result = await runner.compile_run_arkts(
         body.code,

@@ -33,10 +33,11 @@ class CompileRequestModel(BaseModel):
 
 class RunResponse(BaseModel):
     run: ResponseLog | None = None
-    run_aot: ResponseLog | None = None
     compile: ResponseLog
     disassembly: DisasmResponse | None = None
     verifier: ResponseLog | None = None
+    aot_compile: ResponseLog | None = None
+    aot_run: ResponseLog | None = None
     ir_dump: IrDumpResponse | None = None
 
 
@@ -44,4 +45,5 @@ class CompileResponse(BaseModel):
     compile: ResponseLog
     disassembly: DisasmResponse | None = None
     verifier: ResponseLog | None = None
+    aot_compile: ResponseLog | None = None
     ir_dump: IrDumpResponse | None = None

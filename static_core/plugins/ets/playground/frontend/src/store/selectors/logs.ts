@@ -28,7 +28,10 @@ export const selectCompilationLogs = createSelector(
     [selectOutLogs, selectErrLogs],
     (outLogs, errLogs): ILog[] =>
         [...outLogs, ...errLogs].filter(log =>
-            log.from === ELogType.COMPILE_OUT || log.from === ELogType.COMPILE_ERR
+            log.from === ELogType.COMPILE_OUT || log.from === ELogType.COMPILE_ERR ||
+            log.from === ELogType.AOT_COMPILE_OUT || log.from === ELogType.AOT_COMPILE_ERR ||
+            log.from === ELogType.DISASM_OUT || log.from === ELogType.DISASM_ERR ||
+            log.from === ELogType.VERIFIER_OUT || log.from === ELogType.VERIFIER_ERR
         )
 );
 
@@ -37,6 +40,6 @@ export const selectRuntimeLogs = createSelector(
     (outLogs, errLogs): ILog[] =>
         [...outLogs, ...errLogs].filter(log =>
             log.from === ELogType.RUN_OUT || log.from === ELogType.RUN_ERR ||
-            log.from === ELogType.RUN_AOT_OUT || log.from === ELogType.RUN_AOT_ERR
+            log.from === ELogType.AOT_RUN_OUT || log.from === ELogType.AOT_RUN_ERR
         )
 );
