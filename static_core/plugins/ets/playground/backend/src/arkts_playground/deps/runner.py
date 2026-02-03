@@ -29,7 +29,7 @@ from typing_extensions import Unpack
 from ..config import get_settings
 from ..metrics import (AST_FAILURES, COMPILER_FAILURES, DISASM_FAILURES,
                        RUNTIME_FAILURES)
-from ..models.common import VerificationMode
+from ..models.common import IrDumpFileItem, VerificationMode
 
 logger = structlog.stdlib.get_logger(__name__)
 
@@ -65,7 +65,7 @@ class DisasmResult(TypedDict):
 class IrDumpResult(TypedDict):
     output: str
     error: str
-    compiler_dump: str | None
+    compiler_dump: list[IrDumpFileItem]
     disasm_dump: str | None
     exit_code: int | None
 
@@ -82,24 +82,24 @@ class IrDumpPaths(NamedTuple):
     disasm_file: Path
 
 
-class AotOutputData(NamedTuple):
-    compile_out: str
-    run_out: str
-    compile_err: str
-    run_err: str
-
-
 class CompileOptions(TypedDict, total=False):
     disasm: bool
     verifier: bool
     ir_dump: IrDumpOptions | None
+    aot_mode: bool
 
 
 class CompileResult(TypedDict):
     compile: SubprocessExecResult
     disassembly: DisasmResult | None
     verifier: SubprocessExecResult | None
+    aot_compile: SubprocessExecResult | None
     ir_dump: IrDumpResult | None
+
+
+class AotCompileRunResult(TypedDict):
+    aot_compile: SubprocessExecResult
+    aot_run: SubprocessExecResult
 
 
 class CompileRunResult(TypedDict):
@@ -107,7 +107,8 @@ class CompileRunResult(TypedDict):
     disassembly: DisasmResult | None
     verifier: SubprocessExecResult | None
     run: SubprocessExecResult | None
-    run_aot: SubprocessExecResult | None
+    aot_compile: SubprocessExecResult | None
+    aot_run: SubprocessExecResult | None
     ir_dump: IrDumpResult | None
 
 
@@ -164,20 +165,7 @@ class Runner:
     @staticmethod
     def _empty_ir_dump(error: str = "", exit_code: int | None = None) -> IrDumpResult:
         """Create empty IR dump result"""
-        return {"output": "", "error": error, "compiler_dump": None, "disasm_dump": None, "exit_code": exit_code}
-
-    @staticmethod
-    def _format_aot_output(data: AotOutputData) -> tuple[str, str]:
-        """Format combined AOT output and error messages"""
-        output = ""
-        if data.compile_out:
-            output += f"=== AOT Compilation ===\n{data.compile_out}\n"
-        if data.run_out:
-            if output:
-                output += "\n"
-            output += data.run_out
-        error = f"{data.compile_err}\n{data.run_err}" if data.compile_err else data.run_err
-        return output, error
+        return {"output": "", "error": error, "compiler_dump": [], "disasm_dump": None, "exit_code": exit_code}
 
     async def get_versions(self) -> tuple[str, str, str]:
         """Get arkts_playground package and ark versions
@@ -199,12 +187,17 @@ class Runner:
         :rtype: Dict[str, Any]
         """
         log = logger.bind(stage="compile")
-        log.info("Compilation pipeline started", disasm=kwargs.get("disasm"), verifier=kwargs.get("verifier"))
+        log.info(
+            "Compilation pipeline started",
+            disasm=kwargs.get("disasm"),
+            verifier=kwargs.get("verifier"),
+            aot_mode=kwargs.get("aot_mode", False)
+        )
         async with aiofiles.tempfile.TemporaryDirectory(prefix="arkts_playground") as tempdir:
             stsfile = await self._save_code(tempdir, code)
             res: CompileResult = {
                 "compile": await self._compile(stsfile, options),
-                "disassembly": None, "verifier": None, "ir_dump": None
+                "disassembly": None, "verifier": None, "ir_dump": None, "aot_compile": None
             }
             log = log.bind(compile_ret=res["compile"]['exit_code'])
 
@@ -222,6 +215,14 @@ class Runner:
                 verify_res = await self._verify(abcfile)
                 res["verifier"] = verify_res
                 log.debug("Verification completed", verify_exit_code=verify_res["exit_code"])
+            if kwargs.get("aot_mode", False):
+                aot_res = await self._compile_aot_only(abcfile, tempdir)
+                res["aot_compile"] = {
+                    "output": aot_res.get("aot_compile_output"),
+                    "error": aot_res.get("aot_compile_error"),
+                    "exit_code": aot_res.get("aot_compile_exit_code")
+                }
+                log.debug("AOT compilation completed", aot_compile_exit_code=aot_res.get("aot_compile_exit_code"))
             ir_dump = kwargs.get("ir_dump")
             if ir_dump and (ir_dump.get("compiler_dump", False) or ir_dump.get("disasm_dump", False)):
                 dump_res = await self.generate_ir_dump(abcfile, tempdir, ir_dump)
@@ -245,7 +246,12 @@ class Runner:
             abcfile = f"{stsfile}.abc"
             res: CompileRunResult = {
                 "compile": await self._compile(stsfile, options),
-                "run": None, "run_aot": None, "disassembly": None, "verifier": None, "ir_dump": None
+                "run": None,
+                "aot_compile": None,
+                "aot_run": None,
+                "disassembly": None,
+                "verifier": None,
+                "ir_dump": None
             }
             log = log.bind(compile_ret=res["compile"]['exit_code'])
 
@@ -253,29 +259,36 @@ class Runner:
                 log.error("Compilation failed with nonzero exit code")
                 return res
 
-            ver_mode = kwargs.get("verification_mode", VerificationMode.AHEAD_OF_TIME)
-            log = log.bind(verification_mode=ver_mode.value, aot_mode=kwargs.get("aot_mode", False))
+            log = log.bind(
+                verification_mode=kwargs.get("verification_mode", VerificationMode.AHEAD_OF_TIME).value,
+                aot_mode=kwargs.get("aot_mode", False)
+            )
 
-            res["run"] = await self._run(abcfile, verification_mode=ver_mode)
+            res["run"] = await self._run(
+                abcfile,
+                verification_mode=kwargs.get("verification_mode", VerificationMode.AHEAD_OF_TIME)
+            )
             if kwargs.get("aot_mode", False):
-                res["run_aot"] = await self._run_aot(
-                    abcfile, tempdir, runtime_verify=ver_mode != VerificationMode.DISABLED
+                aot_res = await self._run_aot(
+                    abcfile,
+                    tempdir,
+                    verification_mode=kwargs.get("verification_mode", VerificationMode.AHEAD_OF_TIME)
                 )
+                res["aot_compile"] = aot_res["aot_compile"]
+                res["aot_run"] = aot_res["aot_run"]
             log.info("Program run completed")
 
             if disasm:
-                disasm_res = await self.disassembly(abcfile, f"{stsfile}.pa")
-                res["disassembly"] = disasm_res
-                log.debug("Disassembling completed", dis_exit_code=disasm_res["exit_code"])
+                res["disassembly"] = dis_res = await self.disassembly(abcfile, f"{stsfile}.pa")
+                log.debug("Disassembling completed", dis_exit_code=dis_res["exit_code"])
             if kwargs.get("verifier", False):
-                verifier_res = await self._verify(abcfile)
-                res["verifier"] = verifier_res
-                log.debug("Verification completed", verify_exit_code=verifier_res["exit_code"])
-            ir_dump_opts = kwargs.get("ir_dump")
-            if ir_dump_opts and (ir_dump_opts.get("compiler_dump") or ir_dump_opts.get("disasm_dump")):
-                ir_dump_res = await self.generate_ir_dump(abcfile, tempdir, ir_dump_opts)
-                res["ir_dump"] = ir_dump_res
-                log.debug("IR dump completed", ir_dump_exit_code=ir_dump_res["exit_code"])
+                res["verifier"] = ver_res = await self._verify(abcfile)
+                log.debug("Verification completed", verify_exit_code=ver_res["exit_code"])
+            if (ir_opts := kwargs.get("ir_dump")) and (
+                ir_opts.get("compiler_dump") or ir_opts.get("disasm_dump")
+            ):
+                res["ir_dump"] = ir_res = await self.generate_ir_dump(abcfile, tempdir, ir_opts)
+                log.debug("IR dump completed", ir_dump_exit_code=ir_res["exit_code"])
             return res
 
     async def disassembly(self, input_file: str, output_file: str) -> DisasmResult:
@@ -312,11 +325,11 @@ class Runner:
 
         if not Path(self.binary.ark_aot).exists():
             log.error("ark_aot binary not found", ark_aot_path=self.binary.ark_aot)
-            return self._empty_ir_dump(f"ark_aot binary not found at {self.binary.ark_aot}", 1)
+            return self._empty_ir_dump("Internal error", 1)
 
         if not Path(abc_file).exists():
             log.error("ABC file not found", abc_file=abc_file)
-            return self._empty_ir_dump(f"ABC file not found: {abc_file}", 1)
+            return self._empty_ir_dump("Internal error", 1)
 
         dump_folder = Path(tempdir) / "ir_dump"
         dump_folder.mkdir(exist_ok=True)
@@ -328,7 +341,7 @@ class Runner:
 
         result: IrDumpResult = {
             "output": stdout, "error": stderr,
-            "compiler_dump": None, "disasm_dump": None, "exit_code": retcode
+            "compiler_dump": [], "disasm_dump": None, "exit_code": retcode
         }
 
         if retcode == -11:
@@ -346,7 +359,7 @@ class Runner:
             result["compiler_dump"] = await self._read_compiler_dump_files(paths.dump_folder)
 
         log.info("IR dump completed successfully",
-                 has_compiler_dump=result["compiler_dump"] is not None,
+                 has_compiler_dump=len(result["compiler_dump"]) > 0,
                  has_disasm_dump=result["disasm_dump"] is not None)
         return result
 
@@ -379,18 +392,21 @@ class Runner:
                 "exit_code": retcode
             }
 
-    async def _read_compiler_dump_files(self, dump_folder: Path) -> str | None:
-        """Read and concatenate compiler dump files from folder"""
+    async def _read_compiler_dump_files(self, dump_folder: Path) -> list[IrDumpFileItem]:
+        """Read compiler dump files from folder and return as list of file items"""
         if not dump_folder.exists():
-            return None
+            return []
         dump_files = list(dump_folder.glob("*.ir"))
         if not dump_files:
-            return None
-        contents = []
+            return []
+        contents: list[IrDumpFileItem] = []
         for dump_file in sorted(dump_files):
             async with aiofiles.open(dump_file, mode="r", encoding="utf-8", errors="replace") as f:
-                contents.append(f"=== {dump_file.name} ===\n{await f.read()}")
-        return "\n\n".join(contents) if contents else None
+                contents.append({
+                    "name": dump_file.name,
+                    "content": await f.read()
+                })
+        return contents
 
     def _build_ir_dump_cmd(self, abc_file: str, paths: IrDumpPaths,
                            ir_dump_options: IrDumpOptions) -> list[str]:
@@ -509,8 +525,7 @@ class Runner:
         log = logger.bind(stage="run")
         entry_point = f"{Path(abcfile_name).with_suffix('').stem}.ETSGLOBAL::main"
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets"]
-        if verification_mode != VerificationMode.DISABLED:
-            run_cmd += [f"--verification-mode={verification_mode.value}"]
+        run_cmd += [f"--verification-mode={verification_mode.value}"]
         if self._icu_data:
             run_cmd.append(f"--icu-data-path={self._icu_data}")
         run_cmd.append(abcfile_name)
@@ -539,68 +554,132 @@ class Runner:
         stdout, stderr, retcode = await self._execute_cmd(self.binary.ark_aot, *aot_cmd)
         return stdout, stderr, retcode
 
-    def _build_aot_run_cmd(self, abcfile: str, output_an: Path, runtime_verify: bool) -> list[str]:
+    def _build_aot_run_cmd(
+        self, abcfile: str,
+        verification_mode: VerificationMode = VerificationMode.AHEAD_OF_TIME
+    ) -> list[str]:
         """Build command for running AOT compiled code"""
         entry_point = f"{Path(abcfile).with_suffix('').stem}.ETSGLOBAL::main"
-        cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets", f"--aot-file={output_an}"]
-        if runtime_verify:
-            cmd.append("--verification-mode=ahead-of-time")
+        cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets", "--enable-an:force"]
+        cmd.append(f"--verification-mode={verification_mode.value}")
         if self._icu_data:
             cmd.append(f"--icu-data-path={self._icu_data}")
         cmd.extend([abcfile, entry_point])
         return cmd
 
-    def _handle_aot_compile_failure(self, aot_out: str, aot_err: str, aot_ret: int | None) -> SubprocessExecResult:
-        """Handle AOT compilation failure and return error result"""
-        parts = ["AOT compilation failed:"]
-        if aot_out.strip():
-            parts.append(f"stdout:\n{aot_out}")
-        if aot_err.strip():
-            parts.append(f"stderr:\n{aot_err}")
-        error = "\n".join(parts)
+    async def _compile_aot_only(self, abcfile: str, tempdir: str) -> SubprocessExecResult:
+        """Compiles ABC to native code using AOT (compilation only, no execution)"""
+        log = logger.bind(source="aot_compile")
+
+        if not Path(self.binary.ark_aot).exists():
+            log.error("ark_aot binary not found", ark_aot_path=self.binary.ark_aot)
+            return {
+                "aot_compile_output": "",
+                "aot_compile_error": "Internal error",
+                "aot_compile_exit_code": 1,
+                "run_output": "",
+                "run_error": "",
+                "exit_code": None,
+            }
+
+        output_an = Path(tempdir) / "output.an"
+        log.info("Starting AOT compilation (compile-only mode)", abc_file=abcfile)
+        aot_out, aot_err, aot_ret = await self._aot_compile(abcfile, output_an)
+
+        log = log.bind(aot_compile_ret=aot_ret)
         if aot_ret == -11:
-            error += "\nAOT compilation: Segmentation fault"
+            aot_err += "\nAOT compilation: Segmentation fault"
+            log.error("AOT compilation failed: segmentation fault")
             RUNTIME_FAILURES.labels("aot_segfault").inc()
-        else:
+        elif aot_ret != 0:
+            log.error("AOT compilation failed", exit_code=aot_ret)
             RUNTIME_FAILURES.labels("aot_compile_failure").inc()
-        return {"output": "", "error": error, "exit_code": aot_ret}
+        else:
+            log.info("AOT compilation succeeded")
 
-    async def _run_aot_execution(self, abcfile: str, output_an: Path,
-                                  runtime_verify: bool, aot_data: tuple[str, str]) -> SubprocessExecResult:
-        """Execute AOT compiled code and return result"""
-        aot_out, aot_err = aot_data
-        stdout, stderr, retcode = await self._execute_cmd(
-            self.binary.ark_bin, *self._build_aot_run_cmd(abcfile, output_an, runtime_verify)
-        )
-        output, error = self._format_aot_output(
-            AotOutputData(aot_out, stdout, aot_err, stderr)
-        )
-        if retcode == -11:
-            error += "\nrun (AOT): Segmentation fault"
-            logger.error("AOT program run failed: segmentation fault", source="aot")
-            RUNTIME_FAILURES.labels("aot_run_segfault").inc()
-        elif retcode != 0:
-            RUNTIME_FAILURES.labels("aot_run_failure").inc()
-        return {"output": output, "error": error, "exit_code": retcode}
+        return {
+            "aot_compile_output": aot_out,
+            "aot_compile_error": aot_err,
+            "aot_compile_exit_code": aot_ret,
+            "run_output": "",
+            "run_error": "",
+            "exit_code": None,
+        }
 
-    async def _run_aot(self, abcfile: str, tempdir: str, runtime_verify: bool = False) -> SubprocessExecResult:
+    async def _run_aot(
+        self, abcfile: str, tempdir: str,
+        verification_mode: VerificationMode = VerificationMode.AHEAD_OF_TIME
+    ) -> AotCompileRunResult:
         """Compiles ABC to native code using AOT and runs it"""
         log = logger.bind(source="aot")
 
         if not Path(self.binary.ark_aot).exists():
             log.error("ark_aot binary not found", ark_aot_path=self.binary.ark_aot)
-            return {"output": "", "error": f"AOT mode requires ark_aot binary at {self.binary.ark_aot}", "exit_code": 1}
+            return {
+                "aot_compile": {
+                    "output": "",
+                    "error": "Internal error",
+                    "exit_code": 1
+                },
+                "aot_run": {
+                    "output": "",
+                    "error": "",
+                    "exit_code": 1
+                }
+            }
 
         output_an = Path(tempdir) / "output.an"
         log.info("Starting AOT compilation", abc_file=abcfile)
         aot_out, aot_err, aot_ret = await self._aot_compile(abcfile, output_an)
 
-        if aot_ret != 0:
+        log = log.bind(aot_compile_ret=aot_ret)
+        if aot_ret == -11:
+            aot_err += "\nAOT compilation: Segmentation fault"
+            log.error("AOT compilation failed: segmentation fault")
+            RUNTIME_FAILURES.labels("aot_segfault").inc()
+        elif aot_ret != 0:
             log.error("AOT compilation failed", exit_code=aot_ret)
-            return self._handle_aot_compile_failure(aot_out, aot_err, aot_ret)
+            RUNTIME_FAILURES.labels("aot_compile_failure").inc()
 
-        log.info("AOT compilation succeeded")
-        return await self._run_aot_execution(abcfile, output_an, runtime_verify, (aot_out, aot_err))
+        aot_compile_result: SubprocessExecResult = {
+            "output": aot_out,
+            "error": aot_err,
+            "exit_code": aot_ret
+        }
+
+        if aot_ret != 0:
+            log.info("Skipping AOT execution due to compilation failure")
+            return {
+                "aot_compile": aot_compile_result,
+                "aot_run": {
+                    "output": "",
+                    "error": "",
+                    "exit_code": None
+                }
+            }
+
+        log.info("AOT compilation succeeded, starting execution")
+        stdout, stderr, retcode = await self._execute_cmd(
+            self.binary.ark_bin, *self._build_aot_run_cmd(abcfile, verification_mode)
+        )
+
+        if retcode == -11:
+            stderr += "\nrun (AOT): Segmentation fault"
+            log.error("AOT program run failed: segmentation fault")
+            RUNTIME_FAILURES.labels("aot_run_segfault").inc()
+        elif retcode != 0:
+            RUNTIME_FAILURES.labels("aot_run_failure").inc()
+
+        aot_run_result: SubprocessExecResult = {
+            "output": stdout,
+            "error": stderr,
+            "exit_code": retcode
+        }
+
+        return {
+            "aot_compile": aot_compile_result,
+            "aot_run": aot_run_result
+        }
 
     def _validate(self):
         for f in [self.binary.disasm_bin, self.binary.ark_bin, self.binary.es2panda, self.stdlib_abc]:

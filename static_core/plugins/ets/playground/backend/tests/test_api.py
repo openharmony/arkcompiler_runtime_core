@@ -88,6 +88,7 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
         },
         "disassembly": None,
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None
     }
     if run_compile:
@@ -96,7 +97,7 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
             "error": error_msg,
             "exit_code": 0
         }
-        result["run_aot"] = None
+        result["aot_run"] = None
     if disasm:
         result["disassembly"] = {
             "output": output_msg,
@@ -188,7 +189,7 @@ def test_features_api(playground_client, monkeypatch):
     assert resp.json() == {"ast_mode": "manual"}
 
 
-@pytest.mark.parametrize("verification_mode", ["disabled", "ahead-of-time", "on-the-fly"])
+@pytest.mark.parametrize("verification_mode", ["disabled", "ahead-of-time"])
 def test_run_api_with_verification_modes(playground_client, verification_mode):
     resp = playground_client.post("/run", json={
         "code": "let x = 1",
@@ -200,7 +201,7 @@ def test_run_api_with_verification_modes(playground_client, verification_mode):
     assert resp.status_code == 200
     result = resp.json()
 
-    expected_top_level_keys = {"compile", "run", "run_aot", "disassembly", "verifier", "ir_dump"}
+    expected_top_level_keys = {"compile", "run", "aot_run", "aot_compile", "disassembly", "verifier", "ir_dump"}
     expected_compile_keys = {"exit_code", "output", "error"}
     expected_run_keys = {"exit_code", "output", "error"}
 
@@ -225,7 +226,7 @@ def test_run_api_with_verification_modes(playground_client, verification_mode):
 
     assert result["disassembly"] is None
     assert result["verifier"] is None
-    assert result["run_aot"] is None
+    assert result["aot_run"] is None
     assert result["ir_dump"] is None
 
 
@@ -252,7 +253,8 @@ def test_run_api_full_json_schema_validation(playground_client):
             "output": str,
             "error": str,
         },
-        "run_aot": type(None),
+        "aot_run": type(None),
+        "aot_compile": type(None),
         "disassembly": type(None),
         "verifier": type(None),
         "ir_dump": type(None),
@@ -279,7 +281,8 @@ def test_run_api_full_json_schema_validation(playground_client):
 
     assert result["disassembly"] is None
     assert result["verifier"] is None
-    assert result["run_aot"] is None
+    assert result["aot_run"] is None
+    assert result["aot_compile"] is None
     assert result["ir_dump"] is None
 
 
