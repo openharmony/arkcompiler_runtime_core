@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,12 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the ani for ArkTS
+ * @kit ArkTS
+ */
+
 
 package std.annotations;
 
+/**
+ * Defines ani.unsafe
+ * @namespace ani.unsafe
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export namespace ani.unsafe {
+    /**
+     * Defines Quick annotation
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     @Retention("BYTECODE")
     export @interface Quick {};
+    /**
+     * Defines Direct annotation
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     @Retention("BYTECODE")
     export @interface Direct {};
 }

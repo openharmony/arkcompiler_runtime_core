@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Functions for ArkTS
+ * @kit ArkTS
+ */
+
 
 package escompat;
 
@@ -79,6 +84,12 @@ const uriArrayComponent: boolean[];
 /**
  * The decodeURI() function decodes a Uniform Resource Identifier
  * (URI) previously created by encodeURI() or a similar routine.
+ *
+ * @param { string } uri - The URI string that needs to be decoded
+ * @returns { string }
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function decodeURI(uri: string): string {
     return unescapeImpl(
@@ -168,6 +179,12 @@ function encodeURIImpl(uri: string, ok: boolean[]): string {
  * characters). Compared to encodeURIComponent(), this function
  * encodes fewer characters, preserving those that are part of the
  * URI syntax.
+ *
+ * @param { string } uri - URI that needs to be encoded
+ * @returns { string } - The encoded result
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function encodeURI(uri: string): string {
     return encodeURIImpl(uri, uriArray)
@@ -177,6 +194,12 @@ export function encodeURI(uri: string): string {
  * The decodeURIComponent() function decodes a Uniform Resource
  * Identifier (URI) component previously created
  * by encodeURIComponent() or by a similar routine.
+ *
+ * @param { string } uriComponent - URI that needs to be encoded
+ * @returns { string } - The encoded result
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function decodeURIComponent(uriComponent: string): string {
     return unescapeImpl(
@@ -196,10 +219,12 @@ export function decodeURIComponent(uriComponent: string): string {
  * encodes more characters, including those that are part of the URI
  * syntax.
  *
- * @param uriComponent a string to be encoded as a URI component
- * (a path, query string, fragment, etc.). Other values are converted to strings.
- *
- * @returns A new string representing the provided uriComponent encoded as a URI component.
+ * @param { String | Number | Boolean } uriComponent - a string to be encoded as a URI component.
+ *     (a path, query string, fragment, etc.). Other values are converted to strings.
+ * @returns { string } - A new string representing the provided uriComponent encoded as a URI component.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function encodeURIComponent(uriComponent: String | Number | Boolean): string {
     if (uriComponent instanceof String) {
@@ -212,22 +237,26 @@ export function encodeURIComponent(uriComponent: String | Number | Boolean): str
 }
 
 /**
- * @deprecated This feature is no longer recommended. Though some
+ * This feature is no longer recommended. Though some
  * browsers might still support it, it may have already been removed
  * from the relevant web standards, may be in the process of being
  * dropped, or may only be kept for compatibility purposes. Avoid
  * using it, and update existing code if possible; see the
  * compatibility table at the bottom of this page to guide your
  * decision. Be aware that this feature may cease to work at any time.
- *
- * @note escape() is a non-standard function implemented by browsers
+ * escape() is a non-standard function implemented by browsers
  * and was only standardized for cross-engine compatibility. It is not
  * required to be implemented by all JavaScript engines and may not
  * work everywhere. Use encodeURIComponent() or encodeURI() if
  * possible.
  *
- * The escape() function computes a new string in which certain
- * characters have been replaced by hexadecimal escape sequences.
+ * @param { string } str - a string to be encoded
+ * @returns { string } - a new string in which certain characters have been replaced by hexadecimal escape sequences.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ * @deprecated since 24
+ * @useinstead { encodeURIComponent, encodeURI }
  */
 export function escape(str: string): string {
     let ret = new StringBuilder()
@@ -318,24 +347,27 @@ function unescapeImpl(str: string, push: (str: string, i: int, ret: StringBuilde
 }
 
 /**
- * @deprecated This feature is no longer recommended. Though some
+ * This feature is no longer recommended. Though some
  * browsers might still support it, it may have already been removed
  * from the relevant web standards, may be in the process of being
  * dropped, or may only be kept for compatibility purposes. Avoid
  * using it, and update existing code if possible; see the
  * compatibility table at the bottom of this page to guide your
  * decision. Be aware that this feature may cease to work at any time.
- *
- * @note unescape() is a non-standard function implemented by browsers
+ * unescape() is a non-standard function implemented by browsers
  * and was only standardized for cross-engine compatibility. It is not
  * required to be implemented by all JavaScript engines and may not
  * work everywhere. Use decodeURIComponent() or decodeURI() if
  * possible.
  *
- * The unescape() function computes a new string in which hexadecimal
- * escape sequences are replaced with the characters that they
- * represent. The escape sequences might be introduced by a function
- * like escape().
+ * @param { string } str - a string to be decoded
+ * @returns { string } - a new string in which hexadecimal escape sequences are replaced with
+ *     the characters that they represent.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ * @deprecated since 24
+ * @useinstead { decodeURIComponent, decodeURI }
  */
 export function unescape(str: string): string {
     let ret = new StringBuilder();

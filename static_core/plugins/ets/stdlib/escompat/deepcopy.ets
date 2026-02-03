@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,20 +12,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the deepcopy for ArkTS
+ * @kit ArkTS
+ */
+
 
 package escompat;
 
+/**
+ * Defines Cloneable interface
+ *
+ * @interface Cloneable
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export interface Cloneable {
+	/**
+	 * Clone an object
+	 *
+	 * @returns { Cloneable }
+	 * @syscap SystemCapability.Utils.Lang
+	 * @FaAndStageModel
+     * @since 24
+	 */
 	clone(): Cloneable;
 }
 
-// deepcopy can be used to copy a instance deeply, like builtins types, class with 
-// default constructor. If the instance is or contain a class without default 
-// constructor, `Cloneable` can be used to help to implement copying deeply. At the
-// same time, DeepCopy supports cloning of subclasses that inherit from the parent
-// class provided that the clone method needs to be overridden and if the clone method
-// is not overridden in the parent and child classes an error will be thrown at runtime
-
+/**
+ * deepcopy can be used to copy a instance deeply, like builtins types, class with 
+ * default constructor. If the instance is or contain a class without default 
+ * constructor, `Cloneable` can be used to help to implement copying deeply. At the
+ * same time, DeepCopy supports cloning of subclasses that inherit from the parent
+ * class provided that the clone method needs to be overridden and if the clone method
+ * is not overridden in the parent and child classes an error will be thrown at runtime
+ *
+ * @param { T | null | undefined } src - Data that requires deep copying
+ * @param { int } [depth] - The maximum depth for recursive replication. The default value is -1,
+ *     indicating that all nested types will undergo deep copying
+ * @returns { T | null | undefined }
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function deepcopy<T>(src: T | null | undefined, depth: int = -1): T | null | undefined {
 	const maxDepth = (depth == -1) ? Int.MAX_VALUE : depth
 	return new DeepCloner(maxDepth).clone<T>(src)
