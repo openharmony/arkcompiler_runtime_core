@@ -32,9 +32,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_5.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_6.ets
 
-### Undefined type
-spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
-
 #19963
 spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
 spec/03.types/References_Types/Type_undefined/complex-type.ets
@@ -295,6 +292,8 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 #23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
+#32768
+std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 ### Negative tests (Import-export)
 spec/import_export/05.export_directives/02.export_type_directives/to_export_negative.ets
 
@@ -352,21 +351,6 @@ std/serialization/std_serialization_json_stringify_float_array.ets
 # 9.
 # other fails
 std/core/std_core_BigInt_instance_BigInt_toString_011.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-11.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-12.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-13.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-18.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-comparison-19.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-dec.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-1.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc-2.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-inc.ets
 std/core/TypeCreateErasedBodyTest.ets
 std/core/NumberTest.ets
 regression/15278_0.ets

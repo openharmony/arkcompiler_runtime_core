@@ -1314,10 +1314,8 @@
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_3.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_4.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_5.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_7.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_8.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_10.ets
 15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_11.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
