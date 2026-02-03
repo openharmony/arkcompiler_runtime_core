@@ -1,0 +1,3 @@
+#33323
+ets_tests/ets_escompat_typed_arrays_set_get.ets
+ets_tests/ets_escompat_typed_arrays_set_get_part3.ets

@@ -117,7 +117,7 @@ class Parent {
     static UN: UClassA | UClassB | number = 42
     static readonly RDONLYPRIM: int = 8
     static readonly RDONLYSTR: string = ''
-    static TPLE: [int, string] = [42, "str"]
+    static TPLE: [int, string, Object] = [42, "str", 17.8]
     static ENM = TestFieldEnum.ONE
 
     static get PROP(): number {
@@ -133,7 +133,7 @@ class Parent {
     readonly rdonlyPrim: int = 8
     readonly rdonlyStr: string = ''
     un: UClassA | UClassB | number = 42
-    tple: [int, string] = [42, "str"]
+    tple: [int, string, Point] = [42, "str", new Point()]
     enm: TestFieldEnum = TestFieldEnum.ONE
     private priv = true
     protected prot = true
@@ -242,7 +242,7 @@ function testInstanceGetSetTuple(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
     const parentTpleFld = parentCls.getInstanceField('tple')!
-    const localTuple: [int, string] = [0, "local"]
+    const localTuple: [int, string, Object] = [0, "local", "test"]
 
     arktest.assertNE(localTuple, parentInst.tple)
     arktest.assertNE(localTuple, parentTpleFld.getValue(parentInst))
@@ -250,7 +250,7 @@ function testInstanceGetSetTuple(): void {
     arktest.assertEQ(localTuple, parentInst.tple)
     arktest.assertEQ(localTuple, parentTpleFld.getValue(parentInst))
 
-    const undefTuple: [int | undefined, string | undefined] = [undefined, undefined]
+    const undefTuple: [int | undefined, string | undefined, Object | undefined] = [undefined, undefined, undefined]
     parentTpleFld.setValue(parentInst, undefTuple)
     arktest.assertEQ(undefTuple, parentInst.tple)
     arktest.assertEQ(undefTuple, parentTpleFld.getValue(parentInst))
@@ -377,7 +377,7 @@ function testInstanceGetSetTupleNegative(): void {
     const parentInst = new Parent()
     const parentCls = Class.of(parentInst)
     const parentTpleFld = parentCls.getInstanceField('tple')!
-    const localTuple: [number, Object, string] = [3.14, new Object(), '']
+    const localTuple: [number, Object] = [3.14, new Object()]
     const originalTuple = parentInst.tple
 
     arktest.expectError(() => {
@@ -470,7 +470,7 @@ function testStaticGetSetUnion(): void {
 function testStaticGetSetTuple(): void {
     const parentCls = Class.from<Parent>()
     const parentTpleFld = parentCls.getStaticField('TPLE')!
-    const localTuple: [int, string] = [0, "local"]
+    const localTuple: [int, string, Point, number] = [0, "local", new Point3D(), 3.14]
     const originalTuple = Parent.TPLE
 
     arktest.assertNE(localTuple, Parent.TPLE)
@@ -550,7 +550,7 @@ function testStaticGetSetUnionNegative(): void {
 function testStaticGetSetTupleNegative(): void {
     const parentCls = Class.from<Parent>()
     const parentTpleFld = parentCls.getStaticField('TPLE')!
-    const localTuple: [number, Object, string] = [3.14, new Object(), '']
+    const localTuple: [number, Object] = [3.14, new Object()]
     const originalTuple = Parent.TPLE
 
     arktest.expectError(() => {
