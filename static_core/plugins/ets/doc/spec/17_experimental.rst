@@ -1074,7 +1074,7 @@ An *iterable* class ``C`` is represented in the example below:
         next(): IteratorResult<string> {
           return {
             done: this.index >= this.base.data.length,
-            value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+            value: this.index >= this.base.data.length ? "" : this.base.data[this.index++]
           }
         }
       }
