@@ -641,16 +641,18 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     if (asyncAnnId.IsValid()) {
         return reinterpret_cast<const void *>(EtsAsyncEntryPoint);
     }
+    auto *coroutine = ets::EtsCoroutine::GetCurrent();
+    bool isVerifyEnabled = coroutine->GetPandaVM()->IsVerifyANI();
     switch (GetEtsNapiType(method)) {
         case EtsNapiType::GENERIC: {
-            return ani::GetANIEntryPoint();
+            return ani::GetANIEntryPoint(isVerifyEnabled);
         }
         case EtsNapiType::FAST: {
             auto flags = method->GetAccessFlags();
             flags |= ACC_FAST_NATIVE;
             method->SetAccessFlags(flags);
 
-            return ani::GetANIEntryPoint();
+            return ani::GetANIEntryPoint(isVerifyEnabled);
         }
         case EtsNapiType::CRITICAL: {
             auto flags = method->GetAccessFlags();

@@ -732,16 +732,14 @@ TEST_F(ClassCallStaticMethodBooleanTest, method_call_from_native_method_1)
 {
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("verify_class_call_static_method_boolean_test.Parent", &cls), ANI_OK);
-    ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
-    ani_object object {};
-    ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
-
     std::array methods = {
         ani_native_function {"foo", ":", reinterpret_cast<void *>(A::NativeFoo)},
         ani_native_function {"baz", ":", reinterpret_cast<void *>(A::NativeBaz<ClassCallStaticMethodBooleanTest>)}};
     ASSERT_EQ(env_->Class_BindNativeMethods(cls, methods.data(), methods.size()), ANI_OK);
-
+    ani_method ctor {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+    ani_object object {};
+    ASSERT_EQ(env_->Object_New(cls, ctor, &object), ANI_OK);
     // In the native "foo" method, the "staticVoidParamMethod" method is found
     ASSERT_EQ(env_->Object_CallMethodByName_Void(object, "foo", ":"), ANI_OK);
     // In the native "baz" method, the "staticVoidParamMethod" method is called

@@ -18,6 +18,21 @@
 namespace ark::ets::ani::verify::testing {
 
 class DestroyEscapeLocalScopeTest : public VerifyAniTest {
+public:
+    static void GetClassAndObject(ani_env *env, ani_class *cls, const char *className, ani_object *object)
+    {
+        // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
+        ASSERT_EQ(env->FindClass(className, cls), ANI_OK);
+        ASSERT_NE(*cls, nullptr);
+
+        ani_method ctor {};
+        ASSERT_EQ(env->Class_FindMethod(*cls, "<ctor>", ":", &ctor), ANI_OK);
+
+        ASSERT_EQ(env->Object_New(*cls, ctor, object), ANI_OK);
+        ASSERT_NE(*object, nullptr);
+        // NOLINTEND(cppcoreguidelines-pro-type-vararg)
+    }
+
 protected:
     void CreateEscapeLocalScope()
     {
@@ -121,7 +136,8 @@ TEST_F(DestroyEscapeLocalScopeTest, invalid_ref_after_destroy_scope)
 {
     ASSERT_EQ(env_->CreateEscapeLocalScope(1), ANI_OK);
     ani_ref ref {};
-    ASSERT_EQ(env_->GetUndefined(&ref), ANI_OK);
+    ani_class cls {};
+    GetClassAndObject(env_, &cls, "std.core.Int", reinterpret_cast<ani_object *>(&ref));
     ani_ref escapeRef {};
     ASSERT_EQ(env_->c_api->DestroyEscapeLocalScope(env_, ref, &escapeRef), ANI_OK);
     ani_boolean isUndefined = ANI_FALSE;

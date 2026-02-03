@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ani/ani_helpers.h"
-
+#include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "libarkfile/shorty_iterator.h"
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
@@ -81,9 +81,13 @@ public:
 }  // namespace
 
 extern "C" void EtsNapiEntryPoint();
+extern "C" void EtsNapiVerifyEntryPoint();
 
-const void *GetANIEntryPoint()
+const void *GetANIEntryPoint(bool verifyMode)
 {
+    if (verifyMode) {
+        return reinterpret_cast<const void *>(EtsNapiVerifyEntryPoint);
+    }
     return reinterpret_cast<const void *>(EtsNapiEntryPoint);
 }
 
@@ -348,6 +352,16 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
     return outRegsArgs;
 }
 
+extern "C" uint8_t *EtsNapiBeginVerify(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
+                                       ManagedThread *thread)
+{
+    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
+    PandaEnv *pandaEnv = coroutine->GetEtsNapiEnv();
+    auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
+    envANIVerifier->PushNativeFrame();
+    return EtsNapiBegin(method, inRegsArgs, inStackArgs, outStackArgs, thread);
+}
+
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
@@ -369,6 +383,20 @@ extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNat
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
+}
+
+extern "C" void EtsNapiEndVerify(Method *method, ManagedThread *thread, bool isFastNative)
+{
+    auto coroutine = EtsCoroutine::CastFromThread(thread);
+
+    // Pop native frame verification before ending the native method
+    auto envANIVerifier = coroutine->GetEtsNapiEnv()->GetEnvANIVerifier();
+    auto err = envANIVerifier->PopNativeFrame();
+    if (err) {
+        LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
+    }
+
+    EtsNapiEnd(method, thread, isFastNative);
 }
 
 extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
@@ -394,6 +422,22 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, Manage
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 
     return ret;
+}
+
+extern "C" EtsObject *EtsNapiObjEndVerify(Method *method, verify::VRef vref, ManagedThread *thread, bool isFastNative)
+{
+    auto coroutine = EtsCoroutine::CastFromThread(thread);
+    ani_ref ref = vref.GetRef();
+    auto etsRef = reinterpret_cast<EtsReference *>(ref);
+
+    EtsObject *obj = EtsNapiObjEnd(method, etsRef, thread, isFastNative);
+    // Pop native frame verification before ending the native method
+    auto envANIVerifier = coroutine->GetEtsNapiEnv()->GetEnvANIVerifier();
+    auto err = envANIVerifier->PopNativeFrame();
+    if (err) {
+        LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
+    }
+    return obj;
 }
 
 extern "C" bool IsEtsMethodFastNative(Method *method)
