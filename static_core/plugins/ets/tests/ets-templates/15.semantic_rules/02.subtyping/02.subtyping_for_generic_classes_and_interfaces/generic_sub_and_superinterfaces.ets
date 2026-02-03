@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -23,7 +23,7 @@ interface C<T extends String, G extends Number> {
 }
 
 interface D<T extends String, G extends Number> extends C<T, G> {
-    name: 'String2'
+    name: T
     id: G;
 }
 
