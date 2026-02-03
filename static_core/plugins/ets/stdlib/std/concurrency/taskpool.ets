@@ -491,6 +491,11 @@ export namespace taskpool {
                 if (result instanceof Promise) {
                     result.then(() => {
                         executionSucceeded = true;
+                    }).catch((e) => {
+                        try {
+                            this.onFailCallback?.(e as Error);
+                        } catch (callbackError) {}
+                        throw e;
                     });
                 } else {
                     executionSucceeded = true;
