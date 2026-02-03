@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,20 +167,6 @@ TEST_F(ClassSetStaticFieldIntTest, combination_test3)
     CHECK_FIELD_VALUE(cls, field, 3U, 2U);
 }
 
-TEST_F(ClassSetStaticFieldIntTest, check_initialization)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.TestSetIntFinal", &cls), ANI_OK);
-
-    ani_static_field field {};
-    ASSERT_EQ(env_->Class_FindStaticField(cls, "int_value", &field), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.TestSetIntFinal"));
-    const ani_int intValue = 2410;
-    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.TestSetIntFinal"));
-}
-
 TEST_F(ClassSetStaticFieldIntTest, check_hierarchy)
 {
     ani_class clsParent {};
@@ -189,32 +175,34 @@ TEST_F(ClassSetStaticFieldIntTest, check_hierarchy)
     ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &clsChild), ANI_OK);
 
     ani_static_field parentFieldInParent {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "parentField", &parentFieldInParent), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "parentStaticField", &parentFieldInParent), ANI_OK);
     ani_static_field parentFieldInChild {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "parentField", &parentFieldInChild), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "parentStaticField", &parentFieldInChild), ANI_OK);
     ani_static_field childFieldInParent {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "childField", &childFieldInParent), ANI_NOT_FOUND);
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "childStaticField", &childFieldInParent), ANI_NOT_FOUND);
     ani_static_field childFieldInChild {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "childField", &childFieldInChild), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "childStaticField", &childFieldInChild), ANI_OK);
     ani_static_field overridedFieldInParent {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "overridedField", &overridedFieldInParent), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(clsParent, "overridedStaticField", &overridedFieldInParent), ANI_OK);
     ani_static_field overridedFieldInChild {};
-    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "overridedField", &overridedFieldInChild), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(clsChild, "overridedStaticField", &overridedFieldInChild), ANI_OK);
 
-    // |-------------------------------------------------------------------------------------------------------|
-    // |  ani_class  |          ani_static_field          |  ani_status  |               action                |
-    // |-------------|------------------------------------|--------------|-------------------------------------|
-    // |   Parent    |   parentField from Parent class    |    ANI_OK    |    access to Parent.parentField     |
-    // |   Parent    |   parentField from Child class     |    ANI_OK    |    access to Parent.parentField     |
-    // |   Parent    |    childField from Child class     |      UB      |                 --                  |
-    // |   Parent    |  overridedField from Child class   |      UB      |                 --                  |
-    // |   Parent    |  overridedField from Parent class  |    ANI_OK    |   access to Parent.overridedField   |
-    // |   Child     |    parentField from Parent class   |    ANI_OK    |    access to Parent.parentField     |
-    // |   Child     |    parentField from Child class    |    ANI_OK    |    access to Parent.parentField     |
-    // |   Child     |    childField from Child class     |    ANI_OK    |     access to Child.childField      |
-    // |   Child     |  overridedField from Child class   |    ANI_OK    |   access to Child.overridedField    |
-    // |   Child     |  overridedField from Parent class  |    ANI_OK    |   access to Parent.overridedField   |
-    // |-------------|------------------------------------|--------------|-------------------------------------|
+    // clang-format off
+    // |---------------------------------------------------------------------------------------------------------------|
+    // | ani_class |             ani_static_field             | ani_status |                  action                   |
+    // |-----------|------------------------------------------|------------|-------------------------------------------|
+    // |  Parent   |   parentStaticField from Parent class    |   ANI_OK   |    access to Parent.parentStaticField     |
+    // |  Parent   |   parentStaticField from Child class     |   ANI_OK   |    access to Parent.parentStaticField     |
+    // |  Parent   |    childStaticField from Child class     |     UB     |                    --                     |
+    // |  Parent   |  overridedStaticField from Child class   |     UB     |                    --                     |
+    // |  Parent   |  overridedStaticField from Parent class  |   ANI_OK   |   access to Parent.overridedStaticField   |
+    // |  Child    |    parentStaticField from Parent class   |   ANI_OK   |    access to Parent.parentStaticField     |
+    // |  Child    |    parentStaticField from Child class    |   ANI_OK   |    access to Parent.parentStaticField     |
+    // |  Child    |    childStaticField from Child class     |   ANI_OK   |     access to Child.childStaticField      |
+    // |  Child    |  overridedStaticField from Child class   |   ANI_OK   |   access to Child.overridedStaticField    |
+    // |  Child    |  overridedStaticField from Parent class  |   ANI_OK   |   access to Parent.overridedStaticField   |
+    // |-----------|------------------------------------------|------------|-------------------------------------------|
+    // clang-format on
 
     CHECK_FIELD_VALUE(clsParent, parentFieldInParent, 0U, 1U);
     CHECK_FIELD_VALUE(clsParent, parentFieldInChild, 0U, 2U);
@@ -225,6 +213,174 @@ TEST_F(ClassSetStaticFieldIntTest, check_hierarchy)
     CHECK_FIELD_VALUE(clsChild, childFieldInChild, 0U, 6U);
     CHECK_FIELD_VALUE(clsChild, overridedFieldInChild, 0U, 7U);
     CHECK_FIELD_VALUE(clsChild, overridedFieldInParent, 0U, 8U);
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization0)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Parent", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Parent", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Parent", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Grandchild", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Child", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Grandchild", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldIntTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_int_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
+    const ani_int intValue = 2410;
+    ASSERT_EQ(env_->Class_SetStaticField_Int(cls, field, intValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_int_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

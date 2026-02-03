@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,4 +24,14 @@ class PackstaticA extends Packstatic {
 
 final class PackstaticFinal extends Packstatic {
     static int_value: int = 0;
+}
+
+class Parent {
+    static parentStaticField: int = 1;
+}
+class Child extends Parent {
+    static childStaticField: int = 2;
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: int = 3;
 }

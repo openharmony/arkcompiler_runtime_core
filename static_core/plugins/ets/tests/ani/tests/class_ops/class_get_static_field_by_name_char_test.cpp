@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,19 +161,139 @@ TEST_F(ClassGetStaticFieldByNameCharTest, combination_test4)
     CheckFieldValue("class_get_static_field_by_name_char_test.CharStaticFinal", "char_value");
 }
 
-TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization)
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.CharStaticFinal", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.CharStaticFinal"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
     ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "parentStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
 
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "char_valuex", &charValue), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.CharStaticFinal"));
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Parent", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "char_value", &charValue), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.CharStaticFinal"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "childStaticField", &charValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "grandchildStaticField", &charValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "parentStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "childStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "grandchildStaticField", &charValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "parentStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "childStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameCharTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_char_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
+    ani_char charValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Char(cls, "grandchildStaticField", &charValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_char_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,4 +23,14 @@ class TestSetShortA extends TestSetShort {
 
 final class TestSetShortFinal extends TestSetShort {
     static short_value: short = 3;
+}
+
+class Parent {
+    static parentStaticField: short = 3;
+}
+class Child extends Parent {
+    static childStaticField: short = 2;
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: short = 1;
 }
