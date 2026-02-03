@@ -503,7 +503,6 @@ void GC::ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceC
 
 void GC::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred)
 {
-    ASSERT(!this->IsFullGC());
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, REF_PROC) << "Start processing cleared references";
     ASSERT(referenceProcessor_ != nullptr);

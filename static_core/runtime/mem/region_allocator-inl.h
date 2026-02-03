@@ -551,7 +551,9 @@ size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *re
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
     size_t aliveMoveCount = 0;
     // We should create live bitmap here and copy alive object in marked bitmap to it
-    region->CreateLiveBitmap();
+    if (region->GetLiveBitmap() == nullptr) {
+        region->CreateLiveBitmap();
+    }
     region->CloneMarkBitmapToLiveBitmap();
     [[maybe_unused]] auto visitor = [&aliveObjectsHandler, &region](ObjectHeader *object) {
         aliveObjectsHandler(object);

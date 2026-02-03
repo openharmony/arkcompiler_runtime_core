@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,6 +135,16 @@ MarkBitmap *Region::CreateLiveBitmap()
     ASSERT(liveBitmap_ != nullptr);
     liveBitmap_->ClearAllBits();
     return liveBitmap_;
+}
+
+void Region::DeleteLiveBitmap()
+{
+    auto allocator = GetInternalAllocator();
+    if (liveBitmap_ != nullptr) {
+        allocator->Delete(liveBitmap_->GetBitMap().data());
+        allocator->Delete(liveBitmap_);
+        liveBitmap_ = nullptr;
+    }
 }
 
 void Region::SwapMarkBitmap()
