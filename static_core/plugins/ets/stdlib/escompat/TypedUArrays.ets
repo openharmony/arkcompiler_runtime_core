@@ -840,7 +840,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -852,7 +852,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -953,7 +953,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -965,7 +965,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2355,7 +2355,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2367,7 +2367,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2468,7 +2468,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -2480,7 +2480,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3854,7 +3854,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3866,7 +3866,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3967,7 +3967,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -3979,7 +3979,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5387,7 +5387,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5399,7 +5399,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5500,7 +5500,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -5512,7 +5512,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -6932,7 +6932,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -6944,7 +6944,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -7045,7 +7045,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     }
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
@@ -7057,7 +7057,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
-     * Returns the index of the first occurrence of a value in Array.
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
      * @param searchElement The value to locate in the array.
      *
