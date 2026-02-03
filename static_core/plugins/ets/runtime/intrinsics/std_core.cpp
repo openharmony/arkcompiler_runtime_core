@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +113,7 @@ static PandaString ResolveLibraryName(const PandaString &name)
 void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermission,
                               ark::ets::EtsString *fileName = nullptr)
 {
+    ASSERT(name != nullptr);
     ASSERT(name->AsObject()->IsStringClass());
     auto coroutine = EtsCoroutine::GetCurrent();
     if (shouldVerifyPermission) {
@@ -150,11 +151,19 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
 
 extern "C" void LoadLibrary(ark::ets::EtsString *name)
 {
+    if (UNLIKELY(name == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
     LoadNativeLibraryHandler(name, false);
 }
 
 extern "C" void LoadLibraryWithPermissionCheck(ark::ets::EtsString *name, ark::ets::EtsString *fileName)
 {
+    if (UNLIKELY(name == nullptr || fileName == nullptr)) {
+        ThrowNullPointerException();
+        return;
+    }
     LoadNativeLibraryHandler(name, true, fileName);
 }
 

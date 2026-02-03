@@ -62,8 +62,11 @@ static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &ext
 
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
 {
-    ASSERT(filePath != nullptr);
-    ASSERT(runtimeLinker != nullptr);
+    if (UNLIKELY(runtimeLinker == nullptr || filePath == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
+
     auto *ctx = runtimeLinker->GetClassLinkerContext();
     auto *coro = EtsCoroutine::GetCurrent();
 
@@ -121,32 +124,32 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
 
 EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHeader *rawFileArray)
 {
-    ASSERT(rawFileArray != nullptr);
-    ASSERT(runtimeLinker != nullptr);
-
-    auto *ctx = runtimeLinker->GetClassLinkerContext();
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hs(coro);
-    EtsHandle arrayHandle(coro, reinterpret_cast<EtsByteArray *>(rawFileArray));
-
-    std::unique_ptr<const panda_file::File> pf {nullptr};
-    {
-        // Loading panda-file might be time-consuming, which would affect GC
-        // unless being executed in native scope
-        ScopedNativeCodeThread etsNativeScope(coro);
-        pf = panda_file::OpenPandaFileFromMemory(arrayHandle->GetData<void>(), arrayHandle->GetLength());
+    if (UNLIKELY(runtimeLinker == nullptr || rawFileArray == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
     }
 
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *array = EtsByteArray::FromCoreType(rawFileArray);
+
+    auto pf = panda_file::OpenPandaFileFromMemory(array->GetData<void>(), array->GetLength());
     if (pf == nullptr) {
         ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
                                PandaString("Failed to load abc file from memory"));
         return nullptr;
     }
+
+    auto *ctx = runtimeLinker->GetClassLinkerContext();
     return CreateAbcFile(coro, ctx, std::move(pf));
 }
 
 EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
+    if (UNLIKELY(runtimeLinker == nullptr || clsName == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
+
     const auto name = clsName->GetMutf8();
     PandaString descriptor;
     const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor, true);

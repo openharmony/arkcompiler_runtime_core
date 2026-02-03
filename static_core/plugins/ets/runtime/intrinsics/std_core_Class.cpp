@@ -132,6 +132,11 @@ EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
 
 EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName)
 {
+    if (UNLIKELY(clsName == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
+
     ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
     const auto name = parser.Resolve();
     const auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
@@ -422,6 +427,10 @@ EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
 
 EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
 {
+    if (UNLIKELY(other == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
     return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
 }
 

@@ -105,6 +105,7 @@ endmacro()
 
 add_subdirectory(ani)
 add_subdirectory(any)
+add_subdirectory(api_null_safety)
 add_subdirectory(backtrace)
 add_subdirectory(backtrace_native)
 add_subdirectory(symbol_extractor)
