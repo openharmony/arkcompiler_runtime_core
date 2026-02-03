@@ -15,6 +15,7 @@
 # limitations under the License.
 import functools
 import random
+import subprocess
 import unittest
 from collections.abc import Callable
 from pathlib import Path
@@ -139,9 +140,12 @@ def get_list_path(main_path: str, list_name: str, test_data_folder: str = "data"
     return Path(main_path).parent / test_data_folder / list_name
 
 
-def set_process_mock(mock_popen: MagicMock, return_code: int, output: str = "", error_out: str = "") -> None:
+def set_process_mock(mock_popen: MagicMock, return_code: int, output: str = "",
+                     error_out: str = "", timeout_exception: bool = False) -> None:
     proc = MagicMock()
     proc.__enter__.return_value = proc
     proc.communicate.return_value = (output, error_out)
     proc.returncode = return_code
     mock_popen.return_value = proc
+    if timeout_exception:
+        proc.communicate.side_effect = subprocess.TimeoutExpired(cmd="", timeout=3)

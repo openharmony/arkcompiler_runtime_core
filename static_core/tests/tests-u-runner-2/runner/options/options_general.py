@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,6 +48,7 @@ class GeneralOptions(IOptions):
     __DEFAULT_REPORT_DIR = "report"
     __CFG_RUNNER = "runner"
     __DEFAULT_GN_BUILD = False
+    __DEFAULT_RETRIEVE_LOG_TIMEOUT = 20
 
     __VERBOSE = "verbose"
     __VERBOSE_FILTER = "verbose-filter"
@@ -59,6 +60,7 @@ class GeneralOptions(IOptions):
     __QEMU = "qemu"
     __REPORT_DIR = "report-dir"
     __GN_BUILD = "gn-build"
+    __RETRIEVE_LOG_TIMEOUT = "retrieve-log-timeout"
 
     def __init__(self, data: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(data)
@@ -120,6 +122,11 @@ class GeneralOptions(IOptions):
             default=GeneralOptions.__DEFAULT_GN_BUILD,
             dest=f"{dest}{GeneralOptions.__GN_BUILD}",
             help='Target build is built with GN')
+        group.add_argument(
+            f'--{GeneralOptions.__RETRIEVE_LOG_TIMEOUT}', action='store',
+            default=GeneralOptions.__DEFAULT_RETRIEVE_LOG_TIMEOUT,
+            dest=f"{dest}{GeneralOptions.__RETRIEVE_LOG_TIMEOUT}",
+            help='Timeout for retrieving output of a step that failed by the step timeout')
 
         ReportOptions.add_report_cli(parser, dest)
         TimeReportOptions.add_cli_args(parser, dest)
@@ -204,6 +211,10 @@ class GeneralOptions(IOptions):
     @cached_property
     def cli_options(self) -> list:
         return cast(list, self.__parameters.get("cli-options", []))
+
+    @cached_property
+    def retrieve_log_timeout(self) -> int:
+        return cast(int, self.__parameters.get(self.__RETRIEVE_LOG_TIMEOUT, self.__DEFAULT_RETRIEVE_LOG_TIMEOUT))
 
     def get_command_line(self) -> str:
         options = [

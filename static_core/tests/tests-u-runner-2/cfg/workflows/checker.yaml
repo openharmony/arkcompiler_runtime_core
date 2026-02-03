@@ -37,7 +37,7 @@ parameters:
     checker-arch: x64
     checker-build-config: Static
     checker-is-llvm: "false"
-    checker-is-verbose: "false"
+    checker-is-verbose: "true"
     checker-is-release: "false"
     work-dir: ${parameters.work-dir}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
