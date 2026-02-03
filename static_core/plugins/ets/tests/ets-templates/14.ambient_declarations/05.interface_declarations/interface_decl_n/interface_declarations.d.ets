@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -25,7 +25,7 @@ export declare interface A { a: string }
 export declare interface B {
     a: int
     b: float
-    c: Byte[]
+    c: String[]
 }
 
 export declare interface C {
@@ -42,6 +42,7 @@ export declare interface E<U, V, R> {
 }
 
 export declare interface F {
+    f: string
 }
 
 export declare interface M extends F {

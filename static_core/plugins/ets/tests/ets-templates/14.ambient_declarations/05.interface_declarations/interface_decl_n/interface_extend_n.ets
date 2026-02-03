@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,9 +14,6 @@ limitations under the License.
 ---*/
 /*---
 desc: Ambient Interface implementations
-files:
-- ./interface_declarations.ets
-name: interface_usage_n_1
 tags: [negative, compile-only]
 expected_out: 'Semantic error ESE0141: a(): String|undefined in Extended cannot override a(): String in A because overriding return type is not compatible with the other return type.'
 ---*/
