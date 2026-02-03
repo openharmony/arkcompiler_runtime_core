@@ -542,6 +542,26 @@ is static and the other is not.
    static class
    non-static class
 
+If a class has both ``extends`` and ``implements`` clauses, and 
+methods with the same siganture but different method bodies
+are inherited from a superclass and at least one of superinterfaces,
+then a :index:`compile-time error` occurs. 
+
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+       foo () {}
+    }
+    class C1 {
+       foo () {}
+    }
+    class C2 extends C1 implements I {
+        // Compile-time error as foo() from I and foo() from C1 have different method bodies
+    }
+
+
 |
 
 .. _Implementing Interface Methods:
@@ -584,18 +604,18 @@ Otherwise, a :index:`compile-time error` occurs.
     }
 
     class C2 implements I1, I2 {
-       // Compile-time error as foo() from I1 and foo() from I2 have different implementations
+       // Compile-time error as foo() from I1 and foo() from I2 have different method bodies
     }
 
     interface I3 extends I1 {}
     interface I4 extends I1 {}
     class C3 implements I3, I4 {
-       // OK, as foo() from I3 and foo() from I4 refer to the same implementation
+       // OK, as foo() from I3 and foo() from I4 refer to the same method
     }
 
     interface I5 extends I1 { foo() {} } // override method from I1
     class C4 implements I1, I5 {
-       // Compile-time error as foo() from I1 and foo() from I5 have different implementations
+       // Compile-time error as foo() from I1 and foo() from I5 have different method bodies
     }
 
     class Base {}
@@ -954,6 +974,19 @@ in the example below, then a :index:`compile-time error` occurs:
     class E implements I, J {
         r: number = 1 // OK
     }
+
+If no implementation for the property is provided, then a
+:index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        property: number
+    }
+    class C implements I { // compile-time error: no implementaion at all
+    }
+
 
 .. index::
    property
