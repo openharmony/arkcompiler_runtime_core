@@ -11,25 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-declarations:
+cases:
   - decl: |-
       declare class CallSignatureDeclaration {
         (a: string, b: number): void
         (a: string, b: number): boolean
       }
-    stdout: |-
+    expected: |-
       "Semantic error ESE0130: Function $_invoke is already declared."
   - decl: |-
       declare class CallSignatureDeclaration {
         (a: number): boolean
         (b: number): string
       }
-    stdout: |-
+    expected: |-
       "Semantic error ESE0130: Function $_invoke is already declared."
   - decl: |-
       declare class CallSignatureDeclaration {
-        (a: Array<int>): boolean
-        (a: int[]): string
+        (...a: number[]): boolean
+        (a: number[]): string
       }
-    stdout: |-
+    expected: |-
       "Semantic error ESE0130: Function $_invoke is already declared."

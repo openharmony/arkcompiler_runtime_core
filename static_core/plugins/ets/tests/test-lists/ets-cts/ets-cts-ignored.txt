@@ -830,15 +830,24 @@
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_0.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_n_2.ets
 
+#32456 Initializer in ambient const declaration
+14.ambient_declarations/bad_ambient_declarations_3.ets
+14.ambient_declarations/bad_ambient_declarations_4.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_10.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_11.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_12.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_13.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_14.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_15.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_16.ets
+14.ambient_declarations/01.constant_declarations/constant_usage_n_17.ets
+
 # enable when intitalizers in '.d.ets' check is enabled.
 14.ambient_declarations/04.class_declarations/class_declarations_neg_6.ets
 14.ambient_declarations/04.class_declarations/class_declarations_neg_7.ets
 14.ambient_declarations/04.class_declarations/class_declarations_neg_8.ets
 14.ambient_declarations/04.class_declarations/class_declarations_neg_9.ets
 14.ambient_declarations/04.class_declarations/class_declarations_neg_10.ets
-14.ambient_declarations/bad_ambient_declarations_2.ets
-14.ambient_declarations/bad_ambient_declarations_16.ets
-14.ambient_declarations/bad_ambient_declarations_17.ets
 
 #29270
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets

@@ -12,24 +12,12 @@
 # limitations under the License.
 
 cases:
-  - import: |-
-      CallSignatureDeclaration
-    use: |-
-      arktest.assertTrue(CallSignatureDeclaration(5))
-  
-  - import: |-
-      CallSignatureDeclaration
-    use: |-
-      arktest.assertEQ(CallSignatureDeclaration(5,5), '55')
-  
-  - import: |-
-      CallSignatureDeclaration
-    use: |-
-      arktest.assertEQ(CallSignatureDeclaration(), '5')
-
-  - import: |-
-      CallSignatureDeclaration
-    use: |-
-      arktest.assertEQ(CallSignatureDeclaration(5,5), '55')
-      //Multiple ambient call signatures are allowed in an ambient class declaration
-      arktest.assertEQ(CallSignatureDeclaration('anotherDecl', false), 'anotherDecl')
+  - >
+    arktest.assertTrue(CallSignatureDeclaration(5))
+  - >
+    arktest.assertEQ(CallSignatureDeclaration(5,5), '55')
+  - >
+    arktest.assertEQ(CallSignatureDeclaration(), '5')
+  - |
+    arktest.assertTrue(CallSignatureDeclaration('a'))
+    arktest.assertEQ(CallSignatureDeclaration(5), '6')
