@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 package std.annotations;
 
 export namespace types {
-    // Temporary annotation to allow some necessary but invalid stdlib code to be compiled.
-    // Has effect only inside stdlib. Will be removed.
-    // DON'T USE IT!
+    // Temporary annotation to allow some necessary but invalid stdlib code to be compiled.	 
+    // Has effect only inside stdlib. Will be removed.	 
+    // DON'T USE IT!	 
     @Retention("SOURCE")
+
     export @interface SkipVarianceCheckDontUseItWillBeRemoved {};
 }

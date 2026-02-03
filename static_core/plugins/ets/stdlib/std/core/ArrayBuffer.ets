@@ -12,40 +12,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the ArrayBuffer for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
-
+/**
+ * Interface representing a view of an ArrayBuffer.
+ *
+ * @interface ArrayBufferView
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export interface ArrayBufferView {
     /**
      * The ArrayBuffer instance referenced by the array.
+     *
+     * @type { ArrayBuffer }
+     * @readonly
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     readonly buffer: ArrayBuffer
 
     /**
      * The length in bytes of the array.
+     *
+     * @type { int }
+     * @readonly
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     readonly byteLength: int
 
     /**
      * The offset in bytes of the array.
+     *
+     * @type { int }
+     * @readonly
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     readonly byteOffset: int
 }
 
 /**
- * JS ArrayBuffer API-compatible class
+ * JS ArrayBuffer API-compatible class.
+ * Used to represent a generic, fixed-length raw binary data buffer.
+ *
+ * @class ArrayBuffer
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export class ArrayBuffer
 {
+    /**
+     * Returns the string representation of the ArrayBuffer.
+     *
+     * @returns { String } The string representation of the ArrayBuffer.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     toString(): String {
         return "[object ArrayBuffer]";
     }
 
     /**
-     * Creates ArrayBuffer with size equal to length parameter
+     * Creates an ArrayBuffer with size equal to the length parameter.
      *
-     * @param length size of ArrayBuffer
+     * @param { int } length The size of the ArrayBuffer in bytes.
+     * @param { int } [maxByteLength] Optional maximum size the ArrayBuffer can be resized to.
+     * @throws { RangeError } Throws if length or maxByteLength is negative, or length > maxByteLength.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(length: int, maxByteLength?: int)
     {
@@ -68,9 +116,13 @@ export class ArrayBuffer
     }
 
     /**
-     * Creates ArrayBuffer with size equal to length parameter
+     * Creates an ArrayBuffer with size equal to the length parameter.
      *
-     * @param length size of ArrayBuffer
+     * @param { number } length The size of the ArrayBuffer in bytes.
+     * @param { number } [maxByteLength] Optional maximum size the ArrayBuffer can be resized to.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(length: number, maxByteLength?: number)
     {
@@ -78,11 +130,14 @@ export class ArrayBuffer
     }
 
     /**
-     * Checks if the passed Object is a View
+     * Checks if the passed object is one of the ArrayBuffer views.
      *
-     * @param obj to check
-     *
-     * @returns true if obj is instance of typed array
+     * @param { Object } obj The object to check.
+     * @returns { boolean } Returns true if the object is a view; otherwise false.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static isView(obj: Object): boolean
     {
@@ -100,6 +155,16 @@ export class ArrayBuffer
             || obj instanceof BigUint64Array)
     }
 
+    /**
+     * Internal implementation for slicing the ArrayBuffer.
+     *
+     * @param { int } begin Starting index.
+     * @param { int } end Ending index.
+     * @returns { ArrayBuffer } A new ArrayBuffer containing the sliced data.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     sliceInternal(begin: int, end: int): ArrayBuffer {
         const byteLength = this.getByteLength()
 
@@ -120,13 +185,15 @@ export class ArrayBuffer
     }
 
     /**
-     * Creates a new ArrayBuffer with copy of bytes in range [begin;end)
+     * Creates a new ArrayBuffer with a copy of bytes in the range [begin, end).
      *
-     * @param begin an inclusive index to start copying with
-     *
-     * @param end a last exclusive index to stop copying
-     *
-     * @returns data taken from current ArrayBuffer with respect to begin and end parameters
+     * @param { int } begin An inclusive index to start copying from.
+     * @param { int } [end] An exclusive index to stop copying.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @throws { TypeError } Throws if the ArrayBuffer is detached.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public slice(begin: int, end?: int): ArrayBuffer {
         if (this.detached) {
@@ -137,13 +204,14 @@ export class ArrayBuffer
     }
 
     /**
-     * Creates a new ArrayBuffer with copy of bytes in range [begin;end)
+     * Creates a new ArrayBuffer with a copy of bytes in the range [begin, end).
      *
-     * @param begin an inclusive index to start copying with
-     *
-     * @param end a last exclusive index to stop copying
-     *
-     * @returns data taken from current ArrayBuffer with respect to begin and end parameters
+     * @param { number } begin An inclusive index to start copying from.
+     * @param { number } [end] An exclusive index to stop copying.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public slice(begin: number, end?: number): ArrayBuffer {
         if (end == undefined) return this.slice(begin.toInt())
@@ -151,14 +219,14 @@ export class ArrayBuffer
     }
 
     /**
-     * Returns data at specified index.
-     * No such method in JS library, required for TypedArrays
+     * Returns the byte at the specified index.
      *
-     * @param i index
-     *
-     * @returns byte at index
-     *
-     * @throws {IndexOutOfBoundsError} if `pos` is out of bound
+     * @param { int } pos The position in the buffer.
+     * @returns { byte } The byte value.
+     * @throws { IndexOutOfBoundsError } Throws if pos is out of bounds.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public final at(pos: int): byte {
         if (this.data !== undefined) {
@@ -171,14 +239,13 @@ export class ArrayBuffer
     }
 
     /**
-     * Sets data at specified index.
-     * No such method in JS library, required for TypedArrays
+     * Sets the byte value at the specified index.
      *
-     * @param b new value
-     *
-     * @param i index
-     *
-     * @throws {IndexOutOfBoundsError} if `pos` is out of bound
+     * @param { int } pos The position in the buffer.
+     * @param { byte } val The byte value to set.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public final set(pos: int, val: byte): void {
         if (this.data !== undefined) {
@@ -191,22 +258,50 @@ export class ArrayBuffer
         }
     }
 
+    /**
+     * Returns the length of the ArrayBuffer in bytes.
+     *
+     * @returns { int } The byte length.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public getByteLength(): int {
         return this._byteLength
     }
 
+    /**
+     * Read-only property for the byte length of the ArrayBuffer.
+     *
+     * @returns { int } The byte length.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     get byteLength(): int {
         return this._byteLength
     }
 
     /**
-     * Checks managed data availability first. Otherwise, it checks if there is native data.
-     * ArrayBuffer with managed data cannot be detached.
+     * Returns true if the ArrayBuffer has been detached.
+     *
+     * @returns { boolean } True if the ArrayBuffer has been detached.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     get detached(): boolean {
         return this.data != undefined ? false : this.dataAddress == 0
     }
 
+    /**
+     * Returns true if the ArrayBuffer can be resized.
+     *
+     * @returns { boolean } True if the ArrayBuffer can be resized.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     get resizable(): boolean {
         return this.isResizable
     }
@@ -247,9 +342,14 @@ export class ArrayBuffer
     private final native setImpl(pos: int, val: byte): void
 
     /**
-     * Resizes the ArrayBuffer
+     * Resizes the ArrayBuffer to the specified length.
      *
-     * @param newLen new length
+     * @param { int } newLen The new byte length.
+     * @throws { TypeError, RangeError } Throws TypeError if the buffer is detached or not resizable,
+     *     RangeError if the new length is invalid.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public resize(newLen : int): void {
         if (this.detached) {
@@ -277,13 +377,15 @@ export class ArrayBuffer
     private native static getAddress(array: FixedArray<byte>): long
 
     /**
-    * Creates a new ArrayBuffer from an array of bytes.
-    *
-    * This native method initializes an ArrayBuffer using the provided byte array as the underlying data.
-    *
-    * @param {byte[]} arr - An array of bytes to initialize the ArrayBuffer.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the byte array.
-    */
+     * Creates a new ArrayBuffer from an array of bytes.
+     *
+     * @param { FixedArray<byte> } arr Source byte array.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from(arr: FixedArray<byte>): ArrayBuffer {
         const bf = new ArrayBuffer(arr.length)
         copyTo(arr, bf.data!, 0, 0, arr.length)
@@ -291,14 +393,15 @@ export class ArrayBuffer
     }
 
     /**
-    * Creates a new ArrayBuffer from a Uint8Array.
-    *
-    * This method extracts the underlying ArrayBuffer from the provided Uint8Array and converts it
-    * to an ArrayBuffer using the native conversion for byte arrays.
-    *
-    * @param {Uint8Array} u8arr - A typed array of unsigned 8-bit integers.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the same binary data as the Uint8Array.
-    */
+     * Creates a new ArrayBuffer from a Uint8Array.
+     *
+     * @param { Uint8Array } u8arr Source typed array.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from(u8arr: Uint8Array): ArrayBuffer {
         const arrBuff = u8arr.buffer as ArrayBuffer
         if (arrBuff.detached) {
@@ -310,14 +413,15 @@ export class ArrayBuffer
     }
 
     /**
-    * Creates a new ArrayBuffer from an array of numbers.
-    *
-    * The numbers in the provided array are converted to bytes, and then a new ArrayBuffer is constructed
-    * using these bytes.
-    *
-    * @param {double[]} array - An array of numbers representing byte values.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the data from the array.
-    */
+     * Creates a new ArrayBuffer from an array of numbers.
+     *
+     * @param { double[] } array Source number array.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from(array: double[]): ArrayBuffer {
         const buf = new ArrayBuffer(array.length)
         for (let i = 0; i < array.length; ++i) {
@@ -327,42 +431,44 @@ export class ArrayBuffer
     }
 
     /**
-    * Creates a new ArrayBuffer from a string using the specified encoding.
-    *
-    * This native method encodes the given string using the provided encoding and creates an
-    * ArrayBuffer with the resulting bytes. The resulting ArrayBuffer is expected to have the
-    * specified length.
-    *
-    * @param {string} str - The string to be converted.
-    * @param {string} encoding - The encoding to use for converting the string.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the encoded string data.
-    */
+     * Creates a new ArrayBuffer from a string with specific encoding.
+     *
+     * @param { string } str Source string.
+     * @param { string } encoding String encoding (e.g., "utf8").
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native from(str: string, encoding: string): ArrayBuffer;
 
     /**
-    * Creates a new ArrayBuffer by copying a segment from an existing ArrayBuffer.
-    *
-    * This native method copies a range of bytes from the source ArrayBuffer, starting at the
-    * specified byte offset and continuing for the specified length, into a new ArrayBuffer.
-    *
-    * @param {ArrayBuffer} buff - The source ArrayBuffer.
-    * @param {int} byteOffset - The starting byte index in the source ArrayBuffer.
-    * @param {int} length - The number of bytes to copy.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the specified slice of the source.
-    */
+     * Creates a new ArrayBuffer from a segment of an existing ArrayBuffer.
+     *
+     * @param { ArrayBuffer } buff Source buffer.
+     * @param { int } byteOffset Start offset in source.
+     * @param { int } length Number of bytes to copy.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native from(buff: ArrayBuffer, byteOffset: int, length: int): ArrayBuffer;
 
     /**
-    * Creates a new ArrayBuffer by slicing a segment from an existing ArrayBuffer.
-    *
-    * If the byte offset or length parameters are omitted, they default to 0 and the full length of the
-    * source ArrayBuffer, respectively.
-    *
-    * @param {ArrayBuffer} buffer - The source ArrayBuffer.
-    * @param {number} [byteOffset=0] - The starting byte index in the source ArrayBuffer.
-    * @param {number} [length=buffer.byteLength] - The number of bytes to copy.
-    * @returns {ArrayBuffer} A new ArrayBuffer containing the specified slice of the source.
-    */
+     * Creates a new ArrayBuffer from a segment of an existing ArrayBuffer with number parameters.
+     *
+     * @param { ArrayBuffer } buffer Source buffer.
+     * @param { number } [byteOffset] Start offset.
+     * @param { number } [length] Byte length.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from(buffer: ArrayBuffer, byteOffset?: number, length?: number): ArrayBuffer {
         const resolvedByteOffset = byteOffset ?? 0;
         const resolvedLength = length ?? buffer.byteLength.toDouble();
@@ -370,19 +476,18 @@ export class ArrayBuffer
     }
 
     /**
-    * Creates a new ArrayBuffer from an object, interpreting the second parameter as either a byte offset or an encoding.
-    *
-    * When the object is a string and the second parameter is also a string, the method treats the inputs as
-    * parameters for string conversion (using the specified encoding and length). If the object is an ArrayBuffer,
-    * it copies a segment starting from the provided byte offset for the specified length.
-    *
-    * @param {Object} obj - The source object, which should be either a string or an ArrayBuffer.
-    * @param {int | string} byteOffsetOrEncoding - If `obj` is an ArrayBuffer, this is the starting byte offset;
-    *                                                 if `obj` is a string, this is the encoding to use.
-    * @param {int} length - The number of bytes to copy or the desired length of the encoded string data.
-    * @returns {ArrayBuffer} A new ArrayBuffer created from the provided object.
-    * @throws {Error} If the input object type is unsupported or the arguments are incorrect.
-    */
+     * Creates a new ArrayBuffer from an object.
+     *
+     * @param { Object } obj Source object (string or ArrayBuffer).
+     * @param { int | string } byteOffsetOrEncoding Byte offset or encoding string.
+     * @param { int } length Length to copy.
+     * @returns { ArrayBuffer } The new ArrayBuffer.
+     * @throws { Error } Throws if arguments are incorrect.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static fromObject(obj: Object, byteOffsetOrEncoding: int | string, length: int): ArrayBuffer {
         if (obj instanceof string) {
             const resolvedEncoding: string = byteOffsetOrEncoding instanceof string ? byteOffsetOrEncoding as string : "utf8";
@@ -410,30 +515,30 @@ export class ArrayBuffer
 
 
     /**
-    * Returns the number of bytes required to encode a given string using the specified encoding.
-    *
-    * This native method calculates the byte length of the provided text when it is encoded with the
-    * specified character encoding. Note that the byte length may differ from the number of characters
-    * in the string.
-    *
-    * @param {string} text - The string to evaluate.
-    * @param {string} encoding - The encoding used to convert the string to bytes.
-    * @returns {int} The number of bytes required to encode the string.
-    */
+     * Returns the byte length of a string in a given encoding.
+     *
+     * @param { string } text Source string.
+     * @param { string } encoding Encoding type.
+     * @returns { int } Calculated byte length.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native bytesLength(text: string, encoding: string): int;
 
     /**
-    * Decodes a segment of an ArrayBuffer to a string using the specified encoding.
-    *
-    * This native method converts a portion of the ArrayBuffer, starting at the given index and ending
-    * before the specified end index, into a string. The decoding is performed using the provided encoding.
-    *
-    * @param {ArrayBuffer} buffer - The ArrayBuffer containing the data to decode.
-    * @param {string} encoding - The encoding to use for decoding the data.
-    * @param {int} start - The starting byte index (inclusive) from which to begin decoding.
-    * @param {int} end - The ending byte index (exclusive) at which to stop decoding.
-    * @returns {string} The decoded string representation of the specified segment of the ArrayBuffer.
-    */
+     * Converts a segment of an ArrayBuffer to a string.
+     *
+     * @param { ArrayBuffer } buffer Source buffer.
+     * @param { string } encoding Encoding to use.
+     * @param { int } start Start index.
+     * @param { int } end End index.
+     * @returns { string } Decoded string.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native stringify(buffer: ArrayBuffer, encoding: string, start: int, end: int): string;
 
     private constructor createExternal(data: long, length: int) {
@@ -499,149 +604,954 @@ export class ArrayBuffer
      */
     private static native unregisterWeakRef(weakRef: Object): long
 
+    /**
+     * Atomically adds a byte value to the current value at the specified position in the ArrayBuffer
+     * and replaces it with the result. This operation is thread-safe and guarantees atomicity.
+     * The method performs an atomic read-modify-write operation on an 8-bit signed integer (byte)
+     * located at the calculated address: `byteOffset + index * sizeof(byte)`.
+     *
+     * @param { int } index The index of the element to which the byte value is added.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer to the beginning.
+     * @param { byte } value The byte value to add to the current value at the target location. The addition is
+     *     performed atomically.
+     * @returns { long } The value at the target location before the atomic addition operation. 
+     * @throws { RangeError } If the calculated byte offset is out of bounds for the ArrayBuffer.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on an 8-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically compares and exchanges an 8-bit signed integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } expectedValue The expected current value.
+     * @param { byte } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeI8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): long;
 
+    /**
+     * Atomically exchanges an 8-bit signed integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically loads an 8-bit signed integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadI8(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on an 8-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically stores an 8-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically subtracts a byte value from the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on an 8-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorI8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically adds a short value to the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 16-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically compares and exchanges a 16-bit signed integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } expectedValue The expected current value.
+     * @param { short } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeI16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): long;
 
+    /**
+     * Atomically exchanges a 16-bit signed integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically loads a 16-bit signed integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadI16(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 16-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically stores a 16-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically subtracts a short value from the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 16-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorI16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically adds an int value to the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 32-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically compares and exchanges a 32-bit signed integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } expectedValue The expected current value.
+     * @param { int } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeI32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): long;
 
+    /**
+     * Atomically exchanges a 32-bit signed integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically loads a 32-bit signed integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadI32(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 32-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically stores a 32-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically subtracts an int value from the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 32-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorI32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically adds a long value to the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 64-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically compares and exchanges a 64-bit signed integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } expectedValue The expected current value.
+     * @param { long } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeI64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
 
+    /**
+     * Atomically exchanges a 64-bit signed integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically loads a 64-bit signed integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadI64(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 64-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically stores a 64-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically subtracts a long value from the current value at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 64-bit signed integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorI64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically adds a byte value to the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on an 8-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically compares and exchanges an 8-bit unsigned integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } expectedValue The expected current value.
+     * @param { byte } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeU8(index: int, byteOffset: int, expectedValue: byte, replacementValue: byte): long;
 
+    /**
+     * Atomically exchanges an 8-bit unsigned integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically loads an 8-bit unsigned integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadU8(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on an 8-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically stores an 8-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically subtracts a byte value from the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on an 8-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { byte } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorU8(index: int, byteOffset: int, value: byte): long;
 
+    /**
+     * Atomically adds a short value to the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 16-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically compares and exchanges a 16-bit unsigned integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } expectedValue The expected current value.
+     * @param { short } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeU16(index: int, byteOffset: int, expectedValue: short, replacementValue: short): long;
 
+    /**
+     * Atomically exchanges a 16-bit unsigned integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically loads a 16-bit unsigned integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadU16(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 16-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically stores a 16-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically subtracts a short value from the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 16-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { short } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorU16(index: int, byteOffset: int, value: short): long;
 
+    /**
+     * Atomically adds an int value to the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 32-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically compares and exchanges a 32-bit unsigned integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } expectedValue The expected current value.
+     * @param { int } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeU32(index: int, byteOffset: int, expectedValue: int, replacementValue: int): long;
 
+    /**
+     * Atomically exchanges a 32-bit unsigned integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically loads a 32-bit unsigned integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadU32(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 32-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically stores a 32-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically subtracts an int value from the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 32-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { int } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorU32(index: int, byteOffset: int, value: int): long;
 
+    /**
+     * Atomically adds a long value to the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to add to the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAddU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically performs a bitwise AND operation on a 64-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to AND with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicAndU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically compares and exchanges a 64-bit unsigned integer if the current value matches the expected value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } expectedValue The expected current value.
+     * @param { long } replacementValue The new value to set if the comparison succeeds.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicCompareExchangeU64(index: int, byteOffset: int, expectedValue: long, replacementValue: long): long;
 
+    /**
+     * Atomically exchanges a 64-bit unsigned integer with a new value.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The new value to set.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicExchangeU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically loads a 64-bit unsigned integer from the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @returns { long } The value at the target location.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicLoadU64(index: int, byteOffset: int): long;
 
+    /**
+     * Atomically performs a bitwise OR operation on a 64-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to OR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicOrU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically stores a 64-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to store.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicStoreU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically subtracts a long value from the current value at the specified position (unsigned).
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to subtract from the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicSubU64(index: int, byteOffset: int, value: long): long;
 
+    /**
+     * Atomically performs a bitwise XOR operation on a 64-bit unsigned integer at the specified position.
+     *
+     * @param { int } index The index of the element.
+     * @param { int } byteOffset The byte offset from the start of the ArrayBuffer.
+     * @param { long } value The value to XOR with the current value.
+     * @returns { long } The value before the operation.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native atomicXorU64(index: int, byteOffset: int, value: long): long;
 }
 
+/**
+ * Define the alias ArrayBufferLike on ArrayBuffer
+ *
+ * @typedef { ArrayBuffer } ArrayBufferLike
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export type ArrayBufferLike = ArrayBuffer

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 package std.core;
 
-/**
- * @class Represents ABC file.
- * Intended to be used by AbcRuntimeLinker and other platform extensions.
- */
+/** 
+  * @class Represents ABC file. 
+  * Intended to be used by AbcRuntimeLinker and other platform extensions. 
+  */
 export final class AbcFile {
     private fileHandlePtr: long
 
@@ -26,42 +26,42 @@ export final class AbcFile {
         throw new Error("Constructor called")
     }
 
-    /**
-     * Loads ABC file.
-     *
-     * @param runtimeLinker which the opened file will correspond to.
-     *
-     * @param path to ABC file.
-     *
-     * @returns instance of loaded AbcFile.
-     *
-     * @throws errors happened on loading ABC file.
-     */
-    public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile
+    /** 
+      * Loads ABC file. 
+      * 
+      * @param runtimeLinker which the opened file will correspond to. 
+      * 
+      * @param path to ABC file. 
+      * 
+      * @returns instance of loaded AbcFile. 
+      * 
+      * @throws errors happened on loading ABC file. 
+      */ 
+    public static native loadAbcFile(runtimeLinker: RuntimeLinker, path: string): AbcFile	 
 
-    /**
-     * Loads ABC file from memory.
-     *
-     * @param runtimeLinker which the opened file will correspond to.
-     *
-     * @param rawFile byte array containing the ABC file contents.
-     *
-     * @returns instance of loaded AbcFile.
-     *
-     * @throws errors happened on loading ABC file.
-     */
-    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile
+    /** 
+     * Loads ABC file from memory. 
+     * 
+     * @param runtimeLinker which the opened file will correspond to. 
+     * 
+     * @param rawFile byte array containing the ABC file contents. 
+     * 
+     * @returns instance of loaded AbcFile. 
+     * 
+     * @throws errors happened on loading ABC file. 
+     */ 
+    public static native loadFromMemory(runtimeLinker: RuntimeLinker, rawFile: FixedArray<byte>): AbcFile	 
 
-    /**
-     * Loads class from ABC file.
-     *
-     * @param runtimeLinker which the opened file will correspond to.
-     *
-     * @param path to ABC file.
-     *
-     * @returns loaded Class if it was found in the file, undefined otherwise.
-     *
-     * @throws errors happened during class initialization.
+    /** 
+     * Loads class from ABC file. 
+     * 
+     * @param runtimeLinker which the opened file will correspond to. 
+     * 
+     * @param path to ABC file. 
+     * 
+     * @returns loaded Class if it was found in the file, undefined otherwise. 
+     * 
+     * @throws errors happened during class initialization. 
      */
     public native loadClass(runtimeLinker: RuntimeLinker, clsName: string, init: boolean): Class | undefined
 
