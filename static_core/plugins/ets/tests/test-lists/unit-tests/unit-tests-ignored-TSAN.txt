@@ -4,5 +4,8 @@ ets-common-tests/intrinsics/copyTo.ets
 #32342
 ets-common-tests/taskpool/asyncrunner_tasks.ets
 
+#33011
+ets-common-tests/taskpool/common_tasks_new.ets
+
 #32560
 ets-common-tests/atomics/base_operation_compare_exchange.ets
