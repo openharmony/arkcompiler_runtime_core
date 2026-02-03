@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,10 +108,10 @@ static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *en
             // field is still within the object
             if (toObj != nullptr && offset < obj->GetSizeForwarded()) {
                 RefField<>& toField = *reinterpret_cast<RefField<>*>(reinterpret_cast<uintptr_t>(toObj) + offset);
-                toField.ClearRef(oldField.GetFieldValue());
+                toObj->ClearRef(oldField);
             }
         }
-        field.ClearRef(oldField.GetFieldValue());
+        obj->ClearRef(oldField);
     }
 }
 
@@ -153,7 +153,8 @@ void MarkingCollector::ProcessMarkStack([[maybe_unused]] uint32_t threadIndex, P
             auto region = RegionDesc::GetAliveRegionDescAt(
                 static_cast<MAddress>(reinterpret_cast<uintptr_t>(object)));
             visitor.SetMarkingRefFieldArgs(object);
-            auto objSize = object->ForEachRefFieldAndGetSize(visitor.GetRefFieldVisitor());
+            auto objSize = object->ForEachRefFieldAndGetSize(visitor.GetRefFieldVisitor(),
+                visitor.GetWeakRefFieldVisitor());
             region->AddLiveByteCount(objSize);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
             if constexpr (ProcessXRef) {
@@ -412,6 +413,7 @@ void MarkingCollector::ClearWeakStack(bool parallel)
     } else {
         ProcessWeakStack(globalWeakStack_);
     }
+    globalWeakStack_.clear();
 }
 
 bool MarkingCollector::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
@@ -447,7 +449,7 @@ bool MarkingCollector::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
 
 void MarkingCollector::MarkRememberSetImpl(BaseObject* object, LocalCollectStack &collectStack)
 {
-    object->ForEachRefField([this, &collectStack, &object](RefField<>& field) {
+    auto fieldHandler = [this, &collectStack, &object](RefField<>& field) {
         BaseObject* targetObj = field.GetTargetObject();
         if (Heap::IsHeapAddress(targetObj)) {
             RegionDesc* region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(targetObj));
@@ -458,7 +460,8 @@ void MarkingCollector::MarkRememberSetImpl(BaseObject* object, LocalCollectStack
                 DLOG(TRACE, "remember set marking obj: %p@%p, ref: %p", object, &field, targetObj);
             }
         }
-    });
+    };
+    object->ForEachRefField(fieldHandler, fieldHandler);
 }
 
 void MarkingCollector::ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel)

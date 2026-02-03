@@ -119,7 +119,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         return Unexpected(PandaString("Cannot create PandaCoreVM"));
     }
 
-    mem::StaticObjectOperator::Initialize(vm);
+    mem::StaticObjectOperator::Initialize();
 
     auto classLinker = EtsClassLinker::Create(runtime->GetClassLinker());
     if (!classLinker) {

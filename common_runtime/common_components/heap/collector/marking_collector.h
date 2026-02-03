@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -210,12 +210,21 @@ public:
         {
             visitor_ = std::forward<Functor>(f);
         }
+
+        template <typename Functor>
+        void SetWeakVisitor(Functor &&f)
+        {
+            weakVisitor_ = std::forward<Functor>(f);
+        }
+
         const auto &GetRefFieldVisitor() const { return visitor_; }
+        const auto &GetWeakRefFieldVisitor() const { return weakVisitor_; }
         void SetMarkingRefFieldArgs(BaseObject *obj) { *closure_ = obj; }
         const auto &GetClosure() const { return closure_; }
 
     private:
         common::RefFieldVisitor visitor_;
+        common::RefFieldVisitor weakVisitor_;
         std::shared_ptr<BaseObject *> closure_;
     };
     virtual MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack,

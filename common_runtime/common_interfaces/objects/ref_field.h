@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,6 @@ template <bool isAtomic = false>
 class RefField {
 public:
     static constexpr uint64_t TAG_WEAK = 0x01ULL;
-    static constexpr MAddress REF_UNDEFINED = 0x02ULL;
 
     struct BitFieldLayout {
         MAddress address : 48;
@@ -94,11 +93,6 @@ public:
         } else {
             fieldVal = static_cast<RefFieldValue>(newVal);
         }
-    }
-
-    bool ClearRef(MAddress expectedValue)
-    {
-        return CompareExchange(expectedValue, REF_UNDEFINED);
     }
 
     bool CompareExchange(MAddress expectedValue, MAddress newValue,

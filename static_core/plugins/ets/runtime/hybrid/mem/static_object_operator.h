@@ -32,17 +32,18 @@ namespace ark::mem {
 
 class StaticObjectOperator : public common::BaseObjectOperatorInterfaces {
 public:
-    static void Initialize(ark::ets::PandaEtsVM *vm);
+    static void Initialize();
 
     bool IsValidObject([[maybe_unused]] const common::BaseObject *object) const override
     {
         return true;
     }
 
-    void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &visitor) const override;
-
-    size_t ForEachRefFieldAndGetSize(const common::BaseObject *object,
-                                     const common::RefFieldVisitor &visitor) const override;
+    void ForEachRefField(const common::BaseObject *object, const common::RefFieldVisitor &fieldHandler,
+                         const common::RefFieldVisitor &weakFieldHandler) const override;
+    size_t ForEachRefFieldAndGetSize(const common::BaseObject *object, const common::RefFieldVisitor &fieldHandler,
+                                     const common::RefFieldVisitor &weakFieldHandler) const override;
+    void ClearRef(common::RefField<> &field) const override;
 
     size_t GetSize(const common::BaseObject *object) const override
     {
@@ -57,7 +58,6 @@ public:
 
 private:
     static StaticObjectOperator instance_;
-    ark::ets::PandaEtsVM *vm_ {nullptr};
 };
 
 }  // namespace ark::mem
@@ -67,7 +67,7 @@ private:
 namespace ark::mem {
 class StaticObjectOperator {
 public:
-    static void Initialize([[maybe_unused]] ark::ets::PandaEtsVM *vm) {}
+    static void Initialize() {}
 };
 }  // namespace ark::mem
 

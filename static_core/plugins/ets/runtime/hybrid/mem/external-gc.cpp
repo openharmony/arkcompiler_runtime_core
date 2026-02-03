@@ -22,7 +22,6 @@
 #include "common_interfaces/heap/heap_visitor.h"
 #ifdef PANDA_JS_ETS_HYBRID_MODE
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
-#include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 
 namespace ark::mem::ets {
@@ -33,13 +32,6 @@ void VisitVmRoots(const GCRootVisitor &visitor, PandaVM *vm)
     RootManager<EtsLanguageConfig> rootManager(vm);
     rootManager.VisitNonHeapRoots(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
     vm->VisitStringTable(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
-}
-
-void UpdateVmRoots(const GCRootUpdater &updater, PandaVM *vm)
-{
-    trace::ScopedTrace scopedTrace(__FUNCTION__);
-    RootManager<EtsLanguageConfig> rootManager(vm);
-    rootManager.UpdateRefsToMovedObjects(updater);
 }
 
 }  // namespace ark::mem::ets
@@ -69,46 +61,9 @@ void VisitStaticRoots(const RefFieldVisitor &visitor)
     ark::mem::ets::VisitVmRoots(rootVisitor, vm);
 }
 
-void UpdateStaticRoots(const RefFieldVisitor &visitor)
-{
-    ark::PandaVM *vm = GetPandaVM();
-    if (vm == nullptr) {
-        return;
-    }
-
-    ark::GCRootUpdater rootUpdater = [&visitor](ark::ObjectHeader **object) {
-        ark::ObjectHeader *prev = *object;
-        visitor(reinterpret_cast<RefField<> &>(*reinterpret_cast<BaseObject **>(object)));
-        return prev != *object;
-    };
-    ark::mem::ets::UpdateVmRoots(rootUpdater, vm);
-}
-
-void SweepStaticRoots(const WeakRefFieldVisitor &visitor)
-{
-    ark::PandaVM *vm = GetPandaVM();
-    if (vm == nullptr) {
-        return;
-    }
-    ark::GCObjectVisitor visitorWrap = [&visitor](ark::ObjectHeader *object) -> ark::ObjectStatus {
-        // Provide the reference to a local variable.
-        // The object must be forwarded during UpdateStaticRoots.
-        // Here we need to know is the object alive or not.
-        bool alive = visitor(reinterpret_cast<RefField<> &>(*reinterpret_cast<BaseObject **>(&object)));
-        return alive ? ark::ObjectStatus::ALIVE_OBJECT : ark::ObjectStatus::DEAD_OBJECT;
-    };
-    vm->SweepVmRefs(visitorWrap);
-    auto *refProccessor = static_cast<ark::mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
-    refProccessor->ClearDeadReferences([&visitor](const ark::ObjectHeader *object) -> bool {
-        return !visitor(reinterpret_cast<RefField<> &>(*reinterpret_cast<const BaseObject **>(&object)));
-    });
-}
-
 void RegisterStaticRootsProcessFunc()
 {
     RegisterVisitStaticRootsHook(VisitStaticRoots);
-    RegisterUpdateStaticRootsHook(UpdateStaticRoots);
-    RegisterSweepStaticRootsHook(SweepStaticRoots);
 }
 
 }  // namespace common
