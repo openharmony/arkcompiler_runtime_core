@@ -13,16 +13,38 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+{% for cc in cases %}
+{% set ctype = cc.type | default('Object') %}
 
 /*---
 desc: Create FixedArray with wrong values
 tags: [negative, compile-only]
-expected_out: "{{c.expected_out}}"
+
+{% if cc.expected_out is defined %}
+expected_out: "{{cc.expected_out}}"
+{% else %}
+expected_out:  "Semantic error ESE0318: Type '{{cc.initType}}' cannot be assigned to type '{{cc.type}}'"
+{% endif -%}
+
 ---*/
 
+abstract class MyAbstractClass {}
+
+interface IInterface {}
+
+class IImpl implements IInterface {
+}
+
+type AT = {{ctype}}
+
 function main(): void {
-{{c.logic|indent}}
+    {% if cc.logic is defined %}
+        {{cc.logic|indent}}
+    {% else %}
+        let input = {{cc.value}}
+        let a: FixedArray<AT> = new FixedArray<AT>(30, input)
+    {% endif -%}
+
 }
 
 {% endfor %}

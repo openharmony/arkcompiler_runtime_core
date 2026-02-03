@@ -46,3 +46,9 @@ cases:
       arktest.assertEQ(count, 3)
   - use: |-
       let n = [1, "abc", 2]
+  - use: |-
+      let a : FixedArray<Axis> = [Axis.X, Axis.Y, Axis.Z, ]  // ok, trailing comma is ignored
+    decl: enum Axis {X, Y, Z}
+  - use: |-
+      let a : FixedArray<Name> = [{name: 'Bob'}, {name: 'Mary'}, ]  // ok, trailing comma is ignored
+    decl: "interface Name {name: string}"

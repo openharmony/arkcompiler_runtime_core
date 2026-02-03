@@ -13,20 +13,12 @@
  * limitations under the License.
  */
 
-{% for logic in logics %}
-{% for c in cases %}
 
 /*---
-desc: Create FixedArray with wrong predefined values
-tags: [negative, compile-only]
+desc: FixedArray inheritance prohibited
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0176: The super type of 'FixedArrayExtender' class is not extensible."
 ---*/
 
-{% set logic_data = logic|replace("check_type", c.type)|replace("check_value", c.value) %}
-
-
-function main(): void {
-  {{logic_data}}
+class FixedArrayExtender extends FixedArray<String> {
 }
-
-{% endfor %}
-{% endfor %}
