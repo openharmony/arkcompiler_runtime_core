@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,5 +171,8 @@ export const InvalidFuncParaNames: Set<string> = new Set([
     'overload',
     'function',
     'constructor',
+]);
+export const InvalidSDKs: Set<string> = new Set([
+  '@ohos.taskpool'
 ]);
 export const LIMIT_DECORATOR: string[] = ['Sendable', 'Concurrent'];
