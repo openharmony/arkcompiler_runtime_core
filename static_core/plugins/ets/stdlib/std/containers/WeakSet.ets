@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,19 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the WeakSet for ArkTS
+ * @kit ArkTS
+ */
+
 package std.containers;
 
 /**
- * A WeakSet is a collection of garbage-collectable values.  A value
+ * A WeakSet is a collection of garbage-collectable values. A value
  * in the WeakSet may only occur once. It is unique in the WeakSet's
- * collection.
+ * collection
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export final class WeakSet<K extends Object> {
     // NOTE(cheezzario) move creation to constructor
@@ -29,7 +36,11 @@ export final class WeakSet<K extends Object> {
     }
 
     /**
-     * The WeakSet() constructor creates WeakSet objects.
+     * The WeakSet() constructor creates WeakSet objects
+     *
+     * @param { K[] | null } [elements] - Optional initial object array to initialize the WeakSet
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     constructor(elements?: K[] | null) {
         if (elements != null) {
@@ -40,7 +51,11 @@ export final class WeakSet<K extends Object> {
     }
 
     /**
-     * The WeakSet() constructor creates WeakSet objects.
+     * The WeakSet() constructor creates WeakSet objects
+     *
+     * @param { Iterable<K> } elements - An iterable object whose elements will be added to the new WeakSet
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     constructor(elements: Iterable<K>) {
         iteratorForEach<K>(elements.$_iterator(), (elem: K) => {
@@ -49,8 +64,12 @@ export final class WeakSet<K extends Object> {
     }
 
     /**
-     * The add() method appends a new object to the end of a WeakSet
-     * object.
+     * The add() method appends a new object to the end of a WeakSet object
+     *
+     * @param { K } v - The object to add
+     * @returns { WeakSet<K> } Returns the WeakSet instance itself, supporting chaining
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     add(v: K): WeakSet<K>{
         this.elements.set(v, null)
@@ -58,16 +77,25 @@ export final class WeakSet<K extends Object> {
     }
 
     /**
-     * The has() method returns a boolean indicating whether an object
-     * exists in a WeakSet or not.
+     * The has() method returns a boolean indicating whether an object exists in a WeakSet or not
+     *
+     * @param { K } v - The object to check
+     * @returns { boolean } Returns true if the object exists, otherwise returns false
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     has(v: K): boolean {
         return this.elements.has(v)
     }
 
     /**
-     * The delete() method removes the specified element from
-     * a WeakSet object.
+     * The delete() method removes the specified element from a WeakSet object
+     *
+     * @param { K } v - The object to remove
+     * @returns { boolean } Returns true if the object was successfully removed,
+     *     returns false if the object does not exist or removal failed
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     delete(v: K): boolean {
         return this.elements.delete(v)

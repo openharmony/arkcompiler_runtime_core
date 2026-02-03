@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the WeakMap for ArkTS
+ * @kit ArkTS
+ */
+
 package std.containers;
 
- /**
-  * A WeakMap is a collection of key/value pairs whose keys must be objects,
-  * with values of any arbitrary type, and which does not create strong references to its keys.
-  * That is, an object's presence as a key in a WeakMap does not prevent the object from being garbage collected.
-  * Once an object used as a key has been collected,
-  * its corresponding values in any WeakMap become candidates for garbage collection as well
-  */
+/**
+ * A WeakMap is a collection of key/value pairs whose keys must be objects,
+ * with values of any arbitrary type, and which does not create strong references to its keys.
+ * That is, an object's presence as a key in a WeakMap does not prevent the object from being garbage collected.
+ * Once an object used as a key has been collected,
+ * its corresponding values in any WeakMap become candidates for garbage collection as well
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
 export final class WeakMap<K extends Object, V> {
     private readonly keyRefToEntry = new Map<WeakRef<K>, WeakMapEntry<V>>
     private readonly keyHashToKeyRefs = new Map<Int, Array<WeakRef<K>>>()
@@ -36,7 +43,11 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The WeakMap() constructor creates WeakMap objects.
+     * The WeakMap() constructor creates WeakMap objects
+     *
+     * @param { ([K, V])[] | null } [entries] - Optional array of key-value pairs to initialize the WeakMap
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     constructor(entries?: ([K, V])[] | null) {
         this.registry = new FinalizationRegistry<WeakRef<K>>((keyRef: WeakRef<K>) => {
@@ -61,7 +72,11 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The WeakMap() constructor creates WeakMap objects.
+     * The WeakMap() constructor creates WeakMap objects
+     *
+     * @param { Iterable<[K, V]> } entries - Iterable of key-value pairs to initialize the WeakMap
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     constructor(entries: Iterable<[K, V]>) {
         this(null)
@@ -72,10 +87,14 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The set() method adds a new element with a specified key
-     * and value to a WeakMap object.
+     * The set() method adds a new element with a specified key and value to a WeakMap object
      *
-     * @throws TypeError if key is not garbage-collectable
+     * @param { K } key - The key to set, must be an object type
+     * @param { V } val - The value to set
+     * @returns { WeakMap<K, V> } Returns the WeakMap instance itself, supporting chaining
+     * @throws { TypeError } When the key is not a garbage-collectable object
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     set(key: K, val: V): WeakMap<K, V> {
         if (!WeakMap.validateKey(key)) {
@@ -104,9 +123,12 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The has() method returns a boolean indicating whether
-     * an element with the specified key exists in the WeakMap
-     * object or not.
+     * The has() method returns a boolean indicating whether an element with the specified key exists in the WeakMap
+     *
+     * @param { K } key - The key to check
+     * @returns { boolean } Returns true if the key exists in the WeakMap, otherwise returns false
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     has(key: K): boolean {
         const keyHash = Runtime.getHashCode(key)
@@ -125,8 +147,12 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The get() method returns a specified element from
-     * a WeakMap object.
+     * The get() method returns a specified element from a WeakMap object
+     *
+     * @param { K } key - The key to get the value for
+     * @returns { V | undefined } Returns the value associated with the key, or undefined if the key does not exist
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     get(key: K): V | undefined {
         const keyHash = Runtime.getHashCode(key)
@@ -150,8 +176,13 @@ export final class WeakMap<K extends Object, V> {
     }
 
     /**
-     * The delete() method removes the specified element from
-     * a WeakMap object.
+     * The delete() method removes the specified element from a WeakMap object
+     *
+     * @param { K } key - The key of the element to remove
+     * @returns { boolean } Returns true if the element was successfully removed,
+     *     returns false if the key does not exist
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     delete(key: K): boolean {
         const keyHash = Runtime.getHashCode(key)
@@ -217,19 +248,44 @@ export final class WeakMap<K extends Object, V> {
     private native static validateKey(key: Object): boolean
 }
 
+/**
+ * WeakMap entry type
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
 class WeakMapEntry<V> {
     private readonly _keyHash: int
     private readonly _value: V
 
+    /**
+     * Creates a WeakMapEntry
+     *
+     * @param { int } keyHash - Hash of the key
+     * @param { V } value - The value
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
+     */
     constructor(keyHash: int, value: V) {
         this._keyHash = keyHash
         this._value = value
     }
 
+    /**
+     * Hash of the key
+     * @type { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
+     */
     get keyHash(): int {
         return this._keyHash
     }
 
+    /**
+     * The value
+     * @type { V }
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
+     */
     get value(): V {
         return this._value
     }
