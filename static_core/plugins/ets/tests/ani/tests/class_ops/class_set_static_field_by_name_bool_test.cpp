@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,18 +143,130 @@ TEST_F(ClassSetStaticFieldByNameBoolTest, invalid_argument1)
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Boolean(nullptr, cls, "bool_value", ANI_TRUE), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization)
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.BoolStatic", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "parentStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
 
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_valuex", ANI_TRUE), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Parent", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "bool_value", ANI_TRUE), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.BoolStatic"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "childStaticField", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "grandchildStaticField", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "parentStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "childStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "grandchildStaticField", ANI_TRUE), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "parentStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "childStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameBoolTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_bool_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Boolean(cls, "grandchildStaticField", ANI_TRUE), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_bool_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

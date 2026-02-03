@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,18 +164,172 @@ TEST_F(ClassSetStaticFieldShortTest, combination_test4)
     CheckFieldValue("class_set_static_field_short_test.TestSetShortFinal", "short_value");
 }
 
-TEST_F(ClassSetStaticFieldShortTest, check_initialization)
+TEST_F(ClassSetStaticFieldShortTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.TestSetShortFinal", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Parent", &cls), ANI_OK);
 
     ani_static_field field {};
-    ASSERT_EQ(env_->Class_FindStaticField(cls, "short_value", &field), ANI_OK);
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.TestSetShortFinal"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
     const ani_short shortValue = 127U;
     ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.TestSetShortFinal"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Parent", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Child", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Parent", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Grandchild", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Child", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Child", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Child", &cls), ANI_OK);
+
+    ani_class fieldClass {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Grandchild", &fieldClass), ANI_OK);
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(fieldClass, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "parentStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "childStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldShortTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_short_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_field field {};
+    ASSERT_EQ(env_->Class_FindStaticField(cls, "grandchildStaticField", &field), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
+    const ani_short shortValue = 127U;
+    ASSERT_EQ(env_->Class_SetStaticField_Short(cls, field, shortValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_short_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

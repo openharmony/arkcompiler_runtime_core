@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,4 +23,14 @@ class TestSetCharA extends TestSetChar {
 
 final class TestSetCharFinal extends TestSetChar {
     static char_value: char = c'a';
+}
+
+class Parent {
+    static parentStaticField: char = c'a';
+}
+class Child extends Parent {
+    static childStaticField: char = c'n';
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: char = c'i';
 }

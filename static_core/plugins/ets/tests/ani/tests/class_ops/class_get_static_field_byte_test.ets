@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,4 +37,14 @@ class TestByteA extends TestByte {
 
 final class TestByteFinal extends TestByte {
     static byte_value: byte = 126;
+}
+
+class Parent {
+    static parentStaticField: byte = 127;
+}
+class Child extends Parent {
+    static childStaticField: byte = 127;
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: byte = 127;
 }
