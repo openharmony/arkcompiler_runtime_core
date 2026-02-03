@@ -100,7 +100,7 @@ async def test_compile(monkeypatch, ark_build, compile_opts, disasm, verifier):
 
     expected = {
         "compile": {"error": "", "exit_code": 0, "output": "executed"},
-        "disassembly": None, "verifier": None, "ir_dump": None
+        "disassembly": None, "verifier": None, "aot_compile": None, "ir_dump": None
     }
     if disasm:
         expected["disassembly"] = {
@@ -188,8 +188,9 @@ async def test_compile_and_run(monkeypatch, ark_build, compile_opts: list, disas
         },
         "disassembly": None,
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None,
-        "run_aot": None,
+        "aot_run": None,
         "run": {
             "error": "", "exit_code": 0, "output": "run and compile"
         }
@@ -241,8 +242,9 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
         },
         "disassembly": None,
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None,
-        "run_aot": None,
+        "aot_run": None,
         "run": None
     }
     assert res == expected
@@ -272,8 +274,9 @@ async def test_run_when_compile_segfault(monkeypatch, ark_build):
         },
         "disassembly": None,
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None,
-        "run_aot": None,
+        "aot_run": None,
         "run": None
     }
     assert res == expected
@@ -320,8 +323,9 @@ async def test_run_disasm_failed(monkeypatch, ark_build, ):
             "output": ""
         },
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None,
-        "run_aot": None
+        "aot_run": None
     }
     res_without_run = {k: v for k, v in res.items() if k != "run"}
     assert res_without_run == expected
@@ -350,6 +354,7 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
         },
         "disassembly": None,
         "verifier": None,
+        "aot_compile": None,
         "ir_dump": None
     }
     assert res == expected
@@ -357,9 +362,8 @@ async def test_compile_failed_with_disasm(monkeypatch, ark_build):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("verification_mode,expected_opts", [
-    (VerificationMode.DISABLED, []),
+    (VerificationMode.DISABLED, ["--verification-mode=disabled"]),
     (VerificationMode.AHEAD_OF_TIME, ["--verification-mode=ahead-of-time"]),
-    (VerificationMode.ON_THE_FLY, ["--verification-mode=on-the-fly"]),
 ])
 async def test_run_with_verification_modes(monkeypatch, ark_build, verification_mode, expected_opts):
     run_opts = [f"--boot-panda-files={ark_build[4]}", "--load-runtimes=ets"] + expected_opts + ["ETSGLOBAL::main"]
@@ -385,8 +389,9 @@ async def test_run_with_verification_modes(monkeypatch, ark_build, verification_
     assert res["compile"] == {"error": "", "exit_code": 0, "output": "executed"}
     assert res["disassembly"] is None
     assert res["verifier"] is None
+    assert res["aot_compile"] is None
     assert res["ir_dump"] is None
-    assert res["run_aot"] is None
+    assert res["aot_run"] is None
 
 
 async def test_get_versions(monkeypatch, ark_build):
@@ -651,7 +656,7 @@ async def test_compile_run_with_aot_mode(monkeypatch, ark_build):
                         stdout=b"executed",
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
-                        opts=[boot_panda, "--load-runtimes=ets", "--aot-file=", "ETSGLOBAL::main"],
+                        opts=[boot_panda, "--load-runtimes=ets", "--enable-an:force", "ETSGLOBAL::main"],
                         stdout=b"aot run output",
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
@@ -670,8 +675,8 @@ async def test_compile_run_with_aot_mode(monkeypatch, ark_build):
     res = await r.compile_run_arkts("code", [], False, aot_mode=True)
     assert res["run"]["exit_code"] == 0
     assert res["run"]["output"] == "jit output"
-    assert res["run_aot"]["exit_code"] == 0
-    assert "aot run output" in res["run_aot"]["output"]
+    assert res["aot_run"]["exit_code"] == 0
+    assert "aot run output" in res["aot_run"]["output"]
 
 
 @pytest.mark.asyncio
@@ -699,8 +704,9 @@ async def test_aot_compile_failure(monkeypatch, ark_build):
     r = Runner(ark_build[0])
     with capture_logs() as cap_logs:
         res = await r.compile_run_arkts("code", [], False, aot_mode=True)
-    assert res["run_aot"]["exit_code"] == 1
-    assert "AOT compilation failed:" in res["run_aot"]["error"]
+    assert res["aot_compile"]["exit_code"] == 1
+    assert "aot error" in res["aot_compile"]["error"]
+    assert res["aot_run"]["exit_code"] is None
     aot_fail_logs = [l for l in cap_logs if "AOT compilation failed" in l.get("event", "")]
     assert len(aot_fail_logs) > 0
 
@@ -728,8 +734,9 @@ async def test_aot_compile_segfault(monkeypatch, ark_build):
 
     r = Runner(ark_build[0])
     res = await r.compile_run_arkts("code", [], False, aot_mode=True)
-    assert res["run_aot"]["exit_code"] == -11
-    assert "AOT compilation: Segmentation fault" in res["run_aot"]["error"]
+    assert res["aot_compile"]["exit_code"] == -11
+    assert "AOT compilation: Segmentation fault" in res["aot_compile"]["error"]
+    assert res["aot_run"]["exit_code"] is None
 
 
 @pytest.mark.asyncio
@@ -743,7 +750,7 @@ async def test_aot_run_nonzero(monkeypatch, ark_build):
                         stdout=b"executed",
                         return_code=0),
             FakeCommand(expected=str(ark_build[3]),
-                        opts=[boot_panda, "--load-runtimes=ets", "--aot-file=", "ETSGLOBAL::main"],
+                        opts=[boot_panda, "--load-runtimes=ets", "--enable-an:force", "ETSGLOBAL::main"],
                         stderr=b"runtime error",
                         return_code=1),
             FakeCommand(expected=str(ark_build[3]),
@@ -760,7 +767,7 @@ async def test_aot_run_nonzero(monkeypatch, ark_build):
 
     r = Runner(ark_build[0])
     res = await r.compile_run_arkts("code", [], False, aot_mode=True)
-    assert res["run_aot"]["exit_code"] == 1
+    assert res["aot_run"]["exit_code"] == 1
 
 
 @pytest.mark.asyncio
@@ -794,8 +801,10 @@ async def test_aot_missing_binary(monkeypatch, tmp_path):
 
     r = Runner(build_path)
     res = await r.compile_run_arkts("code", [], False, aot_mode=True)
-    assert res["run_aot"]["exit_code"] == 1
-    assert "AOT mode requires ark_aot binary" in res["run_aot"]["error"]
+    assert res["aot_compile"]["exit_code"] == 1
+    assert "Internal error" in res["aot_compile"]["error"]
+    assert res["aot_run"]["exit_code"] == 1
+    assert res["aot_run"]["error"] == ""
 
 
 @pytest.mark.asyncio
@@ -855,7 +864,7 @@ async def test_ir_dump_abc_not_found(ark_build):
     ir_dump_opts = {"compiler_dump": True, "disasm_dump": False}
     res = await r.generate_ir_dump("/nonexistent/file.abc", "/tmp", ir_dump_opts)
     assert res["exit_code"] == 1
-    assert "ABC file not found" in res["error"]
+    assert "Internal error" in res["error"]
 
 
 @pytest.mark.asyncio
@@ -904,8 +913,9 @@ async def test_ir_dump_success_with_files(monkeypatch, ark_build, tmp_path):
     res = await r.generate_ir_dump(str(abc_file), str(tmp_path), {"compiler_dump": True, "disasm_dump": True})
     assert res["exit_code"] == 0
     assert res["compiler_dump"] is not None
-    assert "IR content 1" in res["compiler_dump"]
-    assert "IR content 2" in res["compiler_dump"]
+    assert isinstance(res["compiler_dump"], list)
+    assert any(item["content"] == "IR content 1" for item in res["compiler_dump"])
+    assert any(item["content"] == "IR content 2" for item in res["compiler_dump"])
     assert res["disasm_dump"] == "disasm content"
 
 

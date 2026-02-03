@@ -32,7 +32,17 @@ export const fetchCompileCode = createAsyncThunk(
         thunkAPI.dispatch(setRunRes(null));
         const state: RootState = thunkAPI.getState() as RootState;
         const codeState = state.code || '';
-        const appState = state?.appState || false;
+        const appState = state?.appState || {
+            disasm: false,
+            verifier: true,
+            aotMode: false,
+            clearLogsEachRun: true,
+            verificationMode: 'ahead-of-time' as const,
+            irDump: {
+                compilerDump: false,
+                disasmDump: false,
+            }
+        };
         const optionsState = state.options || {};
         thunkAPI.dispatch(setClearHighLightErrs());
         if (appState.clearLogsEachRun) {
@@ -44,6 +54,7 @@ export const fetchCompileCode = createAsyncThunk(
             options: optionsState?.pickedOptions,
             disassemble: appState.disasm,
             verifier: appState.verifier,
+            aot_mode: appState.aotMode,
             ir_dump: (appState.irDump.compilerDump || appState.irDump.disasmDump) ? {
                 compiler_dump: appState.irDump.compilerDump,
                 disasm_dump: appState.irDump.disasmDump,
@@ -67,7 +78,17 @@ export const fetchRunCode = createAsyncThunk(
         thunkAPI.dispatch(setRunRes(null));
         const state: RootState = thunkAPI.getState() as RootState;
         const codeState = state.code || '';
-        const appState = state?.appState || false;
+        const appState = state?.appState || {
+            disasm: false,
+            verifier: true,
+            aotMode: false,
+            clearLogsEachRun: true,
+            verificationMode: 'ahead-of-time' as const,
+            irDump: {
+                compilerDump: false,
+                disasmDump: false,
+            }
+        };
         const optionsState = state?.options || {};
         thunkAPI.dispatch(setClearHighLightErrs());
         if (appState.clearLogsEachRun) {
@@ -97,12 +118,7 @@ export const fetchRunCode = createAsyncThunk(
     },
 );
 
-export const setCodeAction = createAsyncThunk(
-    '@code/setCode',
-    (data: string, thunkAPI) => {
-        thunkAPI.dispatch(setCode(data));
-    },
-);
+export const setCodeAction = setCode;
 
 export const flushPendingCodeUpdate = (): void => {
     window.dispatchEvent(new Event('flushPendingCodeUpdate'));

@@ -148,7 +148,6 @@ const ControlPanel = (): JSX.Element => {
                             >
                                 <Radio label="Disabled" value="disabled" />
                                 <Radio label="Ahead of Time" value="ahead-of-time" />
-                                <Radio label="On the Fly" value="on-the-fly" />
                             </RadioGroup>
                             <Checkbox
                                 checked={runAotMode}
