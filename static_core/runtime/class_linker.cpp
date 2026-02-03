@@ -324,6 +324,14 @@ private:
     panda_file::ClassDataAccessor *dataAccessor_;
 };
 
+void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> interfaces)
+{
+    ITable::Free(allocator_, itable);
+    if (!interfaces.Empty()) {
+        allocator_->Free(interfaces.begin());
+    }
+}
+
 ClassLinker::ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler)
 {
     ClassInfo classInfo;
@@ -345,12 +353,11 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::Class
 
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
-        ITable::Free(allocator_, info.itableBuilder->GetITable());
         return false;
     }
     ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
-        ITable::Free(allocator_, info.itableBuilder->GetITable());
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
@@ -401,7 +408,7 @@ bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> meth
     }
     ASSERT(info.vtableBuilder != nullptr);
     if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
-        ITable::Free(allocator_, info.itableBuilder->GetITable());
+        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
         return false;
     }
     info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
@@ -1061,7 +1068,6 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
 
     auto *klass = LoadClass(&classDataAccessor, descriptor, baseClass, res.value(), context, ext, errorHandler);
     if (klass == nullptr) {
-        allocator_->Free(res->Data());
         return nullptr;
     }
 
@@ -1136,7 +1142,6 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
                                    classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 
     if (UNLIKELY(klass == nullptr)) {
-        ITable::Free(allocator_, classInfo.itableBuilder->GetITable());
         return nullptr;
     }
 
@@ -1163,7 +1168,6 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
 
     klass->CalcHaveNoRefsInParents();
     if (UNLIKELY(!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor))) {
-        ITable::Free(allocator_, classInfo.itableBuilder->GetITable());
         return nullptr;
     }
 
