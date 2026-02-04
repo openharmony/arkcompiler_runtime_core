@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,11 +225,111 @@ function testArrayOfNumberFromIndex() {
     checkArray(data, -10000000001, -1, -1);
 }
 
+class A {
+    toString1 = (): number => {
+        return 0;
+    }
+}
+
+function testArrayOfMixedTypes() {
+    let obj: A = {
+        toString1: (): number => {
+            return 0;
+        }
+    };
+    let one = 1;
+    let _float = -(4 / 3);
+    let a: Array<number | string | undefined | null | boolean | object> =
+    new Array<number | string | undefined | null | boolean | object>(+0, 0, -0, false, "false", undefined, "0", obj, _float, -(4 / 3), -1.3333333333333, "str", one, 1);
+
+    arktest.assertEQ(a.lastIndexOf(-(4 / 3)), 9, 'a[9]=-(4/3)');
+    arktest.assertEQ(a.lastIndexOf(0), 2, 'a[2] = -0, but using === -0 and 0 are equal');
+    arktest.assertEQ(a.lastIndexOf(-0), 2, 'a[2] = -0');
+    arktest.assertEQ(a.lastIndexOf(1), 13, 'a[13] = 1');
+    arktest.assertEQ(a.lastIndexOf(obj), 7, 'a[7] = obj');
+
+    arktest.assertEQ(a.lastIndexOf(true), -1, 'a.lastIndexOf(true)');
+    arktest.assertEQ(a.lastIndexOf(5), -1, 'a.lastIndexOf(5)');
+    arktest.assertEQ(a.lastIndexOf("str1"), -1, 'a.lastIndexOf("str1")');
+    arktest.assertEQ(a.lastIndexOf(null), -1, 'a.lastIndexOf(null)');
+    arktest.assertEQ(a.lastIndexOf(new Object()), -1, 'a.lastIndexOf(new Object())');
+}
+
+function testArrayElementTypeDiffersFromSearchElementType() {
+    let a1: Array<string | boolean> = new Array<string | boolean>("true");
+    arktest.assertEQ(a1.lastIndexOf(true), -1, 'a1: ["true"].lastIndexOf(true)');
+
+    let a2: Array<string | number> = new Array<string | number>("0");
+    arktest.assertEQ(a2.lastIndexOf(0), -1, 'a2: ["0"].lastIndexOf(0)');
+
+    let a3: Array<boolean | number> = new Array<boolean | number>(false);
+    arktest.assertEQ(a3.lastIndexOf(0), -1, 'a3: [false].lastIndexOf(0)');
+
+    let a4: Array<undefined | number> = new Array<undefined | number>(undefined);
+    arktest.assertEQ(a4.lastIndexOf(0), -1, 'a4: [undefined].lastIndexOf(0)');
+
+    let a5: Array<null | number> = new Array<null | number>(null);
+    arktest.assertEQ(a5.lastIndexOf(0), -1, 'a5: [null].lastIndexOf(0)');
+
+    let arr: Array<number> = new Array<number>();
+    let a6: Array<Array<number> | number> = new Array<Array<number> | number>(arr);
+    arktest.assertEQ(a6.lastIndexOf(0), -1, 'a6: [[]].lastIndexOf(0)');
+
+    let _undefined1 = undefined;
+    let _undefined2: undefined;
+    let a7: Array<number | string | undefined | null | boolean> = new Array<number | string | undefined | null | boolean>(undefined, _undefined1, _undefined2, true, 0, false, null, 1, "undefined", 1);
+    arktest.assertEQ(a7.lastIndexOf(undefined), 2, 'a7.lastIndexOf(undefined)');
+
+    let _false = false;
+    let a8: Array<number | string | undefined | null | boolean> =  new Array<number | string | undefined | null | boolean>(_false, false, 0, "false", null, undefined)
+    arktest.assertEQ(a8.lastIndexOf(_false), 1, 'a8.lastIndexOf(_false)');
+
+    let _sfalse = "false"
+    let a9: Array<number | string | undefined | null | boolean> = new Array<number | string | undefined | null | boolean>(false, 0, _sfalse, "false", null, undefined)
+    arktest.assertEQ(a9.lastIndexOf(_sfalse), 3, 'a9.lastIndexOf(_sfalse)');
+
+    let obj1 = new A();
+    let obj2 = new A();
+    let obj3 = obj1;
+    let a10: Array<object> = new Array<object>(obj2, obj1, obj3, obj1, obj2)
+    arktest.assertEQ(a10.lastIndexOf(obj3), 3, 'a10.lastIndexOf(obj3)');
+
+    let _null = null;
+    let a11: Array<number | string | undefined | null | boolean> =
+    new Array<number | string | undefined | null | boolean>(null, _null, "null", undefined, 0, false, );
+    arktest.assertEQ(a11.lastIndexOf(null), 1, 'a11.lastIndexOf(null)');
+}
+
+function testArraySelfReference() {
+    let a: Array<number> = new Array<number>(0, 1, 2, 3);
+    let arr1: Array<number | Array<number>> = new Array<number | Array<number>>(0, 1, a, 3);
+    arktest.assertEQ(arr1.lastIndexOf(a), 2, 'a.lastIndexOf(a)');
+
+    let b: Array<string> = new Array<string>("0,1");
+    let arr2: Array<number | string | Array<string>> = new Array<number | string | Array<string>>(0, b, "0,1", 3);
+
+    arktest.assertEQ(arr2.lastIndexOf(b.toString()), 2, 'arr2.lastIndexOf(b.toString())');
+    arktest.assertEQ(arr2.lastIndexOf("0,1"), 2, 'arr2.lastIndexOf("0,1")');
+}
+
+function testArrayElementOwnDataProperty() {
+    let arr: Array<boolean> = new Array<boolean>(true, true, true);
+    arktest.assertEQ(arr.lastIndexOf(true), 2, '[true, true, true].lastIndexOf(true)');
+    arr[2] = false;
+    arktest.assertEQ(arr.lastIndexOf(true), 1, '[true, true, false].lastIndexOf(true)');
+    arr[1] = false;
+    arktest.assertEQ(arr.lastIndexOf(true), 0, '[true, false, false].lastIndexOf(true)');
+}
+
 function main(): int {
     let testSuite = new arktest.ArkTestsuite('Array.lastIndexOf');
     testSuite.addTest('Arrays of BigInt64: lastIndexOf for arrays', testArrayOfBigInt);
     testSuite.addTest('Arrays of BigInt64: lastIndexOf for arrays with fromIndex', testArrayOfBigIntFromIndex);
     testSuite.addTest('Arrays of Number: lastIndexOf for arrays', testArrayOfNumber);
     testSuite.addTest('Arrays of Number: lastIndexOf for arrays with fromIndex', testArrayOfNumberFromIndex);
+    testSuite.addTest('Arrays of Mixed types: lastIndexOf for arrays', testArrayOfMixedTypes);
+    testSuite.addTest('Arrays of Mixed types: type of array element is different from type of search element', testArrayElementTypeDiffersFromSearchElementType);
+    testSuite.addTest('Arrays with self-reference: lastIndexOf for arrays with array elements', testArraySelfReference);
+    testSuite.addTest('Arrays of Boolean: element to be retrieved is own data property on an Array', testArrayElementOwnDataProperty);
     return testSuite.run();
 }
