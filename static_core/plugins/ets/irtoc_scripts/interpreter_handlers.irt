@@ -302,12 +302,12 @@ end
         btype := getBoxedType(obj_flags)
         If(btype, Cast(EtsConstants::ETS_CLASS_BOXED_TYPE_DOUBLE_MASK_VALUE).u32).EQ.b {
           value_double := LoadI(v1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f64
-          pe_cmp1 := Not(isNan64(value_double).b).b
+          pe_cmp1 := Compare(isNan64(value_double).b, 0).b
           Goto(:"PtrEqJoin#{suffix}")
         }
         If(btype, Cast(EtsConstants::ETS_CLASS_BOXED_TYPE_FLOAT_MASK_VALUE).u32).EQ.b {
           value_float := LoadI(v1).Imm(EtsConstants::BOX_PRIMITIVE_VALUE_OFFSET).f32
-          pe_cmp2 := Not(isNan32(value_float).b).b
+          pe_cmp2 := Compare(isNan32(value_float).b, 0).b
           Goto(:"PtrEqJoin#{suffix}")
         } Else {
           pe_true2 := 1
