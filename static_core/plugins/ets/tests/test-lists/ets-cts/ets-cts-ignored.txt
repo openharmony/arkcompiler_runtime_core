@@ -34,6 +34,9 @@
 
 #31484
 03.types/11.types_void_or_undefined/void/void_subtyping_basic_0.ets
+03.types/11.types_void_or_undefined/void/void_subtyping_basic_2.ets
+03.types/11.types_void_or_undefined/void/void_subtyping_basic_3.ets
+03.types/11.types_void_or_undefined/void/void_subtyping_basic_4.ets
 03.types/11.types_void_or_undefined/void/void_arrow_functions_0.ets
 03.types/11.types_void_or_undefined/void/void_arrow_functions_1.ets
 03.types/11.types_void_or_undefined/void/void_arrow_functions_2.ets

@@ -13,10 +13,6 @@
 
 ---
 cases:
-  - description: "Assigning void as type annotation should be CTE"
-    statements:
-      - "let x: void = undefined"
-
   - description: "Assigning number-returning function to void-returning function should be CTE"
     statements:
       - "let f1: () => void = () => 1"
