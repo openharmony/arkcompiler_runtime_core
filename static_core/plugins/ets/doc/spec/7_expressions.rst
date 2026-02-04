@@ -3996,18 +3996,12 @@ Two specific cases of a *cast expression* are described in the sections below:
 
 - :ref:`Runtime Checking in Cast Expression` otherwise.
 
-If none of conditions stated in these sections are satisfied, then a
-:index:`compile-time error` occurs.
-
-
 .. index::
-   constant expression
    cast expression
+   numeric literal
    object literal
    array literal
    type inference
-   expression
-   runtime
 
 |
 
