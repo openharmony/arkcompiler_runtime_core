@@ -72,3 +72,52 @@ cases:
           }
           arktest.assertEQ(res, 'abc')
       expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."
+
+    # $_iterator with parameters - must be parameterless
+    - decl: |-
+          class C {
+              data: string[] = ['a', 'b', 'c']
+              $_iterator(x: int) {
+                  return new CIterator(this)
+              }
+          }
+          class CIterator implements Iterator<string> {
+              index = 0
+              base: C
+              constructor (base: C) {
+                  this.base = base
+              }
+              next(): IteratorResult<string> {
+                  return {
+                      done: this.index >= this.base.data.length,
+                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+                  }
+              }
+          }
+      use: |-
+          let c = new C()
+          for (let x of c) {}
+      expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."
+
+    # $_iterator with wrong return type
+    - decl: |-
+          class C {
+              data: string[] = ['a', 'b', 'c']
+              $_iterator(): string {
+                  return "not an iterator"
+              }
+          }
+      use: |-
+          let c = new C()
+          for (let x of c) {}
+      expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."
+
+    # iteration over non-iterable class
+    - decl: |-
+          class C {
+              data: string[] = ['a', 'b', 'c']
+          }
+      use: |-
+          let c = new C()
+          for (let x of c) {}
+      expected_out: "Semantic error ESE0076: 'For-of' statement source expression is not of iterable type."

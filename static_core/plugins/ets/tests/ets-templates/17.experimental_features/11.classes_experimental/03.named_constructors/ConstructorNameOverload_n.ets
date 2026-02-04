@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,25 @@
  */
 
 /*---
-desc: >-
-    A constructor body can have no more than one call to the current
-    class or direct superclass constructor
+desc: Implicit overloading of named constructors is forbidden
 tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE0201: Call to 'this' must be first statement in constructor
+expected_out: "TBD, now: Semantic error ESE0070: 'Celsius' type does not exist."
 ---*/
 
-class A {
-    public i: int
-    public s: string
+class Temperature {
+    value: double = 0;
 
-    public constructor fromInt(i: int) {
-        this.i = i
+    constructor Celsius(value: double) {
+        this.value = value;
     }
 
-    public constructor fromString(s: string) {
-        this.s = s
+    constructor Celsius(value: string) {
+        this.value = new Double(value)
     }
+}
 
-    public constructor() {
-        this.fromInt(123)
-        this.fromString("Just a test") // CTE: second call to this constructor
-    }
+function main() {
+
+    let temp  = new Temperature.Celsius(100)
+
 }

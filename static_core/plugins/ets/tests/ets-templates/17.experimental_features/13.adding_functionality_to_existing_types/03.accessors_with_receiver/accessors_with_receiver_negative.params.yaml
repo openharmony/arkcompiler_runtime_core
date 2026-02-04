@@ -71,7 +71,7 @@ cases:
       get m(this: A): int {
         return this._m
       }
-    use: "Semantic error ESE0082: Extension function can only defined for class, interface or array."
+    use: ""
     expected_out: "Semantic error ESE0293: Property _m is not visible here."
     
   - desc: "If the receiver type is a class type or an interface type, then private or protected members are not accessible
