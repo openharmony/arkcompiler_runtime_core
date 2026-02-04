@@ -3132,11 +3132,9 @@ constructor body execution sequence is represented by the example below:
 
    class BWPoint extends ColoredPoint {
       constructor(x: number, y: number, black: boolean) {
-        console.log ("Code which does not use 'this'")
-        // zone where super() is called
-        if (black) { super (x, y, ColoredPoint.BLACK) }
-        else { super (x, y, ColoredPoint.WHITE) }
-        console.log ("Any code as this was initialized")
+        console.log ("Code that uses neither 'this' nor 'super'")
+        super (x, y, black ? ColoredPoint.BLACK : ColoredPoint.WHITE)
+        console.log ("Any code after that point")
       }
     }
 
@@ -3180,11 +3178,13 @@ The example below represents *primary* and *secondary* constructors:
         super(x, y) // calls base class constructor as class has 'extends'
         this.color = color
       }
-      // secondary constructors:
-      constructor zero(color: number) {
+      // secondary constructor:
+      constructor (color: number) {
         this(0, 0, color) // calls same class primary constructor
       }
-      constructor (color: number) {
+
+      // secondary named constructor:
+      constructor zero(color: number) {
         this(0, 0, color) // calls same class primary constructor
       }
     }
