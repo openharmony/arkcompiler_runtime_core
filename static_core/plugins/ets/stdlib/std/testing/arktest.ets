@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the arktest for ArkTS
+ * @kit ArkTS
+ */
 
 package std.testing;
 
+/**
+ * Provide a namespace for ArkTS testing-related functionality.
+ * @namespace
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export namespace arktest {
     /**
     * Produce AssertionError if condition is false. Print an additinal message in this case
-    * @param condition the checking condition
-    * @param message Error message for false condition
-    * @param description optional additional description for producing Error
-    * @throws AssertionError if condition is false
+    * @param {boolean} condition The provided condition.
+    * @param {string}  message Optional comment printed when the assertion fails.
+    * @param {string} [description] description comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the condition is false.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     function assertCommon(condition: boolean, message: string, description?: string): void {
         if (!condition) {
@@ -31,63 +45,81 @@ export namespace arktest {
 
     /**
     * Produce AssertionError unconditionally
-    * @param message Error message
-    * @param description optional Error description
-    * @throws AssertionError unconditionally
+    * @param {string}  message Optional comment printed when the assertion fails.
+    * @param {string} [description] description comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the condition is false.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     function failingAssertion(message: string, description?: string): never {
         throw new AssertionError((description ? description + "\n" : "") + message)
     }
 
     /**
-    * Assert that the supplied condition is true
-    * @param condition supplied condition
-    * @param comment optional comment that will be printed in case of failed assertion
-    * @throws AssertionFailed if condition is false
+    * Asserts that the provided condition is true.
+    * @param {boolean} condition The provided condition.
+    * @param {string} [comment] Optional comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the condition is false.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertTrue(condition: boolean, comment?: string): void {
         assertCommon(condition, "expected true but was false", comment)
     }
 
     /**
-    * Assert that the supplied condition is false
-    * @param condition supplied condition
-    * @param comment optional comment that will be printed in case of failed assertion
-    * @throws AssertionFailed if condition is true
+    * Asserts that the provided condition is false.
+    * @param {boolean} condition The provided condition.
+    * @param {string} [comment] Optional comment printed when the assertion fails.
+    * @throws {AssertionError} Thrown when the condition is true.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertFalse(condition: boolean, comment?: string): void {
         assertCommon(!condition, "expected false but was true", comment)
     }
 
     /**
-    * Check two values for == and produce throw error if check failed
-    * @param value1 first value for equality
-    * @param value2 second value for equality
-    * @param comment optional comment will be printed if equality failed
-    * @throws AssertionError if equality failed
+    * Checks whether two values are equal (===). Throws an error if the check fails.
+    * @param {T1} value1 The first value to compare.
+    * @param {T2} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the equality check fails.
+    * @throws {AssertionError} Thrown when the two values are not equal.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertEQ<T1, T2>(value1: T1, value2: T2, comment?: string): void {
         assertCommon(value1 === value2, "expected equality failed: '" + value1 + "' === '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values for != and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether two values are not equal (!==). Throws an error if the check fails.
+    * @param {T1} value1 The first value to compare.
+    * @param {T2} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the non-equality check fails.
+    * @throws {AssertionError} Thrown when the two values are equal.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertNE<T1, T2>(value1: T1, value2: T2, comment?: string): void {
         assertCommon(value1 !== value2, "expected non-equality failed: '" + value1 + "' !== '" + value2 + "'", comment);
     }
 
     /**
-    * Check that the difference between two values of double type does not exceed the absolute error
-    * @param value1 first value to check
-    * @param value2 second value to check
-    * @param absError absolute error
-    * @param comment optional comment will be printed if equality failed
-    * @throws AssertionError if the difference exceed the absolute error
+    * Checks whether the difference between two double values does not exceed the specified absolute error.
+    * @param {double} value1 The first value to be checked.
+    * @param {double} value2 The second value to be checked.
+    * @param {double} absError The allowed absolute error.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the difference between the two values exceeds the absolute error.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertDoubleEQ(value1: double, value2: double, absError: double, comment?: string): void {
         let difference = Math.abs(value1 - value2);
@@ -97,142 +129,183 @@ export namespace arktest {
     }
 
     /**
-    * Check two values of byte type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {byte} value1 The first value to compare.
+    * @param {byte} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: byte, value2: byte, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of short type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {short} value1 The first value to compare.
+    * @param {short} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: short, value2: short, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of int type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {int} value1 The first value to compare.
+    * @param {int} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: int, value2: int, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of long type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {long} value1 The first value to compare.
+    * @param {long} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: long, value2: long, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of float type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {float} value1 The first value to compare.
+    * @param {float} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: float, value2: float, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of double type for < and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than the second value. Throws an error if the check fails.
+    * @param {double} value1 The first value to compare.
+    * @param {double} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is not less than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLT(value1: double, value2: double, comment?: string): void {
         assertCommon(value1 < value2, "expected non-equality failed: '" + value1 + "' < '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of byte type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {byte} value1 The first value to compare.
+    * @param {byte} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: byte, value2: byte, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of short type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {short} value1 The first value to compare.
+    * @param {short} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: short, value2: short, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of int type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {int} value1 The first value to compare.
+    * @param {int} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: int, value2: int, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of long type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {long} value1 The first value to compare.
+    * @param {long} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: long, value2: long, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of float type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {float} value1 The first value to compare.
+    * @param {float} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: float, value2: float, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Check two values of double type for <= and produce throw error if check failed
-    * @param value1 first value for non-equality
-    * @param value2 second value for non-equality
-    * @param comment optional comment will be printed if non-equality failed
-    * @throws AssertionError if non-equality failed
+    * Checks whether the first value is less than or equal to the second value. Throws an error if the check fails.
+    * @param {double} value1 The first value to compare.
+    * @param {double} value2 The second value to compare.
+    * @param {string} [comment] Optional comment printed when the check fails.
+    * @throws {AssertionError} Thrown when the first value is greater than the second value.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function assertLE(value1: double, value2: double, comment?: string): void {
         assertCommon(value1 <= value2, "expected non-equality failed: '" + value1 + "' <= '" + value2 + "'", comment);
     }
 
     /**
-    * Assert callback throws and test the thrown value
-    * @param cb callback to be executed
-    * @param test for a thrown value, acts as predicate or returns an error message
-    * @throws AssertionError if no value thrown or value doesn't match the test predicate
+    * Asserts that a callback function throws an exception and tests the thrown value.
+    * @param {Function} cb The callback function to be executed.
+    * @param {Function} [test] A function used to test the thrown value, 
+    *     acting as a predicate or returning an error message.
+    * @throws {AssertionError} Thrown when the callback function does not throw a value 
+    *     or when the thrown value does not satisfy the test predicate.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function expectThrow(
         cb: () => void,
@@ -252,10 +325,14 @@ export namespace arktest {
     }
 
     /**
-    * Execute callback and check that Error was occurred and it is the same as expected if it passed
-    * @param fn executing callback
-    * @param message optional string message or Error to be tested upon the thrown value
-    * @throws AssertionError if an error was not occured or occured error is not same as expected error
+    * Executes the callback function and checks whether an Error occurs. If an expected value is provided, 
+    * also checks whether the thrown error matches the expected value.
+    * @param {Function} fn The callback function to be executed.
+    * @param {Function} [expect] An optional string message or Error instance used to test the thrown value.
+    * @throws {AssertionError} Thrown when no error occurs or when the thrown error does not match the expected error.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function expectError(fn: () => void, expect?: string | Error): void {
         expectThrow(fn, (e) => {
@@ -282,9 +359,12 @@ export namespace arktest {
     }
 
     /**
-    * Execute callback and check that no Error occurred
-    * @param fn executing callback
-    * @throws AssertionError if an error occured
+    * Executes the callback function and checks that no error occurs.
+    * @param {Function} fn The callback function to be executed.
+    * @throws {AssertionError} Thrown when an error occurs.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     export function expectNoThrow(fn: () => void): void {
         try {
@@ -294,40 +374,100 @@ export namespace arktest {
         }
     }
 
+    /**
+     * Represents terminal colors.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     class TermColor {
+        /**
+         * Represents the color black.
+         * @type {TermColor}
+         * @readonly
+         * @static
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         static readonly BLACK = new TermColor(0)
+
+        /**
+         * Represents the color red.
+         * @type {TermColor}
+         * @readonly
+         * @static
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         static readonly RED = new TermColor(1)
+
+        /**
+         * Represents the color green.
+         * @type {TermColor}
+         * @readonly
+         * @static
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         static readonly GREEN = new TermColor(2)
 
+        /**
+         * The color code.
+         * @type {int}
+         * @readonly
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         readonly code: int
 
         private constructor(code: int) {
             this.code = code
         }
 
+        /**
+         * Returns the string representation of the color.
+         * @returns {string}
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         toString(): string {
             return "" + this.code
         }
     }
 
     /**
-    * @class ArkTest provides interface for running a test
-    */
+     * Provides an interface for running a single test.
+     * @class ArkTest Provides an interface for running a test.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     export class ArkTest {
         /**
-        * Create a test instance
-        * @param name test name
-        * @param callback callback with test body
-        */
+         * Creates a test instance.
+         * @param {string} name The test name.
+         * @param {Function} callback The callback function containing the test body.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         constructor(name: string, callback: () => void) {
             this.name = name;
             this.callback = callback;
         }
 
         /**
-        * Run the test
-        * @returns true if test passed, false - otherwise
-        */
+         * Runs this test.
+         * @returns {boolean} 
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final run(): boolean {
             let testcaseName: string = this.getFullName();
             let startMs = Date.now();
@@ -361,8 +501,12 @@ export namespace arktest {
         }
 
         /**
-        * @returns Full test name (including testsuite)
-        */
+         * Gets the full name of the test (including the test suite name).
+         * @returns {string} The full test name.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final getFullName(): string {
             let name: string = "";
             if (this.suite) {
@@ -371,11 +515,25 @@ export namespace arktest {
             return name + this.name;
         }
 
+        /**
+         * Sets the test suite this test belongs to.
+         * @param {ArkTestsuite} suite The test suite instance.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         public setSuite(suite: ArkTestsuite): void {
             this.suite = suite;
         }
 
-        /// Name of the test
+        /**
+         * The test name.
+         * @type {string}
+         * @readonly
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         readonly name: string;
 
         private readonly callback: () => void;
@@ -383,43 +541,64 @@ export namespace arktest {
     }
 
     /**
-    * @class ArkTestsuite provides interface for running a group of tests
-    */
+     * Provides an interface for running a group of tests.
+     * @class ArkTestsuite provides interface for running a group of tests
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     export class ArkTestsuite {
 
-        /**
-        * Create a testsuite instance
-        * @param name name of testsuite
-        */
+       /**
+         * Creates a test suite instance.
+         * @param {string} name The test suite name.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         constructor(name: string) {
             this.name = name;
             this.tests = new Array<ArkTest>();
         }
 
         /**
-        * Run before each test. Can be overrided in derived testusute class
-        */
+         * Executed before each test runs. Can be overridden in derived classes.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         before(): void {}
 
         /**
-        * Run after each test. Can be overrided in derived testusute class
-        */
+         * Executed after each test runs. Can be overridden in derived classes.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         after(): void {}
 
         /**
-        * Add new test to the testsuite
-        * @param name name of test
-        * @param callback callback with test body
-        */
+         * Adds a new test to the test suite.
+         * @param {string} name The test name.
+         * @param {Function} callback The callback function containing the test body.
+         * @throws {Error} Thrown when the test name is empty.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final addTest(name: string, callback: () => void): void {
             this.addTest(new ArkTest(name, callback));
         }
 
         /**
-        * Add new async test to the testsuite
-        * @param name name of async test
-        * @param asyncCallback callback with async test body
-        */
+         * Adds a new asynchronous test to the test suite.
+         * @param {string} name The asynchronous test name.
+         * @param {Function} asyncCallback The callback function containing the asynchronous test body.
+         * @throws {Error} Thrown when the test name is empty.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final addAsyncTest(name: string, asyncCallback: () => Promise<void>): void {
             let callback = () => {
                 waitForCompletion(asyncCallback);
@@ -428,9 +607,13 @@ export namespace arktest {
         }
 
         /**
-        * Add new test to the testsuite
-        * @param test test instance
-        */
+         * Adds a new test instance to the test suite.
+         * @param {ArkTest} test The test instance.
+         * @throws {Error} Thrown when the test name is empty.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final addTest(test: ArkTest): void {
             if (test.name == "") {
                 throw new Error("Test with empty name is not allowed");
@@ -440,9 +623,12 @@ export namespace arktest {
         }
 
         /**
-        * Run all tests in the testsuite
-        * @returns count of failed tests
-        */
+         * Runs all tests in the test suite.
+         * @returns {int} The number of failed tests.
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         final run(): int {
             let startMs = Date.now();
             this.tests.forEach((test: ArkTest) => {
@@ -469,7 +655,14 @@ export namespace arktest {
             return failedTestsCount;
         }
 
-        /// name of the testsuite
+        /**
+         * The name of the test suite.
+         * @type {string}
+         * @readonly
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
         readonly name: string;
 
         private tests: Array<ArkTest>;

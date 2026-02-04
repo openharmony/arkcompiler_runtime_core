@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,46 +12,82 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines mathematical constants used in ArkTS.
+ * @kit ArkTS
+ */
 
 package std.math.consts;
 
 /**
- * PI as double value
+ * Double-precision constant representing the value of π (pi).
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const PI: double = 3.141592653589793;
 
 /**
- * Euler number as double value
+ * Double-precision constant representing the base of natural logarithms e.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const E: double = 2.718281828459045;
 
 /**
- * Natural logarithm of 10 as double value
+ * Double-precision constant representing the natural logarithm of 10.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const LN10: double = 2.302585092994046;
 
 /**
- * Natural logarithm of 2 as double value
+ * Double-precision constant representing the natural logarithm of 2.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const LN2: double = 0.6931471805599453;
 
 /**
- * Logarithm base 2 of Euler number as double value
+ * Double-precision constant representing the base-2 logarithm of e.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const LOG2E: double = 1.4426950408889634;
 
 /**
- * Logarithm base 10 of Euler number as double value
+ * Double-precision constant representing the base-10 logarithm of e.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const LOG10E: double = 0.4342944819032518;
 
 /**
- * Square root of 1/2 as double value
+ * Double-precision constant representing the square root of 1/2.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const SQRT1_2: double = 0.7071067811865476;
 
 /**
- * Square root of 2 as double value
+ * Double-precision constant representing the square root of 2.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const SQRT2: double = 1.4142135623730951;
 
@@ -63,31 +99,56 @@ export const SQRT2: double = 1.4142135623730951;
 // export const floatNegInf: float = -1.0 / 0.0;
 
 /**
- * Minimal possible difference between two double values
+ * Double-precision constant representing the smallest positive number representable by a double, i.e., 
+ *   the smallest difference between two double values.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleEpsilon: double = 2.22045e-16;
 
 /**
- * Minimal value that this type can have as a double
+ * Double-precision constant representing the smallest normalized value representable by a double.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleMinimum: double = 2.2250738585072014E-308;
 
 /**
- * Maximal value that this type can have as a double
+ * Double-precision constant representing the largest finite value representable by a double.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleMaximum: double = 1.7976931348623157E+308;
 
 /**
- * Represents the NaN value accoring to IEEE 754 specification
+ * Double-precision constant representing a Not-a-Number (NaN) value as defined by IEEE 754.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleNaN: double = 0.0 / 0.0;
 
 /**
- * Represents the +Infinity value accoring to IEEE 754 specification
+ * Double-precision constant representing positive infinity (+Infinity) as defined by IEEE 754.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleInf: double = 1.0 / 0.0;
 
 /**
- * Represents the -Infinity value accoring to IEEE 754 specification
+ * Double-precision constant representing negative infinity (-Infinity) as defined by IEEE 754.
+ * @type {double}
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export const doubleNegInf: double = -1.0 / 0.0;
