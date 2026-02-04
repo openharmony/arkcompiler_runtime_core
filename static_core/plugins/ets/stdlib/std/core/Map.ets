@@ -365,8 +365,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     private deleteAt(at: At) {
-        // NOTE(nkholiavin): maybe need to set deleted keys, values to undefined
         this.buckets.setDeletedAt(at)
+        // Clear key/value immediately to avoid holding references until rehash
+        const idx = getIdxAt(at)
+        this.data[idx + Const.KEY_DATA_OFS] = undefined
+        this.data[idx + Const.VAL_DATA_OFS] = undefined
     }
 
     private static getBucketIndex(capacity: int, k: Any): int {
