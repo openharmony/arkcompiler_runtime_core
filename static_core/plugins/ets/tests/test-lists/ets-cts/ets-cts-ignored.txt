@@ -256,8 +256,11 @@
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
 
-#215 (new)
+#32635
 07.expressions/14.chaining_operator/chop_record.ets
+
+#32603
+07.expressions/14.chaining_operator/condition_compile_time.ets
 
 #30939
 07.expressions/15.new_expressions/constructor_param_array_custom_2.ets
