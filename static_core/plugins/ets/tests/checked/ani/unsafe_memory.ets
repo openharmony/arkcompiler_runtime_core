@@ -133,7 +133,7 @@ function testInt32() : int {
 }
 
 function testInt64() : int {
-    let vals: long[] = [1, -1, 0, 2, -2, 0x7fffffffffffffff as long, -0x8000000000000000 as long];
+    let vals: long[] = [1, -1, 0, 2, -2, 0x7fffffffffffffff as long, Long.MIN_VALUE as long];
     let size: int = vals.length * Long.BYTE_SIZE;
     let addend = Long.BYTE_SIZE - 1
     let addr: long = allocMem(size + addend);
