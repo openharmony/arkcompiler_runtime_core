@@ -30,6 +30,7 @@ from runner.suites.test_metadata import TestMetadata
 _LOGGER = Log.get_logger(__file__)
 
 EXPECTED_FILE_EXTENSION = ".expected"
+DEFAULT_FILTER = "*"
 
 
 class EtsTemplatesGenerator(IGenerator):
@@ -48,6 +49,16 @@ class EtsTemplatesGenerator(IGenerator):
             if test_path.stem in str(file_name) and EXPECTED_FILE_EXTENSION in str(file_name):
                 test_expected.append(file_name)
         return test_expected
+
+    @staticmethod
+    def _get_test_dep_files(parent_test: Path, generated_tests: list[str]) -> set[Path]:
+        dep_files: set[Path] = set()
+        for test in generated_tests:
+            test_metadata = TestMetadata.get_metadata(Path(test))
+            if test_metadata.files:
+                dep_files |= {(parent_test.parent / Path(dep)).resolve() for dep in test_metadata.files}
+
+        return dep_files
 
     @cached_property
     def _matched(self) -> set[Path]:
@@ -97,30 +108,33 @@ class EtsTemplatesGenerator(IGenerator):
         return parent_test if parent_test.exists() else None
 
     def __generate_test(self, path: Path) -> None:
+        dep_tests_to_generate: set[Path] = set()
         test_full_name = os.path.relpath(path, self._source)
         output = self._target / test_full_name
         bench = Benchmark(path, output, test_full_name, self._source, self.extension)
         generated_tests = bench.generate()
-        dep_tests_to_generate: set[Path] = set()
-        for test in generated_tests:
-            test_path = self._source / test_full_name
-            test_metadata = TestMetadata.get_metadata(Path(test))
-            if test_metadata.files:
-                dep_tests_to_generate |= {Path(test) for test in test_metadata.files}
+        self.generated_tests.extend(generated_tests)
 
-            test_parent_dir = test_path.parent
+        if self.test_file is not None or self.filter != DEFAULT_FILTER:
+            dep_files = EtsTemplatesGenerator._get_test_dep_files(path, generated_tests)
+
+            test_parent_dir = self._source / Path(test_full_name).parent
             for file_name in test_parent_dir.iterdir():
                 if file_name.is_file() and file_name.suffixes[-2:] == [".d", ".ets"]:
                     dep_tests_to_generate.add(Path(file_name.name))
 
-        self.generated_tests.extend(generated_tests)
-        dep_tests_to_generate = {(path.parent / Path(dep_test)).resolve() for dep_test in dep_tests_to_generate}
-        if dep_tests_to_generate:
-            for dep_test in dep_tests_to_generate:
-                dep_test_output = self._target / dep_test.relative_to(self._source)
-                if not dep_test_output.exists():
-                    self.__generate_test(dep_test)
-                    self._already_generated.add(dep_test)
+            for test_path in dep_files:
+                test_path_parent = self._strip_test_template_suffix(test_path)
+                if test_path_parent is not None:
+                    dep_tests_to_generate.add(Path(test_path_parent))
+
+            dep_tests_to_generate = {(path.parent / Path(dep_test)).resolve() for dep_test in dep_tests_to_generate}
+            if dep_tests_to_generate:
+                for dep_test in dep_tests_to_generate:
+                    dep_test_output = self._target / dep_test.relative_to(self._source)
+                    if not dep_test_output.exists():
+                        self.__generate_test(dep_test)
+                        self._already_generated.add(dep_test)
 
     def __dfs(self, test_path: Path, seen: set[Path]) -> None:
         path = self._strip_test_template_suffix(test_path)

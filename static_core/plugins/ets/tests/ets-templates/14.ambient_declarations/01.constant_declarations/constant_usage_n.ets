@@ -18,7 +18,7 @@ limitations under the License.
 desc: Ambient Constant declarations implementations
 files: ['./constant_declarations_n_{{loop.index0}}.ets']
 tags: [negative, compile-only]
-expected_out: {{c.expected}} 
+expected_out: {{c.expected}}
 ---*/
 
 import { {{c.decl}} } from './constant_declarations_nd_{{loop.index0}}'
