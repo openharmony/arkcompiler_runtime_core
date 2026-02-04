@@ -56,7 +56,7 @@
     T("Lstd/core/StackTraceElement;", coreStackTraceElement)                                                         \
     T("Lstd/core/LinkerClassNotFoundError;", coreLinkerClassNotFoundError)                                           \
     T("Lescompat/ErrorOptions;", escompatErrorOptions)                                                               \
-    T("Lescompat/ErrorOptionsImpl;", escompatErrorOptionsImpl)                                                       \
+    T("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
     /* StringBuilder */                                                                                              \
     T("Lstd/core/StringBuilder;", coreStringBuilder)                                                                 \
     I("Lstd/core/StringBuilder;", "<ctor>", ":V", coreStringBuilderDefaultConstructor)                               \
