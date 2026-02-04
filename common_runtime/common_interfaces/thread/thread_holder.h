@@ -140,7 +140,6 @@ public:
     void UnregisterJSThread(JSThread *jsThread);
     void RegisterCoroutine(Coroutine *coroutine);
     void UnregisterCoroutine(Coroutine *coroutine);
-    void VisitAllThreads(CommonRootVisitor visitor);
 
     // Get the thread-local alloction buffer, which is used for fast path of allocating heap objects.
     // It should be used after binding mutator, and will be invalid after unbinding.

@@ -128,15 +128,27 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, Obje
 }
 
 template <class LanguageConfig>
-void RootManager<LanguageConfig>::VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const
+void RootManager<LanguageConfig>::VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor)
 {
-    LOG(DEBUG, GC) << "Start collecting roots for thread " << thread->GetId();
+    LOG(DEBUG, GC) << "Start collecting roots for thread " << std::hex << thread->GetId();
 
     thread->VisitGCRoots([&gcRootVisitor](GCRoot root) {
         LOG(DEBUG, GC) << " Found root for thread" << GetDebugInfoAboutObject(root.GetObjectHeader());
         gcRootVisitor(root);
     });
-    LOG(DEBUG, GC) << "Finish collecting roots for thread " << thread->GetId();
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+        auto currentMethod = stack.GetMethod();
+        if (currentMethod->IsCriticalNative()) {
+            LOG(FATAL, GC) << "GC cannot be triggered in CriticalNative method. Method name: "
+                           << currentMethod->GetFullName(true);
+        }
+        LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
+        stack.IterateObjectsWithInfo([this, &gcRootVisitor, &stack](auto &reginfo, auto &vreg) {
+            this->VisitRegisterRoot(vreg, reginfo, stack, gcRootVisitor);
+            return true;
+        });
+    }
+    LOG(DEBUG, GC) << "Finish collecting roots for thread " << std::hex << thread->GetId();
 }
 
 template <class LanguageConfig>
@@ -144,18 +156,6 @@ void RootManager<LanguageConfig>::VisitLocalRoots(const GCRootVisitor &gcRootVis
 {
     auto threadVisitor = [this, &gcRootVisitor](ManagedThread *thread) {
         VisitRootsForThread(thread, gcRootVisitor);
-        for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
-            auto currentMethod = stack.GetMethod();
-            if (currentMethod->IsCriticalNative()) {
-                LOG(FATAL, GC) << "GC cannot be triggered in CriticalNative method. Method name: "
-                               << currentMethod->GetFullName(true);
-            }
-            LOG(DEBUG, GC) << " VisitRoots frame " << std::hex << stack.GetFp();
-            stack.IterateObjectsWithInfo([this, &gcRootVisitor, &stack](auto &reginfo, auto &vreg) {
-                this->VisitRegisterRoot(vreg, reginfo, stack, gcRootVisitor);
-                return true;
-            });
-        }
         return true;
     };
     vm_->GetThreadManager()->EnumerateThreads(threadVisitor);
@@ -174,18 +174,20 @@ void RootManager<LanguageConfig>::VisitRegisterRoot(VRegRef &vRegister, VRegInfo
     if (objectHeader == nullptr) {
         return;
     }
-    LOG(DEBUG, GC) << " Found root for register" << GetDebugInfoAboutObject(objectHeader);
 
     gcRootVisitor({RootType::ROOT_FRAME, &objectHeader});
 
     if (oldRef != objectHeader) {
         if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
-            LOG(DEBUG, GC) << "^ acc updated";
+            LOG(DEBUG, GC) << "Found root for acc " << oldRef << " -> " << GetDebugInfoAboutObject(objectHeader);
             vRegister.template SetReference<false>(objectHeader);
         } else {
+            LOG(DEBUG, GC) << "Found root for register " << oldRef << " -> " << GetDebugInfoAboutObject(objectHeader);
             pframe.template SetVRegValue<std::is_same_v<decltype(vRegister), interpreter::DynamicVRegisterRef &>>(
                 regInfo, objectHeader);
         }
+    } else {
+        LOG(DEBUG, GC) << " Found root for register " << GetDebugInfoAboutObject(objectHeader);
     }
 }
 

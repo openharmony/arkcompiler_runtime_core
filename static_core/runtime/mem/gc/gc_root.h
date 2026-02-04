@@ -149,29 +149,29 @@ public:
                              MemRangeChecker rangeChecker, ObjectChecker rangeObjectChecker,
                              ObjectChecker fromObjectChecker, uint32_t processedFlag) const;
 
+    /// Visit roots for thread
+    void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor);
+
+    /// Visit VM-specific roots
+    void VisitVmRoots(const GCRootVisitor &gcRootVisitor) const;
+
     /// Visit roots in class linker
     void VisitClassRoots(const GCRootVisitor &gcRootVisitor,
                          VisitGCRootFlags flags = VisitGCRootFlags::ACCESS_ROOT_ALL) const;
 
+    /// Visit roots in ClassLinkerContexts
+    void VisitClassLinkerContextRoots(const GCRootVisitor &gcRootVisitor) const;
+
+    /// Visit AOT strings
     void VisitAotStringRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) const;
 
+    /// Update and sweep non-root VM references
     void UpdateAndSweep(const ReferenceUpdater &callback);
 
 private:
-    /// Visit VM-specific roots
-    void VisitVmRoots(const GCRootVisitor &gcRootVisitor) const;
-
     template <class VRegRef, class VRegInfo>
     void VisitRegisterRoot(VRegRef &vRegister, VRegInfo &regInfo, StackWalker &pframe,
                            const GCRootVisitor &gcRootVisitor);
-
-    void VisitClassLinkerContextRoots(const GCRootVisitor &gcRootVisitor) const;
-
-    /**
-     * Visit roots for @param thread
-     * @param thread
-     */
-    void VisitRootsForThread(ManagedThread *thread, const GCRootVisitor &gcRootVisitor) const;
 
     PandaVM *vm_ {nullptr};
 };

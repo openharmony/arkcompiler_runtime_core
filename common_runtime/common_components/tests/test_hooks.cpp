@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@ void MarkThreadLocalJitFortInstalled(void* thread, void* machineCode) {}
 void SynchronizeGCPhaseToJSThread(void *jsThread, GCPhase gcPhase) {}
 void JSGCCallback(void *ecmaVM) {}
 bool IsPostForked() { return true; }
-void VisitJSThread(void *jsThread, CommonRootVisitor visitor) {}
 
 bool IsMachineCodeObject(uintptr_t objPtr)
 {

@@ -97,13 +97,6 @@ void ThreadHolderManager::ResumeAll(ThreadHolder *current)
     ResumeAllImpl(current);
 }
 
-void ThreadHolderManager::IterateAll(CommonRootVisitor visitor)
-{
-    MutatorManager::Instance().VisitAllMutators([&visitor] (Mutator &mutator) {
-        mutator.GetThreadHolder()->VisitAllThreads(visitor);
-    });
-}
-
 void ThreadHolderManager::SuspendAllImpl([[maybe_unused]] ThreadHolder *current)
 {
     MutatorManager::Instance().StopTheWorld(false, GCPhase::GC_PHASE_IDLE);

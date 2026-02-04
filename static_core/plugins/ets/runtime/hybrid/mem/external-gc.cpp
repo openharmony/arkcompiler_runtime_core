@@ -14,32 +14,27 @@
  */
 
 #include "libarkbase/utils/logger.h"
-#include "runtime/mark_word.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/panda_vm.h"
-#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
+#include "runtime/mem/gc/gc_root.h"
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/heap/heap_visitor.h"
-#ifdef PANDA_JS_ETS_HYBRID_MODE
-#include "plugins/ets/runtime/interop_js/xgc/xgc.h"
-#endif  // PANDA_JS_ETS_HYBRID_MODE
+
+namespace common {
+void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &));
+void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &visitorFunc, void *mutator));
+void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
+void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
+void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
+}  // namespace common
 
 namespace ark::mem::ets {
 
-void VisitVmRoots(const GCRootVisitor &visitor, PandaVM *vm)
-{
-    trace::ScopedTrace scopedTrace(__FUNCTION__);
-    RootManager<EtsLanguageConfig> rootManager(vm);
-    rootManager.VisitNonHeapRoots(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
-    vm->VisitStringTable(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL);
-}
-
-}  // namespace ark::mem::ets
-
-namespace common {
-
 static ark::PandaVM *GetPandaVM()
 {
+    // Get PandaVM from Runtime because this function is called from GC thread
+    // which is not a managed thread.
     auto *runtime = ark::Runtime::GetCurrent();
     if (runtime == nullptr) {
         return nullptr;
@@ -47,23 +42,95 @@ static ark::PandaVM *GetPandaVM()
     return runtime->GetPandaVM();
 }
 
-void VisitStaticRoots(const RefFieldVisitor &visitor)
+static void VisitAllRoots(const common::RefFieldVisitor &visitorFunc)
 {
-    ark::PandaVM *vm = GetPandaVM();
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = GetPandaVM();
     if (vm == nullptr) {
         return;
     }
-
-    ark::GCRootVisitor rootVisitor = [&visitor](const ark::mem::GCRoot &gcRoot) {
-        common::RefField<> refField {reinterpret_cast<common::BaseObject *>(gcRoot.GetObjectHeader())};
-        visitor(refField);
-    };
-    ark::mem::ets::VisitVmRoots(rootVisitor, vm);
+    RootManager<EtsLanguageConfig> rootManager(vm);
+    rootManager.VisitNonHeapRoots([&visitorFunc](GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+    });
 }
 
-void RegisterStaticRootsProcessFunc()
+static void VisitMutatorRoots(const common::RefFieldVisitor &visitorFunc, void *mutator)
 {
-    RegisterVisitStaticRootsHook(VisitStaticRoots);
+    ASSERT(mutator != nullptr);
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = GetPandaVM();
+    if (vm == nullptr) {
+        return;
+    }
+    RootManager<EtsLanguageConfig> rootManager(vm);
+    auto *managedThread = reinterpret_cast<ManagedThread *>(mutator);
+    rootManager.VisitRootsForThread(managedThread, [&visitorFunc](GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+    });
 }
 
-}  // namespace common
+static void VisitGlobalRoots(const common::RefFieldVisitor &visitorFunc)
+{
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = GetPandaVM();
+    if (vm == nullptr) {
+        return;
+    }
+    RootManager<EtsLanguageConfig> rootManager(vm);
+
+    auto callback = [&visitorFunc](GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+    };
+    rootManager.VisitAotStringRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitVmRoots(callback);
+}
+
+static void UpdateAndSweep(const common::WeakRefFieldVisitor &visitorFunc)
+{
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = GetPandaVM();
+    if (vm == nullptr) {
+        return;
+    }
+    RootManager<EtsLanguageConfig> rootManager(vm);
+
+    rootManager.UpdateAndSweep([&visitorFunc](ObjectHeader **ref) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        return visitorFunc(reinterpret_cast<common::RefField<> &>(*ref)) ? ObjectStatus::ALIVE_OBJECT
+                                                                         : ObjectStatus::DEAD_OBJECT;
+    });
+}
+
+static void VisitConcurrentRoots(const common::RefFieldVisitor &visitorFunc)
+{
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    auto *vm = GetPandaVM();
+    if (vm == nullptr) {
+        return;
+    }
+    RootManager<EtsLanguageConfig> rootManager(vm);
+
+    auto callback = [&visitorFunc](GCRoot root) {
+        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
+        visitorFunc(reinterpret_cast<common::RefField<> &>(*root.GetObjectPointer()));
+    };
+    rootManager.VisitClassRoots(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
+    rootManager.VisitClassLinkerContextRoots(callback);
+    vm->VisitStringTable(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
+}
+
+void RegisterCmcGcCallbacks()
+{
+    ark::mem::StaticObjectOperator::Initialize();
+    common::SetVisitAllStaticRootsCallback(VisitAllRoots);
+    common::SetVisitStaticMutatorRootsCallback(VisitMutatorRoots);
+    common::SetVisitStaticGlobalRootsCallback(VisitGlobalRoots);
+    common::SetUpdateAndSweepStaticRefsCallback(UpdateAndSweep);
+    common::SetVisitStaticConcurrentRootsCallback(VisitConcurrentRoots);
+}
+
+}  // namespace ark::mem::ets

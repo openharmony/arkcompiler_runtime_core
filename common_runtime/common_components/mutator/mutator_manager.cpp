@@ -42,9 +42,9 @@ bool IsGcThread()
     return false;
 }
 
-void MutatorManager::BindMutator(Mutator& mutator) const
+void MutatorManager::BindMutator(Mutator &mutator) const
 {
-    ThreadLocalData* tlData = ThreadLocal::GetThreadLocalData();
+    ThreadLocalData *tlData = ThreadLocal::GetThreadLocalData();
     if (UNLIKELY_CC(tlData->buffer == nullptr)) {
         (void)AllocationBuffer::GetOrCreateAllocBuffer();
     }
@@ -52,9 +52,9 @@ void MutatorManager::BindMutator(Mutator& mutator) const
     tlData->mutator = &mutator;
 }
 
-void MutatorManager::UnbindMutator(Mutator& mutator) const
+void MutatorManager::UnbindMutator(Mutator &mutator) const
 {
-    ThreadLocalData* tlData = ThreadLocal::GetThreadLocalData();
+    ThreadLocalData *tlData = ThreadLocal::GetThreadLocalData();
     tlData->mutator = nullptr;
     tlData->buffer = nullptr;
 }
@@ -62,7 +62,7 @@ void MutatorManager::UnbindMutator(Mutator& mutator) const
 bool MutatorManager::BindMutatorOnly(Mutator *mutator) const
 {
     // watch dog thread may call this function and copy barrier may occur, so bind mutator here.
-    common::ThreadLocalData* tlData = common::ThreadLocal::GetThreadLocalData();
+    common::ThreadLocalData *tlData = common::ThreadLocal::GetThreadLocalData();
     DCHECK_CC(tlData != nullptr);
     if (tlData->mutator == nullptr) {
         tlData->mutator = mutator;
@@ -73,13 +73,13 @@ bool MutatorManager::BindMutatorOnly(Mutator *mutator) const
 
 void MutatorManager::UnbindMutatorOnly() const
 {
-    ThreadLocalData* tlData = ThreadLocal::GetThreadLocalData();
+    ThreadLocalData *tlData = ThreadLocal::GetThreadLocalData();
     tlData->mutator = nullptr;
 }
 
-Mutator* MutatorManager::CreateMutator()
+Mutator *MutatorManager::CreateMutator()
 {
-    Mutator* mutator = ThreadLocal::GetMutator();
+    Mutator *mutator = ThreadLocal::GetMutator();
     ASSERT_LOGF(mutator != nullptr, "Mutator already exists");
     MutatorManagementRLock();
     mutator->Init();
@@ -97,15 +97,15 @@ void MutatorManager::DestroyExpiredMutators()
     workList.swap(expiringMutators_);
     expiringMutatorListLock_.unlock();
     for (auto it = workList.begin(); it != workList.end(); ++it) {
-        Mutator* expiringMutator = *it;
+        Mutator *expiringMutator = *it;
         delete expiringMutator;
     }
 }
 
-void MutatorManager::DestroyMutator(Mutator* mutator)
+void MutatorManager::DestroyMutator(Mutator *mutator)
 {
     if (TryAcquireMutatorManagementRLock()) {
-        delete mutator; // call ~Mutator() under mutatorListLock
+        delete mutator;  // call ~Mutator() under mutatorListLock
         MutatorManagementRUnlock();
     } else {
         expiringMutatorListLock_.lock();
@@ -114,13 +114,13 @@ void MutatorManager::DestroyMutator(Mutator* mutator)
     }
 }
 
-Mutator* MutatorManager::CreateRuntimeMutator(ThreadType threadType)
+Mutator *MutatorManager::CreateRuntimeMutator(ThreadType threadType)
 {
     // Because TSAN tool can't identify the RwLock implemented by ourselves,
     // we use a global instance fpMutatorInstance instead of an instance created on
     // heap in order to prevent false positives.
     static Mutator fpMutatorInstance;
-    Mutator* mutator = nullptr;
+    Mutator *mutator = nullptr;
     if (threadType == ThreadType::FP_THREAD) {
         mutator = &fpMutatorInstance;
     } else {
@@ -135,8 +135,8 @@ Mutator* MutatorManager::CreateRuntimeMutator(ThreadType threadType)
     ThreadLocal::SetMutator(mutator);
     ThreadLocal::SetThreadType(threadType);
     ThreadLocal::SetProcessorFlag(true);
-    ThreadLocalData* threadData = GetThreadLocalData();
-    PreRunManagedCode(mutator, 2, threadData); // 2 layers
+    ThreadLocalData *threadData = GetThreadLocalData();
+    PreRunManagedCode(mutator, 2, threadData);  // 2 layers
     // only running mutator can enter saferegion.
     MutatorManagementRUnlock();
     return mutator;
@@ -144,7 +144,7 @@ Mutator* MutatorManager::CreateRuntimeMutator(ThreadType threadType)
 
 void MutatorManager::DestroyRuntimeMutator(ThreadType threadType)
 {
-    Mutator* mutator = ThreadLocal::GetMutator();
+    Mutator *mutator = ThreadLocal::GetMutator();
     LOGF_CHECK(mutator != nullptr) << "Fini UpdateThreads with null mutator";
 
     MutatorManagementRLock();
@@ -172,7 +172,7 @@ void MutatorManager::Init()
     SetSuspensionMutatorCount(0);
 }
 
-MutatorManager& MutatorManager::Instance() noexcept
+MutatorManager &MutatorManager::Instance() noexcept
 {
     return BaseRuntime::GetInstance()->GetMutatorManager();
 }
@@ -218,7 +218,7 @@ void MutatorManager::VisitAllMutators(MutatorVisitor func, bool ignoreFinalizer)
         }
     }
     if (!ignoreFinalizer) {
-        Mutator* mutator = Heap::GetHeap().GetFinalizerProcessor().GetMutator();
+        Mutator *mutator = Heap::GetHeap().GetFinalizerProcessor().GetMutator();
         if (mutator != nullptr) {
             func(*mutator);
         }
@@ -231,7 +231,7 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
     bool saferegionEntered = false;
     // Ensure an active mutator entered saferegion before STW (aka. stop all other mutators).
     if (!IsGcThread()) {
-        Mutator* mutator = Mutator::GetMutator();
+        Mutator *mutator = Mutator::GetMutator();
         if (mutator != nullptr) {
             saferegionEntered = mutator->EnterSaferegion(true);
         }
@@ -253,7 +253,9 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
     size_t mutatorCount = GetMutatorCount();
     if (UNLIKELY_CC(mutatorCount == 0)) {
         worldStopped_.store(true, std::memory_order_release);
-        if (syncGCPhase) { TransitionAllMutatorsToGCPhase(phase); }
+        if (syncGCPhase) {
+            TransitionAllMutatorsToGCPhase(phase);
+        }
         return;
     }
     // set mutatorCount as countOfMutatorsToStop.
@@ -263,7 +265,9 @@ void MutatorManager::StopTheWorld(bool syncGCPhase, GCPhase phase)
 
     // the world is stopped.
     worldStopped_.store(true, std::memory_order_release);
-    if (syncGCPhase) { TransitionAllMutatorsToGCPhase(phase); }
+    if (syncGCPhase) {
+        TransitionAllMutatorsToGCPhase(phase);
+    }
 }
 
 void MutatorManager::StartTheWorld() noexcept
@@ -291,7 +295,7 @@ void MutatorManager::StartTheWorld() noexcept
 #ifndef NDEBUG
     // Restore saferegion state if the state is changed when mutator calls StopTheWorld().
     if (!IsGcThread()) {
-        Mutator* mutator = Mutator::GetMutator();
+        Mutator *mutator = Mutator::GetMutator();
         if (mutator != nullptr && shouldLeaveSaferegion) {
             (void)mutator->LeaveSaferegion();
         }
@@ -302,8 +306,8 @@ void MutatorManager::StartTheWorld() noexcept
 void MutatorManager::WaitUntilAllStopped()
 {
     uint64_t beginTime = TimeUtil::MilliSeconds();
-    std::list<Mutator*> unstoppedMutators;
-    auto func = [&unstoppedMutators](Mutator& mutator) {
+    std::list<Mutator *> unstoppedMutators;
+    auto func = [&unstoppedMutators](Mutator &mutator) {
         if ((!mutator.InSaferegion())) {
             unstoppedMutators.emplace_back(&mutator);
         }
@@ -320,12 +324,12 @@ void MutatorManager::WaitUntilAllStopped()
     int timeoutTimes = 0;
     while (true) {
         for (auto it = unstoppedMutators.begin(); it != unstoppedMutators.end();) {
-            Mutator* mutator = *it;
+            Mutator *mutator = *it;
             if (mutator->InSaferegion()) {
                 // current it(mutator) is finished by GC
                 it = unstoppedMutators.erase(it);
             } else {
-                ++it; // skip current round & check it next round
+                ++it;  // skip current round & check it next round
             }
         }
 
@@ -333,8 +337,9 @@ void MutatorManager::WaitUntilAllStopped()
             return;
         }
 
-        if (UNLIKELY_CC(common::g_enableGCTimeoutCheck && TimeUtil::MilliSeconds() - beginTime >
-            (((remainMutatorsSize / STW_TIMEOUTS_THREADS_BASE_COUNT) * STW_TIMEOUTS_BASE_MS) + STW_TIMEOUTS_BASE_MS))) {
+        auto time =
+            ((remainMutatorsSize / STW_TIMEOUTS_THREADS_BASE_COUNT) * STW_TIMEOUTS_BASE_MS) + STW_TIMEOUTS_BASE_MS;
+        if (UNLIKELY_CC(common::g_enableGCTimeoutCheck && TimeUtil::MilliSeconds() - beginTime > time)) {
             timeoutTimes++;
             beginTime = TimeUtil::MilliSeconds();
             DumpMutators(timeoutTimes);
@@ -344,7 +349,7 @@ void MutatorManager::WaitUntilAllStopped()
     }
 }
 
-void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator*> &undoneMutators)
+void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator *> &undoneMutators)
 {
     // Traverse through undoneMutators to select mutators that have not yet completed transition
     // 1. ignore mutators which have completed transition
@@ -352,7 +357,7 @@ void MutatorManager::EnsurePhaseTransition(GCPhase phase, std::list<Mutator*> &u
     // 3. fill mutators which are running state in undoneMutators
     while (undoneMutators.size() > 0) {
         for (auto it = undoneMutators.begin(); it != undoneMutators.end();) {
-            Mutator* mutator = *it;
+            Mutator *mutator = *it;
             if (mutator->GetMutatorPhase() == phase && mutator->FinishedTransition()) {
                 it = undoneMutators.erase(it);
                 continue;
@@ -379,12 +384,12 @@ void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
     Heap::GetHeap().InstallBarrier(phase);
     Heap::GetHeap().SetGCPhase(phase);
 
-    VLOG(DEBUG, "transition gc phase: %s(%u) -> %s(%u)",
-         Collector::GetGCPhaseName(prevPhase), prevPhase, Collector::GetGCPhaseName(phase), phase);
+    VLOG(DEBUG, "transition gc phase: %s(%u) -> %s(%u)", Collector::GetGCPhaseName(prevPhase), prevPhase,
+         Collector::GetGCPhaseName(phase), phase);
 
-    std::list<Mutator*> undoneMutators;
+    std::list<Mutator *> undoneMutators;
     // Broadcast mutator phase transition signal to all mutators
-    VisitAllMutators([&undoneMutators, phase](Mutator& mutator) {
+    VisitAllMutators([&undoneMutators, phase](Mutator &mutator) {
         mutator.SetSuspensionFlag(Mutator::SuspensionType::SUSPENSION_FOR_GC_PHASE);
         mutator.SetSafepointActive(true);
         undoneMutators.push_back(&mutator);
@@ -395,11 +400,11 @@ void MutatorManager::TransitionAllMutatorsToGCPhase(GCPhase phase)
     }
 }
 
-void MutatorManager::EnsureCpuProfileFinish(std::list<Mutator*> &undoneMutators)
+void MutatorManager::EnsureCpuProfileFinish(std::list<Mutator *> &undoneMutators)
 {
     while (undoneMutators.size() > 0) {
         for (auto it = undoneMutators.begin(); it != undoneMutators.end();) {
-            Mutator* mutator = *it;
+            Mutator *mutator = *it;
             if (mutator->FinishedCpuProfile()) {
                 it = undoneMutators.erase(it);
                 continue;
@@ -424,7 +429,7 @@ void MutatorManager::DumpMutators(uint32_t timeoutTimes)
     index += sprintf_s(buf, sizeof(buf), "not stopped: ");
     LOGF_CHECK(index != -1) << "Dump mutators state failed";
     size_t mutatorCount = 0;
-    VisitAllMutators([&](const Mutator& mut) {
+    VisitAllMutators([&](const Mutator &mut) {
         mutatorCount++;
 #ifndef NDEBUG
         mut.DumpMutator();
@@ -443,9 +448,9 @@ void MutatorManager::DumpMutators(uint32_t timeoutTimes)
     });
     LOG_COMMON(ERROR) << "MutatorList size: " << mutatorCount;
 
-    LOGF_CHECK(sprintf_s(buf + index, sizeof(buf) - index, ", total: %u, visited: %zu/%zu",
-        GetSuspensionMutatorCount(), visitedSaferegion, visitedCount) != -1) <<
-            "Dump mutators state failed";
+    LOGF_CHECK(sprintf_s(buf + index, sizeof(buf) - index, ", total: %u, visited: %zu/%zu", GetSuspensionMutatorCount(),
+                         visitedSaferegion, visitedCount) != -1)
+        << "Dump mutators state failed";
     LOGF_CHECK(timeoutTimes <= MAX_TIMEOUT_TIMES) << "Waiting mutators entering saferegion timeout status info:" << buf;
     LOG_COMMON(ERROR) << "STW status info: " << buf;
 }
@@ -454,7 +459,7 @@ void MutatorManager::DumpMutators(uint32_t timeoutTimes)
 void MutatorManager::DumpForDebug()
 {
     size_t count = 0;
-    auto func = [&count](Mutator& mutator) {
+    auto func = [&count](Mutator &mutator) {
         mutator.DumpMutator();
         count++;
     };
@@ -464,9 +469,9 @@ void MutatorManager::DumpForDebug()
 
 void MutatorManager::DumpAllGcInfos()
 {
-    auto func = [](Mutator& mutator) { mutator.DumpGCInfos(); };
+    auto func = [](Mutator &mutator) { mutator.DumpGCInfos(); };
     VisitAllMutators(func);
 }
 #endif
 
-} // namespace common
+}  // namespace common
