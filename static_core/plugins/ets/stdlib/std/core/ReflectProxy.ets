@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,47 +12,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the ReflectProxy for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
+/**
+ * A namespace that provides reflection and proxy functionality.
+ * @namespace reflect
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export namespace reflect {
 
 /**
  * Interface for handling method invocations on a proxy object.
  * Defines methods to manage property access, assignment, and method invocation.
+ * @typedef { InvocationHandler }
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export interface InvocationHandler {
     /**
      * Intercepts the getter operation for the each property on the proxy object.
      *
-     * @param proxy - The proxy object being accessed.
-     * @param method - Intercepted method.
+     * @param { Proxy } proxy - The proxy object being accessed.
+     * @param { InstanceMethod } method - Intercepted method.
+     * @returns { Any } The value of the attribute.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     get(proxy: Proxy, method: InstanceMethod): Any
 
     /**
      * Intercepts the setter operation of a method on the proxy object.
      *
-     * @param proxy - The proxy object being modified.
-     * @param method - Intercepted method.
-     * @param value - The value that has been passed to assign through the setter.
+     * @param { Proxy } proxy - The proxy object being modified.
+     * @param { InstanceMethod } method - Intercepted method.
+     * @param { Any } value - The value that has been passed to assign through the setter.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     set(proxy: Proxy, method: InstanceMethod, value: Any): void
 
     /**
      * Intercepts invocation of a method on the proxy object with the provided arguments.
      *
-     * @param proxy - The proxy object on which the method is invoked.
-     * @param method - Intercepted method.
-     * @param args - An array of arguments that has been passed to the method.
+     * @param { Proxy } proxy - The proxy object on which the method is invoked.
+     * @param { InstanceMethod } method - Intercepted method.
+     * @param { FixedArray<Any> } args - An array of arguments that has been passed to the method.
+     * @returns { Any } The result of the method call.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     invoke(proxy: Proxy, method: InstanceMethod, args: FixedArray<Any>): Any
 }
 
 /**
  * A base class for creating proxy objects that delegate method calls and property access
- * to an `InvocationHandler`. Provides static methods for generating proxy classes and
- * instantiating proxy objects dynamically at runtime.
+ *     to an `InvocationHandler`. Provides static methods for generating proxy classes and
+ *     instantiating proxy objects dynamically at runtime.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export class Proxy {
     /**
@@ -92,8 +121,10 @@ export class Proxy {
 
     /**
      * Retrieves the invocation handler associated with this proxy.
-     *
-     * @returns The `InvocationHandler` used by this proxy.
+     * @returns { InvocationHandler } The `InvocationHandler` used by this proxy.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getHandler(): InvocationHandler {
         return this.handler
@@ -102,10 +133,15 @@ export class Proxy {
     /**
      * Creates a new proxy instance that implements the specified interfaces and uses the provided handler.
      *
-     * @param linker - The `RuntimeLinker` used to generate the proxy class at runtime.
-     * @param interfaces - An array of `Class` objects representing the interfaces to implement.
-     * @param handler - The `InvocationHandler` to handle method and property operations.
-     * @returns A new proxy instance as an `Proxy`.
+     * @param { RuntimeLinker } linker - The `RuntimeLinker` used to generate the proxy class at runtime.
+     * @param { FixedArray<Class> } interfaces - An array of `Class` objects representing the interfaces to implement.
+     * @param { InvocationHandler } handler - The `InvocationHandler` to handle method and property operations.
+     * @returns { Proxy } A new proxy instance as an `Proxy`.
+     * @throws { Error } - Expected constructor does not exists on given class
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static create(linker: RuntimeLinker, interfaces: FixedArray<Class>, handler: InvocationHandler): Proxy {
         let proxyClass = Proxy.createClass(linker, interfaces)
@@ -120,13 +156,27 @@ export class Proxy {
     /**
      * Checks if a class is generated by Proxy.create.
      *
-     * @param klass - The class to check for proxy status.
-     * @returns `true` if the class is a proxy class, `false` otherwise.
+     * @param { Class } klass - The class to check for proxy status.
+     * @returns { boolean } `true` if the class is a proxy class, `false` otherwise.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static isProxyClass(klass: Class): boolean {
         return klass.isSubtypeOf(Class.from<Proxy>()) && Proxy.hasProxyFlag(klass)
     }
 
+    /**
+     * Checks whether the specified class is marked as a proxy class.
+     *
+     * @param { Class } klass - The class to check for proxy status.
+     * @returns { boolean } `true` if the class contains the proxy flag, `false` otherwise.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native hasProxyFlag(klass: Class): boolean
 
     private static createUniqueName(interfaces: FixedArray<Class>): string {

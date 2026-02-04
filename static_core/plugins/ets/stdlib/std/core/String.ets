@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @file Defines the String for ArkTS
+ * @kit ArkTS
+ */
 package std.core;
 
 const MAX_CODE_POINT = 0x10FFFF // Unicode maximum allowed code points
@@ -31,23 +34,41 @@ const LOW_SURROGATE_MAX = 0xDFFF;    // End of the low surrogate range (U+DFFF)
 const SURROGATE_OFFSET = 0x400;      // Offset between high and low surrogates (0x10000 >> 10)
 const SURROGATE_BASE = 0x10000;      // Base value for supplementary Unicode planes (e.g., U+10000)
 
+/**
+ * Unicode string
+ * @typedef { String | RegExp } StringOrRegExp
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 type StringOrRegExp = String | RegExp
 
 /**
  * Unicode string
+ * @extends Object
+ * @implements Comparable<String>, Iterable<String>
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class String extends Object implements Comparable<String>, Iterable<String> {
 
     // The constructors below are implemented via initobj instruction
     /**
      * Constructs an empty String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native constructor()
 
     /**
      * Constructs String from chars array initializer
      *
-     * @param data initializer
+     * @param { FixedArray<char> } data initializer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native constructor(data: FixedArray<char>)
     // let a = new char[1]
@@ -55,21 +76,31 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Constructs String from another String
      *
-     * @param otherStr initializer
+     * @param { String } otherStr initializer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native constructor(otherStr: String)
 
     /**
      * Constructs String from Any
      *
-     * @param object initializer
+     * @param { Any } object initializer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native constructor(object: Any)
 
     /**
      * Creates a new instance of a String
      *
-     * @returns A new String instance
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(): string {
         return new String();
@@ -78,9 +109,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from boolean
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { boolean } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: boolean): string {
         return new String(value);
@@ -89,9 +123,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from byte
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { byte } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: byte): string {
         return new String(value);
@@ -100,9 +137,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from char
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { char } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: char): string {
         return new String(value);
@@ -111,9 +151,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from short
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { short } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: short): string {
         return new String(value);
@@ -122,9 +165,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from int
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { int } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: int): string {
         return new String(value);
@@ -133,9 +179,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from long
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { long } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: long): string {
         return new String(value);
@@ -144,9 +193,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from float
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { float } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: float): string {
         return new String(value);
@@ -155,9 +207,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String from double
      *
-     * @param value The value to be converted to a string.
-     *
-     * @returns A new String instance
+     * @param { double } value The value to be converted to a string.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: double): string {
         return new String(value);
@@ -167,9 +222,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Creates a new instance of a String
      *
-     * @param value The value to be converted to a string. Can be an Object or null.
-     *
-     * @returns A new String instance
+     * @param { Any } value The value to be converted to a string. Can be an Object or null.
+     * @returns { string } A new String instance
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     static $_invoke(value: Any): string {
         return new String(value);
@@ -178,40 +236,43 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Returns an instance of string at passed index.
      *
-     * @param index index to look at
-     *
-     * @returns String value at index
-     *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
+     * @param { int } index index to look at
+     * @returns { string } String value at index
+     * @throws { Error } StringIndexOutOfBoundsError if index is negative or >= length
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native $_get(index: int): String;
 
     /**
      * Checks equality of this string and another Object as String
      *
-     * @param to another object to compare
-     *
-     * @returns true if strings are equal and false otherwise
-     *
-     * @remarks
-     * Implemented as native function,  @see `equals()` intrinsic.
+     * @param { Any } to another object to compare
+     * @returns { boolean } true if strings are equal and false otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native equals(to: Any): boolean;
 
     /**
      * Length of this string
      *
-     * @returns length of this string
-     *
-     * @remarks
-     * Implemented as native function,  @see `getLength()` intrinsic.
+     * @returns { int } length of this string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native getLength(): int;
 
     /**
      * Length of this string
      *
-     * @returns length of this string
+     * @returns { int } length of this string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public get length(): int {
         return this.getLength()
@@ -220,36 +281,38 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Getter for char at some index
      *
-     * @param index index in char array inside String
+     * @param { int } index index in char array inside String
      *
-     * @returns char value at index
-     *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
-     *
-     * @remarks
-     * Implemented as native function,  @see `charAt()` intrinsic.
+     * @returns { char } char value at index
+     * @throws { StringIndexOutOfBoundsError } if index is negative or >= length
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native charAt(index: int): char;
 
     /**
      * Checks if this string is empty
      *
-     * @returns true if empty and false otherwise
-     * @remarks
-     * Implemented as native function,  @see `length()` intrinsic.
+     * @returns { boolean } true if empty and false otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isEmpty(): boolean;
 
     /**
      * Gets the codepoint at the specified index in this string.
-     * Is similar to charAt(index), but if the character at the
-     * index is the beginning of a surrogate pair, the int
-     * representation for this codepoint is returned. Otherwise,
-     * the character at the index is returned.
+     *     Is similar to charAt(index), but if the character at the
+     *     index is the beginning of a surrogate pair, the int
+     *     representation for this codepoint is returned. Otherwise,
+     *     the character at the index is returned.
      *
-     * @param index index of the potential surrogate pair
-     *
-     * @returns the codepoint at the specified index
+     * @param { int } index index of the potential surrogate pair
+     * @returns { int | undefined } the codepoint at the specified index
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public codePointAt(index: int): int | undefined {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
@@ -268,17 +331,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Returns the amount of full codepoints between begin and end
-     * indexes. Characters outside the range are not counted, even if
-     * the range ends in the middle of a surrogate pair.
+     *     indexes. Characters outside the range are not counted, even if
+     *     the range ends in the middle of a surrogate pair.
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns the amount of completed codepoints
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { AssertionError } if begin > end
+     * @returns { int } the amount of completed codepoints
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
@@ -298,27 +360,29 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Returns the amount of full codepoints between begin and end
-     * indexes. Characters outside the range are not counted, even if
-     * the range ends in the middle of a surrogate pair.
+     *     indexes. Characters outside the range are not counted, even if
+     *     the range ends in the middle of a surrogate pair.
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns the amount of completed codepoints
+     * @param { number } begin index to start from
+     * @param { number } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { AssertionError } AssertionError if begin > end
+     * @returns { number } the amount of completed codepoints
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public codePointCount(begin: number, end: number): number {
         return this.codePointCount(begin.toInt(), end.toInt())
     }
 
     /**
-     * Gets the full char sequence that is representing
-     * this string.
+     * Gets the full char sequence that is representing this string.
      *
-     * @returns char[] array
+     * @returns { char[] } char[] array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getChars(): char[] {
         return this.getChars(0, this.getLength());
@@ -326,20 +390,17 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Gets the char sequence that is representing the part of
-     * this string between begin and end indexes. The range is
-     * a half-interview [begin, end).
+     *     this string between begin and end indexes. The range is
+     *     a half-interview [begin, end).
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin > end
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end > length
-     *
-     * @returns char[] array
-     *
-     * @remark
-     * Implemented as native function,  @see `getChars()` intrinsic.
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin > end, if begin is negative or >= length
+     *     if end > length
+     * @returns { char[] } char[] array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getChars(begin: int, end: int): char[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -355,17 +416,17 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Gets the byte sequence that is representing the part of
-     * this string between begin and end indexes. The range is
-     * a half-interview [begin, end).
+     *     this string between begin and end indexes. The range is
+     *     a half-interview [begin, end).
      *
-     * @param begin index to start from
-     * @param end past the ending index
-     *
-     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsError if end >= length
-     * @throws AssertionError if begin > end
-     *
-     * @returns byte[] array
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
+     * @throws { AssertionError } if begin > end
+     * @returns { byte[] } byte[] array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public getBytes(begin: int, end: int): byte[] {
         // #24515: Need to remove the following function call after primitive type refactoring
@@ -381,14 +442,15 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Compares the given StringBuilder to this String. The
-     * result is true if the StringBuilder has the same content
-     * as this String at this moment and false otherwise.
+     *     result is true if the StringBuilder has the same content
+     *     as this String at this moment and false otherwise.
      *
-     * @param sb StringBuilder to compare to
-     *
-     * @throws NullPointerError if sb param is null
-     *
-     * @returns true if StringBuilder has the same String
+     * @param { StringBuilder } sb StringBuilder to compare to
+     * @throws { NullPointerError } if sb param is null
+     * @returns { boolean } true if StringBuilder has the same String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public contentEquals(sb: StringBuilder): boolean {
         return this.equals(sb.toString());
@@ -399,27 +461,29 @@ export final class String extends Object implements Comparable<String>, Iterable
      * The result is less than 0 if this string sorts before the other,
      * 0 if they are equal, and greater than 0 otherwise.
      *
-     * @param other String to compare with
-     *
-     * @throws NullPointerError if to param is null
-     *
-     * @returns the comparison result
+     * @param { String } other String to compare with
+     * @throws { NullPointerError } if to param is null
+     * @returns { int } the comparison result
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native override compareTo(other: String): int;
 
     /**
      * Comparison between this String and another one based on locale and options.
-     * The result is -1 if this string sorts before the another string,
-     * 0 if they are equal, and 1 otherwise.
+     *     The result is -1 if this string sorts before the another string,
+     *     0 if they are equal, and 1 otherwise.
      *
-     * @param that String to compare with
-     * @param locale String representing the BCP47 language tag
-     * @param options Intl.CollatorOptions contains comparison options
-     *
-     * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerError if another or locale is undefined
-     *
-     * @returns the comparison result
+     * @param { String } that String to compare with
+     * @param { string | string[] } [locale] String representing the BCP47 language tag
+     * @param { Intl.CollatorOptions } [options] Intl.CollatorOptions contains comparison options
+     * @throws { RangeError } if the locale tag is invalid or not found
+     * @throws { NullPointerError } if another or locale is undefined
+     * @returns { int } the comparison result
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public localeCompare(that: String, locale?: string | string[], options?: Intl.CollatorOptions): int {
         return new Intl.Collator(locale, options).compare(this, that).toInt()
@@ -427,16 +491,32 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Checks that the substring of this string that starts from
-     * the specified index starts with the specified prefix.
-     * Negative `fromIndex` is treated as 0. Result is always true
-     * if `prefix` is empty.
+     *     the specified index starts with the specified prefix.
+     *     Negative `fromIndex` is treated as 0. Result is always true
+     *     if `prefix` is empty.
      *
-     * @param prefix prefix string
-     * @param fromIndex index to start from
-     *
-     * @returns true if the substring begins with prefix
+     * @param { String } prefix prefix string
+     * @param { int } fromIndex index to start from
+     * @returns { boolean } true if the substring begins with prefix
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private native startsWithImpl(prefix: String, fromIndex: int): boolean;
+
+    /**
+     * Checks that the substring of this string that starts from
+     *     the specified index starts with the specified prefix.
+     *     Negative `fromIndex` is treated as 0. Result is always true
+     *     if `prefix` is empty.
+     *
+     * @param { String } prefix prefix string
+     * @param { int } [fromIndex] index to start from
+     * @returns { boolean } true if the substring begins with prefix
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public startsWith(prefix: String, fromIndex?: int): boolean {
         if (fromIndex == undefined) {
             return this.startsWithImpl(prefix, 0)
@@ -455,6 +535,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @returns true if this string ends with suffix
      */
     private native endsWithImpl(suffix: String, endPosition: int): boolean;
+
+    /**
+     * Checks that this string ends with the specified suffix.
+     *
+     * @param { String } suffix suffix string
+     * @param { int } [endPosition] at which suffix is expected to be found. Defaults to str.length.
+     * @returns { boolean }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public endsWith(suffix: String, endPosition?: int): boolean {
         return this.endsWithImpl(suffix, endPosition ?? this.getLength());
     }
@@ -462,31 +553,36 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Finds the first occurrence of a character in this String.
      *
-     * @param ch to find
-     *
-     * @returns index of the character from the beginning of this string, or -1 if not found
+     * @param { char } ch to find
+     * @returns { int } index of the character from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native indexOf(ch: char): int;
 
     /**
      * Finds the first occurrence of a character in this String at position >= fromIndex.
-     * Negative fromIndex is equivalent to 0, and fromIndex >= length implies no match.
+     *     Negative fromIndex is equivalent to 0, and fromIndex >= length implies no match.
      *
-     * @param ch to find
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the character from the beginning of this string, or -1 if not found
+     * @param { char } ch to find
+     * @param { int } fromIndex to start searching from
+     * @returns { int } index of the character from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native indexOf(ch: char, fromIndex: int): int;
 
     /**
      * Finds the first occurrence of another String in this String
      *
-     * @param str to find
-     *
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the str from the beginning of this string, or -1 if not found
+     * @param { String } str to find
+     * @param { int } [fromIndex] to start searching from
+     * @returns { int } index of the str from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public indexOf(str: String, fromIndex?: int): int {
         return this.indexOfImpl(str, fromIndex ?? 0)
@@ -494,32 +590,38 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Finds the first occurrence of another String in this String at position >= fromIndex.
-     * Negative fromIndex is equivalent to fromIndex = 0, and fromIndex >= length implies no match.
+     *     Negative fromIndex is equivalent to fromIndex = 0, and fromIndex >= length implies no match.
      *
-     * @param str to find
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the str from the beginning of this string, or -1 if not found
+     * @param { String } str to find
+     * @param { int } fromIndex to start searching from
+     * @returns { int } index of the str from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native indexOfImpl(str: String, fromIndex: int): int;
 
     /**
      * Finds the last occurrence of a character in this String at position <= fromIndex.
-     * All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
+     *     All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
      *
-     * @param ch to find
-     * @param fromIndex to start searching from
-     *
-     * @returns index of the character from the beginning of this string, or -1 if not found
+     * @param { char } ch to find
+     * @param { int } fromIndex to start searching from
+     * @returns { int } index of the character from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native lastIndexOf(ch: char, fromIndex: int): int;
 
     /**
      * Finds the last occurrence of a character in this String.
      *
-     * @param ch to find
-     *
-     * @returns index of the character from the beginning of this string, or -1 if not found
+     * @param { char } ch to find
+     * @returns { int } index of the character from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public lastIndexOf(ch: char): int {
         return this.lastIndexOf(ch, this.getLength());
@@ -528,13 +630,13 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Finds the last occurrence of another String in this String.
      *
-     * @param str to find
-     *
-     * @param fromIndex to start searching from
-    *
-     * @throws NullPointerError if str param is null
-     *
-     * @returns index of the str from the beginning of this string, or -1 if not found
+     * @param { String } str to find
+     * @param { int } [fromIndex] to start searching from
+     * @throws { NullPointerError } if str param is null
+     * @returns { int } index of the str from the beginning of this string, or -1 if not found
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public lastIndexOf(str: String, fromIndex?: int): int {
         if (fromIndex == undefined) {
@@ -545,7 +647,7 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Finds the last occurrence of another String in this String at position <= fromIndex.
-     * All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
+     *     All values of fromIndex >= length are equivalent, and negative fromIndex implies no match.
      *
      * @param str to find
      * @param fromIndex to start searching from
@@ -556,19 +658,20 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Selects a substring of this String, starting at a specified index
-     * and ending at index before another specified index.
+     *     and ending at index before another specified index.
+     *     If 'begin' < 0, then 'begin' is assumed to be equal to zero.
+     *     If 'begin' > this.length, then 'begin' is assumed to be equal to the this.length.
+     *     If 'end' < 0, then 'end' is assumed to be equal to zero.
+     *     If 'end' > this.length, then 'end' is assumed to be equal to this.length.
+     *     If 'begin' > 'end', then these are swapped.
+     *     If 'begin' == 'end', then an empty string is returned.
      *
-     * If 'begin' < 0, then 'begin' is assumed to be equal to zero.
-     * If 'begin' > this.length, then 'begin' is assumed to be equal to the this.length.
-     * If 'end' < 0, then 'end' is assumed to be equal to zero.
-     * If 'end' > this.length, then 'end' is assumed to be equal to this.length.
-     * If 'begin' > 'end', then these are swapped.
-     * If 'begin' == 'end', then an empty string is returned.
-     *
-     * @param begin to start substring
-     * @param end to end before at
-     *
-     * @returns new String which is a substring of this String
+     * @param { int } begin to start substring
+     * @param { int } end to end before at
+     * @returns { String } new String which is a substring of this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public native substring(begin: int, end: int): String;
@@ -577,10 +680,12 @@ export final class String extends Object implements Comparable<String>, Iterable
      * Selects a substring of this String, starting at a specified index
      * and ending at index before another specified index.
      *
-     * @param begin to start substring
-     * @param end to end before at
-     *
-     * @returns new String which is a substring of this String
+     * @param { number } begin to start substring
+     * @param { int } [end] to end before at
+     * @returns { String } new String which is a substring of this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public substring(begin: number, end?: int): String {
@@ -590,20 +695,51 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Concatenation of this and array of strings.
      *
-     * @param strings strings to concat with
-     *
-     * @returns new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
+     * @param { String } s strings to concat with
+     * @returns { String } new String which is a concatenation of this + strings[0] + ... + strings[string.length - 1]
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public concat(s: String): String {
         return String.concat2(this, s);
     }
+    /**
+     * concat
+     *
+     * @param { String } s1
+     * @param { String } s2
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public concat(s1: String, s2: String): String {
         return String.concat3(this, s1, s2);
     }
+    /**
+     * concat
+     *
+     * @param { String } s1
+     * @param { String } s2
+     * @param { String } s3
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public concat(s1: String, s2: String, s3: String): String {
         return String.concat4(this, s1, s2, s3);
     }
-
+    /**
+     * concat
+     *
+     * @param { String[] } strings
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public concat(...strings: String[]): String {
         let length = strings.length
         if (length == 0) {
@@ -648,14 +784,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Replaces all occurrences of the specified character
-     * with another specified character. If no specified
-     * character in this string is found then the original
-     * string will be returned
+     *     with another specified character. If no specified
+     *     character in this string is found then the original
+     *     string will be returned
      *
-     * @param oldCh character which occurrences will be replaced
-     * @param newCh character to replace
-     *
-     * @returns new String with replaced characters
+     * @param { char } oldCh character which occurrences will be replaced
+     * @param { char }newCh character to replace
+     * @returns { String } new String with replaced characters
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public replaceChar(oldCh: char, newCh: char): String {
         let newChars: FixedArray<char> = this.getCharsImpl(0, this.getLength());
@@ -669,15 +807,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Checks if this String contains the specified string.
-     * The search starts from specified index.
+     *     The search starts from specified index.
      *
-     * @param str string to search
-     * @param fromIndex index to start search from
-     *
-     * @throws NullPointerError if str param is null
-     * @throws StringIndexOutOfBoundsError if fromIndex param is negative or >= length
-     *
-     * @returns true if this String contains str and false otherwise
+     * @param { String } str string to search
+     * @param { int } fromIndex index to start search from
+     * @throws { NullPointerError } if str param is null
+     * @throws { StringIndexOutOfBoundsError } if fromIndex param is negative or >= length
+     * @returns { boolean } true if this String contains str and false otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public contains(str: String, fromIndex: int): boolean {
         return this.indexOf(str, fromIndex) != -1;
@@ -685,14 +824,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Checks if this String contains the specified string.
-     * The search starts from specified index (negative fromIndex is equivalent to fromIndex = 0, and fromIndex >= length implies no match).
+     *     The search starts from specified index (negative fromIndex is equivalent to fromIndex = 0,
+     *     and fromIndex >= length implies no match).
      *
-     * @param str string to search
-     * @param fromIndex index to start search from
-     *
-     * @throws NullPointerError if str param is null
-     *
-     * @returns true if this String contains str and false otherwise
+     * @param { String } str string to search
+     * @param { number } fromIndex index to start search from
+     * @throws { NullPointerError } if str param is null
+     * @returns { boolean } true if this String contains str and false otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public contains(str: String, fromIndex: number): boolean {
         return this.contains(str, fromIndex.toInt());
@@ -708,6 +849,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
      *
      * @returns string array contains substrings from this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private split(separator: Char, limit: Int): String[] {
         if (limit == 0) {
@@ -780,16 +924,17 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Splits this String by separator and returns an ordered array of substrings.
-     * The order of the resulted array corresponds to the order of the passage of
-     * this String from beginning to end. The pattern is excluded from substrings.
-     * The array is limited by some specified value.
+     *     The order of the resulted array corresponds to the order of the passage of
+     *     this String from beginning to end. The pattern is excluded from substrings.
+     *     The array is limited by some specified value.
      *
-     * @param separator - String or RegExp to split by
-     * @param limit - max length of the returned array. Int.MAX_VALUE if it's negative.
-     *
-     * @throws NullPointerError if pattern param is null
-     *
-     * @returns string array contains substrings from this String
+     * @param { String } separator - String to split by
+     * @param { int } [limit] - max length of the returned array. Int.MAX_VALUE if it's negative.
+     * @throws { NullPointerError } if pattern param is null
+     * @returns { RegExp } string array contains substrings from this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public split(separator: String, limit?: int): String[] {
         let maxSize = limit == undefined ? Int.MAX_VALUE : limit.toInt();
@@ -799,10 +944,30 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.split(separator.charAt(0), maxSize);
     }
 
+    /**
+     * split
+     *
+     * @param { RegExp } separator RegExp to split by
+     * @param { int } [limit] max length of the returned array. If it's negative then there is no limit.
+     * @returns { String[] } string array contains substrings from this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public split(separator: RegExp, limit?: int): String[] {
         return separator.split(this, limit);
     }
 
+    /**
+     * split
+     *
+     * @param { StringOrRegExp } separator String or RegExp to split by
+     * @param { int } [limit] max length of the returned array. If it's negative then there is no limit.
+     * @returns { String[] } string array contains substrings from this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public split(separator: StringOrRegExp, limit?: int): String[] {
         if (separator instanceof RegExp) {
             return (separator as RegExp).split(this, limit);
@@ -812,15 +977,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Concatenates the specified string array by inserting
-     * the specified separator between all elements.
+     *     the specified separator between all elements.
      *
-     * @param strings string array
-     * @param delim separator between all elements
-     *
-     * @throws NullPointerError if strings param is null
-     * @throws NullPointerError if delim param is null
-     *
+     * @param { String[] } strings string array
+     * @param { String } delim separator between all elements
+     * @throws { NullPointerError } if strings param is null, if delim param is null
      * @returns newly created string from string array and delimiter
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static join(strings: String[], delim: String): String {
         return String.join(strings, delim, '', '');
@@ -828,21 +994,21 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Concatenates the specified string array by inserting
-     * the specified prefix before each element, the specified
-     * suffix after each element, and the specified separator
-     * between all elements.
+     *     the specified prefix before each element, the specified
+     *     suffix after each element, and the specified separator
+     *     between all elements.
      *
-     * @param strings string array
-     * @param delim separator between all elements
-     * @param prefix prefix before each element
-     * @param suffix suffix after each element
-     *
-     * @throws NullPointerError if strings param is null
-     * @throws NullPointerError if delim param is null
-     * @throws NullPointerError if prefix param is null
-     * @throws NullPointerError if suffix param is null
-     *
-     * @returns newly created string from string array, prefix, suffix and delimiter
+     * @param { String[] } strings string array
+     * @param { String } delim separator between all elements
+     * @param { String } prefix prefix before each element
+     * @param { String } suffix suffix after each element
+     * @throws { NullPointerError } if strings param is null , if delim param is null
+     *     if prefix param is null, if suffix param is null
+     * @returns { String } newly created string from string array, prefix, suffix and delimiter
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static join(strings: String[], delim: String, prefix: String, suffix: String): String {
         let resStr: String = '';
@@ -857,51 +1023,66 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Creates new string similar to this String but with
-     * all characters in lower case.
+     *     all characters in lower case.
      *
-     * @returns new string with all characters in lower case
+     * @returns { String } new string with all characters in lower case
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native toLowerCase(): String;
 
     /**
      * Creates new string similar to this String but with
-     * all characters in upper case.
+     *     all characters in upper case.
      *
-     * @returns new string with all characters in upper case
+     * @returns { String } new string with all characters in upper case
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native toUpperCase(): String;
 
     /**
      * Trims all whitespaces from the beginning and end of this String.
      *
-     * @returns new trimmed string
+     * @returns { String } new trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native trim(): String;
 
     /**
      * Trims all whitespaces from the beginning of this String.
      *
-     * @returns new left trimmed string
+     * @returns { String } new left trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native trimLeft(): String;
 
     /**
      * Trims all whitespaces from the end of this String.
      *
-     * @returns new right trimmed string
+     * @returns { String } new right trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native trimRight(): String;
 
     /**
-     * Checks whether the specified char is in the specified
-     * char array or not.
+     * Checks whether the specified char is in the specified char array or not.
      *
      * @param ch character to search
      * @param data char array to search in
-     *
-     * @throws NullPointerError if data param is null
-     *
+     * @throws { NullPointerError } if data param is null
      * @returns true if ch is in the data and false otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private static isCharOneOf(ch: char, data: char[]): boolean {
         for (let i: int = 0; i < data.length; i++) {
@@ -913,14 +1094,14 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
-     * Trims all specified characters from the beginning and
-     * end of this String.
+     * Trims all specified characters from the beginning and end of this String.
      *
-     * @param remove that contains the characters to trim
-     *
-     * @throws NullPointerError if remove param is null
-     *
-     * @returns new trimmed string
+     * @param { char[] } remove that contains the characters to trim
+     * @throws { NullPointerError } if remove param is null
+     * @returns { String } new trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public trim(remove: char[]): String {
         if (this.isEmpty()) {
@@ -955,11 +1136,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Trims all specified characters from the beginning this String.
      *
-     * @param remove that contains the characters to trim
-     *
-     * @throws NullPointerError if remove param is null
-     *
-     * @returns new left trimmed string
+     * @param { char[] } remove that contains the characters to trim
+     * @throws { NullPointerError } if remove param is null
+     * @returns { String } new left trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public trimLeft(remove: char[]): String {
         if (this.isEmpty() || !String.isCharOneOf(this.charAt(0), remove)) {
@@ -978,11 +1160,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Trims all specified characters from the end of this String.
      *
-     * @param remove that contains the characters to trim
-     *
-     * @throws NullPointerError if remove param is null
-     *
-     * @returns new right trimmed string
+     * @param { char[] } remove that contains the characters to trim
+     * @throws { NullPointerError } if remove param is null
+     * @returns { String } new right trimmed string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public trimRight(remove: char[]): String {
         let last: int = this.getLength() - 1;
@@ -1001,14 +1184,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Creates a new string of a specified length in which
-     * the beginning of this String is padded with a
-     * specified character. `padStart` is an alias of this method,
-     * except the parameter order.
+     *     the beginning of this String is padded with a
+     *     specified character. `padStart` is an alias of this method,
+     *     except the parameter order.
      *
-     * @param pad to repeat
-     * @param count of characters in the resulting string
-     *
-     * @returns new string with padding at the beginning
+     * @param { char } pad to repeat
+     * @param { int } count of characters in the resulting string
+     * @returns { String } new string with padding at the beginning
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public padLeft(pad: char, count: int): String {
         return this.padStart(count, pad)
@@ -1016,14 +1201,16 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Creates a new string of a specified length in which
-     * the end of this String is padded with a specified
-     * character. `padEnd` is an alias of this method,
-     * except the parameter order.
+     *     the end of this String is padded with a specified
+     *     character. `padEnd` is an alias of this method,
+     *     except the parameter order.
      *
-     * @param pad to repeat
-     * @param count of characters in the resulting string
-     *
-     * @returns new string with padding at the end
+     * @param { char } pad to repeat
+     * @param { int } count of characters in the resulting string
+     * @returns { String } new string with padding at the end
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public padRight(pad: char, count: int): String {
         return this.padEnd(count, pad)
@@ -1034,19 +1221,23 @@ export final class String extends Object implements Comparable<String>, Iterable
      *    a = 'A',
      *    a.repeat(2) == 'AA'
     *
-    * @param count number of repetitions of this String
-    *
-    * @throws ArgumentOutOfRangeError if count < 0
-    *
-    * @returns this string that is repeated count times
+    * @param { int } count number of repetitions of this String
+    * @throws { ArgumentOutOfRangeError } if count < 0
+    * @returns { String } this string that is repeated count times
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     public native repeat(count: int): String;
 
     /**
      * The `toString()` method returns the string representation of the given String
-     * in the form of a copy of the original object.
+     *     in the form of a copy of the original object.
      *
-     * @returns a copy of the original String
+     * @returns { String } a copy of the original String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public override toString(): String {
         return this;
@@ -1054,9 +1245,12 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The `toString()` method returns the string representation of the given String
-     * in the form of a copy of the original object.
+     *     in the form of a copy of the original object.
      *
-     * @returns a copy of the original String
+     * @returns { String } a copy of the original String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public override toLocaleString(): String {
         return this;
@@ -1064,10 +1258,15 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The at() method takes an integer value and returns a new String consisting of the single UTF-16 code unit located
-     * at the specified offset. This method allows for positive and negative integers. Negative integers count back from the last string character.
+     *     at the specified offset. This method allows for positive and negative integers.
+     *     Negative integers count back from the last string character.
      *
-     * @returns A String consisting of the single UTF-16 code unit located at the specified position.
-     * Returns undefined if the given index can not be found.
+     * @param { int } index
+     * @returns { string | undefined } A String consisting of the single UTF-16 code unit located
+     *     at the specified position. Returns undefined if the given index can not be found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public at(index: int): string | undefined {
         const n = this.getLength();
@@ -1087,107 +1286,187 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * The anchor() method creates a string that embeds a string in an <a> element with a name (<a name="...">str</a>)
      *
-     * @returns A string beginning with an <a name="name"> start tag (double quotes in name are replaced with &quot;),
-     * then the text str, and then an </a> end tag.
+     * @param { String } name
+     * @returns { String }A string beginning with an <a name="name"> start tag (double quotes in name are
+     *     replaced with &quot;), then the text str, and then an </a> end tag.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public anchor(name: String): String {
         return this.CreateHTMLString('a', ' name=\"' + name + '\"')
     }
 
-    /*
-     * The big() method creates a string that embeds a string in a <big> element (<big>str</big>), which causes a string to be displayed in a big font.
+    /**
+     * The big() method creates a string that embeds a string in a <big> element (<big>str</big>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public big(): String{
         return this.CreateHTMLString('big', '')
     }
 
 
-    /*
-     * The small() method creates a string that embeds a string in a <small> element (<small>str</small>), which causes a string to be displayed in a big font.
+    /**
+     * The small() method creates a string that embeds a string in a <small> element (<small>str</small>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public small(): String{
         return this.CreateHTMLString('small', '')
     }
 
-    /*
-     * The blink() method creates a string that embeds a string in a <blink> element (<blink>str</blink>), which causes a string to be displayed in a big font.
+    /**
+     * The blink() method creates a string that embeds a string in a <blink> element (<blink>str</blink>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public blink(): String{
         return this.CreateHTMLString('blink', '')
     }
 
-    /*
-     * The bold() method creates a string that embeds a string in a <bold> element (<b>str</b>), which causes a string to be displayed in a big font.
+    /**
+     * The bold() method creates a string that embeds a string in a <bold> element (<b>str</b>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public bold(): String{
         return this.CreateHTMLString('b', '')
     }
 
-    /*
-     * The italics() method creates a string that embeds a string in a <i> element (<i>str</i>), which causes a string to be displayed in a big font.
+    /**
+     * The italics() method creates a string that embeds a string in a <i> element (<i>str</i>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public italics(): String{
         return this.CreateHTMLString('i', '')
     }
 
-    /*
-     * The strike() method creates a string that embeds a string in a <strike> element (<strike>str</strike>), which causes a string to be displayed in a big font.
+    /**
+     * The strike() method creates a string that embeds a string in a <strike> element (<strike>str</strike>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public strike(): String{
         return this.CreateHTMLString('strike', '')
     }
 
-    /*
-     * The sub() method creates a string that embeds a string in a <sub> element (<sub>str</sub>), which causes a string to be displayed in a big font.
+    /**
+     * The sub() method creates a string that embeds a string in a <sub> element (<sub>str</sub>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public sub(): String{
         return this.CreateHTMLString('sub', '')
     }
 
-    /*
-     * The sup() method creates a string that embeds a string in a <sup> element (<sup>str</sup>), which causes a string to be displayed in a big font.
+    /**
+     * The sup() method creates a string that embeds a string in a <sup> element (<sup>str</sup>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public sup(): String{
         return this.CreateHTMLString('sup', '')
     }
 
-    /*
-     * The fixed() method creates a string that embeds a string in a <tt> element (<tt>str</tt>), which causes a string to be displayed in a big font.
+    /**
+     * The fixed() method creates a string that embeds a string in a <tt> element (<tt>str</tt>),
+     *     which causes a string to be displayed in a big font.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public fixed(): String{
         return this.CreateHTMLString('tt', '')
     }
 
-    /*
-     * The fontcolor() method creates a string that embeds a string in a <font> element (<font color="...">str</font>), which causes a string to be displayed in the specified font color.
+    /**
+     * The fontcolor() method creates a string that embeds a string in a <font> element (<font color="...">str</font>),
+     *     which causes a string to be displayed in the specified font color.
+     * @param { String } color
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public fontcolor(color: String): String{
         return this.CreateHTMLString('font', ' color=\"' + color + '\"')
     }
 
-    /*
-     * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
+    /**
+     * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>),
+     *     which causes a string to be displayed in the specified font size.
+     * @param { int } size
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public fontsize(size: int): String{
         return this.CreateHTMLString('font', ' size=\"' + size + '\"')
     }
 
-    /*
-     * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>), which causes a string to be displayed in the specified font size.
+    /**
+     * The fontsize() method creates a string that embeds a string in a <font> element (<font size="...">str</font>),
+     *     which causes a string to be displayed in the specified font size.
+     * @param { String } size
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public fontsize(size: String): String {
         return this.CreateHTMLString('font', ' size=\"' + size.replaceAll('\"', '&quot;') + '\"')
     }
 
-    /*
-     * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be used as a hypertext link to another URL.
+    /**
+     * The link() method creates a string that embeds a string in an <a> element (<a href="...">str</a>), to be
+     *     used as a hypertext link to another URL.
+     * @param { String } link
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public link(link: String): String{
         return this.CreateHTMLString('a', ' href=\"' + link + '\"')
     }
 
-    /*
-     * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code unit at the given index.
+    /**
+     * The charCodeAt() method returns an integer between 0 and 65535 representing the UTF-16 code
+     *     unit at the given index.
+     * @param { int } index
+     * @returns { int }
+     * @throws { RangeError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public charCodeAt(index: int): int {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
@@ -1197,15 +1476,28 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
+    /**
+     * fromCharCodeImpl
+     *
+     * @param { Array<number> } codes is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @returns { String } consisting of the specified UTF-16 code unit.
+     * @throws { NegativeArraySizeError } - Input parameter error.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static native fromCharCodeImpl(codes: Array<number>): String;
 
     /**
      * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit
      *
-     * @param code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
-     *
-     * @returns string consisting of the specified UTF-16 code unit.
-     *
+     * @param { number } code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @returns { String } string consisting of the specified UTF-16 code unit.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public static native fromCharCode(code: number): String;
@@ -1213,10 +1505,13 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * The String.fromCharCode() static method returns a string created from the specified sequence of UTF-16 code units
      *
-     * @param codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
-     *
-     * @returns string consisting of the specified UTF-16 code units.
-     *
+     * @param { number[] } codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @returns { String } string consisting of the specified UTF-16 code units.
+     * @throws { NegativeArraySizeError } - Input parameter error.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static fromCharCode(...codes: number[]): String {
         if (codes.length < 0) {
@@ -1225,8 +1520,12 @@ export final class String extends Object implements Comparable<String>, Iterable
         return String.fromCharCodeImpl(codes)
     }
 
-    /*
+    /**
      * The valueOf() method returns the primitive value of a String object.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public valueOf(): String {
         return this;
@@ -1234,27 +1533,45 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The includes() method performs a case-sensitive search to determine whether one string may
-     * be found within another string, returning true or false as appropriate.
+     *     be found within another string, returning true or false as appropriate.
      *
-     * @param searchString to be searched
-     *
-     * @param position within the string at which to begin searching for searchString
-     *
-     * @returns true if the search string is found anywhere within the given string,
-     *  including when searchString is an empty string; otherwise, false
+     * @param { String } searchString to be searched
+     * @param { int } [position] within the string at which to begin searching for searchString
+     * @returns { boolean } true if the search string is found anywhere within the given string,
+     *     including when searchString is an empty string; otherwise, false
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public includes(searchString: String, position?: int): boolean {
         return this.indexOf(searchString, position) != -1
     }
 
+    /**
+     * The padEnd() method pads the current string with a given string (repeated, if needed)
+     *     so that the resulting string reaches a given length.
+     *     The padding is applied from the end of the current string.
+     * @param { int } end int
+     * @param { char } ch char
+     * @returns { String } string with the padString applied at the end of the current str
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public padEnd(end: int): String {
         return this.padEnd(end, ' ')
     }
 
-    /*
+    /**
      * The padEnd() method pads the current string with a given string (repeated, if needed)
-     * so that the resulting string reaches a given length.
-     * The padding is applied from the end of the current string.
+     *     so that the resulting string reaches a given length.
+     *     The padding is applied from the end of the current string.
+     * @param { int } end int
+     * @param { String } str string
+     * @returns { String } string with the padString applied at the end of the current str
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public padEnd(end: int, ch: char): String {
         if (this.getLength() >= end) {
@@ -1272,14 +1589,15 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The padEnd() method pads the current string with a given string (repeated, if needed)
-     * so that the resulting string reaches a given length.
-     * The padding is applied from the end of the current string.
+     *     so that the resulting string reaches a given length.
+     *     The padding is applied from the end of the current string.
      *
-     * @param end of the resulting string once the current str has been padded
-     *
-     * @param fillString to pad the current str with
-     *
-     * @returns string with the padString applied at the end of the current str
+     * @param { int } end of the resulting string once the current str has been padded
+     * @param { String } [fillString] to pad the current str with
+     * @returns { String } string with the padString applied at the end of the current str
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public padEnd(end: int, fillString?: String): String {
         const str = fillString ?? '\u0020'
@@ -1301,10 +1619,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr);
     }
 
-    /*
+    /**
      * The padStart() method pads the current string with another string (multiple times, if needed)
-     * until the resulting string reaches the given length.
-     * The padding is applied from the start of the current string.
+     *     until the resulting string reaches the given length.
+     *     The padding is applied from the start of the current string.
+     * @param { int } end int
+     * @param { char } ch char
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public padStart(end: int, ch: char): String {
         let padLen = end - this.getLength();
@@ -1321,6 +1645,15 @@ export final class String extends Object implements Comparable<String>, Iterable
         return new String(arr)
     }
 
+    /**
+     * The padStart.
+     * @param { int } end int
+     * @param { String } [fillString] fillString
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public padStart(end: int, fillString?: String): String {
         const str = (fillString == undefined) ? '\u0020' : fillString
         if (this.getLength() >= end || str.getLength() == 0) {
@@ -1343,13 +1676,14 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The substr() method returns a portion of the string, starting at the specified
-     * index and extending for a given number of characters afterwards.
+     *     index and extending for a given number of characters afterwards.
      *
-     * @param begin is index of the first character to include in the returned substring
-     *
-     * @param length is number of characters to extract
-     *
-     * @returns new string containing the specified part of the given string
+     * @param { int } begin is index of the first character to include in the returned substring
+     * @param { int } [length] is number of characters to extract
+     * @returns { String } new string containing the specified part of the given string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public substr(begin: int, length?: int): String {
         begin = normalizeIndex(begin, this.getLength());
@@ -1365,25 +1699,40 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
 
-    /*
+    /**
      * The trimEnd() method removes whitespace from the end of a string and returns a new string,
-     * without modifying the original string. trimRight() is an alias of this method.
+     *     without modifying the original string. trimRight() is an alias of this method.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public trimEnd(): String {
         return this.trimRight()
     }
 
-    /*
+    /**
      * The trimStart() method removes whitespace from the beginning of a string and returns a new string,
-     * without modifying the original string. trimLeft() is an alias of this method.
+     *     without modifying the original string. trimLeft() is an alias of this method.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public trimStart(): String {
         return this.trimLeft()
     }
 
-    /*
+    /**
      * The slice() method extracts a section of a string and returns it as a new string,
-     * without modifying the original string.
+     *     without modifying the original string.
+     * @param { int } [begin] Start index
+     * @param { int } [end] End index
+     * @returns { String }
+     * @throws { AssertionError } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public slice(begin?: int, end?: int): String {
         begin = normalizeIndex(begin ?? 0, this.getLength())
@@ -1394,6 +1743,21 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.substring(begin, end)
     }
 
+    /**
+     * getSubstitution
+     *
+     * @param { String } matched string
+     * @param { String } str string
+     * @param { int } position int
+     * @param { String[] } captures string array
+     * @param { Record<String, String | undefined> | undefined } namedCaptures captures
+     * @param { String } replacement string
+     * @throws { AssertionError } - Input parameter error.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     static getSubstitution(matched: String, str: String, position: int, captures: String[], namedCaptures: Record<String, String | undefined> | undefined, replacement: String) {
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
@@ -1490,16 +1854,27 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
      *
-     * @param searchValue is pattern which can be a String or RegExp
-     *
-     * @param replaceValue is replacement String
-     *
-     * @returns a new replaced string
+     * @param { RegExp } searchValue is pattern which can be a RegExp
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public replace(searchValue: RegExp, replaceValue: String) : String {
         return searchValue.replace(this, replaceValue)
     }
 
+    /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param { String } searchValue is pattern which can be a String
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replace(searchValue: String, replaceValue: String) : String {
         let searchLength = searchValue.getLength()
         let position: int = this.indexOf(searchValue)
@@ -1512,6 +1887,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return preceding + replacement + following
     }
 
+    /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param { StringOrRegExp } searchValue is pattern which can be a String or RegExp
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replace(searchValue: StringOrRegExp, replaceValue: String) : String {
         if (searchValue instanceof RegExp) {
             return (searchValue as RegExp).replace(this, replaceValue)
@@ -1522,16 +1907,27 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
      *
-     * @param searchValue is pattern which can be a String or RegExp
-     *
-     * @param replacer is replacement function
-     *
-     * @returns a new replaced string
+     * @param { RegExp } searchValue is pattern which can be a String or RegExp
+     * @param { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public replace(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
         return searchValue.replace(this, replacer)
     }
 
+    /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param { String } searchValue is pattern which can be a String or RegExp
+     * @param { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replace(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
         let searchLength = searchValue.getLength()
         let position = this.indexOf(searchValue)
@@ -1544,6 +1940,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return preceding + replacement + following
     }
 
+    /**
+     * Returns a new string with one, some, or all matches of a pattern replaced by a replacement
+     *
+     * @param { StringOrRegExp } searchValue is pattern which can be a String or RegExp
+     * @param { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
             return (searchValue as RegExp).replace(this, replacer)
@@ -1551,14 +1957,15 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.replace(searchValue as String, replacer)
     }
 
-     /**
+    /**
      * Returns a new string with all matches of a pattern replaced by a replacement
      *
-     * @param searchValue is pattern which can be a String or RegExp
-     *
-     * @param replaceValue is replacement String
-     *
-     * @returns a new replaced string
+     * @param { RegExp } searchValue is pattern which can be a String or RegExp
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public replaceAll(searchValue: RegExp, replaceValue: String): String {
         if (!searchValue.global) {
@@ -1567,6 +1974,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return searchValue.replace(this, replaceValue)
     }
 
+    /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param { String } searchValue is pattern which can be a String or RegExp
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replaceAll(searchValue: String, replaceValue: String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
@@ -1595,6 +2012,17 @@ export final class String extends Object implements Comparable<String>, Iterable
         return result
     }
 
+    /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param { StringOrRegExp } searchValue is pattern which can be a String or RegExp
+     * @param { String } replaceValue is replacement String
+     * @returns { String } a new replaced string
+     * @throws { Error } Global flag expected for regexp
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replaceAll(searchValue: StringOrRegExp, replaceValue: String): String {
         if (searchValue instanceof RegExp) {
             const re = searchValue as RegExp
@@ -1609,11 +2037,13 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * Returns a new string with all matches of a pattern replaced by a replacement
      *
-     * @param searchValue is pattern which can be a String or RegExp
-     *
-     * @param replacer is replacement function
-     *
-     * @returns a new replaced string
+     * @param  { RegExp } searchValue is pattern which can be a String or RegExp
+     * @param  { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @throws { Error } Global flag expected for regexp
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public replaceAll(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (!searchValue.global) {
@@ -1622,6 +2052,16 @@ export final class String extends Object implements Comparable<String>, Iterable
         return searchValue.replace(this, replacer)
     }
 
+    /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param  { String } searchValue is pattern which can be a String or RegExp
+     * @param  { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replaceAll(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
@@ -1650,6 +2090,17 @@ export final class String extends Object implements Comparable<String>, Iterable
         return result
     }
 
+    /**
+     * Returns a new string with all matches of a pattern replaced by a replacement
+     *
+     * @param  { StringOrRegExp } searchValue is pattern which can be a String or RegExp
+     * @param  { function } replacer is replacement function
+     * @returns { String } a new replaced string
+     * @throws { Error } Global flag expected for regexp
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
         if (searchValue instanceof RegExp) {
             const re = searchValue as RegExp
@@ -1661,22 +2112,44 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.replaceAll(searchValue as String, replacer)
     }
 
-      /**
+    /**
      * Executes a search for a match between a regular expression and this String object.
      *
-     * @param regexp a regular expression object or implicit regular expression
-     *
-     * @returns the index of the first match between the regular expression and the given string,
-     * or -1 if no match was found.
+     * @param { String } regexp a regular expression object or implicit regular expression
+     * @returns { int } the index of the first match between the regular expression and the given string,
+     *     or -1 if no match was found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public search(implicitRegExp: String): int {
         return new RegExp(implicitRegExp).search(this)
     }
 
+    /**
+     * Executes a search for a match between a regular expression and this String object.
+     *
+     * @param { RegExp } regexp a regular expression object or implicit regular expression
+     * @returns { int } the index of the first match between the regular expression and the given string,
+     *     or -1 if no match was found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public search(regexp: RegExp): int {
         return regexp.search(this)
     }
 
+    /**
+     * Executes a search for a match between a regular expression and this String object.
+     *
+     * @param { StringOrRegExp } regexp a regular expression object or implicit regular expression
+     * @returns { int } the index of the first match between the regular expression and the given string,
+     *     or -1 if no match was found.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public search(regexp: StringOrRegExp): int {
         if (regexp instanceof String) {
             return new RegExp(regexp as String).search(this)
@@ -1684,12 +2157,26 @@ export final class String extends Object implements Comparable<String>, Iterable
         return (regexp as RegExp).search(this)
     }
 
-    /*
+    /**
      * The toLocaleLowerCase() method returns the calling string value converted to lower case,
-     * according to any locale-specific case mappings.
+     *     according to any locale-specific case mappings.
+     * @param { String } locale string
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native toLocaleLowerCase(locale: String): String;
 
+    /**
+     * toLocaleLowerCase
+     *
+     * @param { String[] } locale sting array
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toLocaleLowerCase(locale: String[]): String {
         if (locale.length != 0) {
             return this.toLocaleLowerCase(locale[0]);
@@ -1697,16 +2184,38 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.toLocaleLowerCase('');
     }
 
+    /**
+     * toLocaleLowerCase
+     *
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toLocaleLowerCase(): String {
         return this.toLocaleLowerCase('');
     }
 
-    /*
+    /**
      * The toLocaleUpperCase() method returns the calling string value converted to upper case,
-     * according to any locale-specific case mappings.
+     *     according to any locale-specific case mappings.
+     * @param { String } locale string
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native toLocaleUpperCase(locale: String): String;
 
+    /**
+     * The toLocaleUpperCase() method returns the calling string value converted to upper case,
+     *     according to any locale-specific case mappings.
+     * @param { String[] } locale string array
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toLocaleUpperCase(locale: String[]): String {
         if (locale.length != 0) {
             return this.toLocaleUpperCase(locale[0]);
@@ -1714,27 +2223,58 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.toLocaleUpperCase('');
     }
 
+    /**
+     * The toLocaleUpperCase() method returns the calling string value converted to upper case,
+     *     according to any locale-specific case mappings.
+     * @returns { String }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toLocaleUpperCase(): String {
         return this.toLocaleUpperCase('');
     }
     /**
      * Retrieves the result of matching a string against a regular expression
+     *     If the regexp.global is true, all results matching the complete regular expression will be returned,
+     *     but capturing groups are not included
+     *     Otherwise, only the first complete match and its related capturing groups are returned
      *
-     * @param regexp a regular expression object
-     *
-     * @returns
-     * If the regexp.global is true, all results matching the complete regular expression will be returned,
-     * but capturing groups are not included
-     * Otherwise, only the first complete match and its related capturing groups are returned
+     * @param { String } implicitRegExp string
+     * @returns { RegExpMatchArray | null }
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public match(implicitRegExp: String): RegExpMatchArray | null {
         return new RegExp(implicitRegExp).match(this)
     }
 
+    /**
+     * Retrieves the result of matching a string against a regular expression
+     *
+     * @param { RegExp } regexp a regular expression object
+     * @returns { RegExpMatchArray | null }
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public match(regexp: RegExp): RegExpMatchArray | null {
         return regexp.match(this)
     }
 
+    /**
+     * Retrieves the result of matching a string against a regular expression
+     *
+     * @param { StringOrRegExp } regexp string or regexp
+     * @returns { RegExpMatchArray | null }
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public match(regexp: StringOrRegExp): RegExpMatchArray | null {
         if (regexp instanceof String) {
             return new RegExp(regexp as String).match(this)
@@ -1745,9 +2285,14 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * Returns an iterator of all results matching a string against a regular expression,
-     * including capturing groups
+     *     including capturing groups
      *
-     * @param regexp a regular expression object
+     * @param { RegExp } reg regexp
+     * @returns { IterableIterator<RegExpMatchArray> }
+     * @throws { Error } - Input parameter error.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public matchAll(reg: RegExp): IterableIterator<RegExpMatchArray> {
         let flags = reg.flags;
@@ -1768,11 +2313,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * The normalize() method of String values returns the Unicode Normalization Form of this string
      *
-     * @param form is 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
-     *
-     * @throws RangeError if form is not 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
-     *
-     * @returns the Unicode Normalization Form of the string
+     * @param { String } [form] is 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
+     * @throws { RangeError } if form is not 'NFC' or 'NFD' or 'NFKC' or 'NFKD'
+     * @returns { String } the Unicode Normalization Form of the string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public normalize(form?: String): String {
         const f = (form == undefined) ? 'NFC' : form
@@ -1818,7 +2364,11 @@ export final class String extends Object implements Comparable<String>, Iterable
 
     /**
      * The toWellFormed() method of String values returns a string where all lone surrogates of
-     * this string are replaced with the Unicode replacement character U+FFFD.
+     *     this string are replaced with the Unicode replacement character U+FFFD.
+     * @returns { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public toWellFormed(): string {
         let res = new StringBuilder();
@@ -1853,11 +2403,12 @@ export final class String extends Object implements Comparable<String>, Iterable
     /**
      * The String.fromCodePoint() static method returns a string created by using the specified sequence of code points
      *
-     * @param codePoints are integers between 0 and 0x10FFFF (inclusive) representing a Unicode code point
-     *
-     * @throws RangeError if codePoints[i] is less than 0, or is greater than 0x10FFFF
-     *
-     * @returns string created by using the specified sequence of code points
+     * @param { int[] } codePoints are integers between 0 and 0x10FFFF (inclusive) representing a Unicode code point
+     * @throws { RangeError } if codePoints[i] is less than 0, or is greater than 0x10FFFF
+     * @returns { string } string created by using the specified sequence of code points
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static fromCodePoint(...codePoints: int[]): String {
         let res = new StringBuilder();
@@ -1875,25 +2426,47 @@ export final class String extends Object implements Comparable<String>, Iterable
         return res.toString()
     }
 
-    /*
-     * The isWellFormed() method of String values returns a boolean indicating whether this string contains any lone surrogates.
+    /**
+     * The isWellFormed() method of String values returns a boolean indicating whether this string
+     *     contains any lone surrogates.
+     * @returns { boolean }
+     * @throws { RangeError } RangeError if codePoints[i] is less than 0, or is greater than 0x10FFFF
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isWellFormed(): boolean;
 
     /**
      * Check if a string is compressed
      *
-     * @param s string to be checked
-     *
-     * @returns true - if s is compressed, false - otherwise
+     * @returns { boolean } true - if s is compressed, false - otherwise
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native isCompressed(): boolean;
 
+    /**
+    * Iterator implementation.
+    *
+    * @returns {IterableIterator<String>} Iterator for String elements.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
+    */
     public override $_iterator(): IterableIterator<String> {
         return new StringIterator(this)
     }
 }
 
+/**
+ * StringIterator
+ * @implements IterableIterator<String>
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 class StringIterator implements IterableIterator<String> {
     private s: String
     private idx: int = 0
@@ -1902,6 +2475,14 @@ class StringIterator implements IterableIterator<String> {
         this.s = s
     }
 
+    /**
+     * next
+     *
+     * @returns { IteratorResult<String> }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public override next(): IteratorResult<String> {
         if (this.idx == this.s.getLength()) {
             return new IteratorResult<String>()
@@ -1922,5 +2503,9 @@ class StringIterator implements IterableIterator<String> {
 
 /**
  * `string` is an alias for type `String`
+ * @typedef String string
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export type string = String;

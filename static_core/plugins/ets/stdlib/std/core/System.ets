@@ -12,11 +12,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the System for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
+/**
+ * Exits the current program or script with the specified exit code.
+ * @param { int } code The exit code of the program. Typically, 0 indicates normal exit,
+ *     non-zero values indicate abnormal exit.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export native function exit(code: int): void
+
+/**
+ * Prints current call stack information to standard error output.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export native function printStackTrace(): void
+
+/**
+ * Gets current call stack information and returns it as a string array.
+ * @returns { FixedArray<String> } A string array containing call stack information,
+ *     where each string represents one line of the call stack.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function stackTraceLines(): FixedArray<String> {
     return new FixedArray<String>(0);
 }

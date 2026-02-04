@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the StringBuilder for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
 /**
  * Performance-oriented class for string construction
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export final class StringBuilder {
     private static readonly INITIAL_BUF_SIZE: int = 16;
@@ -28,13 +35,19 @@ export final class StringBuilder {
 
     /**
      * Construct a new builder instance with the initial buffer of 16 chars
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor() {}
 
     /**
      * Construct a new builder instance with the provided array of chars
      *
-     * @param fromChars array that will be used to initialize the builder
+     * @param { FixedArray<char> } fromChars array that will be used to initialize the builder
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor(fromChars: FixedArray<char>) {
         let s: String = new String(fromChars);
@@ -48,7 +61,10 @@ export final class StringBuilder {
     /**
      * Construct a new builder instance with the provided array of chars
      *
-     * @param fromChars array that will be used to initialize the builder
+     * @param { char[] } fromChars array that will be used to initialize the builder
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     constructor(fromChars: char[]) {
         let s: String = new String(fromChars);
@@ -62,7 +78,10 @@ export final class StringBuilder {
     /**
      * Constructs a new builder instance with provided string
      *
-     * @param s string that will be used to initialize the builder
+     * @param { String } s string that will be used to initialize the builder
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor (s: String) {
         this.buf[this.index++] = s;
@@ -75,7 +94,10 @@ export final class StringBuilder {
     /**
      * Length of string accumulated so far
      *
-     * @returns length of string accumulated so far
+     * @returns { int } length of string accumulated so far
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public get stringLength(): int {
         return this.length;
@@ -84,11 +106,13 @@ export final class StringBuilder {
     /**
      * Concatenates two strings and return a result as a new string
      *
-     * @param lhs left string (prefix)
-     *
-     * @param rhs right string (suffix)
-     *
-     * @returns result of concatenation
+     * @param { String } lhs left string (prefix)
+     * @param { String } rhs right string (suffix)
+     * @returns { String } result of concatenation
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static concatStrings(lhs: String, rhs: String): String
     {
@@ -99,9 +123,11 @@ export final class StringBuilder {
     /**
      * Appends a string to the builder's internal buffer
      *
-     * @param s string to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { String } s string to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(s: String): StringBuilder;
     private native append(s0: String, s1: String): StringBuilder;
@@ -111,81 +137,99 @@ export final class StringBuilder {
     /**
      * Appends a boolean as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { boolean } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: boolean): StringBuilder;
 
     /**
      * Appends a byte as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { byte } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: byte): StringBuilder;
 
     /**
      * Appends a char to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { char } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: char): StringBuilder;
 
     /**
      * Appends a short as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { short } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: short): StringBuilder;
 
     /**
      * Appends an int as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { int } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: int): StringBuilder;
 
     /**
      * Appends a long as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { long } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: long): StringBuilder;
 
     /**
      * Appends a float as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { float } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: float): StringBuilder;
 
     /**
      * Appends a double as string to the builder's internal buffer
      *
-     * @param i value to be appended
-     *
-     * @returns builder with updated internal buffer
+     * @param { double } i value to be appended
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native append(i: double): StringBuilder;
 
     /**
      * Appends an object representation as string to the builder's internal buffer
      *
-     * @param o object that will be converted to a stringitg
-     *
-     * @returns builder with updated internal buffer
+     * @param { object } o object that will be converted to a stringitg
+     * @returns { StringBuilder } builder with updated internal buffer
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public append(o: Object): StringBuilder {
         this.append(o.toString());
@@ -194,73 +238,94 @@ export final class StringBuilder {
 
     /**
      * Returns the string that was formed as a result of all append operations
-     *
-     * @see append
-     *
-     * @returns String - builder's current buffer as string
+     * @returns { String } - builder's current buffer as string
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public native override toString(): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { boolean } i value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: boolean): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
+     * @param { byte } i value to be converted
      * @returns result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: byte): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { char } i value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: char): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { short } i value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: short): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { int } i value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: int): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { long } i value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static native toString(i: long): String;
 
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { float } f value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static toString(f: float): String {
         return Float.toString(f);
@@ -269,9 +334,12 @@ export final class StringBuilder {
     /**
      * Converts the primitive to a string
      *
-     * @param i value to be converted
-     *
-     * @returns result of the conversion
+     * @param { double } d value to be converted
+     * @returns { String } result of the conversion
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static toString(d: double): String {
         return Double.toString(d);
