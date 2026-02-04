@@ -181,16 +181,6 @@ void ThreadHolder::WaitSuspension()
     mutator_->HandleSuspensionRequest();
 }
 
-void ThreadHolder::VisitAllThreads(CommonRootVisitor visitor)
-{
-    if (jsThread_ != nullptr) {
-        VisitJSThread(jsThread_, visitor);
-    }
-    for ([[maybe_unused]] auto *coroutine : coroutines_) {
-        // Depending on the integrated so
-    }
-}
-
 ThreadHolder::TryBindMutatorScope::TryBindMutatorScope(ThreadHolder *holder) : holder_(nullptr)
 {
     if (holder->TryBindMutator()) {
