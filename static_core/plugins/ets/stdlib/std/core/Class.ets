@@ -391,14 +391,7 @@ export final class Class {
      * @since 24 
      */
     public getInstanceMethod(name: string, signature?: FixedArray<Class>): reflect.InstanceMethod | undefined {
-        let methods = this.getInstanceMethods()
-        if (methods.length == 0) {
-            return undefined
-        }
-        if (signature == undefined) {
-            return Class.findInstanceMethodByNameUnchecked(methods, name)
-        }
-        return Class.findInstanceMethodBySignatureUnchecked(methods, name, signature)
+        return this.getInstanceMethodInternal(name, signature, true)
     }
 
     /** 
@@ -568,23 +561,6 @@ export final class Class {
         return candidate
     }
 
-    private static findInstanceMethodByNameUnchecked(
-        methods: FixedArray<reflect.InstanceMethod>,
-        name: string
-    ): reflect.InstanceMethod | undefined {
-        let candidate: reflect.InstanceMethod | undefined = undefined
-
-        for (let method of methods) {
-            if (method.getName() == name) {
-                if (candidate != undefined) {
-                    throw new Error(`Found two methods with the same name '${name}'. Please specify signature.`)
-                }
-                candidate = method
-            }
-        }
-        return candidate
-    }
-
     // NOTE(kurnevichstanislav): squash two implementations into one after #31016 is fixed.
     private static findStaticMethodBySignatureUnchecked(
         methods: FixedArray<reflect.StaticMethod>,
@@ -593,19 +569,6 @@ export final class Class {
     ): reflect.StaticMethod | undefined {
         for (let method of methods) {
             if (method.getName() == name && Class.compareSignatureStatic(method, signature)) {
-                return method
-            }
-        }
-        return undefined
-    }
-
-    private static findInstanceMethodBySignatureUnchecked(
-        methods: FixedArray<reflect.InstanceMethod>,
-        name: string,
-        signature: FixedArray<Class>
-    ): reflect.InstanceMethod | undefined {
-        for (let method of methods) {
-            if (method.getName() == name && Class.compareSignatureInstance(method, signature)) {
                 return method
             }
         }
@@ -625,19 +588,8 @@ export final class Class {
         return true
     }
 
-    private static compareSignatureInstance(method: reflect.InstanceMethod, signature: FixedArray<Class>): boolean {
-        if (method.getParametersNum() != signature.length) {
-            return false
-        }
-        for (let idx = 0; idx < signature.length; ++idx) {
-            if (method.getParameterType(idx) != signature[idx]) {
-                return false
-            }
-        }
-        return true
-    }
-
     private native getInstanceMethodsInternal(publicOnly: boolean): FixedArray<reflect.InstanceMethod>
+    private native getInstanceMethodInternal(name: string, signature: FixedArray<Class> | undefined, publicOnly: boolean): reflect.InstanceMethod | undefined
     private native getInstanceFieldByNameInternal(name: string, publicOnly: boolean): reflect.InstanceField | undefined
     private native getInstanceFieldsInternal(publicOnly: boolean): FixedArray<reflect.InstanceField>
     private native getStaticMethodsInternal(publicOnly: boolean): FixedArray<reflect.StaticMethod>

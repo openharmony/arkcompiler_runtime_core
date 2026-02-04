@@ -28,13 +28,19 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
+#include "include/mem/panda_containers.h"
+#include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
 #include "plugins/ets/runtime/types/ets_typeapi.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "runtime/handle_scope-inl.h"
 #include "libarkbase/utils/utf.h"
+
+#include <optional>
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -242,6 +248,119 @@ ObjectHeader *StdCoreClassGetInstanceMethodsInternal(EtsClass *cls, EtsBoolean p
         instanceMethods.emplace_back(iter.Value());
     }
     return CreateEtsReflectMethodArray(coro, instanceMethods);
+}
+
+// Match method by comparing each param type to the caller's Class array (same runtime class).
+// Returns std::nullopt when an exception occurred (caller should return nullptr).
+static std::optional<bool> MethodParamsMatchClassArray(ark::Method &m, const EtsObjectArray *signatureArr)
+{
+    EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(&m);
+    const uint32_t paramCount = etsMethod->GetParametersNum();
+    if (paramCount != signatureArr->GetLength()) {
+        return false;
+    }
+    for (uint32_t i = 0; i < paramCount; ++i) {
+        EtsClass *expected = etsMethod->ResolveArgType(i + 1);  // +1: instance method has 'this' at 0
+        if (UNLIKELY(expected == nullptr)) {
+            ASSERT(EtsCoroutine::GetCurrent()->HasPendingException());
+            return std::nullopt;
+        }
+        EtsClass *actual = EtsClass::FromEtsClassObject(signatureArr->Get(i));
+        if (expected != actual) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Helper to build StringData from method name.
+static panda_file::File::StringData MakeStringData(const char *name)
+{
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name);
+    return {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name)), mutf8Name};
+}
+
+// Resolve instance method by name. Returns:
+//   - std::nullopt if multiple overloads found (ambiguous)
+//   - std::optional<EtsMethod*> with nullptr if no method found
+//   - std::optional<EtsMethod*> with non-null value if single method found
+static std::optional<EtsMethod *> ResolveInstanceMethodByName(EtsClass *cls, const char *name, bool publicOnly)
+{
+    panda_file::File::StringData methodName = MakeStringData(name);
+    const ark::MethodNameComp comp;
+    EtsMethod *firstWithName = nullptr;
+    for (auto iter = helpers::InstanceMethodsIterator(cls, publicOnly); !iter.IsEmpty(); iter.Next()) {
+        ark::Method &m = *iter.Value()->GetPandaMethod();
+        if (!comp.equal(m, methodName)) {
+            continue;
+        }
+        if (firstWithName == nullptr) {
+            firstWithName = iter.Value();
+        } else {
+            return std::nullopt;  // multiple overloads found
+        }
+    }
+    return firstWithName;  // nullptr if not found, non-null if single method found
+}
+
+static EtsMethod *GetInstanceMethodByParamClasses(EtsClass *cls, const char *name, const EtsObjectArray *signatureArr,
+                                                  bool publicOnly)
+{
+    panda_file::File::StringData methodName = MakeStringData(name);
+    const ark::MethodNameComp comp;
+
+    for (auto iter = helpers::InstanceMethodsIterator(cls, publicOnly); !iter.IsEmpty(); iter.Next()) {
+        ark::Method &m = *iter.Value()->GetPandaMethod();
+        if (!comp.equal(m, methodName)) {
+            continue;
+        }
+        std::optional<bool> match = MethodParamsMatchClassArray(m, signatureArr);
+        if (UNLIKELY(!match.has_value())) {
+            return nullptr;
+        }
+        if (*match) {
+            return iter.Value();
+        }
+    }
+    return nullptr;
+}
+
+EtsReflectMethod *StdCoreClassGetInstanceMethodInternal(EtsClass *cls, EtsString *name, ObjectHeader *signature,
+                                                        EtsBoolean publicOnly)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    bool publicOnlyBool = FromEtsBoolean(publicOnly);
+
+    PandaString nameStr = name->GetMutf8();
+    const char *nameCStr = nameStr.c_str();
+
+    // signature contains param types only (no return type); match by param types only.
+    // Only the given class is queried (no base classes), consistent with InstanceMethodsIterator / getInstanceMethods.
+    EtsMethod *method = nullptr;
+    if (signature != nullptr) {
+        // Caller passed a signature array of Class instances (e.g. [Class.PRIMITIVE_INT, Class.STRING]).
+        // Match by comparing each param's Class object (same GetRuntimeClass()) to the method's param type.
+        const auto *signatureArr = EtsObjectArray::FromCoreType(signature);
+        method = GetInstanceMethodByParamClasses(cls, nameCStr, signatureArr, publicOnlyBool);
+    } else {
+        std::optional<EtsMethod *> resolved = ResolveInstanceMethodByName(cls, nameCStr, publicOnlyBool);
+        if (UNLIKELY(!resolved.has_value())) {
+            // Multiple overloads found
+            PandaOStringStream msg;
+            msg << "Found two methods with the same name '" << nameCStr << "'. Please specify signature.";
+            ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg.str().c_str());
+            return nullptr;  // unreachable after throw, but makes control flow clear
+        }
+        method = *resolved;  // nullptr if not found, non-null if single method found
+    }
+
+    if (UNLIKELY(method == nullptr || (publicOnlyBool && !method->IsPublic()))) {
+        return nullptr;
+    }
+
+    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
 }
 
 EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
