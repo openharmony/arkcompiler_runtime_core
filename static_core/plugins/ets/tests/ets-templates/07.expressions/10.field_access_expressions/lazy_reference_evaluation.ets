@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: If object reference evaluation completes abruptly, then so does the entire field access expression.
-tags: []
 ---*/
 
 class A {

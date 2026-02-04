@@ -16,13 +16,19 @@
 /*---
 desc: This in class method refer too nulable type.
 assert: Any lexically enclosing instance (§??and §??) can be referred to by explicitly qualifying the keyword this.
-tags: [compile-only]
 ---*/
 
 class A {
   public x: Int|undefined;
 
-  public foo(x: int): void { 
+  public foo(x: int): void {
     this.x = x;
   }
+}
+
+function main(): int {
+  let a = new A();
+  a.foo(10);
+  arktest.assertEQ(a.x, 10);
+  return 0;
 }

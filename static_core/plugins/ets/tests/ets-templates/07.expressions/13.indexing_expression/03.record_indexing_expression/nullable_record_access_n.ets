@@ -19,6 +19,7 @@ desc: >-
     If no ‘?.’ is present in an indexing expression, then the type of object reference
     expression must be an array type, or the Record type; a compile-time error occurs otherwise.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0010: Value is possibly nullish."
 ---*/
 
 function refNullish(): Record<string, number> | {{c.type}} {

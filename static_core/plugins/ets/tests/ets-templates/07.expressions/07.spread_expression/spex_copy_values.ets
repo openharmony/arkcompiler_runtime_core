@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,14 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Spread expression always copies values from original arrays. A callee changes elements of its own copy, but not elements of arrays used in the call.
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
-  }
+{{c.decl}}
 
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
+function main() {
+    {{c.use|indent}}
 }
-
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
-}
+{% endfor %}

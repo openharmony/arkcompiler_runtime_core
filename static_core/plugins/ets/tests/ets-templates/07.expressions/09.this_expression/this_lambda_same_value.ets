@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,29 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: This in lambda body denotes the same value as in surrounding context.
+assert: The parameter this in a lambda body and in the surrounding context denote the same value.
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
+class A {
+  x: int = 0;
+
+  method(): void {
+    let lambda = (): void => {
+      this.x = 10; // this refers to the enclosing A instance
+    };
+    lambda();
   }
 
-  foo(): int {
-    let x = this.bar();
-    return x;
+  getX(): int {
+    return this.x;
   }
 }
 
-class B implements A {}
+function main(): void {
+  let a: A = new A();
+  arktest.assertEQ(a.getX(), 0);
 
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+  a.method();
+  arktest.assertEQ(a.getX(), 10);
 }

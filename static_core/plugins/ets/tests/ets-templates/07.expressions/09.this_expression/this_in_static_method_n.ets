@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,16 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Cannot use 'this' in static method.
+assert: The keyword this cannot be used in static methods.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0202: 'this' cannot be referenced from a static context"
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
+class A {
+  public x: int;
+
+  public static foo(): void {
+    this.x = 10;
   }
-
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
-}
-
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
 }

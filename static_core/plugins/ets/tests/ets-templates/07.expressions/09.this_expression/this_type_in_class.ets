@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,27 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Type of this in class method.
+assert: A corresponding class type is the type of this expression when used in class method.
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
-  }
+interface anInterface {
+  method(): aClass;
+}
 
-  foo(): int {
-    let x = this.bar();
-    return x;
+class aClass implements anInterface {
+  public x: int = 11;
+
+  method(): aClass {
+    arktest.assertTrue(this instanceof aClass);
+    
+    return this; // type of 'this' is aClass
   }
 }
 
-class B implements A {}
+function main(): void {
+  let instance: aClass = new aClass();
+  let result: aClass = instance.method();
 
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+  arktest.assertEQ(result.x, 11);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,14 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Direct call this() can only be used in explicit constructor call.
+assert: The keyword this in a direct call expression this(arguments) can only be used in an explicit constructor call statement.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0201: Call to 'this' must be first statement in constructor"
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
+class A {
+  method(): void {
+    this();
   }
-
-  foo(): int {
-    let x = this.bar();
-    return x;
-  }
-}
-
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
 }

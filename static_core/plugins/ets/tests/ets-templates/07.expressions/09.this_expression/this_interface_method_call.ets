@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,25 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Calling interface methods through this.
+assert: The keyword this can call interface methods from within another interface method.
 ---*/
 
 interface A {
-  bar(): int {
-    return 5;
+  helper(): int {
+    return 11;
   }
 
-  foo(): int {
-    let x = this.bar();
-    return x;
+  compute(): int {
+    let value = this.helper();
+    return value * 2;
   }
 }
 
-class B implements A {}
+class AImpl implements A {}
 
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+function main(): void {
+  let a: AImpl = new AImpl();
+  arktest.assertEQ(a.helper(), 11);
+  arktest.assertEQ(a.compute(), 22);
 }

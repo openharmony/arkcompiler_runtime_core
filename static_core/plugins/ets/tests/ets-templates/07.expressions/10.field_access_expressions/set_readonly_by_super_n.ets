@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,28 @@
  */
 
 /*---
-desc: This in interface method.
-assert: The keyword this can only be used as an expression in the body of an instance method of a class, enum or interface.
+desc: Access to field by keyword super.
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0209: Cannot assign to this property because it is readonly."
 ---*/
 
-interface A {
-  bar(): int {
-    return 5;
+class A {
+  private readonly _x: Int;
+
+  final get x(): Int {
+    return this._x;
   }
 
-  foo(): int {
-    let x = this.bar();
-    return x;
+}
+
+final class B extends A {
+  public bar(input: Int) {
+    super.x = input
   }
 }
 
-class B implements A {}
-
-function main(): int {
-  let b = new B();
-  let result = b.foo();
-  arktest.assertEQ(result, 5);
-  return 0;
+function main(): void {
+    let instance = new B
+    arktest.assertEQ( instance.bar(1), 0 );
 }
+

@@ -18,6 +18,7 @@
 desc: >-
     For a Record<Key, Value> indexing, the index expression must be of type Key.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0251: Cannot find index access method with the required signature."
 ---*/
 
 let r: Record<'11' | '12' | '13', {{c.type}}> = {
