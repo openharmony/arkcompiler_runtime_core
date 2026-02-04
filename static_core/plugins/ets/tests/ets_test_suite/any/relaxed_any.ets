@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,7 @@ function testcall() {
     xassert(((a: any) => a())(() => "aaa") == "aaa");
     xassert(((a: any) => a("bbb"))((v: string) => v) == "bbb");
     xassert(((a: any) => a(123.0))((v: number) => v) == 123.0);
+    xassert(((a: any) => a("foo", "bar"))((v: string, w: string) => v + w) == "foobar");
 
     expectError(() => { ((a: any) => a(1))((s: string) => s) });
 }

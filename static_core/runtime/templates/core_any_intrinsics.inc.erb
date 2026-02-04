@@ -85,114 +85,6 @@ void AnyStbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uin
     return DoAnyStbyname(thread, thisObj, propertyName, val);
 }
 
-ObjectHeader *AnyLdbyidx([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
-                         [[maybe_unused]] double idxFloat)
-{
-    if (thisObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-        return nullptr;
-    }
-    auto *cls = thisObj->ClassAddr<Class>();
-    ASSERT(cls != nullptr);
-
-    switch (cls->GetSourceLang()) {
-% Common::plugins.each_value do |plugin_opts|
-        case <%= plugin_opts["lang_enum"] %>:
-% if plugin_opts.include?('any')
-            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyidx(thread, thisObj, idxFloat);
-% else
-            // Any handlers unimplemented for plugin
-            UNREACHABLE();
-% end
-            break;
-% end
-        default:
-            // NOTE(nsizov): implement core handler here if needed
-            UNREACHABLE();
-    }
-}
-
-void AnyStbyidx([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj, [[maybe_unused]] double key,
-                [[maybe_unused]] ObjectHeader *val)
-{
-    if (thisObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-        return;
-    }
-    auto *cls = thisObj->ClassAddr<Class>();
-    ASSERT(cls != nullptr);
-
-    switch (cls->GetSourceLang()) {
-% Common::plugins.each_value do |plugin_opts|
-        case <%= plugin_opts["lang_enum"] %>:
-% if plugin_opts.include?('any')
-            <%= plugin_opts["directive_name"].upcase %>AnyStbyidx(thread, thisObj, key, val);
-% else
-            // Any handlers unimplemented for plugin
-            UNREACHABLE();
-% end
-            break;
-% end
-        default:
-            // NOTE(nsizov): implement core handler here if needed
-            UNREACHABLE();
-    }
-}
-
-ObjectHeader *AnyLdbyval([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
-                         [[maybe_unused]] ObjectHeader *key)
-{
-    if (thisObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-        return nullptr;
-    }
-    auto *cls = thisObj->ClassAddr<Class>();
-    ASSERT(cls != nullptr);
-
-    switch (cls->GetSourceLang()) {
-% Common::plugins.each_value do |plugin_opts|
-        case <%= plugin_opts["lang_enum"] %>:
-% if plugin_opts.include?('any')
-            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyval(thread, thisObj, key);
-% else
-            // Any handlers unimplemented for plugin
-            UNREACHABLE();
-% end
-            break;
-% end
-        default:
-            // NOTE(nsizov): implement core handler here if needed
-            UNREACHABLE();
-    }
-}
-
-void AnyStbyval([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj, [[maybe_unused]] ObjectHeader *key,
-                [[maybe_unused]] ObjectHeader *val)
-{
-    if (thisObj == nullptr) {
-        interpreter::RuntimeInterface::ThrowNullPointerException();
-        return;
-    }
-    auto *cls = thisObj->ClassAddr<Class>();
-    ASSERT(cls != nullptr);
-
-    switch (cls->GetSourceLang()) {
-% Common::plugins.each_value do |plugin_opts|
-        case <%= plugin_opts["lang_enum"] %>:
-% if plugin_opts.include?('any')
-            <%= plugin_opts["directive_name"].upcase %>AnyStbyval(thread, thisObj, key, val);
-% else
-            // Any handlers unimplemented for plugin
-            UNREACHABLE();
-% end
-            break;
-% end
-        default:
-            // NOTE(nsizov): implement core handler here if needed
-            UNREACHABLE();
-    }
-}
-
 extern "C" bool AnyIsinstance([[maybe_unused]] ManagedThread *thread, ObjectHeader *lhs,
                               [[maybe_unused]] ObjectHeader *rhs)
 {
@@ -269,8 +161,8 @@ ObjectHeader *AnyCallShort(ManagedThread *thread, ObjectHeader *func, ObjectHead
     return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>(args));
 }
 
-static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame,
-                                        ObjectHeader *thisObj, [[maybe_unused]] uint32_t name,
+static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                                        [[maybe_unused]] panda_file::File::StringData funcName,
                                         [[maybe_unused]] Span<VMHandle<ObjectHeader>> args)
 {
     if (thisObj == nullptr) {
@@ -279,13 +171,11 @@ static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, 
     }
     auto *cls = thisObj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
-    [[maybe_unused]] auto pf = frame->GetMethod()->GetPandaFile();
     switch (cls->GetSourceLang()) {
 % Common::plugins.each_value do |plugin_opts|
         case <%= plugin_opts["lang_enum"] %>:
 % if plugin_opts.include?('any')
-            return <%= plugin_opts["directive_name"].upcase %>AnyCallThis(thread, thisObj,
-                pf->GetStringData(panda_file::File::EntityId(name)), args);
+            return <%= plugin_opts["directive_name"].upcase %>AnyCallThis(thread, thisObj, funcName, args);
 % else
             // Any handlers unimplemented for plugin
             UNREACHABLE();
@@ -299,29 +189,35 @@ static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, 
 }
 
 extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                      uint32_t name)
+                                      uint32_t id)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    return AnyCallThis(thread, frame, thisObj, name, Span<VMHandle<ObjectHeader>>());
+    auto pf = frame->GetMethod()->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>());
 }
 
 extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          uint32_t name, uint8_t argStart, uint8_t argc)
+                                          uint32_t id, uint8_t argStart, uint8_t argc)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
     for (uint8_t i = 0; i < argc; i++) {
         args.emplace_back(VMHandle<ObjectHeader>(thread, frame->GetVReg(argStart + i).template GetAs<ObjectHeader *>()));
     }
-    return AnyCallThis(thread, frame, thisObj, name, Span<VMHandle<ObjectHeader>>(args));
+    auto pf = frame->GetMethod()->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>(args));
 }
 
 extern "C" ObjectHeader *AnyCallThisShort(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
-                                          uint32_t name, ObjectHeader *arg)
+                                          uint32_t id, ObjectHeader *arg)
 {
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
-    return AnyCallThis(thread, frame, thisObj, name, Span<VMHandle<ObjectHeader>>(args));
+    auto pf = frame->GetMethod()->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>(args));
 }
 
 static inline ObjectHeader *AnyCallNew([[maybe_unused]] ManagedThread *thread, ObjectHeader *ctor,
@@ -389,6 +285,241 @@ extern "C" void CompilerAnyStbyname(Method *method, ObjectHeader *thisObj, uint3
     auto file = method->GetPandaFile();
     auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
     return DoAnyStbyname(ManagedThread::GetCurrent(), thisObj, propertyName, val);
+}
+
+inline ObjectHeader *DoAnyLdbyidx([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                                  [[maybe_unused]] double idxFloat)
+{
+    if (thisObj == nullptr) {
+        interpreter::RuntimeInterface::ThrowNullPointerException();
+        return nullptr;
+    }
+    auto *cls = thisObj->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+    switch (cls->GetSourceLang()) {
+% Common::plugins.each_value do |plugin_opts|
+        case <%= plugin_opts["lang_enum"] %>:
+% if plugin_opts.include?('any')
+            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyidx(thread, thisObj, idxFloat);
+% else
+            // Any handlers unimplemented for plugin
+            UNREACHABLE();
+% end
+            break;
+% end
+        default:
+            UNREACHABLE();
+    }
+}
+
+extern "C" ObjectHeader *CompilerAnyLdbyidx(ObjectHeader *thisObj, double idxFloat)
+{
+    return DoAnyLdbyidx(ManagedThread::GetCurrent(), thisObj, idxFloat);
+}
+
+inline void DoAnyStbyidx([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                         [[maybe_unused]] double idxFloat, [[maybe_unused]] ObjectHeader *val)
+{
+    if (thisObj == nullptr) {
+        interpreter::RuntimeInterface::ThrowNullPointerException();
+        return;
+    }
+    auto *cls = thisObj->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+    switch (cls->GetSourceLang()) {
+% Common::plugins.each_value do |plugin_opts|
+        case <%= plugin_opts["lang_enum"] %>:
+% if plugin_opts.include?('any')
+            <%= plugin_opts["directive_name"].upcase %>AnyStbyidx(thread, thisObj, idxFloat, val);
+% else
+            // Any handlers unimplemented for plugin
+            UNREACHABLE();
+% end
+            break;
+% end
+        default:
+            UNREACHABLE();
+    }
+}
+
+extern "C" void CompilerAnyStbyidx(ObjectHeader *thisObj, double idxFloat, ObjectHeader *val)
+{
+    return DoAnyStbyidx(ManagedThread::GetCurrent(), thisObj, idxFloat, val);
+}
+
+inline ObjectHeader *DoAnyLdbyval([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                                  [[maybe_unused]] ObjectHeader *key)
+{
+    if (thisObj == nullptr) {
+        interpreter::RuntimeInterface::ThrowNullPointerException();
+        return nullptr;
+    }
+    auto *cls = thisObj->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+    switch (cls->GetSourceLang()) {
+% Common::plugins.each_value do |plugin_opts|
+        case <%= plugin_opts["lang_enum"] %>:
+% if plugin_opts.include?('any')
+            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyval(thread, thisObj, key);
+% else
+            // Any handlers unimplemented for plugin
+            UNREACHABLE();
+% end
+            break;
+% end
+        default:
+            UNREACHABLE();
+    }
+}
+
+extern "C" ObjectHeader *CompilerAnyLdbyval(ObjectHeader *thisObj, ObjectHeader *key)
+{
+    return DoAnyLdbyval(ManagedThread::GetCurrent(), thisObj, key);
+}
+
+inline void DoAnyStbyval([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                         [[maybe_unused]] ObjectHeader *key, [[maybe_unused]] ObjectHeader *val)
+{
+    if (thisObj == nullptr) {
+        interpreter::RuntimeInterface::ThrowNullPointerException();
+        return;
+    }
+    auto *cls = thisObj->ClassAddr<Class>();
+    ASSERT(cls != nullptr);
+    switch (cls->GetSourceLang()) {
+% Common::plugins.each_value do |plugin_opts|
+        case <%= plugin_opts["lang_enum"] %>:
+% if plugin_opts.include?('any')
+            <%= plugin_opts["directive_name"].upcase %>AnyStbyval(thread, thisObj, key, val);
+% else
+            // Any handlers unimplemented for plugin
+            UNREACHABLE();
+% end
+            break;
+% end
+        default:
+            UNREACHABLE();
+    }
+}
+
+extern "C" ObjectHeader *CompilerAnyCall0(ObjectHeader *func)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>());
+}
+
+extern "C" ObjectHeader *CompilerAnyCallRange(ObjectHeader *func, uint32_t argc, void *argv)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    PandaVector<VMHandle<ObjectHeader>> args;
+    auto argvCasted = static_cast<ObjectHeader **>(argv);
+    for (uint8_t i = 0; i < argc; argvCasted++, i++) {
+        args.emplace_back(VMHandle<ObjectHeader>(thread, *argvCasted));
+    }
+
+    return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" ObjectHeader *CompilerAnyCallShort(ObjectHeader *func, ObjectHeader *arg)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
+
+    return AnyCall(thread, func, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" ObjectHeader *CompilerAnyCallThis0(Method *method, ObjectHeader *thisObj, uint32_t id)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    auto pf = method->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>());
+}
+
+extern "C" ObjectHeader *CompilerAnyCallThisRange(Method *method, ObjectHeader *thisObj, uint32_t id, uint32_t argc,
+                                                  void *argv)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    PandaVector<VMHandle<ObjectHeader>> args;
+    auto argvCasted = static_cast<ObjectHeader **>(argv);
+    for (uint8_t i = 0; i < argc; argvCasted++, i++) {
+        args.emplace_back(VMHandle<ObjectHeader>(thread, *argvCasted));
+    }
+    auto pf = method->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" ObjectHeader *CompilerAnyCallThisShort(Method *method, ObjectHeader *thisObj, uint32_t id,
+                                                  ObjectHeader *arg)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
+    auto pf = method->GetPandaFile();
+    auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
+    return AnyCallThis(thread, thisObj, funcName, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" ObjectHeader *CompilerAnyCallNew0(ObjectHeader *ctor)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>());
+}
+
+extern "C" ObjectHeader *CompilerAnyCallNewRange(ObjectHeader *ctor, uint32_t argc, void *argv)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    PandaVector<VMHandle<ObjectHeader>> args;
+    auto argvCasted = static_cast<ObjectHeader **>(argv);
+    for (uint8_t i = 0; i < argc; argvCasted++, i++) {
+        args.emplace_back(VMHandle<ObjectHeader>(thread, *argvCasted));
+    }
+
+    return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" ObjectHeader *CompilerAnyCallNewShort(ObjectHeader *ctor, ObjectHeader *arg)
+{
+    auto *thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
+
+    return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
+}
+
+extern "C" uint8_t CompilerAnyIsinstance(ObjectHeader *lhs, ObjectHeader *rhs)
+{
+    return AnyIsinstance(ManagedThread::GetCurrent(), lhs, rhs);
+}
+
+extern "C" void CompilerAnyStbyval(ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
+{
+    return DoAnyStbyval(ManagedThread::GetCurrent(), thisObj, key, val);
+}
+
+ObjectHeader *AnyLdbyidx(ManagedThread *thread, ObjectHeader *thisObj, double idxFloat)
+{
+    return DoAnyLdbyidx(thread, thisObj, idxFloat);
+}
+
+void AnyStbyidx(ManagedThread *thread, ObjectHeader *thisObj, double key, ObjectHeader *val)
+{
+    DoAnyStbyidx(thread, thisObj, key, val);
+}
+
+ObjectHeader *AnyLdbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key)
+{
+    return DoAnyLdbyval(thread, thisObj, key);
+}
+
+void AnyStbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
+{
+    DoAnyStbyval(thread, thisObj, key, val);
 }
 
 }  // namespace ark::intrinsics

@@ -383,16 +383,26 @@ private:
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 
     template <bool IS_ACC_WRITE>
-    void BuildLoadFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
+    void BuildLoadFromAnyByName(const BytecodeInstruction *bcInst);
     template <bool IS_ACC_WRITE>
-    void BuildStoreFromAnyByName(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildIsInstanceAny(const BytecodeInstruction *bcInst, DataType::Type type);
-    template <bool IS_ACC_WRITE>
-    void BuildAnyCall(const BytecodeInstruction *bcInst);
+    void BuildStoreFromAnyByName(const BytecodeInstruction *bcInst);
+    void BuildLoadFromAnyByIdx(const BytecodeInstruction *bcInst);
+    void BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst);
+    void BuildLoadFromAnyByVal(const BytecodeInstruction *bcInst);
+    void BuildStoreFromAnyByVal(const BytecodeInstruction *bcInst);
+    void BuildIsInstanceAny(const BytecodeInstruction *bcInst);
+    template <bool IS_THIS>
+    void BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeInterface::IntrinsicId intrinsicId,
+                            uint64_t argc);
+    void BuildAnyCall0(const BytecodeInstruction *bcInst);
+    void BuildAnyCallRange(const BytecodeInstruction *bcInst);
+    void BuildAnyCallShort(const BytecodeInstruction *bcInst);
+    void BuildAnyCallThis0(const BytecodeInstruction *bcInst);
+    void BuildAnyCallThisRange(const BytecodeInstruction *bcInst);
+    void BuildAnyCallThisShort(const BytecodeInstruction *bcInst);
+    void BuildAnyCallNew0(const BytecodeInstruction *bcInst);
+    void BuildAnyCallNewRange(const BytecodeInstruction *bcInst);
+    void BuildAnyCallNewShort(const BytecodeInstruction *bcInst);
     void UnsupportedAnyInst(const BytecodeInstruction *bcInst);
 
 #include "inst_builder_extensions.inl.h"

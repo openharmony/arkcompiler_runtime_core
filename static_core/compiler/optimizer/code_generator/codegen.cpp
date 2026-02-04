@@ -1572,6 +1572,8 @@ void Codegen::CreateCallIntrinsic(IntrinsicInst *inst)
         auto paramInfo = GetCallingConvention()->GetParameterInfo(explicitArgs);
         auto rangePtrReg =
             ConvertRegister(paramInfo->GetNextLocation(DataType::POINTER).GetRegister(), DataType::POINTER);
+        ASSERT(explicitArgs > 0 || !inst->IsMethodFirstInput());
+        explicitArgs -= inst->IsMethodFirstInput() ? 1 : 0;
         if (inst->GetInputsCount() > explicitArgs + (inst->RequireState() ? 1U : 0U)) {
             auto rangeSpOffs = GetStackOffset(inst->GetLocation(explicitArgs));
             GetEncoder()->EncodeAdd(rangePtrReg, GetTarget().GetStackReg(), Imm(rangeSpOffs));

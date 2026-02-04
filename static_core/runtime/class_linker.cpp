@@ -1187,6 +1187,8 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
 
     klass->SetState(Class::State::LOADED);
 
+    auto runtime = Runtime::GetCurrent();
+    runtime->GetCha()->Update(klass);
     AnnounceClassInContext(klass);
 
     auto *otherKlass = context->InsertClass(klass);
@@ -1197,7 +1199,7 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
     }
 
     RemoveCreatedClassInExtension(klass);
-    Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(klass);
+    runtime->GetNotificationManager()->ClassPrepareEvent(klass);
 
     return klass;
 }

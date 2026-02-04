@@ -33,6 +33,7 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     static const std::array testModuleNames = {
         "string_tlab_allocations",  //
         "string_tlab_repeat",       //
+        "test_any_static",          //
         "esvalue_load_rte",         //
         "import_type"               //
     };

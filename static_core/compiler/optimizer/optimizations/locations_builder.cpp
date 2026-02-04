@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,6 +265,8 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
         }
         size_t explicitArgs;
         if (IsStackRangeIntrinsic(id, &explicitArgs)) {
+            ASSERT(explicitArgs > 0 || !intrinsic->IsMethodFirstInput());
+            explicitArgs -= (intrinsic->IsMethodFirstInput() ? 1 : 0);
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCallStackRange(inst, explicitArgs, pinfo);
         } else {
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCall(inst, pinfo);

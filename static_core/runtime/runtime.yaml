@@ -828,3 +828,132 @@ intrinsics:
     ret: void
     args: [method, ref, u32, ref]
   impl: ark::intrinsics::CompilerAnyStbyname
+
+- name: CompilerAnyLdbyidx
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, f64]
+  impl: ark::intrinsics::CompilerAnyLdbyidx
+
+- name: CompilerAnyStbyidx
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args: [ref, f64, ref]
+  impl: ark::intrinsics::CompilerAnyStbyidx
+
+- name: CompilerAnyLdbyval
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, ref]
+  impl: ark::intrinsics::CompilerAnyLdbyval
+
+- name: CompilerAnyStbyval
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args: [ref, ref, ref]
+  impl: ark::intrinsics::CompilerAnyStbyval
+
+- name: CompilerAnyCall0
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref]
+  impl: ark::intrinsics::CompilerAnyCall0
+
+- name: CompilerAnyCallRange
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, u32]
+    stackrange: true
+  impl: ark::intrinsics::CompilerAnyCallRange
+
+- name: CompilerAnyCallShort
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, ref]
+  impl: ark::intrinsics::CompilerAnyCallShort
+
+- name: CompilerAnyCallThis0
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [method, ref, u32]
+  impl: ark::intrinsics::CompilerAnyCallThis0
+
+- name: CompilerAnyCallThisRange
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [method, ref, u32, u32]
+    stackrange: true
+  impl: ark::intrinsics::CompilerAnyCallThisRange
+
+- name: CompilerAnyCallThisShort
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [method, ref, u32, ref]
+  impl: ark::intrinsics::CompilerAnyCallThisShort
+
+- name: CompilerAnyCallNew0
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref]
+  impl: ark::intrinsics::CompilerAnyCallNew0
+
+- name: CompilerAnyCallNewRange
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, u32]
+    stackrange: true
+  impl: ark::intrinsics::CompilerAnyCallNewRange
+
+- name: CompilerAnyCallNewShort
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: std.core.Object
+    args: [ref, ref]
+  impl: ark::intrinsics::CompilerAnyCallNewShort
+
+- name: CompilerAnyIsinstance
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: u1
+    args: [ref, ref]
+  impl: ark::intrinsics::CompilerAnyIsinstance

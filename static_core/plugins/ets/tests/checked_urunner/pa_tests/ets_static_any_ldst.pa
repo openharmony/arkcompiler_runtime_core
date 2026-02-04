@@ -22,6 +22,12 @@
 #! METHOD       "_GLOBAL::testStbyname"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /Intrinsic.CompilerAnyStbyname/
+#! METHOD       "_GLOBAL::testLdbynameV"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyLdbyname/
+#! METHOD       "_GLOBAL::testStbynameV"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyStbyname/
 
 #! CHECKER      Static Any Ldbyname and Stbyname AOT
 #! RUN_PAOC     options: "--compiler-regex='.*test.*byname.*'"
@@ -29,6 +35,12 @@
 #! PASS_AFTER   "IrBuilder"
 #! INST         /Intrinsic.CompilerAnyLdbyname/
 #! METHOD       "_GLOBAL::testStbyname"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyStbyname/
+#! METHOD       "_GLOBAL::testLdbynameV"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyLdbyname/
+#! METHOD       "_GLOBAL::testStbynameV"
 #! PASS_AFTER   "IrBuilder"
 #! INST         /Intrinsic.CompilerAnyStbyname/
 #! RUN          entry: "_GLOBAL::main"
@@ -73,11 +85,38 @@
     return
 }
 
+.function i32 testLdbynameV() {
+    initobj.short R._ctor_:(R)
+    sta.obj v0
+    any.ldbyname.v v2, v0, "a"
+    movi v1, 42
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testStbynameV() {
+    initobj.short R._ctor_:(R)
+    sta.obj v0
+    movi v3, 64
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v3
+    sta.obj v1
+    any.stbyname.v v1, v0, "a"
+    ldobj v0, R.a
+    ucmp v3
+    return
+}
+
 .function i32 main() <static, access.function=public> {
     call.short testLdbyname
     jeqz exit_ld
     call.short testStbyname
     jnez exit_st
+    call.short testLdbynameV
+    jeqz exit_ldv
+    call.short testStbynameV
+    jnez exit_stv
     ldai 0
     return
 exit_ld:
@@ -85,6 +124,12 @@ exit_ld:
     return
 exit_st:
     ldai -2
+    return
+exit_ldv:
+    ldai -3
+    return
+exit_stv:
+    ldai -4
     return
 }
 

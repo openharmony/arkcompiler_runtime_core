@@ -27,9 +27,14 @@ import { testTypeChecksInstance } from 'testDecl';
 import { testChainedCallsInstance } from 'testDecl';
 import { testMultipleGettersInstance } from 'testDecl';
 
+native function compileMethod(str: String) : int;
+
 function testIsInstance(): void {
     let res = fooInstance instanceof Foo;
     arktest.assertEQ(res, true);
+
+    let res2 = fooInstance instanceof Qux;
+    arktest.assertEQ(res2, false);
 }
 
 function testLdByName(): void {
@@ -174,6 +179,15 @@ function testArrayLength(): void {
     arktest.assertEQ(len, 3);
 }
 
+function testArrayLengthSplitBody(x: Array<Number>): int {
+    return x.length
+}
+
+function testArrayLengthSplit(): void {
+    let l = testArrayLengthSplitBody(arrFill)
+    arktest.assertEQ(l, 4);
+}
+
 function testArrayPush(): void {
     let arr = testArrayOpsInstance.arr;
     let newLen = arr.push(99);
@@ -209,6 +223,36 @@ function testMultipleGetters(): void {
 }
 
 function testAll(): void {
+    loadLibrary("jitinterface");
+    compileMethod("test_any_static.ETSGLOBAL::testIsInstance");
+    compileMethod("test_any_static.ETSGLOBAL::testLdByName");
+    compileMethod("test_any_static.ETSGLOBAL::testLdByIdx");
+    compileMethod("test_any_static.ETSGLOBAL::testStByName");
+    compileMethod("test_any_static.ETSGLOBAL::testStByIdx");
+    compileMethod("test_any_static.ETSGLOBAL::testCall0");
+    compileMethod("test_any_static.ETSGLOBAL::testCallShort");
+    compileMethod("test_any_static.ETSGLOBAL::testCallRange");
+    compileMethod("test_any_static.ETSGLOBAL::testCallThis0");
+    compileMethod("test_any_static.ETSGLOBAL::testCallThis1");
+    compileMethod("test_any_static.ETSGLOBAL::testCallThis2");
+    compileMethod("test_any_static.ETSGLOBAL::testCallNew0");
+    compileMethod("test_any_static.ETSGLOBAL::testCallNew1");
+    compileMethod("test_any_static.ETSGLOBAL::testCallNew2");
+    compileMethod("test_any_static.ETSGLOBAL::testCallWithUndefined");
+    compileMethod("test_any_static.ETSGLOBAL::testArray");
+    compileMethod("test_any_static.ETSGLOBAL::testArrayFill");
+    compileMethod("test_any_static.ETSGLOBAL::testBigInt");
+    compileMethod("test_any_static.ETSGLOBAL::testSetter");
+    compileMethod("test_any_static.ETSGLOBAL::testGetter");
+    compileMethod("test_any_static.ETSGLOBAL::testBooleanTypes");
+    compileMethod("test_any_static.ETSGLOBAL::testArrayLength");
+    compileMethod("test_any_static.ETSGLOBAL::testArrayLengthSplitBody");
+    compileMethod("test_any_static.ETSGLOBAL::testArrayLengthSplit");
+    compileMethod("test_any_static.ETSGLOBAL::testArrayPush");
+    compileMethod("test_any_static.ETSGLOBAL::testTypeOf");
+    compileMethod("test_any_static.ETSGLOBAL::testChainedMethodCalls");
+    compileMethod("test_any_static.ETSGLOBAL::testMultipleGetters");
+
     testIsInstance();
     testLdByName();
     testLdByIdx();
@@ -231,6 +275,8 @@ function testAll(): void {
     testGetter();
     testBooleanTypes();
     testArrayLength();
+    testArrayLengthSplitBody([]);
+    testArrayLengthSplit();
     testArrayPush();
     testTypeOf();
     testChainedMethodCalls();
