@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,17 +12,77 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Object for ArkTS
+ * @kit ArkTS
+ */
+
 
 package std.core;
 
+/**
+ * Type used to represent object property keys, typically strings.
+ *
+ * @typedef { string } PropertyKey
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export type PropertyKey = string
 
+/**
+ * Name constant representing array "length" property.
+ *
+ * @constant
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const ARRAY_LENGTH_MEMBER_NAME      = "length"
+/**
+ * Name constant representing function "length" property.
+ *
+ * @constant
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const FUNCTION_LENGTH_MEMBER_NAME   = "length"
+/**
+ * Name constant representing function "name" property.
+ *
+ * @constant
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const FUNCTION_NAME_MEMBER_NAME     = "name"
 
+/**
+ * Name constant representing object "toString" method.
+ *
+ * @constant
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const OBJECT_TO_STRING_MEMBER_NAME: string          = "toString"
+/**
+ * Name constant representing object "toLocaleString" method.
+ *
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
+/**
+ * Name constant representing object "hasOwnProperty" method.
+ *
+ * @constant
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
 
 type EntryType = [PropertyKey, Any]
@@ -30,23 +90,40 @@ type NullishEntryType = EntryType | null | undefined
 
 /**
  * `object` is an alias for type `Object`
+ *
+ * @typedef { Object } object
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export type object = Object;
 
 /**
  * Common ancestor amongst all other classes
+ *
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export class Object {
     /**
-    * Constructs a new blank Object
-    */
+     * Constructs a new blank Object
+     *
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     constructor () {};
 
     /**
-    * Converts this object to a string
-    *
-    * @returns result of the conversion
-    */
+     * Converts this object to a string
+     *
+     * @returns { String } A string representing the object.
+     * @throws { AssertionError } The object is an unexpected fixedarray.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toString(): String {
         const thisObj = this
         if (thisObj instanceof Function) {
@@ -94,10 +171,13 @@ export class Object {
     }
 
     /**
-    * Converts this object to locale-specific string representation
-    *
-    * @returns result of the conversion
-    */
+     * Converts this object to locale-specific string representation
+     *
+     * @returns { string } A locale-specific string representing the object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public toLocaleString(): String {
         return reflect.Value.of(this).toLocaleString()
     }
@@ -105,7 +185,10 @@ export class Object {
     /**
     * Returns a hash code (integer representation) for this instance
     *
-    * @returns representation of this instance
+    * @returns { int } The hash code value of this instance.
+    * @syscap SystemCapability.Utils.Lang
+    * @FaAndStageModel
+    * @since 24
     */
     public final $_hashCode(): int {
         return Runtime.getHashCode(this);
@@ -130,6 +213,12 @@ export class Object {
         return keys
     }
 
+    /**
+     * Generates a string key array starting from 0 and incrementing based on the given length.
+     *
+     * @param { Number } length Length of the array.
+     * @returns { string[] } Generated string key array.
+     */
     private static generateKeyArray(length: Number): string[] {
         const len = length.toInt();
         if (len == 0) {
@@ -521,12 +610,15 @@ export class Object {
     }
 
     /**
-    * Transforms key-value pairs into a Record.
-    *
-    * @param entries an Iterable object that contains key-value pairs
-    *
-    * @returns new Record whose properties are given by the elements of the Iterable
-    */
+     * Transforms key-value pairs into a Record.
+     *
+     * @static
+     * @param { Iterable<[PropertyKey, T]> } entries an Iterable object that contains key-value pairs
+     * @returns { Record<PropertyKey, T> }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static fromEntries<T = Any>(entries: Iterable<[PropertyKey, T]>): Record<PropertyKey, T> {
         const result = new Record<PropertyKey, T>()
 

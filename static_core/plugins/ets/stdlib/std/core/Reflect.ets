@@ -12,20 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Reflect for ArkTS
+ * @kit ArkTS
+ */
+
 
 package std.core
 
 native function isLiteralInitializedInterfaceImpl(target: Object): boolean
 
+/**
+ * Core namespace for reflection operations, providing access to metadata such as classes, interfaces,
+ * methods, and properties at runtime.
+ * 
+ * @namespace reflect
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export namespace reflect {
 
 /**
-* Determines whether an object is an interface initialized with a literal
+* Checks if the given object is an interface initialized with a literal.
 *
-* @param target an object
-*
-* @returns a boolean indicating whether or not the target is an interface
-*          initialized with a literal
+* @param { Object } target The object to check.
+* @returns { boolean } Returns true if `target` is an interface initialized with a literal; otherwise returns false.
+* @syscap SystemCapability.Utils.Lang
+* @FaAndStageModel
+* @since 24
 */
 export function isLiteralInitializedInterface(target: Object): boolean {
     return isLiteralInitializedInterfaceImpl(target)

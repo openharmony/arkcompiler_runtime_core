@@ -24,7 +24,7 @@ package escompat;
  * Represents an evaluation error
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class EvalError extends Error {
     /**
@@ -33,7 +33,7 @@ export class EvalError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("EvalError", message, options)
@@ -47,7 +47,7 @@ export class EvalError extends Error {
      * @returns { EvalError } - Newly created EvalError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): EvalError {
         return new EvalError(message, options)
@@ -58,7 +58,7 @@ export class EvalError extends Error {
  * Represents an error that occurs when a numeric types conversion is performed on an index expression, and the fractional part differs from 0.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class NonIntegralIndexError extends Error {
     /**
@@ -67,7 +67,7 @@ export class NonIntegralIndexError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("NonIntegralIndexError", message, options)
@@ -81,7 +81,7 @@ export class NonIntegralIndexError extends Error {
      * @returns { NonIntegralIndexError } - Newly created NonIntegralIndexError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): NonIntegralIndexError {
         return new NonIntegralIndexError(message, options)
@@ -92,7 +92,7 @@ export class NonIntegralIndexError extends Error {
  * Represents an error that occurs when an operation could not be performed, typically (but not exclusively) when a value is not of the expected type
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class TypeError extends Error {
     /**
@@ -101,7 +101,7 @@ export class TypeError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("TypeError", message, options)
@@ -115,7 +115,7 @@ export class TypeError extends Error {
      * @returns { TypeError } - Newly created TypeError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): TypeError {
         return new TypeError(message, options)
@@ -126,7 +126,7 @@ export class TypeError extends Error {
  * Represents an error that occurs when a variable that doesn't exist (or hasn't yet been initialized) in the current scope is referenced
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class ReferenceError extends Error {
     /**
@@ -135,7 +135,7 @@ export class ReferenceError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ReferenceError", message, options)
@@ -149,7 +149,7 @@ export class ReferenceError extends Error {
      * @returns { ReferenceError } - Newly created ReferenceError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
         return new ReferenceError(message, options)
@@ -160,7 +160,7 @@ export class ReferenceError extends Error {
  * Represents an error that occurs when a global URI handling function was used in a wrong way
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class URIError extends Error {
     /**
@@ -169,7 +169,7 @@ export class URIError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("URIError", message, options)
@@ -183,7 +183,7 @@ export class URIError extends Error {
      * @returns { URIError } - Newly created URIError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): URIError {
         return new URIError(message, options)
@@ -195,7 +195,7 @@ export class URIError extends Error {
  * need to be wrapped in a single error.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class AggregateError extends Error {
     /**
@@ -203,7 +203,7 @@ export class AggregateError extends Error {
      *
      * @type { Array<Error> }
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     errors: Array<Error>
 
@@ -214,7 +214,7 @@ export class AggregateError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
@@ -228,7 +228,7 @@ export class AggregateError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(errors: Error[], message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options)
@@ -244,7 +244,7 @@ export class AggregateError extends Error {
      * @returns { AggregateError } - Newly created AggregateError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
@@ -259,7 +259,7 @@ export class AggregateError extends Error {
      * @returns { AggregateError } - Newly created AggregateError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
@@ -271,7 +271,7 @@ export class AggregateError extends Error {
  * Represents an error that occurs when an input string contains invalid or incorrectly formatted data.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class FormatError extends Error {
     /**
@@ -280,7 +280,7 @@ export class FormatError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("FormatError", message, options)
@@ -294,7 +294,7 @@ export class FormatError extends Error {
      * @returns { FormatError } - Newly created FormatError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): FormatError {
         return new FormatError(message, options)
