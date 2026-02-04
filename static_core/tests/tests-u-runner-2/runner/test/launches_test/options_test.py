@@ -149,6 +149,36 @@ class OptionsTest(TestCase):
 
     @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
     @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1"])
+    @patch.dict(os.environ, {
+        'ARKCOMPILER_RUNTIME_CORE_PATH': ".",
+        'ARKCOMPILER_ETS_FRONTEND_PATH': ".",
+        'PANDA_BUILD': ".",
+        'WORK_DIR': f"work-{test_utils.random_suffix()}"
+    }, clear=True)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', lambda: "111111112")
+    def test_expand_last_call(self) -> None:
+        # preparation
+        test_env, test_root, work_dir = self.prepare()
+        # test
+        test = TestStandardFlow(
+            test_env=test_env,
+            test_path=test_root / "test1.ets",
+            params=IOptions({}),
+            test_id="test1.ets"
+        )
+        expected_args = ['--boot-panda-files=stdlib', 'test1.ets', 'test1']
+        for step in test_env.config.workflow.steps:
+            match step.step_kind:
+                case StepKind.RUNTIME:
+                    flags = test.expand_last_call_macros(step)
+                    self.assertListEqual(flags, expected_args)
+
+        # clear up
+        shutil.rmtree(work_dir.root, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', lambda: OptionsTest.data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', lambda: OptionsTest.data_folder)
     @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--is-panda", "False"])
     @patch.dict(os.environ, {
         'ARKCOMPILER_RUNTIME_CORE_PATH': ".",

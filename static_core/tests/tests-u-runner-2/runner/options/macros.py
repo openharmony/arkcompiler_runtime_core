@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #
 
 from os import environ
+from pathlib import Path
 
 from runner.common_exceptions import MacroNotExpanded, ParameterNotFound
 from runner.logger import Log
@@ -28,6 +29,7 @@ _LOGGER = Log.get_logger(__file__)
 
 class Macros:
     __SPACE_SUBSTITUTION = "%20"
+    special_macros = ('test-id', 'test-id-name')
 
     @staticmethod
     def add_steps_2_macro(macro: str) -> str:
@@ -42,6 +44,12 @@ class Macros:
         if macro.find(parameters) >= 0:
             macro = macro.replace(parameters, "")
         return macro.replace("-", "_")
+
+    @staticmethod
+    def process_special_macros(line: str, test_id: str) -> str:
+        result = replace_macro(line, "test-id", test_id)
+        result = replace_macro(result, "test-id-name", Path(test_id).stem)
+        return result
 
     @classmethod
     def expand_macros_in_path(cls, value: str, config: IOptions) -> str | None:
@@ -97,7 +105,7 @@ class Macros:
                 if prop_value is None else prop_value
             if prop_value is None:
                 not_found.append(macro)
-                if macro != 'test-id':
+                if macro not in cls.special_macros:
                     raise ParameterNotFound(
                         f"Cannot expand macro '{macro}' at value '{raw_value}'. "
                         "Check yaml path or provide the value as environment variable")

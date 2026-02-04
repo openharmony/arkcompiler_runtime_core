@@ -224,8 +224,11 @@ steps:
 ```
 The values can contain macros detected by `${}`. The macro's name is yaml path to the wished property.
 
-The special macro `${test-id}` refers to the test file name (or path to the test file if some folder hierarchy is used).
-It will be expanded during the binary executing.
+### Special macros
+In workflow/test-suite configuration files following special macros are supported:
+- `${test-id}` refers to the test file name (or path to the test file if some folder hierarchy is used from the TEST_ROOT).
+- `${test-id-name}` refers to the same test file name, but without all suffixes. 
+All special macros are expanded at last call just before the binary executing.
 
 ## ETS ES checked dependencies
 - `ruby` (installed by default with `$PROJECT/static_core/scripts/install-deps-ubuntu -i=dev`)
