@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,7 +22,7 @@ from runner import common_exceptions
 from runner.extensions.generators.ets_cts.params import Params
 from runner.extensions.generators.ets_cts.template import Template
 from runner.logger import Log
-from runner.utils import write_2_file
+from runner.utils import strip_test_name, write_2_file
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -39,6 +39,14 @@ class Benchmark:
         self.__out_extension = out_extension
         self.__full_name = Path(test_full_name).with_suffix('').name
         self.__ets_templates_path = ets_templates_path
+
+    @property
+    def out_extension(self) -> str:
+        return self.__out_extension
+
+    @out_extension.setter
+    def out_extension(self, value: str) -> None:
+        self.__out_extension = value
 
     @staticmethod
     def get_name_suffix(test_content: str) -> tuple[str | None, str | None]:
@@ -58,13 +66,22 @@ class Benchmark:
 
     def generate(self) -> list[str]:
         _LOGGER.all(f"Generating test: {self.__name}")
-        name_without_ext = self.__input.stem
+        name_without_ext, file_ext = strip_test_name(self.__input)
+        self.out_extension = file_ext
         params = Params(self.__input, name_without_ext).generate()
         template = Template(self.__input, params, self.__ets_templates_path)
+
         _LOGGER.all(f"Starting generate test template: {self.__name}")
         rendered_tests = template.render_template()
         if len(rendered_tests) <= 0:
             raise common_exceptions.TestNotExistException(f"{self.__name}: Incorrect test template")
+
+        tests = self._write_tests_to_file(rendered_tests, name_without_ext, template)
+
+        _LOGGER.all(f"Finish generating test template for: {self.__name}")
+        return tests
+
+    def _write_tests_to_file(self, rendered_tests: list[str], name_without_ext: str, template: Template) -> list[str]:
 
         tests = []
         for i, test in enumerate(rendered_tests):
@@ -74,9 +91,8 @@ class Benchmark:
             name = f"{file_name}_{test_suffix}" if len(rendered_tests) > 1 else file_name
             full_name = f"{self.__full_name}_{test_suffix}" if len(rendered_tests) > 1 else self.__full_name
             test_content = template.generate_test(test, full_name)
-            file_path = self.__output / f"{name}{self.__out_extension}"
+            file_path = self.__output / f"{name}{self.out_extension}"
             write_2_file(file_path=file_path, content=test_content, disallow_overwrite=True)
             tests.append(str(file_path))
 
-        _LOGGER.all(f"Finish generating test template for: {self.__name}")
         return tests

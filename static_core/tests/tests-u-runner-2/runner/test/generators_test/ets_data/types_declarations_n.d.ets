@@ -13,22 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
+{% yaml "types_declarations_n.params.yaml" as testData %}
+{% for decl in testData.declarations %}
+
 /*---
-desc: Ambient Constant declarations implementations
-files: ['./constant_declarations_n_{{loop.index0}}.ets']
-tags: [negative, compile-only]
-expected_out: {{c.expected}}
+desc: Ambient Constant declarations
+tags: [compile-only, not-a-test]
 ---*/
 
-import { {{c.decl}} } from './constant_declarations_n_{{loop.index0}}.d'
-
-function usage() {
-  {{c.use|indent}}
-}
-
-function main() {
-  usage()
-}
+export declare {{ decl}}
 
 {% endfor %}

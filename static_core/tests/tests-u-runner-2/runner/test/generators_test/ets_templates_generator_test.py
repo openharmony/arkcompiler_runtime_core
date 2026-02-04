@@ -38,6 +38,10 @@ class EtsGeneratorTest(TestCase):
         self.config = Config(self.args)
 
     def generate_tests(self, test_source_path: Path, test_gen_path: Path) -> list[str]:
+        '''
+        Generate tests from source path to target path with ets template generator
+        return: sorted list of generated tests
+        '''
         ets_test_generator = EtsTemplatesGenerator(test_source_path, test_gen_path, self.config)
         ets_test_generator.generate()
         generated_tests = sorted(test.name for test in test_gen_path.rglob("*") if test.is_file())
@@ -89,8 +93,11 @@ class EtsGeneratorTest(TestCase):
                                'types_example.ets',
                                'simple_exp_test.ets',
                                'simple_exp_test.ets.expected',
-                               'simple_dep.ets']
-        self.assertEqual(sorted(expected_test_names), sorted(generated_tests))
+                               'simple_dep.ets',
+                               'types_declarations_n_0.d.ets',
+                               'types_declarations_n_1.d.ets'
+                               ]
+        self.assertEqual(sorted(expected_test_names), generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -113,7 +120,7 @@ class EtsGeneratorTest(TestCase):
         expected_test_names = ['different_file_name_a.ets',
                                'different_file_name_b.ets',
                                'different_file_name_c.ets']
-        self.assertEqual(expected_test_names, generated_tests)
+        self.assertEqual(sorted(expected_test_names), generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -139,8 +146,11 @@ class EtsGeneratorTest(TestCase):
         generated_tests = self.generate_tests(test_source_path, test_gen_path)
         self.assertTrue(test_gen_path.exists())
 
-        expected_tests = ['simple_test.ets']
-        self.assertEqual(expected_tests, generated_tests)
+        expected_tests = ['simple_test.ets',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets'
+                          ]
+        self.assertEqual(sorted(expected_tests), generated_tests)
 
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
@@ -169,7 +179,10 @@ class EtsGeneratorTest(TestCase):
 
         expected_tests = ['simple_exp_test.ets',
                           'simple_dep.ets',
-                          'simple_exp_test.ets.expected']
+                          'simple_exp_test.ets.expected',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets'
+                          ]
         self.assertEqual(sorted(expected_tests), generated_tests)
 
         work_dir = Path(os.environ["WORK_DIR"])
@@ -199,7 +212,9 @@ class EtsGeneratorTest(TestCase):
         expected_tests = ['simple_exp_test.ets',
                           'simple_dep.ets',
                           'simple_exp_test.ets.expected',
-                          'simple_test.ets']
+                          'simple_test.ets',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets']
         self.assertEqual(sorted(expected_tests), generated_tests)
 
         work_dir = Path(os.environ["WORK_DIR"])
@@ -228,8 +243,11 @@ class EtsGeneratorTest(TestCase):
 
         expected_tests = ['types_declaration_0.ets',
                             'types_declaration_1.ets',
-                            'types_declaration_2.ets']
-        self.assertEqual(expected_tests, generated_tests)
+                            'types_declaration_2.ets',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets'
+                          ]
+        self.assertEqual(sorted(expected_tests), generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -258,8 +276,10 @@ class EtsGeneratorTest(TestCase):
                           'types_declaration_0.ets',
                           'types_declaration_1.ets',
                           'types_declaration_2.ets',
-                          'types_example.ets']
-        self.assertEqual(expected_tests, generated_tests)
+                          'types_example.ets',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets']
+        self.assertEqual(sorted(expected_tests), generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
@@ -287,8 +307,10 @@ class EtsGeneratorTest(TestCase):
         expected_tests = ['types_declaration_0.ets',
                           'types_declaration_1.ets',
                           'types_declaration_2.ets',
+                          'types_declarations_n_0.d.ets',
+                          'types_declarations_n_1.d.ets'
                          ]
-        self.assertEqual(expected_tests, generated_tests)
+        self.assertEqual(sorted(expected_tests), generated_tests)
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
 
