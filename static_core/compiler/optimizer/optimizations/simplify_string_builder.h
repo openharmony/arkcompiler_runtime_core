@@ -81,9 +81,8 @@ private:
     InstIter SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end);
     InstIter SkipToStringBuilderDefaultOrStringArgConstructor(InstIter begin, InstIter end);
     void InsertNewAppendIntrinsic(ConcatenationMatch &match);
-    IntrinsicInst *CreateConcatIntrinsic(const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
-                                         size_t appendCount, DataType::Type type, SaveStateInst *saveState);
     bool MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match);
+    void FixBrokenSaveStates(Inst *source);
     void FixBrokenSaveStates(Inst *source, Inst *target);
     void Check(const ConcatenationMatch &match);
     void InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic,
@@ -228,7 +227,7 @@ private:
                                                  SaveStateInst *saveState);
     Inst *HoistInstructionToPreHeader(BasicBlock *preHeader, Inst *lastInst, Inst *inst, SaveStateInst *saveState);
     void HoistInstructionsToPreHeader(const ConcatenationLoopMatch &match, SaveStateInst *initSaveState);
-    void HoistCheckCastInstructionUsers(Inst *inst, BasicBlock *loopBlock, BasicBlock *postExit);
+    void HoistCheckCastInstructionUsers(Inst *inst, BasicBlock *loopBlock);
     void HoistInstructionsToPostExit(const ConcatenationLoopMatch &match, SaveStateInst *saveState);
 
     void Cleanup(const ConcatenationLoopMatch &match);
@@ -313,6 +312,7 @@ private:
     StringBuilderFirstLastCallsMap stringBuilderFirstLastCalls_;
     RuntimeInterface::FieldPtr sbStringLengthField_ {nullptr};
     ArenaMap<Inst *, Inst *> sbStringLengthCalls_;
+    BasicBlock *postExit_ {nullptr};
 };
 
 }  // namespace ark::compiler

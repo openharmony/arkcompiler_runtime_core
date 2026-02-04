@@ -320,7 +320,7 @@ public:
         return FindMethodByName(std::string(GETTERS_STRING_BUILDER_GET_STRING_LENGTH));
     }
 
-    MethodPtr GetMethodStringBuilderAppendString([[maybe_unused]] ClassPtr klass) const override
+    MethodPtr GetMethodStringBuilderAppendString() const override
     {
         return FindMethodByName(std::string(METHODS_STRING_BUILDER_APPEND),
                                 std::string(SIGNATURES_STRING_RET_STRING_BUILDER));

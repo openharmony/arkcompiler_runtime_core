@@ -16,6 +16,7 @@
 #include <string>
 
 #include "ets_runtime_interface.h"
+#include "intrinsic_string_flat_check.inl"
 #include "optimizer/ir/datatype.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -239,6 +240,11 @@ bool EtsRuntimeInterface::IsMethodStringBuilderGetStringLength([[maybe_unused]] 
     return method == PlatformTypes()->coreStringBuilderStringLength;
 }
 
+bool EtsRuntimeInterface::IsMethodStringBuilderConcatStrings(MethodPtr method) const
+{
+    return method == PlatformTypes()->coreStringBuilderConcatStrings;
+}
+
 bool EtsRuntimeInterface::IsMethodInModuleScope(MethodPtr method) const
 {
     return static_cast<EtsMethod *>(method)->GetClass()->IsModule();
@@ -459,6 +465,171 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayActualLength(C
 {
     ASSERT(IsClassStdCoreArray(klass));
     return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_ACTUAL_LENGTH.data()));
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBuilderAppendString() const
+{
+    return PlatformTypes()->coreStringBuilderAppendString;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBuilderToString() const
+{
+    return PlatformTypes()->coreStringBuilderToString;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBuilderConcatStrings() const
+{
+    return PlatformTypes()->coreStringBuilderConcatStrings;
+}
+
+bool EtsRuntimeInterface::IsClassString(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes()->coreString;
+}
+
+bool EtsRuntimeInterface::IsClassConsole(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass)) == PlatformTypes()->coreConsole;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringLength() const
+{
+    return PlatformTypes()->coreStringLength;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringGetLength() const
+{
+    return PlatformTypes()->coreStringGetLength;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringIsEmpty() const
+{
+    return PlatformTypes()->coreStringIsEmpty;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSubstringInt() const
+{
+    return PlatformTypes()->coreStringSubstringInt;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSubstringIntInt() const
+{
+    return PlatformTypes()->coreStringSubstringIntInt;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSubstr() const
+{
+    return PlatformTypes()->coreStringSubstr;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringConcat() const
+{
+    return PlatformTypes()->coreStringConcat;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringConcatString2() const
+{
+    return PlatformTypes()->coreStringConcatString2;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringConcatString3() const
+{
+    return PlatformTypes()->coreStringConcatString3;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringConcatString4() const
+{
+    return PlatformTypes()->coreStringConcatString4;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringValueOf() const
+{
+    return PlatformTypes()->coreStringValueOf;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringToString() const
+{
+    return PlatformTypes()->coreStringToString;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringCreateHTMLString() const
+{
+    return PlatformTypes()->coreStringCreateHTMLString;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBig() const
+{
+    return PlatformTypes()->coreStringBig;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSmall() const
+{
+    return PlatformTypes()->coreStringSmall;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBlink() const
+{
+    return PlatformTypes()->coreStringBlink;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringBold() const
+{
+    return PlatformTypes()->coreStringBold;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringItalics() const
+{
+    return PlatformTypes()->coreStringItalics;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringStrike() const
+{
+    return PlatformTypes()->coreStringStrike;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSub() const
+{
+    return PlatformTypes()->coreStringSub;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSup() const
+{
+    return PlatformTypes()->coreStringSup;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringFixed() const
+{
+    return PlatformTypes()->coreStringFixed;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringFontColor() const
+{
+    return PlatformTypes()->coreStringFontColor;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringFontSizeInt() const
+{
+    return PlatformTypes()->coreStringFontSizeInt;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringFontSizeString() const
+{
+    return PlatformTypes()->coreStringFontSizeString;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringLink() const
+{
+    return PlatformTypes()->coreStringLink;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringSlice() const
+{
+    return PlatformTypes()->coreStringSlice;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetMethodStringIsCompressed() const
+{
+    return PlatformTypes()->coreStringIsCompressed;
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBuffer(ClassPtr klass) const
@@ -758,6 +929,60 @@ ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPt
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const
 {
     return ark::cross_values::GetEtsCoroutineAniEnvOffset(arch);
+}
+
+bool EtsRuntimeInterface::IsIntrinsicRequireFlattening(IntrinsicId intrinsicId) const
+{
+    return GetStringFlatCheckArgMask(intrinsicId) != 0;
+}
+
+bool EtsRuntimeInterface::IsMethodRequireFlattening(MethodPtr method) const
+{
+    if (IsMethodStatic(method)) {
+        return false;
+    }
+
+    auto klass = PandaRuntimeInterface::GetClass(method);
+    if (IsClassConsole(klass)) {
+        return true;
+    }
+
+    if (!IsClassString(klass)) {
+        return false;
+    }
+
+    static std::set<MethodPtr> stringClassMethodsWithoutFlatteningRequired = {
+        GetMethodStringLength(),
+        GetMethodStringGetLength(),
+        GetMethodStringIsEmpty(),
+        GetMethodStringSubstringInt(),
+        GetMethodStringSubstringIntInt(),
+        GetMethodStringSubstr(),
+        GetMethodStringConcat(),
+        GetMethodStringConcatString2(),
+        GetMethodStringConcatString3(),
+        GetMethodStringConcatString4(),
+        GetMethodStringValueOf(),
+        GetMethodStringToString(),
+        GetMethodStringCreateHTMLString(),
+        GetMethodStringBig(),
+        GetMethodStringSmall(),
+        GetMethodStringBlink(),
+        GetMethodStringBold(),
+        GetMethodStringItalics(),
+        GetMethodStringStrike(),
+        GetMethodStringSub(),
+        GetMethodStringSup(),
+        GetMethodStringFixed(),
+        GetMethodStringFontColor(),
+        GetMethodStringFontSizeInt(),
+        GetMethodStringFontSizeString(),
+        GetMethodStringLink(),
+        GetMethodStringSlice(),
+        GetMethodStringIsCompressed(),
+    };
+
+    return stringClassMethodsWithoutFlatteningRequired.count(method) == 0;
 }
 
 }  // namespace ark::ets

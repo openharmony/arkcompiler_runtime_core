@@ -37,6 +37,7 @@ bool IsMethodStringBuilderConstructorWithStringArg(const Inst *inst);
 bool IsMethodStringBuilderConstructorWithCharArrayArg(const Inst *inst);
 bool IsStringBuilderToString(const Inst *inst);
 bool IsMethodStringBuilderDefaultConstructor(const Inst *inst);
+bool IsMethodStringBuilderConcatStrings(const Inst *inst);
 bool IsMethodStringGetLength(const Inst *inst);
 bool IsStringLength(const Inst *inst);
 bool IsStringLengthAccessor(const Inst *inst);
@@ -114,6 +115,16 @@ bool ManuallyInlineStringBuilderConstructor(Graph *graph, SaveStateBridgesBuilde
                                             uint64_t appendCallsCount = SB_INITIAL_BUFFER_SIZE);
 Inst *LoadStringBuilderLengthField(Graph *graph, Inst *instance, RuntimeInterface::ClassPtr klass, Inst *getLengthCall);
 
+RuntimeInterface::IdType GetStringBuilderClassId(Graph *graph);
+Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStateInst *saveState);
+IntrinsicInst *CreateStringBuilderAppendStringIntrinsic(Graph *graph, Inst *instance, Inst *arg,
+                                                        SaveStateInst *saveState);
+IntrinsicInst *CreateStringBuilderToStringIntrinsic(Graph *graph, Inst *instance, SaveStateInst *saveState);
+CallInst *CreateStringBuilderDefaultConstructorCall(Graph *graph, Inst *instance, SaveStateInst *saveState);
+IntrinsicInst *CreateConcatIntrinsic(Graph *graph, const std::array<Inst *, 4U> &appendIntrinsics, size_t appendCount,
+                                     DataType::Type type, SaveStateInst *saveState);
+
+bool IsMethodInInliningBlackList(RuntimeInterface *runtime, Inst *inst);
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_STRING_BUILDER_UTILS_H

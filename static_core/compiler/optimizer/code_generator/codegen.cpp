@@ -971,6 +971,8 @@ uint32_t Codegen::GetAOTBinaryFileSnapshotIndexForInst([[maybe_unused]] const In
         // Specifically, on setting type guard after inlining, inst's method pointer is not equal to method of SaveState
         // as it points to real inlined method, not virtual.
         method = inst->CastToLoadClass()->GetMethod();
+    } else if (inst->GetOpcode() == Opcode::LoadAndInitClass) {
+        method = inst->CastToLoadAndInitClass()->GetMethod();
     } else {
         // GetCallMethod() of CallInst (call target) and ResolveVirtualInst (interface method) may point to different
         // files than the inlined code's actual source.

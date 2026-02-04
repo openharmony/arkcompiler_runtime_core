@@ -36,13 +36,6 @@ OptimizeStringConcat::OptimizeStringConcat(Graph *graph)
 {
 }
 
-RuntimeInterface::IdType GetStringBuilderClassId(Graph *graph)
-{
-    auto runtime = graph->GetRuntime();
-    auto klass = runtime->GetStringBuilderClass();
-    return klass == nullptr ? 0 : runtime->GetClassIdWithinFile(graph->GetMethod(), klass);
-}
-
 bool OptimizeStringConcat::RunImpl()
 {
     bool isApplied = false;
@@ -81,66 +74,6 @@ void OptimizeStringConcat::InvalidateAnalyses()
 {
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
-}
-
-Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStateInst *saveState)
-{
-    auto runtime = graph->GetRuntime();
-    auto method = graph->GetMethod();
-
-    auto classId = GetStringBuilderClassId(graph);
-    ASSERT(classId != 0);
-    auto loadClass =
-        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, CopySaveState(graph, saveState),
-                                          TypeIdMixin {classId, method}, runtime->ResolveType(method, classId));
-    auto newObject = graph->CreateInstNewObject(DataType::REFERENCE, pc, loadClass, CopySaveState(graph, saveState),
-                                                TypeIdMixin {classId, method});
-
-    return newObject;
-}
-
-IntrinsicInst *CreateStringBuilderAppendStringIntrinsic(Graph *graph, Inst *instance, Inst *arg,
-                                                        SaveStateInst *saveState)
-{
-    auto appendIntrinsic = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(1));
-    ASSERT(appendIntrinsic->RequireState());
-
-    appendIntrinsic->SetType(DataType::REFERENCE);
-    auto saveStateClone = CopySaveState(graph, saveState);
-    appendIntrinsic->SetInputs(
-        graph->GetAllocator(),
-        {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveStateClone, saveStateClone->GetType()}});
-
-    return appendIntrinsic;
-}
-
-IntrinsicInst *CreateStringBuilderToStringIntrinsic(Graph *graph, Inst *instance, SaveStateInst *saveState)
-{
-    auto toStringCall = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderToStringIntrinsicId());
-    ASSERT(toStringCall->RequireState());
-
-    toStringCall->SetType(DataType::REFERENCE);
-    auto saveStateClone = CopySaveState(graph, saveState);
-    toStringCall->SetInputs(graph->GetAllocator(),
-                            {{instance, instance->GetType()}, {saveStateClone, saveStateClone->GetType()}});
-
-    return toStringCall;
-}
-
-CallInst *CreateStringBuilderDefaultConstructorCall(Graph *graph, Inst *instance, SaveStateInst *saveState)
-{
-    auto runtime = graph->GetRuntime();
-    auto method = runtime->GetStringBuilderDefaultConstructor();
-    auto methodId = runtime->GetMethodId(method);
-
-    auto ctorCall = graph->CreateInstCallStatic(DataType::VOID, instance->GetPc(), methodId, method);
-    ASSERT(ctorCall->RequireState());
-
-    auto saveStateClone = CopySaveState(graph, saveState);
-    ctorCall->SetInputs(graph->GetAllocator(),
-                        {{instance, instance->GetType()}, {saveStateClone, saveStateClone->GetType()}});
-
-    return ctorCall;
 }
 
 Inst *CreateLoadArray(Graph *graph, Inst *array, Inst *index)

@@ -122,6 +122,21 @@ bool IsMethodStringBuilderDefaultConstructor(const Inst *inst)
     return runtime->IsMethodStringBuilderDefaultConstructor(call->GetCallMethod());
 }
 
+bool IsMethodStringBuilderConcatStrings(const Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::CallStatic) {
+        return false;
+    }
+
+    auto call = inst->CastToCallStatic();
+    if (call->IsInlined()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsMethodStringBuilderConcatStrings(call->GetCallMethod());
+}
+
 static bool IsMethodOrIntrinsicCall(const Inst *inst, const Inst *self)
 {
     const Inst *actualSelf = nullptr;
@@ -477,7 +492,7 @@ SaveStateInst *FindFirstSaveState(BasicBlock *block)
 SaveStateInst *FindFirstSaveStateInDominators(BasicBlock *block)
 {
     auto *dominator = block->GetDominator();
-    while (dominator != nullptr && dominator->IsDominate(block)) {
+    while (dominator != nullptr) {
         for (auto inst : dominator->Insts()) {
             if (inst->GetOpcode() == Opcode::SaveState) {
                 return inst->CastToSaveState();
@@ -712,6 +727,13 @@ StringBuilderConstructorSignature GetStringBuilderConstructorSignature(Inst *ins
     UNREACHABLE();
 }
 
+RuntimeInterface::IdType GetStringBuilderClassId(Graph *graph)
+{
+    auto runtime = graph->GetRuntime();
+    auto klass = runtime->GetStringBuilderClass();
+    return klass == nullptr ? 0 : runtime->GetClassIdWithinFile(graph->GetMethod(), klass);
+}
+
 Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t size)
 {
     auto runtime = graph->GetRuntime();
@@ -908,4 +930,107 @@ Inst *LoadStringBuilderLengthField(Graph *graph, Inst *instance, RuntimeInterfac
     return loadObject;
 }
 
+Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStateInst *saveState)
+{
+    auto runtime = graph->GetRuntime();
+    auto method = graph->GetMethod();
+
+    auto classId = GetStringBuilderClassId(graph);
+    ASSERT(classId != 0);
+    auto loadClass =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, CopySaveState(graph, saveState),
+                                          TypeIdMixin {classId, method}, runtime->ResolveType(method, classId));
+    auto newObject = graph->CreateInstNewObject(DataType::REFERENCE, pc, loadClass, CopySaveState(graph, saveState),
+                                                TypeIdMixin {classId, method});
+
+    return newObject;
+}
+
+IntrinsicInst *CreateStringBuilderAppendStringIntrinsic(Graph *graph, Inst *instance, Inst *arg,
+                                                        SaveStateInst *saveState)
+{
+    auto appendIntrinsic = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(1));
+    ASSERT(appendIntrinsic->RequireState());
+
+    appendIntrinsic->SetPc(instance->GetPc());
+    appendIntrinsic->SetType(DataType::REFERENCE);
+    auto saveStateClone = CopySaveState(graph, saveState);
+    appendIntrinsic->SetInputs(
+        graph->GetAllocator(),
+        {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveStateClone, saveStateClone->GetType()}});
+
+    return appendIntrinsic;
+}
+
+IntrinsicInst *CreateStringBuilderToStringIntrinsic(Graph *graph, Inst *instance, SaveStateInst *saveState)
+{
+    auto toStringCall = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderToStringIntrinsicId());
+    ASSERT(toStringCall->RequireState());
+
+    toStringCall->SetPc(instance->GetPc());
+    toStringCall->SetType(DataType::REFERENCE);
+    auto saveStateClone = CopySaveState(graph, saveState);
+    toStringCall->SetInputs(graph->GetAllocator(),
+                            {{instance, instance->GetType()}, {saveStateClone, saveStateClone->GetType()}});
+
+    return toStringCall;
+}
+
+CallInst *CreateStringBuilderDefaultConstructorCall(Graph *graph, Inst *instance, SaveStateInst *saveState)
+{
+    auto runtime = graph->GetRuntime();
+    auto method = runtime->GetStringBuilderDefaultConstructor();
+    auto methodId = runtime->GetMethodId(method);
+
+    auto ctorCall = graph->CreateInstCallStatic(DataType::VOID, instance->GetPc(), methodId, method);
+    ASSERT(ctorCall->RequireState());
+
+    auto saveStateClone = CopySaveState(graph, saveState);
+    ctorCall->SetInputs(graph->GetAllocator(),
+                        {{instance, instance->GetType()}, {saveStateClone, saveStateClone->GetType()}});
+
+    return ctorCall;
+}
+
+IntrinsicInst *CreateConcatIntrinsic(Graph *graph, const std::array<Inst *, 4U> &args, size_t appendCount,
+                                     DataType::Type type, SaveStateInst *saveState)
+{
+    auto concatIntrinsic =
+        graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringConcatStringsIntrinsicId(appendCount));
+    ASSERT(concatIntrinsic->RequireState());
+
+    concatIntrinsic->SetType(type);
+    // Allocate input types (+1 input for save state)
+    concatIntrinsic->AllocateInputTypes(graph->GetAllocator(), appendCount + 1);
+
+    for (size_t index = 0; index < appendCount; ++index) {
+        auto arg = args[index];
+        concatIntrinsic->AppendInput(arg);
+        concatIntrinsic->AddInputType(arg->GetType());
+    }
+
+    auto saveStateClone = CopySaveState(graph, saveState);
+    concatIntrinsic->AppendInput(saveStateClone);
+    concatIntrinsic->AddInputType(saveStateClone->GetType());
+
+    concatIntrinsic->SetPc(saveState->GetPc());
+
+    return concatIntrinsic;
+}
+
+bool IsMethodInInliningBlackList(RuntimeInterface *runtime, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::CallStatic);
+    CallInst *callInst = inst->CastToCallStatic();
+
+    auto &skipList = ark::compiler::g_options.GetCompilerInliningBlacklist();
+    if (!skipList.empty()) {
+        std::string methodName = runtime->GetMethodFullName(callInst->GetCallMethod());
+        if (std::find(skipList.begin(), skipList.end(), methodName) != skipList.end()) {
+            return true;
+        }
+    }
+
+    return false;
+}
 }  // namespace ark::compiler

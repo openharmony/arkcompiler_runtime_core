@@ -97,10 +97,10 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",22
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",21
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",2
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",3
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
@@ -290,10 +290,10 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    "StringBuilder::<ctor>",1
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",22
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",21
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",2
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",3
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 //!
