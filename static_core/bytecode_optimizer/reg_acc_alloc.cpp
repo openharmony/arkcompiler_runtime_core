@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -326,6 +326,19 @@ void RegAccAlloc::MarkPhiInstructions() const
     }
 }
 
+void RegAccAlloc::UnmarkAccPhi(compiler::Inst *inst)
+{
+    ASSERT(inst->IsMarked(accMarker_));
+    inst->ResetMarker(accMarker_);
+    ASSERT(inst->IsPhi());
+    for (auto &user : inst->GetUsers()) {
+        compiler::Inst *uinst = user.GetInst();
+        if (uinst->IsPhi()) {
+            UnmarkAccPhi(uinst);
+        }
+    }
+}
+
 void RegAccAlloc::ClearAccForInstAndUsers(compiler::Inst *inst)
 {
     inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
@@ -333,6 +346,9 @@ void RegAccAlloc::ClearAccForInstAndUsers(compiler::Inst *inst)
         compiler::Inst *uinst = user.GetInst();
         if (uinst->IsSaveState()) {
             continue;
+        }
+        if (uinst->IsPhi() && IsPhiOptimizable(uinst)) {
+            UnmarkAccPhi(uinst);
         }
         SetNeedLda(uinst, true);
     }
