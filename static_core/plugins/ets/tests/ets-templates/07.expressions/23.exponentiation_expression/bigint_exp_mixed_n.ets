@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
-desc: Test power operator ** with BigInt - {{c.description}}
+desc: Bigint exponentiation with numeric types should fail - compile-time error
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE295768: The operands of exponentiation must both be numeric type or bigint type."
 ---*/
 
-function main() {
-    let a: bigint = new bigint({{c.val1}});
-    let b: bigint = new bigint({{c.val2}});
-    let result = a ** b;
-
-    arktest.assertTrue(result instanceof bigint);
-    arktest.assertEQ(result, new bigint({{c.expected}}));
+function main(): void {
+  let a: bigint = 2n;
+  let c: int = 2;
+  let x = a ** c;
 }
-{%- endfor %}

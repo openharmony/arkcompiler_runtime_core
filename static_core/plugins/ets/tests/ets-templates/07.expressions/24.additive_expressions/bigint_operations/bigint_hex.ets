@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
 /*---
-desc: Test power operator ** with BigInt - {{c.description}}
+desc: Bigint hex literal addition and subtraction
 ---*/
 
-function main() {
-    let a: bigint = new bigint({{c.val1}});
-    let b: bigint = new bigint({{c.val2}});
-    let result = a ** b;
+function main(): int {
+  let suite = new arktest.ArkTestsuite("BigIntHex");
 
-    arktest.assertTrue(result instanceof bigint);
-    arktest.assertEQ(result, new bigint({{c.expected}}));
+  suite.addTest("Hex bigint addition", () => {
+    arktest.assertEQ(0xFFn + 0x1n, 0x100n);
+  });
+
+  suite.addTest("Hex bigint with underscore subtraction", () => {
+    arktest.assertEQ(0xBAD_3n - 0x1n, 0xBAD_2n);
+  });
+
+  return suite.run();
 }
-{%- endfor %}
