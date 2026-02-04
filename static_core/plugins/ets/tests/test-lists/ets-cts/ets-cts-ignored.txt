@@ -32,6 +32,7 @@
 03.types/11.types_void_or_undefined/void/generic_void_n_3.ets
 
 #31484
+02.lexical_elements/09.literals/10.undefined_literal/undefined_literal_void.ets
 03.types/11.types_void_or_undefined/void/void_subtyping_basic_0.ets
 03.types/11.types_void_or_undefined/void/void_arrow_functions_0.ets
 03.types/11.types_void_or_undefined/void/void_arrow_functions_1.ets
