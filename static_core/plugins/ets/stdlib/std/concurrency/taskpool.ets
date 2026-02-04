@@ -531,9 +531,7 @@ export namespace taskpool {
                         this.state.store(InternalState.FINISHED.valueOf());
                     }
                     try {
-                        if (this.state.load() == State.CANCELED.valueOf()) {
-                            this.throwCancelTaskError();
-                        } else if (executionSucceeded) {
+                        if (executionSucceeded) {
                             if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
                                 let group: TaskGroup | undefined = allGroups.get(this.groupId);
                                 if (group !== undefined) {
@@ -562,6 +560,12 @@ export namespace taskpool {
                 }
             }
             return result;
+        }
+
+        checkCancellation(): void {
+            if (this.state.load() == State.CANCELED.valueOf()) {
+                this.throwCancelTaskError();
+            }
         }
 
         /// @throws Error for the canceled task
@@ -824,6 +828,18 @@ export namespace taskpool {
                 result = InternalTask.of(currentTask!).state.load() == (State.CANCELED.valueOf());
             }
             return result;
+        }
+
+        /**
+         * Check whether the current task has been canceled
+         *
+         * @throws Error if the current task has been canceled
+         */
+        static checkCancellation(): void {
+            let task = getCurrentTask();
+            if (task !== undefined) {
+                InternalTask.of(task!).checkCancellation();
+            }
         }
 
         /**
@@ -1541,11 +1557,7 @@ export namespace taskpool {
      */
     export function execute(func: Function, ...args: FixedArray<Any>): Promise<Any> {
         initWorkerPoolSync();
-        if (isTaskPoolUseLaunch) {
-            return launchPromise(func, ...args);
-        }
         let task = new Task(func.name, func, ...args);
-        
         return execute(task);
     }
 
@@ -1766,6 +1778,21 @@ export namespace taskpool {
     /**
      * Cancel a concurrent task
      *
+     * @param taskId The id of task for canceling
+     * @throws Error if the task does not exist when it is not executed or has been canceled
+     */
+    export function cancel(taskId: int): void {
+        let task = getTask(taskId);
+        if (task === undefined) {
+            let err = new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
+            throw err;
+        }
+        cancel(task!);
+    }
+
+    /**
+     * Cancel a concurrent task
+     *
      * @param task The task for canceling
      * @throws Error if the task does not exist when it is canceled
      * @see Task.isCancel
@@ -1911,29 +1938,6 @@ export namespace taskpool {
                 threadInfo.taskIds = taskIds;
                 threadInfos.push(threadInfo);
             })
-        } else {
-            workerToTasks.forEach((tasks: Set<Task>, workerId: int) => {
-                const threadInfo: ThreadInfo = new ThreadInfo();
-                threadInfo.tid = workerId;
-                const tasksCount: int = tasks.size.toInt();
-                if (tasksCount == 0) {
-                    threadInfos.push(threadInfo);
-                    return;
-                }
-                const taskIds: int[] = new int[tasksCount];
-                let currentIndex: int = 0;
-                tasks.forEach((task: Task) => {
-                    taskIds[currentIndex] = task.taskId;
-                    currentIndex++;
-                    // priority of running tasks can be regard as the priority of current thread's priority
-                    // current only when task has been executed the worker can execute other task
-                    if (runningTasks.has(task) && threadInfo.priority === undefined) {
-                        threadInfo.priority = InternalTask.of(task).priority;
-                    }
-                });
-                threadInfo.taskIds = taskIds;
-                threadInfos.push(threadInfo);
-            });
         }
         ConcurrencyHelpers.mutexUnlock(mutex);
         const Info: TaskPoolInfo = new TaskPoolInfo();
@@ -1993,33 +1997,12 @@ export namespace taskpool {
         return false;
     }
 
-    function pushToRunning(task: Task): void {
-        const runningInstancesOfTheTask: int | undefined = runningTasks.get(task);
-        runningTasks.set(task, runningInstancesOfTheTask == undefined ? 1 : runningInstancesOfTheTask + 1);
-        if (InternalTask.of(task).groupId != 0) {
-            const runningTasksOfTheGroup: int | undefined = runningGroupTasks.get(InternalTask.of(task).groupId);
-            runningGroupTasks.set(InternalTask.of(task).groupId, runningTasksOfTheGroup == undefined ? 1 : runningTasksOfTheGroup + 1);
-        }
-        // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
-        const currentCoroId: int = CoroutineExtras.getCoroutineId()
-        InternalTask.of(task).coroId = currentCoroId;
-        taskIdToTask.set(task.taskId, task);
-        const currentWorkerId: int = CoroutineExtras.getWorkerId();
-        InternalTask.of(task).workerId = currentWorkerId;
-        const workerTasks: Set<Task> = workerToTasks.get(currentWorkerId, /* default */ new Set<Task>());
-        workerTasks.add(task);
-        workerToTasks.set(currentWorkerId, workerTasks);
-    }
-
-    function getCurrentTaskUnsafe(): Task | undefined {
-        let taskId = getTaskId();
-        let currTask = taskIdToTask.get(taskId);
-        return currTask;
-    }
-
-    function getCurrentTask(): Task | undefined {
+    /**
+     * Get task by taskId and taskName(if have).
+     * @returns The task
+     */
+    function getTask(taskId: int, taskName?: string): Task | undefined {
         let task: Task | undefined = undefined;
-        let taskId = getTaskId();
         let workerId = CoroutineExtras.getWorkerId();
         let currentWorker = filter<GlobalQueueWorker>(workers, (worker: GlobalQueueWorker) => worker.workerId == workerId);
         if (currentWorker.length != 0) {
@@ -2029,28 +2012,24 @@ export namespace taskpool {
                 return true;
             })
         }
+        if (taskName !== undefined && task !== undefined && task!.name != taskName) {
+            return undefined;
+        }
         return task;
+    }
+
+    function getCurrentTask(): Task | undefined {
+        let task: Task | undefined = undefined;
+        let taskId = getTaskId();
+        return getTask(taskId);
     }
 
     function filter<T>(s: Set<T>, cb: (t: T, idx: int, arr: Array<T>) => boolean): Array<T> {
         return Array.from(s).filter(cb);
     }
 
-    function isCancel(): boolean {
-        ConcurrencyHelpers.mutexLock(mutex);
-        const item: Task | undefined = getCurrentTaskUnsafe();
-        if (item === undefined) {
-            ConcurrencyHelpers.mutexUnlock(mutex);
-            // No task on current coroutine
-            return false;
-        }
-        const result: boolean = isCanceled(item!);
-        ConcurrencyHelpers.mutexUnlock(mutex);
-        return result;
-    }
-
     function isCanceled(task: Task): boolean {
-        return pendingDelayedCanceled.has(task) || tasksToBeCanceled.has(task) || groupsToBeCanceled.has(InternalTask.of(task).groupId);
+        return InternalTask.of(task).state.load() == InternalState.CANCELED.valueOf();
     }
 
     function tryCancelDependentTasks(task: Task): void {
@@ -2529,10 +2508,6 @@ export namespace taskpool {
     const waitingGroupTasks: Map<int, int> = new Map<int, int>();
     const runningGroupTasks: Map<int, int> = new Map<int, int>();
     const groupsToBeCanceled: Set<int> = new Set<int>();
-    // value is executing task on the associated taskId
-    const taskIdToTask: Map<int, Task> = new Map<int, Task>();
-    // value is set of executing tasks on this worker
-    const workerToTasks: Map<WorkerId, Set<Task>> = new Map<WorkerId, Set<Task>>();
     // Count of pending tasks per worker
     const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 

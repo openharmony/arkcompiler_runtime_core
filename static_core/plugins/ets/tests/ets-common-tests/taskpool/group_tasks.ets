@@ -233,6 +233,7 @@ function cancelNonStartedGroupTest() {
 
 function waitWaiterSignal(event : Event) {
     event.wait();
+    taskpool.Task.checkCancellation();
 }
 
 function cancelExecutingGroupTest() {
