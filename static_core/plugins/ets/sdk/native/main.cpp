@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,7 +295,9 @@ static ani_status BindXmlPullParser(ani_env *env)
     std::array methods = {
         ani_native_function {"bindNative", "C{std.core.String}:l", reinterpret_cast<void *>(XmlPullParser::BindNative)},
         ani_native_function {"releaseNative", "l:z", reinterpret_cast<void *>(XmlPullParser::ReleaseNative)},
-        ani_native_function {"parseXmlInner", "lzzC{std.core.Function2}C{std.core.Function2}C{std.core.Function2}:z",
+        ani_native_function {"parseXmlInner",
+                             "lzzC{std.core.Function2}C{std.core.Function2}C{std.core.Function2}"
+                             "C{std.core.Function3}:z",
                              reinterpret_cast<void *>(XmlPullParser::ParseXml)},
         ani_native_function {"parserErrorInfo", "l:C{std.core.String}",
                              reinterpret_cast<void *>(XmlPullParser::GetParseError)},

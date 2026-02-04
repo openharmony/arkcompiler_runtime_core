@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,7 +161,7 @@ XmlPullParser::~XmlPullParser() {}
 // CC-OFFNXT(G.FUN.01-CPP) options of parse
 ani_boolean XmlPullParser::ParseXml(ani_env *env, [[maybe_unused]] ani_class self, ani_long pointer,
                                     ani_boolean ignoreNS, ani_boolean supportDCT, ani_fn_object attrValCb,
-                                    ani_fn_object tagValCb, ani_fn_object tknCalCb)
+                                    ani_fn_object tagValCb, ani_fn_object tknCalCb, ani_fn_object attrTagValCb)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     CHECK_NON_NULL_PARSER_AND_RETURN(pointer, false);
@@ -171,6 +171,7 @@ ani_boolean XmlPullParser::ParseXml(ani_env *env, [[maybe_unused]] ani_class sel
     that->attrFunc_ = attrValCb;
     that->tagFunc_ = tagValCb;
     that->tokenFunc_ = tknCalCb;
+    that->attrTagFunc_ = attrTagValCb;
     that->Parse(env);
     return static_cast<ani_boolean>(that->xmlPullParserError_.empty());
 }
@@ -312,9 +313,34 @@ bool XmlPullParser::HandleAttrFunc(ani_env *env)
     if (IsNullishValue(env, static_cast<ani_ref>(attrFunc_)) || attrCount_ == 0U) {
         return true;
     }
-    bool bRec = ParseAttr(env);
-    attrCount_ = 0;
-    return bRec;
+    return ParseAttr(env);
+}
+
+bool XmlPullParser::ParseAttrTag(ani_env *env) const
+{
+    for (size_t i = 0; i < attrCount_; ++i) {
+        ani_string tagName = CreateStringUtf8(env, name_);
+        ani_string key = CreateStringUtf8(env, attributes_[i * 4 + 2]);    // 4 and 2: number of args
+        ani_string value = CreateStringUtf8(env, attributes_[i * 4 + 3]);  // 4 and 3: number of args
+        std::vector<ani_ref> argv {tagName, key, value};
+        ani_ref returnVal {};
+        auto status = env->FunctionalObject_Call(attrTagFunc_, argv.size(), argv.data(), &returnVal);
+        if (status != ANI_OK) {
+            return false;
+        }
+        if (!static_cast<bool>(ToBoolean(env, static_cast<ani_object>(returnVal)))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool XmlPullParser::HandleAttrTagFunc(ani_env *env)
+{
+    if (IsNullishValue(env, static_cast<ani_ref>(attrTagFunc_)) || attrCount_ == 0U) {
+        return true;
+    }
+    return ParseAttrTag(env);
 }
 
 void XmlPullParser::Parse(ani_env *env)
@@ -322,7 +348,8 @@ void XmlPullParser::Parse(ani_env *env)
     bool tagFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(tagFunc_));
     bool attrFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(attrFunc_));
     bool tokenFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(tokenFunc_));
-    if (tagFuncIsNull && attrFuncIsNull && tokenFuncIsNull) {
+    bool attrTagFuncIsNull = IsNullishValue(env, static_cast<ani_ref>(attrTagFunc_));
+    if (tagFuncIsNull && attrFuncIsNull && tokenFuncIsNull && attrTagFuncIsNull) {
         return;
     }
     while (type_ != TagEnum::END_DOCUMENT) {
@@ -338,6 +365,10 @@ void XmlPullParser::Parse(ani_env *env)
         if (!attrFuncIsNull && !HandleAttrFunc(env)) {
             break;
         }
+        if (!attrTagFuncIsNull && !HandleAttrTagFunc(env)) {
+            break;
+        }
+        attrCount_ = 0;
     }
 }
 
