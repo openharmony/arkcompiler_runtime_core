@@ -202,7 +202,7 @@ cases:
   - decl: |-
       let v: Array<Object>|undefined
       let w: Array<Object> = ['abc']
-      let e: Object
+      let e: Object = ''
     use: |-
       arktest.expectThrow(
           () => { e = v![0] },
