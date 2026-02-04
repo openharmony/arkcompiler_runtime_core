@@ -154,6 +154,7 @@ export class Autofixer {
       ]
     ],
     [ts.SyntaxKind.MethodDeclaration, [this[FaultID.NoETSKeyword].bind(this)]],
+    [ts.SyntaxKind.GetAccessor, [this[FaultID.NoGetAccessorType].bind(this)]],
     [
       ts.SyntaxKind.ImportDeclaration,
       [
@@ -845,6 +846,32 @@ export class Autofixer {
         nodeType,
         undefined
       );
+    }
+
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-get-accessor-type`
+   */
+  private [FaultID.NoGetAccessorType](node: ts.Node): ts.VisitResult<ts.Node> {
+    /**
+     * For get accessors without type annotation, add 'any' type.
+     * e.g. get name() {} => get name(): any {}
+     */
+
+    if (ts.isGetAccessorDeclaration(node)) {
+      if (node.type === undefined) {
+        const anyType = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
+        return this.context.factory.updateGetAccessorDeclaration(
+          node,
+          node.modifiers,
+          node.name,
+          node.parameters,
+          anyType,
+          node.body
+        );
+      }
     }
 
     return node;

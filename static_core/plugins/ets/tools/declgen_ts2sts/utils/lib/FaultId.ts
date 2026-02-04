@@ -158,6 +158,7 @@ export enum FaultID {
   BooleanLiteral,
   NoImportType,
   NoConstructorInInterface,
+  NoGetAccessorType,
   // this should always be last enum
   LAST_ID
 }
