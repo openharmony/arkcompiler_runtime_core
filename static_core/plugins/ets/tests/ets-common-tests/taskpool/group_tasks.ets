@@ -391,6 +391,48 @@ function addTaskWithDifferentParamsTest() {
     arktest.assertEQ(longTask.isDone(), false);
 }
 
+async function groupTaskFailedNoSuccessCallbackTest() {
+    let taskGroup: taskpool.TaskGroup = new taskpool.TaskGroup();
+    let successCallbackFlag1: boolean = false;
+    let failCallbackFlag1: boolean = false;
+    let successCallbackFlag2: boolean = false;
+    let failCallbackFlag2: boolean = false;
+    let emptyFunc = (): void => {
+        return;
+    }
+    let errorFunc = (): void => {
+        throw new Error('task error');
+    }
+
+    let task1: taskpool.Task = new taskpool.Task(emptyFunc);
+    task1.onExecutionSucceeded(() => {
+        successCallbackFlag1 = true;
+    })
+    task1.onExecutionFailed(() => {
+        failCallbackFlag1 = true;
+    })
+
+    let task2: taskpool.Task = new taskpool.Task(errorFunc);
+    task2.onExecutionSucceeded(() => {
+        successCallbackFlag2 = true;
+    })
+    task2.onExecutionFailed(() => {
+        failCallbackFlag2 = true;
+    })
+
+    taskGroup.addTask(task1);
+    taskGroup.addTask(task2);
+
+    arktest.expectError(() => {
+        await taskpool.execute(taskGroup);
+    }, new Error('task error'));
+
+    arktest.assertFalse(successCallbackFlag1);
+    arktest.assertFalse(failCallbackFlag1);
+    arktest.assertFalse(successCallbackFlag2);
+    arktest.assertTrue(failCallbackFlag2)
+}
+
 function main(): int {
     let taskGroupTestsuite = new arktest.ArkTestsuite('taskpool.TaskGroup');
     taskGroupTestsuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
@@ -410,6 +452,7 @@ function main(): int {
     taskGroupTestsuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     taskGroupTestsuite.addTest('AddDependencyForGroupTaskTest', addDependencyForGroupTaskTest);
     taskGroupTestsuite.addTest('AddTaskWithDifferentParamsTest', addTaskWithDifferentParamsTest);
+    taskGroupTestsuite.addAsyncTest('GroupTaskFailedNoSuccessCallbackTest', groupTaskFailedNoSuccessCallbackTest);
     let res = taskGroupTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
