@@ -39,6 +39,7 @@ parameters:
     checker-is-llvm: "false"
     checker-is-verbose: "true"
     checker-is-release: "false"
+    checker-use-managed-ptr-64-bit: "false"
     work-dir: ${parameters.work-dir}
     # adds --boot-panda-files option to verifier with all dependent and the current abc files
     is-panda: true
@@ -63,3 +64,4 @@ steps:
             - "--test-dir ${parameters.checker-test-dir}"
             - "--is-llvm ${parameters.checker-is-llvm}"
             - "--is-verbose ${parameters.checker-is-verbose}"
+            - "--use-managed-ptr-64-bit ${parameters.checker-use-managed-ptr-64-bit}"

@@ -24,7 +24,7 @@
 //! PASS_AFTER      "AdjustRefs"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "LoadArrayI"
-//! INST_NEXT       is_hybrid_config? ? /AddI.*0x218/ : /AddI.*0x210/
+//! INST_NEXT       is_hybrid_config? || is_managed_ptr_64_bit_config? ? /AddI.*0x218/ : /AddI.*0x210/
 //! INST_NEXT       "Load 8"
 //!
 //! ASM_METHOD      "load_array.ETSGLOBAL::func"
