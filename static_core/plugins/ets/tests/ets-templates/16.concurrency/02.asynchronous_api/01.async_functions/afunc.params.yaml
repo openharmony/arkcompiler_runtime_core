@@ -371,7 +371,7 @@ cases:
                   this.fld = foo<T>(p)
               }
               meth(): Awaited<T> {
-                  return await this.fld
+                  return waitForCompletion(async () => { return await this.fld })
               }
           }
       use: |-
@@ -393,7 +393,7 @@ cases:
                   this.fld = foo<T>(p)
               }
               meth(): Awaited<T> {
-                  return await this.fld
+                  return waitForCompletion(async () => { return await this.fld })
               }
           }
       use: |-

@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -529,8 +529,10 @@ cases:
           }
       use: |-
           let a = new A
-          arktest.assertEQ((a.bar().Await()), a)
-          arktest.assertEQ(a.fld, 3)
+          waitForCompletion(async ()=>{
+              arktest.assertEQ((a.bar().Await()), a)
+              arktest.assertEQ(a.fld, 3)
+          })
 
     - decl: |-
           // calling extension function returning 'this' from coroutine
@@ -550,8 +552,10 @@ cases:
           }
       use: |-
           let a = new A
-          arktest.assertEQ((await a.bar()), a)
-          arktest.assertEQ(a.fld, 3)
+          waitForCompletion(async () => {
+            arktest.assertEQ((await a.bar()), a)
+            arktest.assertEQ(a.fld, 3)
+          })
 
     - decl: |-
           // calling async method returning 'this'
@@ -567,8 +571,10 @@ cases:
           }
       use: |-
           let a = new A
-          arktest.assertEQ((await (await a.foo()).foo()), a)
-          arktest.assertEQ(a.fld, 2)
+          waitForCompletion(async () => {
+            arktest.assertEQ((await (await a.foo()).foo()), a)
+            arktest.assertEQ(a.fld, 2)
+          })
 
     - decl: |-
         class A {

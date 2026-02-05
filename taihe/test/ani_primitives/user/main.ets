@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1054,12 +1054,14 @@ function testCasetestBaseBoolFunc5() {
     });
     let res: boolean;
     let err: BusinessError = new BusinessError();
-    try {
-        res = await p;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(res, true);
+    waitForCompletion(async () => {
+        try {
+            res = await p;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(res, true);
+    })
 }
 
 function testCasetestBaseBoolFunc5_1() {
@@ -1075,23 +1077,27 @@ function testCasetestBaseBoolFunc5_1() {
     });
     let res: boolean;
     let err: BusinessError = new BusinessError();
-    try {
-        res = await p;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(res, false);
+    waitForCompletion(async () => {
+        try {
+            res = await p;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(res, false);
+    })
 }
 
 function testCasetestBaseBoolFunc5_2() {
-    try {
-        let result: boolean =
-            await primitivesBoolTest.TestBaseBoolFunc5Promise(true);
-        arktest.assertEQ(result, true);
-        console.log("testCasetestBaseBoolFunc5_2 result: " + result);
-    } catch (error) {
-        console.error("testCasetestBaseBoolFunc5_2 failed: " + error);
-    }
+    waitForCompletion(async () => {
+        try {
+            let result: boolean =
+                await primitivesBoolTest.TestBaseBoolFunc5Promise(true);
+            arktest.assertEQ(result, true);
+            console.log("testCasetestBaseBoolFunc5_2 result: " + result);
+        } catch (error) {
+            console.error("testCasetestBaseBoolFunc5_2 failed: " + error);
+        }
+    })
 }
 
 function testCasetestBaseBoolFunc5_3() {

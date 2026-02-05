@@ -23,12 +23,14 @@ function testInit() {
     arktest.assertEQ(wl.get(), str);
     wl.set('main');
     arktest.assertEQ(wl.get(), 'main');
-    await taskpool.execute(() => {
-        arktest.assertEQ(wl.get(), str);
-        wl.set('subWorker');
-        arktest.assertEQ(wl.get(), 'subWorker');
-        wl.delete();
-        arktest.assertEQ(wl.get(), str);
+    waitForCompletion(async () => {
+        await taskpool.execute(() => {
+            arktest.assertEQ(wl.get(), str);
+            wl.set('subWorker');
+            arktest.assertEQ(wl.get(), 'subWorker');
+            wl.delete();
+            arktest.assertEQ(wl.get(), str);
+        })
     })
     arktest.assertEQ(wl.get(), 'main');
 }

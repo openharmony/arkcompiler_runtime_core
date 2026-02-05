@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,7 +31,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(TAIHE_SOURCE src/string.cpp
               src/object.cpp
-              src/runtime.cpp)
+              src/runtime_ani.cpp)
 
 add_library(taihe_runtime STATIC ${TAIHE_SOURCE})
 

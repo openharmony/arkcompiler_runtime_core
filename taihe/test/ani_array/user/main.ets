@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,13 +128,15 @@ function fetchBinaryData() {
                 }
             })});
     let data: Array<float>|undefined;
-    let error: BusinessError|undefined;
-    try {
-        data = await promise;
-    } catch (e) {
-        error = e as BusinessError;
-    }
-    arktest.assertEQ(data?.length, 5);
+    let error: BusinessError | undefined;
+    waitForCompletion(async () => {
+        try {
+            data = await promise;
+        } catch (e) {
+            error = e as BusinessError;
+        }
+        arktest.assertEQ(data?.length, 5);
+    })
 }
 
 function makeStructArrayArray() {
@@ -305,25 +307,29 @@ function test_ani_array_with_PromiseI8_sync() {
         });
     });
     let info: byte[] = new Array<byte>(0);
-    let err: BusinessError|undefined;
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -128 as byte);
+    let err: BusinessError | undefined;
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -128 as byte);
+    })
 }
 
 function test_ani_array_with_PromiseI8_promise() {
     let info: byte[] = new Array<byte>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrI8.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -128 as byte);
+    waitForCompletion(async () => {
+        try {
+            info = await arrI8.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -128 as byte);
+    })
 }
 
 function test_ani_array_with_PromiseI16() {
@@ -351,24 +357,28 @@ function test_ani_array_with_PromiseI16_sync() {
     });
     let info: short[] = new Array<short>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -32768 as short);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -32768 as short);
+    })
 }
 
 function test_ani_array_with_PromiseI16_promise() {
     let info: short[] = new Array<short>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrI16.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -32768 as short);
+    waitForCompletion(async () => {
+        try {
+            info = await arrI16.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -32768 as short);
+    })
 }
 
 function test_ani_array_with_PromiseI32() {
@@ -396,24 +406,28 @@ function test_ani_array_with_PromiseI32_sync() {
     });
     let info: int[] = new Array<int>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -2147483648);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -2147483648);
+    })
 }
 
 function test_ani_array_with_PromiseI32_promise() {
     let info: int[] = new Array<int>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrI32.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -2147483648);
+    waitForCompletion(async () => {
+        try {
+            info = await arrI32.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -2147483648);
+    })
 }
 
 function test_ani_array_with_PromiseI64() {
@@ -441,24 +455,28 @@ function test_ani_array_with_PromiseI64_sync() {
     });
     let info: long[] = new Array<long>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -9223372036854775807 as long);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -9223372036854775807 as long);
+    })
 }
 
 function test_ani_array_with_PromiseI64_promise() {
     let info: long[] = new Array<long>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrI64.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -9223372036854775807 as long);
+    waitForCompletion(async () => {
+        try {
+            info = await arrI64.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -9223372036854775807 as long);
+    })
 }
 
 function test_ani_array_with_PromiseF32() {
@@ -486,24 +504,28 @@ function test_ani_array_with_PromiseF32_sync() {
     });
     let info: float[] = new Array<float>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], (-202505.22).toFloat());
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], (-202505.22).toFloat());
+    })
 }
 
 function test_ani_array_with_PromiseF32_promise() {
     let info: float[] = new Array<float>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrF32.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], (-202505.22).toFloat());
+    waitForCompletion(async () => {
+        try {
+            info = await arrF32.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], (-202505.22).toFloat());
+    })
 }
 
 function test_ani_array_with_PromiseF64() {
@@ -531,24 +553,28 @@ function test_ani_array_with_PromiseF64_sync() {
     });
     let info: double[] = new Array<double>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -202505.221539 as double);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -202505.221539 as double);
+    })
 }
 
 function test_ani_array_with_PromiseF64_promise() {
     let info: double[] = new Array<double>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrF64.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], -202505.221539 as double);
+    waitForCompletion(async () => {
+        try {
+            info = await arrF64.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], -202505.221539 as double);
+    })
 }
 
 function test_ani_array_with_PromiseString() {
@@ -576,24 +602,28 @@ function test_ani_array_with_PromiseString_sync() {
     });
     let info: string[] = new Array<string>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], "String");
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], "String");
+    })
 }
 
 function test_ani_array_with_PromiseString_promise() {
     let info: string[] = new Array<string>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrStr.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], "String");
+    waitForCompletion(async () => {
+        try {
+            info = await arrStr.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], "String");
+    })
 }
 
 function test_ani_array_with_PromiseBool() {
@@ -621,24 +651,28 @@ function test_ani_array_with_PromiseBool_sync() {
     });
     let info: boolean[] = new Array<boolean>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], true);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], true);
+    })
 }
 
 function test_ani_array_with_PromiseBool_promise() {
     let info: boolean[] = new Array<boolean>(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrBool.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[0], true);
+    waitForCompletion(async () => {
+        try {
+            info = await arrBool.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[0], true);
+    })
 }
 
 function test_ani_array_with_PromiseU8() {
@@ -667,24 +701,28 @@ function test_ani_array_with_PromiseU8_sync() {
     });
     let info: Uint8Array = new Uint8Array(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[1], 255);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[1], 255);
+    })
 }
 
 function test_ani_array_with_PromiseU8_promise() {
     let info: Uint8Array = new Uint8Array(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrU8.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[1], 255);
+    waitForCompletion(async () => {
+        try {
+            info = await arrU8.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[1], 255);
+    })
 }
 
 function test_ani_array_with_PromiseU16() {
@@ -712,24 +750,28 @@ function test_ani_array_with_PromiseU16_sync() {
     });
     let info: Uint16Array = new Uint16Array(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-        console.log("info is: " + info);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[1], 65535);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+            console.log("info is: " + info);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[1], 65535);
+    })
 }
 
 function test_ani_array_with_PromiseU16_promise() {
     let info: Uint16Array = new Uint16Array(0);
     let err: BusinessError = new BusinessError();
-    try {
-        info = await arrU16.fetchData();
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(info[1], 65535);
+    waitForCompletion(async () => {
+        try {
+            info = await arrU16.fetchData();
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(info[1], 65535);
+    })
 }
 
 let arrNest: ArrayTest.ArrayNest = ArrayTest.getArrayNest();
