@@ -776,11 +776,11 @@ A :index:`compile-time error` occurs in the following situations:
 .. code-block:: typescript
    :linenos:
 
-    enum DoubleEnum: double { A = 0.0, B = 1, C = 3.141592653589 } // OK
+    enum DoubleEnum: double { A = 0.0, B = 1, C = 3.14159 } // OK
     enum LongEnum: long { A = 0, B = 1, C = 3 } // OK
 
-    enum IncorrectEnum1: double { A, B, C } // compile-time error
-    enum IncorrectEnum2: double { A = 1.0, B = 2, C = "a string" } // compile-time error
+    enum Wrong1: double { A, B, C } // compile-time error: must be explicitly initialized
+    enum Wrong2: long { A = 1, B = "abc" } // compile-time error: not assignable to 'long'
 
 |
 

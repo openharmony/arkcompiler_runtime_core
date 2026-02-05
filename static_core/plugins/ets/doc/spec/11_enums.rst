@@ -88,8 +88,7 @@ are exported along with the mandatory qualification ``Color``.
 
 The value of an enumeration constant can be set as follows:
 
--  Explicitly as a numeric constant expression (expression of type ``int`` or
-   ``long`` ), or as a constant expression of type ``string``; or
+-  Explicitly as a constant expression of type ``int`` or of type ``string``; or
 -  Implicitly by omitting the constant expression, in which case the value of
    the enumeration constant is set to an integer value (see
    :ref:`Enumeration Integer Values`).
@@ -100,12 +99,11 @@ A :index:`compile-time error` occurs if:
   enumeration;
 - At least one initialization expression is not a constant expression; or
 - Enumeration values are set explicitly, and at least one initialization
-  expression type is other than ``int``, ``long``, or ``string``.
+  expression type is other than ``int`` or ``string``.
 
 
 .. index::
    enum constant
-   numeric constant expression
    expression
    value
    integer value
@@ -117,7 +115,7 @@ A :index:`compile-time error` occurs if:
    enumeration
 
 A type to which all enumeration constant values belong is called *enumeration
-base type*. This type is ``int``, ``long``, ``string``, or any explicitly
+base type*. This type is ``int``, ``string``, or any explicitly
 specified valid type (see :ref:`Enumeration with Explicit Type`).
 
 .. index::
@@ -177,7 +175,7 @@ Enumeration Integer Values
 The integer value of an ``enum`` constant is set implicitly if an enumeration
 constant specifies no value.
 
-A constant expression of type ``int`` or ``long`` can be used to set the value
+A constant expression of type ``int`` can be used to set the value
 explicitly:
 
 .. index::
@@ -191,16 +189,11 @@ explicitly:
    expression
    constant expression
    int type
-   long type
 
 .. code-block:: typescript
    :linenos:
 
     enum Background { White = 0xFF, Grey = 0x7F, Black = 0x00 }
-    enum LongEnum { A = 0x7FFF_FFFF_1, B, C }
-
-Choosing which type to use---``int`` or ``long``---is based on the same
-principle as for integer literals (see :ref:`Integer Literals`).
 
 If all constants have no value, then the first constant is assigned
 the value zero. The other constant is assigned the value of the
@@ -224,12 +217,8 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
 
 .. index::
    int type
-   long type
-   integer literal
-   assignment
    constant
    value
-   assignment
 
 |
 
