@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ export class WorkerLocal<T> {
     * @constructor
     */
     constructor() {}
-    
+
     /**
      * Creates a WorkerLocal instance with value initialization function.
      * Automatically initializes value on first get() call per worker.
@@ -54,22 +54,22 @@ export class WorkerLocal<T> {
     constructor(init: () => T) {
       this.init = init;
     }
-  
+
     /**
      * Retrieves the worker-local value for current worker. Auto-initializes
      * using provided init function if value not exists.
-     * 
+     *
      * @returns {T} Worker-specific stored value
      * @throws {Error} When value not initialized and no init function provided
      */
     get(): T {
         let res : Any = undefined;
-        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, (): void => {
+        this.mutex.lockGuard(() => {
             res = this.getinner();
         });
         return res as T;
     }
- 
+
     private getinner(): T {
         const workerId = CoroutineExtras.getWorkerId();
 
@@ -89,11 +89,11 @@ export class WorkerLocal<T> {
 
     /**
      * Updates the worker-local value for current worker.
-     * 
+     *
      * @param {T} value - New value to store for current worker
-     */ 
+     */
     set(value: T):void {
-        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+        this.mutex.lockGuard(() => {
             const workerId = CoroutineExtras.getWorkerId();
             this.storage.set(workerId, new Wrapper<T>(value));
         });
@@ -101,17 +101,17 @@ export class WorkerLocal<T> {
 
     /**
      * Delete the worker-local value for current worker.
-     */ 
+     */
     delete(): void {
-        ConcurrencyHelpers.spinlockGuard(this.tableSpinlock, () => {
+        this.mutex.lockGuard(() => {
             const workerId = CoroutineExtras.getWorkerId();
             this.storage.delete(workerId);
         });
     }
-    // Asynchronous Lock may cause data refreesh failures in high-concurrency scenarios
-    // Using spinlock replace it
-    // NOTE(liu_yaning, #26285): current solution is temporary, the performance will be improved in future
-    private tableSpinlock: Object = ConcurrencyHelpers.spinlockCreate();
+
+    // Using Mutex replace spinlock, spinlock's perfirmance deteriorates sharply in high concurrency scenarios.
+    private mutex: Mutex = new Mutex();
     private storage = new Map<WorkerId, Wrapper<T>>();
     private init?: () => T;
 }
+

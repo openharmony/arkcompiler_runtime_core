@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,12 +108,109 @@ function testWithworkerInit(){
     eaw.quit();
 }
 
+async function testConcurrentReads() {
+    let wl = new WorkerLocal<int>(() => 100);
+    let workerCount = 50;
+    let iterationsPerWorker = 10;
+
+    let promises = new Array<Promise<Any>>(workerCount);
+    for(let i = 0; i < workerCount; i++) {
+        promises.push(taskpool.execute(() => {
+            for(let j = 0; j < iterationsPerWorker; j++) {
+                let value = wl.get();
+                arktest.assertEQ(value, 100);
+            }
+        }));
+    }
+
+    await Promise.all(promises);
+}
+
+async function testConcurrentWrites() {
+    let wl = new WorkerLocal<int>(() => 0);
+    let workerCount = 20;
+    let iterationsPerWorker = 5;
+
+    let promises = new Array<Promise<Any>>(workerCount);
+    for(let i = 0; i < workerCount; i++) {
+        let workerId = i;
+        promises.push(taskpool.execute(() => {
+            for(let j = 0; j < iterationsPerWorker; j++) {
+                wl.set(workerId * 100 + j);
+                let value = wl.get();
+                arktest.assertEQ(value, workerId * 100 + j);
+            }
+        }));
+    }
+
+    await Promise.all(promises);
+
+    arktest.assertEQ(wl.get(), 0);
+}
+
+async function testMultipleInstances() {
+    let wl1 = new WorkerLocal<int>(() => 1);
+    let wl2 = new WorkerLocal<string>(() => 'default');
+    let wl3 = new WorkerLocal<TestObject>(() => new TestObject('obj', 0));
+
+    arktest.assertEQ(wl1.get(), 1);
+    arktest.assertEQ(wl2.get(), 'default');
+    arktest.assertEQ(wl3.get().a1, 'obj');
+
+    wl1.set(100);
+    wl2.set('modified');
+    wl3.set(new TestObject('new', 99));
+
+    arktest.assertEQ(wl1.get(), 100);
+    arktest.assertEQ(wl2.get(), 'modified');
+    arktest.assertEQ(wl3.get().a2, 99);
+
+    await taskpool.execute(() => {
+        arktest.assertEQ(wl1.get(), 1);
+        arktest.assertEQ(wl2.get(), 'default');
+        arktest.assertEQ(wl3.get().a1, 'obj');
+
+        wl1.set(200);
+        wl2.set('worker2');
+        wl3.set(new TestObject('worker2obj', 88));
+
+        arktest.assertEQ(wl1.get(), 200);
+        arktest.assertEQ(wl2.get(), 'worker2');
+        arktest.assertEQ(wl3.get().a2, 88);
+    });
+
+    arktest.assertEQ(wl1.get(), 100);
+    arktest.assertEQ(wl2.get(), 'modified');
+    arktest.assertEQ(wl3.get().a2, 99);
+}
+
+function testNestedOperations() {
+    let wl = new WorkerLocal<int>(() => 0);
+
+    for(let i = 0; i < 10; i++) {
+        let val1 = wl.get();
+        let val2 = wl.get();
+        arktest.assertEQ(val1, val2);
+        wl.set(val1 + 1);
+    }
+    arktest.assertEQ(wl.get(), 10);
+
+    let outerValue = wl.get();
+    wl.set(outerValue + 100);
+    let innerValue = wl.get();
+    arktest.assertEQ(innerValue, outerValue + 100);
+}
+
 function main() {
     const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
     testSuite.addTest('testInit', testInit);
     testSuite.addAsyncTest('testWithoutInit', testWithoutInit);
     testSuite.addTest('testWithMultiInit', testWithMultiInit);
     testSuite.addTest('testWithworkerInit', testWithworkerInit);
+    testSuite.addAsyncTest('testConcurrentReads', testConcurrentReads);
+    testSuite.addAsyncTest('testConcurrentWrites', testConcurrentWrites);
+    testSuite.addAsyncTest('testMultipleInstances', testMultipleInstances);
+    testSuite.addTest('testNestedOperations', testNestedOperations);
     testSuite.run();
     CoroutineExtras.stopTaskpool();
 }
