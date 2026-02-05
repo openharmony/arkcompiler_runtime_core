@@ -74,6 +74,10 @@
 #32775
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_41.ets
 
+#33092
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/ambient_n_1.ets
+04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/ambient_n_3.ets
+
 #32380
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_0.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_1.ets
