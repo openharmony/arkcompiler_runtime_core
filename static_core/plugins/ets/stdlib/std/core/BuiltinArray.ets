@@ -81,15 +81,16 @@ function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<boolean> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Boolean } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<boolean>, index: int): Boolean {
     let len = self.length;
@@ -108,11 +109,15 @@ export function at(self: FixedArray<boolean>, index: int): Boolean {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int): FixedArray<boolean> {
     copyWithin(self, target, 0, self.length);
@@ -120,13 +125,16 @@ export function copyWithin(self: FixedArray<boolean>, target: int): FixedArray<b
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int, start: int): FixedArray<boolean> {
     copyWithin(self, target, start, self.length);
@@ -134,15 +142,17 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int): 
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<boolean> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<boolean>, target: int, start: int, end?: int): FixedArray<boolean> {
     target = normalizeIndex(target, self.length)
@@ -173,15 +183,16 @@ export function copyWithin(self: FixedArray<boolean>, target: int, start: int, e
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<boolean> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<boolean> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end?: int): FixedArray<boolean> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -194,14 +205,15 @@ export function fill(self: FixedArray<boolean>, value: boolean, start?: int, end
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<boolean> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Boolean | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
@@ -212,14 +224,14 @@ export function find(self: FixedArray<boolean>, predicate: (value: boolean, inde
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<boolean> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -231,12 +243,15 @@ export function findIndex(self: FixedArray<boolean>, predicate: (value: boolean,
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<boolean> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Boolean | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, index: int, array: FixedArray<boolean>) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -251,11 +266,14 @@ export function findLast(self: FixedArray<boolean>, predicate: (elem: boolean, i
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<boolean> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -269,11 +287,14 @@ export function every(self: FixedArray<boolean>, predicate: (value: boolean, ind
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<boolean> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<boolean>, predicate: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -285,13 +306,15 @@ export function some(self: FixedArray<boolean>, predicate: (value: boolean, inde
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<boolean> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<boolean>, predicate: (element: boolean, index: int, array: FixedArray<boolean>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -303,11 +326,17 @@ export function findLastIndex(self: FixedArray<boolean>, predicate: (element: bo
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { boolean } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -321,13 +350,17 @@ export function reduce(self: FixedArray<boolean>, callbackfn: (previousValue: bo
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -338,13 +371,17 @@ export function reduce<U = boolean>(self: FixedArray<boolean>, callbackfn: (prev
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<boolean> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousValue: U, currentValue: boolean, index: int, array: FixedArray<boolean>) => U, initialValue: U): U {
     let acc = initialValue
@@ -357,7 +394,12 @@ export function reduceRight<U>(self: FixedArray<boolean>, callbackfn: (previousV
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<boolean> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => void): void {
     const len0 = self.length;
@@ -370,26 +412,30 @@ export function forEach(self: FixedArray<boolean>, callbackfn: (value: boolean, 
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<boolean> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<boolean> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<boolean>, start: int): FixedArray<boolean> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<boolean> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<boolean> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedArray<boolean> {
     const len: int = self.length;
@@ -406,16 +452,15 @@ export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedA
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<boolean> } self The array to operate `lastIndexOf` on.
+ * @param { boolean } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromIndex?: int): int {
     if (self.length == 0) {
@@ -439,13 +484,16 @@ export function lastIndexOf(self: FixedArray<boolean>, element: boolean, fromInd
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<boolean> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<boolean>, sep?: String): string {
     if (self.length == 0) {
@@ -465,40 +513,57 @@ export function join(self: FixedArray<boolean>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<boolean> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<boolean>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<boolean> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<boolean> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<boolean> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<boolean>): string {
     const sb = new StringBuilder()
@@ -516,24 +581,30 @@ export function toLocaleString(self: FixedArray<boolean>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start: int): FixedArray<boolean> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<boolean> } items The elements to add to the array.
+ * @returns { FixedArray<boolean> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ...items: FixedArray<boolean>): FixedArray<boolean> {
     const len = self.length;
@@ -560,13 +631,15 @@ export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ..
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<boolean> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<boolean> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int): FixedArray<boolean> {
     const len = self.length;
@@ -574,14 +647,15 @@ export function toSpliced(self: FixedArray<boolean>, start?: int, delete?: int):
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<boolean> } self The array to operate `includes` on.
+ * @param { boolean } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: int): boolean {
     const len = self.length;
@@ -595,14 +669,14 @@ export function includes(self: FixedArray<boolean>, val: boolean, fromIndex?: in
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<boolean> } self The array to operate `indexOf` on.
+ * @param { boolean } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -615,10 +689,13 @@ export function indexOf(self: FixedArray<boolean>, val: boolean, fromIndex?: int
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<boolean> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<boolean> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<boolean>): FixedArray<boolean> {
     let arr = cloneArray(self);
@@ -627,12 +704,14 @@ export function toSorted(self: FixedArray<boolean>): FixedArray<boolean> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<boolean> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<boolean> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: boolean) => int): FixedArray<boolean> {
     let arr = cloneArray(self);
@@ -641,10 +720,14 @@ export function toSorted(self: FixedArray<boolean>, comparator: (a: boolean, b: 
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<boolean> } self The array to operate `reverse` on.
+ * @returns { FixedArray<boolean> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<boolean>): FixedArray<boolean> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -658,10 +741,13 @@ export function reverse(self: FixedArray<boolean>): FixedArray<boolean> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<boolean> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<boolean> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
     let arr : FixedArray<boolean> = new FixedArray<boolean>(self.length)
@@ -672,14 +758,16 @@ export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<boolean> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { boolean } value The new value to insert at the given index.
+ * @returns { FixedArray<boolean> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<boolean>, index: int, value: boolean): FixedArray<boolean> {
     if (index < 0) {
@@ -694,14 +782,26 @@ export function with(self: FixedArray<boolean>, index: int, value: boolean): Fix
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<boolean> } self The array to operate `values` on.
+ * @returns { IterableIterator<boolean> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<boolean>): IterableIterator<boolean> {
     return new ArrayValuesIterator_boolean(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<boolean> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<boolean>): IterableIterator<[number, boolean]> {
     return new ArrayEntriesIterator_boolean(self);
@@ -710,9 +810,12 @@ export function entries(self: FixedArray<boolean>): IterableIterator<[number, bo
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<boolean> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<boolean> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
     const len = self.length;
@@ -724,11 +827,17 @@ export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, inde
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<boolean> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { boolean } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValue: boolean, currentValue: boolean, index: int, array: FixedArray<boolean>) => boolean): boolean {
     if (self.length == 0) {
@@ -917,15 +1026,16 @@ function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<byte> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Byte } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<byte>, index: int): Byte {
     let len = self.length;
@@ -944,11 +1054,15 @@ export function at(self: FixedArray<byte>, index: int): Byte {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int): FixedArray<byte> {
     copyWithin(self, target, 0, self.length);
@@ -956,13 +1070,16 @@ export function copyWithin(self: FixedArray<byte>, target: int): FixedArray<byte
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int, start: int): FixedArray<byte> {
     copyWithin(self, target, start, self.length);
@@ -970,15 +1087,17 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int): Fix
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<byte> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?: int): FixedArray<byte> {
     target = normalizeIndex(target, self.length)
@@ -1009,15 +1128,16 @@ export function copyWithin(self: FixedArray<byte>, target: int, start: int, end?
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<byte> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<byte> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int): FixedArray<byte> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -1030,14 +1150,15 @@ export function fill(self: FixedArray<byte>, value: byte, start?: int, end?: int
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<byte> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Byte | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
@@ -1048,14 +1169,14 @@ export function find(self: FixedArray<byte>, predicate: (value: byte, index: int
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<byte> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -1067,12 +1188,15 @@ export function findIndex(self: FixedArray<byte>, predicate: (value: byte, index
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<byte> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Byte | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: int, array: FixedArray<byte>) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1087,11 +1211,14 @@ export function findLast(self: FixedArray<byte>, predicate: (elem: byte, index: 
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<byte> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1105,11 +1232,14 @@ export function every(self: FixedArray<byte>, predicate: (value: byte, index: in
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<byte> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<byte>, predicate: (value: byte, index: int, array: FixedArray<byte>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1121,13 +1251,15 @@ export function some(self: FixedArray<byte>, predicate: (value: byte, index: int
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<byte> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte, index: int, array: FixedArray<byte>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1139,11 +1271,17 @@ export function findLastIndex(self: FixedArray<byte>, predicate: (element: byte,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { byte } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -1157,13 +1295,17 @@ export function reduce(self: FixedArray<byte>, callbackfn: (previousValue: byte,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -1174,13 +1316,17 @@ export function reduce<U = byte>(self: FixedArray<byte>, callbackfn: (previousVa
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<byte> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValue: U, currentValue: byte, index: int, array: FixedArray<byte>) => U, initialValue: U): U {
     let acc = initialValue
@@ -1193,7 +1339,12 @@ export function reduceRight<U>(self: FixedArray<byte>, callbackfn: (previousValu
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<byte> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => void): void {
     const len0 = self.length;
@@ -1206,26 +1357,30 @@ export function forEach(self: FixedArray<byte>, callbackfn: (value: byte, index:
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<byte> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<byte> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<byte>, start: int): FixedArray<byte> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<byte> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<byte> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArray<byte> {
     const len: int = self.length;
@@ -1242,16 +1397,15 @@ export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArra
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<byte> } self The array to operate `lastIndexOf` on.
+ * @param { byte } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: int): int {
     if (self.length == 0) {
@@ -1275,13 +1429,16 @@ export function lastIndexOf(self: FixedArray<byte>, element: byte, fromIndex?: i
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<byte> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<byte>, sep?: String): string {
     if (self.length == 0) {
@@ -1301,40 +1458,57 @@ export function join(self: FixedArray<byte>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<byte> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<byte>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<byte> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<byte> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<byte> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<byte>): string {
     const sb = new StringBuilder()
@@ -1352,24 +1526,30 @@ export function toLocaleString(self: FixedArray<byte>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start: int): FixedArray<byte> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<byte> } items The elements to add to the array.
+ * @returns { FixedArray<byte> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...items: FixedArray<byte>): FixedArray<byte> {
     const len = self.length;
@@ -1396,13 +1576,15 @@ export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...it
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<byte> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<byte> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): FixedArray<byte> {
     const len = self.length;
@@ -1410,14 +1592,15 @@ export function toSpliced(self: FixedArray<byte>, start?: int, delete?: int): Fi
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<byte> } self The array to operate `includes` on.
+ * @param { byte } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): boolean {
     const len = self.length;
@@ -1431,14 +1614,14 @@ export function includes(self: FixedArray<byte>, val: byte, fromIndex?: int): bo
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<byte> } self The array to operate `indexOf` on.
+ * @param { byte } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -1451,10 +1634,13 @@ export function indexOf(self: FixedArray<byte>, val: byte, fromIndex?: int): int
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<byte> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<byte> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<byte>): FixedArray<byte> {
     let arr = cloneArray(self);
@@ -1463,12 +1649,14 @@ export function toSorted(self: FixedArray<byte>): FixedArray<byte> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<byte> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<byte> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) => int): FixedArray<byte> {
     let arr = cloneArray(self);
@@ -1477,10 +1665,14 @@ export function toSorted(self: FixedArray<byte>, comparator: (a: byte, b: byte) 
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<byte> } self The array to operate `reverse` on.
+ * @returns { FixedArray<byte> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<byte>): FixedArray<byte> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -1494,10 +1686,13 @@ export function reverse(self: FixedArray<byte>): FixedArray<byte> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<byte> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<byte> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
     let arr : FixedArray<byte> = new FixedArray<byte>(self.length)
@@ -1508,14 +1703,16 @@ export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<byte> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { byte } value The new value to insert at the given index.
+ * @returns { FixedArray<byte> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<byte>, index: int, value: byte): FixedArray<byte> {
     if (index < 0) {
@@ -1530,14 +1727,26 @@ export function with(self: FixedArray<byte>, index: int, value: byte): FixedArra
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<byte> } self The array to operate `values` on.
+ * @returns { IterableIterator<byte> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<byte>): IterableIterator<byte> {
     return new ArrayValuesIterator_byte(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<byte> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<byte>): IterableIterator<[number, byte]> {
     return new ArrayEntriesIterator_byte(self);
@@ -1546,9 +1755,12 @@ export function entries(self: FixedArray<byte>): IterableIterator<[number, byte]
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<byte> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<byte> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => byte): FixedArray<byte> {
     const len = self.length;
@@ -1560,11 +1772,17 @@ export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<byte> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { byte } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: byte, currentValue: byte, index: int, array: FixedArray<byte>) => byte): byte {
     if (self.length == 0) {
@@ -1753,15 +1971,16 @@ function cloneArray(self: FixedArray<short>): FixedArray<short> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<short> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Short } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<short>, index: int): Short {
     let len = self.length;
@@ -1780,11 +1999,15 @@ export function at(self: FixedArray<short>, index: int): Short {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int): FixedArray<short> {
     copyWithin(self, target, 0, self.length);
@@ -1792,13 +2015,16 @@ export function copyWithin(self: FixedArray<short>, target: int): FixedArray<sho
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int, start: int): FixedArray<short> {
     copyWithin(self, target, start, self.length);
@@ -1806,15 +2032,17 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int): Fi
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<short> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<short>, target: int, start: int, end?: int): FixedArray<short> {
     target = normalizeIndex(target, self.length)
@@ -1845,15 +2073,16 @@ export function copyWithin(self: FixedArray<short>, target: int, start: int, end
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<short> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<short> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<short>, value: short, start?: int, end?: int): FixedArray<short> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -1866,14 +2095,15 @@ export function fill(self: FixedArray<short>, value: short, start?: int, end?: i
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<short> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Short | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
@@ -1884,14 +2114,14 @@ export function find(self: FixedArray<short>, predicate: (value: short, index: i
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<short> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -1903,12 +2133,15 @@ export function findIndex(self: FixedArray<short>, predicate: (value: short, ind
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<short> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Short | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<short>, predicate: (elem: short, index: int, array: FixedArray<short>) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1923,11 +2156,14 @@ export function findLast(self: FixedArray<short>, predicate: (elem: short, index
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<short> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1941,11 +2177,14 @@ export function every(self: FixedArray<short>, predicate: (value: short, index: 
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<short> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<short>, predicate: (value: short, index: int, array: FixedArray<short>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -1957,13 +2196,15 @@ export function some(self: FixedArray<short>, predicate: (value: short, index: i
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<short> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<short>, predicate: (element: short, index: int, array: FixedArray<short>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1975,11 +2216,17 @@ export function findLastIndex(self: FixedArray<short>, predicate: (element: shor
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { short } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
@@ -1993,13 +2240,17 @@ export function reduce(self: FixedArray<short>, callbackfn: (previousValue: shor
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2010,13 +2261,17 @@ export function reduce<U = short>(self: FixedArray<short>, callbackfn: (previous
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<short> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousValue: U, currentValue: short, index: int, array: FixedArray<short>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2029,7 +2284,12 @@ export function reduceRight<U>(self: FixedArray<short>, callbackfn: (previousVal
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<short> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => void): void {
     const len0 = self.length;
@@ -2042,26 +2302,30 @@ export function forEach(self: FixedArray<short>, callbackfn: (value: short, inde
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<short> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<short> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<short>, start: int): FixedArray<short> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<short> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<short> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArray<short> {
     const len: int = self.length;
@@ -2078,16 +2342,15 @@ export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArr
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<short> } self The array to operate `lastIndexOf` on.
+ * @param { short } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?: int): int {
     if (self.length == 0) {
@@ -2111,13 +2374,16 @@ export function lastIndexOf(self: FixedArray<short>, element: short, fromIndex?:
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<short> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<short>, sep?: String): string {
     if (self.length == 0) {
@@ -2137,40 +2403,57 @@ export function join(self: FixedArray<short>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<short> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<short>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<short> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<short>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<short> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<short>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<short> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<short>): string {
     const sb = new StringBuilder()
@@ -2188,24 +2471,30 @@ export function toLocaleString(self: FixedArray<short>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start: int): FixedArray<short> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<short> } items The elements to add to the array.
+ * @returns { FixedArray<short> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...items: FixedArray<short>): FixedArray<short> {
     const len = self.length;
@@ -2232,13 +2521,15 @@ export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...i
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<short> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<short> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): FixedArray<short> {
     const len = self.length;
@@ -2246,14 +2537,15 @@ export function toSpliced(self: FixedArray<short>, start?: int, delete?: int): F
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<short> } self The array to operate `includes` on.
+ * @param { short } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<short>, val: short, fromIndex?: int): boolean {
     const len = self.length;
@@ -2267,14 +2559,14 @@ export function includes(self: FixedArray<short>, val: short, fromIndex?: int): 
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<short> } self The array to operate `indexOf` on.
+ * @param { short } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -2287,10 +2579,13 @@ export function indexOf(self: FixedArray<short>, val: short, fromIndex?: int): i
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<short> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<short> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<short>): FixedArray<short> {
     let arr = cloneArray(self);
@@ -2299,12 +2594,14 @@ export function toSorted(self: FixedArray<short>): FixedArray<short> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<short> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<short> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<short>, comparator: (a: short, b: short) => int): FixedArray<short> {
     let arr = cloneArray(self);
@@ -2313,10 +2610,14 @@ export function toSorted(self: FixedArray<short>, comparator: (a: short, b: shor
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<short> } self The array to operate `reverse` on.
+ * @returns { FixedArray<short> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<short>): FixedArray<short> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -2330,10 +2631,13 @@ export function reverse(self: FixedArray<short>): FixedArray<short> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<short> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<short> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<short>): FixedArray<short> {
     let arr : FixedArray<short> = new FixedArray<short>(self.length)
@@ -2344,14 +2648,16 @@ export function toReversed(self: FixedArray<short>): FixedArray<short> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<short> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { short } value The new value to insert at the given index.
+ * @returns { FixedArray<short> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<short>, index: int, value: short): FixedArray<short> {
     if (index < 0) {
@@ -2366,14 +2672,26 @@ export function with(self: FixedArray<short>, index: int, value: short): FixedAr
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<short> } self The array to operate `values` on.
+ * @returns { IterableIterator<short> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<short>): IterableIterator<short> {
     return new ArrayValuesIterator_short(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<short> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<short>): IterableIterator<[number, short]> {
     return new ArrayEntriesIterator_short(self);
@@ -2382,9 +2700,12 @@ export function entries(self: FixedArray<short>): IterableIterator<[number, shor
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<short> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<short> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => short): FixedArray<short> {
     const len = self.length;
@@ -2396,11 +2717,17 @@ export function map(self: FixedArray<short>, callbackfn: (value: short, index: i
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<short> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { short } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue: short, currentValue: short, index: int, array: FixedArray<short>) => short): short {
     if (self.length == 0) {
@@ -2589,15 +2916,16 @@ function cloneArray(self: FixedArray<int>): FixedArray<int> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<int> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Int } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<int>, index: int): Int {
     let len = self.length;
@@ -2616,11 +2944,15 @@ export function at(self: FixedArray<int>, index: int): Int {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int): FixedArray<int> {
     copyWithin(self, target, 0, self.length);
@@ -2628,13 +2960,16 @@ export function copyWithin(self: FixedArray<int>, target: int): FixedArray<int> 
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int, start: int): FixedArray<int> {
     copyWithin(self, target, start, self.length);
@@ -2642,15 +2977,17 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int): Fixe
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<int> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<int>, target: int, start: int, end?: int): FixedArray<int> {
     target = normalizeIndex(target, self.length)
@@ -2681,15 +3018,16 @@ export function copyWithin(self: FixedArray<int>, target: int, start: int, end?:
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<int> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<int> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<int>, value: int, start?: int, end?: int): FixedArray<int> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -2702,14 +3040,15 @@ export function fill(self: FixedArray<int>, value: int, start?: int, end?: int):
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<int> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Int | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
@@ -2720,14 +3059,14 @@ export function find(self: FixedArray<int>, predicate: (value: int, index: int, 
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<int> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -2739,12 +3078,15 @@ export function findIndex(self: FixedArray<int>, predicate: (value: int, index: 
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<int> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Int | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<int>, predicate: (elem: int, index: int, array: FixedArray<int>) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2759,11 +3101,14 @@ export function findLast(self: FixedArray<int>, predicate: (elem: int, index: in
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<int> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -2777,11 +3122,14 @@ export function every(self: FixedArray<int>, predicate: (value: int, index: int,
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<int> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<int>, predicate: (value: int, index: int, array: FixedArray<int>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -2793,13 +3141,15 @@ export function some(self: FixedArray<int>, predicate: (value: int, index: int, 
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<int> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<int>, predicate: (element: int, index: int, array: FixedArray<int>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2811,11 +3161,17 @@ export function findLastIndex(self: FixedArray<int>, predicate: (element: int, i
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { int } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
@@ -2829,13 +3185,17 @@ export function reduce(self: FixedArray<int>, callbackfn: (previousValue: int, c
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2846,13 +3206,17 @@ export function reduce<U = int>(self: FixedArray<int>, callbackfn: (previousValu
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<int> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue: U, currentValue: int, index: int, array: FixedArray<int>) => U, initialValue: U): U {
     let acc = initialValue
@@ -2865,7 +3229,12 @@ export function reduceRight<U>(self: FixedArray<int>, callbackfn: (previousValue
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<int> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => void): void {
     const len0 = self.length;
@@ -2878,26 +3247,30 @@ export function forEach(self: FixedArray<int>, callbackfn: (value: int, index: i
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<int> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<int> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<int>, start: int): FixedArray<int> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<int> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<int> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray<int> {
     const len: int = self.length;
@@ -2914,16 +3287,15 @@ export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<int> } self The array to operate `lastIndexOf` on.
+ * @param { int } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int): int {
     if (self.length == 0) {
@@ -2947,13 +3319,16 @@ export function lastIndexOf(self: FixedArray<int>, element: int, fromIndex?: int
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<int> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<int>, sep?: String): string {
     if (self.length == 0) {
@@ -2973,40 +3348,57 @@ export function join(self: FixedArray<int>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<int> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<int>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<int> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<int>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<int> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<int>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<int> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<int>): string {
     const sb = new StringBuilder()
@@ -3024,24 +3416,30 @@ export function toLocaleString(self: FixedArray<int>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start: int): FixedArray<int> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<int> } items The elements to add to the array.
+ * @returns { FixedArray<int> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...items: FixedArray<int>): FixedArray<int> {
     const len = self.length;
@@ -3068,13 +3466,15 @@ export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...ite
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<int> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<int> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): FixedArray<int> {
     const len = self.length;
@@ -3082,14 +3482,15 @@ export function toSpliced(self: FixedArray<int>, start?: int, delete?: int): Fix
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<int> } self The array to operate `includes` on.
+ * @param { int } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<int>, val: int, fromIndex?: int): boolean {
     const len = self.length;
@@ -3103,14 +3504,14 @@ export function includes(self: FixedArray<int>, val: int, fromIndex?: int): bool
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<int> } self The array to operate `indexOf` on.
+ * @param { int } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -3123,10 +3524,13 @@ export function indexOf(self: FixedArray<int>, val: int, fromIndex?: int): int {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<int> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<int> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<int>): FixedArray<int> {
     let arr = cloneArray(self);
@@ -3135,12 +3539,14 @@ export function toSorted(self: FixedArray<int>): FixedArray<int> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<int> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<int> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => int): FixedArray<int> {
     let arr = cloneArray(self);
@@ -3149,10 +3555,14 @@ export function toSorted(self: FixedArray<int>, comparator: (a: int, b: int) => 
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<int> } self The array to operate `reverse` on.
+ * @returns { FixedArray<int> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<int>): FixedArray<int> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -3166,10 +3576,13 @@ export function reverse(self: FixedArray<int>): FixedArray<int> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<int> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<int> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<int>): FixedArray<int> {
     let arr : FixedArray<int> = new FixedArray<int>(self.length)
@@ -3180,14 +3593,16 @@ export function toReversed(self: FixedArray<int>): FixedArray<int> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<int> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { int } value The new value to insert at the given index.
+ * @returns { FixedArray<int> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<int>, index: int, value: int): FixedArray<int> {
     if (index < 0) {
@@ -3202,14 +3617,26 @@ export function with(self: FixedArray<int>, index: int, value: int): FixedArray<
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<int> } self The array to operate `values` on.
+ * @returns { IterableIterator<int> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<int>): IterableIterator<int> {
     return new ArrayValuesIterator_int(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<int> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<int>): IterableIterator<[number, int]> {
     return new ArrayEntriesIterator_int(self);
@@ -3218,9 +3645,12 @@ export function entries(self: FixedArray<int>): IterableIterator<[number, int]> 
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<int> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<int> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => int): FixedArray<int> {
     const len = self.length;
@@ -3232,11 +3662,17 @@ export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, 
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<int> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { int } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: int, currentValue: int, index: int, array: FixedArray<int>) => int): int {
     if (self.length == 0) {
@@ -3425,15 +3861,16 @@ function cloneArray(self: FixedArray<long>): FixedArray<long> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<long> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Long } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<long>, index: int): Long {
     let len = self.length;
@@ -3452,11 +3889,15 @@ export function at(self: FixedArray<long>, index: int): Long {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int): FixedArray<long> {
     copyWithin(self, target, 0, self.length);
@@ -3464,13 +3905,16 @@ export function copyWithin(self: FixedArray<long>, target: int): FixedArray<long
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int, start: int): FixedArray<long> {
     copyWithin(self, target, start, self.length);
@@ -3478,15 +3922,17 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int): Fix
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<long> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<long>, target: int, start: int, end?: int): FixedArray<long> {
     target = normalizeIndex(target, self.length)
@@ -3517,15 +3963,16 @@ export function copyWithin(self: FixedArray<long>, target: int, start: int, end?
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<long> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<long> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<long>, value: long, start?: int, end?: int): FixedArray<long> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -3538,14 +3985,15 @@ export function fill(self: FixedArray<long>, value: long, start?: int, end?: int
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<long> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Long | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
@@ -3556,14 +4004,14 @@ export function find(self: FixedArray<long>, predicate: (value: long, index: int
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<long> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -3575,12 +4023,15 @@ export function findIndex(self: FixedArray<long>, predicate: (value: long, index
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<long> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Long | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<long>, predicate: (elem: long, index: int, array: FixedArray<long>) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3595,11 +4046,14 @@ export function findLast(self: FixedArray<long>, predicate: (elem: long, index: 
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<long> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -3613,11 +4067,14 @@ export function every(self: FixedArray<long>, predicate: (value: long, index: in
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<long> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<long>, predicate: (value: long, index: int, array: FixedArray<long>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -3629,13 +4086,15 @@ export function some(self: FixedArray<long>, predicate: (value: long, index: int
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<long> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<long>, predicate: (element: long, index: int, array: FixedArray<long>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3647,11 +4106,17 @@ export function findLastIndex(self: FixedArray<long>, predicate: (element: long,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { long } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
@@ -3665,13 +4130,17 @@ export function reduce(self: FixedArray<long>, callbackfn: (previousValue: long,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -3682,13 +4151,17 @@ export function reduce<U = long>(self: FixedArray<long>, callbackfn: (previousVa
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<long> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValue: U, currentValue: long, index: int, array: FixedArray<long>) => U, initialValue: U): U {
     let acc = initialValue
@@ -3701,7 +4174,12 @@ export function reduceRight<U>(self: FixedArray<long>, callbackfn: (previousValu
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<long> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => void): void {
     const len0 = self.length;
@@ -3714,26 +4192,30 @@ export function forEach(self: FixedArray<long>, callbackfn: (value: long, index:
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<long> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<long> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<long>, start: int): FixedArray<long> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<long> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<long> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArray<long> {
     const len: int = self.length;
@@ -3750,16 +4232,15 @@ export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArra
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<long> } self The array to operate `lastIndexOf` on.
+ * @param { long } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: int): int {
     if (self.length == 0) {
@@ -3783,13 +4264,16 @@ export function lastIndexOf(self: FixedArray<long>, element: long, fromIndex?: i
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<long> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<long>, sep?: String): string {
     if (self.length == 0) {
@@ -3809,40 +4293,57 @@ export function join(self: FixedArray<long>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<long> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<long>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<long> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<long>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<long> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<long>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<long> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<long>): string {
     const sb = new StringBuilder()
@@ -3860,24 +4361,30 @@ export function toLocaleString(self: FixedArray<long>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start: int): FixedArray<long> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<long> } items The elements to add to the array.
+ * @returns { FixedArray<long> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...items: FixedArray<long>): FixedArray<long> {
     const len = self.length;
@@ -3904,13 +4411,15 @@ export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...it
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<long> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<long> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): FixedArray<long> {
     const len = self.length;
@@ -3918,14 +4427,15 @@ export function toSpliced(self: FixedArray<long>, start?: int, delete?: int): Fi
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<long> } self The array to operate `includes` on.
+ * @param { long } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<long>, val: long, fromIndex?: int): boolean {
     const len = self.length;
@@ -3939,14 +4449,14 @@ export function includes(self: FixedArray<long>, val: long, fromIndex?: int): bo
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<long> } self The array to operate `indexOf` on.
+ * @param { long } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -3959,10 +4469,13 @@ export function indexOf(self: FixedArray<long>, val: long, fromIndex?: int): int
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<long> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<long> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<long>): FixedArray<long> {
     let arr = cloneArray(self);
@@ -3971,12 +4484,14 @@ export function toSorted(self: FixedArray<long>): FixedArray<long> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<long> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<long> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) => int): FixedArray<long> {
     let arr = cloneArray(self);
@@ -3985,10 +4500,14 @@ export function toSorted(self: FixedArray<long>, comparator: (a: long, b: long) 
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<long> } self The array to operate `reverse` on.
+ * @returns { FixedArray<long> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<long>): FixedArray<long> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -4002,10 +4521,13 @@ export function reverse(self: FixedArray<long>): FixedArray<long> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<long> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<long> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<long>): FixedArray<long> {
     let arr : FixedArray<long> = new FixedArray<long>(self.length)
@@ -4016,14 +4538,16 @@ export function toReversed(self: FixedArray<long>): FixedArray<long> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<long> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { long } value The new value to insert at the given index.
+ * @returns { FixedArray<long> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<long>, index: int, value: long): FixedArray<long> {
     if (index < 0) {
@@ -4038,14 +4562,26 @@ export function with(self: FixedArray<long>, index: int, value: long): FixedArra
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<long> } self The array to operate `values` on.
+ * @returns { IterableIterator<long> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<long>): IterableIterator<long> {
     return new ArrayValuesIterator_long(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<long> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<long>): IterableIterator<[number, long]> {
     return new ArrayEntriesIterator_long(self);
@@ -4054,9 +4590,12 @@ export function entries(self: FixedArray<long>): IterableIterator<[number, long]
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<long> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<long> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => long): FixedArray<long> {
     const len = self.length;
@@ -4068,11 +4607,17 @@ export function map(self: FixedArray<long>, callbackfn: (value: long, index: int
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<long> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { long } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: long, currentValue: long, index: int, array: FixedArray<long>) => long): long {
     if (self.length == 0) {
@@ -4261,15 +4806,16 @@ function cloneArray(self: FixedArray<float>): FixedArray<float> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<float> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Float } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<float>, index: int): Float {
     let len = self.length;
@@ -4288,11 +4834,15 @@ export function at(self: FixedArray<float>, index: int): Float {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int): FixedArray<float> {
     copyWithin(self, target, 0, self.length);
@@ -4300,13 +4850,16 @@ export function copyWithin(self: FixedArray<float>, target: int): FixedArray<flo
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int, start: int): FixedArray<float> {
     copyWithin(self, target, start, self.length);
@@ -4314,15 +4867,17 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int): Fi
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<float> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<float>, target: int, start: int, end?: int): FixedArray<float> {
     target = normalizeIndex(target, self.length)
@@ -4353,15 +4908,16 @@ export function copyWithin(self: FixedArray<float>, target: int, start: int, end
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<float> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<float> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<float>, value: float, start?: int, end?: int): FixedArray<float> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -4374,14 +4930,15 @@ export function fill(self: FixedArray<float>, value: float, start?: int, end?: i
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<float> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Float | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
@@ -4392,14 +4949,14 @@ export function find(self: FixedArray<float>, predicate: (value: float, index: i
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<float> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -4411,12 +4968,15 @@ export function findIndex(self: FixedArray<float>, predicate: (value: float, ind
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<float> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Float | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<float>, predicate: (elem: float, index: int, array: FixedArray<float>) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4431,11 +4991,14 @@ export function findLast(self: FixedArray<float>, predicate: (elem: float, index
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<float> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -4449,11 +5012,14 @@ export function every(self: FixedArray<float>, predicate: (value: float, index: 
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<float> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<float>, predicate: (value: float, index: int, array: FixedArray<float>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -4465,13 +5031,15 @@ export function some(self: FixedArray<float>, predicate: (value: float, index: i
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<float> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<float>, predicate: (element: float, index: int, array: FixedArray<float>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4483,11 +5051,17 @@ export function findLastIndex(self: FixedArray<float>, predicate: (element: floa
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { float } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
@@ -4501,13 +5075,17 @@ export function reduce(self: FixedArray<float>, callbackfn: (previousValue: floa
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -4518,13 +5096,17 @@ export function reduce<U = float>(self: FixedArray<float>, callbackfn: (previous
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<float> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousValue: U, currentValue: float, index: int, array: FixedArray<float>) => U, initialValue: U): U {
     let acc = initialValue
@@ -4537,7 +5119,12 @@ export function reduceRight<U>(self: FixedArray<float>, callbackfn: (previousVal
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<float> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => void): void {
     const len0 = self.length;
@@ -4550,26 +5137,30 @@ export function forEach(self: FixedArray<float>, callbackfn: (value: float, inde
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<float> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<float> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<float>, start: int): FixedArray<float> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<float> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<float> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArray<float> {
     const len: int = self.length;
@@ -4586,16 +5177,15 @@ export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArr
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<float> } self The array to operate `lastIndexOf` on.
+ * @param { float } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?: int): int {
     if (self.length == 0) {
@@ -4619,13 +5209,16 @@ export function lastIndexOf(self: FixedArray<float>, element: float, fromIndex?:
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<float> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<float>, sep?: String): string {
     if (self.length == 0) {
@@ -4645,40 +5238,57 @@ export function join(self: FixedArray<float>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<float> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<float>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<float> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<float>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<float> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<float>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<float> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<float>): string {
     const sb = new StringBuilder()
@@ -4696,24 +5306,30 @@ export function toLocaleString(self: FixedArray<float>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start: int): FixedArray<float> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<float> } items The elements to add to the array.
+ * @returns { FixedArray<float> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...items: FixedArray<float>): FixedArray<float> {
     const len = self.length;
@@ -4740,13 +5356,15 @@ export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...i
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<float> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<float> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): FixedArray<float> {
     const len = self.length;
@@ -4754,14 +5372,15 @@ export function toSpliced(self: FixedArray<float>, start?: int, delete?: int): F
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<float> } self The array to operate `includes` on.
+ * @param { float } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<float>, val: float, fromIndex?: int): boolean {
     const len = self.length;
@@ -4783,14 +5402,14 @@ export function includes(self: FixedArray<float>, val: float, fromIndex?: int): 
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<float> } self The array to operate `indexOf` on.
+ * @param { float } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -4803,10 +5422,13 @@ export function indexOf(self: FixedArray<float>, val: float, fromIndex?: int): i
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<float> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<float> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<float>): FixedArray<float> {
     let arr = cloneArray(self);
@@ -4815,12 +5437,14 @@ export function toSorted(self: FixedArray<float>): FixedArray<float> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<float> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<float> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<float>, comparator: (a: float, b: float) => int): FixedArray<float> {
     let arr = cloneArray(self);
@@ -4829,10 +5453,14 @@ export function toSorted(self: FixedArray<float>, comparator: (a: float, b: floa
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<float> } self The array to operate `reverse` on.
+ * @returns { FixedArray<float> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<float>): FixedArray<float> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -4846,10 +5474,13 @@ export function reverse(self: FixedArray<float>): FixedArray<float> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<float> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<float> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<float>): FixedArray<float> {
     let arr : FixedArray<float> = new FixedArray<float>(self.length)
@@ -4860,14 +5491,16 @@ export function toReversed(self: FixedArray<float>): FixedArray<float> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<float> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { float } value The new value to insert at the given index.
+ * @returns { FixedArray<float> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<float>, index: int, value: float): FixedArray<float> {
     if (index < 0) {
@@ -4882,14 +5515,26 @@ export function with(self: FixedArray<float>, index: int, value: float): FixedAr
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<float> } self The array to operate `values` on.
+ * @returns { IterableIterator<float> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<float>): IterableIterator<float> {
     return new ArrayValuesIterator_float(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<float> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<float>): IterableIterator<[number, float]> {
     return new ArrayEntriesIterator_float(self);
@@ -4898,9 +5543,12 @@ export function entries(self: FixedArray<float>): IterableIterator<[number, floa
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<float> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<float> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => float): FixedArray<float> {
     const len = self.length;
@@ -4912,11 +5560,17 @@ export function map(self: FixedArray<float>, callbackfn: (value: float, index: i
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<float> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { float } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue: float, currentValue: float, index: int, array: FixedArray<float>) => float): float {
     if (self.length == 0) {
@@ -5105,15 +5759,16 @@ function cloneArray(self: FixedArray<double>): FixedArray<double> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<double> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Double } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<double>, index: int): Double {
     let len = self.length;
@@ -5132,11 +5787,15 @@ export function at(self: FixedArray<double>, index: int): Double {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int): FixedArray<double> {
     copyWithin(self, target, 0, self.length);
@@ -5144,13 +5803,16 @@ export function copyWithin(self: FixedArray<double>, target: int): FixedArray<do
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int, start: int): FixedArray<double> {
     copyWithin(self, target, start, self.length);
@@ -5158,15 +5820,17 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int): F
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<double> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<double>, target: int, start: int, end?: int): FixedArray<double> {
     target = normalizeIndex(target, self.length)
@@ -5197,15 +5861,16 @@ export function copyWithin(self: FixedArray<double>, target: int, start: int, en
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<double> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<double> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<double>, value: double, start?: int, end?: int): FixedArray<double> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -5218,14 +5883,15 @@ export function fill(self: FixedArray<double>, value: double, start?: int, end?:
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<double> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Double | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
@@ -5236,14 +5902,14 @@ export function find(self: FixedArray<double>, predicate: (value: double, index:
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<double> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -5255,12 +5921,15 @@ export function findIndex(self: FixedArray<double>, predicate: (value: double, i
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<double> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Double | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<double>, predicate: (elem: double, index: int, array: FixedArray<double>) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -5275,11 +5944,14 @@ export function findLast(self: FixedArray<double>, predicate: (elem: double, ind
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<double> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5293,11 +5965,14 @@ export function every(self: FixedArray<double>, predicate: (value: double, index
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<double> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<double>, predicate: (value: double, index: int, array: FixedArray<double>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -5309,13 +5984,15 @@ export function some(self: FixedArray<double>, predicate: (value: double, index:
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<double> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<double>, predicate: (element: double, index: int, array: FixedArray<double>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -5327,11 +6004,17 @@ export function findLastIndex(self: FixedArray<double>, predicate: (element: dou
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { double } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
@@ -5345,13 +6028,17 @@ export function reduce(self: FixedArray<double>, callbackfn: (previousValue: dou
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -5362,13 +6049,17 @@ export function reduce<U = double>(self: FixedArray<double>, callbackfn: (previo
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<double> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousValue: U, currentValue: double, index: int, array: FixedArray<double>) => U, initialValue: U): U {
     let acc = initialValue
@@ -5381,7 +6072,12 @@ export function reduceRight<U>(self: FixedArray<double>, callbackfn: (previousVa
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<double> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => void): void {
     const len0 = self.length;
@@ -5394,26 +6090,30 @@ export function forEach(self: FixedArray<double>, callbackfn: (value: double, in
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<double> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<double> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<double>, start: int): FixedArray<double> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<double> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<double> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<double>, start?: int, end?: int): FixedArray<double> {
     const len: int = self.length;
@@ -5430,16 +6130,15 @@ export function slice(self: FixedArray<double>, start?: int, end?: int): FixedAr
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<double> } self The array to operate `lastIndexOf` on.
+ * @param { double } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex?: int): int {
     if (self.length == 0) {
@@ -5463,13 +6162,16 @@ export function lastIndexOf(self: FixedArray<double>, element: double, fromIndex
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<double> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<double>, sep?: String): string {
     if (self.length == 0) {
@@ -5489,40 +6191,57 @@ export function join(self: FixedArray<double>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<double> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<double>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<double> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<double>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<double> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<double>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<double> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<double>): string {
     const sb = new StringBuilder()
@@ -5540,24 +6259,30 @@ export function toLocaleString(self: FixedArray<double>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start: int): FixedArray<double> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<double> } items The elements to add to the array.
+ * @returns { FixedArray<double> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...items: FixedArray<double>): FixedArray<double> {
     const len = self.length;
@@ -5584,13 +6309,15 @@ export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<double> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<double> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): FixedArray<double> {
     const len = self.length;
@@ -5598,14 +6325,15 @@ export function toSpliced(self: FixedArray<double>, start?: int, delete?: int): 
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<double> } self The array to operate `includes` on.
+ * @param { double } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<double>, val: double, fromIndex?: int): boolean {
     const len = self.length;
@@ -5627,14 +6355,14 @@ export function includes(self: FixedArray<double>, val: double, fromIndex?: int)
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<double> } self The array to operate `indexOf` on.
+ * @param { double } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -5647,10 +6375,13 @@ export function indexOf(self: FixedArray<double>, val: double, fromIndex?: int):
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<double> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<double> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<double>): FixedArray<double> {
     let arr = cloneArray(self);
@@ -5659,12 +6390,14 @@ export function toSorted(self: FixedArray<double>): FixedArray<double> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<double> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<double> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<double>, comparator: (a: double, b: double) => int): FixedArray<double> {
     let arr = cloneArray(self);
@@ -5673,10 +6406,14 @@ export function toSorted(self: FixedArray<double>, comparator: (a: double, b: do
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<double> } self The array to operate `reverse` on.
+ * @returns { FixedArray<double> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<double>): FixedArray<double> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -5690,10 +6427,13 @@ export function reverse(self: FixedArray<double>): FixedArray<double> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<double> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<double> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<double>): FixedArray<double> {
     let arr : FixedArray<double> = new FixedArray<double>(self.length)
@@ -5704,14 +6444,16 @@ export function toReversed(self: FixedArray<double>): FixedArray<double> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<double> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { double } value The new value to insert at the given index.
+ * @returns { FixedArray<double> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<double>, index: int, value: double): FixedArray<double> {
     if (index < 0) {
@@ -5726,14 +6468,26 @@ export function with(self: FixedArray<double>, index: int, value: double): Fixed
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<double> } self The array to operate `values` on.
+ * @returns { IterableIterator<double> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<double>): IterableIterator<double> {
     return new ArrayValuesIterator_double(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<double> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<double>): IterableIterator<[number, double]> {
     return new ArrayEntriesIterator_double(self);
@@ -5742,9 +6496,12 @@ export function entries(self: FixedArray<double>): IterableIterator<[number, dou
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<double> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<double> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => double): FixedArray<double> {
     const len = self.length;
@@ -5756,11 +6513,17 @@ export function map(self: FixedArray<double>, callbackfn: (value: double, index:
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<double> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { double } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue: double, currentValue: double, index: int, array: FixedArray<double>) => double): double {
     if (self.length == 0) {
@@ -5949,15 +6712,16 @@ function cloneArray(self: FixedArray<char>): FixedArray<char> {
 }
 
 /**
- * Takes an integer value and returns the item at that index,
- * allowing for positive and negative integers. Negative integers count back
- * from the last item in the array.
+ * Takes an integer value and returns the item at that index, allowing for positive and negative integers.
+ * Negative integers count back from the last item in the array.
  *
- * @param index Zero-based index of the array element to be returned.
- * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
- *
- * @returns The element in the array matching the given index.
- * Throw range error if `index` < `-length()` or `index` >= `length()`.
+     @param { FixedArray<char> } self The array to operate `at` on.
+ * @param { int } index Zero-based index of the array element to be returned.
+ * @returns { Char } The element at the given index.
+ * @throws { RangeError } Throws a RangeError if the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function at(self: FixedArray<char>, index: int): Char {
     let len = self.length;
@@ -5976,11 +6740,15 @@ export function at(self: FixedArray<char>, index: int): Char {
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @returns this array after transformation
+     * @param { FixedArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @returns { FixedArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int): FixedArray<char> {
     copyWithin(self, target, 0, self.length);
@@ -5988,13 +6756,16 @@ export function copyWithin(self: FixedArray<char>, target: int): FixedArray<char
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @returns { FixedArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int, start: int): FixedArray<char> {
     copyWithin(self, target, start, self.length);
@@ -6002,15 +6773,17 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int): Fix
 }
 
 /**
- * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its length.
+ * Makes a shallow copy of the Array part to another location in the same Array and returns it without modifying its
+ * length.
  *
- * @param target index at which to copy the sequence
- *
- * @param start index at which to start copying elements from
- *
- * @param end index at which to end copying elements from
- *
- * @returns this array after transformation
+     * @param { FixedArray<char> } self The array to operate `copyWithin` on.
+ * @param { int } target Zero-based index at which to copy the sequence to.
+ * @param { int } start Zero-based index at which to start copying elements from.
+ * @param { int } [end] Zero-based index at which to end copying elements from.
+ * @returns { FixedArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function copyWithin(self: FixedArray<char>, target: int, start: int, end?: int): FixedArray<char> {
     target = normalizeIndex(target, self.length)
@@ -6041,15 +6814,16 @@ export function copyWithin(self: FixedArray<char>, target: int, start: int, end?
 }
 
 /**
- * Changes all elements in the Array to a static value, from a start index to an end index
+ * Changes all elements in the Array to a static value, from a start index to an end index.
  *
- * @param value to fill the array with
- *
- * @param start index at which to start filling
- *
- * @param end index at which to end filling, but not including
- *
- * @returns this array after transformation
+     * @param { FixedArray<char> } self The array to operate `fill` on.
+ * @param { T } value The value to fill the array with.
+ * @param { int } [start] The index at which to start filling (optional).
+ * @param { int } [end] The index at which to end filling (optional, not included).
+ * @returns { FixedArray<char> } The modified array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function fill(self: FixedArray<char>, value: char, start?: int, end?: int): FixedArray<char> {
     start = normalizeIndex(start ?? 0, self.length);
@@ -6062,14 +6836,15 @@ export function fill(self: FixedArray<char>, value: char, start?: int, end?: int
 }
 
 /**
- * Returns the value of the first element in the array where predicate is true, and undefined
- * otherwise.
+ * Returns the value of the first element in the array where predicate is true, and undefined otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found, find
- * immediately returns that element value. Otherwise, find returns undefined.
- *
- * @returns the value of the first element in the array or undefined
+     * @param { FixedArray<char> } self The array to operate `find` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Char | undefined } The value of the first element that satisfies the provided testing function;
+ *     otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function find(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
@@ -6080,14 +6855,14 @@ export function find(self: FixedArray<char>, predicate: (value: char, index: int
 }
 
 /**
- * Returns the index of the first element in the array where predicate is true, and -1
- * otherwise.
+ * Returns the index of the first element in the array where predicate is true, and -1 otherwise.
  *
- * @param predicate find calls predicate once for each element of the array, in ascending
- * order, until it finds one where predicate returns true. If such an element is found,
- * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
- *
- * @returns found element index or -1 otherwise
+     * @param { FixedArray<char> } self The array to operate `findIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findIndex(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = 0; i < self.length; i++) {
@@ -6099,12 +6874,15 @@ export function findIndex(self: FixedArray<char>, predicate: (value: char, index
 }
 
 /**
- * Iterates the array in reverse order and returns the value of the first element
- * that satisfies the provided testing function
+ * Iterates the array in reverse order and returns the value of the first element that satisfies the provided
+ * testing function.
  *
- * @param predicate testing function
- *
- * @returns found element or undefined otherwise
+     * @param { FixedArray<char> } self The array to operate `findLast` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { Char | undefined } The value of the element if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLast(self: FixedArray<char>, predicate: (elem: char, index: int, array: FixedArray<char>) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6119,11 +6897,14 @@ export function findLast(self: FixedArray<char>, predicate: (elem: char, index: 
 /**
  * Determines whether all the members of an array satisfy the specified test.
  *
- * @param predicate A function that accepts up to three arguments. The every method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value false, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     * @param { FixedArray<char> } self The array to operate `every` on.
+ * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value false, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function every(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -6137,11 +6918,14 @@ export function every(self: FixedArray<char>, predicate: (value: char, index: in
 /**
  * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param predicate A function that accepts up to three arguments. The some method calls
- * the predicate function for each element in the array until the predicate returns a value
- * which is coercible to the Boolean value true, or until the end of the array.
- *
- * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @param { FixedArray<char> } self The array to operate `some` on.
+ * @param { function } predicate A function that accepts up to three arguments. The some method calls the predicate
+ *     function for each element in the array until the predicate returns a value which is
+ *     coercible to the Boolean value true, or until the end of the array.
+ * @returns { boolean } True if the predicate returns true for at least one element in the array; otherwise, false.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function some(self: FixedArray<char>, predicate: (value: char, index: int, array: FixedArray<char>) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
@@ -6153,13 +6937,15 @@ export function some(self: FixedArray<char>, predicate: (value: char, index: int
 }
 
 /**
- * Iterates the array in reverse order and returns the index of
- * the first element that satisfies the provided testing function.
- * If no elements satisfy the testing function, -1 is returned.
+ * Iterates the array in reverse order and returns the index of the first element that satisfies the provided
+ * testing function. If no elements satisfy the testing function, -1 is returned.
  *
- * @param predicate testing function
- *
- * @returns index of first element satisfying to predicate, -1 if no such element
+     * @param { FixedArray<char> } self The array to operate `findLastIndex` on.
+ * @param { function } predicate A function to execute on each value in the array.
+ * @returns { int } The index of the first element that satisfies the provided testing function; otherwise, -1.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function findLastIndex(self: FixedArray<char>, predicate: (element: char, index: int, array: FixedArray<char>) => boolean): int {
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6171,11 +6957,17 @@ export function findLastIndex(self: FixedArray<char>, predicate: (element: char,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @returns { char } The accumulated result.
+ * @throws { TypeError } Throws a TypeError if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
@@ -6189,13 +6981,17 @@ export function reduce(self: FixedArray<char>, callbackfn: (previousValue: char,
 }
 
 /**
- * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function
+ * is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+     * @param { FixedArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduce method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -6206,13 +7002,17 @@ export function reduce<U = char>(self: FixedArray<char>, callbackfn: (previousVa
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
- *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of
+ * the callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
+     * @param { FixedArray<char> } self The array to operate `reduce` on.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ *     callbackfn function one time for each element in the array.
+ * @param { U } initialValue The initial value of the accumulator.
+ * @returns { U } The accumulated result.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValue: U, currentValue: char, index: int, array: FixedArray<char>) => U, initialValue: U): U {
     let acc = initialValue
@@ -6225,7 +7025,12 @@ export function reduceRight<U>(self: FixedArray<char>, callbackfn: (previousValu
 /**
  * Performs the specified action for each element in an array.
  *
- * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     * @param { FixedArray<char> } self The array to operate `forEach` on.
+ * @param { function } callbackfn A function that accepts up to three arguments. forEach calls the callbackfn
+ *     function one time for each element in the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function forEach(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => void): void {
     const len0 = self.length;
@@ -6238,26 +7043,30 @@ export function forEach(self: FixedArray<char>, callbackfn: (value: char, index:
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `Int.MAX_VALUE`, which means 'to the end of an array'.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<char> } self The array to operate `slice` on.
+ * @param { int } start The beginning index of the specified portion of the array.
+ * @returns { FixedArray<char> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<char>, start: int): FixedArray<char> {
     return slice(self, start, Int.MAX_VALUE);
 }
 
 /**
- * Creates a new `Array` object and populates it with elements of `this` instance of `Array` class
- * selected from `start` to `end` (`end` not included) where `start` and `end` represent the index of items in that array.
+ * Returns a copy of a section of an array.
  *
- * @param start zero-based index at which to start extraction
- *
- * @param end zero-based index at which to end extraction. `slice()` extracts up to but not including end.
- *
- * @returns `Array` instance, constructed from extracted elements of `this` instance.
+     * @param { FixedArray<char> } self The array to operate `slice` on.
+ * @param { int } [start] The beginning index of the specified portion of the array.
+ * @param { int } [end] The end index of the specified portion of the array. The slice includes elements up to but not
+ *     including the end index.
+ * @returns { FixedArray<char> } A new Array object containing the extracted elements.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArray<char> {
     const len: int = self.length;
@@ -6274,16 +7083,15 @@ export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArra
 }
 
 /**
- * Returns the last index at which a given element can be found in the array,
- * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+ * Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array
+ * is searched backwards.
  *
- * @param element element to locate in the array.
- * @param fromIndex zero-based index at which to start searching backwards.
- * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
- * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
- * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
- *
- * @returns The last index of the element in the array; -1 if not found.
+     * @param { FixedArray<char> } self The array to operate `lastIndexOf` on.
+ * @param { char } searchElement The element to locate in the array.
+ * @returns { int } The last index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: int): int {
     if (self.length == 0) {
@@ -6307,13 +7115,16 @@ export function lastIndexOf(self: FixedArray<char>, element: char, fromIndex?: i
 }
 
 /**
- * Creates and returns a new string by concatenating all of the elements in an `Array`,
- * separated by a specified separator string.
- * If the array has only one item, then that item will be returned without using the separator.
+ * Creates and returns a new string by concatenating all of the elements in an `Array`, separated by a specified
+ * separator string.
  *
- * @param sep specifies a separator
- *
- * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
+     * @param { FixedArray<char> } self The array to operate `join` on.
+ * @param { String } [sep] A string to separate each pair of adjacent elements of the array. If omitted, the array
+ *     elements are separated with a comma.
+ * @returns { string } A string with all array elements joined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function join(self: FixedArray<char>, sep?: String): string {
     if (self.length == 0) {
@@ -6333,40 +7144,57 @@ export function join(self: FixedArray<char>, sep?: String): string {
 /**
  * Returns a string representing the specified array and its elements.
  *
- * @returns string representation
+     * @param { FixedArray<char> } self The array to operate `stringify` on.
+ * @returns { string } A string representing the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toString(self: FixedArray<char>): string {
     return join(self, ",");
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param locales
- *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<char> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @param { Object } options An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @throws { Error } Throws an Error if the method is not implemented.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<char>, locales: Object, options: Object): string {
     throw new Error("Array.toLocaleString: not implemented")
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @param options
- *
- * @returns string representation
+     * @param { FixedArray<char> } self The array to operate `toLocaleString` on.
+ * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<char>, locales: Object): string {
     return toLocaleString(self, new Object(), new Object())
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
  *
- * @returns string representation
+     * @param { FixedArray<char> } self The array to operate `toLocaleString` on.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toLocaleString(self: FixedArray<char>): string {
     const sb = new StringBuilder()
@@ -6384,24 +7212,30 @@ export function toLocaleString(self: FixedArray<char>): string {
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @returns { Array<T> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start: int): FixedArray<char> {
     return toSpliced(self, start, self.length)
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } start The zero-based index at which to start changing the array.
+ * @param { int } delete The number of elements to remove.
+ * @param { FixedArray<char> } items The elements to add to the array.
+ * @returns { FixedArray<char> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...items: FixedArray<char>): FixedArray<char> {
     const len = self.length;
@@ -6428,13 +7262,15 @@ export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...it
 }
 
 /**
- * Copying version of the splice() method.
+ * Returns a new array with some elements removed and/or replaced at a given index.
  *
- * @param start index
- *
- * @param delete number of items after start index
- *
- * @returns a new Array with some elements removed and/or replaced at a given index.
+     * @param { FixedArray<char> } self The array to operate `toSpliced` on.
+ * @param { int } [start] The zero-based index at which to start changing the array.
+ * @param { int } [delete] The number of elements to remove.
+ * @returns { FixedArray<char> } A new array with the changes applied.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): FixedArray<char> {
     const len = self.length;
@@ -6442,14 +7278,15 @@ export function toSpliced(self: FixedArray<char>, start?: int, delete?: int): Fi
 }
 
 /**
- * Checks whether an Array includes a certain value among its entries,
- * returning true or false as appropriate.
+ * Determines whether an array includes a certain value among its entries, returning true or false as appropriate.
  *
- * @param val value to search
- *
- * @param fromIndex start index
- *
- * @returns true if val is in Array
+     * @param { FixedArray<char> } self The array to operate `includes` on.
+ * @param { char } val The value to search for.
+ * @param { int } [fromIndex] The position in this array at which to begin searching for value.
+ * @returns { boolean } True if the value is found, false otherwise.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function includes(self: FixedArray<char>, val: char, fromIndex?: int): boolean {
     const len = self.length;
@@ -6463,14 +7300,14 @@ export function includes(self: FixedArray<char>, val: char, fromIndex?: int): bo
 }
 
 /**
- * Returns the first index at which a given element
- * can be found in the array, or -1 if it is not present.
+ * Returns the first index at which a given element can be found in the array, or -1 if it is not present.
  *
- * @param val value to search
- *
- * @param fromIndex index to search from
- *
- * @returns index of val, -1 otherwise
+     * @param { FixedArray<char> } self The array to operate `indexOf` on.
+ * @param { char } val The element to locate in the array.
+ * @returns { int } The first index of the element in the array; -1 if not found.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int {
     const normFromIndex = normalizeIndex(asIntOrDefault(fromIndex, 0), self.length)
@@ -6483,10 +7320,13 @@ export function indexOf(self: FixedArray<char>, val: char, fromIndex?: int): int
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted in ascending order.
  *
- * @returns sorted copy of hte current instance using default comparator
+     * @param { FixedArray<char> } self The array to operate `toSorted` on.
+ * @returns { FixedArray<char> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<char>): FixedArray<char> {
     let arr = cloneArray(self);
@@ -6495,12 +7335,14 @@ export function toSorted(self: FixedArray<char>): FixedArray<char> {
 }
 
 /**
- * Copying version of the sort() method.
- * It returns a new array with the elements sorted in ascending order.
+ * Returns a new array with the elements sorted using the provided comparator function.
  *
- * @param comparator function to compare to elements of the Array
- *
- * @returns sorted copy of the current instance comparator
+     * @param { FixedArray<char> } self The array to operate `toSorted` on.
+ * @param { function } comparator A function that defines the sort order.
+ * @returns { FixedArray<char> } A new sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) => int): FixedArray<char> {
     let arr = cloneArray(self);
@@ -6509,10 +7351,14 @@ export function toSorted(self: FixedArray<char>, comparator: (a: char, b: char) 
 }
 
 /**
- * Modifies `this` instance of `Array` class and populates
- * it with same elements ordered towards the direction opposite to that previously stated.
+ * Reverses an array in place. The first array element becomes the last, and the last array element becomes the
+ * first.
  *
- * @note Mutating method
+     * @param { FixedArray<char> } self The array to operate `reverse` on.
+ * @returns { FixedArray<char> } The reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function reverse(self: FixedArray<char>): FixedArray<char> {
     for (let i = 0; i < self.length / 2; i++) {
@@ -6526,10 +7372,13 @@ export function reverse(self: FixedArray<char>): FixedArray<char> {
 }
 
 /**
- * Copying version of the reverse() method.
- * It returns a new array with the elements in reversed order.
+ * Returns a new array with the elements in reversed order.
  *
- * @returns reversed copy of the current Array
+     * @param { FixedArray<char> } self The array to operate `toReversed` on.
+ * @returns { FixedArray<char> } A new reversed array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function toReversed(self: FixedArray<char>): FixedArray<char> {
     let arr : FixedArray<char> = new FixedArray<char>(self.length)
@@ -6540,14 +7389,16 @@ export function toReversed(self: FixedArray<char>): FixedArray<char> {
 }
 
 /**
- * Copying version of using the bracket notation to change the value of a given index.
- * It returns a new Array with the element at the given index replaced with the given value.
+ * Returns a new Array with the element at the given index replaced with the given value.
  *
- * @param index to replace
- *
- * @param value new value
- *
- * @returns a new Array with the element at the given index replaced with the given value
+     * @param { FixedArray<char> } self The array to operate `with` on.
+ * @param { int } index The zero-based index at which to replace the value.
+ * @param { char } value The new value to insert at the given index.
+ * @returns { FixedArray<char> } A new array with the element replaced.
+ * @throws { RangeError } If the index is out of bounds.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function with(self: FixedArray<char>, index: int, value: char): FixedArray<char> {
     if (index < 0) {
@@ -6562,14 +7413,26 @@ export function with(self: FixedArray<char>, index: int, value: char): FixedArra
 }
 
 /**
- * Returns an iterator over all values
+ * Returns a new Array Iterator object that contains the values for each index in the array.
+ *
+     * @param { FixedArray<char> } self The array to operate `values` on.
+ * @returns { IterableIterator<char> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function values(self: FixedArray<char>): IterableIterator<char> {
     return new ArrayValuesIterator_char(self);
 }
 
 /**
- * Returns an iterable of key, value pairs for every entry in the array
+ * Returns a new Array Iterator object that contains the key/value pairs for each index in the array.
+ *
+     * @param { FixedArray<char> } self The array to operate `entries` on.
+ * @returns {IterableIterator<[number, T]> } A new Array Iterator object.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function entries(self: FixedArray<char>): IterableIterator<[number, char]> {
     return new ArrayEntriesIterator_char(self);
@@ -6578,9 +7441,12 @@ export function entries(self: FixedArray<char>): IterableIterator<[number, char]
 /**
  * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
- *
- * @returns `Array` instance, constructed from `this` and given function.
+ * @param { FixedArray<char> } self The array to map.
+ * @param { function } callbackfn A function that accepts up to three arguments. The map method calls the callbackfn
+ * function one time for each element in the array.
+ * @returns { FixedArray<char> } An array instance, constructed from `this` and given function.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function map(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => char): FixedArray<char> {
     const len = self.length;
@@ -6592,11 +7458,17 @@ export function map(self: FixedArray<char>, callbackfn: (value: char, index: int
 }
 
 /**
- * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the
+ * callback function is the accumulated result, and is provided as an argument in the next call to the callback
+ * function.
  *
- * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
- *
- * @returns a result after applying callbackfn over all elements of the Array
+ * @param { FixedArray<char> } self The array to reduce.
+ * @param { function } callbackfn A function that accepts up to four arguments. The reduceRight method calls the
+ * callbackfn function one time for each element in the array.
+ * @returns { char } A result after applying callbackfn over all elements of the Array.
+ * @throws { TypeError } Throws if the array is empty and no initial value is provided.
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
  */
 export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: char, currentValue: char, index: int, array: FixedArray<char>) => char): char {
     if (self.length == 0) {
