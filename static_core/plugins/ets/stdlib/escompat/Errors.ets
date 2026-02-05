@@ -22,17 +22,20 @@ package escompat;
 
 /**
  * Represents an evaluation error
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class EvalError extends Error {
     /**
      * Constructs a new EvalError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -42,11 +45,12 @@ export class EvalError extends Error {
     /**
      * Constructs a new EvalError instance with provided message and options
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { EvalError } - Newly created EvalError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): EvalError {
@@ -55,18 +59,22 @@ export class EvalError extends Error {
 }
 
 /**
- * Represents an error that occurs when a numeric types conversion is performed on an index expression, and the fractional part differs from 0.
+ * Represents an error that occurs when a numeric types conversion is performed on an index expression,
+ * and the fractional part differs from 0.
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class NonIntegralIndexError extends Error {
     /**
      * Constructs a new NonIntegralIndexError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -76,11 +84,12 @@ export class NonIntegralIndexError extends Error {
     /**
      * Constructs a new NonIntegralIndexError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { NonIntegralIndexError } - Newly created NonIntegralIndexError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): NonIntegralIndexError {
@@ -89,18 +98,22 @@ export class NonIntegralIndexError extends Error {
 }
 
 /**
- * Represents an error that occurs when an operation could not be performed, typically (but not exclusively) when a value is not of the expected type
+ * Represents an error that occurs when an operation could not be performed, typically (but not exclusively)
+ * when a value is not of the expected type
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class TypeError extends Error {
     /**
      * Constructs a new TypeError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -110,11 +123,12 @@ export class TypeError extends Error {
     /**
      * Constructs a new TypeError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { TypeError } - Newly created TypeError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): TypeError {
@@ -123,18 +137,22 @@ export class TypeError extends Error {
 }
 
 /**
- * Represents an error that occurs when a variable that doesn't exist (or hasn't yet been initialized) in the current scope is referenced
+ * Represents an error that occurs when a variable that doesn't exist (or hasn't yet been initialized)
+ * in the current scope is referenced
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class ReferenceError extends Error {
     /**
      * Constructs a new ReferenceError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -144,11 +162,12 @@ export class ReferenceError extends Error {
     /**
      * Constructs a new ReferenceError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { ReferenceError } - Newly created ReferenceError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): ReferenceError {
@@ -158,17 +177,20 @@ export class ReferenceError extends Error {
 
 /**
  * Represents an error that occurs when a global URI handling function was used in a wrong way
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class URIError extends Error {
     /**
      * Constructs a new URIError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -178,11 +200,12 @@ export class URIError extends Error {
     /**
      * Constructs a new URIError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { URIError } - Newly created URIError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): URIError {
@@ -193,8 +216,10 @@ export class URIError extends Error {
 /**
  * AggregateError object represents an error when several errors
  * need to be wrapped in a single error.
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class AggregateError extends Error {
@@ -203,7 +228,8 @@ export class AggregateError extends Error {
      *
      * @type { Array<Error> }
      * @syscap SystemCapability.Utils.Lang
-     * @since 24
+     * @FaAndStageModel
+     * @since 24 static
      */
     errors: Array<Error>
 
@@ -211,9 +237,10 @@ export class AggregateError extends Error {
      * Constructs a new AggregateError instance with provided errors, message and error specific information
      *
      * @param { Iterable<Error> } errors - Errors to be aggregated
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
@@ -225,9 +252,10 @@ export class AggregateError extends Error {
      * Constructs a new AggregateError instance with provided errors, message and error specific information
      *
      * @param { Error[] } errors - Errors to be aggregated
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(errors: Error[], message?: String, options?: ErrorOptions) {
@@ -239,11 +267,12 @@ export class AggregateError extends Error {
      * Constructs a new AggregateError instance with provided message and error specific information
      *
      * @param { Iterable<Error> } errors - Errors to be aggregated
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { AggregateError } - Newly created AggregateError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
@@ -254,11 +283,12 @@ export class AggregateError extends Error {
      * Constructs a new AggregateError instance with provided message and error specific information
      *
      * @param { Error[] } errors - Errors to be aggregated
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { AggregateError } - Newly created AggregateError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
@@ -269,17 +299,20 @@ export class AggregateError extends Error {
 
 /**
  * Represents an error that occurs when an input string contains invalid or incorrectly formatted data.
+ *
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class FormatError extends Error {
     /**
      * Constructs a new FormatError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -289,11 +322,12 @@ export class FormatError extends Error {
     /**
      * Constructs a new FormatError instance with provided message and error specific information
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { FormatError } - Newly created FormatError instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): FormatError {

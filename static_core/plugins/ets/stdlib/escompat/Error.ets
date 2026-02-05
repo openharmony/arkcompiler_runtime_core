@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * @file Defines the Error for ArkTS
  * @kit ArkTS
@@ -21,8 +20,11 @@
 package escompat;
 
 /**
- * Defines an interface for Error options
+ * Defines ErrorOptions interface
+ *
+ * @interface ErrorOptions
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export interface ErrorOptions {
@@ -32,16 +34,18 @@ export interface ErrorOptions {
      * @type { Object | undefined }
      * @default undefined
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     cause?: Object
 }
 
 /**
- * Implementation of ErrorOptions
+ * Defines ErrorOptionsImpl class
  *
- * @implements ErrorOptions
+ * @implements { ErrorOptions }
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class ErrorOptionsImpl implements ErrorOptions {
@@ -51,6 +55,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      * @type { Object | undefined }
      * @default undefined
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     cause_?: Object
@@ -60,6 +65,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      *
      * @returns { Object | undefined } - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     override get cause(): Object | undefined {
@@ -71,6 +77,7 @@ export class ErrorOptionsImpl implements ErrorOptions {
      *
      * @param { Object | undefined } cause - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set cause(cause: Object | undefined) {
@@ -78,10 +85,11 @@ export class ErrorOptionsImpl implements ErrorOptions {
     }
 
     /**
-     * Constructor for ErrorOptions
+     * Constructor for ErrorOptionsImpl
      *
-     * @param { Object | undefined } cause - A cause of the Error
+     * @param { Object } [cause] - A cause of the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(cause?: Object) {
@@ -90,9 +98,10 @@ export class ErrorOptionsImpl implements ErrorOptions {
 }
 
 /**
- * Stores information about stacktrace and cause in case of an error.
- * Serves as a base class for all error classes.
+ * Defines Error class
+ *
  * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
  * @since 24
  */
 export class Error {
@@ -107,9 +116,10 @@ export class Error {
      * Constructs a new error instance with provided code, message and cause
      *
      * @param { int } code - Error code
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(code: int, message?: String, options?: ErrorOptions) {
@@ -119,9 +129,10 @@ export class Error {
     /**
      * Constructs a new error instance with provided message and cause
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
@@ -133,9 +144,10 @@ export class Error {
      *
      * @param { String } name - Error name
      * @param { int } code - Error code
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(name: String, code: int, message?: String, options?: ErrorOptions) {
@@ -151,8 +163,9 @@ export class Error {
      *
      * @param { String } name - Error name
      * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { ErrorOptions } [options] - Error options
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     constructor(name: String, message: String | undefined, options?: ErrorOptions) {
@@ -162,8 +175,9 @@ export class Error {
     /**
      * Gets the name of the error.
      *
-     * @returns { String } - Current error name
+     * @returns { string } - Current error name
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     get name(): string {
@@ -173,8 +187,9 @@ export class Error {
     /**
      * Sets the name of the error.
      *
-     * @param { String } val - New name for the Error
+     * @param { string } val - New name for the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set name(val: string) {
@@ -186,6 +201,7 @@ export class Error {
      *
      * @returns { int } - Current error code
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     get code(): int {
@@ -197,6 +213,7 @@ export class Error {
      *
      * @param { int } val - New code for the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set code(val: int) {
@@ -206,8 +223,9 @@ export class Error {
     /**
      * Gets the message of the error.
      *
-     * @returns { String } - Current error message
+     * @returns { string } - Current error message
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     get message(): string {
@@ -217,8 +235,9 @@ export class Error {
     /**
      * Sets the message of the error.
      *
-     * @param { String } val - New message for the Error
+     * @param { string } val - New message for the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set message(val: string) {
@@ -230,6 +249,7 @@ export class Error {
      *
      * @returns { Object | undefined } - Current error cause
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     get cause(): Object | undefined {
@@ -241,6 +261,7 @@ export class Error {
      *
      * @param { Object | undefined } val - New cause for the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set cause(val: Object | undefined) {
@@ -250,11 +271,12 @@ export class Error {
     /**
      * Constructs a new error instance with provided message and options
      *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
+     * @param { String } [message] - Error text
+     * @param { ErrorOptions } [options] - Error options
      * @returns { Error } - Newly created Error instance
      * @static
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): Error {
@@ -264,8 +286,9 @@ export class Error {
     /**
      * Converts this error to a string
      *
-     * @returns { string } - String representation of the Error
+     * @returns { String } - String representation of the Error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     override toString(): String {
@@ -277,6 +300,7 @@ export class Error {
      *
      * @returns { String | undefined } - Current error stacktrace
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     get stack(): String | undefined {
@@ -289,6 +313,7 @@ export class Error {
      *
      * @param { String | undefined } newStack - New stacktrace for the error
      * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
      * @since 24
      */
     set stack(newStack: String | undefined) {
