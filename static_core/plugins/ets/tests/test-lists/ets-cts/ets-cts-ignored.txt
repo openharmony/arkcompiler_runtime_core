@@ -539,9 +539,6 @@
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_0.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_1.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_2.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n1.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n2.ets
-09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n3.ets
 
 #32355
 09.classes/06.field_declarations/06.overriding_fields/implementing_property_pos_dif_comb1_0.ets
