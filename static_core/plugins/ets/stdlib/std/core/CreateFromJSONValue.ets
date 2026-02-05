@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,23 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the CreateFromJSONValue for ArkTS
+ * @kit ArkTS
+ */
+
 package std.core;
 
 /**
  * Creates a Boolean instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid boolean literal
- *
- * @returns Boolean - true if JSON encodes true literal, false if JSON encodes false literal
+ * @param { Boolean } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Boolean } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Boolean, json: JSONValue): Boolean {
     if (json instanceof JSONFalse) {
@@ -36,11 +43,13 @@ export function createFromJSONValue(this: Boolean, json: JSONValue): Boolean {
 /**
  * Creates a Byte instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid byte
- *
- * @returns Byte - byte value decoded from JSON
+ * @param { Byte } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Byte } - byte value decoded from JSON
+ * @throws { JSONTypeError } if json does not encode a valid byte
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Byte, json: JSONValue): Byte {
     if (json instanceof JSONNumber) {
@@ -55,11 +64,13 @@ export function createFromJSONValue(this: Byte, json: JSONValue): Byte {
 /**
  * Creates a Char instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid char
- *
- * @returns char - char value decoded from JSON
+ * @param { Char } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Char } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Char, json: JSONValue): Char {
     if (json instanceof JSONString) {
@@ -74,11 +85,13 @@ export function createFromJSONValue(this: Char, json: JSONValue): Char {
 /**
  * Creates a Short instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid short
- *
- * @returns Short - short value decoded from JSON
+ * @param { Short } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Short } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Short, json: JSONValue): Short {
     if (json instanceof JSONNumber) {
@@ -93,11 +106,13 @@ export function createFromJSONValue(this: Short, json: JSONValue): Short {
 /**
  * Creates a Int instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid int
- *
- * @returns Int - int value decoded from JSON
+ * @param { Int } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Int } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Int, json: JSONValue): Int {
     if (json instanceof JSONNumber) {
@@ -112,11 +127,13 @@ export function createFromJSONValue(this: Int, json: JSONValue): Int {
 /**
  * Creates a Long instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid long
- *
- * @returns Long - long value decoded from JSON
+ * @param { Long } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Long } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Long, json: JSONValue): Long {
     if (json instanceof JSONNumber) {
@@ -131,11 +148,13 @@ export function createFromJSONValue(this: Long, json: JSONValue): Long {
 /**
  * Creates a Float instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid float
- *
- * @returns Float - float value decoded from JSON
+ * @param { Float } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Float } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Float, json: JSONValue): Float {
     if (json instanceof JSONNumber) {
@@ -148,14 +167,16 @@ export function createFromJSONValue(this: Float, json: JSONValue): Float {
 }
 
 /**
+/**
  * Creates a Double instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid double
- *
- * @returns Double - double value decoded from JSON
- * @tag arkts
+ * @param { Double } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Double } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: Double, json: JSONValue): Double {
     if (json instanceof JSONNumber) {
@@ -167,11 +188,13 @@ export function createFromJSONValue(this: Double, json: JSONValue): Double {
 /**
  * Creates a String instance based on JSONValue
  *
- * @param json: JSONValue - a JSON representation
- *
- * @throws JSONTypeError if json does not encode a valid String
- *
- * @returns String - string value decoded from JSON
+ * @param { String } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { String } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid String
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function createFromJSONValue(this: String, json: JSONValue): String {
     if (json instanceof JSONString) {

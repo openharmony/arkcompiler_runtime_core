@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,19 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the Comparable for ArkTS
+ * @kit ArkTS
+ */
+
 package std.core;
 
 /**
  * Can be implemented by any type that supports comparison.
+ * @interface Comparable
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export interface Comparable<in T> {
 
@@ -26,11 +35,11 @@ export interface Comparable<in T> {
      * 0 if they are equal
      * and greater than 0 otherwise.
      *
-     * @param other object to compare with
-     *
-     * @throws ClassCastError if other is not a `T`
-     *
-     * @returns result of the comparison
+     * @param { T } to 
+     * @returns { int }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     compareTo(to: T): int;
 }
