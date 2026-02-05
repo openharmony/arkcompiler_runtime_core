@@ -1154,16 +1154,21 @@ void Inst::DumpSourceLine(std::ostream *out) const
 }
 #endif  // PANDA_COMPILER_DEBUG_INFO
 
+void Inst::DumpId(std::ostream *out) const
+{
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    (*out) << std::setw(INDENT_ID) << std::setfill(' ') << std::right
+           << IdToString(id_, allocator, false, IsPhi()) + '.';
+}
+
 void Inst::Dump(std::ostream *out, bool newLine) const
 {
-    // issue: #25677 - if GetBasicBlock() returns nullptr there will be segfault in GetBasicBlock()->GetGraph()
+    ASSERT(GetBasicBlock() != nullptr);
     if (g_options.IsCompilerDumpCompact() && (IsSaveState() || GetOpcode() == Opcode::NOP)) {
         return;
     }
-    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
     // Id
-    (*out) << std::setw(INDENT_ID) << std::setfill(' ') << std::right
-           << IdToString(id_, allocator, false, IsPhi()) + '.';
+    DumpId(out);
     // Type
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
     (*out) << std::setw(INDENT_TYPE) << std::left << DataType::ToString(GetType());
@@ -1189,6 +1194,7 @@ void Inst::Dump(std::ostream *out, bool newLine) const
         (*out) << spaceBuf.data();
         spaceBuf[posDiff] = ' ';
     }
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
     // bytecode pointer
     if (pc_ != INVALID_PC && !g_options.IsCompilerDumpCompact()) {
         (*out) << ' ' << PcToString(pc_, allocator);
