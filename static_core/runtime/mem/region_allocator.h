@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -551,6 +551,19 @@ public:
 
     void Collect(const GCObjectVisitor &deathChecker);
 
+    /**
+     * Reset regions from vector.
+     * @tparam REGIONS_TYPE - type of regions needed to proceed.
+     * @tparam REGIONS_RELEASE_POLICY - region need to be placed in the free queue or returned to mempool.
+     * @tparam OS_PAGES_POLICY - if we need to return region pages to OS or not.
+     * @tparam NEED_LOCK - if we need to take region lock or not. Use it if we allocate regions in parallel
+     * @param regions - vector of regions needed to proceed.
+     * @tparam Container - region's container type
+     */
+    template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK,
+              typename Container>
+    void ResetSeveralSpecificRegions(const Container &regions);
+
     template <typename ObjectVisitor>
     void IterateOverObjects(const ObjectVisitor &objVisitor)
     {
@@ -572,7 +585,7 @@ public:
         });
     }
 
-    void VisitAndRemoveFreeRegions(const RegionsVisitor &regionVisitor);
+    PandaVector<Region *> VisitAndRemoveFreeRegions();
 
     constexpr static size_t GetMaxSize()
     {
@@ -633,7 +646,7 @@ public:
 
     void Free([[maybe_unused]] void *mem) {}
 
-    void CollectAndRemoveFreeRegions(const RegionsVisitor &regionVisitor, const GCObjectVisitor &deathChecker);
+    PandaVector<Region *> CollectFreeRegions(const GCObjectVisitor &deathChecker);
 
     /**
      * @brief Iterates over all objects allocated by this allocator.
@@ -644,6 +657,10 @@ public:
     {
         this->GetSpace()->IterateRegions([&](Region *region) { region->IterateOverObjects(visitor); });
     }
+
+    template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK,
+              typename Container>
+    void ResetSeveralSpecificRegions(const Container &regions);
 
     template <typename ObjectVisitor>
     void IterateOverObjectsInRange(const ObjectVisitor &visitor, void *begin, void *end)
