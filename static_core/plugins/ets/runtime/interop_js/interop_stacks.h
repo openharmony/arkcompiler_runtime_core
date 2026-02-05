@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_STACKS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_STACKS_H
 
+#include "hybrid/ecma_vm_interface.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 
 #include "plugins/ets/runtime/ets_call_stack.h"
@@ -24,16 +25,7 @@ namespace ark::ets::interop::js {
 
 class InteropCallStack final : public EtsCallStack {
 public:
-    InteropCallStack()
-    {
-        void *pool = ark::os::mem::MapRWAnonymousWithAlignmentRaw(POOL_SIZE, ark::os::mem::GetPageSize());
-        if (pool == nullptr) {
-            InteropFatal("InteropCallStack alloc failed");
-        }
-        startAddr_ = reinterpret_cast<Record *>(pool);
-        endAddr_ = reinterpret_cast<Record *>(ToUintPtr(pool) + POOL_SIZE);
-        curAddr_ = startAddr_;
-    }
+    InteropCallStack();
 
     ~InteropCallStack() override
     {
@@ -69,6 +61,11 @@ public:
         return {startAddr_, (ToUintPtr(curAddr_) - ToUintPtr(startAddr_)) / sizeof(Record)};
     }
 
+    bool ForEachInteropFrame(const std::function<void(const void *frame, bool isStaticFrame)> &callback);
+
+    void *GetStaticTopFrame() const;
+    void *GetDynamicTopFrameSP() const;
+
 private:
     NO_COPY_SEMANTIC(InteropCallStack);
     NO_MOVE_SEMANTIC(InteropCallStack);
@@ -83,6 +80,10 @@ private:
         }
         InteropFatal("InteropCallStack overflow");
     }
+
+    bool ForEachDynamicFrame(void *currFrameSP, void *toFrameSP,
+                             const std::function<void(const void *frame)> &cb) const;
+    bool ForEachStaticFrame(StackWalker *stack, void *toFrame, const std::function<void(const void *frame)> &cb) const;
 
     static constexpr uint32_t MAX_FRAMES = 1024;
     static constexpr size_t POOL_SIZE = MAX_FRAMES * sizeof(Record);

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 
 #include "hybrid/vm_interface.h"
 #include <cstdint>
+#include <functional>
 
 namespace arkplatform {
+using TaggedType = uint64_t;
 
 class EcmaVMInterface : public VMInterface {
 public:
@@ -43,6 +45,17 @@ public:
     virtual bool StartXRefMarking()
     {
         return true;
+    }
+
+    virtual TaggedType *GetTopFrameSPFromDynamic() const
+    {
+        return nullptr;
+    }
+
+    virtual bool ForEachDynamicFrame([[maybe_unused]] void *currFrameSP, [[maybe_unused]] void *toFrameSP,
+                                     [[maybe_unused]] const std::function<void(const void *)> &cb) const
+    {
+        return false;
     }
 };
 

@@ -295,6 +295,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/timer_helper/interop_timer_helper.cpp",
     "runtime/interop_js/interop_common.cpp",
     "runtime/interop_js/interop_context.cpp",
+    "runtime/interop_js/interop_stacks.cpp",
     "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",
     "runtime/interop_js/intrinsics_api_impl.cpp",
     "runtime/interop_js/js_job_queue.cpp",
@@ -314,6 +315,7 @@ if (ark_ets_interop_js) {
     "runtime/interop_js/xgc/xgc.cpp",
     "runtime/interop_js/xgc/xgc_vm_adaptor.cpp",
     "runtime/interop_js/xref_object_operator.cpp",
+    "runtime/tooling/internal_api.cpp",
   ]
 
   if (ark_ets_hybrid) {

@@ -51,6 +51,7 @@ endif(PANDA_JS_ETS_HYBRID_MODE)
 panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/intrinsics/std_js_jsruntime.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_context.cpp
+        ${ETS_EXT_SOURCES}/interop_js/interop_stacks.cpp
         ${ETS_EXT_SOURCES}/interop_js/intrinsics_api_impl.cpp
         ${ETS_EXT_SOURCES}/interop_js/call/call_js.cpp
         ${ETS_EXT_SOURCES}/interop_js/call/call_ets.cpp
@@ -92,6 +93,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/xgc/xgc_vm_adaptor.cpp
         ${ETS_EXT_SOURCES}/interop_js/xref_object_operator.cpp
         ${ETS_EXT_SOURCES}/interop_js/code_scopes.cpp
+        ${ETS_EXT_SOURCES}/tooling/internal_api.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
         ${ETS_INTEROP_HYBRID_SOURCES}
 )
