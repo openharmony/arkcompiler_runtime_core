@@ -16,7 +16,7 @@
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
-let original: String = new String("abcde");
+let original: String = "abcde";
 
 //! CHECKER       Equal Substring JIT
 //! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_string_substring.ETSGLOBAL::main"

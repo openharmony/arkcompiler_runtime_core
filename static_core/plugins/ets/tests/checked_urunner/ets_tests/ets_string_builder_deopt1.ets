@@ -17,7 +17,10 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER      JIT optimize string builder instance, don't insert deoptimization
-//! RUN          options: "--compiler-regex='.*ETSGLOBAL::(__noinline__caller|throws)' --no-async-jit=true --compiler-hotness-threshold=50 --compiler-profiling-threshold=0", entry: "ets_string_builder_deopt1.ETSGLOBAL::main"
+//! RUN          entry: "ets_string_builder_deopt1.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::(__noinline__caller|throws)'\
+//!                 --no-async-jit=true --compiler-hotness-threshold=50 --compiler-profiling-threshold=0"
+//!
 //! EVENT        /Inline,ets_string_builder_deopt1.ETSGLOBAL::__noinline__caller,ets_string_builder_deopt1.ETSGLOBAL::throws,.*,STATIC,SUCCESS/
 //! METHOD       "throws"
 //! PASS_BEFORE  "BranchElimination"

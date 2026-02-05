@@ -15,7 +15,9 @@
 
 //! CHECKER         Peepholes with Bitfield Extration JIT for AArch64
 //! SKIP_IF         @architecture != "arm64"
-//! RUN             force_jit: true, options: "--compiler-loop-unroll=false", entry: "lowering_bitfield_extraction.ETSGLOBAL::main"
+//! RUN             force_jit: true, entry: "lowering_bitfield_extraction.ETSGLOBAL::main",
+//!                 options: "--compiler-loop-unroll=false"
+//!
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::main,.*,COMPILED/
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::__noinline__foo1,.*,COMPILED/
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::__noinline__foo2,.*,COMPILED/
@@ -56,7 +58,9 @@
 
 //! CHECKER         Peepholes with Bitfield Extration JIT for Arm32 (bfx only supported for 32-bit integers)
 //! SKIP_IF         @architecture != "arm32"
-//! RUN             force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-loop-unroll=false", entry: "lowering_bitfield_extraction.ETSGLOBAL::main"
+//! RUN             force_jit: true, entry: "lowering_bitfield_extraction.ETSGLOBAL::main",
+//!                 options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-loop-unroll=false"
+//!
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::main,.*,COMPILED/
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::__noinline__foo1,.*,COMPILED/
 //! EVENT           /Compilation,lowering_bitfield_extraction.ETSGLOBAL::__noinline__foo2,.*,COMPILED/

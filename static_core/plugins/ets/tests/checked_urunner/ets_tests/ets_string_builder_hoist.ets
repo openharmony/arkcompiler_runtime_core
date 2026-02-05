@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-//! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! DEFINE_FRONTEND_OPTIONS     DEFAULT ARGS
+//! RUN_FRONTEND        options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER     AOT: Verify StringBuilder hoisting optimization for string concatenation in loop
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*will_hoist[0-9]+'"
+//! RUN_PAOC    options: "--compiler-regex='.*willHoist[0-9]+'"
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST        /Load.*std\.core\.StringBuilder/
@@ -30,9 +30,10 @@
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
-//! RUN         force_jit: true, options: "--compiler-regex='.*will_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
+//! RUN         force_jit: true, entry: "ets_string_builder_hoist.ETSGLOBAL::main",
+//!             options: "--compiler-regex='.*willHoist[0-9]+'"
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST        /LoadImmediate/
@@ -40,7 +41,7 @@
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
-function will_hoist1() {
+function willHoist1() {
     let ret: string = "test:"
     for (let i = 0; i < 10; i++) {
         ret += String(i)
@@ -51,33 +52,34 @@ function will_hoist1() {
 
 //! CHECKER     AOT: Verify StringBuilder hoisting is not performed in some case
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*will_not_hoist[0-9]+'"
+//! RUN_PAOC    options: "--compiler-regex='.*willNotHoist[0-9]+'"
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist2"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist2"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting is not performed in some case
-//! RUN         force_jit: true, options: "--compiler-regex='.*will_not_hoist[0-9]+'", entry: "ets_string_builder_hoist.ETSGLOBAL::main"
+//! RUN         force_jit: true, entry: "ets_string_builder_hoist.ETSGLOBAL::main",
+//!             options: "--compiler-regex='.*willNotHoist[0-9]+'"
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist2"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist2"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 
-function will_not_hoist1() {
+function willNotHoist1() {
     let ret: string = ""
     let acc: string = "test:"
     for (let i = 0; i < 10; i++, acc += String(i)) {
@@ -86,7 +88,7 @@ function will_not_hoist1() {
     return ret
 }
 
-function will_not_hoist2() {
+function willNotHoist2() {
     let ret: string = ""
     let acc: string = "test:"
     for (let i = 0; i < 10; acc += String(i), i++) {
@@ -96,15 +98,15 @@ function will_not_hoist2() {
 }
 
 function main() {
-    arktest.assertEQ(will_hoist1(), "test:0123456789")
-    arktest.assertEQ(will_not_hoist1(), "test:123456789")
-    arktest.assertEQ(will_not_hoist2(), "test:012345678")
+    arktest.assertEQ(willHoist1(), "test:0123456789")
+    arktest.assertEQ(willNotHoist1(), "test:123456789")
+    arktest.assertEQ(willNotHoist2(), "test:012345678")
 }
 
 //! CHECKER     BCO: Verify StringBuilder hoisting optimizations
 //! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST        /Load.*std\.core\.StringBuilder/
@@ -112,12 +114,12 @@ function main() {
 //! INST_NEXT   /CallStatic \d+ std\.core\.StringBuilder::<ctor>/
 //! INST_NOT   /StringBuilder::append/
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist1"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 //!
-//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::will_not_hoist2"
+//! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist2"
 //! PASS_AFTER  "SimplifyStringBuilder"
 //! IN_BLOCK    "prehead"
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/

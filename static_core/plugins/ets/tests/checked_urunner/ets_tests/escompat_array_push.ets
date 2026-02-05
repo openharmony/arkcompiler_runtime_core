@@ -17,31 +17,32 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       std.core Array push
-//! RUN           force_jit: true, options: "--compiler-regex=.*::test_array_push_.*", entry: "escompat_array_push.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::main",
+//!               options: "--compiler-regex=.*::testArrayPush.*"
 //!
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push"
+//! METHOD        "escompat_array_push.ETSGLOBAL::testArrayPush"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::push/
 //! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 //!
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_unions"
+//! METHOD        "escompat_array_push.ETSGLOBAL::testArrayPushUnions"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::push/
 //! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 //!
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_one"
+//! METHOD        "escompat_array_push.ETSGLOBAL::testArrayPushOne"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::pushOne/
 //! INST_COUNT    /CallStatic.*std.core.Array::pushOne/, 5
 //!
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_array"
+//! METHOD        "escompat_array_push.ETSGLOBAL::testArrayPushArray"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::pushArray/
 //! INST_COUNT    /CallStatic.*std.core.Array::pushArray/, 5
 
-function test_array_push() {
-    let array_size: int = 3;
-    let array1: Array<number> = new Array<number>(array_size);
+function testArrayPush() {
+    let arraySize: int = 3;
+    let array1: Array<number> = new Array<number>(arraySize);
 
     array1.push(-1);
     arktest.assertEQ(array1[array1.length - 1], -1);
@@ -62,13 +63,16 @@ function test_array_push() {
 }
 
 //! CHECKER       std.core Array push2
-//! RUN           force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::test_array_push_managed_objects' --compiler-if-conversion=false", entry: "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
-//! METHOD        "escompat_array_push.ETSGLOBAL::test_array_push_managed_objects"
+//! RUN           force_jit: true, entry: "escompat_array_push.ETSGLOBAL::testArrayPushManagedObjects",
+//!               options: "--compiler-regex='.*ETSGLOBAL::testArrayPushManagedObjects' \
+//!                --compiler-if-conversion=false"
+//!
+//! METHOD        "escompat_array_push.ETSGLOBAL::testArrayPushManagedObjects"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::push/
 //! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
-function test_array_push_managed_objects() {
-    let array: Array<Object> = new Array<Object>();
+function testArrayPushManagedObjects() {
+    let array: Array<Object> = [];
 
     // test number
     let obj1 = 123;
@@ -86,19 +90,18 @@ function test_array_push_managed_objects() {
     arktest.assertEQ(array[array.length - 1], str);
     arktest.assertEQ(array.length, 3);
 
-    let array1: Array<null> = new Array<null>();
+    let array1: Array<null> = [];
     // test null and undefined
     array1.push(null);
     arktest.assertEQ(array1[array1.length - 1], null);
 
-    let array2: Array<undefined> = new Array<undefined>();
+    let array2: Array<undefined> = [];
     array2.push(undefined);
     arktest.assertEQ(array2[array2.length - 1], undefined);
 }
 
-function test_array_push_unions() {
-    let array: Array<Object | null | undefined | number | string> =
-        new Array<Object | null | undefined | number | string>();
+function testArrayPushUnions() {
+    let array: Array<Object | null | undefined | number | string> = [];
     // test number
     array.push(123);
     arktest.assertEQ(array[array.length - 1], 123);
@@ -108,7 +111,7 @@ function test_array_push_unions() {
     arktest.assertEQ(array[array.length - 1], "abc");
 
     // test object
-    let obj: Object = new Object()
+    let obj: Object = {}
     array.push(obj);
     arktest.assertEQ(array[array.length - 1], obj);
 
@@ -123,9 +126,8 @@ function test_array_push_unions() {
     arktest.assertEQ(array.length, 5);
 }
 
-function test_array_push_one() {
-    let array: Array<Object | null | undefined | number | string> =
-        new Array<Object | null | undefined | number | string>();
+function testArrayPushOne() {
+    let array: Array<Object | null | undefined | number | string> = [];
     // test number
     array.pushOne(123);
     arktest.assertEQ(array[array.length - 1], 123);
@@ -135,7 +137,7 @@ function test_array_push_one() {
     arktest.assertEQ(array[array.length - 1], "abc");
 
     // test object
-    let obj: Object = new Object()
+    let obj: Object = {}
     array.pushOne(obj);
     arktest.assertEQ(array[array.length - 1], obj);
 
@@ -150,9 +152,8 @@ function test_array_push_one() {
     arktest.assertEQ(array.length, 5);
 }
 
-function test_array_push_array() {
-    let array: Array<Object | null | undefined | number | string> =
-        new Array<Object | null | undefined | number | string>();
+function testArrayPushArray() {
+    let array: Array<Object | null | undefined | number | string> = [];
     // test number
     array.pushArray(1, 2, 3);
     arktest.assertEQ(array[array.length - 1], 3);
@@ -162,9 +163,9 @@ function test_array_push_array() {
     arktest.assertEQ(array[array.length - 1], "c");
 
     // test object
-    let obj1: Object = new Object()
-    let obj2: Object = new Object()
-    let obj3: Object = new Object()
+    let obj1: Object = {}
+    let obj2: Object = {}
+    let obj3: Object = {}
     array.pushArray(obj1, obj2, obj3);
     arktest.assertEQ(array[array.length - 1], obj3);
 
@@ -180,8 +181,8 @@ function test_array_push_array() {
 }
 
 function main(): void {
-    test_array_push()
-    test_array_push_unions()
-    test_array_push_one()
-    test_array_push_array()
+    testArrayPush()
+    testArrayPushUnions()
+    testArrayPushOne()
+    testArrayPushArray()
 }

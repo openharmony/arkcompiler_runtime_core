@@ -13,37 +13,54 @@
  * limitations under the License.
  */
 
-/* `hot_inf` is inlined firstly even without profiling */
+/* `hotInf` is inlined firstly even without profiling */
 //! CHECKER      Check inlining sequence without profiling
-//! RUN          options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=100 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_3.ETSGLOBAL::main"
-//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
+//! RUN          entry: "inlining_order_3.ETSGLOBAL::main", 
+//!              options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=100 \
+//!                 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler \
+//!                 --compiler-log=inlining --no-async-jit"
+//!
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotInf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//!# EVENT_NEXT  \
+//!#        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotCatch,.*,STATIC,SUCCESS/
+//!#        (Inlining in catch blocks is not supported)
 
 //! CHECKER      Check inlining sequence with profiling
-//! RUN          options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler --compiler-log=inlining --no-async-jit", entry: "inlining_order_3.ETSGLOBAL::main"
-//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
+//! RUN          entry: "inlining_order_3.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::.*' --compiler-profiling-threshold=0 \
+//!                 --compiler-hotness-threshold=30 --log-level=debug --log-components=compiler \
+//!                 --compiler-log=inlining --no-async-jit"
+//!
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotInf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//!# EVENT_NEXT  \
+//!#        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotCatch,.*,STATIC,SUCCESS/
+//!#        (Inlining in catch blocks is not supported)
 
 //! CHECKER      Check inlining sequence with profiling (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: ""
-//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_inf,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//!# EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::hot_catch,.*,STATIC,SUCCESS/ (Inlining in catch blocks is not supported)
-//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::test_loops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//! RUN          options: "--log-level=debug --log-components=compiler --compiler-log=inlining", entry: "inlining_order_3.ETSGLOBAL::main"
+//! EVENT        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotInf,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//!
+//!# EVENT_NEXT  \
+//!#        /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::hotCatch,.*,STATIC,SUCCESS/
+//!#        (Inlining in catch blocks is not supported)
+//!
+//! EVENT_NEXT   /Inline,inlining_order_3.ETSGLOBAL::testLoops,inlining_order_3.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! RUN          entry: "inlining_order_3.ETSGLOBAL::main",
+//!              options: "--log-level=debug --log-components=compiler --compiler-log=inlining"
 
 function cold(): int { return 30; }
 
-function hot_inf(i:int):int { return -i; }
-function hot_catch(i:int):int { return -i; }
+function hotInf(i:int):int { return -i; }
+function hotCatch(i:int):int { return -i; }
 function hot(i:int):int { return -i; }
 
-function test_loops(): void {
+function testLoops(): void {
     let N = cold();
     let arr: FixedArray<int> = new FixedArray<int>(N);
 
@@ -51,17 +68,17 @@ function test_loops(): void {
         arr[i] += hot(i);
         try {
             for (;;) {
-                arr[i + N] = hot_inf(i);
+                arr[i + N] = hotInf(i);
             }
         } catch (e) {
-            arr[i] += hot_catch(i);
+            arr[i] += hotCatch(i);
         }
     }
 }
 
 function main(): int {
     for (let i = 0; i < 3; i++) {
-        test_loops();
+        testLoops();
     }
     return 0;
 }

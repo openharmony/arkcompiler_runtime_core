@@ -14,9 +14,14 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Do not optimize inlined throws
-//! RUN          force_jit: true, options: "--compiler-regex='.*MultipleCatch::__noinline__multipleCatch' --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-inlining-max-insts=160", entry: "ets_try_catch4.ETSGLOBAL::main"
+//! RUN          force_jit: true, entry: "ets_try_catch4.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*MultipleCatch::__noinline__multipleCatch' \
+//!               --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!               --compiler-enable-osr=false --compiler-inlining-max-insts=160"
+//!
 //! EVENT        /Compilation,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
-//! EVENT        /Inline,ets_try_catch4.MultipleCatch::__noinline__multipleCatch,ets_try_catch4.ETSGLOBAL::throw_errors,.*,STATIC,SUCCESS/
+//! EVENT        /Inline,.*::__noinline__multipleCatch,ets_try_catch4.ETSGLOBAL::throwErrors,.*,STATIC,SUCCESS/
+//!
 //! METHOD       "ets_try_catch4.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "Throw",2
@@ -45,7 +50,7 @@
 class Error0 extends Error {}
 class Error1 extends Error {}
 
-function throw_errors(i: int): void {
+function throwErrors(i: int): void {
  switch (i) {
  case 0:
       throw new Error0();
@@ -63,7 +68,7 @@ class MultipleCatch {
     for (let i : int = 0; i < 16; i++) {
       let k : int = i % 2;
       try {
-        throw_errors(k);
+        throwErrors(k);
       } catch (e) {
         if (e instanceof Error0) {
           res += 1;
