@@ -436,6 +436,14 @@ void libabckit::InstModifier::ModifyInstClass(ark::pandasm::Ins &ins) const
             return;
         }
         record->name = newName;
+        const auto prog = this->file_->GetStaticProgram();
+        auto oldIt = prog->recordTable.find(oldName);
+        if (oldIt != prog->recordTable.end() && prog->recordTable.find(newName) == prog->recordTable.end()) {
+            auto entry = prog->recordTable.extract(oldName);
+            entry.key() = newName;
+            entry.mapped().name = newName;
+            prog->recordTable.insert(std::move(entry));
+        }
     } else if (IsArray(oldName)) {
         newName = GetArrayTypeNewName(this->file_, oldName);
         const auto prog = this->file_->GetStaticProgram();

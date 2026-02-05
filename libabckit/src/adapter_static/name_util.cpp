@@ -24,6 +24,7 @@
 
 namespace {
 constexpr std::string_view OBJECT_LITERAL_SUFFIX = "$ObjectLiteral";
+constexpr std::string_view GENSYM_PREFIX = "gensym%%_";
 constexpr std::string_view PARTIAL_PREFIX = "%%partial-";
 constexpr std::string_view NAME_DELIMITER = ".";
 constexpr std::string_view GLOBAL_CLASS = "ETSGLOBAL";
@@ -128,6 +129,21 @@ std::string libabckit::NameUtil::ObjectLiteralGetFullName(const AbckitCoreClass 
                                                           const std::string &newName)
 {
     auto objectLiteralName = std::regex_replace(newName, std::regex(R"(\.)"), "$") + OBJECT_LITERAL_SUFFIX.data();
+
+    // Preserve gensym suffix when multiple object literals implement the same interface
+    const auto *record = GetStaticImplRecord(const_cast<AbckitCoreClass *>(objectLiteral));
+    if (record != nullptr) {
+        const std::string &oldName = record->name;
+        const size_t suffixPos = oldName.find(OBJECT_LITERAL_SUFFIX);
+        if (suffixPos != std::string::npos) {
+            const size_t gensymStart = suffixPos + OBJECT_LITERAL_SUFFIX.size();
+            const std::string_view remainder(oldName.data() + gensymStart, oldName.size() - gensymStart);
+            if (remainder.find(GENSYM_PREFIX) == 0) {
+                objectLiteralName += std::string(remainder);
+            }
+        }
+    }
+
     return std::string {objectLiteral->owningModule->moduleName->impl} + NAME_DELIMITER.data() + objectLiteralName;
 }
 

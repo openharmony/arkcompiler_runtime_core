@@ -20,6 +20,15 @@ class A {
     }
 }
 
+class C {}
+class B extends C {}
+
+let supArr: FixedArray<C|string|null> = [new C]
+let subArr: FixedArray<B|string|null> = [new B]
+
+let sup: FixedArray<C|string|null>|null|string|undefined = supArr
+let sub: FixedArray<B|string|null>|null|string|undefined = subArr
+
 class MyClass {
     public prop: string;
     constructor() {
@@ -50,6 +59,8 @@ function main() {
     initFuncName('123', new MyClass());
     console.log(add1(1, 2));
     console.log(add3(1, 2));
-    classA.foo("foo");
+    classA.foo('foo');
+    sup = sub
+    console.log('testCase',sup, subArr)
 }
 

@@ -44,7 +44,9 @@ static constexpr auto MODIFIED_STATIC =
 TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetName)
 {
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
     const char *newName = "RenamedFunc";
     AbckitFile *file = g_impl->openAbc(INITIAL_STATIC, strlen(INITIAL_STATIC));
     ASSERT_NE(file, nullptr);
@@ -73,14 +75,16 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetName)
     g_impl->closeFile(modifiedFile);
 
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, output));
+    EXPECT_EQ(modifiedOutput, output);
 }
 
 // Test: test-kind=api, api=FunctionSetNameStatic, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionSetName)
 {
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
     const char *newName = "RenamedFunc";
     auto *file = g_impl->openAbc(INITIAL_STATIC, strlen(INITIAL_STATIC));
     ASSERT_NE(file, nullptr);
@@ -108,7 +112,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionSetName)
     g_impl->closeFile(modifiedFile);
 
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, output));
+    EXPECT_EQ(modifiedOutput, output);
 }
 
 static void TransformMethodReturnTypeToString(AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *graph)
@@ -249,7 +253,9 @@ static void TransformMethodReturnTypeToI32(AbckitFile *file, AbckitCoreFunction 
 TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType1)
 {
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
 
     helpers::TransformMethod(INITIAL_STATIC, MODIFIED_STATIC, "add2", TransformMethodReturnTypeToString,
                              [](AbckitGraph *) {});
@@ -268,7 +274,9 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType1)
     auto typeId = g_implI->typeGetTypeId(retType);
     ASSERT_EQ(typeId, ABCKIT_TYPE_ID_STRING);
     g_impl->closeFile(file);
-    EXPECT_TRUE(helpers::Match(modifiedOutput, "123\nclass prop\n1\nhello\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(modifiedOutput,
+                               "123\nclass prop\n1\nhello\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
 }
 
 // Test: test-kind=api, api=FunctionSetReturnTypeStatic, abc-kind=ArkTS2, category=positive, extension=c
@@ -290,7 +298,9 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionSetReturnType2)
     ASSERT_EQ(typeId, ABCKIT_TYPE_ID_I32);
     g_impl->closeFile(file);
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, "123\nclass prop\n5\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(modifiedOutput,
+                               "123\nclass prop\n5\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
 }
 
 // Test: test-kind=api, api=FunctionSetReturnTypeStatic, abc-kind=ArkTS2, category=positive, extension=c
@@ -450,7 +460,9 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionSetReturnType)
         },
         [](AbckitGraph *) {});
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(modifiedOutput,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
     auto *file = g_impl->openAbc(MODIFIED_STATIC, strlen(MODIFIED_STATIC));
     ASSERT_NE(file, nullptr);
     auto *retType = g_implI->functionGetReturnType(helpers::FindMethodByName(file, "foo"));
@@ -490,7 +502,9 @@ void ValidateFunctionParameters(AbckitFile *file, const char *methodName,
 TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionAddParameter)
 {
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
 
     AbckitFile *file = g_impl->openAbc(INITIAL_STATIC, strlen(INITIAL_STATIC));
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -539,7 +553,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, InstanceFunctionAddParameter)
     ValidateFunctionParameters(modifiedFile, "foo", expectedParamTypes);
     g_impl->closeFile(modifiedFile);
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, output));
+    EXPECT_EQ(modifiedOutput, output);
 }
 
 // Test: test-kind=api, api=FunctionAddParameter, abc-kind=ArkTS2, category=positive, extension=c
@@ -590,7 +604,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddParamString)
     ValidateFunctionParameters(modifiedFile, "initFuncName", expectedParamTypes);
     g_impl->closeFile(modifiedFile);
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, output));
+    EXPECT_EQ(modifiedOutput, output);
 }
 
 // Test: test-kind=api, api=FunctionAddParameter, abc-kind=ArkTS2, category=positive, extension=c
@@ -657,7 +671,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddParamReferenceType)
     ValidateFunctionParameters(modifiedFile, "initFuncName", expectedParamTypes);
     g_impl->closeFile(modifiedFile);
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(modifiedOutput, output));
+    EXPECT_EQ(modifiedOutput, output);
 }
 // Test: test-kind=api, api=FunctionAddParameter, abc-kind=ArkTS2, category=positive, extension=c
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
@@ -717,7 +731,7 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionAddIntParam)
     g_impl->closeFile(modifiedFile);
 
     auto modifiedOutput = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    ASSERT_TRUE(helpers::Match(modifiedOutput, output));
+    ASSERT_EQ(modifiedOutput, output);
 }
 
 TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionRemoveParamExist)
@@ -776,7 +790,9 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, StaticFunctionRemoveParamNonExist)
 TEST_F(LibAbcKitModifyApiFunctionsTest, AsyncFunctionSetName)
 {
     auto output = helpers::ExecuteStaticAbc(INITIAL_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(INITIAL_STATIC, &file);
     auto *method = helpers::FindMethodByName(file, "foo2");
@@ -789,7 +805,9 @@ TEST_F(LibAbcKitModifyApiFunctionsTest, AsyncFunctionSetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     output = helpers::ExecuteStaticAbc(MODIFIED_STATIC, "functions_static", "main");
-    EXPECT_TRUE(helpers::Match(output, "123\nclass prop\n1\n123\nfoo\n"));
+    EXPECT_TRUE(helpers::Match(output,
+                               "123\nclass prop\n1\n123\nfoo\ntestCase \\[functions_static\\.B \\{\\}\\] "
+                               "\\[functions_static\\.B \\{\\}\\]\n"));
 }
 
 TEST_F(LibAbcKitModifyApiFunctionsTest, ttt)

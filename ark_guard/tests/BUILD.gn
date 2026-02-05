@@ -87,6 +87,8 @@ test_ets_files = [
   "ut/obfuscator/code_sample/function_async_demo",
   "ut/obfuscator/code_sample/namespace_default_symbol",
   "ut/obfuscator/code_sample/union_type_ref",
+  "ut/obfuscator/code_sample/interface_object_literal_demo",
+  "ut/obfuscator/code_sample/fixed_array_union_demo",
   "ut/obfuscator/seeds_dumper_test",
   "ut/obfuscator_preprocess/preprocess_test_001",
   "ut/obfuscator_preprocess/preprocess_test_002",
