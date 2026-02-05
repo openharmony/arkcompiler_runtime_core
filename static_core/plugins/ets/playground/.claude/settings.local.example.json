@@ -1,0 +1,11 @@
+{
+  "_comment": "Example local settings - copy to settings.local.json and customize",
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)"
+    ]
+  },
+  "_note": "settings.local.json is gitignored - use for personal preferences"
+}
