@@ -27,8 +27,8 @@ readonly TSC_PACKAGE_PATH="$TMP_TSC_PATH/ohos-typescript-4.9.5-r4.tgz"
 target_files=("lib" "bin" "package.json" "LICENSE" "README.md" "README.OpenSource" "SECURITY.md" "ThirdPartyNoticeText.txt")
 
 # clean and create temporary directories
-rm -rf "$TMP_DECLGEN_PATH" && cp -rP "$SOURCE_PATH/" "$TMP_DECLGEN_PATH/"
-rm -rf "$TMP_TSC_PATH" && mkdir -p "$TMP_TSC_PATH"
+[ -n "$TMP_DECLGEN_PATH" ] && rm -rf "$TMP_DECLGEN_PATH" && cp -rP "$SOURCE_PATH/" "$TMP_DECLGEN_PATH/"
+[ -n "$TMP_TSC_PATH" ] && rm -rf "$TMP_TSC_PATH" && mkdir -p "$TMP_TSC_PATH"
 for file in "${target_files[@]}"; do
     if [ -e "$TSC_PATH/$file" ]; then
         cp -rP "$TSC_PATH/$file" "$TMP_TSC_PATH/"
