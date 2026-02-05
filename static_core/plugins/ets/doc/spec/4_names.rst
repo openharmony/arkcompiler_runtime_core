@@ -847,9 +847,9 @@ variable is determined as follows:
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 
-An ambient variable declaration must have *type* but has no *initializer*.
-Otherwise, a :index:`compile-time error` occurs.
-
+An ambient variable declaration (see 
+:ref:`Ambient Constant or Variable Declarations`) must have *type*
+but no *initializer*. Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    variable declaration
@@ -1102,7 +1102,7 @@ If type of an initializer expression cannot be inferred, then a
 
 .. note::
 
-    The presence of an initializer for
+    The presence of an initializer for 
     :ref:`Ambient Constant or Variable Declarations`
     causes a :index:`compile-time error`.
 

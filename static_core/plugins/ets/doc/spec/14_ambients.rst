@@ -126,8 +126,10 @@ The syntax of *ambient* constant or variable declarations is presented below:
    variable declaration
    declaration
 
-An ambient constant and variable declaration must have an explicit type annotation,
-and must have no initializer. Otherwise, a :index:`compile-time error` occurs:
+An *ambient constant* and *variable declaration* must have an explicit type
+annotation, and must have no initializer. Otherwise,
+a :index:`compile-time error` occurs:
+
 
 .. code-block:: typescript
    :linenos:
