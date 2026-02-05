@@ -18,8 +18,8 @@ Enumerations
 .. meta:
     frontend_status: Done
 
-Enumeration type ``enum`` specifies a distinct user-defined type with an
-associated set of named constants that define its possible values.
+Enumeration type ``enum`` specifies a distinct user-defined class type with an
+associated set of named constants that define its possible enumeration values.
 
 The syntax of *enumeration declaration* is presented below:
 
@@ -54,8 +54,8 @@ The modifier ``const`` is skipped as it has no impact on ``enum`` semantics in
 Enumerations with explicitly specified type values are described in
 :ref:`Enumeration with explicit type`.
 
-Qualification by type is mandatory to access the enumeration constant, except
-enumeration constant initialization expressions:
+Qualification by type name is mandatory to access the enumeration constant,
+except enumeration constant initialization expressions:
 
 .. code-block:: typescript
    :linenos:
@@ -86,12 +86,12 @@ are exported along with the mandatory qualification ``Color``.
    enum constant
    const enum
 
-The value of an enum constant can be set as follows:
+The value of an enumeration constant can be set as follows:
 
 -  Explicitly as a numeric constant expression (expression of type ``int`` or
    ``long`` ), or as a constant expression of type ``string``; or
 -  Implicitly by omitting the constant expression, in which case the value of
-   the enum constant is set to an integer value (see
+   the enumeration constant is set to an integer value (see
    :ref:`Enumeration Integer Values`).
 
 A :index:`compile-time error` occurs if:

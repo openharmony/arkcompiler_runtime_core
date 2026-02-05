@@ -792,8 +792,8 @@ Enumeration Methods
 .. meta:
     frontend_status: Done
 
-Several static methods are available to handle each enumeration type
-as follows:
+Several static methods are available for each enumeration class type as
+follows:
 
 -  Method ``static values()`` returns an array of enumeration constants
    in the order of declaration.
