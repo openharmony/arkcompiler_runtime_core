@@ -59,7 +59,7 @@ Future versions may extend the environment configuration with additional runtime
    * `cd /path/runtime_core/static_core/plugins/ets/playground/backend`
    * `python3 -m build`
 * Build docker image
-   * `cd /path/runtimne_core/static_core`
+   * `cd /path/runtime_core/static_core`
    * `docker build -t "your-tag" -f  ./plugins/ets/playground/backend/Dockerfile .`
 * Run docker
    * `docker run -d --name  arkts-playground -p 8000:8000 your-tag`
