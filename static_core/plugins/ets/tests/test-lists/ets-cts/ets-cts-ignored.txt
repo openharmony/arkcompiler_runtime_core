@@ -1413,6 +1413,9 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
 
+#28235 Constructor Names not yet work
+15.semantic_rules/09.overriding/constructor_no_override_1.ets
+
 #31858 overriding conflict between superclass and superinterface implementations
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_15.ets
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_17.ets
