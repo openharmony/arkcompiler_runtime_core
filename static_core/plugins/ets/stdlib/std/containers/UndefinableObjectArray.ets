@@ -13,13 +13,42 @@
  * limitations under the License.
  */
 
+/**
+ * @file Defines the UndefinableObjectArray for ArkTS
+ * @kit ArkTS
+ */
+
 package std.containers
 
+/**
+ * Container namespace providing implementations of various container classes
+ * @namespace containers
+ * @syscap SystemCapability.Utils.Lang
+ * @since 24
+ */
 export namespace containers {
     
+    /**
+     * Represents a type that can be either Object or undefined
+     * @typedef { Object | undefined } UndefinableObject
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
+     */
     type UndefinableObject = Object | undefined
 
+    /**
+     * A dynamic array class that can contain Object or undefined values
+     * @syscap SystemCapability.Utils.Lang
+     * @since 24
+     */
     export class UndefinableObjectArray {
+        /**
+         * Default initial size of the array
+         * @type { int }
+         * @static
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         /* const */ static ArrayInitSize : int = 16
 
         private init(capacity: int, val: UndefinableObject): void {
@@ -31,38 +60,46 @@ export namespace containers {
         }
 
         /**
-        * Constructs new UndefinableObjectArray with respect to capacity and initial value
-        *
-        * @param capacity
-        *
-        * @param val
-        */
+         * Constructs new UndefinableObjectArray with respect to capacity and initial value
+         *
+         * @param { int } capacity - The initial capacity of the array
+         * @param { UndefinableObject } val - The value used to initialize all array elements
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         constructor(capacity: int, val: UndefinableObject) {
             this.init(capacity, val)
         }
 
         /**
-        * Constructs new UndefinableObjectArray with required capacity
-        *
-        * @param capacity
-        */
+         * Constructs new UndefinableObjectArray with required capacity
+         *
+         * @param { int } capacity - The initial capacity of the array
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         constructor(capacity: int) {
             this.data = new FixedArray<UndefinableObject>(capacity)
             this.curSize = 0
         }
 
         /**
-        * Constructs new empty UndefinableObjectArray
-        */
+         * Constructs new empty UndefinableObjectArray
+         *
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         constructor() {
             this(UndefinableObjectArray.ArrayInitSize)
         }
 
         /**
-        * Increases capacity if passed argument is greater than current capacity
-        *
-        * @param capacity
-        */
+         * Increases capacity if passed argument is greater than current capacity
+         *
+         * @param { int } capacity - The new capacity
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
                 let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(capacity)
@@ -74,10 +111,12 @@ export namespace containers {
         }
 
         /**
-        * Gets the underlying array
-        *
-        * @returns the underlying array
-        */
+         * Gets the underlying array
+         *
+         * @returns { Object[] } The underlying array containing all non-undefined elements
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public toArray(): Object[] {
             let newData = new (Object)[this.curSize]
             for (let i = 0; i < this.curSize; ++i) {
@@ -98,10 +137,12 @@ export namespace containers {
         }
 
         /**
-        * Pushes a value to the end of the array
-        *
-        * @param e value to push
-        */
+         * Pushes a value to the end of the array
+         *
+         * @param { UndefinableObject } e - Value to push
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public pushBack(e: UndefinableObject): void {
             if (this.curSize == this.data.length) {
                 let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(UndefinableObjectArray.getNewCapacity(this.data.length))
@@ -115,10 +156,13 @@ export namespace containers {
         }
 
         /**
-        * Pops a value from the end of the List
-        *
-        * @returns popped value
-        */
+         * Pops a value from the end of the List
+         *
+         * @returns { UndefinableObject } Popped value
+         * @throws { AssertionError } When the array is empty, attempting to pop an element will throw this exception
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public popBack(): UndefinableObject {
             if (this.curSize === 0) {
                 throw new AssertionError("No data to popBack from UndefinableObjectArray!")
@@ -128,30 +172,36 @@ export namespace containers {
         }
 
         /**
-        * Returns number of elements in the List
-        */
+         * Returns number of elements in the List
+         *
+         * @returns { int } The number of elements in the array
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public size(): int {
             return this.curSize
         }
 
         /**
-        * Returns an element at the specified index
-        *
-        * @param index element position
-        *
-        * @returns an element
-        */
+         * Returns an element at the specified index
+         *
+         * @param { int } index - Element position
+         * @returns { UndefinableObject } An element at the specified index
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public at(index: int): UndefinableObject {
             return this.data[index]
         }
 
         /**
-        * Sets an element at the specified index
-        *
-        * @param index element position
-        *
-        * @param e new value
-        */
+         * Sets an element at the specified index
+         *
+         * @param { int } index - Element position
+         * @param { UndefinableObject } e - New value
+         * @syscap SystemCapability.Utils.Lang
+         * @since 24
+         */
         public set(index: int, e: UndefinableObject): void {
             this.data[index] = e
         }
