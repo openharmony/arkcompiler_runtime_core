@@ -1829,10 +1829,6 @@
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_rte_12.ets
 17.experimental_features/04.enumerations_experimental/02.enumeration_methods/enum_explicit_type_fromvalue_rte_13.ets
 
-#18763 es2panda aborts on for-of over a union type array
-17.experimental_features/06.iterable_types/it_9.ets
-17.experimental_features/06.iterable_types/it_10.ets
-
 #31022
 17.experimental_features/06.iterable_types/it_18.ets
 
