@@ -1619,57 +1619,32 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Returns a string representing the elements of the array. The elements are converted to Strings using their
      * toLocaleString methods.
      *
-
-     * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
-     * @param { Object } options An object with configuration properties.
-     * @returns { string } A string representing the elements of the array.
-     * @throws { Error } Throws an Error if the method is not implemented.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Returns a string representing the elements of the array. The elements are converted to Strings using their
-     * toLocaleString methods.
-     *
-
-     * @param { Object } locales A string with a BCP 47 language tag, or an array of such strings.
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings.
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } A string representing the elements of the array.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Returns a string representing the elements of the array. The elements are converted to Strings using their
-     * toLocaleString methods.
-     *
-
-     * @returns { string } A string representing the elements of the array.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override toLocaleString(): string {
-        const sb = new StringBuilder()
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         const len = this.actualLength;
-        for (let i = 0; i < len; i++) {
-            if (i != 0) {
+        if (len > 0) {
+            const sb = new StringBuilder()
+            let x = this.$_get_unsafe(0);
+            if (x instanceof object) {
+                sb.append(x.toLocaleString(locales, options))
+            }
+            for (let i: int = 1; i < len; ++i) {
                 sb.append(",")
+                let x = this.$_get_unsafe(i);
+                if (x instanceof object) {
+                    sb.append(x.toLocaleString(locales, options))
+                }
             }
-            let x = this.$_get_unsafe(i) as Any;
-            if ((null !== x) && (undefined !== x)) {
-                sb.append((x! as object).toLocaleString()) // #26217
-            }
+            return sb.toString()
         }
-        return sb.toString()
+        return ""
     }
 
     /**

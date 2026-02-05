@@ -445,21 +445,9 @@ export final class BigInt {
     }
 
     /**
-     * Converts a number to a string by using current locale.
-     *
-     * @returns { string } A string representation of the BigInt formatted according to the current locale.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(): string {
-        return this.toLocaleString(undefined)
-    }
-
-    /**
      * Converts a number to a string by using the current or specified locale.
      *
-     * @param { string | Intl.Locale | (string | Intl.Locale)[] } [locales] A string with a BCP 47 language tag, or an
+     * @param { Intl.LocalesArgument } [locales] A string with a BCP 47 language tag, or an
      *     array of such strings.
      * @param { BigIntToLocaleStringOptions } [options] An object with some or all of the properties of the
      *     Intl.NumberFormat options.
@@ -468,10 +456,29 @@ export final class BigInt {
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: BigIntToLocaleStringOptions): string {
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: BigIntToLocaleStringOptions): string {
         const numFmtOptions = BigInt.toNumberFormatOptions(options)
         const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), numFmtOptions)
         return formatter.format(this)
+    }
+
+    /**
+     * Converts a number to a string by using the current or specified locale.
+     *
+     * @param { Intl.LocalesArgument } [locales] A string with a BCP 47 language tag, or an
+     *     array of such strings.
+     * @param { object } [options] An object with some or all of the properties of the
+     *     Intl.NumberFormat options.
+     * @returns { string } A string representing the BigInt formatted according to the locale and options.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
+        if (options instanceof BigIntToLocaleStringOptions) {
+            return this.toLocaleString(locales, options)
+        }
+        return this.toLocaleString(locales, undefined)
     }
 
     private static toNumberFormatOptions(options?: BigIntToLocaleStringOptions): Intl.NumberFormatOptions | undefined {
@@ -1547,11 +1554,11 @@ export final class BigInt {
         if (s.length >= 2 && s.charAt(0) == c'0') {
             const secondChar = s.charAt(1).toLowerCase()
             switch (secondChar) {
-                case c'b': 
+                case c'b':
                     return [s.substring(2), 2]
-                case c'o': 
+                case c'o':
                     return [s.substring(2), 8]
-                case c'x': 
+                case c'x':
                     return [s.substring(2), 16]
             }
         }
@@ -1561,7 +1568,7 @@ export final class BigInt {
     private static multiplyDecimalArrayWithDigit(a: Array<int>, digit: int): Array<int> {
         const lenA: int = a.length
         const result: Array<int> = Array.create<int>(lenA + 1, 0)
-        let carry: int = 0 
+        let carry: int = 0
 
         for (let i = lenA - 1; i >= 0; i--) {
             const product: int = a[i] * digit + carry
@@ -1572,13 +1579,13 @@ export final class BigInt {
         if (carry > 0) {
             result[0] = carry
             return result
-        } 
+        }
         return result.slice(1)
 
     }
 
     private static addDecimalArrayWithDigit(a: Array<int>, digit: int): Array<int> {
-        if (digit === 0) return a.slice()        
+        if (digit === 0) return a.slice()
         const result: Array<int> = a.slice()
         let carry = digit
         let i: int = result.length - 1
@@ -1600,11 +1607,11 @@ export final class BigInt {
             return [0]
         }
 
-        let result: Array<int> = [0]      
+        let result: Array<int> = [0]
         for (let i = 0; i < s.length; i++) {
-            let currentChar: char = s.charAt(i)           
+            let currentChar: char = s.charAt(i)
             if (currentChar == c'_') {
-                continue  
+                continue
             }
 
             let digitValue: int
@@ -1771,17 +1778,17 @@ export final class BigInt {
 
     private static isValidDigitForRadix(judgeChar: char, radix: int): boolean {
         switch (radix) {
-            case 2: 
+            case 2:
                 return judgeChar == c'0' || judgeChar == c'1'
 
-            case 8: 
+            case 8:
                 return judgeChar >= c'0' && judgeChar <= c'7'
 
-            case 10: 
+            case 10:
                 return judgeChar >= c'0' && judgeChar <= c'9'
 
-            case 16: 
-                return (judgeChar >= c'0' && judgeChar <= c'9') || 
+            case 16:
+                return (judgeChar >= c'0' && judgeChar <= c'9') ||
                        (judgeChar >= c'A' && judgeChar <= c'F') ||
                        (judgeChar >= c'a' && judgeChar <= c'f')
             default:

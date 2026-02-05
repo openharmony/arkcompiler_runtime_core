@@ -81,15 +81,6 @@ const concatenateReducer = (previousValue: string, currentValue: string, index: 
     return previousValue + "" + currentValue
 }
 
-class A {
-    style: string
-    currency: string
-    constructor(style: string, currency: string) {
-        this.style = style
-        this.currency = currency
-    }
-}
-
 function indexAccess(): boolean {
     return array[0] === 1 && array[1] === 2 && array[2] === 3 && array[3] === 4
 }
@@ -252,7 +243,11 @@ function testSplice(): boolean {
 }
 
 function testToLocaleString(): boolean {
-    return array.toLocaleString("en-US", new A("currency", "USD")) === "$1.00,$2.00,$3.00,$4.00"
+    let options = {
+        style: "currency",
+        currency: "USD"
+    } as Intl.NumberFormatOptions;
+    return array.toLocaleString("en-US", options) === "$1.00,$2.00,$3.00,$4.00"
 }
 
 function testToReversed(): boolean {

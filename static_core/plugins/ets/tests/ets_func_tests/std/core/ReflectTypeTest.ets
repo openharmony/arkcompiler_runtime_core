@@ -697,7 +697,8 @@ function suiteGetInstanceMethods() {
 
     // Test methods getters
     let baseObjInstanceMethodsExpected =
-        [ "toString", "toLocaleString", "$_hashCode", "hasOwnProperty", "hasOwnProperty" ]
+        [ "toString", "toLocaleString", "$_hashCode",
+         "hasOwnProperty", "hasOwnProperty" ]
 
     let baseObjStaticMethodsExpected =
         [ "keys", "keys", "assign", "hasOwn", "hasOwn", "values", "values", "entries",
@@ -712,7 +713,7 @@ function suiteGetInstanceMethods() {
     testGetInstanceMethods(Class.from<DerivedIface>(), ["boo", "defaultMethod"])
     testGetInstanceMethods(Class.from<DerivedDerivedIface>(), ["foo", "goo"])
 
-    testGetInstanceMethodByName(typeBaseObj, [ "toString", "toLocaleString", "$_hashCode"])
+    testGetInstanceMethodByName(typeBaseObj, ["toString", "$_hashCode"])
     let hasOwnProperty1 = typeBaseObj.getInstanceMethod("hasOwnProperty", [ Class.from<string>() ])
     let hasOwnProperty2 = typeBaseObj.getInstanceMethod("hasOwnProperty", [ Class.PRIMITIVE_DOUBLE ])
     arktest.assertNE(hasOwnProperty1, undefined)

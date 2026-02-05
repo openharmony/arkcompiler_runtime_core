@@ -124,21 +124,24 @@ function dateTimeFormatTest8() {
 
 function dateToLocaleString1() {
     let date = new Date(Date.UTC(2022, 9, 20, 18, 0, 0));
-    let value = date.toLocaleString('en-US', {timeZone: 'UTC'});
+    let options: Intl.DateTimeFormatOptions = {timeZone: 'UTC'}
+    let value = date.toLocaleString('en-US', options);
     let zerotime = "10/20/2022, 6:00:00 PM";
     arktest.assertEQ(value, zerotime)
 }
 
 function dateToLocaleString2() {
     let date = new Date(Date.UTC(2022, 9, 20, 18, 0, 0));
-    let value = date.toLocaleString('ko-KR', {timeZone: 'UTC'});
+    let options: Intl.DateTimeFormatOptions = {timeZone: 'UTC'}
+    let value = date.toLocaleString('ko-KR', options);
     let zerotime = "2022. 10. 20. 오후 6:00:00";
     arktest.assertEQ(value, zerotime)
 }
 
 function dateToLocaleString3() {
     let date = new Date(Date.UTC(2022, 9, 20, 18, 0, 0));
-    let value = date.toLocaleTimeString('it-IT', { hour12: false, timeZone: 'UTC', timeZoneName: 'short' });
+    let options: Intl.DateTimeFormatOptions = { hour12: false, timeZone: 'UTC', timeZoneName: 'short' }
+    let value = date.toLocaleTimeString('it-IT', options);
     let zerotime = "18:00:00 UTC";
     arktest.assertEQ(value, zerotime)
 }

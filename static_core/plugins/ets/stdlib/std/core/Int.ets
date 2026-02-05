@@ -258,8 +258,40 @@ export final class Int extends Integral implements Comparable<Int> {
         return this.value == (other as Int).value
     }
 
-    public toLocaleString(): string {
-        return new Intl.NumberFormat().format(this.value)
+    /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { Intl.NumberFormatOptions } [ options ] An object with some or all of the properties of the
+     *     Intl.NumberFormat options
+     * @returns { String } result of the locale-specific conversion
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
+        const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
+        return formatter.format(this.value)
+    }
+
+    /**
+     * Converts this object to a locale-specific string representation
+     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with some or all of the properties of the
+     *     Intl.NumberFormat options
+     * @returns { String } result of the locale-specific conversion
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
+        if (options instanceof Intl.NumberFormatOptions) {
+            return this.toLocaleString(locales, options)
+        }
+        return this.toLocaleString(locales, undefined)
     }
 
     /**

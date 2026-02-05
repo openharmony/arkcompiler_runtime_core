@@ -224,7 +224,7 @@
  *
      <% if this_arg != "" %>* @param { <%= this_type %> } self The array to operate `every` on.<% end %>
  * @param { function } predicate A function that accepts up to three arguments. The every method calls the predicate
- *     function for each element in the array until the predicate returns a value which is 
+ *     function for each element in the array until the predicate returns a value which is
  *     coercible to the Boolean value false, or until the end of the array.
  * @returns { boolean } True if the predicate returns true for all elements in the array; otherwise, false.
  * @syscap SystemCapability.Utils.Lang
@@ -614,6 +614,7 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
     return <%= this_call.('join') %>",");
 }
 
+% if this_array != 'escompat_array'
 /**
  * Returns a string representing the elements of the array. The elements are converted to Strings using their
  * toLocaleString methods.
@@ -670,6 +671,40 @@ private joinObject(arr: Array<T>, visited: Set<Array<T>>, result: StringBuilder,
     }
     return sb.toString()
 }
+% else
+
+/**
+ * Returns a string representing the elements of the array. The elements are converted to Strings using their
+ * toLocaleString methods.
+ *
+ * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+ *     array of such strings.
+ * @param { object } [ options ] An object with configuration properties.
+ * @returns { string } A string representing the elements of the array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+<%= access_public %> override toLocaleString<%= this_generic %>(<%= this_arg %>locales?: Intl.LocalesArgument, options?: object): string {
+    const len = <%= this_len_int %>;
+    if (len > 0) {
+        const sb = new StringBuilder()
+        let x = <%= get_unsafe.(this, '0') %>;
+        if (x instanceof object) {
+            sb.append(x.toLocaleString(locales, options))
+        }
+        for (let i: int = 1; i < len; ++i) {
+            sb.append(",")
+            let x = <%= get_unsafe.(this, 'i') %>;
+            if (x instanceof object) {
+                sb.append(x.toLocaleString(locales, options))
+            }
+        }
+        return sb.toString()
+    }
+    return ""
+}
+% end
 
 /**
  * Returns a new array with some elements removed and/or replaced at a given index.
