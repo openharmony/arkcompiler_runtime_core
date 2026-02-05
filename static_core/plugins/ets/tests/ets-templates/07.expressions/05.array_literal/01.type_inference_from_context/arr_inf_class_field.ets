@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,26 @@
 
 /*---
 desc: >-
-  The type of an array literal can be inferred from the context
-  that can be specified as one of the following: explicit type annotation
-  of a variable declaration, left-hand part type of an assignment,
-  explicit return type of a function, a method, or a lambda in a return
-  statement, parameter type in a call, target type of a cast expression,
-  or type of an array element or a class field.
+  Array literal type inferred from the type of a class field.
 ---*/
 
+class Config {
+    values: number[] = [1, 2, 3]
+    names: string[] = ["x", "y", "z"]
+    matrix: number[][] = [
+        [10, 20],
+        [30, 40]
+    ]
+}
+
 function main() {
-    let tuple: [number, string] = [1, "hello"] // ok
-    arktest.assertTrue( tuple[0] == 1 && tuple[1] == "hello" )
+    let cfg = new Config()
+
+    arktest.assertEQ(cfg.values[0], 1)
+    arktest.assertEQ(cfg.values[2], 3)
+
+    arktest.assertEQ(cfg.names[1], "y")
+
+    arktest.assertEQ(cfg.matrix[0][1], 20)
+    arktest.assertEQ(cfg.matrix[1][0], 30)
 }

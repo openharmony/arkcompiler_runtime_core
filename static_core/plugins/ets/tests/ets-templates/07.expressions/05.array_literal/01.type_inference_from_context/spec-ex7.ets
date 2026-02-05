@@ -15,11 +15,11 @@
 
 /*---
 desc: >-
-  If the type used in the context is a union type (see Union Types),
-  then it is necessary to try inferring the type of the array literal
-  from its elements (see Array Type Inference from Types of Elements).
-  If successful, then the type so inferred must be compatible with one
-  of the types that form the union type.
+  If a type used in a context is a union type, then Array Literal Type
+  Inference from Context is taken repetitively trying to use each type of
+  the union type as the context. If only a single type is inferred, then
+  this single type is used as the type of the literal. Otherwise, a
+  compile-time error occurs.
 tags: [compile-only, negative]
 ---*/
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,15 @@
 
 /*---
 desc: >-
-  The type of an array literal can be inferred from the context
-  that can be specified as one of the following: explicit type annotation
-  of a variable declaration, left-hand part type of an assignment,
-  explicit return type of a function, a method, or a lambda in a return
-  statement, parameter type in a call, target type of a cast expression,
-  or type of an array element or a class field.
+  If type used in a context is an interface I, and I is a generic
+  superinterface of a resizable array type with the single type parameter
+  I<T>, then an array literal is considered as an instance of Array<T>.
 ---*/
 
 function main() {
-    let tuple: [number, string] = [1, "hello"] // ok
-    arktest.assertTrue( tuple[0] == 1 && tuple[1] == "hello" )
+    let b: ConcatArray<number> = [1, 2]
+    arktest.assertEQ(b.length, 2)
+
+    let d: ArrayLike<Object> = [1, "aa"]
+    arktest.assertEQ(d.length, 2)
 }
