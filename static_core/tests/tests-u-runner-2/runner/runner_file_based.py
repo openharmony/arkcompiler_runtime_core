@@ -39,18 +39,6 @@ from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
 
-INDEX_TITLE = "${Title}"
-INDEX_OPTIONS = "${Options}"
-INDEX_TOTAL = "${Total}"
-INDEX_PASSED = "${Passed}"
-INDEX_FAILED = "${Failed}"
-INDEX_IGNORED = "${Ignored}"
-INDEX_EXCLUDED_LISTS = "${ExcludedThroughLists}"
-INDEX_EXCLUDED_OTHER = "${ExcludedByOtherReasons}"
-INDEX_TEST_NAME = "${TestName}"
-INDEX_TEST_ID = "${TestId}"
-INDEX_FAILED_TESTS_LIST = "${FailedTestsList}"
-
 _LOGGER = Log.get_logger(__file__)
 
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,12 +14,20 @@
 
 set -e
 
+declare -i EXIT_CODE=0
 SCRIPT_DIR=$(realpath "$(dirname "${0}")")
 ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
+RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner-2
+YAML_LINTER_DIR=${ROOT_DIR}/tests/test-linters
 
-
-function save_exit_code() {
-    return $(($1 + $2))
+function run() {
+    local desc=$1 && shift
+    local executor=$1 && shift
+    local args=("$@")
+    echo "...Run ${desc}"
+    if ! $executor "${args[@]}"; then
+        ((EXIT_CODE++))
+    fi
 }
 
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
@@ -27,46 +35,26 @@ activate_venv
 
 set +e
 
-EXIT_CODE=0
-RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner-2
+cd "${RUNNER_DIR}" || exit 1
 
-cd "${RUNNER_DIR}"
+run "Pylint /runner, main.py" pylint --rcfile .pylintrc runner main.py --ignore=test
+# Disable duplicate code and protected access for tests
+run "Pylint on tests" pylint --rcfile .pylintrc runner/test/ --disable=protected-access --disable=duplicate-code
 
-echo "Pylint /runner, main.py"
-pylint --rcfile .pylintrc runner main.py --ignore=test262,config_test,reports,runner_file_based.py
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-pylint --rcfile .pylintrc runner/extensions/generators/test262/ runner/test/config_test runner/reports runner/runner_file_based.py --disable=duplicate-code
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-echo "MyPy main.py"
-mypy main.py
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-echo "MyPy /runner"
-mypy -p runner
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-echo "Ruff check"
-ruff check .
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-echo "Check complexity with radon"
-flake8 --radon-max-cc 15 --select=R701 .
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
-
-echo "Yamllint check"
-python ../test-linters/check_yaml_templates.py ./cfg
-save_exit_code ${EXIT_CODE} $?
-EXIT_CODE=$?
+run "MyPy main.py" mypy main.py
+run "MyPy /runner" mypy -p runner
+run "Ruff check" ruff check .
+run "Check complexity with radon" flake8 --radon-max-cc 15 --select=R701 .
+run "Yamllint check" python "${YAML_LINTER_DIR}/check_yaml_templates.py" ./cfg
 
 set -e
 
 deactivate_venv
-exit ${EXIT_CODE}
+
+if [[ "${EXIT_CODE}" != "0" ]]; then
+    echo "...Linter checks failed (EXIT_CODE = ${EXIT_CODE})"
+    exit 1
+else
+    echo '...Linter checks passed'
+    exit 0
+fi

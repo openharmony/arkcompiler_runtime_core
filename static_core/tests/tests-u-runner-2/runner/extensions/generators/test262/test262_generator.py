@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -122,7 +122,7 @@ class Test262Generator(IGenerator):
         stamp_name = f"test262-{self.revision}"
         test_root = download_and_generate(
             name="test262",
-            stamp_name=stamp_name,
+            stamp_name=stamp_name,  # pylint: disable=duplicate-code
             url=self.url,
             revision=self.revision,
             download_root=self._source,
