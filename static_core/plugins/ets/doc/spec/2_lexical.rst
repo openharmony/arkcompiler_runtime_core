@@ -31,11 +31,11 @@ Use of Unicode Characters
     frontend_status: Done
 
 The |LANG| programming language uses characters of the Unicode Character
-set [1]_ as its terminal symbols. It uses the Unicode UTF-16 encoding to
-represent text in sequences of 16-bit code units.
+set [1]_ as its terminal symbols. The Unicode UTF-16 encoding represents
+text in sequences of 16-bit code units.
 
 The term *Unicode code point* is used in this specification only where such
-representation is relevant to refer the reader to Unicode Character set and
+representation is relevant to refer to the Unicode Character set and the
 UTF-16 encoding. Where such representation is irrelevant to the discussion,
 the generic term *character* is used.
 
@@ -274,9 +274,9 @@ characters:
       : UNICODE_CLASS_ND
       ;
 
-See :ref:`Grammar Summary` for the Unicode character categories *UNICODE_CLASS_LU*,
-*UNICODE_CLASS_LL*, *UNICODE_CLASS_LT*, *UNICODE_CLASS_LM*, *UNICODE_CLASS_LO*,
-and *UNICODE_CLASS_ND*.
+The Unicode character categories *UNICODE_CLASS_LU*, *UNICODE_CLASS_LL*,
+*UNICODE_CLASS_LT*, *UNICODE_CLASS_LM*, *UNICODE_CLASS_LO*, and
+*UNICODE_CLASS_ND* are discussed in detail in :ref:`Grammar Summary`.
 
 |
 
@@ -289,11 +289,11 @@ Keywords
     frontend_status: Done
 
 *Keywords* are reserved words with meanings permanently predefined in |LANG|.
-Keywords are case-sensitive, and their exact spelling is presented in the
-four tables below. The kinds of keywords are discussed below.
+Keywords are case-sensitive. The exact spelling of keywords grouped by types
+is presented in the four tablesbelow.
 
-1. The following *hard keywords* are reserved in any context, and
-cannot be used as identifiers:
+1. *Hard keywords* are reserved in any context. Hard keywords cannot be used as
+identifiers:
 
 .. index::
    keyword
@@ -365,10 +365,8 @@ cannot be used as identifiers:
    +--------------------+-------------------+------------------+------------------+
 
 
-|
-
-2. Names and aliases of predefined types are *hard keywords*. They cannot be
-used as identifiers:
+2. Names and aliases of predefined types are also *hard keywords*. They cannot
+be used as identifiers:
 
 +---------------+---------------+
 | Primary Name  | Alias         |
@@ -402,8 +400,8 @@ used as identifiers:
 | ``void``      |               |
 +---------------+---------------+
 
-3. The following *soft keywords* have special meaning in certain contexts but
-are valid identifiers elsewhere:
+3. *Soft keywords* have special meanings reserved in certain contexts. However,
+soft keywords are valid identifiers elsewhere:
 
 .. index::
    keyword
@@ -426,8 +424,8 @@ are valid identifiers elsewhere:
 |      ``keyof``     |    ``type``        |
 +--------------------+--------------------+
 
-4. The following identifiers are also treated as *soft keywords* reserved for
-the future use or currently used in |TS|:
+4. The following identifiers are also considered *soft keywords* reserved for
+the future use in |LANG|, or currently used as soft keywords in |TS|:
 
 .. index::
    identifier
@@ -450,14 +448,16 @@ Operators and Punctuators
 .. meta:
     frontend_status: Done
 
-*Operators* are tokens that denote various actions to be performed on values:
-addition, subtraction, comparison, and other. The keywords ``instanceof`` and
-``typeof`` also act as operators.
+*Operators* are tokens that denote various actions to be performed on values.
+Operators include addition, subtraction, comparison, and other. The keywords
+``instanceof`` and ``typeof`` also act as operators.
 
 *Punctuators* are tokens that separate, complete, or otherwise organize program
-elements and parts: commas, semicolons, parentheses, square brackets, etc.
+elements and parts. Punctuators include commas, semicolons, parentheses, square
+brackets, etc.
 
-The following character sequences represent operators and punctuators:
+Operators and punctuators are represented by the following sequences of
+characters:
 
 .. index::
    operator
@@ -637,19 +637,19 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Type of integer literal is determined by using
-:ref:`Type Inference for Numeric Literals` if its context allows inferring type.
-Otherwise, the type is determined as follows:
+If context allows inferring type, then :ref:`Type Inference for Numeric Literals`
+is used to determine the type of an integer literal. Otherwise, the type is
+determined as follows:
 
-- ``int`` if the literal value can be represented
-  by a non-negative 32-bit number, i.e., the value is in the
-  range 0..max(int); or
+- If the literal value can be represented by a non-negative 32-bit number,
+  i.e., the value is in the range ``0..max(int)``, then the type is ``int``;
 
-- ``long`` otherwise.
+- If the literal value can be represented by a non-negative 64-bit number,
+  i.e., the value is in the range ``0..max(long)``, then the type is ``long``;
 
-A :index:`compile-time error` occurs if an integer literal value is too
-large for the values of type ``long``. The concept is represented by the
-examples below:
+- Otherwise, a :index:`compile-time error` occurs.
+
+The concept is represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -665,7 +665,7 @@ examples below:
     0x7FFF_FFFF_1
     9223372036854775807 // max(long)
 
-    // compile-time error as value is too large:
+    // compile-time error as the value is too large:
     9223372036854775808 // max(long) + 1
     0xFFFF_FFFF_FFFF_FFFF_0
 
@@ -730,22 +730,22 @@ last symbol of a literal.
 Floating-point literals are of floating-point types that match literals as
 follows:
 
-- ``float`` if *float type suffix* is present; or
-- ``float`` or ``double`` that is inferred using
-  :ref:`Type Inference for Numeric Literals`
-  if its context allows to infer type; or
-- ``double`` otherwise (type ``number`` is an alias to ``double``).
-    
-A :index:`compile-time error` occurs if a floating-point literal is
-too large for its type:
+- If *float type suffix* is present, then ``float``;
+- If the context allows inferring type, then
+  :ref:`Type Inference for Numeric Literals` is used to infer type ``float``
+  or ``double``;
+- Otherwise, ``double`` (type ``number`` is an alias to ``double``).
+
+If a floating-point literal is too large for its type, then a
+:index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
 
-    // compile-time error as value is too large for type float:
+    // compile-time error as the value is too large for type float:
     3.4e39f
 
-    // compile-time error as value is too large for type double:
+    // compile-time error as the value is too large for type double:
     1.7e309
 
 .. index::
@@ -815,7 +815,7 @@ Strings that represent numbers or any integer value can be converted to
    integer value
 
 Two methods allow taking *bitsCount* lower bits of a ``bigint`` number and
-return them as a result. Signed and unsigned versions are both possible as
+return them as results. Signed and unsigned versions are both possible as
 follows:
 
 .. code-block:: typescript
@@ -837,7 +837,7 @@ Boolean Literals
 .. meta:
     frontend_status: Done
 
-The two *boolean literal* values are represented by the keywords ``true`` and
+*Boolean literal* values are represented by the two keywords: ``true`` and
 ``false``.
 
 .. code-block:: abnf
@@ -943,13 +943,13 @@ and more. An escape sequence always starts with the backslash character
 
 -  ``x`` and two hexadecimal digits (like ``7F``),
 
--  ``u`` and four hexadecimal digits (forming a fixed Unicode escape
-   sequence like ``\u005c``),
+-  ``u`` and four hexadecimal digits that form a fixed Unicode escape
+   sequence like ``\u005c``,
 
--  ``u{`` and at least one hexadecimal digit followed by ``}`` (forming
-   a bounded Unicode escape sequence like ``\u{5c}``), and
+-  ``u{`` and at least one hexadecimal digit followed by ``}`` that form
+   a bounded Unicode escape sequence like ``\u{5c}``, and
 
--  any single character except digits from '1' to '9', and characters ``'x'``,
+-  Any single character except digits from '1' to '9' and characters ``'x'``,
    ``'u'``, ``'CR'``, and ``'LF'``.
 
 .. index::
@@ -963,7 +963,7 @@ and more. An escape sequence always starts with the backslash character
    hexadecimal
    Unicode escape sequence
 
-The examples are provided below:
+Escape sequences are represented in the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -1020,7 +1020,7 @@ the backlash ``'\'``. Multiline strings can contain newline characters:
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
-A multiline string is represented in the example below:
+A *multiline string* is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1100,7 +1100,7 @@ Regex Literal
         'g'? 'i'? 'm'? 's'? 'u'? 'v'? 'y'? 
         ;
 
-Regex flags can be put in any order. However, a duplication of a regex flag
+Regex flags can be put in any order. However, duplicating a regex flag
 causes a :index:`compile-time error`.
 
 *Regex literals* are represented in the example below:
@@ -1164,7 +1164,7 @@ The value is typically used for types like ``T | null``
 
 *Undefined literal* is the only literal of types ``void`` and ``undefined``
 (see :ref:`Types void or undefined`) to denote a reference with a value that is
-not defined. The undefined literal is represented by the keyword ``undefined``:
+not defined. The *undefined literal* is represented by the keyword ``undefined``:
 
 .. code-block:: abnf
 
@@ -1188,13 +1188,13 @@ Comments
 .. meta:
     frontend_status: Done
 
-*Comment* is a piece of text added in the stream to document and compliment
-the source code. Comments are insignificant for the syntactic grammar (see
+*Comment* is a piece of text stream added to document and complement the
+source code. Comments are insignificant for the syntactic grammar (see
 :ref:`Grammar Summary`).
 
 *Line comments* begin with the sequence of characters ``'//'`` as in the
 example below, and end with the line separator character. Any character
-or sequence of characters between them is allowed but ignored.
+or sequence of characters between those characters is allowed but ignored.
 
 .. code-block:: typescript
    :linenos:
@@ -1232,7 +1232,7 @@ Semicolons
 
 Declarations and statements are usually terminated by a line separator (see
 :ref:`Line Separators`). A semicolon must be used in some cases to separate
-syntax productions written in one line, or to avoid ambiguity.
+syntax productions written in a single line, or to avoid ambiguity.
 
 .. index::
    declaration
