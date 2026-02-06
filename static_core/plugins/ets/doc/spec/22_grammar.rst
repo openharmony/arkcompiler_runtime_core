@@ -210,7 +210,6 @@ Grammar Summary
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
-        | launchExpression
         | awaitExpression
         ;
 
@@ -1039,10 +1038,7 @@ Grammar Summary
         arguments block
         ;
 
-      launchExpression:
-        'launch' functionCallExpression|methodCallExpression|lambdaExpression;
-
-      awaitExpression:
+    awaitExpression:
         'await' expression
         ;
 

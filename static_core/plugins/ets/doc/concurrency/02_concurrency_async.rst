@@ -185,6 +185,31 @@ The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of
 - Otherwise, the ``await`` does not define a suspension point and the type and
   value of the ``awaitExpression`` match those of the ``expression``.
 
+.. code-block:: typescript
+   :linenos:
+
+   async function g(): Promise<Object> { /* returns Promise */ }
+
+   async function f() { // await is allowed in async context only
+     // ...
+
+     // v1 is Awaited<Promise<Object>>, which is effectively Object
+     // g returns Promise, hence await is a suspension point
+     let v1 = await g()
+
+     // v2 is Int
+     // await returns an Int, hence no suspension point here
+     let v2 = await new Int(5)
+
+     // implying that anotherMethod returns a Promise:
+     //  - method returned an object: await can suspend; v3 is the await result
+     //  - method returned undefined: no suspension, v3 is undefined
+     // v3 is Awaited<ReturnType(anotherMethod)> | undefined
+     let v3 = await obj.method()?.anotherMethod()
+
+     // ...
+   }
+
 If ``awaitExpression`` defines a suspension point, then:
 
 - its type is ``Awaited<type(expression)>``;
