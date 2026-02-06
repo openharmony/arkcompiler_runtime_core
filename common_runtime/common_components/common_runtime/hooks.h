@@ -55,6 +55,9 @@ PUBLIC_API void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakR
 PUBLIC_API void VisitStaticConcurrentRoots(const RefFieldVisitor &visitor);
 PUBLIC_API void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
 
+PUBLIC_API void UpdateReadBarrierEntrypoint(void *thread, GCPhase gcPhase);
+PUBLIC_API void SetUpdateReadBarrierEntrypoint(void (*callback) (void *thread, GCPhase gcPhase));
+
 PUBLIC_API void AddXRefToDynamicRoots();
 PUBLIC_API void RemoveXRefFromDynamicRoots();
 

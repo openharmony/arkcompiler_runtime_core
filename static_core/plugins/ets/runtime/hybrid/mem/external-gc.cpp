@@ -15,6 +15,7 @@
 
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/gc/gc_root.h"
+#include "runtime/mem/gc/cmc-gc-adapter/cmc-gc-adapter.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/hybrid/mem/static_object_operator.h"
@@ -27,6 +28,7 @@ void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &
 void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
 void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
 void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
+void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, common::GCPhase phase));
 }  // namespace common
 
 namespace ark::mem::ets {
@@ -123,6 +125,24 @@ static void VisitConcurrentRoots(const common::RefFieldVisitor &visitorFunc)
     vm->VisitStringTable(callback, VisitGCRootFlags::ACCESS_ROOT_ALL);
 }
 
+static void UpdateReadBarrierEntrypoint(void *thread, common::GCPhase phase)
+{
+    auto *vm = GetPandaVM();
+    auto *gc = static_cast<CMCGCAdapter<EtsLanguageConfig> *>(vm->GetGC());
+    auto *managedThread = ManagedThread::CastFromMutator(reinterpret_cast<Mutator *>(thread));
+    if (phase == common::GCPhase::GC_PHASE_PRECOPY) {
+        gc->EnableReadBarrier(managedThread);
+    } else if (phase == common::GCPhase::GC_PHASE_IDLE) {
+        gc->DisableReadBarrier(managedThread);
+    }
+    // Check if a new phase has been added
+    ASSERT(phase == common::GCPhase::GC_PHASE_ENUM || phase == common::GCPhase::GC_PHASE_MARK ||
+           phase == common::GCPhase::GC_PHASE_PRECOPY || phase == common::GCPhase::GC_PHASE_COPY ||
+           phase == common::GCPhase::GC_PHASE_FIX || phase == common::GCPhase::GC_PHASE_IDLE ||
+           phase == common::GCPhase::GC_PHASE_POST_MARK || phase == common::GCPhase::GC_PHASE_FINAL_MARK ||
+           phase == common::GCPhase::GC_PHASE_REMARK_SATB);
+}
+
 void RegisterCmcGcCallbacks()
 {
     ark::mem::StaticObjectOperator::Initialize();
@@ -131,6 +151,7 @@ void RegisterCmcGcCallbacks()
     common::SetVisitStaticGlobalRootsCallback(VisitGlobalRoots);
     common::SetUpdateAndSweepStaticRefsCallback(UpdateAndSweep);
     common::SetVisitStaticConcurrentRootsCallback(VisitConcurrentRoots);
+    common::SetUpdateReadBarrierEntrypoint(UpdateReadBarrierEntrypoint);
 }
 
 }  // namespace ark::mem::ets

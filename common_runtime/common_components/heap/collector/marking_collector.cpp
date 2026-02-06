@@ -108,10 +108,10 @@ static void ClearWeakRef(WeakStack::value_type *begin, WeakStack::value_type *en
             // field is still within the object
             if (toObj != nullptr && offset < obj->GetSizeForwarded()) {
                 RefField<>& toField = *reinterpret_cast<RefField<>*>(reinterpret_cast<uintptr_t>(toObj) + offset);
-                toObj->ClearRef(oldField);
+                toObj->ClearRef(toField);
             }
         }
-        obj->ClearRef(oldField);
+        obj->ClearRef(field);
     }
 }
 

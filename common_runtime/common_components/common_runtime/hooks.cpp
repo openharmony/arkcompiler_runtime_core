@@ -14,6 +14,7 @@
  **/
 
 #include "common_components/common_runtime/hooks.h"
+#include "common_components/log/log.h"
 
 namespace common {
 
@@ -21,6 +22,7 @@ void (*g_visitAllStaticRootsCallback)(const RefFieldVisitor &) = nullptr;
 void (*g_visitStaticMutatorRootsCallback)(const RefFieldVisitor &, void *mutator) = nullptr;
 void (*g_visitStaticGlobalRootsCallback)(const RefFieldVisitor &) = nullptr;
 void (*g_updateAndSweepStaticRefsCallback)(const WeakRefFieldVisitor &visitor) = nullptr;
+void (*g_updateReadBarrierEntrypoint)(void *thread, GCPhase gcPhase) = nullptr;
 void (*g_visitStaticConcurrentRootsCallback)(const RefFieldVisitor &) = nullptr;
 void (*g_unmarkAllStaticXRefsCallback)() = nullptr;
 void (*g_sweepUnmarkedStaticXRefsCallback)() = nullptr;
@@ -127,6 +129,17 @@ void RemoveXRefFromStaticRoots()
 void SetRemoveXRefFromStaticRootsCallback(void (*callback)())
 {
     g_removeXRefFromStaticRootsCallback = callback;
+}
+
+void UpdateReadBarrierEntrypoint([[maybe_unused]] void *thread, [[maybe_unused]] GCPhase gcPhase)
+{
+    ASSERT_LOGF(g_updateReadBarrierEntrypoint != nullptr, "function is nullptr");
+    g_updateReadBarrierEntrypoint(thread, gcPhase);
+}
+
+void SetUpdateReadBarrierEntrypoint(void (*callback)(void *thread, GCPhase gcPhase))
+{
+    g_updateReadBarrierEntrypoint = callback;
 }
 
 void SetBaseAddress([[maybe_unused]] uintptr_t base) {}

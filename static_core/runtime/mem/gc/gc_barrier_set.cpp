@@ -19,15 +19,10 @@
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
-#include "runtime/include/object_header.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/rem_set.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map.h"
 #include "runtime/mem/object_helpers-inl.h"
-
-#if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/base_runtime.h"
-#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
 
@@ -196,54 +191,80 @@ void GCG1BarrierSet::PostCardToQueue(CardTable::CardPtr card)
     updatedRefsQueue_->push_back(card);
 }
 
+extern "C" void *ReadBarrierFuncEntrypoint(void **fieldPtr)
+{
+    if constexpr (GCCMCBarrierSet::USE_READ_BARRIERS) {
+        auto field = *reinterpret_cast<common::RefField<false> *>(*fieldPtr);
+        return common::BaseRuntime::ReadBarrier(field.GetTargetObject(), *fieldPtr);
+    }
+    return nullptr;
+}
+
+GCCMCBarrierSet::GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
+    : GCBarrierSet(allocator, BarrierType::PRE_CMC_READ_BARRIER, BarrierType::PRE_WRB_NONE,
+                   BarrierType::POST_CMC_WRITE_BARRIER)
+{
+    readBarrierFunc_ = &ReadBarrierFuncEntrypoint;
+    ASSERT(readBarrierFunc_ != nullptr);
+    AddBarrierOperand(
+        BarrierPosition::BARRIER_POSITION_PRE, "CMC_READ_BARRIER",
+        BarrierOperand(BarrierOperandType::FUNC_WITH_OBJ_FIELD_ADDRESS, BarrierOperandValue(readBarrierFunc_)));
+}
+
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] void *storedValAddr)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
+    if (storedValAddr == nullptr) {
+        return;
+    }
     common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset),
                                       storedValAddr);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
-class GCCMCBarrierSet::CMCWriteBarrierHandle {
-public:
-    explicit CMCWriteBarrierHandle(const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> &callback)
-        : callback_(callback)
-    {
-    }
-
-    bool operator()(ObjectHeader *obj, ObjectHeader *field, uint32_t offset, [[maybe_unused]] bool isVolatile)
-    {
-        callback_(obj, field, offset);
-        return true;
-    }
-
-private:
-    const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> &callback_;
-};
-
 void GCCMCBarrierSet::PostBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset,
                                   [[maybe_unused]] size_t count)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    const std::function<void(ObjectHeader *, ObjectHeader *, uint32_t)> visitor = [](ObjectHeader *obj,
-                                                                                     ObjectHeader *ref, uint32_t off) {
-        common::BaseRuntime::WriteBarrier(static_cast<void *>(obj), ToVoidPtr(ToUintPtr(obj) + off),
-                                          static_cast<void *>(ref));
-    };
-    CMCWriteBarrierHandle handler(visitor);
-    GCStaticObjectHelpers::TraverseAllObjectsWithInfo<false>(
-        reinterpret_cast<ObjectHeader *>(const_cast<void *>(objAddr)), handler, ToVoidPtr(ToUintPtr(objAddr) + offset),
-        ToVoidPtr(ToUintPtr(objAddr) + offset + count));
+    auto *begin = reinterpret_cast<ObjectPointerType *>(ToUintPtr(objAddr) + offset);
+    auto *end = begin + count;
+    while (begin < end) {
+        auto value = *begin;
+        if (value != 0) {
+            common::BaseRuntime::WriteBarrier(const_cast<void *>(objAddr), static_cast<void *>(begin),
+                                              ToVoidPtr(value));
+        }
+        ++begin;
+    }
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
-void *GCCMCBarrierSet::PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
+bool GCCMCBarrierSet::IsReadBarrierEnabled()
 {
-#if defined(ARK_USE_COMMON_RUNTIME)
-    return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
-#endif  // ARK_USE_COMMON_RUNTIME
+    return ManagedThread::GetCurrent()->GetReadBarrierEntrypoint() != nullptr;
+}
+
+void *GCCMCBarrierSet::ReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
+{
+    if constexpr (USE_READ_BARRIERS) {
+        return common::BaseRuntime::ReadBarrier(const_cast<void *>(objAddr), ToVoidPtr(ToUintPtr(objAddr) + offset));
+    }
     return nullptr;
+}
+
+void *GCCMCBarrierSet::ReadBarrier(void **refAddr)
+{
+    if constexpr (USE_READ_BARRIERS) {
+        auto *readBarrier = ManagedThread::GetCurrent()->GetReadBarrierEntrypoint();
+        if (readBarrier != nullptr) {
+            reinterpret_cast<ObjFieldProcessFunc>(readBarrier)(refAddr);
+            auto field = *reinterpret_cast<common::RefField<false> *>(*refAddr);
+            return field.GetTargetObject();
+        }
+    }
+    auto field = *reinterpret_cast<common::RefField<false> *>(*refAddr);
+    return field.GetTargetObject();
 }
 
 }  // namespace ark::mem

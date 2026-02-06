@@ -311,6 +311,9 @@ void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
         // the JSThread local gc state
         SynchronizeGCPhaseToJSThread(jsThread_, newPhase);
     }
+    if (thread_ != nullptr) {
+        UpdateReadBarrierEntrypoint(thread_, newPhase);
+    }
     // Clear mutator's suspend request after phase transition
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE); // atomic seq-cst
 }

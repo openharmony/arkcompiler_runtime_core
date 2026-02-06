@@ -20,6 +20,11 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/mem/gc/card_table.h"
+#include "runtime/include/object_header.h"
+
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "common_interfaces/base_runtime.h"
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
 
@@ -59,7 +64,7 @@ public:
         return postType_;
     }
 
-    virtual bool IsPreReadBarrierEnabled()
+    virtual bool IsReadBarrierEnabled()
     {
         return !mem::IsEmptyBarrier(preReadType_);
     }
@@ -101,9 +106,14 @@ public:
 
     BarrierOperand GetPostBarrierOperand(std::string_view name);
 
-    virtual void *PreReadBarrier([[maybe_unused]] const void *objAddr, [[maybe_unused]] size_t offset)
+    virtual void *ReadBarrier(const void *objAddr, size_t offset)
     {
-        UNREACHABLE();
+        return *reinterpret_cast<void **>((ToUintPtr(objAddr) + offset));
+    }
+
+    virtual void *ReadBarrier(void **refAddr)
+    {
+        return *refAddr;
     }
 
 protected:
@@ -243,11 +253,12 @@ private:
 /// BarrierSet for hybird CMC GC
 class GCCMCBarrierSet : public GCBarrierSet {
 public:
-    explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator)
-        : GCBarrierSet(allocator, BarrierType::PRE_CMC_READ_BARRIER, BarrierType::PRE_WRB_NONE,
-                       BarrierType::POST_CMC_WRITE_BARRIER)
-    {
-    }
+#if defined(ARK_USE_COMMON_RUNTIME)
+    static constexpr bool USE_READ_BARRIERS = true;
+#else
+    static constexpr bool USE_READ_BARRIERS = false;
+#endif
+    explicit GCCMCBarrierSet(mem::InternalAllocatorPtr allocator);
 
     NO_COPY_SEMANTIC(GCCMCBarrierSet);
     NO_MOVE_SEMANTIC(GCCMCBarrierSet);
@@ -262,15 +273,16 @@ public:
 
     void PostBarrier(const void *objAddr, size_t offset, size_t count) override;
 
-    bool IsPreReadBarrierEnabled() override
-    {
-        return true;
-    }
+    bool IsReadBarrierEnabled() override;
 
-    void *PreReadBarrier(const void *objAddr, size_t offset) override;
+    void *ReadBarrier(const void *objAddr, size_t offset) override;
+
+    void *ReadBarrier(void **refAddr) override;
 
 private:
     class CMCWriteBarrierHandle;
+    /// Function which is called for the read barrier
+    ObjFieldProcessFunc readBarrierFunc_;
 };
 
 }  // namespace ark::mem

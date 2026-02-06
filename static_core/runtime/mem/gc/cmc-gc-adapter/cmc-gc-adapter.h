@@ -17,6 +17,8 @@
 
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
+#include "runtime/include/managed_thread.h"
+#include "runtime/coroutines/coroutine.h"
 
 namespace ark::mem {
 
@@ -56,12 +58,37 @@ public:
     void StartGC() override {}
     void StopGC() override;
 
+    void EnableReadBarrier(ManagedThread *thread)
+    {
+        UpdateReadBarrierEntrypointInMutator<true>(thread);
+    }
+
+    void DisableReadBarrier(ManagedThread *thread)
+    {
+        UpdateReadBarrierEntrypointInMutator<false>(thread);
+    }
+
 private:
     void MarkObject(ObjectHeader *object) override;
     bool IsMarked(const ObjectHeader *object) const override;
     void InitializeImpl() override;
     void RunPhasesImpl(GCTask &task) override;
     void MarkReferences(GCMarkingStackType *references, GCPhase gcPhase) override;
+
+    template <bool ENABLE_BARRIER>
+    void UpdateReadBarrierEntrypointInMutator(ManagedThread *thread)
+    {
+        ObjFieldProcessFunc entrypointFunc = nullptr;
+
+        if constexpr (ENABLE_BARRIER) {
+            auto addr = this->GetBarrierSet()->GetBarrierOperand(ark::mem::BarrierPosition::BARRIER_POSITION_PRE,
+                                                                 "CMC_READ_BARRIER");
+            entrypointFunc = std::get<ObjFieldProcessFunc>(addr.GetValue());
+        }
+
+        void *entrypointFuncUntyped = reinterpret_cast<void *>(entrypointFunc);
+        thread->SetReadBarrierEntrypoint(entrypointFuncUntyped);
+    }
 };
 
 }  // namespace ark::mem
