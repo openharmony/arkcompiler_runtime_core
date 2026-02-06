@@ -96,7 +96,7 @@ function(ani_verify_add_generated_tests TARGET_PREF)
             DEPENDS "${ARG_ETS_CONFIG}"
         )
 
-        add_custom_target(copy_config DEPENDS "${OUTPUT_ETS_CONFIG}")
+        add_custom_target(copy_config_${TARGET_PREF} DEPENDS "${OUTPUT_ETS_CONFIG}")
     endif()
 
     foreach(params_item ${ARG_PARAMS})
@@ -140,8 +140,8 @@ function(ani_verify_add_generated_tests TARGET_PREF)
         )
 
         add_dependencies(${TARGET} generate_files_for_${TARGET})
-        if(TARGET copy_config)
-            add_dependencies(${TARGET} copy_config)
+        if(TARGET copy_config_${TARGET_PREF})
+            add_dependencies(${TARGET} copy_config_${TARGET_PREF})
         endif()
     endforeach()
 endfunction(ani_verify_add_generated_tests)

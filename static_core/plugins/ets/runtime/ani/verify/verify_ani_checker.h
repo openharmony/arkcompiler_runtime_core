@@ -39,10 +39,13 @@
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
+    X(VERIFY_READ_FIELD,                    VerifyReadField)                      \
+    X(VERIFY_READ_STATIC_FIELD,             VerifyReadStaticField)                \
+    X(VERIFY_WRITE_FIELD,                   VerifyWriteField)                     \
+    X(VERIFY_WRITE_STATIC_FIELD,            VerifyWriteStaticField)               \
     X(VERIFY_METHOD,                        VerifyMethod)                         \
     X(VERIFY_STATIC_METHOD,                 VerifyStaticMethod)                   \
     X(VERIFY_FUNCTION,                      VerifyFunction)                       \
-    X(VERIFY_FIELD,                         VerifyField)                          \
     X(VERIFY_METHOD_A_ARGS,                 VerifyMethodAArgs)                    \
     X(VERIFY_METHOD_V_ARGS,                 VerifyMethodVArgs)                    \
     X(VERIFY_VM_STORAGE,                    VerifyVmStorage)                      \
@@ -100,6 +103,7 @@
     X(ANI_STATIC_METHOD,                StaticMethod,              VStaticMethod *)          \
     X(ANI_FUNCTION,                     Function,                  VFunction *)              \
     X(ANI_FIELD,                        Field,                     VField *)                 \
+    X(ANI_STATIC_FIELD,                 StaticField,               VStaticField *)           \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
@@ -142,9 +146,15 @@
 
 namespace ark::ets {
 class EtsMethod;
+class EtsField;
 }  // namespace ark::ets
 
 namespace ark::ets::ani::verify {
+
+enum class AccessMode {
+    READ,
+    READWRITE,
+};
 
 class VVm;
 class VEnv;
@@ -156,6 +166,7 @@ class VMethod;
 class VStaticMethod;
 class VFunction;
 class VField;
+class VStaticField;
 class VString;
 class VError;
 class VArray;
@@ -278,6 +289,24 @@ public:
         return ANIArg(ArgValueByObject(vobject), name, Action::VERIFY_THIS_OBJECT);
     }
 
+    static ANIArg MakeForField(VField *vfield, std::string_view name, EtsType fieldType, AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_WRITE_FIELD, fieldType);
+        }
+        return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_READ_FIELD, fieldType);
+    }
+
+    static ANIArg MakeForStaticField(VStaticField *vstaticField, std::string_view name, EtsType staticFieldType,
+                                     AccessMode accessMode)
+    {
+        if (accessMode == AccessMode::READWRITE) {
+            return ANIArg(ArgValueByStaticField(vstaticField), name, Action::VERIFY_WRITE_STATIC_FIELD,
+                          staticFieldType);
+        }
+        return ANIArg(ArgValueByStaticField(vstaticField), name, Action::VERIFY_READ_STATIC_FIELD, staticFieldType);
+    }
+
     static ANIArg MakeForMethod(VMethod *vmethod, std::string_view name, EtsType returnType, bool isConstructor = false)
     {
         if (isConstructor) {
@@ -294,11 +323,6 @@ public:
     static ANIArg MakeForFunction(VFunction *vfunction, std::string_view name, EtsType returnType)
     {
         return ANIArg(ArgValueByFunction(vfunction), name, Action::VERIFY_FUNCTION, returnType);
-    }
-
-    static ANIArg MakeForField(VField *vfield, std::string_view name, EtsType returnType)
-    {
-        return ANIArg(ArgValueByField(vfield), name, Action::VERIFY_FIELD, returnType);
     }
 
     static ANIArg MakeForMethodArgs(AniMethodArgs *aniMethodArgs, std::string_view name)

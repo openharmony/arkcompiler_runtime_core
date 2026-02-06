@@ -256,6 +256,7 @@ PandaString ANIArg::GetStringType() const
         case ValueType::ANI_STATIC_METHOD:                return "ani_static_method";
         case ValueType::ANI_FUNCTION:                     return "ani_function";
         case ValueType::ANI_FIELD:                        return "ani_field";
+        case ValueType::ANI_STATIC_FIELD:                 return "ani_static_field";
         case ValueType::ANI_OBJECT:                       return "ani_object";
         case ValueType::ANI_STRING:                       return "ani_string";
         case ValueType::ANI_VALUE_ARGS:                   return "const ani_value *";
@@ -657,6 +658,84 @@ public:
         return {};
     }
 
+    std::optional<PandaString> VerifyReadField(VField *vfield, EtsType fieldType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vfield)) {
+            return "wrong field";
+        }
+
+        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong object for field";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyReadStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
+            return "wrong static field";
+        }
+
+        std::optional<PandaString> err =
+            DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong class for static field";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyWriteField(VField *vfield, EtsType fieldType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vfield)) {
+            return "wrong field";
+        }
+
+        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, fieldType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong object for field";
+        }
+
+        if (vfield->GetEtsField()->IsReadonly()) {
+            return "field is read-only";
+        }
+        return {};
+    }
+
+    std::optional<PandaString> VerifyWriteStaticField(VStaticField *vstaticfield, EtsType staticFieldType)
+    {
+        if (!GetEnvANIVerifier()->IsValidField(vstaticfield)) {
+            return "wrong static field";
+        }
+
+        std::optional<PandaString> err =
+            DoVerifyField(vstaticfield, impl::VField::ANIFieldType::STATIC_FIELD, staticFieldType);
+        if (err) {
+            return err;
+        }
+
+        if (class_ == nullptr || !vstaticfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
+            return "wrong class for static field";
+        }
+
+        if (vstaticfield->GetEtsField()->IsReadonly()) {
+            return "static field is read-only";
+        }
+        return {};
+    }
+
     std::optional<PandaString> VerifyMethod(VMethod *vmethod, EtsType returnType)
     {
         if (!GetEnvANIVerifier()->IsValidMethod(vmethod)) {
@@ -720,22 +799,6 @@ public:
         EtsType fieldReturnType = vfield->GetEtsField()->GetEtsType();
         if (fieldReturnType != returnType) {
             return "wrong return type";
-        }
-        return {};
-    }
-
-    std::optional<PandaString> VerifyField(VField *vfield, EtsType returnType)
-    {
-        if (!GetEnvANIVerifier()->IsValidField(vfield)) {
-            return "wrong field";
-        }
-        std::optional<PandaString> err = DoVerifyField(vfield, impl::VField::ANIFieldType::FIELD, returnType);
-        if (err) {
-            return err;
-        }
-
-        if (class_ == nullptr || !vfield->GetEtsField()->GetDeclaringClass()->IsAssignableFrom(class_)) {
-            return "wrong object for field";
         }
         return {};
     }
@@ -921,6 +984,30 @@ static std::optional<PandaString> VerifyCtor(Verifier &v, const ANIArg &arg)
     return v.VerifyCtor(arg.GetValueMethod(), arg.GetReturnType());
 }
 
+static std::optional<PandaString> VerifyReadField(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_FIELD);
+    return v.VerifyReadField(arg.GetValueField(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyReadStaticField(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_READ_STATIC_FIELD);
+    return v.VerifyReadStaticField(arg.GetValueStaticField(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyWriteField(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_FIELD);
+    return v.VerifyWriteField(arg.GetValueField(), arg.GetReturnType());
+}
+
+static std::optional<PandaString> VerifyWriteStaticField(Verifier &v, const ANIArg &arg)
+{
+    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_WRITE_STATIC_FIELD);
+    return v.VerifyWriteStaticField(arg.GetValueStaticField(), arg.GetReturnType());
+}
+
 static std::optional<PandaString> VerifyMethod(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_METHOD);
@@ -937,12 +1024,6 @@ static std::optional<PandaString> VerifyFunction(Verifier &v, const ANIArg &arg)
 {
     ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FUNCTION);
     return v.VerifyFunction(arg.GetValueFunction(), arg.GetReturnType());
-}
-
-static std::optional<PandaString> VerifyField(Verifier &v, const ANIArg &arg)
-{
-    ASSERT(arg.GetAction() == ANIArg::Action::VERIFY_FIELD);
-    return v.VerifyField(arg.GetValueField(), arg.GetReturnType());
 }
 
 static std::optional<PandaString> VerifyMethodAArgs(Verifier &v, const ANIArg &arg)
