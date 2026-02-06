@@ -345,6 +345,7 @@
 16.concurrency/02.asynchronous_api/01.async_functions/return_type_is_promise/negative_cases/async_function_returns_not_promise_8.ets
 16.concurrency/02.asynchronous_api/03.async_methods/return_type_is_promise/negative_cases/async_method_returns_not_promise_1.ets
 16.concurrency/02.asynchronous_api/01.async_functions/return_type_is_promise/negative_cases/async_function_returns_not_promise_5.ets
+16.concurrency/04.coroutines/domains/domain_ea_2.ets
 17.experimental_features/05.indexable_types/ind_expr_15.ets
 17.experimental_features/05.indexable_types/ind_expr_16.ets
 17.experimental_features/05.indexable_types/ind_expr_18.ets

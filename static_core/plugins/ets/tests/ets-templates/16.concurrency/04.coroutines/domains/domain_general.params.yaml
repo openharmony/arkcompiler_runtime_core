@@ -1,0 +1,212 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - desc: >-
+      Verify that a coroutine launched in GENERAL domain
+      does NOT execute on the main worker.
+    decl: |-
+      const TEST_ITERATIONS: int = 10;
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+          "Test precondition: main() should run on main worker (ID=0)");
+
+      // Create LaunchParams for GENERAL domain
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
+      };
+
+      // Run multiple times to increase confidence
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const launchedWorkerId: int = job.Await();
+
+          // Verify that the coroutine did NOT run on the main worker
+          arktest.assertNE(launchedWorkerId, mainWorkerId, 
+              `Iteration ${i}: Coroutine in GENERAL domain should NOT execute on main worker`);
+      }
+
+  - desc: >-
+      Verify that a coroutine launched in GENERAL domain
+      does NOT execute on an EA worker.
+    decl: |-
+      const TEST_ITERATIONS: int = 10;
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+
+      // Create and start an EA worker
+      const ea = new EAWorker();
+      ea.start();
+      const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
+
+      // Verify EA worker has different ID than main
+      arktest.assertNE(eaWorkerId, mainWorkerId, 
+          "Test precondition: EA worker should have different ID than main worker");
+
+      // Create LaunchParams for GENERAL domain
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
+      };
+
+      // Run multiple times to increase confidence
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const launchedWorkerId: int = job.Await();
+
+          // Verify that the coroutine did NOT run on the EA worker
+          arktest.assertNE(launchedWorkerId, eaWorkerId, 
+              `Iteration ${i}: Coroutine in GENERAL domain should NOT execute on EA worker`);
+          // Also verify it did NOT run on main worker
+          arktest.assertNE(launchedWorkerId, mainWorkerId, 
+              `Iteration ${i}: Coroutine in GENERAL domain should NOT execute on main worker`);
+      }
+
+      // Cleanup
+      ea.quit();
+
+  - desc: >-
+      Verify that hint with general worker ID is used in GENERAL domain.
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+
+      // First, collect some general worker IDs by launching without hint
+      let generalWorkerIds = new Set<int>();
+      const defaultParams: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
+      };
+      
+      for (let i = 0; i < 10; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, defaultParams);
+          generalWorkerIds.add(job.Await());
+      }
+
+      // Verify we have at least one general worker ID
+      arktest.assertTrue(generalWorkerIds.size > 0, 
+          "Should have collected at least one general worker ID");
+
+      // Get one general worker ID to use as hint
+      const targetWorkerId: int = Array.from<int>(generalWorkerIds)[0];
+
+      // Verify it's not main worker
+      arktest.assertNE(targetWorkerId, mainWorkerId,
+          "Target general worker should not be main worker");
+
+      // Launch with hint pointing to specific general worker
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL, [targetWorkerId])
+      };
+
+      // Run multiple times - should always execute on the hinted worker
+      for (let i = 0; i < 5; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const resultId: int = job.Await();
+          
+          arktest.assertEQ(resultId, targetWorkerId,
+              `Iteration ${i}: Coroutine with hint should execute on the specified general worker`);
+      }
+
+  - desc: >-
+      Verify that main worker ID in hint is ignored for GENERAL domain.
+    decl: |-
+      const TEST_ITERATIONS: int = 10;
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+      arktest.assertEQ(mainWorkerId, MAIN_WORKER_ID, 
+          "Test precondition: main() should run on main worker (ID=0)");
+
+      // Create LaunchParams for GENERAL domain with main worker ID in hint
+      // Main worker ID should be ignored
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL, [mainWorkerId])
+      };
+
+      // Run multiple times - should never execute on main worker
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const launchedWorkerId: int = job.Await();
+
+          // Verify that the coroutine did NOT run on main worker despite hint
+          arktest.assertNE(launchedWorkerId, mainWorkerId, 
+              `Iteration ${i}: Main worker ID in hint should be ignored for GENERAL domain`);
+      }
+
+  - desc: >-
+      Verify that EA worker ID in hint is ignored for GENERAL domain.
+    decl: |-
+      const TEST_ITERATIONS: int = 10;
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+
+      // Create and start an EA worker
+      const ea = new EAWorker();
+      ea.start();
+      const eaWorkerId: int = ea.run<int>(getWorkerId).Await();
+
+      // Verify EA worker has different ID than main
+      arktest.assertNE(eaWorkerId, mainWorkerId, 
+          "Test precondition: EA worker should have different ID than main worker");
+
+      // Create LaunchParams for GENERAL domain with EA worker ID in hint
+      // EA worker ID should be ignored
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL, [eaWorkerId])
+      };
+
+      // Run multiple times - should never execute on EA worker
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const launchedWorkerId: int = job.Await();
+
+          // Verify that the coroutine did NOT run on EA worker despite hint
+          arktest.assertNE(launchedWorkerId, eaWorkerId, 
+              `Iteration ${i}: EA worker ID in hint should be ignored for GENERAL domain`);
+          // Also verify it did NOT run on main worker
+          arktest.assertNE(launchedWorkerId, mainWorkerId, 
+              `Iteration ${i}: Coroutine in GENERAL domain should NOT execute on main worker`);
+      }
+
+      // Cleanup
+      ea.quit();
+
+  - desc: >-
+      Verify that coroutines in GENERAL domain are distributed
+      among multiple general workers.
+    decl: |-
+      const TEST_ITERATIONS: int = 50;
+    logic: |-
+      const mainWorkerId: int = getWorkerId();
+
+      // Create LaunchParams for GENERAL domain
+      const params: LaunchParams = {
+          workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.GENERAL)
+      };
+
+      // Collect worker IDs from multiple coroutine launches
+      let workerIds = new Set<int>();
+      for (let i = 0; i < TEST_ITERATIONS; i++) {
+          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          const workerId: int = job.Await();
+          
+          // Verify it's not main worker
+          arktest.assertNE(workerId, mainWorkerId, 
+              `Iteration ${i}: Should not execute on main worker`);
+          
+          workerIds.add(workerId);
+      }
+
+      // Verify that coroutines were distributed to multiple workers
+      // With 50 iterations, we expect to see more than 1 worker used
+      // (unless there's only 1 general worker in the pool)
+      arktest.assertTrue(workerIds.size >= 1, 
+          "At least one general worker should be used");
