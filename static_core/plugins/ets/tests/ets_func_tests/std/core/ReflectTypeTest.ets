@@ -622,7 +622,52 @@ function testPrimitive() {
     arktest.assertEQ(fldType5.getUnionConstituentTypes(), undefined)
 }
 
-function main(): int {
+function testIsSubtypeOf() {
+    let ddi = Class.from<DerivedDerivedIface>()
+    let di = Class.from<DerivedIface>()
+    let bi = Class.from<BaseIface>()
+    let obj = Class.from<Object>()
+
+    arktest.assertTrue(ddi.isSubtypeOf(ddi))
+    arktest.assertTrue(ddi.isSubtypeOf(di))
+    arktest.assertTrue(ddi.isSubtypeOf(bi))
+    arktest.assertTrue(ddi.isSubtypeOf(obj))
+
+    arktest.assertFalse(di.isSubtypeOf(ddi))
+    arktest.assertFalse(bi.isSubtypeOf(ddi))
+    arktest.assertFalse(obj.isSubtypeOf(ddi))
+
+    arktest.assertTrue(di.isSubtypeOf(di))
+    arktest.assertTrue(di.isSubtypeOf(bi))
+    arktest.assertTrue(di.isSubtypeOf(obj))
+
+    arktest.assertFalse(bi.isSubtypeOf(di))
+    arktest.assertFalse(obj.isSubtypeOf(di))
+
+    arktest.assertTrue(bi.isSubtypeOf(obj))
+
+    arktest.assertFalse(obj.isSubtypeOf(bi))
+
+    let b = Class.from<B>()
+    let a = Class.from<A>()
+    let iface = Class.from<Iface>()
+
+    arktest.assertTrue(b.isSubtypeOf(a))
+    arktest.assertTrue(b.isSubtypeOf(iface))
+    arktest.assertTrue(b.isSubtypeOf(obj))
+
+    arktest.assertFalse(a.isSubtypeOf(b))
+    arktest.assertFalse(iface.isSubtypeOf(b))
+    arktest.assertFalse(obj.isSubtypeOf(b))
+
+    arktest.assertTrue(a.isSubtypeOf(iface))
+    arktest.assertTrue(a.isSubtypeOf(obj))
+
+    arktest.assertFalse(iface.isSubtypeOf(a))
+    arktest.assertFalse(obj.isSubtypeOf(a))
+}
+
+function suiteGetInstanceMethods() {
     let typeBaseObj = Class.of(new Object())
 
     testGetName(typeBaseObj, "std.core.Object")
@@ -678,23 +723,31 @@ function main(): int {
     testGetInstanceMethodByName(typeB, ["boo1", "boo2"])
 
     tryGetPrivateInstanceMethodByName(typeA, [ "prfoo1", "prfoo2" ])
+}
 
-    testGetConstructors()
-    testGetStaticMethods()
-    testGetStaticMethod()
-    testGetStaticFields()
-    testGetInstanceFields()
+function main(): int {
+    const suite = new arktest.ArkTestsuite('Type API tests')
 
-    testInstanceFieldEquals()
-    testStaticFieldEquals()
-    testStaticMethodEquals()
+    suite.addTest('GetInstanceMethods', suiteGetInstanceMethods)
 
-    testIsUnion()
-    testUnionField()
-    testUnionParameter()
-    testUnionRet()
+    suite.addTest('GetConstructors', testGetConstructors)
+    suite.addTest('GetStaticMethods', testGetStaticMethods)
+    suite.addTest('GetStaticMethod', testGetStaticMethod)
+    suite.addTest('GetStaticFields', testGetStaticFields)
+    suite.addTest('GetInstanceFields', testGetInstanceFields)
 
-    testPrimitive()
+    suite.addTest('InstanceFieldEquals', testInstanceFieldEquals)
+    suite.addTest('StaticFieldEquals', testStaticFieldEquals)
+    suite.addTest('StaticMethodEquals', testStaticMethodEquals)
 
-    return 0
+    suite.addTest('IsUnion', testIsUnion)
+    suite.addTest('UnionField', testUnionField)
+    suite.addTest('UnionParameter', testUnionParameter)
+    suite.addTest('UnionRet', testUnionRet)
+
+    suite.addTest('Primitives', testPrimitive)
+
+    suite.addTest('IsSubtypeOf', testIsSubtypeOf)
+
+    return suite.run()
 }

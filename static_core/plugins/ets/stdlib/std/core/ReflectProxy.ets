@@ -177,9 +177,9 @@ export class Proxy {
      * @FaAndStageModel
      * @since 24
      */
-    public static native hasProxyFlag(klass: Class): boolean
+    private static native hasProxyFlag(klass: Class): boolean
 
-    private static createUniqueName(interfaces: FixedArray<Class>): string {
+    private static createUniqueName(): string {
         return Proxy.PROXY_PREFIX.concat((++Proxy.uniqueNameCounter).toString())
     }
 
@@ -189,7 +189,7 @@ export class Proxy {
      * @returns A `Class` object representing the dynamically generated proxy class.
      */
     private static createClass(linker: RuntimeLinker, interfaces: FixedArray<Class>): Class {
-        let proxyName: string = Proxy.createUniqueName(interfaces)
+        let proxyName: string = Proxy.createUniqueName()
         return Proxy.generateProxy(linker, proxyName, interfaces)
     }
 

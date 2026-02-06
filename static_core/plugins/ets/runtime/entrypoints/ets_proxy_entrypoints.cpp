@@ -300,12 +300,15 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
 
+    // Passed pointer to stack `args`, because it passed as GPR and FPR due to calling proxy bridge from i2c.
     Span<uint8_t> gprArgs(args, arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
     Span<uint8_t> fprArgs(gprArgs.end(), arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
     arch::ArgReader<RUNTIME_ARCH> argReader(gprArgs, fprArgs, inStackArgs);
 
-    argReader.Read<Method *>();  // Method * also pushed in GPR args, skip.
+    [[maybe_unused]] auto *readedMethod = argReader.Read<Method *>();
+    ASSERT(readedMethod == method);
 
+    // When i2c bridge calls proxy bridge, `this` should be always passed as second argument (method is first).
     auto *thisObj = EtsObject::FromCoreType(argReader.Read<ObjectHeader *>());
     [[maybe_unused]] EtsHandleScope scope(coroutine);
 

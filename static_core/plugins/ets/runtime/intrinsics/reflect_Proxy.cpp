@@ -20,8 +20,8 @@
 
 namespace ark::ets::intrinsics {
 
-static std::optional<Span<Class *>> CheckAndTrasformInterfaces(EtsObjectArray *interfaces,
-                                                               InternalAllocatorPtr allocator)
+static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *interfaces,
+                                                                InternalAllocatorPtr allocator)
 {
     Span<Class *> proxyInterfaces;
 
@@ -76,7 +76,7 @@ extern "C" EtsClass *ReflectProxyGenerateProxy(EtsRuntimeLinker *linker, EtsStri
     const uint8_t *descriptorMutf8 = utf::CStringAsMutf8(descriptor.c_str());
 
     auto internalAllocator = coroutine->GetPandaVM()->GetHeapManager()->GetInternalAllocator();
-    auto proxyInterfaces = CheckAndTrasformInterfaces(interfacesH.GetPtr(), internalAllocator);
+    auto proxyInterfaces = CheckAndTransformInterfaces(interfacesH.GetPtr(), internalAllocator);
     if (UNLIKELY(!proxyInterfaces)) {
         return nullptr;
     }

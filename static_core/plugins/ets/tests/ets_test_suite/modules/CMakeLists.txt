@@ -401,8 +401,17 @@ function(create_multiple_implement_test TARGET WORK_DIR SOURCE_DIR)
         DEPENDS ${TARGET}-multiple_implement1-run-sts-app-mode
     )
 
+    # test a3_extends_i3.ets multiple implement method
+    run_sts_app_mode(${TARGET}-multiple_implement2-run-sts-app-mode ${WORK_DIR} "@app.module2.MainAbility" "${ABC_FILES}"
+                     SPAWN_ENTRYPOINT_FUNCTION "mainMultipleImplement2")
+    add_dependencies(${TARGET}-multiple_implement2-run-sts-app-mode ${TARGET}-app)
+    add_custom_target(${TARGET}-multiple_implement2
+        COMMENT "Check class multiple implement method mainMultipleImplement2"
+        DEPENDS ${TARGET}-multiple_implement2-run-sts-app-mode
+    )
+
     add_custom_target(${TARGET}
-            DEPENDS ${TARGET}-multiple_implement ${TARGET}-multiple_implement1
+            DEPENDS ${TARGET}-multiple_implement ${TARGET}-multiple_implement1 ${TARGET}-multiple_implement2
     )
 
 endfunction()

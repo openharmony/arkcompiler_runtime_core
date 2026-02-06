@@ -113,11 +113,15 @@ ObjectHeader *StdCoreClassGetInterfaces(EtsClass *cls)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     const auto interfaces = cls->GetRuntimeClass()->GetInterfaces();
-    auto result = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, interfaces.size());
-    for (size_t i = 0; i < interfaces.size(); i++) {
-        result->Set(i, reinterpret_cast<EtsObject *>(EtsClass::FromRuntimeClass(interfaces[i])));
+    auto *result = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, interfaces.size());
+    if (UNLIKELY(result == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
     }
-    return reinterpret_cast<ObjectHeader *>(result);
+    for (size_t i = 0; i < interfaces.size(); i++) {
+        result->Set(i, EtsClass::FromRuntimeClass(interfaces[i])->AsObject());
+    }
+    return result->AsObject()->GetCoreType();
 }
 
 EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
@@ -418,9 +422,6 @@ EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
 
 EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
 {
-    if (other->IsInterface()) {
-        return static_cast<EtsBoolean>(cls->GetRuntimeClass()->Implements(other->GetRuntimeClass()));
-    }
     return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
 }
 
