@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-//! CHECKER    JIT IR Builder: Case #1: std.core.Array get/set operations.
-//! RUN        force_jit: true, options: "--compiler-regex='.*(test1|array[GS]et).*'", entry: "escompat_array_get_set.ETSGLOBAL::test1"
+//# std.core.Array get/set operations:
+//! CHECKER    JIT IR Builder: Case #1
+//! RUN        force_jit: true, entry: "escompat_array_get_set.ETSGLOBAL::test1",
+//!            options: "--compiler-regex='.*(test1|array[GS]et).*'"
+//!
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
@@ -28,7 +31,8 @@
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 
-//! CHECKER    AOT IR Builder: Case #1: IRBuilder pass must NOT inline Array get/set since neither class Array nor get/set method is final.
+//# IRBuilder pass must NOT inline Array get/set since neither class Array nor get/set method is final:
+//! CHECKER    AOT IR Builder: Case #1
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='.*array[GS]et.*'"
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::arrayGet"
@@ -46,8 +50,11 @@
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST       /Call((Virtual)|(Static)) .*std\.core\.Array::\$_set/
 
-//! CHECKER    JIT IR Builder: Case #2: std.core.Array get/set operations (with errors).
-//! RUN        force_jit: true, options: "--compiler-regex='escompat_array_get_set.ETSGLOBAL::__noinline__test.*'", entry: "escompat_array_get_set.ETSGLOBAL::test2"
+//# std.core.Array get/set operations (with errors):
+//! CHECKER    JIT IR Builder: Case #2
+//! RUN        force_jit: true, entry: "escompat_array_get_set.ETSGLOBAL::test2",
+//!            options: "--compiler-regex='escompat_array_get_set.ETSGLOBAL::__noinline__test.*'"
+//!
 //! EVENT      /Compilation,escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError,.*,COMPILED/
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"
 //! PASS_AFTER "IrBuilder"
@@ -63,7 +70,8 @@
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 
-//! CHECKER    AOT IR Builder: Case #2: std.core.Array get/set operations (with errors).
+//# std.core.Array get/set operations (with errors):
+//! CHECKER    AOT IR Builder: Case #2
 //! SKIP_IF    @architecture == "arm32"
 //! RUN_PAOC   options: "--compiler-regex='escompat_array_get_set.ETSGLOBAL::__noinline__test.*'"
 //! METHOD     "escompat_array_get_set.ETSGLOBAL::__noinline__testRangeError"

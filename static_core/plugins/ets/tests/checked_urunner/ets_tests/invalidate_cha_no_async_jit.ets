@@ -27,7 +27,9 @@ function __noinline__test() {
 
 //! CHECKER  Check no deadlock when loading Child and CHA-invalidating __noinline__foo in no async JIT
 //! # use verification-mode=disabled so that verifier doesn't load the class in advance
-//! RUN      force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::.*' --verification-mode=disabled", entry: "invalidate_cha_no_async_jit.ETSGLOBAL::main"
+//! RUN      force_jit: true, entry: "invalidate_cha_no_async_jit.ETSGLOBAL::main",
+//!          options: "--compiler-regex='.*ETSGLOBAL::.*' --verification-mode=disabled"
+//!
 //! EVENT    /Inline,invalidate_cha_no_async_jit.ETSGLOBAL::__noinline__foo,invalidate_cha_no_async_jit.Base::foo,.*,VIRTUAL_CHA,SUCCESS/
 //! EVENT    /ChaInvalidate,invalidate_cha_no_async_jit.Base::foo,invalidate_cha_no_async_jit.Child/
 //! EVENT    /ChaDeoptimize,invalidate_cha_no_async_jit.ETSGLOBAL::__noinline__foo/

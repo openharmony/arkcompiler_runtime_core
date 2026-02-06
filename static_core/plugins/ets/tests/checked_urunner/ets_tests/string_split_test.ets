@@ -20,7 +20,9 @@
 //! METHOD       "string_split_test.ETSGLOBAL::main"
 
 //! CHECKER      JIT test check no deoptimization occurs in String.split
-//! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::main' --compiler-inlining=false", entry: "string_split_test.ETSGLOBAL::main"
+//! RUN          force_jit: true, entry: "string_split_test.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::main' --compiler-inlining=false"
+//!
 //! EVENT_NOT    /Deoptimization,string_split_test.ETSGLOBAL::main,BOUNDS_CHECK/
 //! METHOD       "string_split_test.ETSGLOBAL::main"
 

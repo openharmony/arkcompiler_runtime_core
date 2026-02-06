@@ -17,7 +17,10 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER      JIT leave string builder instance for proper inlining deoptimization
-//! RUN          options: "--compiler-regex='.*ETSGLOBAL::__noinline__caller' --no-async-jit=true --compiler-hotness-threshold=50 --compiler-profiling-threshold=0", entry: "ets_string_builder_deopt3.ETSGLOBAL::main"
+//! RUN          entry: "ets_string_builder_deopt3.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::__noinline__caller' --no-async-jit=true \
+//!                 --compiler-hotness-threshold=50 --compiler-profiling-threshold=0"
+//!
 //! METHOD       "__noinline__caller"
 //! PASS_BEFORE  "BranchElimination"
 //! INST_COUNT   "NewObject", 1

@@ -14,7 +14,9 @@
  */
 
 //! CHECKER       Check LSE with PHI in JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::main'", entry: "ets_lse_phi_test.ETSGLOBAL::main"
+//! RUN           force_jit: true, entry: "ets_lse_phi_test.ETSGLOBAL::main",
+//!               options: "--compiler-regex='.*ETSGLOBAL::main'"
+//!
 //! METHOD        "ets_lse_phi_test.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /StoreObject .* ets_lse_phi_test.C0.x0/, 2

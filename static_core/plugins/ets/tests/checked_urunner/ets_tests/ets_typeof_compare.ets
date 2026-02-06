@@ -14,7 +14,10 @@
  */
 
 //! CHECKER      Check for typeof + compare peephole
-//! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::__noinline__process_typeof' --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_typeof_compare.ETSGLOBAL::main"
+//! RUN          force_jit: true, entry: "ets_typeof_compare.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::__noinline__process_typeof' \
+//!                 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false"
+//!
 //! EVENT        /Compilation,ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
 //! METHOD       "ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof"
 //! PASS_AFTER   "IrBuilder"
