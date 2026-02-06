@@ -301,15 +301,15 @@ export namespace containers {
         }
 
         private fetchAndAddSize(): int {
-            return this.actualSize.fetchAndAdd(1);
+            return this.actualSize.fetchAdd(1);
         }
 
         private fetchAndSubSize(): int {
-            return this.actualSize.fetchAndSub(1);
+            return this.actualSize.fetchSub(1);
         }
 
         private atomicsGetSize(): int {
-            return this.actualSize.get();
+            return this.actualSize.load();
         }
 
         private pushListNode(newNode: ListNode<T>): void {

@@ -9068,7 +9068,7 @@ intrinsics:
   - name: AtomicIntSet
     space: ets
     class_name: std.containers.AtomicInt
-    method_name: set
+    method_name: store
     static: false
     signature:
       ret: void
@@ -9078,7 +9078,7 @@ intrinsics:
   - name: AtomicIntGet
     space: ets
     class_name: std.containers.AtomicInt
-    method_name: get
+    method_name: load
     static: false
     signature:
       ret: i32
@@ -9108,7 +9108,7 @@ intrinsics:
   - name: AtomicIntFetchAndAdd
     space: ets
     class_name: std.containers.AtomicInt
-    method_name: fetchAndAdd
+    method_name: fetchAdd
     static: false
     signature:
       ret: i32
@@ -9118,7 +9118,7 @@ intrinsics:
   - name: AtomicIntFetchAndSub
     space: ets
     class_name: std.containers.AtomicInt
-    method_name: fetchAndSub
+    method_name: fetchSub
     static: false
     signature:
       ret: i32
@@ -9360,7 +9360,7 @@ intrinsics:
   - name: escompatAtomicIntSet
     space: ets
     class_name: std.concurrency.AtomicInt
-    method_name: set
+    method_name: store
     static: false
     signature:
       ret: void
@@ -9370,7 +9370,7 @@ intrinsics:
   - name: escompatAtomicIntGet
     space: ets
     class_name: std.concurrency.AtomicInt
-    method_name: get
+    method_name: load
     static: false
     signature:
       ret: i32
@@ -9400,7 +9400,7 @@ intrinsics:
   - name: escompatAtomicIntFetchAndAdd
     space: ets
     class_name: std.concurrency.AtomicInt
-    method_name: fetchAndAdd
+    method_name: fetchAdd
     static: false
     signature:
       ret: i32
@@ -9410,7 +9410,7 @@ intrinsics:
   - name: escompatAtomicIntFetchAndSub
     space: ets
     class_name: std.concurrency.AtomicInt
-    method_name: fetchAndSub
+    method_name: fetchSub
     static: false
     signature:
       ret: i32

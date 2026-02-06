@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,16 +60,16 @@ final class AtomicInt {
         this.value = v;
     }
 
-    public native set(v: int): void;
-    public native get(): int;
+    public native store(v: int): void;
+    public native load(): int;
     
     // Atomically sets the value to the given value and returns the previous value.
     public native exchange(v: int): int;
     // Returns the previous value of the atomic integer.
     public native compareAndSwap(expected: int, newValue: int): int;
 
-    public native fetchAndAdd(v: int): int;
-    public native fetchAndSub(v: int): int;
+    public native fetchAdd(v: int): int;
+    public native fetchSub(v: int): int;
 
     private value: int;
 }
