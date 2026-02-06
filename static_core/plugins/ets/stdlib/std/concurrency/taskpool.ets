@@ -68,6 +68,7 @@ export namespace taskpool {
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED: int = 10200111;
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED: int = 10200112;
     const TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY: int = 10200113;
+    const TASKPOOL_ERROR_SEQ_RUNNER_CHANGE_PRIORITY: int = 10200114;
 
     class GlobalQueueWorker extends EAWorker {
         public static closingTask: Task = new Task("closingTask", (): void => {});
@@ -1194,7 +1195,12 @@ export namespace taskpool {
 
         constructor(name: string, priority?: Priority) {
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
-            this.impl.priority = priority === undefined ? Priority.MEDIUM : priority;
+            let newPriority = priority === undefined ? Priority.MEDIUM : priority;
+            if (name.isEmpty() || this.impl.priority === undefined) {
+                this.impl.priority = newPriority;
+            } else if (this.impl.priority !== newPriority) {
+                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_CHANGE_PRIORITY, "seqRunner:: The priority can not be changed.");
+            }
         }
 
         execute(task: Task): Promise<Any> {
