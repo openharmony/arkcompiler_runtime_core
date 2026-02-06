@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,27 @@ TEST_F(InstTest, Dataflow)
     ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(5U)), &INS(3U));
     ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(4U)), &INS(4U));
     ASSERT_EQ(static_cast<PhiInst &>(INS(6U)).GetPhiInput(&BB(7U)), &INS(5U));
+
+    // Test optional inputs interface
+    auto checkInputsOpt = [this](Inst &inst, std::initializer_list<size_t> list) {
+        if (inst.GetInputs().Size() != list.size()) {
+            return false;
+        }
+        size_t i = 0;
+        for (auto el : list) {
+            if (inst.GetInputOpt(i++)->GetInst() != &INS(el)) {
+                return false;
+            }
+        }
+        return !inst.GetInputOpt(list.size()).has_value() && !inst.GetInputOpt(list.size() + 1).has_value() &&
+               !inst.GetInputOpt(list.size() + 10).has_value();
+    };
+    ASSERT_TRUE(checkInputsOpt(INS(2U), {0U, 1U}));
+    ASSERT_TRUE(checkInputsOpt(INS(3U), {0U}));
+    ASSERT_TRUE(checkInputsOpt(INS(7U), {3U, 2U}));
+    ASSERT_TRUE(checkInputsOpt(INS(4U), {1U}));
+    ASSERT_TRUE(checkInputsOpt(INS(5U), {4U}));
+    ASSERT_TRUE(checkInputsOpt(INS(6U), {3U, 4U, 5U}));
 
     {  // Test iterating over users of constant instruction
         const Inst *inst = &INS(2U);

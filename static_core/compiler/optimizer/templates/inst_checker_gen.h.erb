@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,13 +76,20 @@ public:
     }
 %     next
 %   end
-        CHECKER_EQ(inst->GetInputsCount(), <%= inst.inputs.size %>U);
+        CHECKER_LE(<%= inst.min_num_inputs %>U, inst->GetInputsCount());
+        CHECKER_LE(inst->GetInputsCount(), <%= inst.max_num_inputs %>U);
 %   inst.inputs.each_with_index do |operand, i|
 %     if operand.has('save_state')
         CHECKER_ASSERT(inst->GetInput(<%= i %>).GetInst()->IsSaveState());
 %     else
-        CHECKER_DO_IF_NOT_VISITOR(v, CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
-            std::cerr << "Wrong input <%= i %> type '" << DataType::ToString(GetInputType(inst, <%= i %>)) << "' for inst:\n" << *inst << std::endl);
+%       if operand.is_opt?
+        if (inst->GetInputsCount() > <%= i %>) {
+%       end
+          CHECKER_DO_IF_NOT_VISITOR(v, CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
+              std::cerr << "Wrong input <%= i %> type '" << DataType::ToString(GetInputType(inst, <%= i %>)) << "' for inst:\n" << *inst << std::endl);
+%       if operand.is_opt?
+        }
+%       end
 %     end
 %   end
     }

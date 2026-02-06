@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -492,6 +492,7 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64 AND PANDA_WITH_TESTS)
     set(PANDA_CODEGEN_TESTS_SOURCES
         tests/unit_test.cpp
         tests/spill_fill_encoder_test.cpp
+        tests/codegen/codegen_optional_inputs_test.cpp
         )
     if(PANDA_COMPILER_TARGET_AARCH64)
         list(APPEND PANDA_CODEGEN_TESTS_SOURCES

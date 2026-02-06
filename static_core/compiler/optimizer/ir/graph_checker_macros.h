@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,9 @@
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECKER_EQ(lhs, rhs) CHECK_EQ(lhs, rhs)
+// CC-OFFNXT(G.PRE.02) should be with define
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECKER_LE(lhs, rhs) CHECK_LE(lhs, rhs)
 
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -66,11 +69,24 @@
         reinterpret_cast<InstChecker *>(v)->SetStatus(false); \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
+#define ABCKIT_CHECK_LE(lhs, rhs)                                     \
+    if (UNLIKELY(!(lhs <= rhs))) {                                    \
+        std::cerr << "The values are not less or equal" << std::endl; \
+        reinterpret_cast<InstChecker *>(v)->SetStatus(false);         \
+    }
+// CC-OFFNXT(G.PRE.02) should be with define
 #define CHECKER_EQ(lhs, rhs)                                          \
     if (reinterpret_cast<InstChecker *>(v)->GetGraph()->IsAbcKit()) { \
         ABCKIT_CHECK_EQ((lhs), (rhs));                                \
     } else {                                                          \
         CHECK_EQ(lhs, rhs);                                           \
+    }
+// CC-OFFNXT(G.PRE.02) should be with define
+#define CHECKER_LE(lhs, rhs)                                          \
+    if (reinterpret_cast<InstChecker *>(v)->GetGraph()->IsAbcKit()) { \
+        ABCKIT_CHECK_LE((lhs), (rhs));                                \
+    } else {                                                          \
+        CHECK_LE(lhs, rhs);                                           \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
 #define ABCKIT_DO_IF_NOT_VISITOR(visitor, cond, func)                \
