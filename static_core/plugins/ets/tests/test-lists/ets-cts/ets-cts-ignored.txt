@@ -1,5 +1,4 @@
 #28019
-02.lexical_elements/07.keywords/soft_11.ets
 02.lexical_elements/07.keywords/soft_12.ets
 
 #26476 bigint literals with hex, oct, bin
@@ -102,9 +101,6 @@
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_10.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_11.ets
 04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_ambiguity_n_12.ets
-
-#31911
-04.names_declarations_and_scopes/07.function_declarations/07.return_type/ret_type_n_7.ets
 
 #31042 no CTE for void constrained by undefined
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_constraint_n_0.ets
@@ -250,9 +246,6 @@
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_1.ets
 07.expressions/13.indexing_expression/03.record_indexing_expression/record_field_set_2.ets
 
-#32635
-07.expressions/14.chaining_operator/chop_record.ets
-
 #32603
 07.expressions/14.chaining_operator/condition_compile_time.ets
 
@@ -303,9 +296,6 @@
 07.expressions/16.instanceof_expression/instanceof_func_17.ets
 07.expressions/16.instanceof_expression/instanceof_func_28.ets
 07.expressions/16.instanceof_expression/instanceof_func_31.ets
-07.expressions/16.instanceof_expression/instanceof_func_32.ets
-07.expressions/16.instanceof_expression/instanceof_func_33.ets
-07.expressions/16.instanceof_expression/instanceof_func_35.ets
 07.expressions/16.instanceof_expression/instanceof_func_36.ets
 
 #730 (spec)
@@ -343,31 +333,8 @@
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_7.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_8.ets
 
-#29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
-07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_1.ets
-07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_2.ets
-07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_3.ets
-07.expressions/16.instanceof_expression/instanceof_parametrized_class_negative_4.ets
-
-#29203 Warning: Type parameter is erased from type 'Array' when used in instanceof expression
-07.expressions/16.instanceof_expression/instanceof_neg_27.ets
-07.expressions/16.instanceof_expression/instanceof_neg_29.ets
-07.expressions/16.instanceof_expression/instanceof_neg_31.ets
-07.expressions/16.instanceof_expression/instanceof_neg_33.ets
-07.expressions/16.instanceof_expression/instanceof_neg_36.ets
-07.expressions/16.instanceof_expression/instanceof_neg_38.ets
-
 #32103
-07.expressions/16.instanceof_expression/instantiated_generic_type_0.ets
-07.expressions/16.instanceof_expression/instantiated_generic_type_1.ets
 07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
-07.expressions/16.instanceof_expression/instantiated_generic_type_3.ets
-07.expressions/16.instanceof_expression/instantiated_generic_type_4.ets
-
-#28907 Specifying type for too large integer number with as doesn't produce CTE
-07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_0.ets
-07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_1.ets
-07.expressions/17.cast_expressions/01.type_inference_in_cast_expression/type_inference_negative_2.ets
 
 #30583
 07.expressions/20.nullish-coalescing_expression/resulting_type_crash.ets
@@ -558,30 +525,7 @@
 09.classes/06.field_declarations/04.field_initialization/non_static_field_initialization_reference.ets
 09.classes/06.field_declarations/04.field_initialization/non_static_field_self_initialization_reference.ets
 
-#23050
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_252.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_253.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_254.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_255.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_256.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_257.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_258.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_259.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_260.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_261.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_262.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_263.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_264.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_265.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_266.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_267.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_268.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_269.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_270.ets
-09.classes/06.field_declarations/05.fields_with_late_initialization/fields_with_late_initialization_cte_271.ets
-
-
-#194
+#32586
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n1_0.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n1_1.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n1_2.ets
@@ -595,8 +539,6 @@
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_0.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_1.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_type_n2_2.ets
-
-#28793
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n1.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n2.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n3.ets
@@ -893,13 +835,6 @@
 14.ambient_declarations/01.constant_declarations/constant_usage_n_16.ets
 14.ambient_declarations/01.constant_declarations/constant_usage_n_17.ets
 
-# enable when intitalizers in '.d.ets' check is enabled.
-14.ambient_declarations/04.class_declarations/class_declarations_neg_6.ets
-14.ambient_declarations/04.class_declarations/class_declarations_neg_7.ets
-14.ambient_declarations/04.class_declarations/class_declarations_neg_8.ets
-14.ambient_declarations/04.class_declarations/class_declarations_neg_9.ets
-14.ambient_declarations/04.class_declarations/class_declarations_neg_10.ets
-
 #29270
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_0.ets
 14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_usage_n_1.ets
@@ -912,7 +847,7 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
-#27702 Type safety check
+#25111
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/positive_0.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/positive_1.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_fixed-size_array_types/negative_type_safety_0.ets
@@ -1466,13 +1401,6 @@
 15.semantic_rules/10.overloading/first_match/first_match_2c_2i_8.ets
 
 #29203 Warning: Type parameter is erased from type 'type' when used in instanceof expression.
-15.semantic_rules/11.type_erasure/instanceof_negative_0.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_1.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_15.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_3.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_4.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_5.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_6.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_1.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_10.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_11.ets
@@ -1494,9 +1422,6 @@
 
 #31596
 15.semantic_rules/14.dispatch/root_call_dispatch_2.ets
-
-#30498
-16.concurrency/02.asynchronous_api/05.promise/promise_negative.ets
 
 #30547
 16.concurrency/02.asynchronous_api/01.async_functions/afunc_n_6.ets
@@ -2078,11 +2003,10 @@
 18.annotations/base_annotation_syntax_n_5.ets
 18.annotations/base_annotation_syntax_n_6.ets
 
-31690 review after merge
+#31690 review after merge
 03.types/19.union_types/union_type_assignment_66.ets
 03.types/19.union_types/union_type_assignment_77.ets
 07.expressions/16.instanceof_expression/instanceof_neg_35.ets
-09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_17.ets
 09.classes/06.field_declarations/06.overriding_fields/overriding_fields_20.ets
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method.ets
@@ -2106,12 +2030,3 @@
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_11.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_24.ets
 15.semantic_rules/11.type_erasure/instanceof_gen_25.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_11.ets
-15.semantic_rules/11.type_erasure/instanceof_negative_12.ets
-
-NOTE: tests failed only in 'simultaneous' mode
-13.modules_and_namespaces/03.import_directives/02.default_import_binding/default_import_union.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_9.ets
-05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_12.ets
-04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_0.ets
-04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_1.ets

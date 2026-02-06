@@ -1,3 +1,10 @@
+#31690 
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_0.ets
+04.names_declarations_and_scopes/02.declarations/01.declaration_distinguishable_by_signatures/spec_example_1_1.ets
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_9.ets
+05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_12.ets
+13.modules_and_namespaces/03.import_directives/02.default_import_binding/default_import_union.ets
+
 #31588
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default.ets
 13.modules_and_namespaces/05.export_directives/04.re-export_directive/reexported_default_2.ets
