@@ -108,7 +108,7 @@ void EtsEscompatArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsEs
     auto inputManagedData = handle->GetManagedDataImpl();
     if (inputManagedData != nullptr) {
         // Pre read barrier is need, because an input managed buffer is movable.
-        auto *readBarrierSet = Thread::GetCurrent()->GetBarrierSet();
+        auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
         if (readBarrierSet->IsPreReadBarrierEnabled()) {
             readBarrierSet->PreReadBarrier(inputManagedData, coretypes::Array::GetDataOffset());
         }

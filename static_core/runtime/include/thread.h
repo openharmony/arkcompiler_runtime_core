@@ -316,14 +316,6 @@ public:
         return threadType_;
     }
 
-    ALWAYS_INLINE mem::GCBarrierSet *GetBarrierSet() const
-    {
-        return barrierSet_;
-    }
-
-    // pre_buff_ may be destroyed during Detach(), so it should be initialized once more
-    void InitPreBuff();
-
     static constexpr size_t GetVmOffset()
     {
         return MEMBER_OFFSET(Thread, vm_);
@@ -334,44 +326,18 @@ public:
         return &threadRandomState_;
     }
 
-private:
-    void InitCardTableData(mem::GCBarrierSet *barrier);
-    void InitThreadRandomState();
-
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    bool isCompiledFrame_ {false};
-    ThreadId internalId_ {0};
-
-    EntrypointsTable *entrypointsTable_ {nullptr};
-    void *object_ {nullptr};
-    Frame *frame_ {nullptr};
-    ObjectHeader *exception_ {nullptr};
-    uintptr_t nativePc_ {};
-    mem::TLAB *tlab_ {nullptr};
-    void *cardTableAddr_ {nullptr};
-    void *cardTableMinAddr_ {nullptr};
     std::atomic<void *> preWrbEntrypoint_ {nullptr};  // if NOT nullptr, stores pointer to PreWrbFunc and indicates we
                                                       // are currently in concurrent marking phase
-    // keeps IRtoC GC PostWrb impl for storing one object
-    void *postWrbOneObject_ {nullptr};
-    // keeps IRtoC GC PostWrb impl for storing two objects
-    void *postWrbTwoObjects_ {nullptr};
-    void *stringClassPtr_ {nullptr};    // ClassRoot::LINE_STRING
-    void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
-    void *arrayU8ClassPtr_ {nullptr};   // ClassRoot::ARRAY_U8
-    PandaVector<ObjectHeader *> *preBuff_ {nullptr};
-    void *languageExtensionData_ {nullptr};
-#ifndef NDEBUG
-    uintptr_t runtimeCallEnabled_ {1};
-#endif
     uint64_t threadRandomState_ {0};
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
+    void InitThreadRandomState();
+
     PandaVM *vm_ {nullptr};
     ThreadType threadType_ {ThreadType::THREAD_TYPE_NONE};
-    mem::GCBarrierSet *barrierSet_ {nullptr};
 #ifndef PANDA_TARGET_WINDOWS
     stack_t signalStack_ {};
 #endif

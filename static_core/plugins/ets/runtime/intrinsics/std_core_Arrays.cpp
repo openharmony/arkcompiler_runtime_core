@@ -151,7 +151,7 @@ template <typename T>
 static auto GetCopy([[maybe_unused]] const void *srcAddr)
 {
 #ifdef ARK_HYBRID
-    auto *readBarrierSet = Thread::GetCurrent()->GetBarrierSet();
+    auto *readBarrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
     bool usePreReadBarrier = readBarrierSet->IsPreReadBarrierEnabled();
 
     return [usePreReadBarrier, readBarrierSet, srcAddr](T *srcPtr, T *dstPtr) {

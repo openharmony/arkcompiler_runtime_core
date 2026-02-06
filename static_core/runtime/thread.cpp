@@ -72,24 +72,15 @@ void Thread::FreeInternalMemory()
 
 void Thread::FreeAllocatedMemory()
 {
+#ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     ASSERT(allocator != nullptr);
-    allocator->Delete(preBuff_);
-    preBuff_ = nullptr;
-
-#ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
     allocator->Free(signalStack_.ss_sp);
 #endif
 }
 
 Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorLock()), vm_(vm), threadType_(threadType)
 {
-    // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
-    mem::GC *gc = vm->GetGC();
-    if (gc != nullptr) {
-        barrierSet_ = vm->GetGC()->GetBarrierSet();
-        InitCardTableData(barrierSet_);
-    }
     InitializeThreadFlag();
     InitThreadRandomState();
 #ifdef PANDA_USE_CUSTOM_SIGNAL_STACK
@@ -99,8 +90,6 @@ Thread::Thread(PandaVM *vm, ThreadType threadType) : ThreadProxy(vm->GetMutatorL
     signalStack_.ss_flags = 0;
     sigaltstack(&signalStack_, nullptr);
 #endif
-
-    entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
 }
 
 void Thread::InitThreadRandomState()
@@ -108,42 +97,6 @@ void Thread::InitThreadRandomState()
     struct timeval tv = {0, 0};
     gettimeofday(&tv, nullptr);
     threadRandomState_ = static_cast<uint64_t>(tv.tv_sec * MICROSEC_CONVERSION + tv.tv_usec);
-}
-
-void Thread::InitCardTableData(mem::GCBarrierSet *barrier)
-{
-    auto postBarrierType = barrier->GetPostType();
-    switch (postBarrierType) {
-        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
-            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
-            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
-            postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
-            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
-            break;
-        case ark::mem::BarrierType::POST_WRB_NONE:
-            postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
-            postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
-            break;
-        case mem::POST_RB_NONE:
-        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
-            break;
-        case mem::PRE_WRB_NONE:
-        case mem::PRE_RB_NONE:
-        case mem::PRE_SATB_BARRIER:
-        case ark::mem::BarrierType::PRE_CMC_READ_BARRIER:
-            LOG(FATAL, RUNTIME) << "Post barrier expected";
-            break;
-    }
-}
-
-void Thread::InitPreBuff()
-{
-    auto allocator = GetInternalAllocator(this);
-    mem::GC *gc = GetVM()->GetGC();
-    auto barrier = gc->GetBarrierSet();
-    if (barrier->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
-        preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
-    }
 }
 
 /* static */
@@ -202,6 +155,32 @@ MTManagedThread *MTManagedThread::Create(Runtime *runtime, PandaVM *vm, ark::pan
     return thread;
 }
 
+void ManagedThread::InitCardTableData(mem::GCBarrierSet *barrier)
+{
+    auto postBarrierType = barrier->GetPostType();
+    switch (postBarrierType) {
+        case ark::mem::BarrierType::POST_INTERREGION_BARRIER:
+            cardTableAddr_ = std::get<uint8_t *>(barrier->GetPostBarrierOperand("CARD_TABLE_ADDR").GetValue());
+            cardTableMinAddr_ = std::get<void *>(barrier->GetPostBarrierOperand("MIN_ADDR").GetValue());
+            postWrbOneObject_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkSingleFast);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(PostInterRegionBarrierMarkPairFast);
+            break;
+        case ark::mem::BarrierType::POST_WRB_NONE:
+            postWrbOneObject_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            postWrbTwoObjects_ = reinterpret_cast<void *>(EmptyPostWriteBarrier);
+            break;
+        case mem::POST_RB_NONE:
+        case ark::mem::BarrierType::POST_CMC_WRITE_BARRIER:
+            break;
+        case mem::PRE_WRB_NONE:
+        case mem::PRE_RB_NONE:
+        case mem::PRE_SATB_BARRIER:
+        case ark::mem::BarrierType::PRE_CMC_READ_BARRIER:
+            LOG(FATAL, RUNTIME) << "Post barrier expected";
+            break;
+    }
+}
+
 ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *pandaVm,
                              Thread::ThreadType threadType, ark::panda_file::SourceLang threadLang)
     : Thread(pandaVm, threadType),
@@ -212,14 +191,15 @@ ManagedThread::ManagedThread(ThreadId id, mem::InternalAllocatorPtr allocator, P
 {
     ASSERT(zeroTlab_ != nullptr);
     tlab_ = zeroTlab_;
-
+    entrypointsTable_ = Runtime::GetCurrent()->GetEntrypointsTable();
     // WORKAROUND(v.cherkashin): EcmaScript side build doesn't have GC, so we skip setting barriers for this case
     mem::GC *gc = pandaVm->GetGC();
     if (gc != nullptr) {
-        preBarrierType_ = gc->GetBarrierSet()->GetPreType();
-        postBarrierType_ = gc->GetBarrierSet()->GetPostType();
-        auto barrierSet = gc->GetBarrierSet();
-        if (barrierSet->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
+        barrierSet_ = gc->GetBarrierSet();
+        InitCardTableData(barrierSet_);
+        preBarrierType_ = barrierSet_->GetPreType();
+        postBarrierType_ = barrierSet_->GetPostType();
+        if (barrierSet_->GetPreType() != ark::mem::BarrierType::PRE_WRB_NONE) {
             preBuff_ = allocator->New<PandaVector<ObjectHeader *>>();
             // need to initialize in constructor because we have barriers between constructor and InitBuffers in
             // InitializedClasses
@@ -272,6 +252,7 @@ ManagedThread::~ManagedThread()
     internalLocalAllocator_ = nullptr;
     allocator->Delete(stackFrameAllocator_);
     allocator->Delete(ptThreadInfo_.release());
+    FreePreBuffer();
 
 #if defined(VERBOSE_THREAD_STATE_LOG)
     ASSERT(threadFrameStates_.empty() && "stack should be empty");
@@ -293,6 +274,14 @@ void ManagedThread::InitBuffers()
             g1PostBarrierRingBuffer_ = allocator->New<mem::GCG1BarrierSet::G1PostBarrierRingBufferType>();
         }
     }
+}
+
+void ManagedThread::FreePreBuffer()
+{
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    ASSERT(allocator != nullptr);
+    allocator->Delete(preBuff_);
+    preBuff_ = nullptr;
 }
 
 NO_INLINE static uintptr_t GetStackTop()
@@ -899,6 +888,7 @@ void ManagedThread::FreeInternalMemory()
     allocator->Delete(objectHeaderHandleStorage_);
     objectHeaderHandleScopes_.~PandaVector<HandleScope<ObjectHeader *> *>();
 
+    FreePreBuffer();
     Thread::FreeInternalMemory();
 }
 

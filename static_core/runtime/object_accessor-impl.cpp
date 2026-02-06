@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,48 +18,35 @@
 // We don't move them to object_accessor-inl.h because including runtime.h
 // will lead to circular header dependences.
 
-#include "runtime/include/object_accessor-inl.h"
+#include "runtime/include/object_accessor.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 
 namespace ark {
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
-inline
-#endif
-    mem::GCBarrierSet *  // CC-OFF(G.FMT.10, G.FMT.14) project code style
-    ObjectAccessor::GetBarrierSet()
+mem::GCBarrierSet *ObjectAccessor::GetBarrierSet()
 {
-    return Thread::GetCurrent()->GetBarrierSet();
+    // The getter for non-managed threads (JIT, GC)
+    const auto *thread = Thread::GetCurrent();
+    ASSERT(thread != nullptr);
+    return thread->GetVM()->GetGC()->GetBarrierSet();
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
-inline
-#endif
-    mem::GCBarrierSet *  // CC-OFF(G.FMT.10, G.FMT.14) project code style
-    ObjectAccessor::GetBarrierSet(const ManagedThread *thread)
+mem::GCBarrierSet *ObjectAccessor::GetBarrierSet(const ManagedThread *thread)
 {
     return thread->GetBarrierSet();
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
-inline
-#endif
-    mem::BarrierType  // CC-OFF(G.FMT.10) project code style
-    ObjectAccessor::GetPreBarrierType(const ManagedThread *thread)
+mem::BarrierType ObjectAccessor::GetPreBarrierType(const ManagedThread *thread)
 {
     return thread->GetPreBarrierType();
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
-inline
-#endif
-    mem::BarrierType  // CC-OFF(G.FMT.10) project code style
-    ObjectAccessor::GetPostBarrierType(const ManagedThread *thread)
+mem::BarrierType ObjectAccessor::GetPostBarrierType(const ManagedThread *thread)
 {
     return thread->GetPostBarrierType();
 }
