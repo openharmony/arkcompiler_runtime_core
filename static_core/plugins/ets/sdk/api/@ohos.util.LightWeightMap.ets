@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ function createBusinessError(code: int, message: string) {
 
 export type LightWeightMapCbFn<K, V> = (value: V, key: K, map: LightWeightMap<K, V>) => void;
 
-interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
+export interface ReadonlyLightWeightMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the LightWeightMap
      *
