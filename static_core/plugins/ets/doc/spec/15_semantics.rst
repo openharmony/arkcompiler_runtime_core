@@ -4181,8 +4181,7 @@ member is excluded in the right-hand-side column for brevity):
 
        - *Covariant* type parameters are instantiated with the constraint type;
        - *Contravariant* type parameters are instantiated with type ``never``;
-       - *Invariant* type parameters are instantiated with no type argument,
-         i.e., ``Array<T>`` is instantiated as ``Array<>``.
+       - *Invariant* type parameters are instantiated with a *Wildcard Type*
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
