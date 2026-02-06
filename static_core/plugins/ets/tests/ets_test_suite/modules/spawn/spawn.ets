@@ -100,9 +100,10 @@ function mainMultipleOverrideBase1() {
     abilityExpectVerificationError("L@app/module1/MainAbility;");
 }
 
-function mainVerificationModeOnTheFly() {
-    abilityExpectVerificationError("@verification_mode.bar.ETSGLOBAL::bar");
-}
+// NOTE(dslynko, #33090): re-enable or remove
+// function mainVerificationModeOnTheFly() {
+//     abilityExpectVerificationError("@verification_mode.bar.ETSGLOBAL::bar");
+// }
 
 function mainVerificationModeAheadOfTime() {
     abilityExpectVerificationError("L@verification_mode/bar/ETSGLOBAL;");

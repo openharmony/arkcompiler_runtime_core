@@ -104,6 +104,11 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
 {
     ASSERT(runtime != nullptr);
 
+    // NOTE(dslynko, #33090): re-enable or remove
+    if (verifier::VerificationModeFromString(options.GetVerificationMode()) == verifier::VerificationMode::ON_THE_FLY) {
+        return Unexpected(PandaString("on-the-fly verification mode is not supported in ets"));
+    }
+
     if (!PandaEtsVM::CreateTaskManagerIfNeeded(options)) {
         return Unexpected(PandaString("Cannot create TaskManager"));
     }

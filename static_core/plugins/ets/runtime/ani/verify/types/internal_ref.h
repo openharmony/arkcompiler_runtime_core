@@ -21,7 +21,7 @@
 namespace ark::ets::ani::verify {
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
-class InternalRef {
+class InternalRef final {
 public:
     explicit InternalRef(ani_ref ref) : ref_(ref) {}
 
@@ -36,8 +36,10 @@ public:
         return ref_;
     }
 
-    DEFAULT_COPY_SEMANTIC(InternalRef);
-    DEFAULT_MOVE_SEMANTIC(InternalRef);
+    NO_COPY_SEMANTIC(InternalRef);
+    NO_MOVE_SEMANTIC(InternalRef);
+
+    ~InternalRef() = default;
 
 private:
     ani_ref ref_;

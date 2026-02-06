@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -420,19 +420,20 @@ create_multiple_implement_test(ets_modules_multiple_implement_test ${CMAKE_CURRE
 
 function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR TEST_NAME ASM_SOURCE)
     prepare_incompatible_app(${TARGET}-app ABC_FILES ${WORK_DIR} ${SOURCE_DIR} ${TEST_NAME} ASM_SOURCE ${ASM_SOURCE})
+    # NOTE(dslynko, #33090): re-enable or remove
     # test --verification-mode on-the-fly mode
-    set(RUNTIME_EXTRA_OPTIONS
-        "--load-runtimes=ets"
-        "--verification-mode=on-the-fly"
-        "--gc-type=g1-gc"
-    )
-    run_sts_app_mode_with_special_option(${TARGET}-on-the-fly-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
-                     SPAWN_ENTRYPOINT_FUNCTION "mainVerificationModeOnTheFly" RUNTIME_EXTRA_OPTIONS ${RUNTIME_EXTRA_OPTIONS})
-    add_dependencies(${TARGET}-on-the-fly-run-sts-app-mode ${TARGET}-app)
-    add_custom_target(${TARGET}-on-the-fly
-        COMMENT "Check --verification-mode on-the-fly mode mainVerificationModeOnTheFly"
-        DEPENDS ${TARGET}-on-the-fly-run-sts-app-mode
-    )
+    # set(RUNTIME_EXTRA_OPTIONS
+    #     "--load-runtimes=ets"
+    #     "--verification-mode=on-the-fly"
+    #     "--gc-type=g1-gc"
+    # )
+    # run_sts_app_mode_with_special_option(${TARGET}-on-the-fly-run-sts-app-mode ${WORK_DIR} "@app.module.MainAbility" "${ABC_FILES}"
+    #                  SPAWN_ENTRYPOINT_FUNCTION "mainVerificationModeOnTheFly" RUNTIME_EXTRA_OPTIONS ${RUNTIME_EXTRA_OPTIONS})
+    # add_dependencies(${TARGET}-on-the-fly-run-sts-app-mode ${TARGET}-app)
+    # add_custom_target(${TARGET}-on-the-fly
+    #     COMMENT "Check --verification-mode on-the-fly mode mainVerificationModeOnTheFly"
+    #     DEPENDS ${TARGET}-on-the-fly-run-sts-app-mode
+    # )
 
     # test --verification-mode ahead-of-time mode
     set(RUNTIME_EXTRA_OPTIONS
@@ -448,7 +449,10 @@ function(create_verification_mode_test TARGET WORK_DIR SOURCE_DIR TEST_NAME ASM_
         DEPENDS ${TARGET}-ahead-of-time-run-sts-app-mode
     )
     add_custom_target(${TARGET}
-            DEPENDS ${TARGET}-on-the-fly ${TARGET}-ahead-of-time
+            DEPENDS
+                # NOTE(dslynko, #33090): re-enable or remove
+                # ${TARGET}-on-the-fly
+                ${TARGET}-ahead-of-time
     )
 endfunction()
 
