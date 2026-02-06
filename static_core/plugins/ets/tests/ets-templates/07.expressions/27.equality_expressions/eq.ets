@@ -13,19 +13,40 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
 desc: >-
     The two forms have the same semantics regardless of the number of the symbols '=' used in the operator.
     The form of the operator '===' is identical to '==', and '!==' is identical to '!='.
 ---*/
-{{c.decl}}
+class A {}
+class B {}
+enum Color { Red, Green, Blue }
 
-function main() {
-    let a = {{c.a}}
-    let b = {{c.b}}
-    arktest.assertTrue( (a == b) == (a === b) )
-    arktest.assertTrue( (a != b) == (a !== b) )
+function eq2<T, U>(a: T, b: U): boolean {
+    return a == b
 }
-{%- endfor %}
+
+function eq3<T, U>(a: T, b: U): boolean {
+    return a === b
+}
+
+function ne2<T, U>(a: T, b: U): boolean {
+    return a != b
+}
+
+function ne3<T, U>(a: T, b: U): boolean {
+    return a !== b
+}
+
+function main(): int {
+    let tests = new arktest.ArkTestsuite("EqualityExpressions");
+{% for c in cases %}
+    tests.addTest("EqualityExpressions_{{loop.index}}", () => {
+        let a = {{c.a}}
+        let b = {{c.b}}
+        arktest.assertEQ(eq2(a, b), eq3(a, b))
+        arktest.assertEQ(ne2(a, b), ne3(a, b))
+    })
+{% endfor %}
+    return tests.run()
+}

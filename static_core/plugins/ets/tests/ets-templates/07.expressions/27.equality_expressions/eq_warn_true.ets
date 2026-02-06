@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,35 +13,17 @@
  * limitations under the License.
  */
 
-{%- for op in operators %}
-    {%- for type in types %}
-        {%- for operand in operands %}
-
+{%- for c in cases %}
 /*---
-desc: Any equality expression is of type boolean
-tags: [compile-only, negative]
+desc: >-
+    If an equality expression is known at compile time to always evaluate to false
+    or true at runtime, then a compile-time warning is issued.
+expected_out: |-
+    {{c.warning|indent}}
 ---*/
+{{c.decl}}
 
-const a: {{operand}}
-const b: {{operand}}
-
-const e: {{type}} = (a {{op}} b)
-
-// Auxiliary stuff
-
-class C {}
-interface I {}
-
-// union
-type U = number|string
-// tuple
-type TU = [number, boolean]
-// function
-type F = () => void
-
-enum EN { a, b, c }
-enum ES { a = "a", b = "b", c = "c" }
-
-        {%- endfor %}
-    {%- endfor %}
+function main(): void {
+    {{c.main|indent}}
+}
 {%- endfor %}
