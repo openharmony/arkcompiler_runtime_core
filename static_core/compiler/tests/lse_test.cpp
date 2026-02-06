@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2782,17 +2782,18 @@ TEST_F(LSETest, RelocatablePoolConstants)
         BASIC_BLOCK(2U, -1L)
         {
             INST(0U, Opcode::SaveState).NoVregs();
-            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(0U);
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(0U);
 
             INST(2U, Opcode::SaveState).NoVregs();
             INST(3U, Opcode::LoadString).ref().Inputs(2U).TypeId(42U);
-            INST(4U, Opcode::StoreStatic).ref().Inputs(1U, 3U);
+            INST(4U, Opcode::StoreStatic).ref().Inputs(1U, 3U).TypeId(377U);
 
             INST(7U, Opcode::SafePoint).NoVregs();
 
             INST(8U, Opcode::SaveState).NoVregs();
             INST(9U, Opcode::LoadString).ref().Inputs(8U).TypeId(42U);
-            INST(10U, Opcode::StoreStatic).ref().Inputs(1U, 9U);
+            INST(10U, Opcode::StoreStatic).ref().Inputs(5U, 9U).TypeId(363U);
 
             INST(11U, Opcode::ReturnVoid);
         }
@@ -2804,15 +2805,16 @@ TEST_F(LSETest, RelocatablePoolConstants)
         BASIC_BLOCK(2U, -1L)
         {
             INST(0U, Opcode::SaveState).NoVregs();
-            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U);
+            INST(1U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(0U);
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(0U).TypeId(0U);
 
             INST(2U, Opcode::SaveState).NoVregs();
             INST(3U, Opcode::LoadString).ref().Inputs(2U).TypeId(42U);
-            INST(4U, Opcode::StoreStatic).ref().Inputs(1U, 3U);
+            INST(4U, Opcode::StoreStatic).ref().Inputs(1U, 3U).TypeId(377U);
 
             INST(7U, Opcode::SafePoint).Inputs(3U).SrcVregs({VirtualRegister::BRIDGE});
 
-            INST(10U, Opcode::StoreStatic).ref().Inputs(1U, 3U);
+            INST(10U, Opcode::StoreStatic).ref().Inputs(5U, 3U).TypeId(363U);
 
             INST(11U, Opcode::ReturnVoid);
         }

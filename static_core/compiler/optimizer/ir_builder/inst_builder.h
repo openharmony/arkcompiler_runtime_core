@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -332,13 +332,12 @@ private:
     virtual void BuildNewObject(const BytecodeInstruction *bcInst);
     virtual void BuildLoadConstArray(const BytecodeInstruction *bcInst);
     void BuildLoadConstStringArray(const BytecodeInstruction *bcInst);
-    template <typename T>
+    template <typename T = uint32_t>
     void BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                    const pandasm::LiteralArray &litArray);
     template <typename T>
     void BuildUnfoldLoadConstPrimitiveArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                             const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
-    template <typename T>
     void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                          const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
     void BuildInitString(const BytecodeInstruction *bcInst);
