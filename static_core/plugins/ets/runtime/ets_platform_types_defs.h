@@ -85,6 +85,14 @@
     T("Lstd/core/CondVar;", coreCondVar)                                                                             \
     T("Lstd/core/QueueSpinlock;", coreQueueSpinlock)                                                                 \
     T("Lstd/core/RWLock;", coreRWLock)                                                                               \
+    /* Taskpool */                                                                                                   \
+    T("Lstd/concurrency/taskpool;", stdConcurrencyTaskpool)                                                          \
+    S("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerThreshold", "I:V",                                      \
+      stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerThreshold)                                                       \
+    S("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerMonitorInterval", "I:V",                                \
+      stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval)                                                 \
+    S("Lstd/concurrency/taskpool;", "retriggerTaskPoolBlockedExpandMonitor", ":V",                                   \
+      stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor)                                                   \
     /* Finalization */                                                                                               \
     T("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                     \
     T("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                       \

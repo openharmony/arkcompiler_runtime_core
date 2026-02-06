@@ -6862,6 +6862,26 @@ intrinsics:
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemSetTaskPoolIdleThreshold
 
+  - name: StdCoroutineSetTaskPoolBlockedWorkerThreshold
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolBlockedWorkerThresholdDebug
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolBlockedWorkerThreshold
+
+  - name: StdCoroutineSetTaskPoolBlockedWorkerMonitorInterval
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: setTaskPoolBlockedWorkerMonitorIntervalDebug
+    static: true
+    signature:
+      ret: void
+      args: [i32]
+    impl: ark::ets::intrinsics::StdSystemSetTaskPoolBlockedWorkerMonitorInterval
+
   - name: StdCoroutineGetTaskPoolWorkersNum
     space: ets
     class_name: std.debug.concurrency.CoroutineExtras
@@ -6891,6 +6911,16 @@ intrinsics:
       ret: void
       args: []
     impl: ark::ets::intrinsics::StdSystemRetriggerTaskPoolShrink
+
+  - name: StdCoroutineRetriggerTaskPoolBlockedExpandMonitor
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: retriggerTaskPoolBlockedExpandMonitorDebug
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::StdSystemRetriggerTaskPoolBlockedExpandMonitor
 
   - name: StdCoroutineGetTaskPoolWorkersLimit
     space: ets

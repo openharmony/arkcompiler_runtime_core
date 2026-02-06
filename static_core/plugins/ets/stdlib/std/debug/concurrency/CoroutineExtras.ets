@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,12 +54,18 @@ export final class CoroutineExtras {
     public static native setTaskPoolTriggerShrinkInterval(interval: int): void;
     // set taskpool idle threshold
     public static native setTaskPoolIdleThreshold(threshold: int): void;
+    // set taskpool blocked worker threshold
+    public static native setTaskPoolBlockedWorkerThresholdDebug(thresholdMs: int): void;
+    // set taskpool blocked worker monitor interval
+    public static native setTaskPoolBlockedWorkerMonitorIntervalDebug(intervalMs: int): void;
     // get taskpool workers num
     public static native getTaskPoolWorkersNum(): int;
     // set taskpool workers limit
     public static native setTaskPoolWorkersLimit(limit: int): void;
     // retrigger taskpool shrink
     public static native retriggerTaskPoolShrink(): void;
+    // (re)start blocked-worker expansion monitor
+    public static native retriggerTaskPoolBlockedExpandMonitorDebug(): void;
     // get taskpool workers limit based on the device
     public static native getTaskPoolWorkersLimit(): int;
     // dump currently stored unhandled failed jobs
