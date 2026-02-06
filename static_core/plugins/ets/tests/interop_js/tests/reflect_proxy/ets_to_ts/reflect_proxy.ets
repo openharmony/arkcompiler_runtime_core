@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ export class SomeObject {
     public point: int = 0;
 }
 
-interface AIface {
+export interface AIface {
     messageA: string;
 
     foo(): int;
@@ -31,14 +31,14 @@ interface AIface {
     booCalled(): boolean;
 }
 
-interface BIface {
+export interface BIface {
     messageB: string
 
     goo(): int;
     gooCalled(): boolean;
 }
 
-class A implements AIface {
+export class A implements AIface {
     messageA: string = 'some default string A';
     fooIsCalled: boolean = false;
     booIsCalled: boolean = false;
@@ -59,7 +59,7 @@ class A implements AIface {
     }
 }
 
-class AB implements AIface, BIface {
+export class AB implements AIface, BIface {
     messageA: string = 'some default string A';
     messageB: string = 'some default string B';
     fooIsCalled: boolean = false;

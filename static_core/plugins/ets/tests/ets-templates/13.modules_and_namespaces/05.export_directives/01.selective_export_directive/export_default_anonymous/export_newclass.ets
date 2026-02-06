@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-class A{
+export class A{
     field: string = "export_newclass_A_field"
     foo(): string {
         return "export_newclass_A_foo is invoked"

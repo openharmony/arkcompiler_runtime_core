@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ tags:
 - not-a-test
 ---*/
 
-class A {
+export class A {
   c: int = 9
   foo(): int {
     return this.c
