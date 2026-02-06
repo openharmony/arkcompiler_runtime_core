@@ -354,30 +354,44 @@ cases:
     - decl: |-
           type UT = C | D
 
-          class C implements Iterator<string> {
+          class C implements Iterable<string> {
               data: string[] = ['a', 'b', 'c']
+              $_iterator() { // Function type is inferred from its body
+                  return new CIterator(this)
+              }
+          }
+
+          class CIterator implements Iterator<string> {
               index = 0
-              $_iterator() {
-                  return this
+              base: C
+              constructor (base: C) {
+                  this.base = base
               }
               next(): IteratorResult<string> {
                   return {
-                      done: this.index >= this.data.length,
-                      value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                      done: this.index >= this.base.data.length,
+                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
                   }
               }
           }
 
-          class D implements Iterator<string> {
+          class D implements Iterable<string> {
               data: string[] = ['d', 'e', 'f']
+              $_iterator() { // Function type is inferred from its body
+                  return new DIterator(this)
+              }
+          }
+
+          class DIterator implements Iterator<string> {
               index = 0
-              $_iterator() {
-                  return this
+              base: D
+              constructor (base: D) {
+                  this.base = base
               }
               next(): IteratorResult<string> {
                   return {
-                      done: this.index >= this.data.length,
-                      value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                      done: this.index >= this.base.data.length,
+                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
                   }
               }
           }
@@ -395,16 +409,22 @@ cases:
     - decl: |-
           type UT = C | string
 
-          class C implements Iterator<string> {
+          class C implements Iterable<string> {
               data: string[] = ['a', 'b', 'c']
+              $_iterator() { // Function type is inferred from its body
+                  return new CIterator(this)
+              }
+          }
+          class CIterator implements Iterator<string> {
               index = 0
-              $_iterator() {
-                  return this
+              base: C
+              constructor (base: C) {
+                  this.base = base
               }
               next(): IteratorResult<string> {
                   return {
-                      done: this.index >= this.data.length,
-                      value: this.index >= this.data.length ? undefined : this.data[this.index++]
+                      done: this.index >= this.base.data.length,
+                      value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
                   }
               }
           }
