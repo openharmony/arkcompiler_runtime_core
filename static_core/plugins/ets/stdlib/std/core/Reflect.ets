@@ -21,6 +21,7 @@
 package std.core
 
 native function isLiteralInitializedInterfaceImpl(target: Object): boolean
+native function isFuncObjAsyncImpl(target: Object): boolean
 
 /**
  * Core namespace for reflection operations, providing access to metadata such as classes, interfaces,
@@ -44,6 +45,21 @@ export namespace reflect {
 */
 export function isLiteralInitializedInterface(target: Object): boolean {
     return isLiteralInitializedInterfaceImpl(target)
+}
+
+/**
+*  Determines if a functional object was lowered
+ * from an async function
+ * @namespace reflect
+ * @param { Function } target The functional object to check
+ * @returns a boolean indicating whether or not the target class annotated
+ *          with `std.core.AsyncFunctionObject` annotation
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function isFuncObjAsync(target: Function): boolean {
+    return isFuncObjAsyncImpl(target)
 }
 
 } // namespace reflect

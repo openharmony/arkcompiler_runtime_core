@@ -9431,6 +9431,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::IsLiteralInitializedInterfaceImpl
 
+  - name: stdCoreReflectIsFuncObjAsync
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: isFuncObjAsyncImpl
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::IsFuncObjAsyncImpl
+
 ######################################
 # std.concurrency.ConcurrencyHelpers #
 ######################################
