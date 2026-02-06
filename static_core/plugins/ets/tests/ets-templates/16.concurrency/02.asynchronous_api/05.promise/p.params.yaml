@@ -192,7 +192,7 @@ cases:
     - decl: |-
           //implicit cast Promise<void> to Promise<string> - one of the promise chain steps don't return value
       use: |-
-          const checkPromise: Promise<string> = new Promise<string>(
+          const checkPromise: Promise<void> = new Promise<string>(
               (resolve: (p: string) => void, reject: (p: Error) => void): void => resolve("test")
           ).then(
               (data: string) => {return 'test'}
@@ -203,5 +203,5 @@ cases:
                   throw new Error(data)
               }
           ).catch(
-              (p: Error): string => {}
+              (p: Error): void => {}
           );
