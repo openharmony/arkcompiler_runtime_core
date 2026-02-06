@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,12 +32,13 @@ parameters:
     full-gc-bombing-frequency: 0
     heap-verifier: fail_on_verification
     compiler-enable-jit: "true"
+    no-async-jit: "false"
     ark-args: [ ]
     ark-workflow-args:
         - ${parameters.ark-args}
         - "--compiler-check-final=true"
         - "--compiler-ignore-failures=false"
-        - "--no-async-jit=false"
+        - "--no-async-jit=${parameters.no-async-jit}"
 steps:
     hybrid-es2panda-verifier:
         from: hybrid-es2panda-verifier
