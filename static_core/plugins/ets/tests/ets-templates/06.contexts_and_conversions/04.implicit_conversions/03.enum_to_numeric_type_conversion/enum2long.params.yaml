@@ -53,7 +53,7 @@ cases:
     - decl: |-
           let s: int = 42
           class A {
-              fld1: int = Color.Red
+              fld1: long = Color.Red
               fld2: number = Color.Blue + Color.Green
               fld3: long = s + Color.Green - 42
           }

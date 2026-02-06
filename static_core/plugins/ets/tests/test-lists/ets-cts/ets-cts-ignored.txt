@@ -158,12 +158,6 @@
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
-#29887
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_72.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_73.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_78.ets
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_79.ets
-
 #31755
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
 
