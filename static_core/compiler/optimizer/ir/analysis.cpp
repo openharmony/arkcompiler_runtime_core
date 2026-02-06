@@ -530,8 +530,10 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm)
     return std::nullopt;
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
-                                                                           Inst *stopSearch, BasicBlock *targetBlock)
+                                                                           Inst *stopSearch, BasicBlock *targetBlock,
+                                                                           Marker visited)
 {
     ASSERT(graph != nullptr);
     ASSERT(source != nullptr);
@@ -540,9 +542,16 @@ ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph
 
     AllocOrClear(graph, &bridges_);
 
-    auto visited = graph->NewMarker();
+    // NOTE(anaumova): This optimization was added because it has a significant positive effect on the operation time of
+    // the StringFlatCheck pass. We will continue to investigate it and the code may be refactored. #32948
+    Marker prevMarker = visited;
+    if (visited == UNDEF_MARKER) {
+        visited = graph->NewMarker();
+    }
     SearchSSOnWay(targetBlock, target, source, visited, stopSearch);
-    graph->EraseMarker(visited);
+    if (prevMarker == UNDEF_MARKER) {
+        graph->EraseMarker(visited);
+    }
     return bridges_;
 }
 
@@ -711,8 +720,10 @@ void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target,
-                                                                   Inst *stopSearchInst, BasicBlock *targetBlock)
+                                                                   Inst *stopSearchInst, BasicBlock *targetBlock,
+                                                                   Marker visited)
 {
     ASSERT(graph != nullptr);
     ASSERT(source != nullptr);
@@ -729,7 +740,7 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
         // if target is nullptr, we won't traverse the target block
         ASSERT(target == nullptr || target->GetBasicBlock() == targetBlock);
     }
-    SearchMissingObjInSaveStates(graph, source, target, stopSearchInst, targetBlock);
+    SearchMissingObjInSaveStates(graph, source, target, stopSearchInst, targetBlock, visited);
     if (!bridges_->empty()) {
         CreateBridgeInSS(source);
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Created bridge(s)";
@@ -745,6 +756,7 @@ void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
     AllocOrClear(graph, &users_);
     PrepareUsers(inst, users_);
 
+    MarkerHolder marker(graph);
     for (auto &user : *users_) {
         auto *targetInst = user->GetInst();
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Check usage: Try to do SSB for real source inst: " << *inst << "\n"
@@ -752,9 +764,10 @@ void SaveStateBridgesBuilder::FixInstUsageInSS(Graph *graph, Inst *inst)
         if (targetInst->IsPhi()) {
             // check SaveStates on path between inst and the end of corresponding predecessor of Phi's block
             auto *predBlock = targetInst->GetBasicBlock()->GetPredecessor(user->GetBbNum());
-            SearchAndCreateMissingObjInSaveState(graph, inst, predBlock->GetLastInst(), nullptr, predBlock);
+            SearchAndCreateMissingObjInSaveState(graph, inst, predBlock->GetLastInst(), nullptr, predBlock,
+                                                 marker.GetMarker());
         } else {
-            SearchAndCreateMissingObjInSaveState(graph, inst, targetInst);
+            SearchAndCreateMissingObjInSaveState(graph, inst, targetInst, nullptr, nullptr, marker.GetMarker());
         }
     }
 }
