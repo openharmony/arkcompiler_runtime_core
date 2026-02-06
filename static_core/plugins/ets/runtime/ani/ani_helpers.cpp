@@ -258,7 +258,7 @@ extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_
 //       |                        |                    |                        |
 // 0x0000
 static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
-                                   PandaEnv *pandaEnv)
+                                   ani_env *pandaEnv)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto outRegsArgs = inRegsArgs - ExtArchTraits ::FP_ARG_NUM_BYTES - ExtArchTraits ::GP_ARG_NUM_BYTES;
@@ -324,8 +324,9 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
 
     EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
     PandaEnv *pandaEnv = coroutine->GetEtsNapiEnv();
-
-    uint8_t *outRegsArgs = PrepareArgsOnStack(method, inRegsArgs, inStackArgs, outStackArgs, pandaEnv);
+    ani_env *argEnv = pandaEnv->IsVerifyANI() ? static_cast<ani_env *>(pandaEnv->GetEnvANIVerifier()->GetEnv())
+                                              : static_cast<ani_env *>(pandaEnv);
+    uint8_t *outRegsArgs = PrepareArgsOnStack(method, inRegsArgs, inStackArgs, outStackArgs, argEnv);
 
     // ATTENTION!!!
     // Don't move the following code above, because only from this point on,

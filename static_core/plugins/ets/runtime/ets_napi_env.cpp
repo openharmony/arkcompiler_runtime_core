@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,6 @@ PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsRefe
     if (coroutine->GetPandaVM()->IsVerifyANI()) {
         ani::verify::ANIVerifier *verifier = GetEtsVM()->GetANIVerifier();
         envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(verifier, c_api);
-        c_api = ani::verify::GetVerifyInteractionAPI();
     }
 }
 

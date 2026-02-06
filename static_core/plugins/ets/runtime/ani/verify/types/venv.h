@@ -17,21 +17,22 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_TYPES_VENV_H
 
 #include "plugins/ets/runtime/ani/ani.h"
-#include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
+#include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "plugins/ets/runtime/ani/verify/types/vmethod.h"
+#include "plugins/ets/runtime/ani/verify/types/vfield.h"
+#include "plugins/ets/runtime/ani/verify/types/vresolver.h"
+#include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/include/mem/panda_smart_pointers.h"
 
 namespace ark::ets::ani::verify {
 
-class VRef;
+class EnvANIVerifier;
 
-class VEnv final {
+class VEnv final : public ani_env {
 public:
-    ani_env *GetEnv()
-    {
-        // NOTE: Use different ani_env * for each native frames, #28620
-        return reinterpret_cast<ani_env *>(this);
-    }
-
+    static PandaUniquePtr<VEnv> Create();
+    ani_env *GetEnv();
     static VEnv *GetCurrent();
 
     // Scope
@@ -42,36 +43,19 @@ public:
 
     // Local refs
     template <class RefType>
-    auto AddLocalVerifiedRef(RefType ref)
-    {
-        return GetEnvANIVerifier()->AddLocalVerifiedRef(ref);
-    }
+    auto AddLocalVerifiedRef(RefType ref);
+
     void DeleteLocalVerifiedRef(VRef *vref);
 
-    VMethod *GetVerifiedMethod(ani_method method)
-    {
-        return GetEnvANIVerifier()->GetVerifiedMethod(method);
-    }
+    VMethod *GetVerifiedMethod(ani_method method);
 
-    VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod)
-    {
-        return GetEnvANIVerifier()->GetVerifiedStaticMethod(staticMethod);
-    }
+    VStaticMethod *GetVerifiedStaticMethod(ani_static_method staticMethod);
 
-    VFunction *GetVerifiedFunction(ani_function function)
-    {
-        return GetEnvANIVerifier()->GetVerifiedFunction(function);
-    }
+    VFunction *GetVerifiedFunction(ani_function function);
 
-    VField *GetVerifiedField(ani_field field)
-    {
-        return GetEnvANIVerifier()->GetVerifiedField(field);
-    }
+    VField *GetVerifiedField(ani_field field);
 
-    VStaticField *GetVerifiedStaticField(ani_static_field staticField)
-    {
-        return GetEnvANIVerifier()->GetVerifiedStaticField(staticField);
-    }
+    VStaticField *GetVerifiedStaticField(ani_static_field staticField);
 
     // Global refs
     VRef *AddGlobalVerifiedRef(ani_ref gref);
@@ -84,7 +68,15 @@ public:
     bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
 
 private:
+    VEnv() : ani_env()
+    {
+        c_api = ani::verify::GetVerifyInteractionAPI();
+    }
+    ~VEnv() = default;
     EnvANIVerifier *GetEnvANIVerifier();
+    NO_COPY_SEMANTIC(VEnv);
+    NO_MOVE_SEMANTIC(VEnv);
+    friend class ark::mem::Allocator;
 };
 
 }  // namespace ark::ets::ani::verify

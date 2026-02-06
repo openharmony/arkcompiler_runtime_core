@@ -33,6 +33,7 @@ class VFunction;
 class VField;
 class VStaticField;
 class VError;
+class VArray;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -169,6 +170,16 @@ struct TypeMapping<VError **> {
 template <>
 struct TypeMapping<VError *> {
     using Type = ani_error;
+};
+
+template <>
+struct TypeMapping<VArray **> {
+    using Type = ani_array *;
+};
+
+template <>
+struct TypeMapping<VArray *> {
+    using Type = ani_array;
 };
 
 template <>

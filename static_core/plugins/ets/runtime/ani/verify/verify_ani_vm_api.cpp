@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ NO_UB_SANITIZE static ani_status GetEnv(VVm *vvm, uint32_t version, VEnv **vresu
     ani_env *result {};
     ani_status status = g_vmApi->GetEnv(vvm->GetVm(), version, &result);
     if (LIKELY(status == ANI_OK)) {
-        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->GetEnv(result);
+        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->GetEnv();
     }
     return status;
 }
@@ -72,7 +72,7 @@ NO_UB_SANITIZE static ani_status AttachCurrentThread(VVm *vvm, const ani_options
     ani_env *result {};
     ani_status status = g_vmApi->AttachCurrentThread(vvm->GetVm(), options, version, &result);
     if (LIKELY(status == ANI_OK)) {
-        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->AttachThread(result);
+        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->AttachThread();
     }
     return status;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,16 @@
 
 namespace ark::ets::ani::verify {
 
+PandaUniquePtr<VEnv> VEnv::Create()
+{
+    return MakePandaUnique<VEnv>();
+}
+
+ani_env *VEnv::GetEnv()
+{
+    return EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+}
+
 /*static*/
 VEnv *VEnv::GetCurrent()
 {
@@ -29,8 +39,8 @@ VEnv *VEnv::GetCurrent()
     if (coro == nullptr) {
         return nullptr;
     }
-    ani_env *env = coro->GetEtsNapiEnv();
-    return reinterpret_cast<VEnv *>(env);
+    auto venv = coro->GetEtsNapiEnv()->GetEnvANIVerifier()->GetEnv();
+    return venv;
 }
 
 void VEnv::CreateLocalScope()
@@ -53,9 +63,41 @@ std::optional<PandaString> VEnv::DestroyEscapeLocalScope(VRef *vref)
     return GetEnvANIVerifier()->DestroyEscapeLocalScope(vref);
 }
 
+// Local refs
+template <class RefType>
+auto VEnv::AddLocalVerifiedRef(RefType ref)
+{
+    return GetEnvANIVerifier()->AddLocalVerifiedRef(ref);
+}
+
 void VEnv::DeleteLocalVerifiedRef(VRef *vref)
 {
     GetEnvANIVerifier()->DeleteLocalVerifiedRef(vref);
+}
+
+VMethod *VEnv::GetVerifiedMethod(ani_method method)
+{
+    return GetEnvANIVerifier()->GetVerifiedMethod(method);
+}
+
+VStaticMethod *VEnv::GetVerifiedStaticMethod(ani_static_method staticMethod)
+{
+    return GetEnvANIVerifier()->GetVerifiedStaticMethod(staticMethod);
+}
+
+VFunction *VEnv::GetVerifiedFunction(ani_function function)
+{
+    return GetEnvANIVerifier()->GetVerifiedFunction(function);
+}
+
+VField *VEnv::GetVerifiedField(ani_field field)
+{
+    return GetEnvANIVerifier()->GetVerifiedField(field);
+}
+
+VStaticField *VEnv::GetVerifiedStaticField(ani_static_field staticField)
+{
+    return GetEnvANIVerifier()->GetVerifiedStaticField(staticField);
 }
 
 VRef *VEnv::AddGlobalVerifiedRef(ani_ref gref)

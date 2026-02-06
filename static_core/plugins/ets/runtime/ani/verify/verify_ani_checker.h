@@ -35,6 +35,7 @@
     X(VERIFY_CLASS,                         VerifyClass)                          \
     X(VERIFY_STRING,                        VerifyString)                         \
     X(VERIFY_ERROR,                         VerifyError)                          \
+    X(VERIFY_ARRAY,                         VerifyArray)                          \
     X(VERIFY_DEL_LOCAL_REF,                 VerifyDelLocalRef)                    \
     X(VERIFY_THIS_OBJECT,                   VerifyThisObject)                     \
     X(VERIFY_CTOR,                          VerifyCtor)                           \
@@ -63,9 +64,11 @@
     X(VERIFY_UTF16_STRING,                  VerifyUTF16String)                    \
     X(VERIFY_UTF8_BUFFER,                   VerifyUTF8Buffer)                     \
     X(VERIFY_UTF8_STRING,                   VerifyUTF8String)                     \
+    X(VERIFY_ARRAY_INDEX,                   VerifyArrayIndex)                     \
     X(VERIFY_SIZE,                          VerifySize)                           \
     X(VERIFY_RESOLVER,                      VerifyResolver)                       \
     X(VERIFY_ERROR_STORAGE,                 VerifyErrorStorage)                   \
+    X(VERIFY_ARRAY_STORAGE,                 VerifyArrayStorage)                   \
     X(VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE,   VerifyFixedArrayBooleanStorage)       \
     X(VERIFY_FIXED_ARRAY_CHAR_STORAGE,      VerifyFixedArrayCharStorage)          \
     X(VERIFY_FIXED_ARRAY_BYTE_STORAGE,      VerifyFixedArrayByteStorage)          \
@@ -99,6 +102,7 @@
     X(ANI_FIELD,                        Field,                     VField *)                 \
     X(ANI_STRING,                       String,                    VString *)                \
     X(ANI_ERROR,                        Error,                     VError *)                 \
+    X(ANI_ARRAY,                        Array,                     VArray *)                 \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
     X(ANI_VM_STORAGE,                   VmStorage,                 ani_vm **)                \
@@ -121,6 +125,7 @@
     X(ANI_ERROR_STORAGE,                ErrorStorage,              VError **)                \
     X(UINT32,                           U32,                       uint32_t)                 \
     X(METHOD_ARGS,                      MethodArgs,                AniMethodArgs *)          \
+    X(ANI_ARRAY_STORAGE,                ArrayStorage,              VArray **)                \
     X(ANI_FIXED_ARRAY_BOOLEAN_STORAGE,  FixedArrayBooleanStorage,  VFixedArrayBoolean **)    \
     X(ANI_FIXED_ARRAY_CHAR_STORAGE,     FixedArrayCharStorage,     VFixedArrayChar **)       \
     X(ANI_FIXED_ARRAY_BYTE_STORAGE,     FixedArrayByteStorage,     VFixedArrayByte **)       \
@@ -153,6 +158,7 @@ class VFunction;
 class VField;
 class VString;
 class VError;
+class VArray;
 class VFixedArrayBoolean;
 class VFixedArrayChar;
 class VFixedArrayByte;
@@ -305,6 +311,16 @@ public:
         return ANIArg(ArgValueByMethodArgs(aniMethodArgs), name, Action::VERIFY_METHOD_A_ARGS);
     }
 
+    static ANIArg MakeForArray(VArray *varray, std::string_view name)
+    {
+        return ANIArg(ArgValueByArray(varray), name, Action::VERIFY_ARRAY);
+    }
+
+    static ANIArg MakeForArrayIndex(ani_size index, std::string_view name)
+    {
+        return ANIArg(ArgValueBySize(index), name, Action::VERIFY_ARRAY_INDEX);
+    }
+
     // NOLINTNEXTLINE(readability-non-const-parameter)
     static ANIArg MakeForBooleanStorage(ani_boolean *valueStorage, std::string_view name)
     {
@@ -381,6 +397,11 @@ public:
     static ANIArg MakeForErrorStorage(VError **errStorage, std::string_view name)
     {
         return ANIArg(ArgValueByErrorStorage(errStorage), name, Action::VERIFY_ERROR_STORAGE);
+    }
+
+    static ANIArg MakeForArrayStorage(VArray **arrStorage, std::string_view name)
+    {
+        return ANIArg(ArgValueByArrayStorage(arrStorage), name, Action::VERIFY_ARRAY_STORAGE);
     }
 
     static ANIArg MakeForArrayBooleanStorage(VFixedArrayBoolean **arrStorage, std::string_view name)

@@ -22,3 +22,27 @@ ani_verify_add_generated_tests(ani_verify_test_fixed_array_new
            "long: type=long,Type=Long"
            "short: type=short,Type=Short"
 )
+
+ani_verify_add_gtest(ani_verify_test_array_new
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_new_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_array_get_length
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_get_length_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_array_set
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_set_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_array_get
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_get_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_array_push
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_push_test.cpp
+)
+
+ani_verify_add_gtest(ani_verify_test_array_pop
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/verify_array_pop_test.cpp
+)

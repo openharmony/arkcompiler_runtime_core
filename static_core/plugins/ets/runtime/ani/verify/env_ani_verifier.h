@@ -18,6 +18,7 @@
 
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/ani.h"
+#include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
@@ -39,8 +40,8 @@ public:
     EnvANIVerifier(ANIVerifier *verifier, const __ani_interaction_api *interactionAPI);
     ~EnvANIVerifier() = default;
 
-    VEnv *GetEnv(ani_env *env);
-    VEnv *AttachThread(ani_env *env);
+    VEnv *GetEnv();
+    VEnv *AttachThread();
 
     void PushNativeFrame();
     [[nodiscard]] std::optional<PandaString> PopNativeFrame();
@@ -96,6 +97,8 @@ private:
         PandaSet<VRef *> refs;
         PandaUniquePtr<ArenaAllocator> refsAllocatorHolder;
         ArenaAllocator *refsAllocator;
+        PandaUniquePtr<VEnv> venvHolder;
+        VEnv *venv;
     };
 
     void DoPushNativeFrame();

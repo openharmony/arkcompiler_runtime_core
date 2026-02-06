@@ -70,6 +70,14 @@ public:
     }
 };
 
+class VArray final : public VObject {
+public:
+    ani_array GetRef()
+    {
+        return static_cast<ani_array>(VObject::GetRef());
+    }
+};
+
 class VFixedArray : public VObject {
 public:
     ani_fixedarray GetRef()
