@@ -39,7 +39,7 @@ function testTaskPool() {
     taskpool.execute(() => {
         arktest.expectError(() => {
             EAWorker.current();
-        }, new Error('Can not get current worker in taskpool'));
+        }, new Error('EAWorker:: Cannot get current worker in taskpool'));
         event.fire();
     });
     event.wait();

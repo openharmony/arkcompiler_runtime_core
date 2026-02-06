@@ -162,7 +162,7 @@ export class EAWorker {
      */
     public start(): void {
         if ((this.loopStarted.get() || this.loopJoined.get()) && !this.isMain()) {
-            throw new Error("Worker already started or quit");
+            throw new Error('EAWorker:: Worker already started or quit');
         }
         this.worker.start(() => {
             EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
@@ -239,7 +239,7 @@ export class EAWorker {
     public static current(): EAWorker | undefined {
         let currentWorker = EAWorker.getWorkers().get(CoroutineExtras.getWorkerId());
         if (currentWorker !== undefined && currentWorker.isTaskpool) {
-            throw new Error("Can not get current worker in taskpool");
+            throw new Error('EAWorker:: Cannot get current worker in taskpool');
         }
         return currentWorker;
     }
@@ -254,7 +254,7 @@ export class EAWorker {
      */
     public run<R> (task: Function, ...args: FixedArray<Any>): Job<R> {
         if (!this.loopStarted.get()) {
-            throw new Error("Can not run task when worker is not started");
+            throw new Error('EAWorker:: Cannot run task when worker is not started');
         }
         return this.worker.run<R>(task, ...args);
     }
@@ -285,10 +285,11 @@ export class EAWorker {
      * Stop EAWorker
      * This method closes run queue and detaches worker
      * Note: it's required to call join for EAWorker
+     * @returns { Job<R> } Job that represents the task
      */
     public join(): Job<void> {
         if (!this.loopStarted.get()) {
-             throw new Error("Cannot stop worker before start");
+             throw new Error('EAWorker:: Cannot stop worker before start');
         }
         let finalTask = () => { EAWorker.getWorkers().delete(this.worker.getWorkerId()); };
         let joinJob = this.worker.join(finalTask);
@@ -299,7 +300,7 @@ export class EAWorker {
 
     /**
      * Post task to EAWorker
-      @param { Task } task The task to post
+     * @param { Task } task The task to post
      */
     public postTask(task: Task):void {
         if (this.isMain()) {
@@ -307,7 +308,7 @@ export class EAWorker {
             return;
         }
         if (!this.loopStarted.get()) {
-            throw new Error("Can not post task when worker is not started");
+            throw new Error('EAWorker:: Cannot post task when worker is not started');
         }
         this.worker.run<void>(task);
     }
@@ -446,19 +447,19 @@ export class MainWorker extends InternalWorker {
     }
 
     start(initialTask: Task) {
-        throw new Error("Main worker cannot be started");
+        throw new Error('EAWorker:: Main worker cannot be started');
     }
 
     join(finalTask: Task): Job<void> {
-        throw new Error("Main worker cannot be stopped");
+        throw new Error('EAWorker:: Main worker cannot be stopped');
     }
 
     override setPriority(priority: WorkerPriority) {
-        throw new Error("Main worker cannot set priority");
+        throw new Error('EAWorker:: Main worker cannot set priority');
     }
 
     override setErrorHandler(handler: ErrorHandlerType) {
-        throw new Error("Main worker cannot have uncaught exception handler");
+        throw new Error('EAWorker:: Main worker cannot have uncaught exception handler');
     }
 
     override getErrorHandler(): ErrorHandlerType | undefined {

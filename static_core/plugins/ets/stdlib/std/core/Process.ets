@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ export namespace StdProcess {
             }
             out += '\n' + stack;
         } else {
-            throw new Error('unknown error type');
+            throw new Error('Process:: Unknown error type');
         }
         console.error(out);
         let procManager = new StdProcess.ProcessManager();
@@ -149,7 +149,7 @@ export namespace StdProcess {
                 }
             } else {
                 if ((signal as int) < 1 || (signal as int) > 31) {
-                    throw new RangeError("Invalid signal value");
+                    throw new RangeError("Process:: Invalid signal value");
                 }
                 killSignal = signal;
             }
@@ -201,7 +201,6 @@ export namespace StdProcess {
          */
         readonly killed: boolean;
     }
-
 
     /**
      * @class Wrapper for parameters used by process.RunCmd function to create a ChildProcess
@@ -382,7 +381,6 @@ export namespace StdProcess {
     */
     export native function getPastCpuTime(): long;
 
-
     /**
     * Create a child process to execute a given command
     *
@@ -405,12 +403,10 @@ export namespace StdProcess {
     */
     export native function abort(): void;
 
-
     /**
     * Store user-triggered event
     *
     * @param { string } type type of storage event
-    *
     * @param { EventListener } listener callback for event handling
     *
     */
@@ -430,16 +426,14 @@ export namespace StdProcess {
             setErrorHandler(listener);
             return;
         }
-        throw new Error("not implemented");
+        throw new Error("Process:: Event type not implemented");
     }
 
     /**
     * Remove user-triggered event
     *
     * @param { string } type type of storage event
-    *
     * @returns { boolean } indicating if the event has been removed successfully
-    *
     */
     export function off(type: "unhandledPromiseRejection" | "uncaughtError", listener?: RejectedObjectListener): boolean {
         if (type == string("unhandledJobRejection")) {
@@ -462,7 +456,7 @@ export namespace StdProcess {
             setErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
             return true;
         }
-        throw new Error("not implemented");
+        throw new Error("Process:: Event type not implemented");
     }
 
     /**
@@ -510,7 +504,7 @@ export namespace StdProcess {
                 }
             } else {
                 if ((options.killSignal as int) < 1 || (options.killSignal as int) > 31) {
-                    throw new RangeError("Invalid signal value");
+                    throw new RangeError("Process:: Invalid signal value");
                 }
                 killSignal = options.killSignal as int;
             }
@@ -518,7 +512,7 @@ export namespace StdProcess {
 
         if (options.maxBuffer != undefined) {
             if ((options.maxBuffer as int) < 0) {
-                throw new RangeError("Invalid buffer size value");
+                throw new RangeError("Process:: Invalid buffer size value");
             }
             maxBuffer = min(options.maxBuffer as int, MAX_BUFFER_SIZE);
         }

@@ -70,7 +70,7 @@ function testMessageHandlerWithoutWorker() {
         new concurrency.MessageHandler((msg: concurrency.Message) => {
             // do nothing
         });
-    }, new Error('No worker found for MessageHandler'));
+    }, new Error('MessageHandler:: No worker found'));
 }
 
 

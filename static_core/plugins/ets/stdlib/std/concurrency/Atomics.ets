@@ -68,7 +68,6 @@ export class Waiter {
         return count;
     }
 
-
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private promiseQueue: containers.BlockingQueue<CompletableJob<string>> = new containers.LinkedBlockingQueue<CompletableJob<string>>();
 }
@@ -102,7 +101,7 @@ export namespace Atomics {
      */
     export function add(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt();
@@ -119,7 +118,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicAddU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -133,7 +132,7 @@ export namespace Atomics {
      */
     export function add(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -142,7 +141,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -156,7 +155,7 @@ export namespace Atomics {
      */
     export function and(typedArray: Int8Array | Int16Array | Int32Array| Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -173,7 +172,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicAndU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -187,7 +186,7 @@ export namespace Atomics {
      */
     export function and(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -196,7 +195,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -213,7 +212,7 @@ export namespace Atomics {
      */
     export function compareExchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, expectedValue: long, replacementValue: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -230,7 +229,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicCompareExchangeU32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -247,7 +246,7 @@ export namespace Atomics {
      */
     export function compareExchange(typedArray: BigInt64Array | BigUint64Array, index: int, expectedValue: bigint, replacementValue: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -256,7 +255,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -272,7 +271,7 @@ export namespace Atomics {
      */
     export function exchange(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -289,7 +288,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicExchangeU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -304,7 +303,7 @@ export namespace Atomics {
      */
     export function exchange(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -313,7 +312,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -326,7 +325,7 @@ export namespace Atomics {
      */
     export function load(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -343,7 +342,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicLoadU32(index, byteOffset)
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -356,7 +355,7 @@ export namespace Atomics {
      */
     export function load(typedArray: BigInt64Array, index: int): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -372,7 +371,7 @@ export namespace Atomics {
      */
     export function load(typedArray: BigUint64Array, index: int): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -389,7 +388,7 @@ export namespace Atomics {
      */
     export function or(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -406,7 +405,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicOrU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -420,7 +419,7 @@ export namespace Atomics {
      */
     export function or(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -429,7 +428,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -443,7 +442,7 @@ export namespace Atomics {
      */
     export function store(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -460,7 +459,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicStoreU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -474,7 +473,7 @@ export namespace Atomics {
      */
     export function store(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -483,7 +482,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -497,7 +496,7 @@ export namespace Atomics {
      */
     export function sub(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -514,7 +513,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicSubU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -528,7 +527,7 @@ export namespace Atomics {
      */
     export function sub(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -537,7 +536,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -551,7 +550,7 @@ export namespace Atomics {
      */
     export function xor(typedArray: Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array, index: int, value: long): long {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -568,7 +567,7 @@ export namespace Atomics {
         } else if (typedArray instanceof Uint32Array) {
             return buffer.atomicXorU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -582,7 +581,7 @@ export namespace Atomics {
      */
     export function xor(typedArray: BigInt64Array | BigUint64Array, index: int, value: bigint): bigint {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         let buffer = typedArray.buffer
         let byteOffset = typedArray.byteOffset.toInt()
@@ -591,7 +590,7 @@ export namespace Atomics {
         } else if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error("Unhandled array type!")
+            throw new Error('Atomics:: Unhandled array type')
         }
     }
 
@@ -607,7 +606,7 @@ export namespace Atomics {
      */
     export function wait(typedArray: Int32Array, index: int, value: long): string {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return waitImpl(typedArray, index, value.toLong());
     }
@@ -626,7 +625,7 @@ export namespace Atomics {
      */
     export function wait(typedArray: Int32Array, index: int, value: long, timeout: int): string {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return waitImpl(typedArray, index, value.toLong(), timeout);
     }
@@ -643,7 +642,7 @@ export namespace Atomics {
      */
     export function wait(typedArray: BigInt64Array, index: int, value: bigint): string {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return waitImpl(typedArray, index, value.getLong());
     }
@@ -662,7 +661,7 @@ export namespace Atomics {
      */
     export function wait(typedArray: BigInt64Array, index: int, value: bigint, timeout: int): string {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return waitImpl(typedArray, index, value.getLong(), timeout);
     }
@@ -680,7 +679,7 @@ export namespace Atomics {
      */
     export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint): Promise<string> {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return asyncWaitImpl(typedArray, index, value.getLong()) as Promise<string>;
     }
@@ -700,7 +699,7 @@ export namespace Atomics {
      */
     export async function waitAsync(typedArray: Int32Array | BigInt64Array, index: int, value: bigint, timeout: int): Promise<string> {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return asyncWaitImpl(typedArray, index, value.getLong(), timeout) as Promise<string>;
     }
@@ -715,7 +714,7 @@ export namespace Atomics {
      */
     export function notify(typedArray: Int32Array | BigInt64Array, index: int): int {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return notifyImpl(typedArray, index)
     }
@@ -730,7 +729,7 @@ export namespace Atomics {
      */
     export function notify(typedArray: Int32Array | BigInt64Array, index: int, count: int): int {
         if (index < 0 || index >= typedArray.length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return notifyImpl(typedArray, index, count)
     }
@@ -824,7 +823,7 @@ export namespace Atomics {
     // https://tc39.es/ecma262/multipage/structured-data.html#sec-validateatomicaccess
     function index2byteOffset(startByteOffset: int, elementSize: int, length: int, index: int): int {
         if (index < 0 || index >= length) {
-            throw new RangeError("Index out of bounds")
+            throw new RangeError("Atomics:: Index out of bounds")
         }
         return startByteOffset + (index * elementSize)
     }

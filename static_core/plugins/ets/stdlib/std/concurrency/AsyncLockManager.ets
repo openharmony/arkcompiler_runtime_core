@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,13 +58,13 @@ class AsyncLockManager {
             ConcurrencyHelpers.mutexLock(this.mutex);
             let lock = this.locks.get(name);
             if (lock == undefined) {
-                throw new Error('AsyncLock ' + name + ' not found');
+                throw new Error('AsyncLock:: Lock \'' + name + '\' not found');
             }
             if (name.includes('__AnonymousLockName__')) {
-                throw new Error('Lock cannot be found');
+                throw new Error('AsyncLock:: Anonymous lock cannot be queried');
             }
             if (lock!.deref() == undefined) {
-                throw new Error('Lock is in undefined state');
+                throw new Error('AsyncLock:: Lock is in invalid state');
             }
             return lock!.deref()!.query();
         }

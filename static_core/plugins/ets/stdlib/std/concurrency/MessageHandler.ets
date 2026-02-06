@@ -50,7 +50,7 @@ export namespace concurrency {
             if (worker == undefined) {
                 worker = EAWorker.current();
                 if (worker == undefined) {
-                    throw new Error("No worker found for MessageHandler");
+                    throw new Error('MessageHandler:: No worker found');
                 }
             }
             this.handler = handler;

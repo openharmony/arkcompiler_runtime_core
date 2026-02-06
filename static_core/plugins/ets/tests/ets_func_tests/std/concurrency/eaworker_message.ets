@@ -100,13 +100,13 @@ function testMainQuit() {
     let eawMain = EAWorker.main();
     arktest.expectError(() => {
         eawMain.quit();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
     arktest.expectError(() => {
         eawMain.quit();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
     arktest.expectError(() => {
         eawMain.join();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
 }
 
 function testQuit() {
@@ -240,27 +240,27 @@ function testMain() {
 
     arktest.expectError(() => {
         mainWorker.quit();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
 
     arktest.expectError(() => {
         mainWorker.quit();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
 
     arktest.expectError(() => {
         mainWorker.join();
-    }, new Error('Main worker cannot be stopped'));
+    }, new Error('EAWorker:: Main worker cannot be stopped'));
 
     arktest.expectError(() => {
         mainWorker.setPriority(WorkerPriority.PRIORITY_HIGH);
-    }, new Error('Main worker cannot set priority'));
+    }, new Error('EAWorker:: Main worker cannot set priority'));
 
     arktest.expectError(() => {
         mainWorker.setUncaughtExceptionHandler((e: Error) => {});
-    }, new Error('Main worker cannot have uncaught exception handler'));
+    }, new Error('EAWorker:: Main worker cannot have uncaught exception handler'));
 
     arktest.expectError(() => {
         mainWorker.start();
-    }, new Error('Main worker cannot be started'));
+    }, new Error('EAWorker:: Main worker cannot be started'));
 
     arktest.assertEQ(mainWorker.getUncaughtExceptionHandler(), undefined);
 }
@@ -269,19 +269,19 @@ function testQuitBeforeStart() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
         eaw.quit();
-    }, new Error('Cannot stop worker before start'));
+    }, new Error('EAWorker:: Cannot stop worker before start'));
     eaw.start();
     eaw.quit();
     arktest.expectError(() => {
         eaw.start();
-    }, new Error('Worker already started or quit'));
+    }, new Error('EAWorker:: Worker already started or quit'));
 }
 
 function testPostTaskWhenNotStarted() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
         eaw.postTask(() => {});
-    }, new Error('Can not post task when worker is not started'));
+    }, new Error('EAWorker:: Cannot post task when worker is not started'));
 }
 
 function testStartAfterQuit() {
@@ -296,7 +296,7 @@ function testStartafterJoin() {
     let eaw = new EAWorker();
     arktest.expectError(() => {
          eaw.join();
-    }, new Error('Cannot stop worker before start'));
+    }, new Error('EAWorker:: Cannot stop worker before start'));
     eaw.start();
     eaw.quit();
 }

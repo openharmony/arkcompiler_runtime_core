@@ -620,7 +620,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private doResolve<U>(value: U|PromiseLike<U>): void {
         if (value instanceof PromiseLike) {
             if (value === this) {
-                this.rejectImpl(new TypeError("Cannot reolve the promise by self"), false);
+                this.rejectImpl(new TypeError("Cannot resolve the promise by itself"), false);
             }
             this.subscribeOnAnotherPromise<U>(value as PromiseLike<U>);
         } else {
