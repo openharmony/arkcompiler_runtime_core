@@ -21,8 +21,8 @@ if (PANDA_LLVM_BACKEND)
     return()
 endif()
 
-# NOTE: Disable compiler because mix-stack not support JIT/AOT.
-if (PANDA_COMPILER_ENABLE)
+# NOTE: Disable the "Release" compilation mode because of compilation optimization.
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     return()
 endif()
 
