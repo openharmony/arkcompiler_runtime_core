@@ -2383,6 +2383,11 @@ public:
         return T::template GetField<IsVolatileFlag>();
     }
 
+    bool IsBarrier() const override
+    {
+        return T::IsBarrier() || GetVolatile();
+    }
+
 protected:
     using IsVolatileFlag = typename T::LastField::NextFlag;
     using LastField = IsVolatileFlag;
@@ -4429,11 +4434,6 @@ public:
         return GetInput(0).GetInst();
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     Inst *GetGCBarrierEntrypoint()
     {
         auto input = GetInputOpt(2);
@@ -4559,11 +4559,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     Inst *GetArray()
     {
         return GetInput(0).GetInst();
@@ -4636,11 +4631,6 @@ public:
         return inputType;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -4686,11 +4676,6 @@ public:
         return input0Type;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -4715,11 +4700,6 @@ public:
     using Base::Base;
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
 
     Inst *GetStoredValue()
     {
@@ -4770,11 +4750,6 @@ public:
     using Base::Base;
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
 
     Inst *GetPointer()
     {
@@ -5266,11 +5241,6 @@ public:
         return inputType;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -5319,11 +5289,6 @@ public:
         return input0Type;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
@@ -5348,11 +5313,6 @@ class LoadObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst3> {
 public:
     using Base = DynObjectAccessMixin<FixedInputsInst3>;
     using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
 };
 
 /// Store value to dynamic object
@@ -5360,25 +5320,16 @@ class StoreObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst<4U>> 
 public:
     using Base = DynObjectAccessMixin<FixedInputsInst<4U>>;
     using Base::Base;
-
-    bool IsBarrier() const override
-    {
-        return true;
-    }
 };
 
 /// Resolve instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API ResolveObjectFieldInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ResolveObjectFieldInst : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    ResolveObjectFieldInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
+    ResolveObjectFieldInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5427,11 +5378,6 @@ public:
         return index == 0 ? DataType::REFERENCE : DataType::UINT32;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
@@ -5474,11 +5420,6 @@ public:
         return index == 0 ? DataType::REFERENCE : GetType();
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
@@ -5501,23 +5442,16 @@ public:
 
 /// Store value into resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>,
-                                                      public TypeIdMixin {
+class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>;
+    using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+    StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetVolatile() || GetNeedBarrier();
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5540,7 +5474,6 @@ public:
         auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToStoreResolvedObjectField()->SetTypeId(GetTypeId());
         clone->CastToStoreResolvedObjectField()->SetMethod(GetMethod());
-        ASSERT(clone->CastToStoreResolvedObjectField()->GetVolatile() == GetVolatile());
         return clone;
     }
 
@@ -5565,11 +5498,6 @@ public:
     {
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5622,11 +5550,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return GetNeedBarrier() || GetVolatile() || Inst::IsBarrier();
-    }
-
     void SetVnObject(VnObject *vnObj) const override;
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
@@ -5655,16 +5578,12 @@ public:
 
 /// Resolve static instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API ResolveObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ResolveObjectFieldStaticInst : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    ResolveObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
+    ResolveObjectFieldStaticInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5713,11 +5632,6 @@ public:
         return DataType::REFERENCE;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
@@ -5751,11 +5665,6 @@ public:
     {
         SetNeedBarrier(needBarrier);
         SetVolatile(isVolatile);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -5800,11 +5709,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType(size_t index) const override
@@ -5842,11 +5746,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return true;
-    }
-
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(GetInputsCount() == 2U);
@@ -5870,21 +5769,12 @@ public:
 
 /// Create new object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API NewObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API NewObjectInst : public FixedInputsInst2, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
+    using Base = FixedInputsInst2;
     using Base::Base;
 
-    NewObjectInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
+    NewObjectInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -5907,19 +5797,16 @@ public:
 
 /// Create new array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API NewArrayInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
+class PANDA_PUBLIC_API NewArrayInst : public FixedInputsInst3, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
+    using Base = FixedInputsInst3;
     using Base::Base;
 
     static constexpr size_t INDEX_CLASS = 0;
     static constexpr size_t INDEX_SIZE = 1;
     static constexpr size_t INDEX_SAVE_STATE = 2;
 
-    NewArrayInst(Initializer t, TypeIdMixin m, bool needBarrier = false) : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
+    NewArrayInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5937,11 +5824,6 @@ public:
         }
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -5954,21 +5836,12 @@ public:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadConstArrayInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadConstArrayInst : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    LoadConstArrayInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
+    LoadConstArrayInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5988,22 +5861,14 @@ public:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API FillConstArrayInst : public NeedBarrierMixin<FixedInputsInst2>,
-                                            public TypeIdMixin,
-                                            public ImmediateMixin {
+class PANDA_PUBLIC_API FillConstArrayInst : public FixedInputsInst2, public TypeIdMixin, public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
+    using Base = FixedInputsInst2;
     using Base::Base;
 
-    FillConstArrayInst(Initializer t, TypeIdMixin m, uint64_t imm, bool needBarrier = false)
+    FillConstArrayInst(Initializer t, TypeIdMixin m, uint64_t imm)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), ImmediateMixin(imm)
     {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -6026,22 +5891,14 @@ public:
 
 /// Checkcast
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                                       public TypeIdMixin {
+class PANDA_PUBLIC_API CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<FixedInputsInst3>>, public TypeIdMixin {
 public:
-    using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
+    using Base = OmitNullCheckMixin<ClassTypeMixin<FixedInputsInst3>>;
     using Base::Base;
 
-    CheckCastInst(Initializer t, TypeIdMixin m, ClassType classType, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
+    CheckCastInst(Initializer t, TypeIdMixin m, ClassType classType) : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetClassType(classType);
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -6069,22 +5926,15 @@ public:
 
 /// Is instance
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
+class PANDA_PUBLIC_API IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<FixedInputsInst3>>,
                                         public TypeIdMixin {
 public:
-    using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
+    using Base = OmitNullCheckMixin<ClassTypeMixin<FixedInputsInst3>>;
     using Base::Base;
 
-    IsInstanceInst(Initializer t, TypeIdMixin m, ClassType classType, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
+    IsInstanceInst(Initializer t, TypeIdMixin m, ClassType classType) : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
         SetClassType(classType);
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -6112,25 +5962,17 @@ public:
 
 /// Load data from constant pool.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadFromPool : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadFromPool : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    LoadFromPool(Initializer t, TypeIdMixin m, bool needBarrier = false) : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
+    LoadFromPool(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         return DataType::NO_TYPE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -6146,16 +5988,12 @@ public:
 
 /// Load data from dynamic constant pool.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadFromPoolDynamic : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadFromPoolDynamic : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    LoadFromPoolDynamic(Initializer t, TypeIdMixin m, bool needBarrier = false)
-        : Base(std::move(t)), TypeIdMixin(std::move(m))
-    {
-        SetNeedBarrier(needBarrier);
-    }
+    LoadFromPoolDynamic(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -6192,20 +6030,14 @@ protected:
 
 /// Initialization or loading of the class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API ClassInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ClassInst : public FixedInputsInst1, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst1>;
+    using Base = FixedInputsInst1;
     using Base::Base;
 
-    ClassInst(Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+    ClassInst(Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), klass_(klass)
     {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -6242,20 +6074,14 @@ private:
 
 /// Loading of the runtime class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API RuntimeClassInst : public NeedBarrierMixin<FixedInputsInst0>, public TypeIdMixin {
+class PANDA_PUBLIC_API RuntimeClassInst : public FixedInputsInst0, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst0>;
+    using Base = FixedInputsInst0;
     using Base::Base;
 
-    RuntimeClassInst(Inst::Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+    RuntimeClassInst(Inst::Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), klass_(klass)
     {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -6306,22 +6132,16 @@ public:
 
 /// Get global var address inst
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API GlobalVarInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API GlobalVarInst : public FixedInputsInst2, public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
+    using Base = FixedInputsInst2;
     using Base::Base;
 
     GlobalVarInst(Initializer t, uintptr_t address) : Base(std::move(t)), address_(address) {}
 
-    GlobalVarInst(Initializer t, TypeIdMixin m, uintptr_t address, bool needBarrier = false)
+    GlobalVarInst(Initializer t, TypeIdMixin m, uintptr_t address)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), address_(address)
     {
-        SetNeedBarrier(needBarrier);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -6843,11 +6663,6 @@ public:
         return GetInput(1).GetInst();
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPair();
@@ -6904,11 +6719,6 @@ public:
         auto inputType = GetInput(0).GetInst()->GetType();
         ASSERT(inputType == DataType::REFERENCE || inputType == DataType::ANY);
         return inputType;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -6978,11 +6788,6 @@ public:
         return GetType() == DataType::REFERENCE;
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph)->CastToStoreArrayPair();
@@ -7007,11 +6812,6 @@ public:
     {
         SetVolatile(false);
         SetNeedBarrier(false);
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -7063,10 +6863,6 @@ public:
         return GetInput(0).GetInst();
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     DataType::Type GetInputType(size_t index) const override
@@ -7140,11 +6936,6 @@ public:
     bool IsPropagateLiveness() const override
     {
         return GetType() == DataType::REFERENCE;
-    }
-
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;

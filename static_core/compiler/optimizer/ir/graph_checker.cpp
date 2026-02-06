@@ -1677,10 +1677,11 @@ void GraphChecker::VisitStoreObjectDynamic(GraphVisitor *v, Inst *inst)
     CheckMemoryInstruction(v, inst, needBarrier);
 }
 
-void GraphChecker::VisitFillConstArray(GraphVisitor *v, Inst *inst)
+void GraphChecker::VisitFillConstArray([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    bool needBarrier = inst->CastToFillConstArray()->GetNeedBarrier();
-    CheckMemoryInstruction(v, inst, needBarrier);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, DataType::IsTypeNumeric(inst->GetType()),
+        (std::cerr << "FillConstArray should only be used for primitives\n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitStoreResolvedObjectField(GraphVisitor *v, Inst *inst)
