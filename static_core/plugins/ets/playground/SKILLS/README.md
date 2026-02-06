@@ -1,10 +1,10 @@
 # ArkTS Playground Skills
 
-This directory contains custom Claude Code skills for the ArkTS Playground project.
+This directory contains custom skills for the ArkTS Playground project.
 
 ## What Are Skills?
 
-Skills are reusable, project-specific capabilities that Claude Code can invoke via slash commands (e.g., `/fullstack`, `/add-endpoint`). Each skill is documented with its usage, examples, and behavior.
+Skills are reusable, project-specific capabilities that AI agents can invoke via slash commands (e.g., `/fullstack`, `/add-endpoint`). Each skill is documented with its usage, examples, and behavior.
 
 ## Structure
 
@@ -196,23 +196,11 @@ This convention makes it easy to:
 
 ## Related Documentation
 
-- **CLAUDE.md** - Project overview and architecture
-- **.claude/settings.json** - Claude Code configuration
-- **.claude/settings.local.json** - Local settings (gitignored)
+- **AGENTS.md** - Project overview and architecture
 
 ## Skill Integration
 
-Claude Code automatically discovers skills from the `SKILLS/` directory. The folder structure is defined in `.claude/settings.json`:
-
-```json
-{
-  "skills": {
-    "directory": "SKILLS",
-    "structure": "folder-per-skill",
-    "naming": "match-folder"
-  }
-}
-```
+AI agents automatically discover skills from the `SKILLS/` directory. The folder structure follows the "folder-per-skill" pattern with "match-folder" naming.
 
 Each skill folder's `<skill-name>.md` file is read and parsed for:
 - YAML front matter (`name`, `description`)

@@ -232,7 +232,7 @@ export final class ArrayIndexOutOfBoundsError extends RangeError {
 }
 
 /**
- * Represents error that is thrown when illegal arithmetic operation is occured (e.g. division by zero)
+ * Represents error that is thrown when illegal arithmetic operation has occurred (e.g. division by zero)
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @since 24
@@ -312,7 +312,7 @@ export class InstantiationError extends Error {
 }
 
 /**
- * Represents an error that occurs when an internal error occured
+ * Represents an error that occurs when an internal error has occurred
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
  * @since 24
