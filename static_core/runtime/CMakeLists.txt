@@ -857,6 +857,11 @@ add_gtests(
 )
 
 add_gtests(
+    arkruntime_ark_vm_api_test
+    tests/ark_vm_api_test.cpp
+)
+
+add_gtests(
     arkruntime_memory_mem_leak_test
     tests/mem_leak_test.cpp
 )

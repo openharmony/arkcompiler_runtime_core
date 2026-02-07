@@ -27,6 +27,11 @@
 namespace ark::compiler {
 class RuntimeInterface;
 
+struct ProfilePathInfo {
+    PandaString curProfilePath;
+    PandaString baselineProfilePath;
+};
+
 class AotManager {
     using BitSetElement = uint32_t;
     static constexpr size_t MASK_WIDTH = BITS_PER_BYTE * sizeof(BitSetElement);
@@ -160,6 +165,11 @@ public:
         return profiledMethods_;
     }
 
+    using ProfilePathEntry = std::pair<PandaString, ProfilePathInfo>;
+    void RegisterProfilePaths(PandaVector<ProfilePathEntry> &&entries);
+
+    PandaUnorderedMap<PandaString, ProfilePathInfo> GetProfiledPandaFilesMapSnapshot() const;
+
     PandaUnorderedSet<std::string> &GetProfiledPandaFiles()
     {
         return profiledPandaFiles_;
@@ -180,6 +190,9 @@ private:
     mutable os::memory::Mutex profiledMethodsLock_;
     PandaList<Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
     PandaUnorderedSet<std::string> profiledPandaFiles_;
+
+    mutable os::memory::Mutex profilePathMapLock_;
+    PandaUnorderedMap<PandaString, ProfilePathInfo> profiledPandaFilesMap_ GUARDED_BY(profilePathMapLock_);
 
     os::memory::RecursiveMutex aotStringRootsLock_;
     PandaVector<ObjectHeader **> aotStringGcRoots_;

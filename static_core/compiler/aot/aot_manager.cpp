@@ -241,6 +241,23 @@ void AotManager::RegisterAotStringRoot(ObjectHeader **slot, bool isYoung)
     aotStringGcRootsCount_.fetch_add(1, std::memory_order_acq_rel);
 }
 
+void AotManager::RegisterProfilePaths(PandaVector<ProfilePathEntry> &&entries)
+{
+    if (entries.empty()) {
+        return;
+    }
+    os::memory::LockHolder lock(profilePathMapLock_);
+    for (auto &entry : entries) {
+        profiledPandaFilesMap_.emplace(std::move(entry.first), std::move(entry.second));
+    }
+}
+
+PandaUnorderedMap<PandaString, ProfilePathInfo> AotManager::GetProfiledPandaFilesMapSnapshot() const
+{
+    os::memory::LockHolder lock {profilePathMapLock_};
+    return profiledPandaFilesMap_;
+}
+
 void AotManager::ParseClassContextToFile(std::string_view context)
 {
     size_t start = 0;

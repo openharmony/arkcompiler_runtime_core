@@ -17,8 +17,10 @@
 // NOLINTBEGIN
 
 #ifdef __cplusplus
+#include <cstddef>
 #include <cstdint>
 #else
+#include <stddef.h>
 #include <stdint.h>
 #endif
 
@@ -33,9 +35,15 @@
 extern "C" {
 #endif
 
-typedef enum { ARKVM_OK, ARKVM_ERROR, ARKVM_INVALID_ARGS, ARKVM_INVALID_CONTEXT } arkvm_status;
+typedef enum { ARKVM_OK, ARKVM_ERROR, ARKVM_INVALID_ARGS, ARKVM_INVALID_CONTEXT, ARKVM_PARTIAL_SUCCESS } arkvm_status;
 
 typedef enum { ARKVM_SCHEDULER_RUN_ONCE } arkvm_schedule_mode;
+
+typedef struct {
+    const char *abcPath;
+    const char *curProfilePath;
+    const char *baselineProfilePath;
+} arkvm_profile_path_info;
 
 /**
  * The arkvm_external_scheduler_poster is an API that should be provided by an external scheduler to post tasks.
@@ -66,6 +74,17 @@ ARKVM_API_EXPORT arkvm_status ARKVM_RegisterExternalScheduler(arkvm_external_sch
  * @param mode is a scheduling policy that affects the number of scheduled coroutines.
  */
 ARKVM_API_EXPORT arkvm_status ARKVM_RunScheduler(arkvm_schedule_mode mode);
+
+/**
+ * @brief Batch register profile path mappings for ABC files.
+ *
+ * This function is used during the module loading phase to register, in a single call,
+ * the profile path mappings for all ABC files within the current module.
+ *
+ * @param infos is an array of profile path mapping entries.
+ * @param infoCount is the number of entries in @p infos.
+ */
+ARKVM_API_EXPORT arkvm_status ARKVM_RegisterProfilePaths(const arkvm_profile_path_info *infos, size_t infoCount);
 
 #ifdef __cplusplus
 }
