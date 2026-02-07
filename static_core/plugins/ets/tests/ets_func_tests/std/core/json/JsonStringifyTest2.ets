@@ -68,89 +68,95 @@ class TestInterfaceImpl implements TestInterface {
     a: Any = undefined
 }
 
-function checkJSONObject(jObj: JSONObject, expectedValues: Map<string, string>) {
-    const flds = jObj.getFields()
-    arktest.assertEQ(flds.size, expectedValues.size)
-    for (const entry of expectedValues.entries()) {
-        arktest.assertEQ(flds.get(entry[0])?.toString(), entry[1])
-    }
-}
-
-function checkJSONArray(jsonArr: JSONArray, expectedValues: Map<string, string>[]) {
-    const jsonArrValues = jsonArr.values
-    arktest.assertEQ(jsonArrValues.length, expectedValues.length)
-    for (let i = 0; i < jsonArrValues.length; i++) {
-        checkJSONObject(jsonArrValues[i] as JSONObject, expectedValues[i])
-    }
-}
-
 function stringifyObjectLiteralSimpleCases(): void {
-    let obj: TestInterface = {s: "str", d: -1.5, a: undefined}
+    let obj: TestInterface = {s: 'str', d: -1.5, a: undefined}
     arktest.assertTrue(reflect.isLiteralInitializedInterface(obj))
 
     // Expect {"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(obj)
-    let expected: Map<string, string> = new Map<string,string>([
-        ["d", "-1.5"],
-        ["s", "str"],
-    ])
-    checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
 
-    obj.a = new TestClass("val")
+    let jsonObj = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonObj.getString('s'), 'str')
+    arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
+
+    obj.a = new TestClass('val')
     // Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
     jsonStr = JSON.stringify(obj)
-    expected.set("a", "{value:val}")
-    checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
+    jsonObj = JSON.parseJsonElement(jsonStr)
+    let innerObj = jsonObj.getElement('a')
+    arktest.assertEQ(innerObj.getString('value'), 'val')
+    arktest.assertEQ(jsonObj.getString('s'), 'str')
+    arktest.assertEQ(jsonObj.getDouble('d'), -1.5)   
 
-    let array: TestInterface[] = [{s: "", d: 0.0, a: undefined}, {s: "s", d: 1.5, a: new TestClass("val")}]
+    let array: TestInterface[] = [{s: '', d: 0.0, a: undefined}, {s: 's', d: 1.5, a: new TestClass('val')}]
     // Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
     jsonStr = JSON.stringify(array)
-    expected.set("d", "1.5")
-    expected.set("s", "s")
-    const expectedArray: Map<string,string>[] = [new Map<string,string>([["d", "0"], ["s", ""]]), expected]
-    checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, expectedArray)
+    let jsonArr = JSON.parseJsonElement(jsonStr).asArray()
+    jsonObj = jsonArr[0]
+    arktest.assertEQ(jsonObj.getString('s'), '')
+    arktest.assertEQ(jsonObj.getDouble('d'), 0)
+    jsonObj = jsonArr[1]
+    innerObj = jsonObj.getElement('a')
+    arktest.assertEQ(innerObj.getString('value'), 'val')
+    arktest.assertEQ(jsonObj.getString('s'), 's')
+    arktest.assertEQ(jsonObj.getDouble('d'), 1.5)
 
-    let fixedArray: FixedArray<TestInterface> = [{s: "", d: 0.0, a: undefined}, {s: "s", d: 1.5, a: new TestClass("val")}]
+    let fixedArray: FixedArray<TestInterface> = [{s: '', d: 0.0, a: undefined}, {s: 's', d: 1.5, a: new TestClass('val')}]
     // Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
     jsonStr = JSON.stringify(fixedArray)
-    checkJSONArray(JSONParser.parse(jsonStr) as JSONArray, expectedArray)
+    jsonArr = JSON.parseJsonElement(jsonStr).asArray()
+    jsonObj = jsonArr[0]
+    arktest.assertEQ(jsonObj.getString('s'), '')
+    arktest.assertEQ(jsonObj.getDouble('d'), 0)
+    jsonObj = jsonArr[1]
+    innerObj = jsonObj.getElement('a')
+    arktest.assertEQ(innerObj.getString('value'), 'val')
+    arktest.assertEQ(jsonObj.getString('s'), 's')
+    arktest.assertEQ(jsonObj.getDouble('d'), 1.5)
+
 
     let record: Record<string, TestInterface[]> = new Record<string, TestInterface[]>()
-    record["filler"] = array
+    record['filler'] = array
     // Expect {"filler":[{"d":0,"s":""},{"a":{"value":"val"},"d":-1.5,"s":"str"}]}
     jsonStr = JSON.stringify(record)
-    const jsonObj = JSONParser.parse(jsonStr) as JSONObject
-    const fields = jsonObj.getFields()
-    arktest.assertEQ(fields.size, 1)
-    checkJSONArray(fields.get("filler") as JSONArray, expectedArray)
+    jsonObj = JSON.parseJsonElement(jsonStr)
+    jsonArr = jsonObj.getArray('filler')
+    jsonObj = jsonArr[0]
+    arktest.assertEQ(jsonObj.getString('s'), '')
+    arktest.assertEQ(jsonObj.getDouble('d'), 0)
+    jsonObj = jsonArr[1]
+    innerObj = jsonObj.getElement('a')
+    arktest.assertEQ(innerObj.getString('value'), 'val')
+    arktest.assertEQ(jsonObj.getString('s'), 's')
+    arktest.assertEQ(jsonObj.getDouble('d'), 1.5)
 }
 
 function stringifyObjectLiteralCornerCases(): void {
-    const testObj = new TestClass("val")
-    let objLit: TestInterface = {s: "str", d: -1.5, a: testObj}
+    const testObj = new TestClass('val')
+    let objLit: TestInterface = {s: 'str', d: -1.5, a: testObj}
     arktest.assertTrue(reflect.isLiteralInitializedInterface(objLit))
 
     // Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(objLit)
-    let expected: Map<string, string> = new Map<string,string>([
-        ["a", "{value:val}"],
-        ["d", "-1.5"],
-        ["s", "str"],
-    ])
-    checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
+    let jsonObj = JSON.parseJsonElement(jsonStr)
+    let innerObj = jsonObj.getElement('a')
+    arktest.assertEQ(innerObj.getString('value'), 'val')
+    arktest.assertEQ(jsonObj.getString('s'), 'str')
+    arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
 
     // Check that replacer is applied
     // Expect {"a":123,"d":-1.5,"s":"str"}
-    jsonStr = JSON.stringify(objLit, (key: String, value: Any): Any => { return (key == "a") ? 123 : value })
-    expected.set("a", "123")
-    checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
+    jsonStr = JSON.stringify(objLit, (key: String, value: Any): Any => { return (key == 'a') ? 123 : value })
+    jsonObj = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonObj.getInteger('a'), 123)
+    arktest.assertEQ(jsonObj.getString('s'), 'str')
+    arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
 
-    // Check that fields filter is not applied to object literal itself, but is applied to all nested objects
     // Expect {"s":"str"}
-    jsonStr = JSON.stringify(objLit, ["s"])
-    expected.delete('a')
-    expected.delete('d')
-    checkJSONObject(JSONParser.parse(jsonStr) as JSONObject, expected)
+    jsonStr = JSON.stringify(objLit, ['s'])
+    jsonObj = JSON.parseJsonElement(jsonStr)
+    arktest.assertEQ(jsonObj.tryGetElement('d'), undefined)
+    arktest.assertEQ(jsonObj.tryGetString('s'), 'str')
 
     // Check cyclic dependencies are detected
     objLit.a = objLit;
