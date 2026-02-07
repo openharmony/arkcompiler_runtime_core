@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,17 @@
 #include "string_util.h"
 
 #include <algorithm>
+#include <cctype>
 #include <regex>
+#include <unordered_map>
+#include <vector>
 
 #include "assert_util.h"
 #include "logger.h"
 #include "configuration/configuration_constants.h"
 
 namespace {
-constexpr std::string_view REGEX_NUMERIC_PLACEHOLDER = "<([0-9]+)>";
-constexpr std::string_view REGEX_DOT_PLACEHOLDER = R"((\.+))";
-constexpr int BRACE_SIZE = 2;
+constexpr int BRACE_SIZE = 2;  // 2 is the size of brace characters
 
 bool ContainRegexSymbol(const std::string &str)
 {
@@ -38,67 +39,109 @@ bool ContainRegexSymbol(const std::string &str)
     return false;
 }
 
+// Write to output buffer to avoid allocation
+static void EscapeParenthesesToBuffer(std::string &out, const std::string &str)
+{
+    out.clear();
+    out.reserve(str.size() + BRACE_SIZE);
+    for (const char c : str) {
+        if (c == '{' || c == '}') {
+            out += '\\';
+        }
+        out += c;
+    }
+}
+
 std::string EscapeParentheses(const std::string &str)
 {
     std::string result;
-    result.reserve(str.size() + BRACE_SIZE);
-    for (const char c : str) {
-        if (c == '{' || c == '}') {
-            result += '\\';
-        }
-        result += c;
-    }
+    EscapeParenthesesToBuffer(result, str);
     return result;
+}
+
+// Write to output buffer to avoid allocation
+static void RemoveSpacesToBuffer(std::string &out, const std::string &str)
+{
+    out = str;
+    out.erase(std::remove(out.begin(), out.end(), ' '), out.end());
 }
 
 std::string RemoveSpaces(const std::string &str)
 {
-    std::string result = str;
-    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    std::string result;
+    RemoveSpacesToBuffer(result, str);
     return result;
 }
 
+// Lightweight: replace single dots with "\\.", keep multiple dots as-is (no regex)
 std::string ReplaceDot(const std::string &str)
 {
-    std::smatch match;
     std::string result;
-
-    auto searchStart = str.cbegin();
-
-    while (std::regex_search(searchStart, str.cend(), match, std::regex(REGEX_DOT_PLACEHOLDER.data()))) {
-        result.append(searchStart, match[0].first);
-        if (match[1].str().size() == 1) {
+    result.reserve(str.size() + 8);  // 8 is the buffer size for escaped dots
+    for (size_t i = 0; i < str.size();) {
+        if (str[i] != '.') {
+            result += str[i++];
+            continue;
+        }
+        size_t dotCount = 0;
+        while (i < str.size() && str[i] == '.') {
+            ++dotCount;
+            ++i;
+        }
+        if (dotCount == 1) {
             result.append("\\.");
         } else {
-            result.append(match[1].str());
+            result.append(dotCount, '.');
         }
-        searchStart = match[0].second;
     }
-    result.append(searchStart, str.cend());
     return result;
+}
+
+// Lightweight: replace <N> with matchedPatterns[N-1] (no regex, no substr)
+static int ParseBackrefNum(const std::string &str, size_t start, size_t end)
+{
+    int val = 0;
+    for (size_t k = start; k < end; ++k) {
+        val = val * 10 + static_cast<int>(str[k] - '0');  // 10 is the base of decimal number
+    }
+    return val;
 }
 
 std::string ReplaceNumericWildcards(const std::string &str, const std::vector<std::string> &matchedPatterns)
 {
-    std::smatch match;
     std::string result;
-
-    auto searchStart = str.cbegin();
-    while (std::regex_search(searchStart, str.cend(), match, std::regex(REGEX_NUMERIC_PLACEHOLDER.data()))) {
-        result.append(searchStart, match[0].first);
-        auto matchNum = std::stoi(match[1].str());
+    result.reserve(str.size());
+    size_t i = 0;
+    while (i < str.size()) {
+        if (str[i] != '<') {
+            result += str[i++];
+            continue;
+        }
+        if (i + 1 >= str.size() || !std::isdigit(static_cast<unsigned char>(str[i + 1]))) {
+            result += str[i++];
+            continue;
+        }
+        size_t j = i + 1;
+        while (j < str.size() && std::isdigit(static_cast<unsigned char>(str[j]))) {
+            ++j;
+        }
+        if (j >= str.size() || str[j] != '>') {
+            result += str[i++];
+            continue;
+        }
+        int matchNum = ParseBackrefNum(str, i + 1, j);
         // CC-OFFNXT(G.STD.16) fatal error
         ARK_GUARD_ASSERT(
             matchNum <= 0, ark::guard::ErrorCode::CLASS_SPECIFICATION_FORMAT_ERROR,
-            "ClassSpecification parsing failed: Back reference can not be 0, found invalid back reference" +
-                match[0].str());
-        size_t num = matchNum - 1;
+            "ClassSpecification parsing failed: Back reference can not be 0, found invalid back reference <" +
+                str.substr(i + 1, j - i - 1) + ">");
+        size_t num = static_cast<size_t>(matchNum - 1);
+        // CC-OFFNXT(G.FUN.01) fatal error
         if (num < matchedPatterns.size()) {
             result.append(matchedPatterns[num]);
         }
-        searchStart = match[0].second;
+        i = j + 1;
     }
-    result.append(searchStart, str.cend());
     return result;
 }
 
@@ -129,6 +172,170 @@ std::string ReplaceWildcardToRegex(const std::vector<std::pair<std::string, std:
     }
     return ReplaceNumericWildcards(result, matchedPatterns);
 }
+
+static bool MatchSimpleWildcardRegexImpl(std::string_view str, std::string_view pat);
+
+static bool IsValidEscapedChar(char c)
+{
+    return c == '.' || c == '(' || c == ')' || c == '{' || c == '}';
+}
+
+static bool IsValidSpecialChar(char c)
+{
+    return c == '(' || c == '|' || c == '+' || c == '{' || c == '}' || c == '?' || c == '^' || c == '$';
+}
+
+static bool CheckEscapedChar(std::string_view pattern, size_t &i)
+{
+    if (i + 1 >= pattern.size()) {
+        return false;
+    }
+    char c = pattern[i + 1];
+    if (!IsValidEscapedChar(c)) {
+        return false;
+    }
+    i += 2;  // 2 is the length of escaped character sequence
+    return true;
+}
+
+static bool CheckDotStar(std::string_view pattern, size_t &i)
+{
+    if (i + 1 < pattern.size() && pattern[i + 1] == '*') {
+        i += 2;  // 2 is the length of escaped character sequence
+        return true;
+    }
+    return false;
+}
+
+static bool CheckBracketPattern(std::string_view pattern, size_t &i)
+{
+    if (pattern.substr(i).compare(0, 7, "[^/\\.]*") == 0) {  // 7 is the length of "[^/\\.]*"
+        i += 7;
+        return true;
+    }
+    if (pattern.substr(i).compare(0, 6, "[^/\\.]") == 0) {  // 6 is the length of "[^/\\.]"
+        i += 6;
+        return true;
+    }
+    return false;
+}
+
+static bool IsSimpleWildcardRegexPattern(std::string_view pattern)
+{
+    for (size_t i = 0; i < pattern.size();) {
+        if (pattern[i] == '\\') {
+            if (!CheckEscapedChar(pattern, i)) {
+                return false;
+            }
+            continue;
+        }
+        if (pattern[i] == '.') {
+            if (!CheckDotStar(pattern, i)) {
+                return false;
+            }
+            continue;
+        }
+        if (pattern[i] == '[') {
+            if (!CheckBracketPattern(pattern, i)) {
+                return false;
+            }
+            continue;
+        }
+        if (IsValidSpecialChar(pattern[i])) {
+            return false;
+        }
+        ++i;
+    }
+    return true;
+}
+
+static bool IsEscapedChar(char c)
+{
+    return c == '.' || c == '(' || c == ')' || c == '{' || c == '}';
+}
+
+static bool MatchEscapedPattern(std::string_view str, std::string_view pat)
+{
+    char esc = pat[1];
+    if (!IsEscapedChar(esc)) {
+        return false;
+    }
+    if (str.empty() || str[0] != esc) {
+        return false;
+    }
+    return MatchSimpleWildcardRegexImpl(str.substr(1), pat.substr(2));  // 2 is length of escaped character sequence
+}
+
+static bool MatchNotSlashDotPattern(std::string_view str, std::string_view pat)
+{
+    if (str.empty() || str[0] == '/' || str[0] == '.') {
+        return false;
+    }
+    return MatchSimpleWildcardRegexImpl(str.substr(1), pat.substr(6));  // 6 is the length of "[^/\\.]"
+}
+
+static bool MatchSimpleWildcardRegexImpl(std::string_view str, std::string_view pat)
+{
+    if (pat.empty()) {
+        return str.empty();
+    }
+    if (pat.size() >= 2 && pat.compare(0, 2, ".*") == 0) {  // 2 is the length of ".*"
+        for (size_t k = 0; k <= str.size(); ++k) {
+            if (MatchSimpleWildcardRegexImpl(str.substr(k), pat.substr(2))) {  // 2 is the length of ".*"
+                return true;
+            }
+        }
+        return false;
+    }
+    if (pat.size() >= 7 && pat.compare(0, 7, "[^/\\.]*") == 0) {  // 7 is the length of "[^/\\.]*"
+        for (size_t k = 0;; ++k) {
+            if (MatchSimpleWildcardRegexImpl(str.substr(k), pat.substr(7))) {  // 7 is the length of "[^/\\.]*"
+                return true;
+            }
+            if (k >= str.size() || str[k] == '/' || str[k] == '.') {
+                break;
+            }
+        }
+        return false;
+    }
+    if (pat.size() >= 6 && pat.compare(0, 6, "[^/\\.]") == 0) {  // 6 is the length of "[^/\\.]"
+        return MatchNotSlashDotPattern(str, pat);
+    }
+    if (pat[0] == '\\' && pat.size() >= 2) {  // 2 is the length of escaped character sequence
+        return MatchEscapedPattern(str, pat);
+    }
+    if (!str.empty() && pat[0] == str[0]) {
+        return MatchSimpleWildcardRegexImpl(str.substr(1), pat.substr(1));
+    }
+    return false;
+}
+
+static bool MatchSimpleWildcardRegex(const std::string &str, const std::string &pattern)
+{
+    return MatchSimpleWildcardRegexImpl(std::string_view(str), std::string_view(pattern));
+}
+
+// Cache for compiled regexes - use optimize to reduce regex compilation cost
+static const std::regex &GetCachedRegex(const std::string &regexStr)
+{
+    static constexpr size_t maxCacheSize = 256;  // 256 is the maximum cache size limit
+    static std::unordered_map<std::string, std::regex> cache;
+    static std::vector<std::string> keyOrder;  // For simple FIFO eviction
+
+    auto it = cache.find(regexStr);
+    if (it != cache.end()) {
+        return it->second;
+    }
+    if (cache.size() >= maxCacheSize) {
+        cache.erase(keyOrder.front());
+        keyOrder.erase(keyOrder.begin());
+    }
+    const auto flags = std::regex_constants::ECMAScript | std::regex_constants::optimize;
+    auto [inserted, _] = cache.emplace(regexStr, std::regex(regexStr, flags));
+    keyOrder.push_back(regexStr);
+    return inserted->second;
+}
+
 }  // namespace
 
 std::string ark::guard::StringUtil::ReplaceSlashWithDot(const std::string &str)
@@ -161,14 +368,30 @@ bool ark::guard::StringUtil::IsMatch(const std::string &inputStr, const std::str
     if (pattern.empty()) {
         return false;
     }
-    auto processedInput = RemoveSpaces(inputStr);
-    auto processedPattern = RemoveSpaces(pattern);
-    if (ContainRegexSymbol(processedPattern)) {
-        std::string escapedPattern = EscapeParentheses(processedPattern);
-        auto rc = regex_match(processedInput, std::regex(escapedPattern, std::regex_constants::ECMAScript));
-        return rc;
+    thread_local std::string g_scratchInput;
+    thread_local std::string g_scratchPattern;
+    thread_local std::string g_scratchEscaped;
+
+    RemoveSpacesToBuffer(g_scratchInput, inputStr);
+    RemoveSpacesToBuffer(g_scratchPattern, pattern);
+    if (!ContainRegexSymbol(g_scratchPattern)) {
+        return g_scratchInput == g_scratchPattern;
     }
-    return processedInput == processedPattern;
+    EscapeParenthesesToBuffer(g_scratchEscaped, g_scratchPattern);
+    if (IsSimpleWildcardRegexPattern(g_scratchEscaped)) {
+        return MatchSimpleWildcardRegex(g_scratchInput, g_scratchEscaped);
+    }
+    return std::regex_match(g_scratchInput, GetCachedRegex(g_scratchEscaped));
+}
+
+bool ark::guard::StringUtil::RegexMatch(const std::string &str, const std::string &regexPattern)
+{
+    if (regexPattern.empty()) {
+        return false;
+    }
+    // RegexMatch handles user-provided patterns (e.g. universalReservedFileNames "x[a-z]x")
+    // which can be arbitrary ECMAScript regex - must use std::regex, not simple wildcard
+    return std::regex_match(str, GetCachedRegex(regexPattern));
 }
 
 std::string ark::guard::StringUtil::ConvertWildcardToRegex(const std::string &input)
@@ -237,7 +460,7 @@ size_t ark::guard::StringUtil::FindLongestMatchedPrefixReg(const std::vector<std
     size_t maxLength = 0;
     std::smatch match;
     for (const auto &regexStr : prefixes) {
-        std::regex pattern(regexStr, std::regex_constants::ECMAScript);
+        const auto &pattern = GetCachedRegex(regexStr);
         if (std::regex_search(input, match, pattern)) {
             maxLength = std::max(maxLength, static_cast<size_t>(match[0].length()));
         }
@@ -250,4 +473,29 @@ std::string ark::guard::StringUtil::RemoveAllSpaces(const std::string &input)
     std::string result = input;
     result.erase(std::remove_if(result.begin(), result.end(), ::isspace), result.end());
     return result;
+}
+
+void ark::guard::StringUtil::WarmupRegexCache(const std::vector<std::string> &patterns)
+{
+    for (const auto &p : patterns) {
+        if (!p.empty()) {
+            GetCachedRegex(p);
+        }
+    }
+}
+
+void ark::guard::StringUtil::WarmupRegexCacheForIsMatch(const std::vector<std::string> &patterns)
+{
+    for (const auto &p : patterns) {
+        if (p.empty()) {
+            continue;
+        }
+        const std::string processed = PreparePatternForMatch(p);
+        GetCachedRegex(processed);
+    }
+}
+
+std::string ark::guard::StringUtil::PreparePatternForMatch(const std::string &pattern)
+{
+    return EscapeParentheses(RemoveSpaces(pattern));
 }

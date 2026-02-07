@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -210,4 +210,55 @@ HWTEST_F(TestAnnotation, annotation_006, TestSize.Level0)
 
     visitor_ = std::make_unique<TestInterfaceMethodAnnotationVisitor>();
     method1.value()->AnnotationsAccept(*visitor_);
+}
+
+class SetNameTestVisitor final : public TestBaseAnnotationVisitor {
+public:
+    void InitTargetAnnotationNames() override
+    {}
+
+    bool Visit(abckit_wrapper::Annotation *annotation) override
+    {
+        if (annotation->GetName() == "MyAnno1") {
+            // Test SetName with valid new name
+            const std::string newName = "NewAnnotationName";
+            bool result = annotation->SetName(newName);
+
+            EXPECT_TRUE(result);
+            std::string currentName = annotation->GetName();
+            EXPECT_EQ(currentName, newName);
+
+            tested_ = true;
+            return false;  // Early exit after testing
+        }
+        return true;
+    }
+
+    bool WasTested() const { return tested_; }
+
+    void IsValidate()
+    {
+        EXPECT_TRUE(tested_);
+    }
+
+private:
+    bool tested_ = false;
+};
+
+/**
+ * @tc.name: annotation_007
+ * @tc.desc: test annotation SetName method with valid name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TestAnnotation, annotation_007, TestSize.Level0)
+{
+    const auto clazz = fileView.Get<abckit_wrapper::Class>("annotation_test.ClassA");
+    ASSERT_TRUE(clazz.has_value());
+
+    visitor_ = std::make_unique<SetNameTestVisitor>();
+    clazz.value()->AnnotationsAccept(*visitor_);
+
+    static_cast<SetNameTestVisitor*>(visitor_.get())->IsValidate();
+    EXPECT_TRUE(static_cast<SetNameTestVisitor*>(visitor_.get())->WasTested());
 }

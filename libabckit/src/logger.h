@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,10 @@ public:
     int overflow(int c) override
     {
         return c;
+    }
+    std::streamsize xsputn(const char * /*s*/, std::streamsize n) override
+    {
+        return n;
     }
 };
 extern thread_local NullBuffer g_nB;
@@ -256,14 +260,16 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_LOG_(level)                                             \
     libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
-    *LIBABCKIT_LOG_STREAM(level) << libabckit::Logger::msgPrefix_ << "[" << LIBABCKIT_FUNC_NAME << "] "
+    if (libabckit::Logger::CheckPermission(#level))                       \
+    *libabckit::Logger::GetLoggerStream(#level) << libabckit::Logger::msgPrefix_ << "[" << LIBABCKIT_FUNC_NAME << "] "
 
 // CC-OFFNXT(G.DCL.01) public API
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_LOG_NO_FUNC_(level)                                     \
     libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
-    *LIBABCKIT_LOG_STREAM(level) << libabckit::Logger::msgPrefix_
+    if (libabckit::Logger::CheckPermission(#level))                       \
+    *libabckit::Logger::GetLoggerStream(#level) << libabckit::Logger::msgPrefix_
 
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -67,6 +67,7 @@ abckit_gtests_sources = [
   "clean_scenarios/cpp_api/dynamic/router_table/router_table_test.cpp",
   "clean_scenarios/cpp_api/dynamic/scan_subclasses/scan_subclasses_test.cpp",
   "cpp/tests/cpp_test.cpp",
+  "cpp/tests/cpp_test_name_util.cpp",
   "helpers/helpers.cpp",
   "helpers/helpers_mode.cpp",
   "helpers/helpers_nullptr.cpp",
@@ -94,6 +95,9 @@ abckit_gtests_sources = [
   "regression/issue_IB1YEI/cpp_api/issue_IB1YEI.cpp",
   "regression/issue_IB2T4M/c_api/issue_IB2T4M.cpp",
   "scenarios/add_log/add_log_dynamic_test.cpp",
+  "ut/logger_test.cpp",
+  "ut/modify_name_helper_test.cpp",
+  "ut/name_util_test.cpp",
 
   # 29942
   # "scenarios/add_log/add_log_static_test.cpp",

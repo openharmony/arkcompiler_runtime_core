@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,20 +18,65 @@
 
 namespace {
 constexpr std::string_view OBJECT_FULL_NAME_SEP = ".";
-}
+constexpr size_t TYPICAL_FQN_DEPTH = 8;
+}  // namespace
 
 AbckitWrapperErrorCode abckit_wrapper::Object::Init()
 {
     return AbckitWrapperErrorCode::ERR_SUCCESS;
 }
 
+void abckit_wrapper::Object::InvalidateFullyQualifiedNameCache()
+{
+    cachedFullyQualifiedName_.reset();
+    for (auto &[_, child] : children_) {
+        std::visit(
+            [](auto *obj) {
+                if (obj != nullptr) {
+                    obj->InvalidateFullyQualifiedNameCache();
+                }
+            },
+            child);
+    }
+}
+
 std::string abckit_wrapper::Object::GetFullyQualifiedName() const
 {
-    if (this->GetPackageName().empty()) {
-        return this->GetName();
+    if (cachedFullyQualifiedName_.has_value()) {
+        return *cachedFullyQualifiedName_;
     }
 
-    return this->GetPackageName() + OBJECT_FULL_NAME_SEP.data() + this->GetName();
+    thread_local std::vector<std::string> parts;
+    parts.clear();
+    parts.reserve(TYPICAL_FQN_DEPTH);
+    const Object *obj = this;
+    while (obj != nullptr) {
+        parts.push_back(obj->GetName());
+        obj = obj->parent_.has_value() ? obj->parent_.value() : nullptr;
+    }
+    if (parts.empty()) {
+        return "";
+    }
+    if (parts.size() == 1) {
+        cachedFullyQualifiedName_ = std::move(parts[0]);
+        return *cachedFullyQualifiedName_;
+    }
+    size_t total = 0;
+    for (const auto &p : parts) {
+        total += p.size() + 1;
+    }
+    --total;
+
+    std::string result;
+    result.reserve(total);
+    for (size_t i = parts.size(); i-- > 0;) {
+        if (i != parts.size() - 1) {
+            result += OBJECT_FULL_NAME_SEP;
+        }
+        result += parts[i];
+    }
+    cachedFullyQualifiedName_ = std::move(result);
+    return *cachedFullyQualifiedName_;
 }
 
 std::string abckit_wrapper::Object::GetPackageName() const

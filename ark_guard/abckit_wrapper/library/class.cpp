@@ -48,6 +48,7 @@ std::string abckit_wrapper::Class::GetName() const
 
 bool abckit_wrapper::Class::SetName(const std::string &name)
 {
+    InvalidateFullyQualifiedNameCache();
     const auto clazz = this->GetArkTsImpl<abckit::core::Class, abckit::arkts::Class>();
     if (clazz.has_value()) {
         return clazz->SetName(name);
