@@ -136,6 +136,8 @@
        stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval)                                                 \
     SM("Lstd/concurrency/taskpool;", "retriggerTaskPoolBlockedExpandMonitor", ":V",                                   \
        stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor)                                                   \
+    TP("Lstd/core/EAWorker;", coreEAWorker)                                                                           \
+    SM("Lstd/core/EAWorker;", "handleInteropEnvError", ":V", coreEAWorkerHandleInteropEnvError)                       \
     /* Finalization */                                                                                                \
     TP("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                     \
     TP("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                       \

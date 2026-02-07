@@ -21,8 +21,10 @@
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
@@ -60,37 +62,24 @@ static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *
     LambdaUtils::InvokeVoid(EtsCoroutine::GetCurrent(), taskObj);
 }
 
-Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached, bool &jsEnvEmpty)
+static Coroutine *TryCreateEACoroutine(PandaEtsVM *etsVM, bool needInterop, bool &limitIsReached, bool &jsEnvEmpty)
 {
     auto *runtime = Runtime::GetCurrent();
     auto *coroMan = etsVM->GetCoroutineManager();
     auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
-    void *jsEnv = nullptr;
-    if (needInterop) {
-        jsEnv = ifaceTable->CreateJSRuntime();
-        if (jsEnv == nullptr) {
-            jsEnvEmpty = true;
-            LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
-            return nullptr;
-        }
+    if (needInterop && !ifaceTable->AreInteropInterfacesAvailable()) {
+        jsEnvEmpty = true;
+        LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
+        return nullptr;
     }
     auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
     // exclusiveCoro == nullptr means that we reached the limit of eaworkers count or memory resources
     if (exclusiveCoro == nullptr) {
         limitIsReached = true;
         LOG(ERROR, COROUTINES) << "The limit of Exclusive Workers has been reached";
-        if (jsEnv != nullptr) {
-            ifaceTable->CleanUpJSEnv(jsEnv);
-        }
         return nullptr;
     }
 
-    // early return to avoid waste time on creating jsEnv
-    if (!needInterop) {
-        return exclusiveCoro;
-    }
-
-    ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     return exclusiveCoro;
 }
 
@@ -125,6 +114,34 @@ bool HasPendingError(bool limitIsReached, bool jsEnvEmpty)
     return false;
 }
 
+static bool PrepareInteropEnv(PandaEtsVM *etsVM, Coroutine *exclusiveCoro)
+{
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto *ifaceTable = EtsCoroutine::CastFromThread(coroMan->GetMainThread())->GetExternalIfaceTable();
+    void *jsEnv = nullptr;
+    jsEnv = ifaceTable->CreateJSRuntime();
+    if (jsEnv == nullptr) {
+        LOG(ERROR, COROUTINES) << "Cannot create EAWorker support interop without JsEnv";
+        return false;
+    }
+
+    ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
+    return true;
+}
+
+static void HandleInteropEnvError()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *method = PlatformTypes()->coreEAWorkerHandleInteropEnvError;
+    if (method == nullptr) {
+        LOG(ERROR, COROUTINES) << "EAWorker handleInteropEnvError method is not found";
+        coro->GetManager()->DestroyExclusiveWorker();
+        return;
+    }
+    method->GetPandaMethod()->Invoke(coro, nullptr);
+    coro->GetManager()->DestroyExclusiveWorker();
+}
+
 void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
 {
     auto *coroMan = etsVM->GetCoroutineManager();
@@ -136,6 +153,22 @@ void DestroyExclusiveWorker(PandaEtsVM *etsVM, bool supportInterop)
     } else {
         coroMan->DestroyExclusiveWorker();
     }
+}
+
+static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, Coroutine *eaCoro, bool supportInterop,
+                                       mem::Reference *taskRef)
+{
+    bool res = true;
+    if (supportInterop) {
+        res = PrepareInteropEnv(etsVM, eaCoro);
+    }
+    if (!res) {
+        HandleInteropEnvError();
+        etsVM->GetGlobalObjectStorage()->Remove(taskRef);
+        return;
+    }
+    RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
+    DestroyExclusiveWorker(etsVM, supportInterop);
 }
 
 EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
@@ -171,8 +204,7 @@ EtsInt ExclusiveLaunch(EtsObject *task, uint8_t needInterop, EtsString *name)
             }
             workerId = eaCoro->GetWorker()->GetId();
             event.Fire();
-            RunTaskOnEACoroutine(etsVM, supportInterop, taskRef);
-            DestroyExclusiveWorker(etsVM, supportInterop);
+            SetupAndRunExclusiveWorker(etsVM, eaCoro, supportInterop, taskRef);
         });
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
