@@ -1321,4 +1321,106 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkInCompleteCB)
     constexpr int expected = 4;
     ASSERT_EQ(testCounter, expected);
 }
+
+TEST_F(AsyncWorkTest, QueueAsyncWorkAfterCompleted)
+{
+    auto firstDone = AsyncWorkEvent();
+    auto secondDone = AsyncWorkEvent();
+    constexpr int kExpectedExecutions = 2;
+
+    AsyncWork *work = nullptr;
+    struct TestData {
+        AsyncWorkEvent *first;
+        AsyncWorkEvent *second;
+        int executed {0};
+        int completed {0};
+    };
+    auto data = TestData {&firstDone, &secondDone, 0, 0};
+
+    auto status = CreateAsyncWork(
+        env_,
+        []([[maybe_unused]] ani_env *env, void *raw) {
+            auto *d = reinterpret_cast<TestData *>(raw);
+            d->executed++;
+        },
+        []([[maybe_unused]] ani_env *env, WorkStatus s, void *raw) {
+            auto *d = reinterpret_cast<TestData *>(raw);
+            ASSERT_EQ(s, WorkStatus::OK);
+            auto cnt = ++d->completed;
+            if (cnt == 1) {
+                d->first->Fire();
+            } else if (cnt == 2) {
+                d->second->Fire();
+            }
+        },
+        &data, &work);
+    ASSERT_EQ(status, WorkStatus::OK);
+    ASSERT_NE(work, nullptr);
+
+    ASSERT_EQ(QueueAsyncWork(env_, work), WorkStatus::OK);
+    firstDone.Wait();
+
+    ASSERT_EQ(QueueAsyncWork(env_, work), WorkStatus::OK);
+    secondDone.Wait();
+
+    ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
+    ASSERT_EQ(data.executed, kExpectedExecutions);
+    ASSERT_EQ(data.completed, kExpectedExecutions);
+}
+
+TEST_F(AsyncWorkTest, QueueAsyncWorkInComplete)
+{
+    auto done = AsyncWorkEvent();
+    AsyncWork *work = nullptr;
+    constexpr int kExpectedExecutions = 2;
+
+    struct TestData {
+        AsyncWorkEvent *done;
+        AsyncWork **workPtr;
+        int executed {0};
+        int completed {0};
+        int requeueAttempted {0};
+        int requeueSucceeded {0};
+    };
+    auto data = TestData {&done, &work, 0, 0, 0, 0};
+
+    auto status = CreateAsyncWork(
+        env_,
+        []([[maybe_unused]] ani_env *env, void *raw) {
+            auto *d = reinterpret_cast<TestData *>(raw);
+            d->executed++;
+        },
+        []([[maybe_unused]] ani_env *env, WorkStatus s, void *raw) {
+            auto *d = reinterpret_cast<TestData *>(raw);
+            EXPECT_EQ(s, WorkStatus::OK);
+            auto cnt = ++d->completed;
+            if (cnt == 1) {
+                d->requeueAttempted = 1;
+                auto qs = QueueAsyncWork(env, *d->workPtr);
+                if (qs == WorkStatus::OK) {
+                    d->requeueSucceeded = 1;
+                } else {
+                    d->done->Fire();
+                    return;
+                }
+            }
+
+            if (cnt >= 2) {
+                d->done->Fire();
+            }
+        },
+        &data, &work);
+    ASSERT_EQ(status, WorkStatus::OK);
+    ASSERT_NE(work, nullptr);
+
+    ASSERT_EQ(QueueAsyncWork(env_, work), WorkStatus::OK);
+    done.Wait();
+
+    ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
+
+    EXPECT_EQ(data.executed, kExpectedExecutions);
+    EXPECT_EQ(data.requeueAttempted, 1);
+    EXPECT_EQ(data.requeueSucceeded, 1);
+    EXPECT_EQ(data.completed, kExpectedExecutions);
+}
 }  // namespace ark::ets::ani_helpers::testing

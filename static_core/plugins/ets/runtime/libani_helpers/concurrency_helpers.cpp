@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,8 @@ constexpr uint8_t INITIAL = 0;
 constexpr uint8_t QUEUED = 1;
 constexpr uint8_t RUNNING = 2;
 constexpr uint8_t CANCELED = 3;
+constexpr uint8_t COMPLETING = 4;
+constexpr uint8_t COMPLETED = 5;
 
 AsyncWork *CastWork(void *work)
 {
@@ -71,10 +73,16 @@ void CompleteCallbackInternal(ani_env *env, void *w)
 {
     auto *impl = CastWork(w);
     auto status = WorkStatus::OK;
-    if (impl->status == CANCELED) {
+    // Atomic with seq_cst order reason: use the default ordering; state is observed by other API paths.
+    if (impl->status.load(std::memory_order_seq_cst) == CANCELED) {
         status = WorkStatus::CANCELED;
     }
+    // Atomic with seq_cst order reason: use the default ordering; required for re-queue from complete cb.
+    impl->status.store(COMPLETING, std::memory_order_seq_cst);
     impl->complete(env, status, impl->data);
+
+    auto completing = COMPLETING;
+    impl->status.compare_exchange_strong(completing, COMPLETED);
 }
 
 }  // namespace
@@ -96,8 +104,11 @@ WorkStatus QueueAsyncWork(ani_env *env, AsyncWork *work)
     CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(work);
 
-    auto initial = INITIAL;
-    if (!work->status.compare_exchange_strong(initial, QUEUED)) {
+    auto expected = INITIAL;
+    while (!work->status.compare_exchange_strong(expected, QUEUED)) {
+        if (expected == COMPLETING || expected == COMPLETED) {
+            continue;
+        }
         return WorkStatus::ERROR;
     }
 
