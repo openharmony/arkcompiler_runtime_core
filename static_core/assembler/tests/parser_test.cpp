@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <string>
+#include <set>
 
 namespace ark::test {
 
@@ -4921,6 +4922,118 @@ TEST(parsertests, test_union_canonicalization_arrays)
     for (const auto &[notCanonRec, canonRec] : records) {
         ASSERT_EQ(program.recordTable.find(notCanonRec), program.recordTable.end());
         ASSERT_NE(program.recordTable.find(canonRec), program.recordTable.end());
+    }
+}
+
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
+TEST(parsertests, test_collect_strings_from_function_insns)
+{
+    {
+        Parser p;
+        std::string source =
+            ".function void main() {\n"
+            "    lda.str \"Hello\"\n"
+            "    lda.str \"World\"\n"
+            "    call.short helper, v0, v1\n"
+            "    movi v0, 10\n"
+            "}\n"
+            ".function void helper() {}";
+
+        auto item = p.Parse(source);
+        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+        ASSERT_TRUE(item.HasValue());
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
+        const auto &func = item.Value().functionStaticTable.at(sigMain);
+        auto collectedStrings = func.CollectStringsFromFunctionInsns();
+
+        std::set<std::string> expectedStrings = {"Hello", "World"};
+        ASSERT_EQ(collectedStrings, expectedStrings);
+    }
+    {
+        // collect duplicate string
+        Parser p;
+        std::string source =
+            ".function void main() {\n"
+            "    lda.str \"duplicate\"\n"
+            "    lda.str \"duplicate\"\n"
+            "    lda.str \"unique\"\n"
+            "    lda.str \"duplicate\"\n"
+            "}";
+
+        auto item = p.Parse(source);
+        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+        ASSERT_TRUE(item.HasValue());
+
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
+        const auto &func = item.Value().functionStaticTable.at(sigMain);
+        auto collectedStrings = func.CollectStringsFromFunctionInsns();
+
+        std::set<std::string> expectedStrings = {"duplicate", "unique"};
+        ASSERT_EQ(collectedStrings, expectedStrings) << "Should only have 2 unique strings";
+    }
+    {
+        // mix strings and calls
+        Parser p;
+        std::string source =
+            ".function void main() {\n"
+            "    lda.str \"string1\"\n"
+            "    call.short helper, v0, v1\n"
+            "    lda.str \"string2\"\n"
+            "    movi v0, 10\n"
+            "    lda.str \"string3\"\n"
+            "    call.range func, v0\n"
+            "}\n"
+            ".function void helper() {}\n"
+            ".function void func() {}";
+
+        auto item = p.Parse(source);
+        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+        ASSERT_TRUE(item.HasValue());
+
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
+        const auto &func = item.Value().functionStaticTable.at(sigMain);
+        auto collectedStrings = func.CollectStringsFromFunctionInsns();
+
+        std::set<std::string> expectedStrings = {"string1", "string2", "string3"};
+        ASSERT_EQ(collectedStrings, expectedStrings);
+    }
+    {
+        // empty strings
+        Parser p;
+        std::string source =
+            ".function void main() {\n"
+            "    lda.str \"\"\n"
+            "    lda.str \"non-empty\"\n"
+            "    lda.str \"\"\n"
+            "}";
+
+        auto item = p.Parse(source);
+        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+        ASSERT_TRUE(item.HasValue());
+
+        const auto sigMain = GetFunctionSignatureFromName("main", {});
+        const auto &func = item.Value().functionStaticTable.at(sigMain);
+        auto collectedStrings = func.CollectStringsFromFunctionInsns();
+
+        std::set<std::string> expectedStrings = {"", "non-empty"};
+        ASSERT_EQ(collectedStrings, expectedStrings);
+    }
+    {
+        // no string
+        Parser p;
+        std::string source =
+            ".function void calc(){\n"
+            "    movi v0, 10\n"
+            "    movi v1, 20\n"
+            "    add2 v0\n"
+            "}";
+
+        auto item = p.Parse(source);
+
+        const auto sig = GetFunctionSignatureFromName("calc", {});
+        auto collectedStrings = item.Value().functionStaticTable.at(sig).CollectStringsFromFunctionInsns();
+
+        ASSERT_TRUE(collectedStrings.empty()) << "Function with no string_id or method_id should collect no strings";
     }
 }
 

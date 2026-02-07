@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@ namespace panda::abc2program {
 
 AbcCodeProcessor::AbcCodeProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
                                    panda_file::File::EntityId method_id, pandasm::Function &function)
-    : AbcFileEntityProcessor(entity_id, entity_container), method_id_(method_id), function_(function),
+    : AbcFileEntityProcessor(entity_id, entity_container),
+      method_id_(method_id),
+      function_(function),
       debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     code_data_accessor_ = std::make_unique<panda_file::CodeDataAccessor>(*file_, entity_id_);
@@ -98,7 +100,7 @@ void AbcCodeProcessor::FillInsWithoutLabels()
          * we only need to enumerate the 4 jump pandasm::Ins which stored in jump_inst_idx_vec_,
          * while no need to enumerate the whole 100 pandasm::Ins.
          * It will improve our compile performance.
-        */
+         */
         if (pa_ins->IsJump()) {
             jump_inst_idx_vec_.emplace_back(inst_idx);
         }
@@ -199,7 +201,7 @@ void AbcCodeProcessor::HandleCatchBlock(panda_file::CodeDataAccessor::CatchBlock
     curr_catch_end_pc_ = catch_block.GetHandlerPc() + catch_block.GetCodeSize();
     AddLabel4InsAtPc(curr_catch_begin_pc_);
     AddLabel4InsAtPc(curr_catch_end_pc_);
-    pandasm::Function::CatchBlock pa_catch_block{};
+    pandasm::Function::CatchBlock pa_catch_block {};
     FillCatchBlockLabels(pa_catch_block);
     FillExceptionRecord(catch_block, pa_catch_block);
     function_.catch_blocks.emplace_back(pa_catch_block);
@@ -244,19 +246,15 @@ std::string AbcCodeProcessor::GetLabelNameAtPc(uint32_t inst_pc) const
 
 void AbcCodeProcessor::FillLocalVariableTable()
 {
-    const std::vector<panda_file::LocalVariableInfo>& variables =
+    const std::vector<panda_file::LocalVariableInfo> &variables =
         debug_info_extractor_.GetLocalVariableTable(method_id_);
-    
+
     for (const auto &variable : variables) {
         uint32_t start_idx = GetInstIdxByInstPc(variable.start_offset);
         uint32_t end_idx = GetInstIdxByInstPc(variable.end_offset);
         uint32_t length = end_idx - start_idx;
-        panda::pandasm::debuginfo::LocalVariable local_var = {variable.name,
-                                                              variable.type,
-                                                              variable.type_signature,
-                                                              variable.reg_number,
-                                                              start_idx,
-                                                              length};
+        panda::pandasm::debuginfo::LocalVariable local_var = {
+            variable.name, variable.type, variable.type_signature, variable.reg_number, start_idx, length};
         function_.local_variable_debug.push_back(local_var);
     }
 }
@@ -271,9 +269,9 @@ void AbcCodeProcessor::FillInsDebug()
     uint32_t offset_end = UINT_MAX;
     size_t line = DEFAULT_LINE;
     uint32_t column = DEFAULT_COLUMN;
-    const std::vector<panda::panda_file::LineTableEntry>& line_table =
+    const std::vector<panda::panda_file::LineTableEntry> &line_table =
         debug_info_extractor_.GetLineNumberTable(method_id_);
-    const std::vector<panda::panda_file::ColumnTableEntry>& column_table =
+    const std::vector<panda::panda_file::ColumnTableEntry> &column_table =
         debug_info_extractor_.GetColumnNumberTable(method_id_);
 
     for (uint32_t inst_idx = 0; inst_idx < function_.ins.size(); inst_idx++) {
@@ -294,11 +292,8 @@ void AbcCodeProcessor::FillInsDebug()
 }
 
 template <typename T>
-void AbcCodeProcessor::SkipToNextEntryIfNeeded(uint32_t &idx,
-                                               uint32_t &offset_start,
-                                               uint32_t &offset_end,
-                                               uint32_t inst_idx,
-                                               const T &table)
+void AbcCodeProcessor::SkipToNextEntryIfNeeded(uint32_t &idx, uint32_t &offset_start, uint32_t &offset_end,
+                                               uint32_t inst_idx, const T &table)
 {
     uint32_t ins_offset = GetInstPcByInstIdx(inst_idx);
     ASSERT(ins_offset < UINT_MAX);

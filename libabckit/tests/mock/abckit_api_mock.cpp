@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,13 @@ void DestroyGraph(AbckitGraph *graph)
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
 }
 
+void SetNeedOptimize(AbckitFile *file, bool needOptimize)
+{
+    g_calledFuncs.push(__func__);
+    EXPECT_TRUE(file == DEFAULT_FILE);
+    EXPECT_TRUE(needOptimize);
+}
+
 // NOLINTEND(readability-identifier-naming)
 
 static AbckitApi g_impl = {
@@ -81,6 +88,12 @@ static AbckitApi g_impl = {
     // ========================================
 
     DestroyGraph,
+
+    // ========================================
+    // Switch API entrypoints
+    // ========================================
+
+    SetNeedOptimize,
 };
 
 // NOLINTEND(readability-identifier-naming)

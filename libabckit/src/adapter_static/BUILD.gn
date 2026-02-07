@@ -93,6 +93,7 @@ ohos_source_set("abckit_adapter_static_source_set") {
     ":abckit_adapter_static_header_deps",
     "$abckit_root/src:abckit_concat_intrinsics_yaml",
     "$ark_root_static/abc2program:arkts_abc2program",
+    "$ark_root_static/assembler:libarktsassembler_frontend_static",
     "$ark_root_static/assembler:libarktsassembler",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt",
     "$ark_root_static/bytecode_optimizer:libarktsbytecodeopt",

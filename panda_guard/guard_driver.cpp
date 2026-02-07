@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,11 @@ void panda::guard::GuardDriver::Run(int argc, const char **argv)
     ProgramGuard::GuardProgram(program);
     LOG(INFO, PANDAGUARD) << TAG << "guard for program success";
 
+    program.strings.clear();
+    for (const auto &[_, function] : program.function_table) {
+        const auto &funcStringSet = function.CollectStringsFromFunctionInsns();
+        program.strings.insert(funcStringSet.begin(), funcStringSet.end());
+    }
     if (context->IsDebugMode() && !options->GetObfPaFilePath().empty()) {
         Dump(program, options->GetObfPaFilePath());
         LOG(INFO, PANDAGUARD) << TAG << "program to pa success";

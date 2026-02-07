@@ -22,6 +22,7 @@ file(MAKE_DIRECTORY "${PANDASM_BIN_TESTS}")
 panda_isa_gen(
     TEMPLATES
         "isa.h.erb"
+        "function_collect_string.cpp.erb"
         "ins_emit.h.erb"
         "ins_to_string.cpp.erb"
         "ins_create_api.h.erb"
@@ -42,6 +43,7 @@ set(SOURCES
     assembly-ins.cpp
     context.cpp
     meta.cpp
+    function_collect_string.cpp
     ins_to_string.cpp
     extensions/extensions.cpp
     utils/number-utils.cpp

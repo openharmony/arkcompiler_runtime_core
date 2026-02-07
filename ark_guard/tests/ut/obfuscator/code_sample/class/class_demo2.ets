@@ -48,7 +48,6 @@ class ClassA extends AbstractClass implements Interface1 {
     public field1: int = 1;
     protected field2: int = 2;
     private field3: int = 3;
-    internal field4: int = 4;
     field_inf: string;
 
     constructor() {
@@ -73,13 +72,9 @@ class ClassA extends AbstractClass implements Interface1 {
         return 'A method3';
     }
 
-    internal method4() {
-        return 4;
-    }
-
     methodAbs() {
-        return ClassA.method0() + this.method1() + this.method2() + this.method3() + this.method4() +
-            (this.field + this.field1 + this.field3 + this.field4);
+        return ClassA.method0() + this.method1() + this.method2() + this.method3() +
+            (this.field + this.field1 + this.field3);
     }
 
     print() {

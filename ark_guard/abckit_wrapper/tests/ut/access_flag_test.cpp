@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ public:
 
 /**
  * @tc.name: method_access_flags_001
- * @tc.desc: test method access flags PUBLIC PROTECTED PRIVATE INTERNAL
+ * @tc.desc: test method access flags PUBLIC PROTECTED PRIVATE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -62,11 +62,6 @@ HWTEST_F(TestAccessFlag, method_access_flags_001, TestSize.Level4)
         fileView.Get<abckit_wrapper::Method>("access_flag_test.ClassA.method3:access_flag_test.ClassA;void;");
     ASSERT_TRUE(method3.has_value());
     AssertHasAccessFlags(method3.value()->GetAccessFlags(), abckit_wrapper::AccessFlags::PRIVATE);
-    // internal
-    const auto method4 =
-        fileView.Get<abckit_wrapper::Method>("access_flag_test.ClassA.method4:access_flag_test.ClassA;void;");
-    ASSERT_TRUE(method4.has_value());
-    AssertHasAccessFlags(method4.value()->GetAccessFlags(), abckit_wrapper::AccessFlags::INTERNAL);
 }
 
 /**
@@ -170,26 +165,6 @@ HWTEST_F(TestAccessFlag, method_access_flags_005, TestSize.Level4)
         visitor.Wrap<abckit_wrapper::MemberAccessFlagFilter>(abckit_wrapper::AccessFlags::PRIVATE)));
     ASSERT_TRUE(visitor.members_.size() == 1);
     ASSERT_EQ(visitor.members_[0], method3.value());
-}
-
-/**
- * @tc.name: method_access_flags_006
- * @tc.desc: test member access filter the internal method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TestAccessFlag, method_access_flags_006, TestSize.Level4)
-{
-    const auto classA = fileView.Get<abckit_wrapper::Class>("access_flag_test.ClassA");
-    const auto method4 =
-        fileView.Get<abckit_wrapper::Method>("access_flag_test.ClassA.method4:access_flag_test.ClassA;void;");
-    ASSERT_TRUE(classA.has_value());
-    ASSERT_TRUE(method4.has_value());
-    TestMemberAccessFlagVisitor visitor;
-    ASSERT_TRUE(classA.value()->MembersAccept(
-        visitor.Wrap<abckit_wrapper::MemberAccessFlagFilter>(abckit_wrapper::AccessFlags::INTERNAL)));
-    ASSERT_TRUE(visitor.members_.size() == 1);
-    ASSERT_EQ(visitor.members_[0], method4.value());
 }
 
 /**
@@ -375,7 +350,7 @@ HWTEST_F(TestAccessFlag, method_access_flags_016, TestSize.Level4)
 
 /**
  * @tc.name: field_access_flags_001
- * @tc.desc: test field access flags PUBLIC PROTECTED PRIVATE INTERNAL
+ * @tc.desc: test field access flags PUBLIC PROTECTED PRIVATE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -393,10 +368,6 @@ HWTEST_F(TestAccessFlag, field_access_flags_001, TestSize.Level4)
     const auto field3 = fileView.Get<abckit_wrapper::Field>("access_flag_test.ClassC.field3");
     ASSERT_TRUE(field3.has_value());
     AssertHasAccessFlags(field3.value()->GetAccessFlags(), abckit_wrapper::AccessFlags::PRIVATE);
-    // internal
-    const auto field4 = fileView.Get<abckit_wrapper::Field>("access_flag_test.ClassC.field4");
-    ASSERT_TRUE(field4.has_value());
-    AssertHasAccessFlags(field4.value()->GetAccessFlags(), abckit_wrapper::AccessFlags::INTERNAL);
 }
 
 /**
@@ -469,26 +440,6 @@ HWTEST_F(TestAccessFlag, field_access_flags_005, TestSize.Level4)
         visitor.Wrap<abckit_wrapper::MemberAccessFlagFilter>(abckit_wrapper::AccessFlags::PRIVATE)));
     ASSERT_TRUE(visitor.members_.size() == 1);
     ASSERT_EQ(visitor.members_[0], field3.value());
-}
-
-/**
- * @tc.name: field_access_flags_006
- * @tc.desc: test member access filter the internal field
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TestAccessFlag, field_access_flags_006, TestSize.Level4)
-{
-    const auto classC = fileView.Get<abckit_wrapper::Class>("access_flag_test.ClassC");
-    const auto field4 = fileView.Get<abckit_wrapper::Field>("access_flag_test.ClassC.field4");
-    ASSERT_TRUE(classC.has_value());
-    ASSERT_TRUE(field4.has_value());
-    TestMemberAccessFlagVisitor visitor;
-    // ignore cctor
-    ASSERT_TRUE(classC.value()->MembersAccept(visitor.Wrap<abckit_wrapper::MemberAccessFlagFilter>(
-        abckit_wrapper::AccessFlags::INTERNAL, abckit_wrapper::AccessFlags::CCTOR)));
-    ASSERT_TRUE(visitor.members_.size() == 1);
-    ASSERT_EQ(visitor.members_[0], field4.value());
 }
 
 /**

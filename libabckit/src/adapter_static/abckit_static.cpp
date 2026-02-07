@@ -1642,12 +1642,7 @@ void CloseFileStatic(AbckitFile *file)
         }
         functionsMap.clear();
 
-        if (file->generateStatus.pf != nullptr) {
-            delete static_cast<panda_file::File *>(file->generateStatus.pf);
-        }
-        if (file->generateStatus.maps != nullptr) {
-            delete static_cast<pandasm::AsmEmitter::PandaFileToPandaAsmMaps *>(file->generateStatus.maps);
-        }
+        file->generateStatus.clear<panda_file::File, AbckitIrInterface>();
     }
 
     if ((file->destoryData != nullptr) && (file->data != nullptr)) {
@@ -1684,7 +1679,15 @@ void WriteAbcStatic(AbckitFile *file, const char *path, size_t len)
     }
 
     auto program = file->GetStaticProgram();
-
+    program->strings.clear();
+    for (const auto &[_, function] : program->functionStaticTable) {
+        const auto &funcStringSet = function.CollectStringsFromFunctionInsns();
+        program->strings.insert(funcStringSet.begin(), funcStringSet.end());
+    }
+    for (const auto &[_, function] : program->functionInstanceTable) {
+        const auto &funcStringSet = function.CollectStringsFromFunctionInsns();
+        program->strings.insert(funcStringSet.begin(), funcStringSet.end());
+    }
     auto emitDebugInfo = false;
     std::map<std::string, size_t> *statp = nullptr;
     ark::pandasm::AsmEmitter::PandaFileToPandaAsmMaps *mapsp = nullptr;
@@ -1711,11 +1714,13 @@ void DestroyGraphStaticSync(AbckitGraph *graph)
     auto *ctxGInternal = reinterpret_cast<CtxGInternal *>(graph->internal);
     // dirty hack to obtain PandaFile pointer
     // NOTE(mshimenkov): refactor it
-    auto *fileWrapper =
-        reinterpret_cast<panda_file::File *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
-    delete fileWrapper;
+    if (!graph->file->needOptimize) {
+        auto *fileWrapper =
+            reinterpret_cast<panda_file::File *>(ctxGInternal->runtimeAdapter->GetBinaryFileForMethod(nullptr));
+        delete fileWrapper;
+        delete ctxGInternal->irInterface;
+    }
     delete ctxGInternal->runtimeAdapter;
-    delete ctxGInternal->irInterface;
     delete ctxGInternal->localAllocator;
     delete ctxGInternal->allocator;
     delete ctxGInternal;

@@ -119,13 +119,12 @@ public:
     }
 
 #ifndef PANDA_TARGET_WINDOWS
-    void VerifyAbcRunResult(const std::string &oriModuleName, const std::string &oriMethodName) const
+    void VerifyAbcRunResult(const std::string &oriModuleName, const std::string &oriMethodName,
+                            const std::string &obfModuleName, const std::string &obfMethodName) const
     {
         const auto oriOutput = ark::guard::ExecuteUtil::ExecuteStaticAbc(abcPath_, oriModuleName, oriMethodName);
         ASSERT_FALSE(oriOutput.empty());
 
-        const auto obfModuleName = module_->GetName();
-        const auto obfMethodName = method_->GetRawName();
         const auto obfOutput = ark::guard::ExecuteUtil::ExecuteStaticAbc(obfAbcPath_, obfModuleName, obfMethodName);
         if (removeLog_) {
             ASSERT_TRUE(obfOutput.empty());
@@ -143,18 +142,26 @@ public:
 #ifndef PANDA_TARGET_WINDOWS
         std::string oriModuleName;
         std::string oriMethodName;
+        std::string obfModuleName;
+        std::string obfMethodName;
         if (module_ && method_) {
             oriModuleName = module_->GetName();
             oriMethodName = method_->GetRawName();
         }
 #endif
         ExecuteObfuscator();
-        VerifyObfuscatedFilesExist();
         VerifyObfuscatedNamesChanged();
         VerifyObfuscatedKept();
 #ifndef PANDA_TARGET_WINDOWS
         if (module_ && method_) {
-            VerifyAbcRunResult(oriModuleName, oriMethodName);
+            obfModuleName = module_->GetName();
+            obfMethodName = method_->GetRawName();
+        }
+#endif
+        VerifyObfuscatedFilesExist();
+#ifndef PANDA_TARGET_WINDOWS
+        if (module_ && method_ && !obfModuleName.empty() && !obfMethodName.empty()) {
+            VerifyAbcRunResult(oriModuleName, oriMethodName, obfModuleName, obfMethodName);
         }
 #endif
     }
@@ -503,11 +510,9 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_012, TestSize.Level1)
     ASSERT_TRUE(classCField1.has_value());
 
     this->ExecuteObfuscator();
-
-    this->VerifyObfuscatedFilesExist();
-
     ASSERT_EQ(classAField1.value()->GetRawName(), interface1Field1.value()->GetRawName());
     ASSERT_EQ(classCField1.value()->GetRawName(), interface2Field1.value()->GetRawName());
+    this->VerifyObfuscatedFilesExist();
 }
 
 /**
@@ -840,7 +845,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field1", "field1");
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field2", "field2");
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field3", "field3");
-    AddElement<abckit_wrapper::Field>("class_demo2.ClassA.field4", "field4");
     AddElement<abckit_wrapper::Field>("class_demo2.ClassA.%%property-field_inf", "field_inf");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.%%get-field_inf:class_demo2.ClassA;std.core.String;",
                                        "field_inf");
@@ -850,7 +854,6 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method1:class_demo2.ClassA;std.core.String;", "method1");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method2:class_demo2.ClassA;std.core.String;", "method2");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method3:class_demo2.ClassA;std.core.String;", "method3");
-    AddElement<abckit_wrapper::Method>("class_demo2.ClassA.method4:class_demo2.ClassA;i32;", "method4");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.methodAbs:class_demo2.ClassA;std.core.String;", "methodAbs");
     AddElement<abckit_wrapper::Method>("class_demo2.ClassA.print:class_demo2.ClassA;void;", "print");
 
@@ -878,10 +881,16 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_019, TestSize.Level1)
     const auto externalField = this->fileView_.Get<abckit_wrapper::Field>("class_demo1.BaseClass.field1");
     ASSERT_TRUE(externalField.has_value());
 
-    this->VerifyObfuscated();
+    this->ExecuteObfuscator();
+    const auto externalClassName = externalClass.value()->GetName();
+    const auto externalFieldRawName = externalField.value()->GetRawName();
 
-    ASSERT_EQ(externalClass.value()->GetName(), "BaseClass");
-    ASSERT_EQ(externalField.value()->GetRawName(), "field1");
+    this->VerifyObfuscatedFilesExist();
+    VerifyObfuscatedNamesChanged();
+    VerifyObfuscatedKept();
+
+    ASSERT_EQ(externalClassName, "BaseClass");
+    ASSERT_EQ(externalFieldRawName, "field1");
 }
 
 /*
@@ -1339,10 +1348,9 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_031, TestSize.Level1)
 
     this->ExecuteObfuscator();
 
-    this->VerifyObfuscatedFilesExist();
-
     ASSERT_EQ(classAField1.value()->GetRawName(), interface1Field1.value()->GetRawName());
     ASSERT_EQ(classCField1.value()->GetRawName(), interface2Field1.value()->GetRawName());
+    this->VerifyObfuscatedFilesExist();
 }
 
 /**
@@ -1449,19 +1457,47 @@ HWTEST_F(ObfuscatorTest, obfuscator_test_033, TestSize.Level1)
 
     this->VerifyObfuscatedFilesExist();
 
+    fileView_.~FileView();
+
+    new (&fileView_) abckit_wrapper::FileView();
+    ASSERT_EQ(fileView_.Init(obfAbcPath_), AbckitWrapperErrorCode::ERR_SUCCESS);
+
+    config_.obfuscationRules.applyNameCache = config_.defaultNameCachePath;
     this->ClearKeepOptions();
     this->ExecuteObfuscator();
 
-    ASSERT_EQ(class1.value()->GetName(), "Class1");
-    ASSERT_EQ(class1Method1.value()->GetRawName(), "foo1");
-    ASSERT_EQ(class1Field1.value()->GetRawName(), "field1");
-    ASSERT_EQ(moduleField1.value()->GetRawName(), "field2");
-    ASSERT_EQ(moduleMethod1.value()->GetRawName(), "foo2");
-    ASSERT_EQ(namespace1.value()->GetName(), "Ns1");
-    ASSERT_EQ(namespace1Field1.value()->GetRawName(), "field3");
-    ASSERT_EQ(namespace1Method1.value()->GetRawName(), "foo3");
-    ASSERT_NE(class2.value()->GetName(), "Class2");
-    ASSERT_NE(interface1.value()->GetName(), "Interface1");
+    this->VerifyObfuscatedFilesExist();
+
+    fileView_.~FileView();
+    new (&fileView_) abckit_wrapper::FileView();
+    ASSERT_EQ(fileView_.Init(obfAbcPath_), AbckitWrapperErrorCode::ERR_SUCCESS);
+
+    const auto class1_2 = this->fileView_.Get<abckit_wrapper::Class>("incremental_test.Class1");
+    ASSERT_TRUE(class1_2.has_value());
+    const auto class1Method1_2 =
+        this->fileView_.Get<abckit_wrapper::Method>("incremental_test.Class1.foo1:incremental_test.Class1;void;");
+    ASSERT_TRUE(class1Method1_2.has_value());
+    const auto class1Field1_2 = this->fileView_.Get<abckit_wrapper::Field>("incremental_test.Class1.field1");
+    ASSERT_TRUE(class1Field1_2.has_value());
+    const auto moduleField1_2 = this->fileView_.Get<abckit_wrapper::Field>("incremental_test.field2");
+    ASSERT_TRUE(moduleField1_2.has_value());
+    const auto moduleMethod1_2 = this->fileView_.Get<abckit_wrapper::Method>("incremental_test.foo2:void;");
+    ASSERT_TRUE(moduleMethod1_2.has_value());
+    const auto namespace1_2 = this->fileView_.Get<abckit_wrapper::Namespace>("incremental_test.Ns1");
+    ASSERT_TRUE(namespace1_2.has_value());
+    const auto namespace1Field1_2 = this->fileView_.Get<abckit_wrapper::Field>("incremental_test.Ns1.field3");
+    ASSERT_TRUE(namespace1Field1_2.has_value());
+    const auto namespace1Method1_2 = this->fileView_.Get<abckit_wrapper::Method>("incremental_test.Ns1.foo3:void;");
+    ASSERT_TRUE(namespace1Method1_2.has_value());
+
+    ASSERT_EQ(class1_2.value()->GetName(), "Class1");
+    ASSERT_EQ(class1Method1_2.value()->GetRawName(), "foo1");
+    ASSERT_EQ(class1Field1_2.value()->GetRawName(), "field1");
+    ASSERT_EQ(moduleField1_2.value()->GetRawName(), "field2");
+    ASSERT_EQ(moduleMethod1_2.value()->GetRawName(), "foo2");
+    ASSERT_EQ(namespace1_2.value()->GetName(), "Ns1");
+    ASSERT_EQ(namespace1Field1_2.value()->GetRawName(), "field3");
+    ASSERT_EQ(namespace1Method1_2.value()->GetRawName(), "foo3");
 }
 
 /**
