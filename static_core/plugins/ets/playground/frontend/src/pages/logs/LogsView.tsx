@@ -16,7 +16,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ILog} from '../../models/logs';
 import styles from './styles.module.scss';
-import {Icon, Tooltip, Checkbox} from '@blueprintjs/core';
+import {Icon, Checkbox} from '@blueprintjs/core';
 import cx from 'classnames';
 import { AppDispatch } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -41,6 +41,10 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
     const [logs, setLogs] = useState<ILog[]>(logArr);
     const [showOut, setShowOut] = useState<boolean>(true);
     const [showErr, setShowErr] = useState<boolean>(true);
+    const [showCompile, setShowCompile] = useState<boolean>(true);
+    const [showAot, setShowAot] = useState<boolean>(true);
+    const [showDisasm, setShowDisasm] = useState<boolean>(true);
+    const [showVerifier, setShowVerifier] = useState<boolean>(true);
     const [filterText, setFilterText] = useState<string>('');
     const dispatch = useDispatch<AppDispatch>();
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +67,35 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
             return true;
         });
 
+        // Filter by source (Compile, AOT, Disasm, Verifier)
+        filtered = filtered.filter(log => {
+            const source = log.from || '';
+
+            const isCompile = source.includes('compile') && !source.includes('aot');
+            const isRun = (source === 'runOut' || source === 'runErr');
+            const isAot = source.includes('aot');
+            const isDisasm = source.includes('disasm');
+            const isVerifier = source.includes('verifier');
+
+            if ((isCompile || isRun) && !showCompile) {
+                return false;
+            }
+
+            if (isAot && !showAot) {
+                return false;
+            }
+
+            if (isDisasm && !showDisasm) {
+                return false;
+            }
+
+            if (isVerifier && !showVerifier) {
+                return false;
+            }
+
+            return true;
+        });
+
         // Filter by text
         if (filterText) {
             filtered = filtered.filter(el =>
@@ -71,7 +104,7 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
         }
 
         setLogs(filtered);
-    }, [logArr, showOut, showErr, filterText]);
+    }, [logArr, showOut, showErr, showCompile, showAot, showDisasm, showVerifier, filterText]);
 
     useEffect(() => {
         if (!containerRef.current) {
@@ -128,19 +161,13 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                         >
                             [{log.from?.includes('Err') ? 'err' : 'out'}]
                         </span>
-                        {log.from?.includes('Aot') && (
+                        {log.from && !log.from.includes('aot') &&
+                         (log.from.includes('compile') || log.from === 'runOut' || log.from === 'runErr') && (
+                            <span className={cx(styles.tag, styles.modeTag)}>[cmpl]</span>
+                        )}
+                        {log.from?.includes('aot') && (
                             <span className={cx(styles.tag, styles.modeTag)}>[AOT]</span>
                         )}
-                        {(log.from === 'runOut' || log.from === 'runErr') && (
-                            <span className={cx(styles.tag, styles.modeTag)}>[JIT]</span>
-                        )}
-                        <div
-                            className={cx({
-                                [styles.tag]: true,
-                                [styles.orange]: log.exit_code !== 0})}
-                        >
-                            <Tooltip content='exit_code' placement='bottom'><span>[{log.exit_code}]:</span></Tooltip>
-                        </div>
                         <div className={styles.messageContainer}>
                             {log.message.map((el, ind) => (
                                 <pre
@@ -178,6 +205,30 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
                     checked={showErr}
                     label="Err"
                     onChange={(e): void => setShowErr(e.currentTarget.checked)}
+                    className={styles.checkbox}
+                />
+                <Checkbox
+                    checked={showCompile}
+                    label="Compile"
+                    onChange={(e): void => setShowCompile(e.currentTarget.checked)}
+                    className={styles.checkbox}
+                />
+                <Checkbox
+                    checked={showAot}
+                    label="AOT"
+                    onChange={(e): void => setShowAot(e.currentTarget.checked)}
+                    className={styles.checkbox}
+                />
+                <Checkbox
+                    checked={showDisasm}
+                    label="Disasm"
+                    onChange={(e): void => setShowDisasm(e.currentTarget.checked)}
+                    className={styles.checkbox}
+                />
+                <Checkbox
+                    checked={showVerifier}
+                    label="Verifier"
+                    onChange={(e): void => setShowVerifier(e.currentTarget.checked)}
                     className={styles.checkbox}
                 />
                 <input

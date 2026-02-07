@@ -93,13 +93,13 @@ const MosaicApp = (): JSX.Element => {
 
     useEffect(() => {
         const compilationUnread = [
-            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr')) || []),
-            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr')) || [])
+            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr' || el.from === 'aotCompileOut' || el.from === 'aotCompileErr')) || []),
+            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'compileOut' || el.from === 'compileErr' || el.from === 'aotCompileOut' || el.from === 'aotCompileErr')) || [])
         ].length;
 
         const runtimeUnread = [
-            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr' || el.from === 'runAotOut' || el.from === 'runAotErr')) || []),
-            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr' || el.from === 'runAotOut' || el.from === 'runAotErr')) || [])
+            ...(outLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr' || el.from === 'aotRunOut' || el.from === 'aotRunErr')) || []),
+            ...(errLogs?.filter(el => !el?.isRead && (el.from === 'runOut' || el.from === 'runErr' || el.from === 'aotRunOut' || el.from === 'aotRunErr')) || [])
         ].length;
 
         setCompilationLogsCount(compilationUnread);

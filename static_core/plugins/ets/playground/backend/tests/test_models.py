@@ -61,13 +61,13 @@ class TestCompileRequestModel:
             options={"--opt-level": "2"},
             disassemble=True,
             verifier=True,
-            verification_mode=VerificationMode.ON_THE_FLY,
+            verification_mode=VerificationMode.AHEAD_OF_TIME,
         )
         assert model.code == "let x = 1"
         assert model.options == {"--opt-level": "2"}
         assert model.disassemble is True
         assert model.verifier is True
-        assert model.verification_mode == VerificationMode.ON_THE_FLY
+        assert model.verification_mode == VerificationMode.AHEAD_OF_TIME
 
     def test_verification_mode_disabled(self):
         """Test model with disabled verification mode."""
