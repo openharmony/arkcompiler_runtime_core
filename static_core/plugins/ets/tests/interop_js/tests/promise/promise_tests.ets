@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,13 +140,12 @@ function testRejectedPromise(): int {
             globalTest!.fail();
             return null;
         });
-        p.catch<Object | null>((err: Error): Object | null => {
+        p.catch<Object | null>((err: Error): Object => {
             if (err == error) {
                 globalTest!.success();
             } else {
                 globalTest!.fail();
             }
-            return null;
         });
     } catch (e) {
         globalTest!.fail();
@@ -203,7 +202,7 @@ function testPromiseEmptyThen(): int {
     let p = new Promise<Object>((resolve: (value: Object) => void): void => {
         resolve(new Object());
     });
-    let nextP = p.then<void>((): void => {
+    let nextP = p.then<Object>((): Object => {
         globalTest!.success();
     });
     return 0;
