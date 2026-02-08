@@ -141,7 +141,7 @@ export namespace taskpool {
             }
         }
 
-        closeWorker() {
+        closeWorker(): void {
             this.setWorkerActive(false);
             ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
                 // notiy all to make sure the right one can be closed
@@ -159,12 +159,12 @@ export namespace taskpool {
             return res;
         }
         
-        public setWorkerActive(active: boolean) {
+        public setWorkerActive(active: boolean): void {
             ConcurrencyHelpers.lockGuard(this.isAliveMutex, () => {
                 this.isActive = active;
             });
         }
-        public notifyNewTask() {
+        public notifyNewTask(): void {
             ConcurrencyHelpers.lockGuard(this.isAliveMutex, () => {
                 ConcurrencyHelpers.condVarNotifyOne(this.newTaskCondVar, this.isAliveMutex);
             });
@@ -348,8 +348,8 @@ export namespace taskpool {
             this.join();
         }
 
-        public isAliveMutex = ConcurrencyHelpers.mutexCreate();
-        public newTaskCondVar = ConcurrencyHelpers.condVarCreate();
+        public isAliveMutex: Object = ConcurrencyHelpers.mutexCreate();
+        public newTaskCondVar: Object = ConcurrencyHelpers.condVarCreate();
 
         private needInterop: boolean = false;
         public isActive: boolean = true;
@@ -477,7 +477,7 @@ export namespace taskpool {
             this.task = task;
         }
 
-        static of(task: Task) {
+        static of(task: Task): InternalTask {
             return (task.internalTask as InternalTask);
         }
 
@@ -870,7 +870,7 @@ export namespace taskpool {
         }
 
 
-        clearPendingPromiseDeferredUnsafe() {
+        clearPendingPromiseDeferredUnsafe(): void {
             while (this.pendingDeferreds.length > 0) {
                 this.pendingDeferreds.shift();
             }
@@ -1288,7 +1288,7 @@ export namespace taskpool {
             this.tasks = new Array<Task>();
         }
 
-        static of(group: TaskGroup) {
+        static of(group: TaskGroup): GroupState {
             return group.state as GroupState;
         }
 
@@ -2887,7 +2887,7 @@ export namespace taskpool {
     native function setTaskId(taskid: int): void;
 
     // managed mutex for taskpool containers below
-    const mutex = ConcurrencyHelpers.mutexCreate();
+    const mutex: Object = ConcurrencyHelpers.mutexCreate();
     // value is count of tasks
     const waitingTasks: containers.ConcurrentHashMap<Task, int> = new containers.ConcurrentHashMap<Task, int>();
     const runningTasks: containers.ConcurrentHashMap<Task, int> = new containers.ConcurrentHashMap<Task, int>();
@@ -2901,13 +2901,13 @@ export namespace taskpool {
     // Count of pending tasks per worker
     const workerPendingTasksCount: Map<WorkerId, Int> = new Map<WorkerId, Int>();
 
-    const workersMutex = ConcurrencyHelpers.mutexCreate();
+    const workersMutex: Object = ConcurrencyHelpers.mutexCreate();
     let workers: Set<GlobalQueueWorker> = new Set<GlobalQueueWorker>();
     let idleWorkers: containers.ConcurrentSet<GlobalQueueWorker> = new containers.ConcurrentSet<GlobalQueueWorker>();
     let isWorkersInitialized: AtomicFlag = new AtomicFlag(false);
     let isInitTaskLaunched: AtomicFlag = new AtomicFlag(false);
 
-    const taskQueuesMutex = ConcurrencyHelpers.mutexCreate();
+    const taskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     let isTaskQueuesInitialized: boolean = false;
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
@@ -2921,9 +2921,9 @@ export namespace taskpool {
     let mediumTaskExecuteCount: int = 0;
     
     // New task queue management variables
-    const globalTaskQueuesMutex = ConcurrencyHelpers.mutexCreate();
-    const globalTaskCondVar = ConcurrencyHelpers.condVarCreate();
-    const globalTaskCounterMutex = ConcurrencyHelpers.mutexCreate();
+    const globalTaskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
+    const globalTaskCondVar: Object = ConcurrencyHelpers.condVarCreate();
+    const globalTaskCounterMutex: Object = ConcurrencyHelpers.mutexCreate();
     let globalHighTaskExecuteCount: AtomicInt = new AtomicInt(0);
     let globalMediumTaskExecuteCount: AtomicInt = new AtomicInt(0);
 
@@ -2939,7 +2939,7 @@ export namespace taskpool {
     const initialWorkersNumber: int = isTaskpoolSupportInterop ? 1 : 2;
     const continuousExecutionCount: int = 5;
 
-    const taskCountMutex = ConcurrencyHelpers.mutexCreate();
+    const taskCountMutex: Object = ConcurrencyHelpers.mutexCreate();
     let waitingTasksNum: AtomicInt = new AtomicInt(0);
     let totalExecCount: AtomicInt = new AtomicInt(0);
     let totalExecTime: AtomicInt = new AtomicInt(0);

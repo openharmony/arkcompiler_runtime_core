@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,7 @@ export final class CompletableJob<T> extends Job<T>
     /**
      * This method is used to finish the job with undefined value.
      */
-    public finish() {
+    public finish(): void {
         this.finishImpl(undefined);
     }
 
@@ -72,14 +72,14 @@ export final class CompletableJob<T> extends Job<T>
      *
      * @param value value to finish the job with.
      */
-    public finish<T>(value: T) {
+    public finish<T>(value: T): void {
         this.finishImpl<T>(value);
     }
 
     /**
      * This method is used to fail the job with empty Error.
      */
-    public fail() {
+    public fail(): void {
         this.failImpl(new Error());
     }
 
@@ -89,7 +89,7 @@ export final class CompletableJob<T> extends Job<T>
      *
      * @param error value to fail the job with.
      */
-    public fail(error: Error) {
+    public fail(error: Error): void {
         this.failImpl(error);
     }
 

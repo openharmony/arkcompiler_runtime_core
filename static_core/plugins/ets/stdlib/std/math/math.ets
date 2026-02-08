@@ -340,7 +340,7 @@ export native function clz64(v: long): int;
  * @FaAndStageModel
  * @since 24
  */
-export function clz64(v: int) {
+export function clz64(v: int): int {
     let extendedNum: long = v.toLong();
     let mask: long = (1 as long << 32) - 1;
     return clz64(extendedNum & mask);
@@ -354,7 +354,7 @@ export function clz64(v: int) {
  * @FaAndStageModel
  * @since 24
  */
-export function clz64(v: short) {
+export function clz64(v: short): int {
     let extendedNum: long = v.toLong();
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);
@@ -368,7 +368,7 @@ export function clz64(v: short) {
  * @FaAndStageModel
  * @since 24
  */
-export function clz64(v: byte) {
+export function clz64(v: byte): int {
     let extendedNum: long = v.toLong();
     let mask: long = (1 as long << 8) - 1;
     return clz64(extendedNum & mask);
@@ -382,7 +382,7 @@ export function clz64(v: byte) {
  * @FaAndStageModel
  * @since 24
  */
-export function clz64(v: char) {
+export function clz64(v: char): int {
     let extendedNum: long = v.toLong();
     let mask: long = (1 as long << 16) - 1;
     return clz64(extendedNum & mask);

@@ -27,8 +27,8 @@ export interface PromiseLike<out T> {
  * Class represents the promise status.
  */
 export class PromiseStatus{
-    static readonly fulfilled = "fulfilled";
-    static readonly rejected = "rejected";
+    static readonly fulfilled: string = "fulfilled";
+    static readonly rejected: string = "rejected";
 }
 
 /**

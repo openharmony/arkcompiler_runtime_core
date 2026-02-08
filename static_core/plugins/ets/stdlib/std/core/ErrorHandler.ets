@@ -77,7 +77,7 @@ export class ProcessErrorHandler {
      * @FaAndStageModel
      * @since 24
      */
-    public reset(cb: UncaughtErrorListener) {
+    public reset(cb: UncaughtErrorListener): void {
         ConcurrencyHelpers.lockGuard(this.mutex, () => {
             this.callback = cb;
         });

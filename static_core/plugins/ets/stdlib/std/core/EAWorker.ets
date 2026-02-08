@@ -188,7 +188,7 @@ export class EAWorker {
      * Set the priority of the worker
      * @param { WorkerPriority } priority The new priority value for the worker
      */
-    public setPriority(priority: WorkerPriority) {
+    public setPriority(priority: WorkerPriority): void {
         if (this.loopStarted.get()) {
             this.worker.setPriority(priority);
         }
@@ -350,7 +350,7 @@ export abstract class InternalWorker {
         return this.runImpl<R>((): R => { return task.unsafeCall(...args) as R; });
     }
 
-    abstract start(initialTask: Task);
+    abstract start(initialTask: Task): void;
 
     abstract join(finalTask: Task): Job<void>;
 
@@ -364,11 +364,11 @@ export abstract class InternalWorker {
         return this.workerId;
     }
 
-    setPriority(priority: WorkerPriority) {
+    setPriority(priority: WorkerPriority): void {
         this.runImpl<void>(() => { InternalWorker.setCurrentWorkerPriority(priority); });
     }
 
-    setErrorHandler(handler: ErrorHandlerType) {
+    setErrorHandler(handler: ErrorHandlerType): void {
         this.errorHandler = handler;
     }
 
@@ -539,7 +539,7 @@ export class MainWorker extends InternalWorker {
         super("main", MAIN_WORKER_ID);
     }
 
-    start(initialTask: Task) {
+    start(initialTask: Task): void {
         throw new Error('EAWorker:: Main worker cannot be started');
     }
 
@@ -547,15 +547,15 @@ export class MainWorker extends InternalWorker {
         throw new Error('EAWorker:: Main worker cannot be stopped');
     }
 
-    handleCreateInteropEnvError() {
+    handleCreateInteropEnvError(): void {
         throw new Error("EAWorker:: Main worker do not need to handle create interop env error");
     }
 
-    override setPriority(priority: WorkerPriority) {
+    override setPriority(priority: WorkerPriority): void {
         throw new Error('EAWorker:: Main worker cannot set priority');
     }
 
-    override setErrorHandler(handler: ErrorHandlerType) {
+    override setErrorHandler(handler: ErrorHandlerType): void {
         throw new Error('EAWorker:: Main worker cannot have uncaught exception handler');
     }
 

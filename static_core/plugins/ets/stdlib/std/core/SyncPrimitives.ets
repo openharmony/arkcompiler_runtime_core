@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +203,7 @@ export final class ReadLock implements Lock {
     }
 
     /// Acquires lock and allows to get shared with other readers access to the critical seciton
-    public lock() {
+    public lock(): void {
         ReadLock.lock(this.rwLock);
     }
 
@@ -211,7 +211,7 @@ export final class ReadLock implements Lock {
      * Releases lock and unblocks waiters
      * NOTE: readers have higher priority for unblocking than writers
      */
-    public unlock() {
+    public unlock(): void {
         ReadLock.unlock(this.rwLock);
     }
 
@@ -227,7 +227,7 @@ export final class WriteLock implements Lock {
     }
 
     /// Acquires lock and allows to get exclusive access to the critical seciton
-    public lock() {
+    public lock(): void {
         WriteLock.lock(this.rwLock);
     }
 
@@ -235,7 +235,7 @@ export final class WriteLock implements Lock {
      * Releases lock and unblocks waiters
      * NOTE: readers have higher priority for unblocking than writers
      */
-    public unlock() {
+    public unlock(): void {
         WriteLock.unlock(this.rwLock);
     }
 

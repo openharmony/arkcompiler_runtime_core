@@ -161,7 +161,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      * @since 24
      */
-    public static readonly CHAR_BIT_SIZE = 16;
+    public static readonly CHAR_BIT_SIZE: int = 16;
 
     /**
      * Compares this instance to other Char object The result is less than 0 if this instance lesser than provided
@@ -174,7 +174,7 @@ export final class Char extends Object implements Comparable<Char> {
      * @FaAndStageModel
      * @since 24
      */
-    public static readonly MAX_CODE_POINT = 0x10FFFF
+    public static readonly MAX_CODE_POINT: int = 0x10FFFF
 
     /**
      * Compares this instance to other Char object The result is less than 0 if this instance lesser than provided
