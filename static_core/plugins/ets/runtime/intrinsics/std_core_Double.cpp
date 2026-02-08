@@ -79,6 +79,7 @@ double StdCoreDoubleParseInt(EtsString *str, int32_t radix)
 {
     auto ps = str->GetMutf8();
     auto start = reinterpret_cast<const uint8_t *>(ps.c_str());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto end = start + ps.size();
     return std::trunc(helpers::StringToDoubleWithRadix(start, end, radix));
 }

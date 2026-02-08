@@ -63,9 +63,7 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
         const auto errorMessage = std::string("Failed to create the collator for ").append(localeName);
         ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
 
-        if (newCollator != nullptr) {
-            delete newCollator;
-        }
+        delete newCollator;
         return nullptr;
     }
 

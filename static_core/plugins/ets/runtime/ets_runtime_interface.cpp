@@ -15,13 +15,13 @@
 
 #include <string>
 
-#include "ani.h"
 #include "ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "types/ets_method.h"
 
+// NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark::ets::panda_file_items;
 
 namespace ark::ets {

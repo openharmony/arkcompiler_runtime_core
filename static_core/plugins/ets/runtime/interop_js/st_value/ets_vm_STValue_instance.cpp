@@ -68,7 +68,9 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     std::vector<ani_value> argArray;
@@ -76,12 +78,12 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    STValueData *clsData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *clsData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (clsData == nullptr || !clsData->IsAniRef() || clsData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_class clsClass = static_cast<ani_class>(clsData->GetAniRef());
+    auto clsClass = static_cast<ani_class>(clsData->GetAniRef());
 
     std::string ctorString {};
     if (!GetString(env, jsArgv[0], "ClassCtor", ctorString)) {
@@ -100,6 +102,7 @@ napi_value STValueClassInstantiateImpl(napi_env env, napi_callback_info info)
     if (!argArray.empty()) {
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New_A(clsClass, ctorMethod, &newObject, argArray.data()));
     } else {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(clsClass, ctorMethod, &newObject));
     }
 
@@ -121,7 +124,9 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
     napi_valuetype lengthType {};
@@ -196,25 +201,27 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
     uint32_t arrLength;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &arrLength));
 
-    STValueData *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
+    auto *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
     if (typeData == nullptr || !typeData->IsAniRef() || typeData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "elementType");
         return nullptr;
     }
-    STValueData *initData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[2]));
+    auto *initData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[2]));
     if (initData == nullptr || !initData->IsAniRef()) {
         ThrowJSNonObjectError(env, "initialElement");
         return nullptr;
     }
 
-    ani_type arrayType = static_cast<ani_type>(typeData->GetAniRef());
-    ani_ref initValue = static_cast<ani_ref>(initData->GetAniRef());
+    auto arrayType = static_cast<ani_type>(typeData->GetAniRef());
+    auto initValue = static_cast<ani_ref>(initData->GetAniRef());
 
     ani_fixedarray_ref fixRefArray {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Ref(arrayType, arrLength, initValue, &fixRefArray));
@@ -237,7 +244,9 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
     napi_valuetype lengthType {};
@@ -255,14 +264,14 @@ napi_value STValueNewArrayImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsElement = jsArgv[1];
-    STValueData *elementData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    auto *elementData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
 
     if (elementData == nullptr || !elementData->IsAniRef()) {
         ThrowJSNonObjectError(env, "initialElement");
         return nullptr;
     }
 
-    ani_ref initValue = static_cast<ani_ref>(elementData->GetAniRef());
+    auto initValue = static_cast<ani_ref>(elementData->GetAniRef());
     ani_array newArray {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_New(arrLength, initValue, &newArray));
 

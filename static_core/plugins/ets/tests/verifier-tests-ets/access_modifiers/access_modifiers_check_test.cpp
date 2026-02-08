@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,10 @@
 #include "include/method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_vm.h"
 #include "public.h"
 #include "verification/ets_plugin.h"
 #include "verification/type/type_system.h"
 #include "verification/public_internal.h"
-#include "verification/jobs/service.h"
 #include "libarkbase/utils/utf.h"
 
 namespace ark::ets::test {
@@ -48,15 +46,15 @@ public:
         options_.SetBootPandaFiles({stdlib});
         Runtime::Create(options_);
 
-        config = verifier::NewConfig();
-        service = CreateService(config, Runtime::GetCurrent()->GetInternalAllocator(),
-                                ark::Runtime::GetCurrent()->GetClassLinker(), "");
+        config_ = verifier::NewConfig();
+        service_ = CreateService(config_, Runtime::GetCurrent()->GetInternalAllocator(),
+                                 ark::Runtime::GetCurrent()->GetClassLinker(), "");
     }
 
     ~CheckAccessModifiersTest() override
     {
-        DestroyService(service, false);
-        DestroyConfig(config);
+        DestroyService(service_, false);
+        DestroyConfig(config_);
         Runtime::Destroy();
     }
 
@@ -66,7 +64,6 @@ public:
     void SetUp() override
     {
         coroutine_ = EtsCoroutine::GetCurrent();
-        vm_ = coroutine_->GetPandaVM();
         coroutine_->ManagedCodeBegin();
     }
 
@@ -76,19 +73,18 @@ public:
     }
 
 protected:
-    PandaEtsVM *vm_ = nullptr;                    // NOLINT(misc-non-private-member-variables-in-classes)
     ark::verifier::plugin::EtsPlugin plugin_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
-    verifier::Service *service;                   // NOLINT(misc-non-private-member-variables-in-classes)
-    verifier::Config *config;                     // NOLINT(misc-non-private-member-variables-in-classes)
+    verifier::Service *service_ = nullptr;        // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
+    verifier::Config *config_ = nullptr;
     RuntimeOptions options_;
     EtsCoroutine *coroutine_ = nullptr;
 };
 
 TEST_F(CheckAccessModifiersTest, CorrectMethodAccess)
 {
-    verifier::TypeSystem typeSystem(service->verifierService, ark::panda_file::SourceLang::ETS);
+    verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
     pandasm::Parser p;
 
     auto source = R"(
@@ -137,7 +133,7 @@ TEST_F(CheckAccessModifiersTest, CorrectMethodAccess)
 
 TEST_F(CheckAccessModifiersTest, IncorrectMethodAccess)
 {
-    verifier::TypeSystem typeSystem(service->verifierService, ark::panda_file::SourceLang::ETS);
+    verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
     pandasm::Parser p;
 
     auto source = R"(
@@ -178,7 +174,7 @@ TEST_F(CheckAccessModifiersTest, IncorrectMethodAccess)
 
 TEST_F(CheckAccessModifiersTest, CorrectFieldAccess)
 {
-    verifier::TypeSystem typeSystem(service->verifierService, ark::panda_file::SourceLang::ETS);
+    verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
     pandasm::Parser p;
 
     auto source = R"(
@@ -224,7 +220,7 @@ TEST_F(CheckAccessModifiersTest, CorrectFieldAccess)
 
 TEST_F(CheckAccessModifiersTest, IncorrectFieldAccess)
 {
-    verifier::TypeSystem typeSystem(service->verifierService, ark::panda_file::SourceLang::ETS);
+    verifier::TypeSystem typeSystem(service_->verifierService, ark::panda_file::SourceLang::ETS);
     pandasm::Parser p;
 
     auto source = R"(

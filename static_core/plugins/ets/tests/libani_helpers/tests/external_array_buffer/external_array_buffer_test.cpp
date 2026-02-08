@@ -36,37 +36,31 @@ void TestFinalizer([[maybe_unused]] void *data, [[maybe_unused]] void *finalizer
 
 TEST_F(ExternalArrayBufferTest, CreateExternalArrayBuffer)
 {
-    const int size = 3u;
-    auto data = std::make_unique<uint8_t[]>(size);
-    data[0u] = 1u;
-    data[1u] = 2u;
-    data[2u] = 3u;
+    static constexpr int SIZE = 3U;
+    std::array<uint8_t, SIZE> buffer = {1U, 2U, 3U};
 
     ani_arraybuffer arrayBuffer;
-    auto status = CreateExternalArrayBuffer(env_, data.get(), size, &arrayBuffer);
+    auto status = CreateExternalArrayBuffer(env_, buffer.data(), SIZE, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
-    CheckArrayBuffer(arrayBuffer, data.get(), size);
+    CheckArrayBuffer(arrayBuffer, buffer.data(), SIZE);
 
     ani_arraybuffer finalizableArrayBuffer;
-    status = CreateFinalizableArrayBuffer(env_, data.get(), size, TestFinalizer, nullptr, &finalizableArrayBuffer);
+    status = CreateFinalizableArrayBuffer(env_, buffer.data(), SIZE, TestFinalizer, nullptr, &finalizableArrayBuffer);
     ASSERT_EQ(status, ANI_OK);
-    CheckArrayBuffer(finalizableArrayBuffer, data.get(), size);
+    CheckArrayBuffer(finalizableArrayBuffer, buffer.data(), SIZE);
 }
 
 TEST_F(ExternalArrayBufferTest, CreateExternalArrayBufferInvalid)
 {
-    const int size = 3u;
-    const int offset = 1u;
-    auto data = std::make_unique<uint8_t[]>(size + offset);
-    uint8_t *unalignedPtr = data.get() + offset;
-    unalignedPtr[0u] = 1u;
-    unalignedPtr[1u] = 2u;
-    unalignedPtr[2u] = 3u;
+    static constexpr int SIZE = 3U;
+    static constexpr int OFFSET = 1U;
+    std::array<uint8_t, SIZE + OFFSET> buffer {};
+    uint8_t *unalignedPtr = buffer.data() + OFFSET;
 
     ani_arraybuffer arrayBuffer;
-    auto status = CreateExternalArrayBuffer(env_, unalignedPtr, size, &arrayBuffer);
+    auto status = CreateExternalArrayBuffer(env_, unalignedPtr, SIZE, &arrayBuffer);
     ASSERT_EQ(status, ANI_INVALID_ARGS);
-    status = CreateFinalizableArrayBuffer(env_, unalignedPtr, size, TestFinalizer, nullptr, &arrayBuffer);
+    status = CreateFinalizableArrayBuffer(env_, unalignedPtr, SIZE, TestFinalizer, nullptr, &arrayBuffer);
     ASSERT_EQ(status, ANI_INVALID_ARGS);
 }
 

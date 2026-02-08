@@ -21,52 +21,66 @@ namespace ark::ets::ani::testing {
 
 class IsAssignableFromUnionTest : public AniTest {
 public:
-    EtsClass *GetClassFromDesc(const PandaString &desc)
+    void SetUp() override
     {
-        PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env_);
-        [[maybe_unused]] ScopedManagedCodeFix s(pandaEnv);
-        EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-        return classLinker->GetClass(desc.c_str());
+        coro_ = EtsCoroutine::GetCurrent();
+        coro_->ManagedCodeBegin();
     }
+
+    void TearDown() override
+    {
+        coro_->ManagedCodeEnd();
+    }
+
+    EtsClass *GetClassFromDesc(std::string_view desc)
+    {
+        EtsClassLinker *classLinker = coro_->GetPandaVM()->GetClassLinker();
+        return classLinker->GetClass(desc.data(), false, nullptr);
+    }
+
+private:
+    EtsCoroutine *coro_ = nullptr;
 };
 
+// NOLINTBEGIN(readability-identifier-naming)
 TEST_F(IsAssignableFromUnionTest, is_assignable_class)
 {
-    const PandaString className_A = "Lis_assignable_from_union_test/A;";
-    EtsClass *class_A = GetClassFromDesc(className_A);
+    static constexpr std::string_view CLASS_NAME_A = "Lis_assignable_from_union_test/A;";
+    EtsClass *class_A = GetClassFromDesc(CLASS_NAME_A);
     ASSERT_NE(class_A, nullptr);
     ASSERT_FALSE(class_A->IsUnionClass());
 
-    const PandaString className_B = "Lis_assignable_from_union_test/B;";
-    EtsClass *class_B = GetClassFromDesc(className_B);
+    static constexpr std::string_view CLASS_NAME_B = "Lis_assignable_from_union_test/B;";
+    EtsClass *class_B = GetClassFromDesc(CLASS_NAME_B);
     ASSERT_NE(class_B, nullptr);
     ASSERT_FALSE(class_B->IsUnionClass());
 
-    const PandaString className_C = "Lis_assignable_from_union_test/C;";
-    EtsClass *class_C = GetClassFromDesc(className_C);
+    static constexpr std::string_view CLASS_NAME_C = "Lis_assignable_from_union_test/C;";
+    EtsClass *class_C = GetClassFromDesc(CLASS_NAME_C);
     ASSERT_NE(class_C, nullptr);
     ASSERT_FALSE(class_C->IsUnionClass());
 
-    const PandaString className_D = "Lis_assignable_from_union_test/D;";
-    EtsClass *class_D = GetClassFromDesc(className_D);
+    static constexpr std::string_view CLASS_NAME_D = "Lis_assignable_from_union_test/D;";
+    EtsClass *class_D = GetClassFromDesc(CLASS_NAME_D);
     ASSERT_NE(class_D, nullptr);
     ASSERT_FALSE(class_D->IsUnionClass());
 
-    const PandaString unionClassName_AD = "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_AD = GetClassFromDesc(unionClassName_AD);
+    static constexpr std::string_view UNION_CLASS_NAME_A_D =
+        "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
+    EtsClass *class_AD = GetClassFromDesc(UNION_CLASS_NAME_A_D);
     ASSERT_NE(class_AD, nullptr);
     ASSERT_TRUE(class_AD->IsUnionClass());
 
-    const PandaString unionClassName_ACD =
+    static constexpr std::string_view UNION_CLASS_NAME_A_C_D =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/C;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_ACD = GetClassFromDesc(unionClassName_ACD);
+    EtsClass *class_ACD = GetClassFromDesc(UNION_CLASS_NAME_A_C_D);
     ASSERT_NE(class_ACD, nullptr);
     ASSERT_TRUE(class_ACD->IsUnionClass());
 
-    const PandaString unionClassName_ABC_DE =
+    static constexpr std::string_view UNION_CLASS_NAME_A_B_C_D_E =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/C;Lis_assignable_from_union_test/"
         "D;Lis_assignable_from_union_test/E;}";
-    EtsClass *class_ABC_DE = GetClassFromDesc(unionClassName_ABC_DE);
+    EtsClass *class_ABC_DE = GetClassFromDesc(UNION_CLASS_NAME_A_B_C_D_E);
     ASSERT_NE(class_ABC_DE, nullptr);
     ASSERT_TRUE(class_ABC_DE->IsUnionClass());
 
@@ -83,39 +97,40 @@ TEST_F(IsAssignableFromUnionTest, is_assignable_class)
 
 TEST_F(IsAssignableFromUnionTest, is_assignable_null_class)
 {
-    const PandaString className_A = "Lis_assignable_from_union_test/A;";
-    EtsClass *class_A = GetClassFromDesc(className_A);
+    static constexpr std::string_view CLASS_NAME_A = "Lis_assignable_from_union_test/A;";
+    EtsClass *class_A = GetClassFromDesc(CLASS_NAME_A);
     ASSERT_NE(class_A, nullptr);
     ASSERT_FALSE(class_A->IsUnionClass());
 
-    const PandaString className_B = "Lis_assignable_from_union_test/B;";
-    EtsClass *class_B = GetClassFromDesc(className_B);
+    static constexpr std::string_view CLASS_NAME_B = "Lis_assignable_from_union_test/B;";
+    EtsClass *class_B = GetClassFromDesc(CLASS_NAME_B);
     ASSERT_NE(class_B, nullptr);
     ASSERT_FALSE(class_B->IsUnionClass());
 
-    const PandaString className_D = "Lis_assignable_from_union_test/D;";
-    EtsClass *class_D = GetClassFromDesc(className_D);
+    static constexpr std::string_view CLASS_NAME_D = "Lis_assignable_from_union_test/D;";
+    EtsClass *class_D = GetClassFromDesc(CLASS_NAME_D);
     ASSERT_NE(class_D, nullptr);
     ASSERT_FALSE(class_D->IsUnionClass());
 
-    const PandaString unionClassName_AD = "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_AD = GetClassFromDesc(unionClassName_AD);
+    static constexpr std::string_view UNION_CLASS_NAME_AD =
+        "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
+    EtsClass *class_AD = GetClassFromDesc(UNION_CLASS_NAME_AD);
     ASSERT_NE(class_AD, nullptr);
     ASSERT_TRUE(class_AD->IsUnionClass());
 
-    const PandaString className_Null = "Lstd/core/Null;";
-    EtsClass *class_Null = GetClassFromDesc(className_Null);
+    static constexpr std::string_view CLASS_NAME_NULL = "Lstd/core/Null;";
+    EtsClass *class_Null = GetClassFromDesc(CLASS_NAME_NULL);
     ASSERT_NE(class_Null, nullptr);
     ASSERT_FALSE(class_Null->IsUnionClass());
 
-    const PandaString className_BNull = "{ULis_assignable_from_union_test/B;Lstd/core/Null;}";
-    EtsClass *class_BNull = GetClassFromDesc(className_BNull);
+    static constexpr std::string_view UNION_CLASS_NAME_B_NULL = "{ULis_assignable_from_union_test/B;Lstd/core/Null;}";
+    EtsClass *class_BNull = GetClassFromDesc(UNION_CLASS_NAME_B_NULL);
     ASSERT_NE(class_BNull, nullptr);
     ASSERT_TRUE(class_BNull->IsUnionClass());
 
-    const PandaString className_ADNull =
+    static constexpr std::string_view UNION_CLASS_NAME_A_D_NULL =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;Lstd/core/Null;}";
-    EtsClass *class_ADNull = GetClassFromDesc(className_ADNull);
+    EtsClass *class_ADNull = GetClassFromDesc(UNION_CLASS_NAME_A_D_NULL);
     ASSERT_NE(class_ADNull, nullptr);
     ASSERT_TRUE(class_ADNull->IsUnionClass());
 
@@ -130,41 +145,44 @@ TEST_F(IsAssignableFromUnionTest, is_assignable_null_class)
 
 TEST_F(IsAssignableFromUnionTest, not_assignable_class)
 {
-    const PandaString className_A = "Lis_assignable_from_union_test/A;";
-    EtsClass *class_A = GetClassFromDesc(className_A);
+    static constexpr std::string_view CLASS_NAME_A = "Lis_assignable_from_union_test/A;";
+    EtsClass *class_A = GetClassFromDesc(CLASS_NAME_A);
     ASSERT_NE(class_A, nullptr);
     ASSERT_FALSE(class_A->IsUnionClass());
 
-    const PandaString className_C = "Lis_assignable_from_union_test/C;";
-    EtsClass *class_C = GetClassFromDesc(className_C);
+    static constexpr std::string_view CLASS_NAME_C = "Lis_assignable_from_union_test/C;";
+    EtsClass *class_C = GetClassFromDesc(CLASS_NAME_C);
     ASSERT_NE(class_C, nullptr);
     ASSERT_FALSE(class_C->IsUnionClass());
 
-    const PandaString unionClassName_AD = "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_AD = GetClassFromDesc(unionClassName_AD);
+    static constexpr std::string_view UNION_CLASS_NAME_A_D =
+        "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
+    EtsClass *class_AD = GetClassFromDesc(UNION_CLASS_NAME_A_D);
     ASSERT_NE(class_AD, nullptr);
     ASSERT_TRUE(class_AD->IsUnionClass());
 
-    const PandaString unionClassName_DE = "{ULis_assignable_from_union_test/D;Lis_assignable_from_union_test/E;}";
-    EtsClass *class_DE = GetClassFromDesc(unionClassName_DE);
+    static constexpr std::string_view UNION_CLASS_NAME_D_E =
+        "{ULis_assignable_from_union_test/D;Lis_assignable_from_union_test/E;}";
+    EtsClass *class_DE = GetClassFromDesc(UNION_CLASS_NAME_D_E);
     ASSERT_NE(class_DE, nullptr);
     ASSERT_TRUE(class_DE->IsUnionClass());
 
-    const PandaString unionClassName_BC = "{ULis_assignable_from_union_test/B;Lis_assignable_from_union_test/C;}";
-    EtsClass *class_BC = GetClassFromDesc(unionClassName_BC);
+    static constexpr std::string_view UNION_CLASS_NAME_B_C =
+        "{ULis_assignable_from_union_test/B;Lis_assignable_from_union_test/C;}";
+    EtsClass *class_BC = GetClassFromDesc(UNION_CLASS_NAME_B_C);
     ASSERT_NE(class_BC, nullptr);
     ASSERT_TRUE(class_BC->IsUnionClass());
 
-    const PandaString unionClassName_ACD =
+    static constexpr std::string_view UNION_CLASS_NAME_A_C_D =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/C;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_ACD = GetClassFromDesc(unionClassName_ACD);
+    EtsClass *class_ACD = GetClassFromDesc(UNION_CLASS_NAME_A_C_D);
     ASSERT_NE(class_ACD, nullptr);
     ASSERT_TRUE(class_ACD->IsUnionClass());
 
-    const PandaString unionClassName_ABC_DE =
+    static constexpr std::string_view UNION_CLASS_NAME_A_B_C_D_E =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/C;Lis_assignable_from_union_test/"
         "D;Lis_assignable_from_union_test/E;}";
-    EtsClass *class_ABC_DE = GetClassFromDesc(unionClassName_ABC_DE);
+    EtsClass *class_ABC_DE = GetClassFromDesc(UNION_CLASS_NAME_A_B_C_D_E);
     ASSERT_NE(class_ABC_DE, nullptr);
     ASSERT_TRUE(class_ABC_DE->IsUnionClass());
 
@@ -177,35 +195,36 @@ TEST_F(IsAssignableFromUnionTest, not_assignable_class)
 
 TEST_F(IsAssignableFromUnionTest, not_assignable_null_class)
 {
-    const PandaString className_A = "Lis_assignable_from_union_test/A;";
-    EtsClass *class_A = GetClassFromDesc(className_A);
+    static constexpr std::string_view CLASS_NAME_A = "Lis_assignable_from_union_test/A;";
+    EtsClass *class_A = GetClassFromDesc(CLASS_NAME_A);
     ASSERT_NE(class_A, nullptr);
     ASSERT_FALSE(class_A->IsUnionClass());
 
-    const PandaString unionClassName_AD = "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_AD = GetClassFromDesc(unionClassName_AD);
+    static constexpr std::string_view UNION_CLASS_NAME_A_D =
+        "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;}";
+    EtsClass *class_AD = GetClassFromDesc(UNION_CLASS_NAME_A_D);
     ASSERT_NE(class_AD, nullptr);
     ASSERT_TRUE(class_AD->IsUnionClass());
 
-    const PandaString unionClassName_ACD =
+    static constexpr std::string_view UNION_CLASS_NAME_A_C_D =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/C;Lis_assignable_from_union_test/D;}";
-    EtsClass *class_ACD = GetClassFromDesc(unionClassName_ACD);
+    EtsClass *class_ACD = GetClassFromDesc(UNION_CLASS_NAME_A_C_D);
     ASSERT_NE(class_ACD, nullptr);
     ASSERT_TRUE(class_ACD->IsUnionClass());
 
-    const PandaString className_Null = "Lstd/core/Null;";
-    EtsClass *class_Null = GetClassFromDesc(className_Null);
+    static constexpr std::string_view CLASS_NAME_NULL = "Lstd/core/Null;";
+    EtsClass *class_Null = GetClassFromDesc(CLASS_NAME_NULL);
     ASSERT_NE(class_Null, nullptr);
     ASSERT_FALSE(class_Null->IsUnionClass());
 
-    const PandaString className_ANull = "{ULis_assignable_from_union_test/A;Lstd/core/Null;}";
-    EtsClass *class_ANull = GetClassFromDesc(className_ANull);
+    static constexpr std::string_view UNION_CLASS_NAME_A_NULL = "{ULis_assignable_from_union_test/A;Lstd/core/Null;}";
+    EtsClass *class_ANull = GetClassFromDesc(UNION_CLASS_NAME_A_NULL);
     ASSERT_NE(class_ANull, nullptr);
     ASSERT_TRUE(class_ANull->IsUnionClass());
 
-    const PandaString className_ADNull =
+    static constexpr std::string_view UNION_CLASS_NAME_A_D_NULL =
         "{ULis_assignable_from_union_test/A;Lis_assignable_from_union_test/D;Lstd/core/Null;}";
-    EtsClass *class_ADNull = GetClassFromDesc(className_ADNull);
+    EtsClass *class_ADNull = GetClassFromDesc(UNION_CLASS_NAME_A_D_NULL);
     ASSERT_NE(class_ADNull, nullptr);
     ASSERT_TRUE(class_ADNull->IsUnionClass());
 
@@ -214,6 +233,7 @@ TEST_F(IsAssignableFromUnionTest, not_assignable_null_class)
     ASSERT_FALSE(class_ACD->IsAssignableFrom(class_ADNull));
     ASSERT_FALSE(class_ADNull->IsAssignableFrom(class_ACD));
 }
+// NOLINTEND(readability-identifier-naming)
 
 TEST_F(IsAssignableFromUnionTest, is_instanceof_undefined)
 {

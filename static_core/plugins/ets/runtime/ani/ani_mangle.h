@@ -29,7 +29,7 @@ public:
     static std::optional<PandaString> ConvertDescriptor(const std::string_view descriptor, bool allowArray = false);
     static std::optional<PandaString> ConvertSignature(const std::string_view descriptor);
     static void ConvertSignatureToProto(std::optional<EtsMethodSignature> &methodSignature,
-                                        const std::string_view descriptor);
+                                        const std::string_view signature);
 };
 
 }  // namespace ark::ets::ani

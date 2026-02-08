@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,7 @@ void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)
     } else if (field.type.GetId() == panda_file::Type::TypeId::U1) {
         std::optional<uint32_t> boolVal = fieldAccessor.GetValue<uint32_t>();
         if (boolVal.has_value()) {
+            // NOLINTNEXTLINE(readability-implicit-bool-conversion)
             field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(boolVal.value() != 0));
         }
     } else if (field.type.GetId() == panda_file::Type::TypeId::F32) {

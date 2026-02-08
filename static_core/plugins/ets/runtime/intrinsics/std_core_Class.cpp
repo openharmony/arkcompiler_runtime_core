@@ -78,7 +78,7 @@ EtsRuntimeLinker *StdCoreClassGetLinkerInternal(EtsClass *cls)
 
 EtsBoolean StdCoreClassIsNamespace(EtsClass *cls)
 {
-    return cls->IsModule();
+    return ToEtsBoolean(cls->IsModule());
 }
 
 EtsClass *StdCoreClassOf(EtsObject *obj)
@@ -530,19 +530,19 @@ ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publ
 EtsBoolean StdCoreClassIsEnum(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsEtsEnum();
+    return ToEtsBoolean(cls->IsEtsEnum());
 }
 
 EtsBoolean StdCoreClassIsInterface(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsInterface();
+    return ToEtsBoolean(cls->IsInterface());
 }
 
 EtsBoolean StdCoreClassIsFixedArray(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsArrayClass();
+    return ToEtsBoolean(cls->IsArrayClass());
 }
 
 EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
@@ -551,7 +551,7 @@ EtsBoolean StdCoreClassIsSubtypeOf(EtsClass *cls, EtsClass *other)
         ThrowNullPointerException();
         return 0;
     }
-    return static_cast<EtsBoolean>(other->IsAssignableFrom(cls));
+    return ToEtsBoolean(other->IsAssignableFrom(cls));
 }
 
 EtsClass *StdCoreClassGetFixedArrayComponentType(EtsClass *cls)
@@ -565,7 +565,7 @@ EtsClass *StdCoreClassGetFixedArrayComponentType(EtsClass *cls)
 EtsBoolean StdCoreClassIsUnion(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsUnionClass();
+    return ToEtsBoolean(cls->IsUnionClass());
 }
 
 ObjectHeader *StdCoreClassGetUnionConstituentTypesInternal(EtsClass *cls)
@@ -594,19 +594,19 @@ ObjectHeader *StdCoreClassGetUnionConstituentTypesInternal(EtsClass *cls)
 EtsBoolean StdCoreClassIsFinal(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsFinal() || cls->IsStringClass();
+    return ToEtsBoolean(cls->IsFinal() || cls->IsStringClass());
 }
 
 EtsBoolean StdCoreClassIsAbstract(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsAbstract();
+    return ToEtsBoolean(cls->IsAbstract());
 }
 
 EtsBoolean StdCoreClassIsPrimitive(EtsClass *cls)
 {
     ASSERT(cls != nullptr);
-    return cls->IsPrimitive();
+    return ToEtsBoolean(cls->IsPrimitive());
 }
 
 }  // namespace ark::ets::intrinsics

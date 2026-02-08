@@ -283,7 +283,7 @@ public:
             auto methodIdx = pandaFile_.GetMethodIndex(&regionHeader);
 
             for (auto methodId : methodIdx) {
-                MethodPtr methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
+                auto methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
                 if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) == methodName) {
                     return methodPtr;
                 }
@@ -301,7 +301,7 @@ public:
             auto methodIdx = pandaFile_.GetMethodIndex(&regionHeader);
 
             for (auto methodId : methodIdx) {
-                MethodPtr methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
+                auto methodPtr = reinterpret_cast<MethodPtr>(methodId.GetOffset());
                 if (GetMethodFullName(reinterpret_cast<MethodPtr>(methodId.GetOffset()), false) == methodName &&
                     GetSignature(methodPtr) == methodSignature) {
                     return methodPtr;

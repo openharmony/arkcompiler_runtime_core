@@ -171,7 +171,7 @@ extern "C" EtsObject *ReflectMethodInvokeInternal(ark::ObjectHeader *thisMethod,
     auto *method = reflectMethod->GetEtsMethod();
     ASSERT(method != nullptr);
 
-    const uint8_t instanceFlag = !method->IsStatic();
+    const auto instanceFlag = static_cast<uint8_t>(!method->IsStatic());
     // Step 1: Handle thisObj validation for instance methods
     if (instanceFlag != 0) {
         method = helpers::ValidateAndResolveInstanceMethod(coro, thisObjH.GetPtr(), method);

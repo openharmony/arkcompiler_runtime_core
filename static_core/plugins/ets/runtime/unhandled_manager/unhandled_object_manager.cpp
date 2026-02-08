@@ -66,8 +66,8 @@ static void VisitObjectsImpl(PandaUnorderedSet<EtsObject *> &objects, const GCRo
         visitor(mem::GCRoot(mem::RootType::ROOT_VM, &pointer));
         if (pointer != ToObjPtr(obj)) {
             toInsert.push_back(reinterpret_cast<EtsObject *>(pointer));
-            auto del_it = it++;
-            objects.erase(del_it);
+            auto delIt = it++;
+            objects.erase(delIt);
         } else {
             ++it;
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,7 @@ void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const Object
         auto *refStart = reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *refEnd = refStart + refNum;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (auto *ref = refStart; ref < refEnd; ++ref) {
             auto o = ObjectAccessor::Load(ref);
             if (o == 0) {

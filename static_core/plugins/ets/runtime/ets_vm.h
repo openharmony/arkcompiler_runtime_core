@@ -341,7 +341,7 @@ public:
     EtsFinalizableWeakRef *RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
                                                       void (*finalizer)(void *), void *finalizerArg);
 
-    bool UnregisterFinalizerForObject(EtsCoroutine *coro, EtsFinalizableWeakRef *object);
+    bool UnregisterFinalizerForObject(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef);
 
     void CleanFinalizableReferenceList();
 

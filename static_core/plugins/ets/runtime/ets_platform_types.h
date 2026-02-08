@@ -35,11 +35,11 @@ class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define T(descr, name) EtsClass *name;
+#define T(descr, name) EtsClass *name = nullptr;
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define I(descr, mname, msig, name) EtsMethod *name;
+#define I(descr, mname, msig, name) EtsMethod *name = nullptr;
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define S(descr, mname, msig, name) EtsMethod *name;
+#define S(descr, mname, msig, name) EtsMethod *name = nullptr;
     ETS_PLATFORM_TYPES_LIST(T, I, S)
 #undef T
 #undef I

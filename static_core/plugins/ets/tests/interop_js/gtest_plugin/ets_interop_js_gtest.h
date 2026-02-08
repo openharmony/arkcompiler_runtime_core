@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,15 +73,16 @@ public:
 
     ani_object CreateBoolean(ani_env *env, ani_boolean boo)
     {
-        static constexpr const char *className = "std.core.Boolean";
+        static constexpr const char *CLASS_NAME = "std.core.Boolean";
         ani_class booleanCls {};
-        [[maybe_unused]] auto status = env->FindClass(className, &booleanCls);
+        [[maybe_unused]] auto status = env->FindClass(CLASS_NAME, &booleanCls);
         ASSERT(status == ANI_OK);
         ani_method ctor {};
 
         status = env->Class_FindMethod(booleanCls, "<ctor>", "z:", &ctor);
         ASSERT(status == ANI_OK);
         ani_object obj {};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         if (env->Object_New(booleanCls, ctor, &obj, boo) != ANI_OK) {
             std::cerr << "Failed to cllocate Boolean!" << std::endl;
         }
@@ -98,7 +99,7 @@ public:
 
         std::string clsDescriptor = "std.core.AbcRuntimeLinker";
         ani_class cls {};
-        ani_status status = env->FindClass(clsDescriptor.c_str(), &cls);
+        [[maybe_unused]] ani_status status = env->FindClass(clsDescriptor.c_str(), &cls);
         if (status != ANI_OK) {
             std::cerr << "Failed to find class: std.core.AbcRuntimeLinker!" << std::endl;
             return false;
@@ -137,13 +138,14 @@ public:
         return true;
     }
 
-    ani_ref GetClassRefObject(ani_env *env, std::string moduleName)
+    ani_ref GetClassRefObject(ani_env *env, const std::string &moduleName)
     {
-        ani_status status {};
+        [[maybe_unused]] ani_status status {};
         ani_ref clsRef = nullptr;
         ani_string moduleStr = nullptr;
         status = env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &moduleStr);
         ASSERT(status == ANI_OK);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         status = env->Object_CallMethod_Ref(static_cast<ani_object>(classObjRef_), loadMethodRef_, &clsRef, moduleStr,
                                             CreateBoolean(env, ANI_FALSE));
         if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
@@ -153,17 +155,17 @@ public:
         return clsRef;
     }
 
-    EtsInteropTest()
+    EtsInteropTest()  // NOLINT(cppcoreguidelines-pro-type-member-init)
     {
         ani_vm *vm {};
-        ani_env *aniEnv_ {};
+        ani_env *aniEnv {};
         ani_size vmCount;
         ANI_GetCreatedVMs(&vm, 1, &vmCount);
         ASSERT(vmCount == 1);
-        vm->GetEnv(ANI_VERSION_1, &aniEnv_);
+        vm->GetEnv(ANI_VERSION_1, &aniEnv);
 
         std::string modulePath = GetABCPath();
-        SetRuntimeLinker(aniEnv_, modulePath);
+        SetRuntimeLinker(aniEnv, modulePath);
     }
 
     static void SetUpTestSuite()
@@ -268,7 +270,7 @@ private:
     void GetRuntimeLinkerOptions(ani_env *env, ani_array &refArray, const std::string &modulePath)
     {
         const char *abcPathEnv = std::getenv("ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH");
-        std::string_view asmAbcPath(abcPathEnv ? abcPathEnv : "");
+        std::string_view asmAbcPath((abcPathEnv != nullptr) ? abcPathEnv : "");
         int arrArgSize = (!asmAbcPath.empty()) ? 2 : 1;
 
         ani_class stringCls {};

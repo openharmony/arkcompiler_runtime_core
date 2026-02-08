@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,9 @@ static napi_value STValueTemplateInvokeFunction(
 
     size_t jsArgc = 0;
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 3U) {
@@ -88,13 +90,14 @@ static napi_value STValueTemplateInvokeFunction(
     }
 
     // 4. extract function
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     ani_function aniFunction = findFunction(data, functionName, signatureName);
     if (aniFunction == nullptr) {
         return nullptr;
     }
 
     // 5. invoke func according to returnType
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
     auto aniEnv = GetAniEnv();
     switch (returnType) {
         case SType::BOOLEAN: {
@@ -158,6 +161,7 @@ static napi_value STValueTemplateInvokeFunction(
             ani_status status = args.empty() ? aniEnv->Function_Call_Ref(aniFunction, &invokeResult)
                                              : aniEnv->Function_Call_Ref_A(aniFunction, &invokeResult, args.data());
             ANI_CHECK_ERROR_RETURN(env, status);
+            // NOLINTNEXTLINE(performance-move-const-arg)
             return CreateSTValueInstance<ani_ref>(env, std::move(invokeResult));
         }
         case SType::VOID: {
@@ -166,12 +170,14 @@ static napi_value STValueTemplateInvokeFunction(
             ANI_CHECK_ERROR_RETURN(env, status);
             ani_ref undefinedRef {};
             ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&undefinedRef));
+            // NOLINTNEXTLINE(performance-move-const-arg)
             return CreateSTValueInstance<ani_ref>(env, std::move(undefinedRef));
         }
         default: {
             ThrowUnsupportedSTypeError(env, returnType);
         }
     }
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
     return nullptr;
 }
 
@@ -181,7 +187,7 @@ napi_value STValueNamespaceInvokeFunctionImpl(napi_env env, [[maybe_unused]] nap
     auto namespaceFindFunction = [env](STValueData *data, std::string &functionName,
                                        std::string &signatureName) -> ani_function {
         auto aniEnv = GetAniEnv();
-        ani_namespace aniNsp = reinterpret_cast<ani_namespace>(data->GetAniRef());
+        auto aniNsp = reinterpret_cast<ani_namespace>(data->GetAniRef());
         ani_function aniFunction = nullptr;
         ani_status status =
             aniEnv->Namespace_FindFunction(aniNsp, functionName.c_str(), signatureName.c_str(), &aniFunction);
@@ -209,6 +215,7 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
     }
 
     napi_value jsThis {};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
     if (!CheckNapiIsArray(env, jsArgv[0])) {
@@ -222,7 +229,7 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
     for (uint32_t argIdx = 0; argIdx < argLength; argIdx++) {
         napi_value jsVal {};
         NAPI_CHECK_FATAL(napi_get_element(env, jsArgv[0], argIdx, &jsVal));
-        STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsVal));
+        auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsVal));
         if (!data->IsAniRef()) {
             ThrowJSNonObjectError(env, "in args " + std::to_string(argIdx) + "-th arg");
             return nullptr;
@@ -230,12 +237,12 @@ napi_value STValueFunctionalObjectInvokeImpl(napi_env env, [[maybe_unused]] napi
         argArray[argIdx] = data->GetAniRef();
     }
 
-    STValueData *fnData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *fnData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (fnData == nullptr || !fnData->IsAniRef() || fnData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_fn_object fnObj = static_cast<ani_fn_object>(fnData->GetAniRef());
+    auto fnObj = static_cast<ani_fn_object>(fnData->GetAniRef());
 
     ani_ref fnResult {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FunctionalObject_Call(fnObj, argLength, argArray.data(), &fnResult));
@@ -253,50 +260,60 @@ napi_value ObjectInvokeMethodWithNoArgs(napi_env env, ani_object invokeObj, cons
     switch (returnType) {
         case SType::BOOLEAN: {
             ani_boolean fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Boolean(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::CHAR: {
             ani_char fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Char(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::BYTE: {
             ani_byte fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Byte(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::SHORT: {
             ani_short fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Short(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::INT: {
             ani_int fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Int(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::LONG: {
             ani_long fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Long(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::FLOAT: {
             ani_float fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Float(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::DOUBLE: {
             ani_double fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Double(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::REFERENCE: {
             ani_ref fnResult {};
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Ref(invokeObj, name, signature, &fnResult));
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Void(invokeObj, name, signature));
             ani_ref result {};
             ANI_CHECK_ERROR_RETURN(env, aniEnv->GetUndefined(&result));
@@ -374,6 +391,7 @@ napi_value ObjectInvokeMethodWithArgs(napi_env env, ani_object invokeObj, const 
             return CreateSTValueInstance(env, fnResult);
         }
         case SType::VOID: {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             ANI_CHECK_ERROR_RETURN(env,
                                    aniEnv->Object_CallMethodByName_Void_A(invokeObj, name, signature, argArrayData));
             ani_ref result {};
@@ -402,7 +420,9 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
     }
 
     napi_value jsThis {};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     std::vector<ani_value> argArray;
@@ -418,12 +438,12 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
     if (!GetString(env, jsArgv[1], "signatureName", signatureString)) {
         return nullptr;
     }
-    STValueData *objData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *objData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (objData == nullptr || !objData->IsAniRef() || objData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_object invokeObj = reinterpret_cast<ani_object>(objData->GetAniRef());
+    auto invokeObj = reinterpret_cast<ani_object>(objData->GetAniRef());
 
     SType returnType;
     if (!CheckArgsAndGetReturnType(env, signatureString, argArray.size(), returnType)) {
@@ -435,6 +455,7 @@ napi_value STValueObjectInvokeMethodImpl(napi_env env, [[maybe_unused]] napi_cal
     return ObjectInvokeMethodWithArgs(env, invokeObj, nameString, signatureString, returnType, argArray);
 }
 
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 napi_value ClassInvokeStaticMethodWithNoArgs(napi_env env, ani_class clsClass, const std::string &nameString,
                                              const std::string &signatureString, SType returnType)
 {
@@ -507,6 +528,7 @@ napi_value ClassInvokeStaticMethodWithNoArgs(napi_env env, ani_class clsClass, c
     }
     return nullptr;
 }
+// NOLINTEND(cppcoreguidelines-pro-type-vararg)
 
 napi_value ClassInvokeStaticMethodWitArgs(napi_env env, ani_class clsClass, const std::string &nameString,
                                           const std::string &signatureString, SType returnType,
@@ -601,6 +623,7 @@ napi_value STValueClassInvokeStaticMethodImpl(napi_env env, [[maybe_unused]] nap
     }
 
     napi_value jsThis {};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -617,12 +640,12 @@ napi_value STValueClassInvokeStaticMethodImpl(napi_env env, [[maybe_unused]] nap
     if (!GetString(env, jsArgv[1], "signatureName", signatureString)) {
         return nullptr;
     }
-    STValueData *clsData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *clsData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (clsData == nullptr || !clsData->IsAniRef() || clsData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_class clsClass = reinterpret_cast<ani_class>(clsData->GetAniRef());
+    auto clsClass = reinterpret_cast<ani_class>(clsData->GetAniRef());
 
     SType returnType;
     if (!CheckArgsAndGetReturnType(env, signatureString, argArray.size(), returnType)) {

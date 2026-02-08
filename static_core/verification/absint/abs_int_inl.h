@@ -2813,8 +2813,8 @@ public:
         }
 
         Sync();
-        constexpr size_t initSize = 5;
-        SmallVector<int, initSize> regs;
+        constexpr size_t INIT_SIZE = 5;
+        SmallVector<int, INIT_SIZE> regs;
         for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
             regs.push_back(regIdx);
         }

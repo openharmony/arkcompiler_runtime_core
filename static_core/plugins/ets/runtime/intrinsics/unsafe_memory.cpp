@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,6 +212,7 @@ extern "C" EtsString *UnsafeMemoryReadString(EtsLong buf, int len)
     return EtsString::CreateFromUtf8(reinterpret_cast<const char *>(buf), static_cast<uint32_t>(len));
 }
 
+// NOLINTNEXTLINE(readability-redundant-declaration)
 extern "C" int32_t WriteStringToMem(int64_t buf, ObjectHeader *s);
 extern "C" int UnsafeMemoryWriteString(EtsLong addrEts, EtsString *str)
 {

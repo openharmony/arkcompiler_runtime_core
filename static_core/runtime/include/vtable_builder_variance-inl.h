@@ -91,7 +91,8 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessProxyClassM
             vtable_.ReplaceEntryWith(itInfo, info);
             compatibleExists = true;
             break;
-        } else if (IsOverriddenBy(ctx, info->GetProtoId(), itInfo->GetProtoId())) {
+        }
+        if (IsOverriddenBy(ctx, info->GetProtoId(), itInfo->GetProtoId())) {
             compatibleExists = true;
             break;
         }

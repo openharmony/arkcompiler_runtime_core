@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 
 namespace ark::bytecodeopt::test {
 
-static inline size_t HasInitObject(compiler::Graph *g)
+static bool HasInitObject(compiler::Graph *g)
 {
     for (auto bb : g->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
@@ -43,9 +43,9 @@ TEST_F(IrBuilderTest, NewObjectAndCtorEliminatedInitObjAppears)
         }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), true);
+    EXPECT_TRUE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, TryBlockWithGapNoInitObj)
@@ -67,9 +67,9 @@ TEST_F(IrBuilderTest, TryBlockWithGapNoInitObj)
         }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_FALSE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, SafeArithmeticBetweenNewAndCtor)
@@ -87,9 +87,9 @@ TEST_F(IrBuilderTest, SafeArithmeticBetweenNewAndCtor)
         }
     )";
     ASSERT_TRUE(ParseToGraph(src, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), true);
+    EXPECT_TRUE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, SafeMovBetweenNewAndCtor)
@@ -105,9 +105,9 @@ TEST_F(IrBuilderTest, SafeMovBetweenNewAndCtor)
         }
     )";
     ASSERT_TRUE(ParseToGraph(src, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), true);
+    EXPECT_TRUE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, SafeMovLdaBetweenNewAndCtor)
@@ -125,9 +125,9 @@ TEST_F(IrBuilderTest, SafeMovLdaBetweenNewAndCtor)
         }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), true);
+    EXPECT_TRUE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, UnrelatedCallBetweenNewAndCtor)
@@ -146,9 +146,9 @@ TEST_F(IrBuilderTest, UnrelatedCallBetweenNewAndCtor)
         }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_FALSE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
 }
 
 TEST_F(IrBuilderTest, SafeInstUsedAsCtorArg)
@@ -164,8 +164,8 @@ TEST_F(IrBuilderTest, SafeInstUsedAsCtorArg)
         }
     )";
     ASSERT_TRUE(ParseToGraph(source, "main"));
-    EXPECT_EQ(HasInitObject(GetGraph()), false);
+    EXPECT_FALSE(HasInitObject(GetGraph()));
     EXPECT_TRUE(GetGraph()->RunPass<BytecodeOptPeepholes>());
-    EXPECT_EQ(HasInitObject(GetGraph()), true);
+    EXPECT_TRUE(HasInitObject(GetGraph()));
 }
 }  // namespace ark::bytecodeopt::test

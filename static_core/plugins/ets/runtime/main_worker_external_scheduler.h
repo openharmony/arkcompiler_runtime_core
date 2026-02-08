@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ public:
     using TaskPosterFunc = void (*)(void (*task)(void *data), void *taskData, const char *taskName, int64_t delayMs);
 
     explicit MainWorkerExternalScheduler(TaskPosterFunc poster);
-    ~MainWorkerExternalScheduler() = default;
+    ~MainWorkerExternalScheduler() override = default;
     NO_COPY_SEMANTIC(MainWorkerExternalScheduler);
     NO_MOVE_SEMANTIC(MainWorkerExternalScheduler);
 

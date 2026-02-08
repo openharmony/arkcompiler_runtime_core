@@ -234,16 +234,16 @@ static bool AddOptions(logger::Options *loggerOptions, ark::RuntimeOptions *runt
     ++tid;
     // end of NOTE(konstanting)
 
-    static size_t constexpr defaultArgc = 1;
-    std::array<napi_value, defaultArgc> argv {};
+    static size_t constexpr DEFAULT_ARGC = 1;
+    std::array<napi_value, DEFAULT_ARGC> argv {};
 
-    size_t argc = defaultArgc;
+    size_t argc = DEFAULT_ARGC;
     NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
 
     napi_value napiFalse;
     NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
-    if (argc != defaultArgc) {
+    if (argc != DEFAULT_ARGC) {
         LogError("CreateRuntimeLegacy: bad args number");
         return napiFalse;
     }
@@ -279,16 +279,16 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
     // XGC-related checks and so on. See ets_vm_api.cpp:CreateRuntime and AddOptions function
     // above for reference.
 
-    static size_t constexpr defaultArgc = 1;
-    std::array<napi_value, defaultArgc> argv {};
+    static size_t constexpr DEFAULT_ARGC = 1;
+    std::array<napi_value, DEFAULT_ARGC> argv {};
 
-    size_t argc = defaultArgc;
+    size_t argc = DEFAULT_ARGC;
     NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), nullptr, nullptr));
 
     napi_value napiFalse;
     NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
 
-    if (argc != defaultArgc) {
+    if (argc != DEFAULT_ARGC) {
         LogError("CreateRuntimeViaAni: bad args number");
         return napiFalse;
     }
@@ -332,11 +332,11 @@ static napi_value CreateRuntimeViaAni(napi_env env, napi_callback_info info)
 
 static napi_value Init(napi_env env, napi_value exports)
 {
-    auto STValueCtor = GetSTValueClass(env);
-    auto STypeObj = CreateSTypeObject(env);
+    auto stValueCtor = GetSTValueClass(env);
+    auto sTypeObj = CreateSTypeObject(env);
     const std::array desc = {
-        napi_property_descriptor {"STValue", 0, 0, 0, 0, STValueCtor, napi_default, 0},
-        napi_property_descriptor {"SType", 0, 0, 0, 0, STypeObj, napi_default, 0},
+        napi_property_descriptor {"STValue", 0, 0, 0, 0, stValueCtor, napi_default, 0},
+        napi_property_descriptor {"SType", 0, 0, 0, 0, sTypeObj, napi_default, 0},
         napi_property_descriptor {"version", 0, Version, 0, 0, 0, napi_enumerable, 0},
         // NOTE(konstanting, #23205): to be deleted
         napi_property_descriptor {"createRuntimeLegacy", 0, CreateRuntimeLegacy, 0, 0, 0, napi_enumerable, 0},

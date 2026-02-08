@@ -132,7 +132,9 @@ int32_t StringLastIndexOfSwar(CharType *data, int32_t offset, [[maybe_unused]] i
     auto alignedUp = reinterpret_cast<CharType *>(ark::AlignUp(reinterpret_cast<uintptr_t>(data), sizeof(LoadType)));
     ASSERT(alignedUp >= data);
     LoadType searchPattern = BuildSearchPattern<CharType, LoadType>(character);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     while (ptr - IndexOfConstants<CharType, LoadType>::VECTOR_SIZE >= alignedUp) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         ptr -= IndexOfConstants<CharType, LoadType>::VECTOR_SIZE;
         LoadType value = *reinterpret_cast<LoadType *>(ptr);
         LoadType xoredValue = SwapBytes(searchPattern ^ value);
@@ -219,9 +221,10 @@ inline size_t ClzInSwappedBytes<PandaWideUintT>(PandaWideUintT val)
 template <>
 inline PandaWideUintT SwapBytes<PandaWideUintT>(PandaWideUintT val)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     static_assert(sizeof(PandaWideUintT) == 16);
-    uint64_t hi = static_cast<uint64_t>(val >> BITS_PER_UINT64);
-    uint64_t lo = static_cast<uint64_t>(val);
+    auto hi = static_cast<uint64_t>(val >> BITS_PER_UINT64);
+    auto lo = static_cast<uint64_t>(val);
     auto high = static_cast<PandaWideUintT>(__builtin_bswap64(lo)) << BITS_PER_UINT64;
     auto low = static_cast<PandaWideUintT>(__builtin_bswap64(hi));
     PandaWideUintT swapped = high | low;

@@ -485,9 +485,9 @@ void MemLastCharSimdLowering::GenLoadAndFastCheck128(llvm::VectorType *vecTy)
 
 llvm::Value *MemLastCharSimdLowering::GenFindChar128(llvm::IntegerType *charTy)
 {
-    static constexpr uint32_t sixtyFour = 64U;
-    static constexpr int32_t zeroBasedMaxIndexU8 = 15;
-    static constexpr int32_t zeroBasedMaxIndexU16 = 7;
+    static constexpr uint32_t SIXTY_FOUR = 64U;
+    static constexpr int32_t ZERO_BASED_MAX_INDEX_U8 = 15;
+    static constexpr int32_t ZERO_BASED_MAX_INDEX_U16 = 7;
     ASSERT(vcmpeq1_ != nullptr);
     auto i64Ty = builder_->getInt64Ty();
     // Inspect high 64-bit part of vcmpeq1 first as we are looking for the last occurrence of 'ch'
@@ -503,7 +503,8 @@ llvm::Value *MemLastCharSimdLowering::GenFindChar128(llvm::IntegerType *charTy)
     builder_->SetInsertPoint(inspectV1D0Bb_);
     auto v1d0 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 0UL), i64Ty);
     auto clz10 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, v1d0, builder_->getFalse(), nullptr);
-    auto pos10 = builder_->CreateAdd(clz10, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(sixtyFour, sixtyFour)));
+    auto pos10 =
+        builder_->CreateAdd(clz10, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(SIXTY_FOUR, SIXTY_FOUR)));
     builder_->CreateBr(foundBb_);
     // Compute a pointer to the char
     builder_->SetInsertPoint(foundBb_);
@@ -512,8 +513,8 @@ llvm::Value *MemLastCharSimdLowering::GenFindChar128(llvm::IntegerType *charTy)
     nbits->addIncoming(pos10, inspectV1D0Bb_);
     uint32_t bitsShiftWidth = charTy->isIntegerTy(8U) ? 3UL : 4UL;
     auto nchars = builder_->CreateNeg(builder_->CreateLShr(nbits, bitsShiftWidth));
-    auto maxIndex = charTy->isIntegerTy(8U) ? zeroBasedMaxIndexU8 : zeroBasedMaxIndexU16;
-    auto maxIndexValue = llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(sixtyFour, maxIndex));
+    auto maxIndex = charTy->isIntegerTy(8U) ? ZERO_BASED_MAX_INDEX_U8 : ZERO_BASED_MAX_INDEX_U16;
+    auto maxIndexValue = llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(SIXTY_FOUR, maxIndex));
     auto offsetInChars = builder_->CreateAdd(nchars, maxIndexValue);
     auto foundCharPtr = builder_->CreateInBoundsGEP(charTy, addr_, offsetInChars);
     builder_->CreateBr(lastBb_);

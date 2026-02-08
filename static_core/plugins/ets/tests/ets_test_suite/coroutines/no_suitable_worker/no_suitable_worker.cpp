@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ TEST_F(EtsNoSuitableWorkerTest, NoSuitableWorkerForNativeCoro)
     [[maybe_unused]] EtsHandleScope scope(coro);
     auto etsVm = coro->GetPandaVM();
     auto *coroManager = static_cast<StackfulCoroutineManager *>(etsVm->GetCoroutineManager());
+    // NOLINTNEXTLINE(readability-magic-numbers)
     auto groupId = CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::EXACT_ID, {99});
     auto cb = []([[maybe_unused]] void *data) {};
     auto launchRes = coroManager->LaunchNative(cb, reinterpret_cast<void *>(1U), "NoSuitableWorkerForNativeCoro",

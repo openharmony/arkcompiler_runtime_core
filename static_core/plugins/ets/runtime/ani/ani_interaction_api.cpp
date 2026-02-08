@@ -539,12 +539,12 @@ static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const 
     EtsClass *cls = etsObject->GetClass();
     EtsMethod *method = nullptr;
     // Note: remove this code as soon as new mangler rules have merged.
-    constexpr std::size_t oldGetSetPrefixLength = 5;
+    static constexpr std::size_t OLD_GET_SET_PREFIX_LENGTH = std::string_view("<get>").size();
     std::string methodName(name);
     if (methodName.rfind("<get>", 0) == 0) {
-        methodName.replace(0, oldGetSetPrefixLength, "%%get-");
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%get-");
     } else if (methodName.rfind("<set>", 0) == 0) {
-        methodName.replace(0, oldGetSetPrefixLength, "%%set-");
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%set-");
     }
     ani_status status = DoGetClassMethodUnderManagedScope<false>(cls, methodName.c_str(), signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -751,9 +751,12 @@ NO_UB_SANITIZE static ani_status FindModule(ani_env *env, const char *moduleDesc
     auto &convertedDescriptor = desc.value();
     // `convertedDescriptor` contains redundant trailing `;`, hence need to substract 1
     PandaString descriptor(convertedDescriptor.size() + ETSGLOBAL_NAME.size() - 1, 0);
-    auto copiedChars = convertedDescriptor.copy(descriptor.data(), convertedDescriptor.size() - 1);
+    [[maybe_unused]] auto copiedChars = convertedDescriptor.copy(descriptor.data(), convertedDescriptor.size() - 1);
     ASSERT(copiedChars == convertedDescriptor.size() - 1);
-    copiedChars += ETSGLOBAL_NAME.copy(descriptor.data() + copiedChars, ETSGLOBAL_NAME.size());
+
+    // // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    size_t res = ETSGLOBAL_NAME.copy(descriptor.data() + copiedChars, ETSGLOBAL_NAME.size());
+    copiedChars += res;
     ASSERT(copiedChars == descriptor.size());
 
     // NOTE: Check that results is namespace, #22400
@@ -1728,12 +1731,12 @@ NO_UB_SANITIZE static ani_status Class_FindMethod(ani_env *env, ani_class cls, c
     ani_status status;
 
     // Note: remove this code as soon as new mangler rules have merged.
-    constexpr std::size_t oldGetSetPrefixLength = 5;
+    static constexpr std::size_t OLD_GET_SET_PREFIX_LENGTH = std::string_view("<get>").size();
     std::string methodName(name);
     if (methodName.rfind("<get>", 0) == 0) {
-        methodName.replace(0, oldGetSetPrefixLength, "%%get-");
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%get-");
     } else if (methodName.rfind("<set>", 0) == 0) {
-        methodName.replace(0, oldGetSetPrefixLength, "%%set-");
+        methodName.replace(0, OLD_GET_SET_PREFIX_LENGTH, "%%set-");
     }
     status = GetClassMethod<false>(env, cls, methodName.c_str(), signature, &method);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);

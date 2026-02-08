@@ -22,9 +22,6 @@
 #include "include/language_context.h"
 #include "include/method.h"
 #include "public.h"
-#include "verification/type/type_system.h"
-#include "verification/public_internal.h"
-#include "verification/jobs/service.h"
 #include "libarkbase/utils/utf.h"
 #include "util/tests/verifier_test.h"
 #include "include/runtime.h"
@@ -35,15 +32,15 @@ class VerifyAnyOpcodes : public VerifierTest {
 public:
     VerifyAnyOpcodes()
     {
-        config = verifier::NewConfig();
-        service = CreateService(config, Runtime::GetCurrent()->GetInternalAllocator(),
-                                ark::Runtime::GetCurrent()->GetClassLinker(), "");
+        config_ = verifier::NewConfig();
+        service_ = CreateService(config_, Runtime::GetCurrent()->GetInternalAllocator(),
+                                 ark::Runtime::GetCurrent()->GetClassLinker(), "");
     }
 
     ~VerifyAnyOpcodes() override
     {
-        DestroyService(service, false);
-        DestroyConfig(config);
+        DestroyService(service_, false);
+        DestroyConfig(config_);
     }
 
     NO_COPY_SEMANTIC(VerifyAnyOpcodes);
@@ -63,16 +60,17 @@ public:
         return classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     }
 
-    Method *GetDirectMethodFromClass(ClassLinkerExtension *ext, std::string className, std::string methodName)
+    Method *GetDirectMethodFromClass(ClassLinkerExtension *ext, const std::string &className,
+                                     const std::string &methodName)
     {
         PandaString descriptor;
         Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor));
         return klass->GetDirectMethod(utf::CStringAsMutf8(methodName.c_str()));
     }
 
-protected:
-    verifier::Service *service;  // NOLINT(misc-non-private-member-variables-in-classes)
-    verifier::Config *config;    // NOLINT(misc-non-private-member-variables-in-classes)
+private:
+    verifier::Config *config_;
+    verifier::Service *service_;
 };
 
 TEST_F(VerifyAnyOpcodes, AnyIsInstance)

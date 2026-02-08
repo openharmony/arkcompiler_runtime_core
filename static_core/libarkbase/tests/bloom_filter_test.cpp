@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ namespace ark {
 TEST(BloomFilterTest, InvalidConstruction)
 {
     // n = 0
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EXPECT_DEATH({ BloomFilter bf(0, 0.01); }, ".*");
 
     // p <= 0
@@ -33,10 +34,10 @@ TEST(BloomFilterTest, InvalidConstruction)
 
 TEST(BloomFilterTest, InsertAndQuery)
 {
-    constexpr size_t n = 1000;
-    constexpr double p = 0.01;
+    static constexpr size_t N = 1000;
+    static constexpr double P = 0.01;
 
-    BloomFilter bf(n, p);
+    BloomFilter bf(N, P);
 
     std::vector<std::string> keys = {"alpha", "beta", "gamma", "delta", "epsilon"};
     for (auto &key : keys) {
@@ -62,17 +63,17 @@ static std::vector<std::string> BuildSampleKeys(size_t count, const std::string 
 
 TEST(BloomFilterTest, FalsePositiveRate)
 {
-    constexpr size_t n = 50000;
-    constexpr double p = 0.01;
+    static constexpr size_t N = 50000;
+    static constexpr double P = 0.01;
 
-    BloomFilter bf(n, p);
+    BloomFilter bf(N, P);
 
-    std::vector<std::string> inserted = BuildSampleKeys(n, "exist_");
+    std::vector<std::string> inserted = BuildSampleKeys(N, "exist_");
     for (auto &key : inserted) {
         bf.Add(reinterpret_cast<const uint8_t *>(key.c_str()));
     }
 
-    std::vector<std::string> nonInserted = BuildSampleKeys(n, "miss_");
+    std::vector<std::string> nonInserted = BuildSampleKeys(N, "miss_");
 
     size_t mustNonExist = 0;
     size_t mayExist = 0;
@@ -86,9 +87,9 @@ TEST(BloomFilterTest, FalsePositiveRate)
         }
     }
 
-    EXPECT_GT(mustNonExist, 0u);
+    EXPECT_GT(mustNonExist, 0U);
 
-    constexpr double_t allowErrorPower = 10.0;
-    EXPECT_LE(static_cast<double>(mayExist) / n, p * allowErrorPower);
+    static constexpr double_t ALLOW_ERROR_POWER = 10.0;
+    EXPECT_LE(static_cast<double>(mayExist) / N, P * ALLOW_ERROR_POWER);
 }
 }  // namespace ark

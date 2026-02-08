@@ -28,13 +28,13 @@ extern "C" EtsBoolean IsFuncObjAsyncImpl(EtsObject *target)
 
     if (target == nullptr) {
         ThrowNullPointerException();
-        return false;
+        return ToEtsBoolean(false);
     }
 
     auto *runtimeClass = target->GetClass()->GetRuntimeClass();
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
-    EtsBoolean result = false;
+    bool result = false;
     cda.EnumerateAnnotations([&pf, &result](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
@@ -44,7 +44,7 @@ extern "C" EtsBoolean IsFuncObjAsyncImpl(EtsObject *target)
         }
     });
 
-    return result;
+    return ToEtsBoolean(result);
 }
 
 }  // namespace ark::ets::intrinsics

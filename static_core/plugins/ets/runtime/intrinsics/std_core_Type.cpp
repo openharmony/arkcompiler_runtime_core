@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -296,6 +296,7 @@ static EtsField *GetField(EtsClass *cls, EtsString *name)
         uint8_t *data = name->IsTreeString() ? name->GetTreeStringDataMUtf8(tree8Buf) : name->GetDataMUtf8();
         size_t len = name->GetUtf8Length();
         fieldName.resize(len);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         std::copy(data, data + len, fieldName.data());
     } else {
         uint16_t *data = name->IsTreeString() ? name->GetTreeStringDataUtf16(tree16Buf) : name->GetDataUtf16();

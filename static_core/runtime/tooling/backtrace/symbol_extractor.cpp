@@ -17,11 +17,6 @@
 
 namespace ark::tooling {
 
-ArkSymbolExtractor::~ArkSymbolExtractor()
-{
-    arkPandaFile_.reset();
-}
-
 ArkSymbolExtractor *ArkSymbolExtractor::Create()
 {
     auto extractor = new ArkSymbolExtractor();
@@ -48,7 +43,7 @@ void ArkSymbolExtractor::CreateArkPandaFile()
         LOG(ERROR, RUNTIME) << "Failed to open panda file.";
         return;
     }
-    arkPandaFile_ = std::shared_ptr<const panda_file::File>(pf.release());
+    arkPandaFile_ = std::move(pf);
 }
 
 void ArkSymbolExtractor::CreateArkFileData(uint8_t *data, uintptr_t dataSize, uintptr_t loadOffset)

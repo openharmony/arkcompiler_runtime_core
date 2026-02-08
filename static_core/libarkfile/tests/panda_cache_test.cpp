@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -365,9 +365,9 @@ TEST(PandaCache, TestLazyInitializationThreadSafety)
 {
     PandaCache cache;
 
-    static constexpr int numberOfInitThreads = 10;
+    static constexpr int NUMBER_OF_INIT_THREADS = 10;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    std::thread threads[numberOfInitThreads];
+    std::thread threads[NUMBER_OF_INIT_THREADS];
 
     auto initAndSet = [&cache](int threadId) {
         EntityId id(threadId);
@@ -376,15 +376,15 @@ TEST(PandaCache, TestLazyInitializationThreadSafety)
         ASSERT_EQ(cache.GetMethodFromCache(id), method);
     };
 
-    for (int i = 0; i < numberOfInitThreads; i++) {
+    for (int i = 0; i < NUMBER_OF_INIT_THREADS; i++) {
         threads[i] = std::thread(initAndSet, i);
     }
 
-    for (int i = 0; i < numberOfInitThreads; i++) {
-        threads[i].join();
+    for (auto &thread : threads) {
+        thread.join();
     }
 
-    for (int i = 0; i < numberOfInitThreads; i++) {
+    for (int i = 0; i < NUMBER_OF_INIT_THREADS; i++) {
         EntityId id(i);
         auto *m = reinterpret_cast<ElementMock *>(cache.GetMethodFromCache(id));
         delete m;

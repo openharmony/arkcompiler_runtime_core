@@ -17,16 +17,14 @@
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLDATETIMEFORMAT_H
 
 #include "ani/ani.h"
-#include <memory>
 
 // Forward declare ICU class to avoid including heavy headers here
 namespace U_ICU_NAMESPACE {
 class DateFormat;
-}
+}  // namespace U_ICU_NAMESPACE
 
 namespace ark::ets::stdlib::intl {
 ani_status RegisterIntlDateTimeFormatMethods(ani_env *env);
-std::unique_ptr<icu::DateFormat> CreateICUDateFormat(ani_env *env, ani_object self);
 }  // namespace ark::ets::stdlib::intl
 
 #endif

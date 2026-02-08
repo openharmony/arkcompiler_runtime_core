@@ -34,7 +34,8 @@ CoroutineWorkerDomain FinalizationRegistryManager::GetCoroDomain(EtsCoroutine *c
     CoroutineWorker *worker = coro->GetWorker();
     if (worker->IsMainWorker()) {
         return CoroutineWorkerDomain::MAIN;
-    } else if (worker->InExclusiveMode()) {
+    }
+    if (worker->InExclusiveMode()) {
         return CoroutineWorkerDomain::EA;
     }
     return CoroutineWorkerDomain::GENERAL;
@@ -104,9 +105,11 @@ bool FinalizationRegistryManager::CanCleanup(CoroutineWorker::Id currentId, Coro
 {
     if (domain == CoroutineWorkerDomain::MAIN) {
         return currentDomain == CoroutineWorkerDomain::MAIN;
-    } else if (domain == CoroutineWorkerDomain::GENERAL) {
+    }
+    if (domain == CoroutineWorkerDomain::GENERAL) {
         return currentDomain == CoroutineWorkerDomain::MAIN || currentDomain == CoroutineWorkerDomain::GENERAL;
-    } else if (domain == CoroutineWorkerDomain::EA) {
+    }
+    if (domain == CoroutineWorkerDomain::EA) {
         return (currentDomain == CoroutineWorkerDomain::EA) && (currentId == id);
     }
     return false;
@@ -131,7 +134,8 @@ static CoroutineWorkerGroup::Id GetGroupId(CoroutineManager *coroManager, Corout
 {
     if (domain == CoroutineWorkerDomain::MAIN) {
         return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN);
-    } else if (domain == CoroutineWorkerDomain::EA) {
+    }
+    if (domain == CoroutineWorkerDomain::EA) {
         return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::EA, {id});
     }
     return CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::GENERAL);

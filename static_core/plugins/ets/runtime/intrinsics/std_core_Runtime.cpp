@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ EtsLong StdRuntimeGetHashCodeByValue(EtsObject *source)
 
 EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
 {
-    return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), a, b);
+    return ToEtsBoolean(ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), a, b));
 }
 
 static std::string GetClassName(EtsClass *cls)

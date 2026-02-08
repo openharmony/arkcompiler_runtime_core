@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,11 +42,11 @@ public:
         return status == ANI_OK && *env != nullptr;
     }
 
-    static constexpr uintptr_t dummyPoiner = 0x1234;
+    static constexpr uintptr_t DUMMY_POINTER = 0x1234;
 
     static bool CheckNativePointer(void *data)
     {
-        return reinterpret_cast<uintptr_t>(data) == dummyPoiner;
+        return reinterpret_cast<uintptr_t>(data) == DUMMY_POINTER;
     }
 
     static void DummyFinalizer([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint)
@@ -71,7 +71,7 @@ public:
             }
             // Use N-API which don't have counterparts in other ArkTS interfaces
             auto status =
-                napi_wrap(napiEnv, jsObj, reinterpret_cast<void *>(dummyPoiner), DummyFinalizer, nullptr, nullptr);
+                napi_wrap(napiEnv, jsObj, reinterpret_cast<void *>(DUMMY_POINTER), DummyFinalizer, nullptr, nullptr);
             if (status != napi_ok) {
                 return undefinedRef;
             }

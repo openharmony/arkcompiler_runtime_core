@@ -26,7 +26,7 @@
 // Include the intrinsic function we're testing
 namespace ark::ets::intrinsics {
 extern "C" EtsBoolean EtsWeakMapValidateKey(EtsObject *key);
-}
+}  // namespace ark::ets::intrinsics
 
 namespace ark::ets::test {
 
@@ -105,6 +105,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBooleanBox)
 // Test that boxed Int is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsIntBox)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsObject *boxedInt = EtsBoxPrimitive<EtsInt>::Create(coro_, 42);
     ASSERT_NE(boxedInt, nullptr);
 
@@ -115,6 +116,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsIntBox)
 // Test that boxed Long is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsLongBox)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsObject *boxedLong = EtsBoxPrimitive<EtsLong>::Create(coro_, 100L);
     ASSERT_NE(boxedLong, nullptr);
 
@@ -125,6 +127,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsLongBox)
 // Test that boxed Double is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsDoubleBox)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsObject *boxedDouble = EtsBoxPrimitive<EtsDouble>::Create(coro_, 3.14);
     ASSERT_NE(boxedDouble, nullptr);
 
@@ -135,7 +138,8 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsDoubleBox)
 // Test that boxed Float is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsFloatBox)
 {
-    EtsObject *boxedFloat = EtsBoxPrimitive<EtsFloat>::Create(coro_, 2.5f);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    EtsObject *boxedFloat = EtsBoxPrimitive<EtsFloat>::Create(coro_, 2.5F);
     ASSERT_NE(boxedFloat, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedFloat);
@@ -145,6 +149,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsFloatBox)
 // Test that boxed Byte is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsByteBox)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsObject *boxedByte = EtsBoxPrimitive<EtsByte>::Create(coro_, static_cast<EtsByte>(10));
     ASSERT_NE(boxedByte, nullptr);
 
@@ -155,6 +160,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsByteBox)
 // Test that boxed Short is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsShortBox)
 {
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsObject *boxedShort = EtsBoxPrimitive<EtsShort>::Create(coro_, static_cast<EtsShort>(1000));
     ASSERT_NE(boxedShort, nullptr);
 
@@ -218,6 +224,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsNullValue)
 TEST_F(EtsWeakMapTest, ValidateKeyAcceptsArray)
 {
     // Create an array using the static Create method
+    // NOLINTNEXTLINE(readability-magic-numbers)
     EtsArray *arr = EtsIntArray::Create(10);
     ASSERT_NE(arr, nullptr);
 

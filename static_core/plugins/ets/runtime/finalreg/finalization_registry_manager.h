@@ -87,7 +87,7 @@ public:
 private:
     /// @brief Increase number of cleanup coroutines and check if not exceeds limit
     bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded();
-    EtsFinalizationRegistry *UpdateAndSweepFinRegChain(EtsFinalizationRegistry *head, const ReferenceUpdater &updater);
+    EtsFinalizationRegistry *UpdateAndSweepFinRegChain(EtsFinalizationRegistry *cur, const ReferenceUpdater &updater);
 
     // Limit of cleanup coroutines count
     static constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;

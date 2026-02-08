@@ -374,10 +374,7 @@ void EtsCoroutine::ProcessUnhandledRejectedPromises(bool listAllObjects)
 bool EtsCoroutine::IsContextSwitchRisky() const
 {
     auto *callStk = GetLocalStorage().Get<DataIdx::INTEROP_CALL_STACK_PTR, EtsCallStack *>();
-    if (callStk != nullptr && callStk->Current() != nullptr) {
-        return true;
-    }
-    return false;
+    return (callStk != nullptr && callStk->Current() != nullptr);
 }
 
 void EtsCoroutine::PrintCallStack() const

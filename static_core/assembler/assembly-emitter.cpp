@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1452,14 +1452,14 @@ bool AsmEmitter::MakeFunctionItems(
 /*static*/
 void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities)
 {
-    static std::vector<std::pair<std::string, std::vector<std::string>>> UNUSED_ITEM_KEYS_TO_EMIT = {
+    static std::vector<std::pair<std::string, std::vector<std::string>>> unusedItemKeysToEmit = {
         {
             "std.core.String.%%get-length:i32;",
             {"std.core.StringBuilder.%%get-stringLength:i32;"},
         },
     };
 
-    for (auto &[key, values] : UNUSED_ITEM_KEYS_TO_EMIT) {
+    for (auto &[key, values] : unusedItemKeysToEmit) {
         auto dependant = entities.methodItems.find(key);
         if (dependant == entities.methodItems.end()) {
             continue;

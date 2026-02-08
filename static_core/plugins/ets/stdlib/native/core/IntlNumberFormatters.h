@@ -25,6 +25,7 @@
 
 namespace ark::ets::stdlib::intl {
 
+// NOLINTBEGIN(readability-identifier-naming)
 namespace refs {
 extern ani_class g_resolvedOptionsClass;
 
@@ -47,6 +48,7 @@ extern ani_field g_unitDisplay_field;
 extern ani_field g_useGrouping_field;
 extern ani_field g_numberFormat_options_field;
 }  // namespace refs
+// NOLINTEND(readability-identifier-naming)
 
 constexpr std::string_view COMPACT_DISPLAY_SHORT = "short";
 constexpr std::string_view COMPACT_DISPLAY_LONG = "long";

@@ -29,7 +29,7 @@
 #include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/interop_js/xgc/xgc.h"
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-pro-type-cstyle-cast)
 namespace ark::ets::interop::js::ets_proxy::testing {
 
 class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {

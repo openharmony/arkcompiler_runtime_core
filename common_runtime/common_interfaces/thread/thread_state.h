@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,11 +83,3 @@ private:
 };
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_H
-// NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
-//           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
-//           readability-else-after-return, readability-duplicate-include,
-//           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
-//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
-//           modernize-use-auto, llvm-namespace-comment,
-//           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
-//           readability-implicit-bool-conversion)

@@ -329,11 +329,13 @@ static bool ReplaceWithStdCoreStringEquals(IntrinsicInst *intrinsic, Graph *grap
     auto *runtime = graph->GetRuntime();
 
     auto input0TypeInfo = input0->GetObjectTypeInfo();
-    if (!input0TypeInfo.IsValid() || !input0TypeInfo.GetClass() || !runtime->IsStringClass(input0TypeInfo.GetClass())) {
+    if (!input0TypeInfo.IsValid() || input0TypeInfo.GetClass() == nullptr ||
+        !runtime->IsStringClass(input0TypeInfo.GetClass())) {
         return false;
     }
     auto input1TypeInfo = input1->GetObjectTypeInfo();
-    if (!input1TypeInfo.IsValid() || !input1TypeInfo.GetClass() || !runtime->IsStringClass(input1TypeInfo.GetClass())) {
+    if (!input1TypeInfo.IsValid() || input1TypeInfo.GetClass() == nullptr ||
+        !runtime->IsStringClass(input1TypeInfo.GetClass())) {
         return false;
     }
 

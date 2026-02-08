@@ -331,7 +331,7 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
 RuntimeInterface::EntrypointId GetStringBuilderAppendStringsEntrypointId(uint32_t numArgs, mem::BarrierType barrierType)
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
-    switch (barrierType) {
+    switch (barrierType) {                                  // NOLINT(hicpp-multiway-paths-covered)
         case mem::BarrierType::POST_INTERREGION_BARRIER: {  // G1 GC
             std::array<EntrypointId, 5U> entrypoints {
                 EntrypointId::INVALID,  // numArgs = 0
@@ -628,18 +628,18 @@ void Codegen::CreateStringFromCharCodeSingle(IntrinsicInst *inst, Reg dst, SRCRE
     ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
     auto cache = src[FIRST_OPERAND];
     auto number = src[SECOND_OPERAND];
-    constexpr auto eid = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    static constexpr auto EID = EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
 
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(
             klassReg, false,
             MemRef(ThreadReg(), static_cast<ssize_t>(GetRuntime()->GetStringClassPointerTlsOffset(GetArch()))));
-        CallFastPath(inst, eid, dst, {}, cache, number, klassReg);
+        CallFastPath(inst, EID, dst, {}, cache, number, klassReg);
     } else {
         auto klassImm =
             TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetLineStringClass(GetGraph()->GetMethod(), nullptr)));
-        CallFastPath(inst, eid, dst, {}, cache, number, klassImm);
+        CallFastPath(inst, EID, dst, {}, cache, number, klassImm);
     }
 }
 
