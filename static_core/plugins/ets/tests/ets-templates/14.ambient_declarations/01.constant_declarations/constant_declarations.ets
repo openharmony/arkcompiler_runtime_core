@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -40,19 +40,19 @@ export enum Color3 { Red = "1" , Green = "2", Blue =  "3" }
 
 export const enum Color4 { Red, Green, Blue }
 
-export const QuestionOfAll1 = 42
+export const QuestionOfAll1: int = 42
 
-export const QuestionOfAll2 = 0xBAD3
+export const QuestionOfAll2: int = 0xBAD3
 
-export const BigLongLiteral = 9223372036854775807
+export const BigLongLiteral: long = 9223372036854775807
 
-export const FloatConst1 = 3.14f
+export const FloatConst1: float = 3.14f
 
-export const FloatConst2 = 3.141_592
+export const FloatConst2: number = 3.141_592
 
-export const FloatConst3 = .5    
+export const FloatConst3: number = .5
 
-export const Hello = "Hello"
+export const Hello: string = "Hello"
 
-export const MultilineSentence = `This is an example of multi-line string,
+export const MultilineSentence: string = `This is an example of multi-line string,
       which should be enclosed in backticks (\`)`

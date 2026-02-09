@@ -17,12 +17,12 @@ cases:
     - entry_point: foo
       cmd_line_args: X, Y
       use: |-
-          export function foo(args: string[]) {
+          export function foo(args: string[]): void {
               arktest.assertEQ(args[0], 'X')
               arktest.assertEQ(args[1], 'Y')
           }
 
-          export function main() { // should not be called
+          export function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
@@ -36,7 +36,7 @@ cases:
               return 0
           }
 
-          export function main() { // should not be called
+          export function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
@@ -46,7 +46,7 @@ cases:
       use: |-
           export overload foo { foo1 }
 
-          export function foo1(args: string[]) {
+          export function foo1(args: string[]): void {
               arktest.assertEQ(args[0], 'X')
               arktest.assertEQ(args[1], 'Y')
           }
@@ -75,7 +75,7 @@ cases:
     - entry_point: foo
       cmd_line_args: X, Y
       use: |-
-          export function foo(args: string[]) {
+          export function foo(args: string[]): void {
               arktest.assertEQ(main(args), 42)
           }
 
@@ -90,7 +90,7 @@ cases:
       use: |-
           class MyError extends Error {}
 
-          export function foo(args: string[]) {
+          export function foo(args: string[]): void {
               arktest.expectThrow(
                   () => main(args),
                   (e: Error) => e instanceof MyError

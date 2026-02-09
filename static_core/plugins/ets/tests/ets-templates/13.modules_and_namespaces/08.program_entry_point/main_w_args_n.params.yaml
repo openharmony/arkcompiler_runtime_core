@@ -37,7 +37,7 @@ cases:
       use: |-
           export overload main { main1, main }
 
-          export function main(args: string[]) {
+          export function main(args: string[]): void {
               arktest.assertEQ(args[0], 'X')
               arktest.assertEQ(args[1], 'Y')
           }
@@ -68,11 +68,11 @@ cases:
       use: |-
           export overload main { main1, main2, main }
 
-          export function main1(args: string[]) {
+          export function main1(args: string[]): void {
               arktest.assertTrue(false)
           }
 
-          export function main2(args: string[]) {
+          export function main2(args: string[]): void {
               arktest.assertTrue(false)
           }
 

@@ -33,7 +33,7 @@ cases:
       decl: |-
           namespace ns {
             let i: int
-            export function foo() {
+            export function foo(): int {
               return i
             }
             static {

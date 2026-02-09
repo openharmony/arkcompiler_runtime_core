@@ -20,4 +20,4 @@ tags:
 - not-a-test
 ---*/
 
-export default const c_var = 2;
+export default const c_var: int = 2;

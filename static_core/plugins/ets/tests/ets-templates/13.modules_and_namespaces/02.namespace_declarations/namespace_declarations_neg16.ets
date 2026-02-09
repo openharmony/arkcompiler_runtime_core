@@ -25,7 +25,7 @@ tags: [compile-only, negative]
 import {Transit as Transit1} from "./namespace_storage"
 
 export namespace Transit1.B {
-    export let variable1 = 1;
+    export let variable1: int = 1;
 }
 
 function main() {

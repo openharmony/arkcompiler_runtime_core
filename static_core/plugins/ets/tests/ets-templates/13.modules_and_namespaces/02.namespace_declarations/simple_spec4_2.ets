@@ -22,7 +22,7 @@ desc: >-
 namespace A {
     let variable1 = 1;
     export namespace C {
-        export let variable11 = 11;
+        export let variable11: int = 11;
     }
 }
 
@@ -31,7 +31,7 @@ namespace A {
 }
 
 namespace A.C {
-    export let variable12 = 12;
+    export let variable12: int = 12;
 }
 
 function main() {

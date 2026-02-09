@@ -66,34 +66,34 @@ cases:
     decl: |-
       namespace ns1 {
         export let i: int = 1
-        export function foo() {}
+        export function foo(): void {}
       }
       namespace ns2 { }
       namespace ns1 {
         let i: int = 1
-        export function bar() {}
+        export function bar(): void {}
       }
 
   - doc: Same name used for merged namespaces
     decl: |-
       namespace ns1 {
         export let i: int = 1
-        export function foo() {}
+        export function foo(): void {}
       }
       namespace ns2 { }
       namespace ns1 {
         let i: int = 1
-        export function bar() {}
+        export function bar(): void {}
       }
 
   - doc: Static initializer used only at the first call to namespace member
     decl: |-
       namespace ns1 {
         export let i: int = 1
-        export function foo() {}
+        export function foo(): void {}
       }
       namespace ns2 { }
       namespace ns1 {
         let i: int = 1
-        export function bar() {}
+        export function bar(): void {}
       }

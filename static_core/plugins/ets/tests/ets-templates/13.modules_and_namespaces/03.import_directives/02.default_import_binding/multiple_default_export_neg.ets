@@ -18,5 +18,5 @@ desc: Export 2 default entities from the same module. Only one default export is
 tags: [compile-only, negative]
 ---*/
 
-export default let var = 1;
+export default let var: int = 1;
 export default function foo(): int { return 1; }

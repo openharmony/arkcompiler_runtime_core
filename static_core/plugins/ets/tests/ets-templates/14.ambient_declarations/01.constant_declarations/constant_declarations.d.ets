@@ -43,9 +43,9 @@ export declare const BigLongLiteral: long
   
 export declare const FloatConst1: float
   
-export declare const FloatConst2: double
+export declare const FloatConst2: number
   
-export declare const FloatConst3: double  
+export declare const FloatConst3: number   
   
 export declare const Hello: string
   

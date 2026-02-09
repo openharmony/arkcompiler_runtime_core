@@ -18,5 +18,5 @@ desc: Only one default export is allowed in a module
 tags: [compile-only, negative]
 ---*/
 
-export default const b = 1;
-export default const c = 4;
+export default const b: int = 1;
+export default const c: int = 4;
