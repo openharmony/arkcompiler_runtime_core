@@ -134,8 +134,11 @@ function runTestSuite(testSuite: string, opts: TestRunnerCLIOptions): TestResult
 
   const failedTests: TestResult[] = [];
 
+  const interopTestListPath = path.join(opts.testDirPath, '../test-lists/interop-tests.txt');
+  const interopTests = readInteropTestList(interopTestListPath);
+
   for (const test of collectTests(testSuite, opts)) {
-    const res = runTest(test);
+    const res = runTest(test, interopTests);
 
     if (!res.outputsMatch || !res.reportsMatch) {
       failedTests.push(res);
@@ -145,11 +148,33 @@ function runTestSuite(testSuite: string, opts: TestRunnerCLIOptions): TestResult
   return failedTests;
 }
 
-function runTest(test: Test): TestResult {
+function readInteropTestList(filePath: string): Set<string> {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0 && !line.startsWith('#'));
+    return new Set(lines);
+  } catch (error) {
+    return new Set();
+  }
+}
+
+function runTest(test: Test, interopTests: Set<string>): TestResult {
   Logger.info(`Running test ${test.name}`);
 
-  const declgenOptions = { outDir: test.outDir, rootDir: test.rootDir, inputFiles: test.testSource, inputDirs: [] }
-  let compilerOptions: ts.CompilerOptions | undefined = undefined
+  const enableInteropFeatures = interopTests.has(test.name);
+
+  const declgenOptions = {
+    outDir: test.outDir,
+    rootDir: test.rootDir,
+    inputFiles: test.testSource,
+    inputDirs: [],
+    enableInteropFeatures: enableInteropFeatures
+  };
+
+  let compilerOptions: ts.CompilerOptions | undefined = undefined;
 
   if (test.suite === 'package_source') {
     compilerOptions = {

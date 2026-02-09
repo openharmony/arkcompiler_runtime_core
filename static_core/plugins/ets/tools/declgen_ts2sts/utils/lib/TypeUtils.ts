@@ -17,6 +17,17 @@ import * as ts from 'typescript';
 export const JSValue: string = 'Any';
 export const ESObject: string = 'ESObject';
 export const ArrayType: string = 'Array';
+export enum InteropNamespace {
+    Dynamic = 'es',
+    Static = 'st'
+};
+export enum InteropType {
+    Array = 'Array',
+    Map = 'Map',
+    Set = 'Set',
+    STValue = 'STValue'
+};
+export const InteropSdkName = '@ohos.lang.interop';
 export const KitPrefix: string[] = [];
 export const BuiltInType: string[] = ['Symbol', 'SharedArrayBuffer', 'PropertyDecorator', 'Transferable'];
 export const ETSKeyword: string[] = ['Class', 'ESObject', 'MethodType'];

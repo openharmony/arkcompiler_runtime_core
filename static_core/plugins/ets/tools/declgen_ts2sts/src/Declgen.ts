@@ -48,6 +48,7 @@ export class Declgen {
   private visitedFiles: Map<string, ts.SourceFile>;
   private writedFiles: Set<string>;
   private uiInteropTransformer?: Function;
+  private enableInteropFeatures: boolean;
 
   constructor(
     declgenOptions: DeclgenCLIOptions,
@@ -65,6 +66,7 @@ export class Declgen {
     this.visitedFiles = new Map<string, ts.SourceFile>();
     this.writedFiles = new Set<string>();
     this.uiInteropTransformer = uiInteropTransformer;
+    this.enableInteropFeatures = declgenOptions.enableInteropFeatures ?? true;
 
     // Create SourceFile based on code content.
     if (codeInputs) {
@@ -117,7 +119,7 @@ export class Declgen {
       ...(this.uiInteropTransformer ? [this.uiInteropTransformer(program)] : []),
       (ctx: ts.TransformationContext): ts.CustomTransformer => {
         const typeChecker = program.getTypeChecker();
-        const autofixer = new Autofixer(typeChecker, ctx);
+        const autofixer = new Autofixer(this.enableInteropFeatures, typeChecker, ctx);
         const transformer = new Transformer(ctx, this.sourceFileMap, [autofixer.fixNode.bind(autofixer)]);
 
         return transformer.createCustomTransformer((sourceFile: ts.SourceFile) => {
@@ -210,16 +212,18 @@ export class Declgen {
       sourceFile,
       [
         (context: ts.TransformationContext): ts.Transformer<ts.SourceFile> => {
-          const autofixer = new Autofixer(typeChecker, context);
+          const autofixer = new Autofixer(this.enableInteropFeatures, typeChecker, context);
           const visit = (node: ts.Node): ts.Node | undefined => {
-            const fixedNode = autofixer.fixNode(node);
+            const visitedNode = ts.visitEachChild(node, visit, context);
+            
+            const fixedNode = autofixer.fixNode(visitedNode);
 
             if (fixedNode === undefined) {
-              return node;
+              return visitedNode;
             } else if (Array.isArray(fixedNode)) {
               return context.factory.createBlock(fixedNode as readonly ts.Statement[]);
             } else {
-              return ts.visitEachChild(fixedNode, visit, context);
+              return fixedNode;
             }
           };
           return (sourceFile: ts.SourceFile): ts.SourceFile => {

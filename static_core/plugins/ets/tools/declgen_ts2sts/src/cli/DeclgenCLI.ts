@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ export interface DeclgenCLIOptions {
    * default is [*]
    */
   includePaths?: string[];
+  enableInteropFeatures?: boolean;
 }
 
 export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
@@ -76,6 +77,7 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       },
       [] as string[]
     );
+    cliParser.option('--interop', 'Enable interop features.');
 
     return cliParser;
   }
@@ -88,6 +90,7 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
       tsconfig: opts.project,
       inputDirs: opts.dir,
       includePaths: opts.include,
+      enableInteropFeatures: opts.interop === true,
     };
   }
 

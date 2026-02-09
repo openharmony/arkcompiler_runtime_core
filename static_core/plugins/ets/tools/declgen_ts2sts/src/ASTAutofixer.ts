@@ -30,15 +30,20 @@ import {
   SpecificTypes,
   InvalidFuncParaNames,
   BuiltInType,
-  InvalidSDKs
+  InvalidSDKs,
+  InteropType,
+  InteropSdkName,
+  InteropNamespace
 } from '../utils/lib/TypeUtils';
 import * as path from 'path';
 
 export class Autofixer {
   private readonly typeChecker: ts.TypeChecker;
   private readonly context: ts.TransformationContext;
+  private enableInteropFeatures: boolean;
 
-  constructor(typeChecker: ts.TypeChecker, context: ts.TransformationContext) {
+  constructor(enableInteropFeatures: boolean, typeChecker: ts.TypeChecker, context: ts.TransformationContext) {
+    this.enableInteropFeatures = enableInteropFeatures;
     this.typeChecker = typeChecker;
     this.context = context;
   }
@@ -60,6 +65,8 @@ export class Autofixer {
     [
       ts.SyntaxKind.SourceFile,
       [
+        this[FaultID.NoInvalidSDKImportExport].bind(this),
+        this[FaultID.FixInteropImports].bind(this),
         this[FaultID.ImportAfterStatement].bind(this),
         this[FaultID.LimitImport].bind(this),
         this[FaultID.DuplicatedDeclaration].bind(this),
@@ -70,8 +77,7 @@ export class Autofixer {
         this[FaultID.AddDeclareToTopLevelVariable].bind(this),
         this[FaultID.AddDeclareToTopLevelFunction].bind(this),
         this[FaultID.AddDeclareToTopLevelNamespace].bind(this),
-        this[FaultID.AddDeclareToTopLevelClass].bind(this),
-        this[FaultID.NoInvalidSDKImportExport].bind(this)
+        this[FaultID.AddDeclareToTopLevelClass].bind(this)
       ]
     ],
     [
@@ -126,6 +132,7 @@ export class Autofixer {
         this[FaultID.ESObjectType].bind(this),
         this[FaultID.UtilityType].bind(this),
         this[FaultID.NoInvalidSDKType].bind(this),
+        this[FaultID.ConvertESTypeToInteropType].bind(this),
       ]
     ],
     [
@@ -178,7 +185,8 @@ export class Autofixer {
     [ts.SyntaxKind.VariableDeclaration, [this[FaultID.ConstLiteralToType].bind(this)]],
     [ts.SyntaxKind.IndexedAccessType, [this[FaultID.IndexAccessType].bind(this)]],
     [ts.SyntaxKind.FunctionType, [this[FaultID.FunctionType].bind(this)]],
-    [ts.SyntaxKind.ImportType, [this[FaultID.NoImportType].bind(this)]]
+    [ts.SyntaxKind.ImportType, [this[FaultID.NoImportType].bind(this)]],
+    [ts.SyntaxKind.ArrayType, [this[FaultID.ConvertESTypeToInteropType].bind(this)]]
   ]);
 
   fixNode(node: ts.Node): ts.VisitResult<ts.Node> {
@@ -862,13 +870,15 @@ export class Autofixer {
    */
   private [FaultID.NoGetAccessorType](node: ts.Node): ts.VisitResult<ts.Node> {
     /**
-     * For get accessors without type annotation, add 'any' type.
-     * e.g. get name() {} => get name(): any {}
+     * For get accessors without type annotation, add 'Any' type.
+     * e.g. get name() {} => get name(): Any {}
      */
 
     if (ts.isGetAccessorDeclaration(node)) {
       if (node.type === undefined) {
-        const anyType = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
+        const anyType = this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(JSValue), undefined
+        );
         return this.context.factory.updateGetAccessorDeclaration(
           node,
           node.modifiers,
@@ -1213,7 +1223,8 @@ export class Autofixer {
     if (ts.isTypeReferenceNode(node) && isUtilityTypes(node)) {
       return createNodeFromUtilType(
         UtilityTypes.get((node.typeName as ts.Identifier).text)!,
-        this.context.factory
+        this.enableInteropFeatures,
+        this.context
       );
     }
     return node;
@@ -1574,6 +1585,23 @@ export class Autofixer {
           typeNode,
           node.initializer
         );
+      } else {
+        // Revert the type converted by interop rules
+        if (this.enableInteropFeatures && isInteropArray(node.type)) {
+          const elementType = node.type.typeArguments?.[0];
+          const typeNode = this.context.factory.createArrayTypeNode(
+            elementType ?? this.context.factory.createTypeReferenceNode(JSValue, undefined)
+          );
+          return this.context.factory.updateParameterDeclaration(
+            node,
+            node.modifiers,
+            node.dotDotDotToken,
+            node.name,
+            node.questionToken,
+            typeNode,
+            node.initializer
+          );
+        }
       }
     }
     return node;
@@ -1584,10 +1612,18 @@ export class Autofixer {
    */
   private [FaultID.TupleTypeToArray](node: ts.Node): ts.VisitResult<ts.Node> {
     if (ts.isTupleTypeNode(node)) {
-      return this.context.factory.createTypeReferenceNode(
-        this.context.factory.createIdentifier('Array'),
-        [this.context.factory.createTypeReferenceNode(JSValue)]
-      );
+      if (this.enableInteropFeatures) {
+        return createESArrayTypeNode(
+          this.context.factory.createTypeReferenceNode(JSValue, undefined),
+          this.context
+        );
+      }
+      else {
+        return this.context.factory.createTypeReferenceNode(
+          this.context.factory.createIdentifier(ArrayType),
+          [this.context.factory.createTypeReferenceNode(JSValue)]
+        );
+      }
     }
 
     return node;
@@ -1961,6 +1997,61 @@ export class Autofixer {
       node.typeParameters,
       node.heritageClauses,
       this.context.factory.createNodeArray([...node.members, ...missingMembers])
+    );
+  }
+  /**
+   * Rule: `arkts-convert-estype-to-interop-type`
+   */
+  private [FaultID.ConvertESTypeToInteropType](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!this.enableInteropFeatures) {
+      return node;
+    }
+    if (ts.isTypeReferenceNode(node)) {
+      if (ts.isIdentifier(node.typeName) && isESBuildinType(node)) {
+        const interopName = convertESBuiltinNameToInteropName(node.typeName, this.context);
+        return this.context.factory.updateTypeReferenceNode(node, interopName, node.typeArguments);
+      }
+      else if (ts.isQualifiedName(node.typeName) && isSTType(node, this.typeChecker)) {
+        const esBuiltinName = convertSTTypeNameToESBuiltinName(node.typeName, this.context);
+        return this.context.factory.updateTypeReferenceNode(node, esBuiltinName, node.typeArguments);
+      }
+    }
+    else if (ts.isArrayTypeNode(node)) {
+      return createESArrayTypeNode(node.elementType, this.context);
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-fix-interop-imports`
+   */
+  private [FaultID.FixInteropImports](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (!this.enableInteropFeatures) {
+      return node;
+    }
+    if (!ts.isSourceFile(node)) {
+      return node;
+    }
+
+    const nonInteropImportDeclarationStatements = node.statements.filter((stmt: ts.Statement): boolean => {
+      return !ts.isImportDeclaration(stmt) || isNonInteropImportDeclaration(stmt);
+    });
+
+    const interopImportDeclarations = node.statements.filter((stmt: ts.Statement): stmt is ts.ImportDeclaration => {
+      return ts.isImportDeclaration(stmt) && !isNonInteropImportDeclaration(stmt);
+    });
+
+    const interopImportDeclaration = createESInteropImportDeclaration(this.context);
+
+    const newStatements = [...nonInteropImportDeclarationStatements, interopImportDeclaration];
+    return this.context.factory.updateSourceFile(
+      node,
+      newStatements,
+      node.isDeclarationFile,
+      node.referencedFiles,
+      node.typeReferenceDirectives,
+      node.hasNoDefaultLib,
+      node.libReferenceDirectives
     );
   }
 }
@@ -3067,12 +3158,17 @@ function isSpecificTypes(node: ts.Node): boolean {
  * Creates an AST node that represents a type compatible with ArkTS 1.2,
  * based on the given utility type in ArkTS 1.1
  */
-function createNodeFromUtilType(targetType: string, factory: ts.NodeFactory):
+function createNodeFromUtilType(targetType: string, enableInteropFeatures: boolean, context: ts.TransformationContext):
   ts.TypeReferenceNode | ts.ArrayTypeNode {
   if (targetType === ArrayType) {
-    return factory.createArrayTypeNode(factory.createTypeReferenceNode(JSValue));
+    if (enableInteropFeatures) {
+      return createESArrayTypeNode(context.factory.createTypeReferenceNode(JSValue), context);
+    }
+    else {
+      return context.factory.createArrayTypeNode(context.factory.createTypeReferenceNode(JSValue));
+    }
   }
-  return factory.createTypeReferenceNode(JSValue);
+  return context.factory.createTypeReferenceNode(JSValue);
 }
 
 function mergeOverloadedMembers(
@@ -3233,11 +3329,22 @@ function getTypeNameKey(type: ts.TypeNode): string {
       ts.isIdentifier(name)
         ? name.escapedText.toString()
         : `${getName(name.left)}.${name.right.escapedText.toString()}`;
-    return getName(type.typeName);
+    const baseName = getName(type.typeName);
+    if (type.typeArguments && type.typeArguments.length > 0) {
+      const typeArgs = type.typeArguments.map(arg => getTypeNameKey(arg)).join(', ');
+      return `${baseName}<${typeArgs}>`;
+    }
+
+    return baseName;
   }
   if (ts.isArrayTypeNode(type)) {
     return getTypeNameKey(type.elementType) + '[]';
   }
+
+  if (ts.isUnionTypeNode(type)) {
+    return type.types.map(t => getTypeNameKey(t)).join(' | ');
+  }
+
   return ts.SyntaxKind[type.kind];
 }
 
@@ -3263,6 +3370,8 @@ function isInvalidSDK(sdkName: string): boolean {
 function getBaseNameFromFilePath(filePath: string): string {
   if (filePath.endsWith(Extension.DTS)) {
     return path.basename(filePath, Extension.DTS);
+  } else if (filePath.endsWith(Extension.DETS)) {
+    return path.basename(filePath, Extension.DETS);
   }
   return path.basename(filePath);
 }
@@ -3541,6 +3650,119 @@ function isSameMethodDeclaration(
   return true;
 }
 
+function createESQualifiedName(
+  namespace: InteropNamespace,
+  type: InteropType,
+  context: ts.TransformationContext
+): ts.QualifiedName {
+  return context.factory.createQualifiedName(
+    context.factory.createIdentifier(namespace),
+    context.factory.createIdentifier(type)
+  );
+}
+
+function isESBuildinType(node: ts.TypeReferenceNode): boolean {
+  if (ts.isIdentifier(node.typeName)) {
+    const typeName = node.typeName.text;
+    return typeName === InteropType.Array || typeName === InteropType.Map || typeName === InteropType.Set;
+  }
+  return false;
+}
+
+function isSTType(node: ts.TypeReferenceNode, typeChecker: ts.TypeChecker): boolean {
+  const typeName = node.typeName;
+  if (!ts.isQualifiedName(typeName)) {
+    return false;
+  }
+  const type = typeChecker.getTypeAtLocation(typeName);
+  const symbol = type.getSymbol();
+
+  if (!symbol) {
+    return false;
+  }
+
+  const declarations = symbol.getDeclarations();
+  if (!declarations || declarations.length === 0) {
+    return false;
+  }
+
+  for (const decl of declarations) {
+    const sourceFileName = decl.getSourceFile().fileName;
+    const sdkName = getBaseNameFromFilePath(sourceFileName);
+    if (sdkName !== InteropSdkName) {
+      continue;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+function convertESBuiltinNameToInteropName(
+  identifier: ts.Identifier,
+  context: ts.TransformationContext
+): ts.EntityName {
+  let converted: ts.EntityName = context.factory.createIdentifier(JSValue);
+  switch (identifier.text) {
+  case InteropType.Array:
+    converted = createESQualifiedName(InteropNamespace.Dynamic, InteropType.Array, context);
+    break;
+  case InteropType.Map:
+    converted = createESQualifiedName(InteropNamespace.Dynamic, InteropType.Map, context);
+    break;
+  case InteropType.Set:
+    converted = createESQualifiedName(InteropNamespace.Dynamic, InteropType.Set, context);
+    break;
+  }
+  return converted;
+}
+
+function convertSTTypeNameToESBuiltinName(
+  node: ts.QualifiedName,
+  context: ts.TransformationContext
+): ts.Identifier {
+  let converted: ts.EntityName = context.factory.createIdentifier(JSValue);
+  if (ts.isIdentifier(node.left)) {
+    switch (node.right.text) {
+    case InteropType.Array:
+      converted = context.factory.createIdentifier(InteropType.Array);
+      break;
+    case InteropType.Map:
+      converted = context.factory.createIdentifier(InteropType.Map);
+      break;
+    case InteropType.Set:
+      converted = context.factory.createIdentifier(InteropType.Set);
+      break;
+    }
+  }
+  return converted;
+}
+
+function createESArrayTypeNode(
+  elementType: ts.TypeNode | ts.TypeNode[],
+  context: ts.TransformationContext
+): ts.TypeReferenceNode {
+  const typeName = context.factory.createQualifiedName(
+    context.factory.createIdentifier(InteropNamespace.Dynamic),
+    context.factory.createIdentifier(InteropType.Array)
+  );
+
+  const typeArguments = Array.isArray(elementType) ? elementType : [elementType];
+
+  return context.factory.createTypeReferenceNode(
+    typeName,
+    typeArguments
+  );
+}
+
+function isNonInteropImportDeclaration(node: ts.ImportDeclaration): boolean {
+  const moduleSpecifier = node.moduleSpecifier;
+  if (ts.isStringLiteral(moduleSpecifier) && moduleSpecifier.text === InteropSdkName) {
+    return false;
+  }
+  return true;
+}
+
 function getMissingAbstractMembers(
   node: ts.ClassDeclaration,
   checker: ts.TypeChecker,
@@ -3588,4 +3810,31 @@ function getMissingAbstractMembers(
     );
   }
   return missingMembers;
+}
+
+function createESInteropImportDeclaration(
+  context: ts.TransformationContext
+): ts.ImportDeclaration {
+    const esName = context.factory.createIdentifier(InteropNamespace.Dynamic);
+    const importClause = context.factory.createImportClause(false, esName, undefined);
+    const moduleSpecifier = context.factory.createStringLiteral(InteropSdkName);
+    const targetImportStmt = context.factory.createImportDeclaration(
+      undefined,
+      importClause,
+      moduleSpecifier
+    );
+
+    return targetImportStmt;
+}
+
+function isInteropArray(node: ts.TypeReferenceNode): boolean {
+  if (ts.isQualifiedName(node.typeName)) {
+    const left = node.typeName.left;
+    const right = node.typeName.right;
+    return ts.isIdentifier(left) &&
+      left.text === InteropNamespace.Dynamic &&
+      ts.isIdentifier(right) &&
+      right.text === InteropType.Array;
+  }
+  return false;
 }

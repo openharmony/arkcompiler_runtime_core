@@ -1,4 +1,7 @@
 # TODO: no 'any' type
-cookbook_tests/arkts-no-private-identifiers.d.ets
-cookbook_tests/arkts-no-duplicate-interfaces-class.d.ets
+cookbook_tests/dets_output/arkts-no-private-identifiers.d.ets
+cookbook_tests/dets_output/arkts-no-duplicate-interfaces-class.d.ets
 cookbook_tests/dets_output/arkts-classes-annotations.d.ets
+cookbook_tests/dets_output/arkts-fix-interop-imports.d.ets
+cookbook_tests/dets_output/arkts-convert-estype-to-interop-type/convert-decl.d.ets
+cookbook_tests/dets_output/arkts-convert-estype-to-interop-type/convert-main.d.ets
