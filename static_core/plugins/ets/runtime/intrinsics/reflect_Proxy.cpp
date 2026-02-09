@@ -51,9 +51,11 @@ static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *
 
 extern "C" EtsClass *ReflectProxyGenerateProxy(EtsRuntimeLinker *linker, EtsString *name, ObjectHeader *interfaces)
 {
-    ASSERT(linker != nullptr);
+    if (UNLIKELY(linker == nullptr || interfaces == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
     ASSERT(name != nullptr);
-    ASSERT(interfaces != nullptr);
 
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
