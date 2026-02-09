@@ -374,7 +374,7 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
     ASSERT(promiseInteropConnectMethod != nullptr);
 
     // xgc-related things
-    stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>();
+    stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>(vm);
     [[maybe_unused]] bool xgcCreated =
         XGC::Create(vm, etsProxyRefStorage.get(), static_cast<STSVMInterfaceImpl *>(stsVMInterface.get()));
     ASSERT(xgcCreated);

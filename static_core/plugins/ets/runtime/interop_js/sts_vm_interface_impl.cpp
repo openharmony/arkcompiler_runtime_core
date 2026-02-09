@@ -26,7 +26,13 @@ void STSVMInterfaceImpl::MarkFromObject(void *obj)
     XGC::GetInstance()->MarkFromObject(obj);
 }
 
-STSVMInterfaceImpl::STSVMInterfaceImpl() : xgcBarrier_(STSVMInterface::DEFAULT_XGC_EXECUTORS_COUNT) {}
+STSVMInterfaceImpl::STSVMInterfaceImpl() : xgcBarrier_(STSVMInterface::DEFAULT_XGC_EXECUTORS_COUNT), vm_(nullptr) {}
+
+STSVMInterfaceImpl::STSVMInterfaceImpl(PandaEtsVM *vm)
+    : xgcBarrier_(STSVMInterface::DEFAULT_XGC_EXECUTORS_COUNT), vm_(vm)
+{
+    ASSERT(vm != nullptr);
+}
 
 void STSVMInterfaceImpl::OnVMAttach()
 {

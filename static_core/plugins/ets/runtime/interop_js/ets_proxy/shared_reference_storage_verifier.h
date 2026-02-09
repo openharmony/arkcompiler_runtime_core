@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,17 +29,25 @@ enum class XgcStatus {
 };
 
 class SharedReferenceStorageVerifier {
+    PandaEtsVM *vm_ {nullptr};
+
 public:
-    static size_t TraverseAllItems(const SharedReferenceStorage *const storage, XgcStatus status);
+    SharedReferenceStorageVerifier([[maybe_unused]] const SharedReferenceStorage *const storage, PandaEtsVM *vm)
+        : vm_(vm)
+    {
+    }
+
+    static size_t TraverseAllItems(const SharedReferenceStorage *const storage, XgcStatus status, PandaEtsVM *vm);
 
 private:
     friend class testing::SharedReferenceStorage1GTest;
-    static size_t VerifyOneItem(const SharedReferenceStorage *const storage, size_t index, XgcStatus status);
+    static size_t VerifyOneItem(const SharedReferenceStorage *const storage, size_t index, XgcStatus status,
+                                PandaEtsVM *vm);
     static size_t CheckObjectAlive(const SharedReference *item, size_t index);
     static size_t CheckObjectAddressValid(const SharedReference *item, size_t index);
     static size_t CheckJsObjectType(const SharedReference *item, size_t index);
     static size_t CheckObjectReindex(const SharedReferenceStorage *const storage, const SharedReference *item,
-                                     size_t index);
+                                     size_t index, PandaEtsVM *vm);
     static size_t IsAllItemsMarked(const SharedReference *item, size_t index);
     static size_t CheckJsObjectAlive(const SharedReference *item, size_t index);
     static size_t CheckJEtsObjectAlive(const SharedReference *item, size_t index);
@@ -51,7 +59,7 @@ private:
 
     static size_t CheckJsObjectReindex(const SharedReferenceStorage *const storage, const SharedReference *item,
                                        size_t index);
-    static size_t CheckEtsObjectReindex(const SharedReference *item, size_t index);
+    static size_t CheckEtsObjectReindex(const SharedReference *item, size_t index, PandaEtsVM *vm);
 };
 }  // namespace ark::ets::interop::js::ets_proxy
 

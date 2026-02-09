@@ -96,8 +96,8 @@ SharedReferenceStorage::~SharedReferenceStorage()
 SharedReference *SharedReferenceStorage::GetReference(EtsObject *etsObject) const
 {
     os::memory::ReadLockHolder lock(storageLock_);
-    ASSERT(SharedReference::HasReference(etsObject));
-    return GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
+    ASSERT(SharedReference::HasReference(vm_, etsObject));
+    return GetItemByIndex(SharedReference::ExtractMaybeIndex(vm_, etsObject));
 }
 
 napi_status NapiUnwrap(napi_env env, napi_value jsObject, void **result)
@@ -145,10 +145,10 @@ SharedReference *SharedReferenceStorage::GetReference(void *data) const
 bool SharedReferenceStorage::HasReference(EtsObject *etsObject, napi_env env)
 {
     os::memory::ReadLockHolder lock(storageLock_);
-    if (!SharedReference::HasReference(etsObject)) {
+    if (!SharedReference::HasReference(vm_, etsObject)) {
         return false;
     }
-    uint32_t index = SharedReference::ExtractMaybeIndex(etsObject);
+    uint32_t index = SharedReference::ExtractMaybeIndex(vm_, etsObject);
     do {
         const SharedReference *currentRef = GetItemByIndex(index);
         if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
@@ -162,7 +162,7 @@ bool SharedReferenceStorage::HasReference(EtsObject *etsObject, napi_env env)
 napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env env) const
 {
     storageLock_.ReadLock();
-    const SharedReference *currentRef = GetItemByIndex(SharedReference::ExtractMaybeIndex(etsObject));
+    const SharedReference *currentRef = GetItemByIndex(SharedReference::ExtractMaybeIndex(vm_, etsObject));
     // CC-OFFNXT(G.CTL.03) false positive
     do {
         if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
@@ -280,8 +280,8 @@ SharedReference *SharedReferenceStorage::CreateReference(InteropCtx *ctx, EtsHan
     // If EtsObject has been already marked as interop object then add new created SharedReference for a new interop
     // context to chain of references with this EtsObject
     ASSERT(etsObject.GetPtr() != nullptr);
-    if (etsObject->HasInteropIndex()) {
-        lastRefInChain = GetItemByIndex(etsObject->GetInteropIndex());
+    if (etsObject->HasInteropIndex(vm_)) {
+        lastRefInChain = GetItemByIndex(etsObject->GetInteropIndex(vm_));
         ASSERT(!HasReferenceWithCtx(lastRefInChain, ctx));
         uint32_t index = lastRefInChain->flags_.GetNextIndex();
         while (index != 0U) {
@@ -389,7 +389,7 @@ void SharedReferenceStorage::DeleteReferenceFromChain(EtsObject *etsObject, Shar
     if (prevRef == nullptr) {
         if (nextIndex == 0U) {
             // Chain contains only one reference, so no more references for this EtsObject
-            etsObject->DropInteropIndex();
+            etsObject->DropInteropIndex(vm_);
         } else {
             // Update interop index to actual head
             etsObject->SetInteropIndex(nextIndex);
@@ -406,7 +406,7 @@ bool SharedReferenceStorage::DeleteReference(
     ASSERT(!sharedRef->IsEmpty());
     auto *etsObject = sharedRef->GetEtsObject();
     // EtsObject contains interop index for the first reference in chain
-    uint32_t nextIndex = etsObject->GetInteropIndex();
+    uint32_t nextIndex = etsObject->GetInteropIndex(vm_);
     ASSERT(nextIndex != 0U);
     SharedReference *prevRef = nullptr;
     do {
@@ -446,14 +446,14 @@ void SharedReferenceStorage::DeleteUnmarkedReferences(SharedReference *sharedRef
     ASSERT(!sharedRef->IsEmpty());
     EtsObject *etsObject = sharedRef->GetEtsObject();
     // Get head of refs chain
-    auto currentIndex = etsObject->GetInteropIndex();
+    auto currentIndex = etsObject->GetInteropIndex(vm_);
     SharedReference *currentRef = GetItemByIndex(currentIndex);
     auto nextIndex = currentRef->flags_.GetNextIndex();
     // if nextIndex is 0, then refs chain contains only 1 element, so need to also drop interop index from EtsObject
     if (LIKELY(nextIndex == 0U)) {
         ASSERT(sharedRef == currentRef);
         DeleteJSRefAndRemoveReference(currentRef);
-        etsObject->DropInteropIndex();
+        etsObject->DropInteropIndex(vm_);
         return;
     }
     SharedReference *headRef = currentRef;
@@ -482,7 +482,7 @@ void SharedReferenceStorage::DeleteUnmarkedReferences(SharedReference *sharedRef
         DeleteJSRefAndRemoveReference(headRef);
         if (nextIndex == 0U) {
             // Head reference is alone reference in the chain, so need to drop interop index from EtsObject header
-            etsObject->DropInteropIndex();
+            etsObject->DropInteropIndex(vm_);
             return;
         }
         // All unmarked references were removed from the chain, so reference after head should marked

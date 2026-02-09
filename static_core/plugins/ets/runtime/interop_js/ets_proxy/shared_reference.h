@@ -189,16 +189,21 @@ private:
         return etsObject->HasInteropIndex();
     }
 
+    static bool HasReference(PandaEtsVM *vm, EtsObject *etsObject)
+    {
+        return etsObject->HasInteropIndex(vm);
+    }
+
     mem::GCRoot GetGCRoot()
     {
         ASSERT(etsRef_ != nullptr);
         return mem::GCRoot {mem::RootType::ROOT_VM, reinterpret_cast<ObjectHeader **>(&etsRef_)};
     }
 
-    static uint32_t ExtractMaybeIndex(EtsObject *etsObject)
+    static uint32_t ExtractMaybeIndex(PandaEtsVM *vm, EtsObject *etsObject)
     {
-        ASSERT(HasReference(etsObject));
-        return etsObject->GetInteropIndex();
+        ASSERT(HasReference(vm, etsObject));
+        return etsObject->GetInteropIndex(vm);
     }
 
     /// Unset mark flag from the reference

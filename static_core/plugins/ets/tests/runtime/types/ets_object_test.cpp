@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -302,10 +302,10 @@ TEST_F(EtsObjectTest, GetHashCode_SingleThread)
     ASSERT_TRUE(obj->HasInteropIndex());
     // after this getting hash should works correct
     ASSERT_EQ(hash, obj->GetHashCode());
-    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex());
+    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM()));
 
     // next we should test droping of interop hash
-    obj->DropInteropIndex();
+    obj->DropInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM());
     ASSERT_TRUE(obj->IsUsedInfo());
     ASSERT_TRUE(obj->IsHashed());
     ASSERT_FALSE(obj->HasInteropIndex());
@@ -356,10 +356,10 @@ TEST_F(EtsObjectTest, SetGetAndDropInteropIndex_SingleThread)
     static constexpr uint32_t INTEROP_INDEX_VALUE = 42U;
     obj->SetInteropIndex(INTEROP_INDEX_VALUE);
     ASSERT_TRUE(obj->HasInteropIndex());
-    ASSERT_EQ(obj->GetInteropIndex(), INTEROP_INDEX_VALUE);
+    ASSERT_EQ(obj->GetInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM()), INTEROP_INDEX_VALUE);
 
     // Next test of interop hash droping
-    obj->DropInteropIndex();
+    obj->DropInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM());
     ASSERT_FALSE(obj->IsHashed());
     ASSERT_FALSE(obj->HasInteropIndex());
 
@@ -372,10 +372,10 @@ TEST_F(EtsObjectTest, SetGetAndDropInteropIndex_SingleThread)
     ASSERT_TRUE(obj->HasInteropIndex());
     // after this getting interop hash should works correct
     ASSERT_EQ(hash, obj->GetHashCode());
-    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex());
+    ASSERT_EQ(INTEROP_INDEX_VALUE, obj->GetInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM()));
 
     // next we should test droping of interop hash
-    obj->DropInteropIndex();
+    obj->DropInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM());
     ASSERT_TRUE(obj->IsUsedInfo());
     ASSERT_TRUE(obj->IsHashed());
     ASSERT_FALSE(obj->HasInteropIndex());
@@ -403,9 +403,9 @@ TEST_F(EtsObjectTest, InteropIndex_MultiThread)
             static constexpr uint32_t INTEROP_INDEX = 42U;
             obj->SetInteropIndex(INTEROP_INDEX);
             while (!finish) {
-                ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex());
+                ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM()));
             }
-            obj->DropInteropIndex();
+            obj->DropInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM());
             ASSERT_TRUE(obj->IsHashed());
             ASSERT_FALSE(obj->HasInteropIndex());
         };
@@ -440,10 +440,10 @@ TEST_F(EtsObjectTest, EtsHash_MultiThread)
         // CC-OFFNXT(G.NAM.03) project code style
         static constexpr uint32_t INTEROP_INDEX = 42U;
         obj->SetInteropIndex(INTEROP_INDEX);
-        ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex());
+        ASSERT_EQ(INTEROP_INDEX, obj->GetInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM()));
         finish = true;
         interopThread.join();
-        obj->DropInteropIndex();
+        obj->DropInteropIndex(EtsCoroutine::GetCurrent()->GetPandaVM());
         ASSERT_TRUE(obj->IsUsedInfo());
         EtsCoroutine::GetCurrent()->GetVM()->FreeInternalResources();
         ASSERT_TRUE(obj->IsHashed());

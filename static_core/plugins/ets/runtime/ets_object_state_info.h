@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ namespace ark::ets {
 
 class EtsObject;
 class EtsCoroutine;
+class PandaEtsVM;
 
 class EtsObjectStateInfo {
 public:
@@ -79,10 +80,10 @@ public:
 
     static bool TryAddNewInfo(EtsObject *obj, uint32_t hash, uint32_t index);
     static bool TryReadEtsHash(const EtsObject *obj, uint32_t *hash);
-    static bool TryReadInteropIndex(const EtsObject *obj, uint32_t *index);
-    static bool TryDropInteropIndex(EtsObject *obj);
+    static bool TryReadInteropIndex(PandaEtsVM *vm, const EtsObject *obj, uint32_t *index);
+    static bool TryDropInteropIndex(PandaEtsVM *vm, EtsObject *obj);
     static bool TryResetInteropIndex(EtsObject *obj, uint32_t index);
-    static bool TryCheckIfInteropIndexIsValid(const EtsObject *obj, bool *isValid);
+    static bool TryCheckIfInteropIndexIsValid(PandaEtsVM *vm, const EtsObject *obj, bool *isValid);
 
 private:
     std::atomic_uint32_t etsHash_ {0};

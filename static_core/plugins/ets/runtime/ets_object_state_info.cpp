@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ bool EtsObjectStateInfo::TryReadEtsHash(const EtsObject *obj, uint32_t *hash)
 }
 
 /*static*/
-bool EtsObjectStateInfo::TryReadInteropIndex(const EtsObject *obj, uint32_t *index)
+bool EtsObjectStateInfo::TryReadInteropIndex(PandaEtsVM *vm, const EtsObject *obj, uint32_t *index)
 {
     // Atomic with acquire order reason: ordering constraints for correctness of future non-atomic and relaxed loadings.
     auto markWord = obj->AtomicGetMark(std::memory_order_acquire);
@@ -107,13 +107,14 @@ bool EtsObjectStateInfo::TryReadInteropIndex(const EtsObject *obj, uint32_t *ind
     // The state can be changed only in GC.
     ASSERT(markWord.GetState() == EtsMarkWord::STATE_USE_INFO);
     // We need to get EtsObjectStateInfo from table
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
+    ASSERT(vm != nullptr);
+    auto *table = vm->GetEtsObjectStateTable();
     auto id = markWord.GetInfoId();
     auto *info = table->LookupInfo(id);
-    LOG_IF(info == nullptr || info->GetEtsObject() != obj, FATAL, RUNTIME)
-        << "TryReadInteropIndex: info was concurrently deleted from table";
+    if (info == nullptr || info->GetEtsObject() != obj) {
+        LOG(FATAL, RUNTIME) << "TryReadInteropIndex: info was concurrently deleted from table";
+        return false;
+    }
     // we can read hash, check if it's valid and return it.
     auto currentIndex = info->GetInteropIndex();
     LOG_IF(currentIndex == INVALID_INTEROP_INDEX, FATAL, RUNTIME) << "Try read invalid interop index";
@@ -122,16 +123,15 @@ bool EtsObjectStateInfo::TryReadInteropIndex(const EtsObject *obj, uint32_t *ind
 }
 
 /*static*/
-bool EtsObjectStateInfo::TryDropInteropIndex(EtsObject *obj)
+bool EtsObjectStateInfo::TryDropInteropIndex(PandaEtsVM *vm, EtsObject *obj)
 {
     // Atomic with acquire order reason: ordering constraints for correctness of future non-atomic and relaxed loadings.
     auto markWord = obj->AtomicGetMark(std::memory_order_acquire);
     // This method can be called only if state of the object is EtsMarkWord::STATE_USE_INFO.
     // The state can be changed only in GC.
     ASSERT(markWord.GetState() == EtsMarkWord::STATE_USE_INFO);
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
+    ASSERT(vm != nullptr);
+    auto *table = vm->GetEtsObjectStateTable();
     ASSERT(table != nullptr);
     auto id = markWord.GetInfoId();
     auto *info = table->LookupInfo(id);
@@ -161,16 +161,15 @@ bool EtsObjectStateInfo::TryResetInteropIndex(EtsObject *obj, uint32_t index)
     return true;
 }
 
-bool EtsObjectStateInfo::TryCheckIfInteropIndexIsValid(const EtsObject *obj, bool *isValid)
+bool EtsObjectStateInfo::TryCheckIfInteropIndexIsValid(PandaEtsVM *vm, const EtsObject *obj, bool *isValid)
 {
     auto markWord = obj->AtomicGetMark(std::memory_order_acquire);
     // This method can be called only if state of the object is EtsMarkWord::STATE_USE_INFO.
     // The state can be changed only in GC.
     ASSERT(markWord.GetState() == EtsMarkWord::STATE_USE_INFO);
     // We need to find current interop index
-    auto *co = EtsCoroutine::GetCurrent();
-    ASSERT(co != nullptr);
-    auto *table = co->GetPandaVM()->GetEtsObjectStateTable();
+    ASSERT(vm != nullptr);
+    auto *table = vm->GetEtsObjectStateTable();
     auto id = markWord.GetInfoId();
     auto *info = table->LookupInfo(id);
     if (info == nullptr || info->GetEtsObject() != obj) {

@@ -106,8 +106,13 @@ ALWAYS_INLINE static void MarkEtsObject(ets_proxy::SharedReference *ref, PandaEt
 static auto CreateXObjectHandler(ets_proxy::SharedReferenceStorage *storage, STSVMInterfaceImpl *stsVmIface)
 {
     return [storage, stsVmIface](ObjectHeader *obj) {
+        auto markWord = obj->AtomicGetMark(std::memory_order_relaxed);
+        if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+            LOG_XGC(DEBUG) << "obj=" << obj << " forwarded = " << markWord.GetForwardingAddress();
+            obj = reinterpret_cast<ObjectHeader *>(markWord.GetForwardingAddress());
+        }
         auto *etsObj = EtsObject::FromCoreType(obj);
-        if (!etsObj->HasInteropIndex()) {
+        if (!etsObj->HasInteropIndex(stsVmIface->GetVM())) {
             return;
         }
         // NOTE(audovichenko): Handle multithreading issue.
@@ -218,7 +223,7 @@ void XGC::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
 
 void XGC::VerifySharedReferences(ets_proxy::XgcStatus status)
 {
-    ets_proxy::SharedReferenceStorageVerifier::TraverseAllItems(storage_, status);
+    ets_proxy::SharedReferenceStorageVerifier::TraverseAllItems(storage_, status, vm_);
 }
 
 void XGC::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc, [[maybe_unused]] size_t heapSize)

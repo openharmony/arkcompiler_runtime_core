@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_SHARED_REFERENCE_FLAGS_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -28,7 +29,7 @@ namespace ark::ets::interop::js::ets_proxy {
 class SharedReferenceFlags {
 public:
     using ValueType = ObjectPointerType;
-    using IndexType = decltype(std::declval<EtsObject>().GetInteropIndex());
+    using IndexType = decltype(std::declval<EtsObject>().GetInteropIndex(std::declval<PandaEtsVM *>()));
     static_assert(sizeof(IndexType) <= sizeof(ValueType));
 
     enum class Bit : ValueType {

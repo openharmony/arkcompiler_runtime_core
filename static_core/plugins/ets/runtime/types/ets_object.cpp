@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,10 +52,10 @@ uint32_t EtsObject::GetHashCode()
     return hash;
 }
 
-uint32_t EtsObject::GetInteropIndex() const
+uint32_t EtsObject::GetInteropIndex(PandaEtsVM *vm) const
 {
     uint32_t index = 0;
-    while (!TryGetInteropIndex(&index)) {
+    while (!TryGetInteropIndex(vm, &index)) {
     }
     return index;
 }
@@ -66,10 +66,27 @@ void EtsObject::SetInteropIndex(uint32_t index)
     }
 }
 
-void EtsObject::DropInteropIndex()
+void EtsObject::DropInteropIndex(PandaEtsVM *vm)
 {
-    while (!TryDropInteropIndex()) {
+    while (!TryDropInteropIndex(vm)) {
     }
+}
+
+bool EtsObject::HasInteropIndex() const
+{
+    auto *co = EtsCoroutine::GetCurrent();
+    ASSERT(co != nullptr);
+    auto *vm = co->GetPandaVM();
+    ASSERT(vm != nullptr);
+    return HasInteropIndex(vm);
+}
+
+bool EtsObject::HasInteropIndex(PandaEtsVM *vm) const
+{
+    bool hasInteropIndex = false;
+    while (!TryCheckIfHasInteropIndex(vm, &hasInteropIndex)) {
+    }
+    return hasInteropIndex;
 }
 
 bool EtsObject::TryGetHashCode(uint32_t *hash)
@@ -113,9 +130,10 @@ bool EtsObject::TryGetHashCode(uint32_t *hash)
     }
 }
 
-bool EtsObject::TryGetInteropIndex(uint32_t *index) const
+bool EtsObject::TryGetInteropIndex(PandaEtsVM *vm, uint32_t *index) const
 {
     ASSERT(index != nullptr);
+    ASSERT(vm != nullptr);
     //  Atomic with relaxed order reason: on this level of execution where we use only atomic mark word for testing the
     //  state and its changing if it's needed. When we use EtsObjectStateInfo static methods, we will reread value of
     //  mark word with acquire order to mark future relaxed read from EtsObjectStateInfo visible for us.
@@ -127,7 +145,7 @@ bool EtsObject::TryGetInteropIndex(uint32_t *index) const
         }
         case EtsMarkWord::STATE_USE_INFO: {
             // In STATE_USE_INFO case we should read hash from EtsObjectState table.
-            return EtsObjectStateInfo::TryReadInteropIndex(this, index);
+            return EtsObjectStateInfo::TryReadInteropIndex(vm, this, index);
         }
         default: {
             LOG(FATAL, RUNTIME) << "Error on TryGetInteropCode(): invalid state " << currentMarkWord.GetState();
@@ -167,8 +185,9 @@ bool EtsObject::TrySetInteropIndex(uint32_t index)
     }
 }
 
-bool EtsObject::TryDropInteropIndex()
+bool EtsObject::TryDropInteropIndex(PandaEtsVM *vm)
 {
+    ASSERT(vm != nullptr);
     //  Atomic with relaxed order reason: on this level of execution where we use only atomic mark word for testing the
     //  state and its changing if it's needed. When we EtsObjectStateInfo static methods, we will reread value of mark
     //  word with acquire order to mark future relaxed read from EtsObjectStateInfo visible for us.
@@ -179,7 +198,7 @@ bool EtsObject::TryDropInteropIndex()
             return AtomicSetMark(currentMarkWord, newMarkWord, std::memory_order_relaxed);
         }
         case EtsMarkWord::STATE_USE_INFO: {
-            return EtsObjectStateInfo::TryDropInteropIndex(this);
+            return EtsObjectStateInfo::TryDropInteropIndex(vm, this);
         }
         default: {
             LOG(FATAL, RUNTIME) << "Error on TryDropInteropCode(): invalid state " << currentMarkWord.GetState();
@@ -188,7 +207,7 @@ bool EtsObject::TryDropInteropIndex()
     }
 }
 
-bool EtsObject::TryCheckIfHasInteropIndex(bool *hasInteropIndex) const
+bool EtsObject::TryCheckIfHasInteropIndex(PandaEtsVM *vm, bool *hasInteropIndex) const
 {
     //  Atomic with relaxed order reason: on this level of execution where we use only atomic mark word for testing the
     //  state and its changing if it's needed. When we EtsObjectStateInfo static methods, we will reread value of mark
@@ -196,7 +215,7 @@ bool EtsObject::TryCheckIfHasInteropIndex(bool *hasInteropIndex) const
     EtsMarkWord currentMarkWord = AtomicGetMark(std::memory_order_relaxed);
     switch (currentMarkWord.GetState()) {
         case EtsMarkWord::STATE_USE_INFO: {
-            return EtsObjectStateInfo::TryCheckIfInteropIndexIsValid(this, hasInteropIndex);
+            return EtsObjectStateInfo::TryCheckIfInteropIndexIsValid(vm, this, hasInteropIndex);
         }
         case EtsMarkWord::STATE_HAS_INTEROP_INDEX: {
             *hasInteropIndex = true;
