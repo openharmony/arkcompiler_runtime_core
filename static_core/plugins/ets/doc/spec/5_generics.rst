@@ -687,7 +687,7 @@ Implicit instantiation is only possible for generic functions and methods.
 If a method of a generic class or interface
 *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with
 default type (see :ref:`Type Parameter Default`) that equals ``T``:sub:`i`,
-and an implicit generic instantion of this method provides no information
+and an implicit generic instantiation of this method provides no information
 to infer a type argument, then the type argument correspondent to ``T``:sub:`i`
 is used as the type argument for ``U``.
 
@@ -697,8 +697,8 @@ This situation is represented in the example below:
    :linenos:
 
     class A <T> {  // T is the class type parameter
-        foo<U = T> (p: U) {} // U is own type paramater with default T
-        bar<V = T> () {}     // V is own type paramater with default T
+        foo<U = T> (p: U) {} // U is own type parameter with default T
+        bar<V = T> () {}     // V is own type parameter with default T
     }
 
     // Assume that X1 and X2 are two distinct types
