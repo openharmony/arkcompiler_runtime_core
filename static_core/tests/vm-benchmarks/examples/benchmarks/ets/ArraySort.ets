@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,8 +40,8 @@ export class ArraySort {
    * @Setup
    */
   public prepareArray(): void {
-    this.ints = new int[this.size];
-    this.intsInitial = new int[this.size];
+    this.ints = new FixedArray<int>(this.size);
+    this.intsInitial = new FixedArray<int>(this.size);
     switch (this.distribution) {
       case "sorted":
         for (let i = 0; i < this.size; i++) {
