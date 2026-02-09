@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,6 @@ bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused
     }
     symOfStoreDebuggerInfo(tid, vm, debuggerPostTask);
 
-#ifndef PANDA_TARGET_ARM32
     // Initialize debugger
     using InitializeDebuggerForSocketpair = bool (*)(void *, bool);
     auto sym = reinterpret_cast<InitializeDebuggerForSocketpair>(
@@ -100,7 +99,6 @@ bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused
         LOG(ERROR, DEBUGGER) << "[NotifyDebugMode] InitializeDebuggerForSocketpair fail";
         return false;
     }
-#endif
 
     using WaitForDebugger = void (*)(void *);
     auto symOfWaitForDebugger =
