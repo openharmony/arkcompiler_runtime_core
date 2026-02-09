@@ -32,6 +32,10 @@
 #include "runtime/mem/mem_stats.h"
 #include "runtime/mem/mem_stats_default.h"
 #include "runtime/mem/runslots_allocator-inl.h"
+#include "runtime/mem/gc/g1/g1-gc.h"
+#include "runtime/mem/region_space.h"
+
+#include "test_utils.h"
 
 namespace ark::mem::test {
 
@@ -77,6 +81,27 @@ public:
 
     private:
         F hook_;
+    };
+
+    class GCCollect : public GCListener {
+    public:
+        explicit GCCollect(VMHandle<ObjectHeader> oldString, VMHandle<coretypes::Array> arr)
+            : oldString_(oldString), arr_(arr)
+        {
+        }
+
+        void GCPhaseStarted([[maybe_unused]] GCPhase phase) override {}
+
+        void GCPhaseFinished(GCPhase phase) override
+        {
+            if (phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE) {
+                arr_->Set(0, oldString_.GetPtr());
+            }
+        }
+
+    private:
+        VMHandle<ObjectHeader> oldString_;
+        VMHandle<coretypes::Array> arr_;
     };
 
     void SetupRuntime(const std::string &gcTypeParam)
@@ -514,4 +539,24 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
     }
     ResetRuntime();
 }
+
+TEST_F(G1GCFullGCTest, TestMarkCardDuringCollectAndHandleReference)
+{
+    std::string gctype = static_cast<std::string>(GCStringFromType(GCType::G1_GC));
+    SetupRuntime(gctype);
+    {
+        HandleScope<ObjectHeader *> scope(thread);
+        PrepareTest<ark::PandaAssemblyLanguageConfig>();
+        auto oldString = VMHandle<ObjectHeader>(thread, ObjectAllocator::AllocString(8U));
+        gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
+        ASSERT_TRUE(ObjectToRegion(oldString.GetPtr())->HasFlag(IS_OLD));
+        VMHandle<coretypes::Array> arr(thread, ObjectAllocator::AllocArray(1U, ClassRoot::ARRAY_STRING, false));
+        ASSERT_NE(ObjectToRegion(oldString.GetPtr()), ObjectToRegion(arr.GetPtr()));
+        GCCollect listener(oldString, arr);
+        gc->AddListener(&listener);
+        gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
+    }
+    ResetRuntime();
+}
+
 }  // namespace ark::mem::test

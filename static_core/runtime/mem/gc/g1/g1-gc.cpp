@@ -958,6 +958,8 @@ void G1GC<LanguageConfig>::CollectAndMoveTenuredRegions(const CollectionSet &col
         }
         UpdateCollectionSet(cs);
         CollectAndMove<true>(cs);
+        // Call HanddleReferences here to process cards that were marked during CollectAndMove.
+        HandleReferences();
         LOG_DEBUG_GC << "Iterative full GC, collected " << cs.size() << " regions";
     }
 }
@@ -1336,7 +1338,7 @@ static bool RemsetRegionPredicate(const Region *r)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
+void G1GC<LanguageConfig>::CollectInSinglePass()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     RemSet<> remset;
@@ -1355,7 +1357,7 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 
     EvacuateCollectionSet(remset);
     UpdateAndSweep();
-    HandleReferences(task);
+    HandleReferences();
     ActualizeRemSets();
 
     analytics_.ReportEvacuatedBytes(copiedBytesYoung_);
@@ -1507,7 +1509,7 @@ void G1GC<LanguageConfig>::UpdateAndSweep()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::HandleReferences([[maybe_unused]] const GCTask &task)
+void G1GC<LanguageConfig>::HandleReferences()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
@@ -1583,7 +1585,7 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
         if (fullCollectionSetPromotion_) {
             FullPromotion(collectibleRegions);
         } else if (singlePassCompactionEnabled_) {
-            CollectInSinglePass(task);
+            CollectInSinglePass();
         } else {
             MixedMarkAndCacheRefs(task, collectibleRegions);
             ClearYoungCards(collectibleRegions);
@@ -2814,6 +2816,7 @@ void G1GC<LanguageConfig>::RestoreYoungRegionsAfterFullGC(const CollectionSet &c
     for (Region *region : allRegions) {
         RemSet<> *remset = region->GetRemSet();
         for (Region *invalidRegion : collectionSet.Young()) {
+            invalidRegion->DeleteLiveBitmap();
             remset->InvalidateRegion<false>(invalidRegion);
         }
     }
@@ -2839,6 +2842,8 @@ void G1GC<LanguageConfig>::BuildCrossYoungRemSets(const Container &young)
             ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<false>(
                 reinterpret_cast<ObjectHeader *>(addr), updateRemsets);
         });
+        region->CreateLiveBitmap();
+        region->CloneMarkBitmapToLiveBitmap();
     }
 }
 

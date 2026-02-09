@@ -248,7 +248,7 @@ private:
      * etc) otherwise false
      */
     bool SinglePassCompactionAvailable();
-    void CollectInSinglePass(const GCTask &task);
+    void CollectInSinglePass();
     void UpdateMetricsAfterSinglePass(size_t allocatedBytesYoung, size_t allocatedBytesOld,
                                       size_t allocatedObjectsYoung, size_t allocatedObjectsOld);
     void CollectMetrickBeforeSinglePass(size_t &allocatedBytesYoung, size_t &allocatedBytesOld,
@@ -256,7 +256,7 @@ private:
     void EvacuateCollectionSet(const RemSet<> &remset);
     void UpdateAndSweep();
     void MergeRemSet(RemSet<> *remset);
-    void HandleReferences(const GCTask &task);
+    void HandleReferences();
     void ResetRegionAfterMixedGC();
 
     template <bool CONCURRENTLY>

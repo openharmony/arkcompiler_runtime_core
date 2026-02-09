@@ -322,6 +322,7 @@ public:
 
     MarkBitmap *CreateMarkBitmap();
     MarkBitmap *CreateLiveBitmap();
+    void DeleteLiveBitmap();
 
     void SwapMarkBitmap();
 
