@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ function foo(a: int) {
             throw new Error("aaa")
         }
         console.log("TRY3")
-    } catch (e: Error) {
+    } catch (e) {
         if (a == 2) {
             console.log("CATCH_IF")
         }
@@ -47,7 +47,7 @@ function bar0(a: int) {
             console.log("THROW")
             throw new Error("MOCK_ERROR");
         }
-    } catch(e: Error) {
+    } catch(e) {
         print_catch();
     }
 }
@@ -55,7 +55,7 @@ function bar0(a: int) {
 function main0() {
     try {
         bar(0)
-    } catch(e: Error) {
+    } catch(e) {
         bar(1);
     }
 }
