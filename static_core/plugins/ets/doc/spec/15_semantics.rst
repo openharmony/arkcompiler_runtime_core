@@ -3362,7 +3362,7 @@ to be called in a class instance creation expression (see :ref:`New Expressions`
     }
 
     new BigFloat(1)      // constructor, marked #1,  is used
-    new BigFloat("3.14") // constructor, marked #1,  is used
+    new BigFloat("3.14") // constructor, marked #2,  is used
 
 |
 
