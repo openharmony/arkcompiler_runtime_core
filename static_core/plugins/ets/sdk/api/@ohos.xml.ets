@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,8 +83,11 @@ export namespace xml {
         isWhitespace(): boolean
     }
 
+    export type AttributeWithTagCb = (tagName: string, key: string, value: string) => boolean
+
     export interface ParseOptions {
         attributeValueCallbackFunction?: (name: string, value: string) => boolean
+        attributeWithTagCallbackFunction?: AttributeWithTagCb
         ignoreNameSpace?: boolean
         supportDoctype?: boolean
         tagValueCallbackFunction?: (name: string, value: string) => boolean
@@ -544,7 +547,8 @@ export namespace xml {
                 option.supportDoctype ?? false,
                 option.attributeValueCallbackFunction,
                 option.tagValueCallbackFunction,
-                option.tokenValueCallbackFunction
+                option.tokenValueCallbackFunction,
+                option.attributeWithTagCallbackFunction
             );
         }
 
@@ -555,7 +559,8 @@ export namespace xml {
             supportDoctype: boolean,
             attributeValueCallbackFunction?: (name: string, value: string) => boolean,
             tagValueCallbackFunction?: (name: string, value: string) => boolean,
-            tokenValueCallbackFunction?: (eventType: EventType, value: ParseInfo) => boolean
+            tokenValueCallbackFunction?: (eventType: EventType, value: ParseInfo) => boolean,
+            attributeWithTagCallbackFunction?: AttributeWithTagCb
         ): boolean;
         private static native parserErrorInfo(pointer: long): string;
 

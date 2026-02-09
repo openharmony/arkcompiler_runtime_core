@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ public:
     // CC-OFFNXT(G.FUN.01-CPP) options of parse
     static ani_boolean ParseXml(ani_env *env, ani_class self, ani_long pointer, ani_boolean ignoreNS,
                                 ani_boolean supportDCT, ani_fn_object attrValCb, ani_fn_object tagValCb,
-                                ani_fn_object tknCalCb);
+                                ani_fn_object tknCalCb, ani_fn_object attrTagValCb);
     static ani_ref GetParseError(ani_env *env, ani_class self, ani_long pointer);
 
 private:
@@ -155,10 +155,12 @@ private:
 
     bool ParseTag(ani_env *env) const;
     bool ParseAttr(ani_env *env) const;
+    bool ParseAttrTag(ani_env *env) const;
     bool ParseToken(ani_env *env) const;
     bool HandleTagFunc(ani_env *env);
     bool HandleTokenFunc(ani_env *env);
     bool HandleAttrFunc(ani_env *env);
+    bool HandleAttrTagFunc(ani_env *env);
 
     void ParseNspFunction();
     void ParseNspFunc(size_t &i, const std::string &attrName);
@@ -182,6 +184,7 @@ private:
     bool bStartDoc_ {true};
     ani_fn_object tagFunc_ {nullptr};
     ani_fn_object attrFunc_ {nullptr};
+    ani_fn_object attrTagFunc_ {nullptr};
     ani_fn_object tokenFunc_ {nullptr};
 
     std::string strXml_ {};

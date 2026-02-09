@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 import {xml} from "@ohos.xml"
+import {util} from "@ohos.util"
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("XmlPullParser API tests, part2");
+    suite.addTest('Testing XML PullParser with attributeWithTagCallbackFunction as function.', testXmlPullParserParseOptions0011)
     suite.addTest("Testing XML PullParser with attributeValueCallbackFunction as function throw error.", testXmlPullParserParseOptions0010)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as undefined.", testXmlPullParserParseOptions0009)
     suite.addTest("Testing XML PullParser with tokenValueCallbackFunction as function.", testXmlPullParserParseOptions0008)
@@ -509,3 +511,27 @@ function testXmlPullParserParseOptions0010() {
 	}, '123');
 }
 
+function testXmlPullParserParseOptions0011() {
+    let xmlStr = 
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<column name="Giana"><value integer="1"/></column>' +
+        '<column name="category"><value Boolean="true"/></column>' +
+        '<column name="day"><orange Boolean="3"/></column>';
+    let textEncoder = new util.TextEncoder();
+    let arrBuffer = textEncoder.encodeInto(xmlStr);
+    let xmlParser = new xml.XmlPullParser(arrBuffer.buffer as object as ArrayBuffer, 'UTF-8');
+
+    let attrWithTag = (tagName: string, key: string, value: string): boolean => {
+        if (tagName == 'orange') {
+            arktest.assertEQ(value, '3')
+        }
+        return true;
+    }
+    
+    let options: xml.ParseOptions = {
+        supportDoctype: true,
+        ignoreNameSpace: true,
+        attributeWithTagCallbackFunction:attrWithTag
+    };
+    xmlParser.parseXml(options);
+}
