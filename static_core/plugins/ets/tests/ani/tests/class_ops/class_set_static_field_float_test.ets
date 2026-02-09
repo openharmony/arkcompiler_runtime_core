@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_class_set_static_field_float
+---*/
+
 class TestSetFloat {
     static float_value: float = 18.0f;
     static string_value: string = "";

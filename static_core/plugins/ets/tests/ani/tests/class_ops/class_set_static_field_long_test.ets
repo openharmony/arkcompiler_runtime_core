@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_class_set_static_field_long
+---*/
+
 class TestSetLong {
     static long_value: long = 24;
     static string_value: string = "";

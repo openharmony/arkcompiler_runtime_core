@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-
+/*---
+arktsconfig: arktsconfig.json
+file_name: ani_test_bind_ops_namespace_bind_native_functions
+---*/
 
 namespace ops {
 export native function sum(a: int, b: int): int;

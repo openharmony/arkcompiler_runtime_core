@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+ /*---
+arktsconfig: arktsconfig.json
+file_name: ani_test_bind_ops_module_bind_native_functions
+---*/
+
 export native function sum(a: int, b: int): int;
 export native function sum(a: int, b: int, c: int): int;
 export native function concat(s0: String, s1: String, s2: String): String;

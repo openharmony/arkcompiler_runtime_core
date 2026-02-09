@@ -17,6 +17,7 @@
 import json
 import re
 from json import JSONDecodeError
+from pathlib import Path
 from subprocess import CompletedProcess
 from typing import TYPE_CHECKING
 
@@ -96,6 +97,11 @@ class BaseValidator(IValidator):
     def gtest_result_validator(json_file: str, test_result: CompletedProcess) -> ValidationResult:
         passed = False
 
+        json_path = Path(json_file)
+        if not json_path.exists() or json_path.stat().st_size == 0:
+            return ValidationResult(False, ValidatorFailKind.STEP_FAILED,
+                                    f"json with the test result ({' '.join(test_result.args[:2])}) is missing/empty")
+
         # should be addedcheck: if there is something in stderr check if it was expected
         # if not - test should fail
 
@@ -103,7 +109,8 @@ class BaseValidator(IValidator):
             try:
                 test_data = json.load(f)
             except JSONDecodeError:
-                print(test_result)
+                return ValidationResult(False, ValidatorFailKind.STEP_FAILED,
+                                        f"json with the test result ({' '.join(test_result.args[:2])}) is invalid")
 
             for test in test_data['testsuites']:
                 for test_case in test['testsuite']:

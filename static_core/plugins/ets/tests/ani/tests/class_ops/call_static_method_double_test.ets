@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*---
+file_name: ani_test_class_ops_call_static_method_double
+---*/
 
 class Operations {
     static sum(a0: double, a1: double): double {

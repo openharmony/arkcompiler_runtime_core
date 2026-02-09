@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+/*---
+  arktsconfig: arktsconfig.json
+---*/
+
 class TestParent {
     static {{ field }}: {{ ets_type }}{% if type == 'ref' %} = new Object(){% endif %};
     static {{ wrong_field }}: {{ wrong_ets_type }}{% if wrong_ets_type == 'Object' %} = new Object(){% endif %};
