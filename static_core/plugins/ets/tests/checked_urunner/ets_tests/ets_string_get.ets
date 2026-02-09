@@ -26,9 +26,9 @@
 //! INST        /Intrinsic.StdCoreStringGet/
 
 function main(): void {
-    let str = "abcdefg";
-    arktest.assertEQ(str[0], "a", "Wrong str.get(0)");
-    arktest.assertEQ(str[6], "g", "Wrong str.get(6)");
+    let str = 'abcdefg';
+    arktest.assertEQ(str[0], 'a', 'Wrong str.get(0)');
+    arktest.assertEQ(str[6], 'g', 'Wrong str.get(6)');
 
     let errorFlag = 0;
     try {

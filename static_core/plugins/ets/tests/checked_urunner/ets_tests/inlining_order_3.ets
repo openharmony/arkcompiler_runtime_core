@@ -54,11 +54,19 @@
 //! RUN          entry: "inlining_order_3.ETSGLOBAL::main",
 //!              options: "--log-level=debug --log-components=compiler --compiler-log=inlining"
 
-function cold(): int { return 30; }
+function cold(): int {
+ return 30; 
+}
 
-function hotInf(i:int):int { return -i; }
-function hotCatch(i:int):int { return -i; }
-function hot(i:int):int { return -i; }
+function hotInf(i:int):int {
+ return -i; 
+}
+function hotCatch(i:int):int {
+ return -i; 
+}
+function hot(i:int):int {
+ return -i; 
+}
 
 function testLoops(): void {
     let N = cold();

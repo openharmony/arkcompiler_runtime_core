@@ -21,7 +21,9 @@
 
 //! CHECKER       JIT IR Builder, check String.concat function
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*concat[0-9]+.*'", entry: "ets_string_concat_func.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*concat[0-9]+.*'",
+//!               entry: "ets_string_concat_func.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_concat_func.ETSGLOBAL::concat0"
 //! PASS_BEFORE   "BranchElimination"
@@ -184,27 +186,27 @@ function concat5(a: string, b: string, c: string, d: string, e: string, f: strin
 }
 
 function concat6(): string {
-    let args = ["a", "b", "cde"]
-    return "".concat(...args);                      // applied
+    let args = ['a', 'b', 'cde']
+    return ''.concat(...args);                      // applied
 }
 
 function concat7(): string {
-    let args = ["a", "b", "c", "d", "e"]
-    return "".concat(...args);                      // applied
+    let args = ['a', 'b', 'c', 'd', 'e']
+    return ''.concat(...args);                      // applied
 }
 
 function concat8(...args: string[]): string {
-    return "".concat(...args);                      // applied
+    return ''.concat(...args);                      // applied
 }
 
 function main() {
-    arktest.assertEQ(concat0("abcde"), "abcde", "Wrong result at concat0")
-    arktest.assertEQ(concat1("abcd", "e"), "abcde", "Wrong result at concat1")
-    arktest.assertEQ(concat2("abc", "d", "e"), "abcde", "Wrong result at concat2")
-    arktest.assertEQ(concat3("ab", "c", "d", "e"), "abcde", "Wrong result at concat3")
-    arktest.assertEQ(concat4("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat4")
-    arktest.assertEQ(concat5("", "a", "b", "c", "d", "e"), "abcde", "Wrong result at concat5")
-    arktest.assertEQ(concat6(), "abcde", "Wrong result at concat6")
-    arktest.assertEQ(concat7(), "abcde", "Wrong result at concat7")
-    arktest.assertEQ(concat8("ab", "c", "d", "e"), "abcde", "Wrong result at concat8")
+    arktest.assertEQ(concat0('abcde'), 'abcde', 'Wrong result at concat0')
+    arktest.assertEQ(concat1('abcd', 'e'), 'abcde', 'Wrong result at concat1')
+    arktest.assertEQ(concat2('abc', 'd', 'e'), 'abcde', 'Wrong result at concat2')
+    arktest.assertEQ(concat3('ab', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat3')
+    arktest.assertEQ(concat4('a', 'b', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat4')
+    arktest.assertEQ(concat5('', 'a', 'b', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat5')
+    arktest.assertEQ(concat6(), 'abcde', 'Wrong result at concat6')
+    arktest.assertEQ(concat7(), 'abcde', 'Wrong result at concat7')
+    arktest.assertEQ(concat8('ab', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat8')
 }

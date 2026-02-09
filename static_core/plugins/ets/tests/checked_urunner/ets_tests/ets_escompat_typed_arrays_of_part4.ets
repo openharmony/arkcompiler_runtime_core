@@ -14,7 +14,9 @@
  */
 
 //! CHECKER       TypedArray of()
-//! RUN           force_jit: true, options: "--compiler-regex=.*test.*ArrayOf.*", entry: "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::checkTypedArrayOf"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex=.*test.*ArrayOf.*",
+//!               entry: "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::checkTypedArrayOf"
 //! METHOD        "ets_escompat_typed_arrays_of_part4.ETSGLOBAL::testUint32ArrayOfNumber"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Uint32ArrayOfNumber"
@@ -78,22 +80,22 @@ function testBigUint64ArrayOfLong() {
 }
 
 function checkArray(arr: ArrayLike<number>, expected: FixedArray<number>) {
-    arktest.assertEQ(arr.length, expected.length, "Unexpected array length")
+    arktest.assertEQ(arr.length, expected.length, 'Unexpected array length')
     for (let i = 0; i < expected.length; i++) {
-        arktest.assertEQ(arr[i], expected[i], "Error in index: " + i + ", value: " + arr[i] + " expected value: " + expected[i])
+        arktest.assertEQ(arr[i], expected[i], 'Error in index: ' + i + ', value: ' + arr[i] + ' expected value: ' + expected[i])
     }
 }
 
 function checkArray(arr: BigInt64Array, expected: FixedArray<number>) {
-    arktest.assertEQ(arr.length, expected.length, "Unexpected array length")
+    arktest.assertEQ(arr.length, expected.length, 'Unexpected array length')
     for (let i = 0; i < expected.length; i++) {
-        arktest.assertEQ(arr[i].getLong(), expected[i], "Error in index: " + i + ", value: " + arr[i] + " expected value: " + expected[i])
+        arktest.assertEQ(arr[i].getLong(), expected[i], 'Error in index: ' + i + ', value: ' + arr[i] + ' expected value: ' + expected[i])
     }
 }
 
 function checkArray(arr: BigUint64Array, expected: FixedArray<number>) {
-    arktest.assertEQ(arr.length, expected.length, "Unexpected array length")
+    arktest.assertEQ(arr.length, expected.length, 'Unexpected array length')
     for (let i = 0; i < expected.length; i++) {
-        arktest.assertEQ(arr[i].getLong(), expected[i], "Error in index: " + i + ", value: " + arr[i] + " expected value: " + expected[i])
+        arktest.assertEQ(arr[i].getLong(), expected[i], 'Error in index: ' + i + ', value: ' + arr[i] + ' expected value: ' + expected[i])
     }
 }

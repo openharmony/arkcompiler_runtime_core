@@ -22,10 +22,10 @@
 //! RUN           entry: "ets_nested_loops.ETSGLOBAL::main"
 
 class C0 {
-  x0: boolean
+  public x0: boolean
 
   f() : string {
-    return ""
+    return ''
   }
 }
 

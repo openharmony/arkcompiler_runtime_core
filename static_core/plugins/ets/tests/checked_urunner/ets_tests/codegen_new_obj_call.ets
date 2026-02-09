@@ -17,7 +17,9 @@
 
 //! CHECKER       No runtime call for NewObject from codegen JIT
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: false, options: "--compiler-hotness-threshold=0 --compiler-regex='.*test.*' --compiler-enable-events=true", entry: "codegen_new_obj_call.ETSGLOBAL::main"
+//! RUN           force_jit: false,
+//!               options: "--compiler-hotness-threshold=0 --compiler-regex='.*test.*' --compiler-enable-events=true",
+//!               entry: "codegen_new_obj_call.ETSGLOBAL::main"
 //!
 //! METHOD        "codegen_new_obj_call.ETSGLOBAL::test"
 //! PASS_AFTER    "Codegen"

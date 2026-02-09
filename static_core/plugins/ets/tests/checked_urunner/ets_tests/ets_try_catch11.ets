@@ -14,7 +14,11 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT IfImm is replaced by DeoptimizeIf
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch11.IfCatch::__noinline__ifCatch", entry: "ets_try_catch11.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false \
+//!                        --compiler-regex=ets_try_catch11.IfCatch::__noinline__ifCatch",
+//!              entry: "ets_try_catch11.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch11.IfCatch::__noinline__ifCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch11.IfCatch::__noinline__ifCatch"
 //! PASS_AFTER   "Inline"

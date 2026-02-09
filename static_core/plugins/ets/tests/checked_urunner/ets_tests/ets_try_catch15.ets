@@ -14,7 +14,11 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT IfImm is replaced by DeoptimizeIf 
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch15.ETSGLOBAL::__noinline__test", entry: "ets_try_catch15.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false \
+//!                        --compiler-regex=ets_try_catch15.ETSGLOBAL::__noinline__test",
+//!              entry: "ets_try_catch15.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch15.ETSGLOBAL::__noinline__test,.*,COMPILED/
 //! METHOD       "ets_try_catch15.ETSGLOBAL::__noinline__test"
 //! PASS_AFTER   "Inline"
@@ -33,7 +37,9 @@
 //! INST         "Throw"
 //! INST_NOT     "DeoptimizeIf"
 
-//! CHECKER      Try Catch Resolving AOT+PGO both IfImms are replaced by DeoptimizeIf because first stmt in try-block is SaveState (SaveState+LoadAndInitClass is not optimized into LoadImmediate)
+//! CHECKER      Try Catch Resolving AOT+PGO both IfImms are replaced by DeoptimizeIf
+//!#              because first stmt in try-block is SaveState (SaveState+LoadAndInitClass
+//!#              is not optimized into LoadImmediate)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_try_catch15.ETSGLOBAL::main"
 //! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch15.ETSGLOBAL::__noinline__test"
@@ -48,16 +54,22 @@ class Ex extends Error {}
 let ex: Ex = new Ex()
 
 class A {
-    t: string = ""
+    public t: string = ''
     getType() : string {
         return this.t
     }
-    constructor(p: int) { if (p == 0) throw ex; else this.t = "int" }
+    constructor(p: int) {
+        if (p == 0) {
+            throw ex; 
+        } else {
+            this.t = 'int' 
+        }
+     }
 }
 
 function __noinline__test() {
     try {
-        if (new A(-1).getType() != "int") {
+        if (new A(-1).getType() != 'int') {
             throw Error()
         }
     } catch (e) {

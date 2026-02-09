@@ -29,10 +29,14 @@
 let counter: int = 0;
 
 class A {
-    foo() { counter += 1; }
+    foo() {
+ counter += 1; 
+}
 }
 class B extends A {
-    foo() { counter += 2; }
+    foo() {
+ counter += 2; 
+}
 }
 
 function __noinline__foo(): A {

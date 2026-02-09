@@ -15,10 +15,10 @@
 
 //! CHECKER         Select-instructions optimization by SelectOptimization, AOT
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*(equals|operands).*'"
+//! RUN_PAOC        options: "--compiler-regex='.*(equals|perands).*'"
 //! RUN             entry: "select_optimization.ETSGLOBAL::main"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__equals_and_4"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__equalsAnd4"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! PASS_AFTER      "SelectOptimization"
@@ -26,7 +26,7 @@
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "Select"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_same_operands"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectSameOperands"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! PASS_AFTER      "SelectOptimization"
@@ -34,7 +34,7 @@
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "Select"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_eq_costant_bool_operands_01X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectEqConstantBoolOperands01X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -44,7 +44,7 @@
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_eq_costant_bool_operands_10X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectEqConstantBoolOperands10X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -54,7 +54,7 @@
 //! INST_NOT        "Select"
 //! INST_COUNT      "XorI", 1
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_ne_costant_bool_operands_10X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectNeConstantBoolOperands10X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -65,7 +65,7 @@
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_ne_costant_bool_operands_01X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectNeConstantBoolOperands01X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -77,9 +77,11 @@
 //! INST_COUNT      "XorI",1
 
 //! CHECKER         Select-instructions optimization by SelectOptimization, JIT
-//! RUN             force_jit: true, options: "--compiler-regex='.*(equals|operands).*'", entry: "select_optimization.ETSGLOBAL::main"
+//! RUN             force_jit: true,
+//!                 options: "--compiler-regex='.*(equals|perands).*'",
+//!                 entry: "select_optimization.ETSGLOBAL::main"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__equals_and_4"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__equalsAnd4"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! PASS_AFTER      "SelectOptimization"
@@ -87,7 +89,7 @@
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "Select"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_same_operands"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectSameOperands"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! PASS_AFTER      "SelectOptimization"
@@ -95,7 +97,7 @@
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "Select"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_eq_costant_bool_operands_01X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectEqConstantBoolOperands01X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -105,7 +107,7 @@
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_eq_costant_bool_operands_10X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectEqConstantBoolOperands10X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -115,7 +117,7 @@
 //! INST_NOT        "Select"
 //! INST_COUNT      "XorI", 1
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_ne_costant_bool_operands_10X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectNeConstantBoolOperands10X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -126,7 +128,7 @@
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
 //!
-//! METHOD          "select_optimization.ETSGLOBAL::__noinline__select_ne_costant_bool_operands_01X0"
+//! METHOD          "select_optimization.ETSGLOBAL::__noinline__selectNeConstantBoolOperands01X0"
 //! PASS_AFTER      "MemoryCoalescing"
 //! INST_NOT        "Select"
 //! INST_NOT        "XorI"
@@ -137,83 +139,78 @@
 //! INST_NOT        "Select"
 //! INST_COUNT      "XorI",1
 
-function __noinline__equals_and_4(a: Object, b: Object) {
+function __noinline__equalsAnd4(a: Object, b: Object) {
     return a == b && b == a && a == b && b == a;
 }
 
-function __noinline__select_same_operands(x: int) {
+function __noinline__selectSameOperands(x: int) {
     if ((x & 2) != 0) {
         x += 1;
-    }
-    else {
+    } else {
         x += 1;
     }
     return x;
 }
 
-function __noinline__select_eq_costant_bool_operands_01X0(a: Object, b: Object) {
+function __noinline__selectEqConstantBoolOperands01X0(a: Object, b: Object) {
     let result = false;
     if (a == b) {
         result = a == b ? true : false;
-    }
-    else {
+    } else {
         result = a == b ? true : false;
     }
     return result;
 }
 
-function __noinline__select_eq_costant_bool_operands_10X0(a: Object, b: Object) {
+function __noinline__selectEqConstantBoolOperands10X0(a: Object, b: Object) {
     let result = false;
     if (a == b) {
         result = a == b ? false : true;
-    }
-    else {
+    } else {
         result = a == b ? false : true;
     }
     return result;
 }
 
-function __noinline__select_ne_costant_bool_operands_10X0(a: Object, b: Object) {
+function __noinline__selectNeConstantBoolOperands10X0(a: Object, b: Object) {
     let result = false;
     if (a != b) {
         result = a == b ? true : false;
-    }
-    else {
+    } else {
         result = a == b ? true : false;
     }
     return result;
 }
 
-function __noinline__select_ne_costant_bool_operands_01X0(a: Object, b: Object) {
+function __noinline__selectNeConstantBoolOperands01X0(a: Object, b: Object) {
     let result = false;
     if (a != b) {
         result = a == b ? false : true;
-    }
-    else {
+    } else {
         result = a == b ? false : true;
     }
     return result;
 }
 
 function main(): void {
-    let a = new Object;
-    let b = new Object;
+    let a: Object = {};
+    let b: Object = {};
 
-    arktest.assertEQ(__noinline__equals_and_4(a, a), true);
-    arktest.assertEQ(__noinline__equals_and_4(a, b), false);
+    arktest.assertEQ(__noinline__equalsAnd4(a, a), true);
+    arktest.assertEQ(__noinline__equalsAnd4(a, b), false);
 
-    arktest.assertEQ(__noinline__select_same_operands(1), 2);
-    arktest.assertEQ(__noinline__select_same_operands(2), 3);
+    arktest.assertEQ(__noinline__selectSameOperands(1), 2);
+    arktest.assertEQ(__noinline__selectSameOperands(2), 3);
 
-    arktest.assertEQ(__noinline__select_eq_costant_bool_operands_01X0(a, a), true);
-    arktest.assertEQ(__noinline__select_eq_costant_bool_operands_01X0(a, b), false);
+    arktest.assertEQ(__noinline__selectEqConstantBoolOperands01X0(a, a), true);
+    arktest.assertEQ(__noinline__selectEqConstantBoolOperands01X0(a, b), false);
 
-    arktest.assertEQ(__noinline__select_eq_costant_bool_operands_10X0(a, a), false);
-    arktest.assertEQ(__noinline__select_eq_costant_bool_operands_10X0(a, b), true);
+    arktest.assertEQ(__noinline__selectEqConstantBoolOperands10X0(a, a), false);
+    arktest.assertEQ(__noinline__selectEqConstantBoolOperands10X0(a, b), true);
 
-    arktest.assertEQ(__noinline__select_ne_costant_bool_operands_10X0(a, a), true);
-    arktest.assertEQ(__noinline__select_ne_costant_bool_operands_10X0(a, b), false);
+    arktest.assertEQ(__noinline__selectNeConstantBoolOperands10X0(a, a), true);
+    arktest.assertEQ(__noinline__selectNeConstantBoolOperands10X0(a, b), false);
 
-    arktest.assertEQ(__noinline__select_ne_costant_bool_operands_01X0(a, a), false);
-    arktest.assertEQ(__noinline__select_ne_costant_bool_operands_01X0(a, b), true);
+    arktest.assertEQ(__noinline__selectNeConstantBoolOperands01X0(a, a), false);
+    arktest.assertEQ(__noinline__selectNeConstantBoolOperands01X0(a, b), true);
 }

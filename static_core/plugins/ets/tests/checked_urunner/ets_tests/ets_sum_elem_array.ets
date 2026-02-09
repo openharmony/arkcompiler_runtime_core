@@ -14,7 +14,9 @@
  */
 
 //! CHECKER       LSE optimize the summury of two elements from array
-//! RUN           force_jit: true, options: "--compiler-regex='.*main1.*'", entry: "ets_sum_elem_array.ETSGLOBAL::main1", result: 5
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*main1.*'",
+//!               entry: "ets_sum_elem_array.ETSGLOBAL::main1", result: 5
 //! EVENT         /Compilation,ets_sum_elem_array.ETSGLOBAL::main1,.*,COMPILED/
 //! METHOD        "ets_sum_elem_array.ETSGLOBAL::main"
 //! PASS_BEFORE   "LSE"
@@ -26,7 +28,9 @@
 //! INST_COUNT    /Cast i64/, 2
 
 //! CHECKER       LSE optimize the summury of two elements from object
-//! RUN           force_jit: true, options: "--compiler-regex='.*main2.*'", entry: "ets_sum_elem_array.ETSGLOBAL::main2", result: 3
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*main2.*'",
+//!               entry: "ets_sum_elem_array.ETSGLOBAL::main2", result: 3
 //! EVENT         /Compilation,ets_sum_elem_array.ETSGLOBAL::main2,.*,COMPILED/
 //! METHOD        "ets_sum_elem_array.ETSGLOBAL::main"
 //! PASS_BEFORE   "LSE"

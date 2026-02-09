@@ -18,15 +18,18 @@
 
 //! CHECKER       Invalid phi instruction AOT (IARN2S/19226)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop' --compiler-loop-unroll=false --compiler-inlining=true", entry: "ets_string_concat_loop_part3.ETSGLOBAL::bugfix_concat_loop"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfixConcatLoop' --compiler-loop-unroll=false \
+//!                         --compiler-inlining=true",
+//!               entry: "ets_string_concat_loop_part3.ETSGLOBAL::bugfixConcatLoop"
 
 //! CHECKER       Invalid phi instruction JIT (IARN2S/19226)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*bugfix_concat_loop' --compiler-loop-unroll=false", entry: "ets_string_concat_loop_part3.ETSGLOBAL::bugfix_concat_loop"
+//! RUN           force_jit: true, options: "--compiler-regex='.*bugfixConcatLoop' --compiler-loop-unroll=false",
+//!               entry: "ets_string_concat_loop_part3.ETSGLOBAL::bugfixConcatLoop"
 
-function bugfix_concat_loop() {
-    let str = "";
-    let a2 : FixedArray<string> = ["dd"]
+function bugfixConcatLoop() {
+    let str = '';
+    let a2 : FixedArray<string> = ['dd']
     let idx2 : string | boolean;
     for (idx2 of a2) {
         let c2 = idx2
@@ -35,5 +38,5 @@ function bugfix_concat_loop() {
         }
     }
 
-    arktest.assertEQ(str, "dd");
+    arktest.assertEQ(str, 'dd');
 }

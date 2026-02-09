@@ -19,151 +19,172 @@ const expectedRangeErrors = (e: Error): boolean => {
 
 //! CHECKER       AOT: TypedArray.with()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test_.*", entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
 //! RUN           entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u8_clamped_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_i8_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u8_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_i16_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u16_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 
 //! CHECKER       JIT: TypedArray.with()
-//! RUN           force_jit: true, options: "--compiler-regex=.*::test_.*", entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex=.*::test.*",
+//!               entry: "ets_escompat_typed_arrays_with.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u8_clamped_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8ClampedArray"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_i8_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u8_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU8Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_i16_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testI16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 //!
-//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::test_u16_array"
+//! METHOD        "ets_escompat_typed_arrays_with.ETSGLOBAL::testU16Array"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.*Array::with/
 
-function test_u8_clamped_array() {
+function testU8ClampedArray() {
     let src  = new Uint8ClampedArray([0, 7, 74, 181, 255])
     let exp1 = new Uint8ClampedArray([0, 0, 74, 181, 255])
     let exp2 = new Uint8ClampedArray([0, 255, 74, 181, 255])
     let exp3 = new Uint8ClampedArray([0, 7, 74, 181, 255])
     let val1: int = -1;
     let val2: int = 256;
-    check_array(src.with(1 as int, val1), exp1)
-    check_array(src.with(1 as int, val2), exp2)
-    check_array(src, exp3)
+    checkArray(src.with(1 as int, val1), exp1)
+    checkArray(src.with(1 as int, val2), exp2)
+    checkArray(src, exp3)
 }
 
-function test_u8_clamped_array_rangeerror() {
+function testU8ClampedArrayRangeerror() {
     let src = new Uint8ClampedArray([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
-    arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(-1 as int, val) 
+}, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(src.length.toInt(), val) 
+}, expectedRangeErrors)
 }
 
-function test_i8_array() {
+function testI8Array() {
     let src  = new Int8Array([-128, -56, 0, 64, 128])
     let exp1 = new Int8Array([-128, 100, 0, 64, 128])
     let exp2 = new Int8Array([-128, -56, 0, 64, 128])
     let val: byte = 100
-    check_array(src.with(1 as int, val), exp1)
-    check_array(src, exp2)
+    checkArray(src.with(1 as int, val), exp1)
+    checkArray(src, exp2)
 }
 
-function test_i8_array_rangeerror() {
+function testI8ArrayRangeerror() {
     let src = new Int8Array([1, 1, 1])
     let val: byte = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
-    arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(-1 as int, val) 
+}, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(src.length.toInt(), val) 
+}, expectedRangeErrors)
 }
 
-function test_u8_array() {
+function testU8Array() {
     let src  = new Uint8Array([0, 7, 74, 181, 255])
     let exp1 = new Uint8Array([0, 4, 74, 181, 255])
     let exp2 = new Uint8Array([0, 7, 74, 181, 255])
     let val: int = 260
-    check_array(src.with(1, val), exp1)
-    check_array(src, exp2)
+    checkArray(src.with(1, val), exp1)
+    checkArray(src, exp2)
 }
 
-function test_u8_array_rangeerror() {
+function testU8ArrayRangeerror() {
     let src = new Uint8Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
-    arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(-1 as int, val) 
+}, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(src.length.toInt(), val) 
+}, expectedRangeErrors)
 }
 
-function test_i16_array() {
+function testI16Array() {
     let src  = new Int16Array([-32768, -1321, 0, 10321, 32767])
     let exp1 = new Int16Array([-32768, 10000, 0, 10321, 32767])
     let exp2 = new Int16Array([-32768, -1321, 0, 10321, 32767])
     let val: short = 10000;
-    check_array(src.with(1 as int, val), exp1)
-    check_array(src, exp2)
+    checkArray(src.with(1 as int, val), exp1)
+    checkArray(src, exp2)
 }
 
-function test_i16_array_rangeerror() {
+function testI16ArrayRangeerror() {
     let src = new Int16Array([1, 1, 1])
     let val: short = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
-    arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(-1 as int, val) 
+}, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(src.length.toInt(), val) 
+}, expectedRangeErrors)
 }
 
-function test_u16_array() {
+function testU16Array() {
     let src  = new Uint16Array([0, 62, 538, 35891, 65535])
     let exp1 = new Uint16Array([0, 14, 538, 35891, 65535])
     let exp2 = new Uint16Array([0, 62, 538, 35891, 65535])
     let val: int = 65550;
-    check_array(src.with(1, val), exp1)
-    check_array(src, exp2)
+    checkArray(src.with(1, val), exp1)
+    checkArray(src, exp2)
 }
 
-function test_u16_array_rangeerror() {
+function testU16ArrayRangeerror() {
     let src = new Uint16Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
-    arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(-1 as int, val) 
+}, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ src.with(src.length.toInt(), val) 
+}, expectedRangeErrors)
 }
 
-function check_array<T extends Number | BigInt>(data: ArrayLike<T>, expected: ArrayLike<T>): void {
-    arktest.assertEQ(data.length, expected.length, "Unexpected array length")
+function checkArray<T extends Number | BigInt>(data: ArrayLike<T>, expected: ArrayLike<T>): void {
+    arktest.assertEQ(data.length, expected.length, 'Unexpected array length')
     for (let i: int = 0; i < data.length; i++) {
-        arktest.assertEQ(data[i], expected[i], "Unexpected element with index " + i)
+        arktest.assertEQ(data[i], expected[i], 'Unexpected element with index ' + i)
     }
 }
 
 function main(): void {
-    test_u8_clamped_array()
-    test_u8_clamped_array_rangeerror()
-    test_i8_array()
-    test_i8_array_rangeerror()
-    test_u8_array()
-    test_u8_array_rangeerror()
-    test_i16_array()
-    test_i16_array_rangeerror()
-    test_u16_array()
-    test_u16_array_rangeerror()
+    testU8ClampedArray()
+    testU8ClampedArrayRangeerror()
+    testI8Array()
+    testI8ArrayRangeerror()
+    testU8Array()
+    testU8ArrayRangeerror()
+    testI16Array()
+    testI16ArrayRangeerror()
+    testU16Array()
+    testU16ArrayRangeerror()
 }

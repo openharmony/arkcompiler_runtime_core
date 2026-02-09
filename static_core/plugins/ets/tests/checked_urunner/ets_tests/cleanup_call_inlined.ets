@@ -14,8 +14,10 @@
  */
 
 //! CHECKER       Remove redundant Call.Inlined and ReturnInlined
-//! RUN           force_jit: true, options: "--compiler-regex='cleanup_call_inlined.ETSGLOBAL::test_.*'", entry: "cleanup_call_inlined.ETSGLOBAL::main"
-//! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_checks_elim"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='cleanup_call_inlined.ETSGLOBAL::test.*'",
+//!               entry: "cleanup_call_inlined.ETSGLOBAL::main"
+//! METHOD        "cleanup_call_inlined.ETSGLOBAL::testAfterChecksElim"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 1
 //! INST_COUNT    /ReturnInlined/, 1
@@ -23,7 +25,7 @@
 //! PASS_AFTER_NEXT "Cleanup" # skip cleanup in light mode
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT      /Inlined/
-//! METHOD        "cleanup_call_inlined.ETSGLOBAL::test_after_escape"
+//! METHOD        "cleanup_call_inlined.ETSGLOBAL::testAfterEscape"
 //! PASS_AFTER    "Inline"
 //! INST_COUNT    /Call.*Inlined/, 10
 //! INST_COUNT    /ReturnInlined/, 10
@@ -35,7 +37,7 @@ function sum2(a: FixedArray<int>): int {
     return a[0] + a[1];
 }
 
-function test_after_checks_elim(): int {
+function testAfterChecksElim(): int {
     let a: FixedArray<int> = new FixedArray<int>(2);
     a[0] = 2;
     a[1] = 3;
@@ -57,7 +59,7 @@ function add(c: WeakRef<Counter>, value: int) : int {
     return c.deref()!.add(value);
 }
 
-function test_after_escape(): int {
+function testAfterEscape(): int {
     let counter = new Counter();
     let ref = new WeakRef<Counter>(counter);
     add(ref, 4);
@@ -65,12 +67,11 @@ function test_after_escape(): int {
     return ref.deref()!.total;
 }
 
-
 function main(): int {
-    if (test_after_checks_elim() != 5) {
+    if (testAfterChecksElim() != 5) {
         return 1;
     }
-    if (test_after_escape() != 9) {
+    if (testAfterEscape() != 9) {
         return 2;
     }
     return 0;

@@ -17,74 +17,76 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER       ArrayInt indexOf
-//! RUN           force_jit: true , options: "--compiler-dump:final --compiler-regex='.*::test_array_.*_index_of'", entry: "escompat_array_indexof.ETSGLOBAL::main"
+//! RUN           force_jit: true, 
+//!               options: "--compiler-dump:final --compiler-regex='.*::testArray.*IndexOf'",
+//!               entry: "escompat_array_indexof.ETSGLOBAL::main"
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayIntIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_number_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayNumberIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_short_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayShortIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_long_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayLongIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_float_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayFloatIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 4
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_char_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayCharIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_boolean_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayBooleanIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_string_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayStringIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /CallStatic.*std.core.Array::indexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_int_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayIntLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_number_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayNumberLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_short_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayShortLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_long_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayLongLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_float_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayFloatLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 4
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_char_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayCharLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_boolean_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayBooleanLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 //!
-//! METHOD        "escompat_array_indexof.ETSGLOBAL::test_array_string_last_index_of"
+//! METHOD        "escompat_array_indexof.ETSGLOBAL::testArrayStringLastIndexOf"
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    /Call(Virtual|Static).*std.core.Array::lastIndexOf /, 5
 
 
-function test_array_int_index_of() {
+function testArrayIntIndexOf() {
     let array: Array<int> = [2, 3, 2, 3, 3, 4, 5];
     arktest.assertEQ(array.indexOf(3 ,  0),  1.);
     arktest.assertEQ(array.indexOf(3 ,  2),  3.);
@@ -93,7 +95,7 @@ function test_array_int_index_of() {
     arktest.assertEQ(array.indexOf(3,  -8),  1.);
 }
 
-function test_array_number_index_of() {
+function testArrayNumberIndexOf() {
     let array: Array<number> = ([1.1, 2.2, 3.3, 3.3, 5.5, 2.2, 4.4]);
     arktest.assertEQ(array.indexOf(3 ,   0), -1.);
     arktest.assertEQ(array.indexOf(2.2 , 0),  1.);
@@ -102,7 +104,7 @@ function test_array_number_index_of() {
     arktest.assertEQ(array.indexOf(2.2, -8),  1.);
 }
 
-function test_array_short_index_of() {
+function testArrayShortIndexOf() {
     let array: Array<short> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement: short = 3;
     arktest.assertEQ(array.indexOf(searchElement ,  0),  1.);
@@ -112,7 +114,7 @@ function test_array_short_index_of() {
     arktest.assertEQ(array.indexOf(searchElement,  -8),  1.);
 }
 
-function test_array_long_index_of() {
+function testArrayLongIndexOf() {
     let array: Array<long> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement: long = 3;
     arktest.assertEQ(array.indexOf(searchElement ,  0),  1.);
@@ -122,7 +124,7 @@ function test_array_long_index_of() {
     arktest.assertEQ(array.indexOf(searchElement , -8),  1.);
 }
 
-function test_array_float_index_of() {
+function testArrayFloatIndexOf() {
     let array: Array<float> = [1.1f, 2.2f, 3.3f, 3.3f, 5.5f, 2.2f, 4.4f];
     let searchElement : float = 2.2f;
     arktest.assertEQ(array.indexOf(searchElement,  0),  1.);
@@ -131,7 +133,7 @@ function test_array_float_index_of() {
     arktest.assertEQ(array.indexOf(searchElement, -8),  1.);
 }
 
-function test_array_char_index_of() {
+function testArrayCharIndexOf() {
     let array: Array<char> = [c'a', c'b', c'c', c'a', c'd', c'a', c'b'];
     let searchElement : char = c'b';
     arktest.assertEQ(array.indexOf(searchElement,   0),  1.);
@@ -145,7 +147,7 @@ function test_array_char_index_of() {
     arktest.assertEQ(array.indexOf(searchElement,  3),  -1.);
 }
 
-function test_array_boolean_index_of() {
+function testArrayBooleanIndexOf() {
     let array: Array<boolean> = [true, false, false, true, false, true, false];
     arktest.assertEQ(array.indexOf(false ,  0),  1.);
     arktest.assertEQ(array.indexOf(false ,  6),  6.);
@@ -154,7 +156,7 @@ function test_array_boolean_index_of() {
     arktest.assertEQ(array.indexOf(false,  -5),  2.);
 }
 
-function test_array_string_index_of() {
+function testArrayStringIndexOf() {
     let array: Array<string> = ["this", "is", "hello", "world", "hello"];
     arktest.assertEQ(array.indexOf("hello",   0),  2.);
     arktest.assertEQ(array.indexOf("world",   2),  3.);
@@ -163,7 +165,7 @@ function test_array_string_index_of() {
     arktest.assertEQ(array.indexOf("this",   -7),  0.);
 }
 
-function test_array_int_last_index_of() {
+function testArrayIntLastIndexOf() {
     let array: Array<int> = [2, 3, 2, 3, 3, 4, 5];
     arktest.assertEQ(array.lastIndexOf(3 ,  0),  -1);
     arktest.assertEQ(array.lastIndexOf(3 ,  2),   1);
@@ -172,7 +174,7 @@ function test_array_int_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(3 , -8),  -1);
 }
 
-function test_array_number_last_index_of() {
+function testArrayNumberLastIndexOf() {
     let array: Array<number> = ([1.1, 2.2, 3.3, 3.3, 5.5, 2.2, 4.4]);
     arktest.assertEQ(array.lastIndexOf(3.,   0), -1);
     arktest.assertEQ(array.lastIndexOf(2.2 , 0), -1);
@@ -181,7 +183,7 @@ function test_array_number_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(2.2, -8), -1);
 }
 
-function test_array_short_last_index_of() {
+function testArrayShortLastIndexOf() {
     let array: Array<short> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement : short = 3;
     arktest.assertEQ(array.lastIndexOf(searchElement ,  0),  -1);
@@ -191,7 +193,7 @@ function test_array_short_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(searchElement , -8),  -1);
 }
 
-function test_array_long_last_index_of() {
+function testArrayLongLastIndexOf() {
     let array: Array<long> = [2, 3, 2, 3, 3, 4, 5];
     let searchElement : long = 3;
     arktest.assertEQ(array.lastIndexOf(searchElement ,  0),  -1);
@@ -201,7 +203,7 @@ function test_array_long_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(searchElement , -8),  -1);
 }
 
-function test_array_float_last_index_of() {
+function testArrayFloatLastIndexOf() {
     let array: Array<float> = [1.1f, 2.2f, 3.3f, 3.3f, 5.5f, 2.2f, 4.4f];
     let searchElement : float = 2.2f;
     arktest.assertEQ(array.lastIndexOf(searchElement , 0),  -1);
@@ -210,7 +212,7 @@ function test_array_float_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(searchElement, -8),  -1);
 }
 
-function test_array_char_last_index_of() {
+function testArrayCharLastIndexOf() {
     let array: Array<char> = [c'a', c'b', c'c', c'a', c'd', c'a', c'b'];
     let searchElement : char = c'b';
     arktest.assertEQ(array.lastIndexOf(searchElement,   0),  -1);
@@ -224,7 +226,7 @@ function test_array_char_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(searchElement,  3),   -1);
 }
 
-function test_array_boolean_last_index_of() {
+function testArrayBooleanLastIndexOf() {
     let array: Array<boolean> = [true, false, false, true, false, true, false];
     arktest.assertEQ(array.lastIndexOf(false ,  0),  -1);
     arktest.assertEQ(array.lastIndexOf(false ,  6),   6);
@@ -233,7 +235,7 @@ function test_array_boolean_last_index_of() {
     arktest.assertEQ(array.lastIndexOf(false,  -5),   2);
 }
 
-function test_array_string_last_index_of() {
+function testArrayStringLastIndexOf() {
     let array: Array<string> = ["this", "is", "hello", "world", "hello"];
     arktest.assertEQ(array.lastIndexOf("hello",   0),  -1);
     arktest.assertEQ(array.lastIndexOf("world",   2),  -1);
@@ -243,20 +245,20 @@ function test_array_string_last_index_of() {
 }
 
 function main() {
-    test_array_int_index_of()
-    test_array_number_index_of()
-    test_array_short_index_of()
-    test_array_long_index_of()
-    test_array_float_index_of()
-    test_array_char_index_of()
-    test_array_boolean_index_of()
-    test_array_string_index_of()
-    test_array_int_last_index_of()
-    test_array_number_last_index_of()
-    test_array_short_last_index_of()
-    test_array_long_last_index_of()
-    test_array_float_last_index_of()
-    test_array_char_last_index_of()
-    test_array_boolean_last_index_of()
-    test_array_string_last_index_of()
+    testArrayIntIndexOf()
+    testArrayNumberIndexOf()
+    testArrayShortIndexOf()
+    testArrayLongIndexOf()
+    testArrayFloatIndexOf()
+    testArrayCharIndexOf()
+    testArrayBooleanIndexOf()
+    testArrayStringIndexOf()
+    testArrayIntLastIndexOf()
+    testArrayNumberLastIndexOf()
+    testArrayShortLastIndexOf()
+    testArrayLongLastIndexOf()
+    testArrayFloatLastIndexOf()
+    testArrayCharLastIndexOf()
+    testArrayBooleanLastIndexOf()
+    testArrayStringLastIndexOf()
 }

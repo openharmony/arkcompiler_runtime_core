@@ -17,10 +17,10 @@
   tags: [not-a-test]
 ---*/
 
-import { risky_array } from './ext_funcs_4.ets';
+import { riskyArray } from './ext_funcs_4.ets';
 
 export function middle(arr: int[]): int {
-    return risky_array(arr); // inline will be here
+    return riskyArray(arr); // inline will be here
 }
 
 export function compute(x: int): int {

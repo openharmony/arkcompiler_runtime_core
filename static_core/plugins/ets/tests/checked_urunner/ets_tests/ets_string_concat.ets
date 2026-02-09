@@ -163,7 +163,9 @@
 
 //! CHECKER       JIT IR Builder, check String concatenation
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*concat[0-9]+.*' --compiler-inlining=false", entry: "ets_string_concat.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*concat[0-9]+.*' --compiler-inlining=false",
+//!               entry: "ets_string_concat.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_string_concat.ETSGLOBAL::concat0"
 //! PASS_BEFORE   "BranchElimination"
@@ -341,8 +343,9 @@ function concat5(a: String, b: String, c: String, d: String): String {
 function concat8(a: String, b: String): String {
     let sb = new StringBuilder();
     sb.append(a);
-    if (b != "")
+    if (b != '') {
         sb.append(b);
+    }
     return sb.toString();                           // not applied, IR is not equivalent to 'return a + b;'
 }
 
@@ -354,28 +357,27 @@ function concat11(a: String, b: String): String {
     return a + b + 1;                               // not applied, concatenation with int
 }
 
-function concat13(): string
-{
-    let str = "" + StringBuilder.toString(1);       // partially applied, calls StdCoreToStringInt
+function concat13(): string {
+    let str = '' + StringBuilder.toString(1);       // partially applied, calls StdCoreToStringInt
     return str;
 }
 
 function concat14(src: string|undefined): string {
-  let dst: string = "" + src;                       // not applied due to instance used outside
+  let dst: string = '' + src;                       // not applied due to instance used outside
                                                     // basic block it was created
   return dst;
 }
 
 function main() {
-    arktest.assertEQ(concat0("abc", "de"), "abcde", "Wrong result at concat0")
-    arktest.assertEQ(concat1("abc", "de"), "abcde", "Wrong result at concat1")
-    arktest.assertEQ(concat2("abc", "de"), "abcde", "Wrong result at concat2")
-    arktest.assertEQ(concat3("abc", "de"), "abcde", "Wrong result at concat3")
-    arktest.assertEQ(concat4("ab", "c", "de"), "abcde", "Wrong result at concat4")
-    arktest.assertEQ(concat5("ab", "c", "d", "e"), "abcde", "Wrong result at concat5")
-    arktest.assertEQ(concat8("abc", "de"), "abcde", "Wrong result at concat8")
-    arktest.assertEQ(concat10("a", "b", "c", "d", "e"), "abcde", "Wrong result at concat10")
-    arktest.assertEQ(concat11("abc", "de"), "abcde1", "Wrong result at concat11")
-    arktest.assertEQ(concat13(), "1", "Wrong result at concat13")
-    arktest.assertEQ(concat14(undefined), "undefined", "Wrong result at concat14")
+    arktest.assertEQ(concat0('abc', 'de'), 'abcde', 'Wrong result at concat0')
+    arktest.assertEQ(concat1('abc', 'de'), 'abcde', 'Wrong result at concat1')
+    arktest.assertEQ(concat2('abc', 'de'), 'abcde', 'Wrong result at concat2')
+    arktest.assertEQ(concat3('abc', 'de'), 'abcde', 'Wrong result at concat3')
+    arktest.assertEQ(concat4('ab', 'c', 'de'), 'abcde', 'Wrong result at concat4')
+    arktest.assertEQ(concat5('ab', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat5')
+    arktest.assertEQ(concat8('abc', 'de'), 'abcde', 'Wrong result at concat8')
+    arktest.assertEQ(concat10('a', 'b', 'c', 'd', 'e'), 'abcde', 'Wrong result at concat10')
+    arktest.assertEQ(concat11('abc', 'de'), 'abcde1', 'Wrong result at concat11')
+    arktest.assertEQ(concat13(), '1', 'Wrong result at concat13')
+    arktest.assertEQ(concat14(undefined), 'undefined', 'Wrong result at concat14')
 }

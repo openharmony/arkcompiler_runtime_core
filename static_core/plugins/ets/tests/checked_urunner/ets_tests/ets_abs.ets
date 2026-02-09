@@ -30,15 +30,33 @@
 //! RUN           entry: "ets_abs.ETSGLOBAL::main"
 
 function main(): int {
-    if (abs(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) return 1;
-    if (abs(Double.NEGATIVE_INFINITY) != Double.POSITIVE_INFINITY) return 2;
-    if (abs(Double.MAX_VALUE) != Double.MAX_VALUE) return 3;
-    if (abs(-Double.MAX_VALUE) != Double.MAX_VALUE) return 4;
-    if (abs(Double.MIN_VALUE) != Double.MIN_VALUE) return 5;
-    if (abs(-Double.MIN_VALUE) != Double.MIN_VALUE) return 6;
-    if (abs(1.) != 1.) return 7;
-    if (abs(-1.) != 1.) return 8;
-    if (abs(0.) != 0.) return 9;
+    if (abs(Double.POSITIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 1;
+    }
+    if (abs(Double.NEGATIVE_INFINITY) != Double.POSITIVE_INFINITY) {
+        return 2;
+    }
+    if (abs(Double.MAX_VALUE) != Double.MAX_VALUE) {
+        return 3;
+    }
+    if (abs(-Double.MAX_VALUE) != Double.MAX_VALUE) {
+        return 4;
+    }
+    if (abs(Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 5;
+    }
+    if (abs(-Double.MIN_VALUE) != Double.MIN_VALUE) {
+        return 6;
+    }
+    if (abs(1.0) != 1.0) {
+        return 7;
+    }
+    if (abs(-1.0) != 1.0) {
+        return 8;
+    }
+    if (abs(0.0) != 0.0) {
+        return 9;
+    }
 
     return 0;
 }

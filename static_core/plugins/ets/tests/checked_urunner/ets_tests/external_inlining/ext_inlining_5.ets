@@ -27,11 +27,13 @@
 import { middle } from './ext_funcs_4_1.ets';
 
 //! CHECKER    Check external inlining with deoptimization
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc", entry: "ext_inlining_5.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Inline,ext_funcs_4_1.ETSGLOBAL::middle,ext_funcs_4.ETSGLOBAL::risky_array,.*,STATIC,SUCCESS/
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_5.ETSGLOBAL::main1"
+//! EVENT      /Inline,ext_funcs_4_1.ETSGLOBAL::middle,ext_funcs_4.ETSGLOBAL::riskyArray,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_5.ETSGLOBAL::main1,ext_funcs_4_1.ETSGLOBAL::middle,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc", entry: "ext_inlining_5.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /DeoptimizationReason,ext_funcs_4.ETSGLOBAL::risky_array,BOUNDS_CHECK_WITH_DEOPT/
+//! RUN        options: "--panda-files=../ext_inlining_5_ext_funcs_4.ets.abc:../ext_inlining_5_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_5.ETSGLOBAL::main1"
+//! EVENT      /DeoptimizationReason,ext_funcs_4.ETSGLOBAL::riskyArray,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_5.ETSGLOBAL::main1,.*,IFRAME/
 //! METHOD     "ext_inlining_5.ETSGLOBAL::main1"
 //! PASS_BEFORE "Inline"
@@ -42,7 +44,7 @@ function main1(): int {
     let total = 0;
 
     try {
-        total = middle(arr); // inlining: main → middle → risky_array
+        total = middle(arr); // inlining: main → middle → riskyArray
     } catch (e) {
         total = -1;
     }

@@ -15,109 +15,111 @@
 
 //! CHECKER       JIT: indexOf() and lastIndexOf()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true,  options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
-//! METHOD        "test_int8array_index_of"
+//! RUN           force_jit: true,  options: "--compiler-regex=.*::test.*array.*",
+//!               entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
+//! METHOD        "testInt8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int8Array::indexOf/
-//! METHOD        "test_int16array_index_of"
+//! METHOD        "testInt16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int16Array::indexOf/
-//! METHOD        "test_int32array_index_of"
+//! METHOD        "testInt32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int32Array::indexOf/
-//! METHOD        "test_bigint64array_index_of"
+//! METHOD        "testBigint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigInt64Array::indexOf/
 //!
-//! METHOD        "test_float32array_index_of"
+//! METHOD        "testFloat32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float32Array::indexOf/
-//! METHOD        "test_float64array_index_of"
+//! METHOD        "testFloat64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float64Array::indexOf/
 
 
 //! CHECKER       AOT: indexOf() and lastIndexOf()
-//! RUN_PAOC      options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
-//! METHOD        "test_int8array_index_of"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
+//!               entry: "ets_escompat_typed_arrays_index_of.ETSGLOBAL::main"
+//! METHOD        "testInt8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int8Array::indexOf/
-//! METHOD        "test_int16array_index_of"
+//! METHOD        "testInt16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int16Array::indexOf/
-//! METHOD        "test_int32array_index_of"
+//! METHOD        "testInt32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int32Array::indexOf/
-//! METHOD        "test_bigint64array_index_of"
+//! METHOD        "testBigint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigInt64Array::indexOf/
 //!
-//! METHOD        "test_float32array_index_of"
+//! METHOD        "testFloat32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float32Array::indexOf/
-//! METHOD        "test_float64array_index_of"
+//! METHOD        "testFloat64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float64Array::indexOf/
 
-function test_int8array_index_of() {
+function testInt8arrayIndexOf() {
     let array = new Int8Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
-    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
-function test_int16array_index_of() {
+function testInt16arrayIndexOf() {
     let array = new Int16Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
-    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
-    arktest.assertEQ(array.indexOf(3.,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3.0,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
-function test_int32array_index_of() {
+function testInt32arrayIndexOf() {
     let array = new Int32Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3.,  0),  2.);
-    arktest.assertEQ(array.indexOf(3.,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3 , -1), -1.);
-    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+    arktest.assertEQ(array.indexOf(3.0,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3.0,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.0);
 }
 
-function test_bigint64array_index_of() {
+function testBigint64arrayIndexOf() {
     let array = new BigInt64Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.);
-    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.);
-    arktest.assertEQ(array.indexOf(3,  8), -1.);
-    arktest.assertEQ(array.indexOf(3, -1), -1.);
-    arktest.assertEQ(array.indexOf(3, -7),  2.);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.0);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.0);
+    arktest.assertEQ(array.indexOf(3,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3, -7),  2.0);
 }
 
-function test_float32array_index_of() {
+function testFloat32arrayIndexOf() {
     let array = new Float32Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3.,  0),  2.);
-    arktest.assertEQ(array.indexOf(3.,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3 , -1), -1.);
-    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+    arktest.assertEQ(array.indexOf(3.0,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3.0,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.0);
 }
 
-function test_float64array_index_of() {
+function testFloat64arrayIndexOf() {
     let array = new Float64Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3,   0),  2.);
-    arktest.assertEQ(array.indexOf(3,   6), -1.);
-    arktest.assertEQ(array.indexOf(3.,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3,   0),  2.0);
+    arktest.assertEQ(array.indexOf(3,   6), -1.0);
+    arktest.assertEQ(array.indexOf(3.0,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
 function main(): void {
-    test_int8array_index_of()
-    test_int16array_index_of()
-    test_int32array_index_of()
-    test_bigint64array_index_of()
-    test_float32array_index_of()
-    test_float64array_index_of()
+    testInt8arrayIndexOf()
+    testInt16arrayIndexOf()
+    testInt32arrayIndexOf()
+    testBigint64arrayIndexOf()
+    testFloat32arrayIndexOf()
+    testFloat64arrayIndexOf()
 }

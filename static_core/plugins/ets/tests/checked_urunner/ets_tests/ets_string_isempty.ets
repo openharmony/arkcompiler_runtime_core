@@ -50,10 +50,10 @@
 //! RUN        entry: "ets_string_isempty.ETSGLOBAL::main"
 
 function newString(): String {
-    return new String("abcde");
+    return 'abcde';
 }
 function emptyString(): String {
-    return new String();
+    return '';
 }
 function nullString(): String | null {
     return null;

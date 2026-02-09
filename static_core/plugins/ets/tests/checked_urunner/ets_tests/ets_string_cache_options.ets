@@ -19,56 +19,76 @@
 //! CHECKER       AOT, check ets cache used by default
 //! SKIP_IF       @architecture == "arm32" || is_hybrid_config?
 //! RUN_PAOC      options: "--compiler-regex='.*main*' --paoc-mode=aot --load-runtimes=ets"
-//! RUN           options: "--compiler-regex='.*main*' --compiler-enable-events --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Fastpath: create string from number with cache"
 
 //! CHECKER       AOT, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*main*' --paoc-mode=aot --load-runtimes=ets"
-//! RUN           options: "--compiler-regex='.*main*' --compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --compiler-enable-events --use-string-caches=false \
+//!                         --compiler-events-path=./events.csv --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 
 
 //! CHECKER       JIT, check ets cache used by default
 //! SKIP_IF       @architecture == "arm32" || is_hybrid_config?
-//! RUN           force_jit: true, options: "--compiler-regex='.*main*' --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*main*' --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Fastpath: create string from number with cache"
 
 //! CHECKER       JIT, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*main*' --compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*main*' --compiler-enable-events --use-string-caches=false \
+//!                         --compiler-events-path=./events.csv",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 
 
 //! CHECKER       INTERP-CPP, check ets cache used by default
 //! SKIP_IF       @architecture == "arm32" || is_hybrid_config?
-//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Fastpath: create string from number with cache"
 
 //! CHECKER       INTERP-CPP, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp --compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=cpp \
+//!                         --compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv \
+//!                         --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 
 
 //! CHECKER       INTERP-IRTOC, check ets cache used by default
 //! SKIP_IF       @architecture == "arm32" || is_hybrid_config?
-//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=irtoc --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Fastpath: create string from number with cache"
 
 //! CHECKER       INTERP-IRTOC, check ets cache not used with option
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=irtoc --compiler-enable-events --use-string-caches=false --compiler-events-path=./events.csv --compiler-enable-jit=false", entry: "ets_string_cache_options.ETSGLOBAL::main"
+//! RUN           options: "--compiler-regex='.*main*' --interpreter-type=irtoc --compiler-enable-events \
+//!                         --use-string-caches=false --compiler-events-path=./events.csv \
+//!                         --compiler-enable-jit=false",
+//!               entry: "ets_string_cache_options.ETSGLOBAL::main"
 //!
 //! EVENT         "EtsCache,Slowpath: create string from number without cache"
 
 function main() : void {
-    arktest.assertEQ((123 as Long).toString(), "123")
+    arktest.assertEQ((123 as Long).toString(), '123')
 }

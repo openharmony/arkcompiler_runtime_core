@@ -31,7 +31,7 @@
 
 
 class C0 {
-  x0: boolean
+  public x0: boolean
 }
 
 function main() : void {

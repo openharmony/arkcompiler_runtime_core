@@ -16,8 +16,9 @@
 //! CHECKER       AOT PGO: EscapeAnalysis should not fold GetInstanceClass with external inlining
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PGO_PROF  entry: "ext_inlining_inline_ic_escape.ETSGLOBAL::main"
-//! RUN_PGO_PAOC  options: "--compiler-inline-external-methods-aot=true --compiler-peepholes=false --compiler-regex='.*__noinline__sum_iter.*'"
-//! METHOD        "ext_inlining_inline_ic_escape.ETSGLOBAL::__noinline__sum_iter"
+//! RUN_PGO_PAOC  options: "--compiler-inline-external-methods-aot=true --compiler-peepholes=false \
+//!                         --compiler-regex='.*__noinline__sumIter.*'"
+//! METHOD        "ext_inlining_inline_ic_escape.ETSGLOBAL::__noinline__sumIter"
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
 //! INST          /GetInstanceClass/
@@ -30,7 +31,7 @@
 //! RUN           entry: "ext_inlining_inline_ic_escape.ETSGLOBAL::main", options: "--compiler-regex='.*main.*'"
 //! EVENT_NOT     /DeoptimizationReason,.*,INLINE_IC/
 
-function __noinline__sum_iter(arr: int[]): int {
+function __noinline__sumIter(arr: int[]): int {
     let s = 0;
     for (let x of arr) {
         s += x;
@@ -40,6 +41,6 @@ function __noinline__sum_iter(arr: int[]): int {
 
 function main(): void {
     let arr: int[] = [1, 2, 3, 4];
-    let res = __noinline__sum_iter(arr);
+    let res = __noinline__sumIter(arr);
     arktest.assertEQ(res, 10);
 }

@@ -18,7 +18,7 @@
 ---*/
 
 // inline tree
-export function risky_array(arr: int[]): int {
+export function riskyArray(arr: int[]): int {
     let sum = 0;
     for (let i = 0; i <= arr.length; i++) {
         sum += arr[i];

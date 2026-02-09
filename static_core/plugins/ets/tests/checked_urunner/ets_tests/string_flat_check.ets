@@ -15,7 +15,9 @@
 
 
 //! CHECKER      Check StringFlatCheck is inserted and SaveState was not broken
-//! RUN          force_jit: true, options: "--compiler-regex=string_flat_check.* --use-all-strings=true", entry: "string_flat_check.ETSGLOBAL::saveStateNotBroken"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=string_flat_check.* --use-all-strings=true",
+//!              entry: "string_flat_check.ETSGLOBAL::saveStateNotBroken"
 //! METHOD       "string_flat_check.ETSGLOBAL::saveStateNotBroken"
 //! PASS_BEFORE  "StringFlatCheck"
 //! INST_NOT     "StringFlatCheck"
@@ -36,7 +38,9 @@ function saveStateNotBroken(): void {
 }
 
 //! CHECKER      Check StringFlatCheck OOM does not break interpreter
-//! RUN          force_jit: true, options: "--compiler-regex=string_flat_check.* --use-all-strings=true", entry: "string_flat_check.ETSGLOBAL::testOutOfMemory"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=string_flat_check.* --use-all-strings=true",
+//!              entry: "string_flat_check.ETSGLOBAL::testOutOfMemory"
 //! METHOD       "string_flat_check.ETSGLOBAL::compare"
 //! PASS_AFTER   "StringFlatCheck"
 //! INST         "StringFlatCheck"
@@ -47,7 +51,7 @@ function testOutOfMemory(): void {
         s1 += i
         s2 += i
     }
-    let buf = new Array<Any>()
+    let buf: Any[] = []
     try {
         while (true) {
             buf.push(new Array<byte>(1000))
@@ -79,7 +83,9 @@ function compare(s1: string, s2: string): int {
 }
 
 //! CHECKER      Check StringFlatCheck is not inserted if tree string is disabled
-//! RUN          force_jit: true, options: "--compiler-regex=string_flat_check.* --use-all-strings=false", entry: "string_flat_check.ETSGLOBAL::stringFlatCheckDisabled"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=string_flat_check.* --use-all-strings=false",
+//!              entry: "string_flat_check.ETSGLOBAL::stringFlatCheckDisabled"
 //! METHOD       "string_flat_check.ETSGLOBAL::stringFlatCheckDisabled"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     "StringFlatCheck"
@@ -92,19 +98,23 @@ function stringFlatCheckDisabled(): void {
 }
 
 //! CHECKER      Check StringFlatCheck is not inserted for instruction which returns flat string
-//! RUN          force_jit: true, options: "--compiler-regex=string_flat_check.* --use-all-strings=true", entry: "string_flat_check.ETSGLOBAL::stringFlatCheckForLoadString"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=string_flat_check.* --use-all-strings=true",
+//!              entry: "string_flat_check.ETSGLOBAL::stringFlatCheckForLoadString"
 //! METHOD       "string_flat_check.ETSGLOBAL::stringFlatCheckForLoadString"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     "StringFlatCheck"
 //! INST         "Intrinsic.StdCoreStringRepeat"
 function stringFlatCheckForLoadString(): void {
-    let r = "a".repeat(2)
+    let r = 'a'.repeat(2)
     arktest.assertEQ(2, r.length)
 }
 
 //! CHECKER      Check StringFlatCheck does not break OSR
 //! SKIP_IF      @architecture != "arm64"
-//! RUN          options: "--compiler-regex=string_flat_check.* --use-all-strings=true --no-async-jit --compiler-hotness-threshold=1 --compiler-enable-osr=true --compiler-ignore-failures=true", entry: "string_flat_check.ETSGLOBAL::main"
+//! RUN          options: "--compiler-regex=string_flat_check.* --use-all-strings=true --no-async-jit \
+//!                        --compiler-hotness-threshold=1 --compiler-enable-osr=true --compiler-ignore-failures=true",
+//!              entry: "string_flat_check.ETSGLOBAL::main"
 //! METHOD       "string_flat_check.ETSGLOBAL::testOsr_OSR"
 //! PASS_AFTER   "StringFlatCheck"
 //! INST_COUNT   "StringFlatCheck", 4
@@ -125,6 +135,6 @@ function testOsr(s1: string, s2: string): int {
 }
 
 function main(): void {
-    let r = testOsr("1234567", "1234567")  // long enough strings to create tree string
+    let r = testOsr('1234567', '1234567')  // long enough strings to create tree string
     arktest.assertTrue(r > 0)
 }
