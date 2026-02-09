@@ -23,11 +23,11 @@ files:
 import {Space1 as mySpace} from "./namespace_storage"
 
 export namespace Space1 {
-    export function foo() {
+    export function foo(): string {
         return "Local Space1"
     }
-    export let nsVar = 1234
-    export const nsConst = 2345
+    export let nsVar: int = 1234
+    export const nsConst: int = 2345
 }
 
  function main() {

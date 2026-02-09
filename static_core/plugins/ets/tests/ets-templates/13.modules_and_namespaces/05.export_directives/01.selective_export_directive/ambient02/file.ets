@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,6 @@ class A {
     fld: string = "abc"
 }
 
-const bar = 42
+const bar: int = 42
 
 export { foo as foo1, A as A1, bar as bar1 }

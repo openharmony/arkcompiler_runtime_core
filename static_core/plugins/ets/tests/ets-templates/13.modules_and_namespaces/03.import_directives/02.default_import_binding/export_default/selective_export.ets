@@ -16,8 +16,8 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-const a = 100;
-const b = 10000;
-const c = "export_string"
+const a: int = 100;
+const b: int = 10000;
+const c: string = "export_string"
 
 export {a as default,b as b,c as c}

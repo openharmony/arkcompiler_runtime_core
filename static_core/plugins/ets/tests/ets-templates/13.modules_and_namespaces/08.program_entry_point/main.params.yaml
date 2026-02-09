@@ -108,17 +108,6 @@ cases:
               return foo(true)!
           }
 
-    # exported function main, void return type
-    - use: |-
-          // entry point exported function main, inferred void, positive
-          let res = ''
-          export function main() {
-              if (true) {
-                  return
-              }
-              arktest.assertNE(res, '')
-          }
-
     - use: |-
           // entry point exported function main, explicit void, positive
           let res = ''
@@ -127,13 +116,6 @@ cases:
                   return
               }
               arktest.assertNE(res, '')
-          }
-
-    # exported function main, int return type
-    - use: |-
-          // entry point exported function main, inferred int, positive
-          export function main() {
-              return 0
           }
 
     - use: |-
@@ -145,10 +127,10 @@ cases:
     # overloading
     - use: |-
           // exported main function is called
-          export function main() {
+          export function main(): void {
               arktest.assertTrue(true)
           }
-          export function main2(args: string[]) {
+          export function main2(args: string[]): void {
               arktest.assertTrue(false)
           }
           export overload main { main, main2 }

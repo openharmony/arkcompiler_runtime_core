@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-const a = 100;
-const b = "export_string"
+const a: int = 100;
+const b: string = "export_string"
 
 export {123456 as default, a as a, b as b}

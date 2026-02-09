@@ -3090,3 +3090,18 @@
 
 #FailKind.DECLGEN_ETS2TS_FAIL:
 15.semantic_rules/10.overloading/main_overload_neg.ets
+#FailKind.TSC_FAIL
+14.ambient_declarations/04.class_declarations/class_decl_23.ets
+14.ambient_declarations/04.class_declarations/class_decl_24.ets
+14.ambient_declarations/04.class_declarations/class_decl_25.ets
+14.ambient_declarations/04.class_declarations/class_decl_26.ets
+14.ambient_declarations/04.class_declarations/class_decl_27.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_23.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_24.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_25.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_26.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_27.d.ets
+14.ambient_declarations/05.interface_declarations/interface_decl/interface_declarations.d.ets
+14.ambient_declarations/05.interface_declarations/interface_decl/interface_declarations.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_declarations.d.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_declarations.ets

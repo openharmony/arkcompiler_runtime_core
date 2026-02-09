@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -20,7 +20,7 @@ tags: [compile-only, not-a-test]
 ---*/
 
 export class MyIterator implements Iterator<String> {
-    index = 0
+    index: int = 0
     base: IterableClass
     constructor(base: IterableClass) {
         this.base = base

@@ -19,39 +19,39 @@ tags: [not-a-test, compile-only]
 ---*/
 
 namespace NS1 {
-    export function sayHello() {
+    export function sayHello(): string {
         return "Hello from NS1";
     }
-    export let nsVar = 1234
-    export const nsConst = 1234
+    export let nsVar: int = 1234
+    export const nsConst: int = 1234
 }
 
 namespace A.B.C {
-    export function foo() {
+    export function foo(): string {
         return "foo";
     }
 }
 
 export namespace Space1 {
-    export function foo() {
+    export function foo(): string {
         return "foo";
     }
-    export let nsVar = 1234
-    export const nsConst = 2345
+    export let nsVar: int = 1234
+    export const nsConst: int = 2345
 }
 
 export namespace Space2 {
     export function foo(p: number): number {
         return p;
     }
-    export let nsVar = "1234"
+    export let nsVar: string = "1234"
 }
 export namespace NS2 {
-    export function sayHello() {
+    export function sayHello(): string {
         return "Hello from NS2";
     }
-    export let nsVar = 1234
-    export const nsConst = 1234
+    export let nsVar: int = 1234
+    export const nsConst: int = 1234
 }
 
 export namespace Transit {

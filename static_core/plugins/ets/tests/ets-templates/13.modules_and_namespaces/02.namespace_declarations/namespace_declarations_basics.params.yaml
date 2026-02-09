@@ -21,7 +21,7 @@ cases:
             constructor() {
               nsClass.text = "foo from myClass"
             }
-              static foo() {
+              static foo(): string {
                 return nsClass.text
             }
           }
@@ -72,8 +72,8 @@ cases:
   # 4. Variable in namespace
   - decl: |-
         namespace myNamespace {
-          export let nsVariable = 13
-          export const nsConstValue = 42
+          export let nsVariable: int = 13
+          export const nsConstValue: int = 42
         }
     use: |-
         arktest.assertNE(myNamespace.nsVariable, 41) 
@@ -83,7 +83,7 @@ cases:
   # 5. Constant in namespace
   - decl: |-
         namespace myNamespace {
-          export const nsConstValue = 42
+          export const nsConstValue: int = 42
         }
     use: |-
         arktest.assertEQ(myNamespace.nsConstValue, 42)
@@ -91,8 +91,8 @@ cases:
   # 6 Access inside namespace
   - decl: |-
         namespace myNamespace {
-          export const nsConstValue = 53
-          export function returnConst() {
+          export const nsConstValue: int = 53
+          export function returnConst(): int {
             return myNamespace.nsConstValue
           }
 
@@ -103,7 +103,7 @@ cases:
   # 7. Function inside namespace
   - decl: |-
         namespace myNamespace {
-          export function foo() {
+          export function foo(): string {
             return "foo"
           }
         }
@@ -114,7 +114,7 @@ cases:
   - decl: |-
         namespace myNamespace {
           export namespace embeddedNamespace {
-            export function foo() {
+            export function foo(): string {
               return "embeddedFoo"
              }
           }
@@ -125,7 +125,7 @@ cases:
   # 9. Namespace with qualified name
   - decl: |-
       namespace A.B.C {
-        export function foo() {
+        export function foo(): string {
           return "quialifiedFoo"
         }
       }
@@ -135,12 +135,12 @@ cases:
   # 10. Namespaces with identical namespace names in a single compilation unit (including embedded namespaces cases) form a single namespace
   - decl: |-
       namespace A {
-        export function foo() {
+        export function foo(): string {
           return "SingleFoo"
         }
       }
       namespace A {
-        export function bar() {
+        export function bar(): string {
           return "SingleBar"
         }
       }
@@ -151,17 +151,17 @@ cases:
   # 11. Extended Namespaces with identical namespace
   - decl: |-
       namespace A {
-        export function foo() {
+        export function foo(): string {
           return "Foo1"
         }
       }
       namespace A.B {
-        export function foo() {
+        export function foo(): string {
           return "Foo2"
         }
       }      
       namespace A.B.C {
-        export function foo() {
+        export function foo(): string {
           return "Foo3"
         }
       }
@@ -173,15 +173,15 @@ cases:
   # 12. Extended Namespaces with qualified name
   - decl: |-
         namespace A {
-          export let variable1 = 1
+          export let variable1: int = 1
         
           export namespace C {
-            export let variable11 = 11
+            export let variable11: int = 11
           }
         }
         
         namespace A.C {
-          export let variable12 = 12
+          export let variable12: int = 12
         }
     use: |-
       arktest.assertEQ(A.variable1, 1)
@@ -191,11 +191,11 @@ cases:
   # 13. Namespace vs local variable visibility
   - decl: |-
         namespace NS2 {
-          export let variable = 1234
+          export let variable: int = 1234
         }
           
         class myClass {
-          public variable = 4321
+          public variable: int = 4321
         }
     use: |-
         let NS2: myClass = new myClass()
@@ -211,12 +211,12 @@ cases:
   # 15. Case sensitivity
   - decl: |-
       namespace NS15 {
-        export function foo1() {
+        export function foo1(): string {
           return "FOO15"
         }
       }
       namespace ns15 {
-        export function foo1() {
+        export function foo1(): string {
           return "foo15_low"
         }
       }
@@ -227,10 +227,10 @@ cases:
   # 16. Calling method inside same namespace
   - decl: |-
       namespace NS16 {
-        function foo1() {
+        function foo1(): string {
           return "Foo16"
         }
-        export function foo2() {
+        export function foo2(): string {
           return foo1()
         }
       }
@@ -240,10 +240,10 @@ cases:
   # 17. Accessing namespace members inside the namespace
   - decl: |-
       namespace NS17 {
-        export function foo() {
+        export function foo(): string {
           return "Foo17"
         }
-        export function boo() {
+        export function boo(): string {
           return foo()
         }  
       }
@@ -253,10 +253,10 @@ cases:
   # 18. Accessing namespace members inside the namespace
   - decl: |-
       namespace NS18 {
-        function foo() {
+        function foo(): string {
           return "Foo18"
         }
-        export function boo() {
+        export function boo(): string {
           return foo()
         }  
       }
@@ -267,10 +267,10 @@ cases:
   # 19. Accessing namespace members inside the namespace
   - decl: |-
       namespace NS19 {
-        export function foo() {
+        export function foo(): string {
           return "Foo19"
         }
-        export function boo() {
+        export function boo(): string {
           return NS19.foo()
         }  
       }
@@ -282,11 +282,11 @@ cases:
       import {Space1 as mySpace} from "./namespace_storage"
   
         export namespace Space1 {
-          export function foo() {
+          export function foo(): string {
             return "Local Space1"
         }
-        export let nsVar = 1234
-        export const nsConst = 2345
+        export let nsVar: int = 1234
+        export const nsConst: int = 2345
       }
     use: |-
       arktest.assertEQ(Space1.foo(), "Local Space1")

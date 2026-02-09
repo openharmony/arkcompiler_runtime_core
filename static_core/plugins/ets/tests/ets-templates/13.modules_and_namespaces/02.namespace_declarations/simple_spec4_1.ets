@@ -39,7 +39,7 @@ namespace A {
 }
 
 namespace A.C {
-    export function moo() {
+    export function moo(): string {
         arktest.assertEQ(too(), "A too") // too()  accessible when namespace C and too() are both exported
         return A.C.too()
     }

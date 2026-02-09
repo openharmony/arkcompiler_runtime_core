@@ -19,13 +19,13 @@ tags: [compile-only, negative]
 ---*/
 
 namespace B {
-    function boo() {
+    function boo(): string {
         return "Another BOO"
     }
 }
 
 namespace B {
-    function boo() {
+    function boo(): string {
         return "Boo"
     }
 }

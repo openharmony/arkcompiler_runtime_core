@@ -13,88 +13,88 @@
 
 --- # A list of top level declarations
 compileErrorTypes:
-# Incompatible types
+# 0-2 Incompatible types
   - "let x: string = 123;"
   - "let y: number = 'hello';"
   - "const z: boolean = 1;"
   
-# Incorrect use of types
+# 3-4 Incorrect use of types
   - "let a: class = Point;"
   - "type B = interface;"
   
-# Duplicate
+# 5-6 Duplicate
   - "class Point {} class Point {}"
   - "interface A {} interface A {}"
   
-# Incorrect generic
+# 7 Incorrect generic
   - "class GenericClass<T, T> {}"
   
-# Errors in union types
+# 8-9 Errors in union types
   - "type InvalidUnion = string | | number;"
   - "type EmptyUnion = |;"
   
-# Incorrect conditional types
+# 10 Incorrect conditional types
   - "type InvalidConditional = T extends ? string : number;"
   
-# Errors in async functions
+# 11-12 Errors in async functions
   - "async function badAsync(): string { return 'data'; }"
   - "async function missingAwait(): Promise<string> { return Promise; }"
   
-# Readonly violation
+# 13 Readonly violation
   - "interface Point { readonly x: number; } let p: Point = { x: 1 }; p.x = 2;"
   
-# Incorrect function parameters
+# 14-15 Incorrect function parameters
   - "function badParams(x: number, x: string): void {}"
   - "function missingType(x): void {}"
   
-# Errors in rest parameters
+# 16 Errors in rest parameters
   - "function badRest(...x: number, y: string): void {}"
   
-# Incorrect const enum
+# 17 Incorrect const enum
   - "const enum BadEnum { A = 'hello', B = 2 }"
   
-# Errors in ambient declarations
+# 18-19 Errors in ambient declarations
   - "declare const x;"
   - "declare function f();"
   
-# Incompatible overrides
+# 20 Incompatible overrides
   - "class Base { method(): number { return 1; } } class Derived extends Base { method(): string { return 'hello'; } }"
   
-# Using undeclared types
+# 21-22 Using undeclared types
   - "let x: UndefinedType = 1;"
   - "function f(): NonExistentType { return 1; }"
   
-# Errors in classes
+# 23-24 Errors in classes
   - "class AbstractClass { abstract method(): void; }"
   - "class FinalClass final {}"
   
-# Incorrect interface implementations
+# 25 Incorrect interface implementations
   - "interface I { prop: number; } class C implements I { prop: string; }"
   
-# Violation of contracts of types
+# 26 Violation of contracts of types
   - "type StringContainer = { value: string }; let container: StringContainer = { value: 123 };"
   
-# Circular dependencies
+# 27 Circular dependencies
   - "type A = B; type B = A;"
   
-# Mixing value and type spaces
+# 28-29 Mixing value and type spaces
   - "let x: class Point = Point;"
   - "type Y = let origin;"
   
-# Invalid array types
+# 30-31 Invalid array types
   - "let arr: number[] = [1, '2', 3];"
   - "let matrix: number[][] = [[1, 2], ['3', 4]];"
   
-# Promise errors
+# 32 Promise errors
   - "async function badPromise(): Promise<number> { return 'string'; }"
   
-# Invalid enum values
+# 33-34 Invalid enum values
   - "enum BadEnum { A = computedValue }"
   - "enum AnotherBad { A = {} }"
   
-# Type assertion errors
+# 35-36 Type assertion errors
   - "let x = 'hello' as number;"
   - "let y = 123 as string;"
   
-# Invalid module/namespace
+# 37 Invalid module/namespace
   - "export default;"

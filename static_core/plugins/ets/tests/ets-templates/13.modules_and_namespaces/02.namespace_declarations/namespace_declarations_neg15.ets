@@ -19,7 +19,7 @@ tags: [compile-only, negative]
 ---*/
 
 namespace abstract {
-    function foo() {
+    function foo(): string {
         return "Foo1"
     }
 }

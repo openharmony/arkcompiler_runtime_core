@@ -19,11 +19,11 @@ cases:
       use: |-
           export overload foo { foo1 }
 
-          export function foo1() {
+          export function foo1(): void {
               arktest.assertTrue(true)
           }
 
-          export function main() {
+          export function main(): void {
               arktest.assertTrue(true)
           }
 
@@ -33,11 +33,11 @@ cases:
           overload foo { foo1 }
           export { foo, foo1, main }
 
-          function foo1() {
+          function foo1(): void  {
               arktest.assertTrue(true)
           }
 
-          function main() {
+          function main(): void  {
               arktest.assertTrue(true)
           }
 
@@ -47,11 +47,11 @@ cases:
           overload main { foo1, main }
           export { foo1, main }
 
-          function foo1() { // should not be called
+          function foo1(): void  { // should not be called
               arktest.assertTrue(false)
           }
 
-          function main() {
+          function main(): void  {
               arktest.assertTrue(true)
           }
 
@@ -116,7 +116,7 @@ cases:
     - entry_point: foo
       tags: negative
       use: |-
-          export function foo() {
+          export function foo(): void  {
               main()
               arktest.assertTrue(false)
           }
@@ -127,12 +127,12 @@ cases:
       use: |-
           namespace NS {
               export let retCode: int
-              export function foo() {
+              export function foo(): void  {
                   arktest.assertEQ(retCode, 0)
               }
           }
 
-          export function foo() {
+          export function foo(): void {
               NS.retCode = 42
               NS.foo()
           }
@@ -147,6 +147,6 @@ cases:
       use: |-
           export overload main { foo1, main }
 
-          export function foo1() { // should not be called
+          export function foo1(): void { // should not be called
               arktest.assertTrue(false)
           }

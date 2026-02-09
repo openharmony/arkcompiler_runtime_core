@@ -19,13 +19,13 @@ topLevelTypes:
   - type Matrix = number[][]
   
 # Variable declarations
-  - let origin = 1;
+  - "let origin: int = 1;"
   - "let i: int = 1;"
   - "let b: byte;"
   
 # Constant declarations
-  - const b = 1;
-  - "const s = \"str\";"
+  - "const b: int = 1;"
+  - "const s: string = \"str\";"
   - "const a: int = 1;"
   
 # Function declarations
@@ -33,7 +33,7 @@ topLevelTypes:
   
 # Function with receiver
   - "function daysUntilTheNewYear(this: Date): int { return 0; }"
-  - () => { return }
+  - "(): void => { return }"
 
 # Namespace/module
   - "namespace Geometry { export class Point {} }"

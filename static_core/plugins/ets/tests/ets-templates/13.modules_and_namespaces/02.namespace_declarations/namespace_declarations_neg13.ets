@@ -19,10 +19,10 @@ tags: [compile-only, negative]
 ---*/
 
 namespace NS15 {
-    function foo1() {
+    function foo1(): string {
         return "Foo1";
     }
-    export function foo2() {
+    export function foo2(): string {
         return NS15.foo1()
     }
 }

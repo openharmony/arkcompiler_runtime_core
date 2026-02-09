@@ -77,9 +77,10 @@ cases:
       "Semantic error ESE0018: Native and Declare methods should have explicit return type."
   # The modifier ‘async’ cannot be used in an ambient context
   - decl: |-
-      declare async function foo() {}
-    expected: |-
-      "Syntax error ESY0106: The modifier async cannot be used in an ambient context."
+      declare async function foo(): void {}
+    stdout: |-
+      "Semantic error ESE0083: Native, Abstract and Declare methods cannot have body."
+
   # A compile-time error occurs if the modifier ‘declare’ is used in a context that is already ambient
   - decl: |-
       declare namespace Ambient {

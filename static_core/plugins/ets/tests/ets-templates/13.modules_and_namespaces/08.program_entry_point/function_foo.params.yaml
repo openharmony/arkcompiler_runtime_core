@@ -16,21 +16,21 @@ cases:
     # void return type
     - entry_point: foo
       use: |-
-          export function foo() {
+          export function foo(): void {
               arktest.assertTrue(true)
           }
 
-          export function main() { // should not be called
+          export function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
     - entry_point: foo
       use: |-
-          function foo() {
+          function foo(): void {
               arktest.assertTrue(true)
           }
 
-          function main() { // should not be called
+          function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
@@ -64,7 +64,7 @@ cases:
       use: |-
           export overload foo { foo1 }
 
-          export function foo1() {
+          export function foo1(): void {
               arktest.assertTrue(true)
           }
 
@@ -77,11 +77,11 @@ cases:
           overload foo { foo1 }
           export { foo, foo1, main }
 
-          function foo1() {
+          function foo1(): void {
               arktest.assertTrue(true)
           }
 
-          function main() { // should not be called
+          function main(): void { // should not be called
               arktest.assertTrue(false)
           }
 
@@ -115,7 +115,7 @@ cases:
     # call main from another entry point
     - entry_point: foo
       use: |-
-          export function foo() {
+          export function foo(): void {
               arktest.assertEQ(main(), 42)
           }
 
@@ -125,7 +125,7 @@ cases:
 
     - entry_point: foo
       use: |-
-          export function foo() {
+          export function foo(): void {
               arktest.expectThrow(() => main())
           }
 
@@ -159,7 +159,7 @@ cases:
       use: |-
           namespace NS {
               let retCode: int
-              export function foo() {
+              export function foo(): int {
                   return retCode - 42
               }
               static {

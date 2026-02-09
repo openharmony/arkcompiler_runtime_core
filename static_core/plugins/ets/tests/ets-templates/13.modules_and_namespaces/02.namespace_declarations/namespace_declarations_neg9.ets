@@ -19,13 +19,13 @@ tags: [compile-only, negative]
 ---*/
 
 namespace A {
-    export function foo() {
+    export function foo(): string {
         return "Another FOO"
     }
 }
 
 namespace A {
-    export function foo() {
+    export function foo(): string {
         return "foo"
     }
 }
