@@ -976,10 +976,14 @@ following conditions are met:
 -  ``m`` :math:`\leq` ``n``.
 -  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
    subtype of parameter type of ``FP``:sub:`i` (contravariance).
--  ``SP``:sub:`i` is a rest parameter where ``FP``:sub:`i` is a rest parameter.
--  ``SP``:sub:`i` is an optional parameter where ``FP``:sub:`i` is an optional
+-  ``FP``:sub:`i` is a rest parameter only if ``SP``:sub:`i` is a rest parameter.
+-  ``FP``:sub:`i` is an optional parameter only if ``SP``:sub:`i` is an optional
+   parameter.
+-  ``FP``:sub:`i` is a required parameter only if ``SP``:sub:`i` is a required
    parameter.
 -  Type ``FR`` is a subtype of ``SR`` (covariance).
+
+
 
 .. index::
    function type
