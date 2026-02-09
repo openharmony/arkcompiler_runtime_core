@@ -55,7 +55,7 @@ cases:
           "Semantic error ESE0244: Member type must be the same for all union objects."
       
     - decl: |-
-          // satatic fields of the same type
+          // static fields of the same type
           class A {
               fld: number = 42.0
           }
@@ -67,3 +67,36 @@ cases:
           arktest.assertEQ(u1.fld, 42.0)  // CTE: fld is a static property of 'B'
       stdout: |-
           "Semantic error ESE0207: 'fld' is a static property of 'B'"  
+
+    - decl: |-
+        // fields of different types
+        interface A {
+            fld: string
+        }
+        interface B {
+            fld?: string 
+        }
+        type U = A|B
+        const u: U = {}
+        let a = u.fld
+      use: |-
+
+      stdout: |-
+        "Semantic error ESE0244: Member type must be the same for all union objects."
+
+    - decl: |-
+        interface IA {
+          flag: '0'
+        }
+        interface IB {
+          flag: '1'
+        }
+        type TIA = IA
+        type TIB = IB
+        type FLAGS = TIA | TIB 
+        type FM = Record<string, FLAGS>
+      use: |-
+        let mf: FM = {'0': {flag: '0'}}
+        let ff = mf['0']!.flag
+      stdout: |-
+        "Semantic error ESE0244: Member type must be the same for all union objects."

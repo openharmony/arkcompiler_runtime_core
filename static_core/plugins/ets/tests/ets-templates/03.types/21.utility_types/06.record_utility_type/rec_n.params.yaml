@@ -15,55 +15,74 @@
 cases:
     - use: |-
         let r: Record //CTE:  Type 'Record<K,V>' is generic but type argument were not provided
+      response: "Semantic error ESE0170: Type ''Record<K,V>'' is generic but type argument were not provided."
+    - use: |-
+          let r: Record<char, string> = {}
+      response: "Semantic error ESE0228: Type argument ''Char'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
-          let r: Record<char, string> = {}  // CTE: wrong key type
+          let r: Record<string|boolean|number, string> = {}
+      response: "Semantic error ESE0228: Type argument ''String|Boolean|Double'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
-          let r: Record<string|boolean|number, string> = {}  // CTE: wrong key type
+          let r: Record<'a'|'b'|number, string> = {}
+      response: "Semantic error ESE0265: All variants of literals listed in the union type must be listed in the object literal"
 
     - use: |-
-          let r: Record<'a'|'b'|number, string> = {}  // CTE: wrong key type
+          let r: Record<'a'|'b'|1|2, string> = {}
 
     - use: |-
-          let r: Record<'a'|'b'|1|2, string> = {}  // CTE: wrong key type
+          let r: Record<string|null, string> = {}
+      response: "Semantic error ESE0228: Type argument ''String|null'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
-          let r: Record<string|null, string> = {}  // CTE: wrong key type
-
-    - use: |-
-          let r: Record<number|undefined, string> = {}  // CTE: wrong key type
-
+          let r: Record<number|undefined, string> = {}
+      response: "Semantic error ESE0228: Type argument ''Double|undefined'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
     - use: |-
         let r: Record<string, 'string'> = {}
-        r.set('Hello', 'World') // CTE: TypeError: Type '"World"' is not compatible with type '"string"' at index 2
+        r.set('Hello', 'World')
+      response: "Semantic error ESE0046: Type ''\"World\"'' is not compatible with type ''\"string\"'' at index 2"
 
     - use: |-
-        let r: Record<Object, string> = {}  // CTE: wrong key type
+        let r: Record<Object, string> = {}
+      response: "Semantic error ESE0228: Type argument ''Object'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
-        let r: Record<undefined, string> = {}  // CTE: wrong key type
+        let r: Record<undefined, string> = {}
+      response: "Semantic error ESE0228: Type argument ''undefined'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - decl: |-
         type TL = () => void
       use: |-
-        let r: Record<TL, string>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
+        let r: Record<TL, string>
+      response: "Semantic error ESE0228: Type argument ''(() => void)'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - use: |-
         let r: Record<Any, string> = {}  // CTE: TypeError: Type argument 'Any' should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
-
+      response: "Semantic error ESE0228: Type argument ''Any'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
     - use: |-
         let r: Record<Void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
-
+      response: "Semantic error ESE0228: Type argument ''Void'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
     - use: |-
         let r: Record<void, string> = {}  // CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
+      response: "Semantic error ESE0228: Type argument ''void'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - decl: |-
         type SA = String[]
       use: |-
         let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
+      response: "Semantic error ESE0228: Type argument ''Array<String>'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
 
     - decl: |-
         type SA = FixedArray<String>
       use: |-
         let r: Record<SA, String>  // CTE: CTE: TypeError: Type argument should be a subtype of 'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'-constraint
+      response: "Semantic error ESE0228: Type argument ''FixedArray<String>'' should be a subtype of ''Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>|BaseEnum<Float>|BaseEnum<Double>|BaseEnum<Byte>|BaseEnum<Short>'' constraint"
+
+    - use: |-
+        let r: Record<3, 3>
+
+    - decl: |-
+        type MR = Record<3, 3>
+      use: |-
+        let r: MR

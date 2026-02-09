@@ -14,10 +14,12 @@
  */
 
 {% for c in cases %}
+{% set response = c.response | default("Syntax error ESY0138: Invalid Type.") %}
 /*---
 desc: >-
     Type Record<K, V> constructs a container that maps keys (of type K) to values (of type V).
 tags: [compile-only, negative]
+expected_out: '{{response}}'
 ---*/
 
 {{c.decl}}

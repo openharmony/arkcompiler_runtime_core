@@ -211,3 +211,16 @@ cases:
       use: |-
           let a:Func = (p: int, q: Func):int => {return 1};
           let ok:boolean = a(10, a) == 1;
+
+    - defs: |-
+        type I = () => I | null
+      use: |-
+        const i: I = () => null
+        let ok = i() == null
+
+    - defs: |-
+        type I = () => I | null
+      use: |-
+        const i: I = () => (() => null) as I
+        const result = i();
+        let ok = result != null

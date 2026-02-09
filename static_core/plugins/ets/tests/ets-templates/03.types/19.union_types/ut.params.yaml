@@ -570,3 +570,22 @@ cases:
         }
       use: |-
         let x = cond() ? new Int(): new Double()
+
+    - decl: |-
+        export interface Entry { name: string }
+        export type StringOrEntry = string | Entry
+        export interface Entries {
+          tag?: string
+          list?: StringOrEntry | StringOrEntry[]
+        }
+        namespace nsglob {
+          export const glob: StringOrEntry[] = [{name: '1'}, ] 
+        }
+        export class runner {
+          static check(...values: Entries[]) {
+            let ee: Entries = values[0]
+            console.log(ee.list?.[0])
+          }
+        }
+      use: |-
+        runner.check({tag: 'tag', list: nsglob.glob})
