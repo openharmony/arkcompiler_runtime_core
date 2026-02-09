@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include <iostream>
+#include <string>
+#include <algorithm>
 #include "mem/vm_handle.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -105,7 +107,9 @@ void StdConsolePrintString(ObjectHeader *header [[maybe_unused]], EtsString *dat
     if (lvl == ConsoleLevel::PRINTLN) {
         std::cout << res << std::flush;
     } else {
-        LogPrint(lvl, "arkts.console", res.data());
+        std::string str(res);
+        str.erase(std::remove(str.begin(), str.end(), '\0'), str.end());
+        LogPrint(lvl, "arkts.console", str.c_str());
     }
 #else
     (lvl == ConsoleLevel::ERROR ? std::cerr : std::cout) << res << std::flush;
