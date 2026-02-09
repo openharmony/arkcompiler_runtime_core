@@ -378,12 +378,9 @@ public:
                 refObj = field.GetTargetObject();
             }
             // If it is forwarded, its toVersion must have been traversed during
-            // EnumRoot, so it must have been marked. There is no need for me to
+            // EnumRoot or created during Remark, so it must have been marked. There is no need for me to
             // check it, nor to push it into the mark stack.
             if (refObj->IsForwarded()) {
-                auto toObj = refObj->GetForwardingPointer();
-                bool find = markSet.find(toObj) != markSet.end();
-                CHECKF(find) << "not found to version obj in markSet";
                 return;
             }
 
