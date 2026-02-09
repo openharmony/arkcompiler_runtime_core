@@ -2252,13 +2252,13 @@ class JSONValueParser {
             && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return new Double(value.value).toInt()
         } else if ((Types.isLongType(type) || type.isEnum()) && this.bigIntMode < 2) {
-            return new Long().createFromJSONValue(value)
+            return createLongFromJSONValue(value)
         } else if ((Types.isShortType(type) || type.isEnum()) && this.bigIntMode < 2) {
-            return new Short().createFromJSONValue(value)
+            return createShortFromJSONValue(value)
         } else if ((Types.isFloatType(type) || type.isEnum()) && this.bigIntMode < 2) {
-            return new Float().createFromJSONValue(value)
+            return createFloatFromJSONValue(value)
         } else if ((Types.isByteType(type) || type.isEnum()) && this.bigIntMode < 2) {
-            return new Byte().createFromJSONValue(value)
+            return createByteFromJSONValue(value)
         } else {
             throw new Error(type.getName() + ' is expected, but get ' + Class.of(value.value).getName()
                 + ' with bigIntMode=' + this.bigIntMode)
@@ -3357,9 +3357,9 @@ export class JsonLexer
     }
 }
 
-export class JSONValue {}
+class JSONValue {}
 
-export class JSONObject extends JSONValue {
+class JSONObject extends JSONValue {
     public keys_: Array<JSONString> = new Array<JSONString>()
     public values: Array<JSONValue> = new Array<JSONValue>()
     public readonly static START_CHAR = c'{'
@@ -3397,7 +3397,7 @@ export class JSONObject extends JSONValue {
     }
 }
 
-export class JSONArray extends JSONValue {
+class JSONArray extends JSONValue {
     public values: Array<JSONValue> = new Array<JSONValue>()
     public readonly static START_CHAR = c'['
     public readonly static END_CHAR = c']'
@@ -3416,7 +3416,7 @@ export class JSONArray extends JSONValue {
     }
 }
 
-export class JSONNumber extends JSONValue {
+class JSONNumber extends JSONValue {
     public value: double
     public bigintValue: bigint = new BigInt()
 
@@ -3425,7 +3425,7 @@ export class JSONNumber extends JSONValue {
     }
 }
 
-export class JSONString extends JSONValue {
+class JSONString extends JSONValue {
     public value: String = ''
     public readonly static START_CHAR = c'"'
     public readonly static END_CHAR = c'"'
@@ -3435,7 +3435,7 @@ export class JSONString extends JSONValue {
     }
 }
 
-export class JSONTrue extends JSONValue {
+class JSONTrue extends JSONValue {
     public readonly static value = 'true'
     public readonly static START_CHAR = c't'
 
@@ -3444,7 +3444,7 @@ export class JSONTrue extends JSONValue {
     }
 }
 
-export class JSONFalse extends JSONValue {
+class JSONFalse extends JSONValue {
     public readonly static value = 'false'
     public readonly static START_CHAR = c'f'
 
@@ -3453,7 +3453,7 @@ export class JSONFalse extends JSONValue {
     }
 }
 
-export class JSONNull extends JSONValue {
+class JSONNull extends JSONValue {
     public readonly static value = 'null'
     public readonly static START_CHAR = c'n'
 
@@ -3461,3 +3461,160 @@ export class JSONNull extends JSONValue {
         return JSONNull.value
     }
 }
+
+/**
+ * Creates a Boolean instance based on JSONValue
+ *
+ * @param { Boolean } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Boolean } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createBooleanFromJSONValue(json: JSONValue): Boolean {
+    if (json instanceof JSONFalse) {
+        return Boolean.FALSE
+    } else if (json instanceof JSONTrue) {
+        return Boolean.TRUE
+    }
+    throw new JSONTypeError('Cannot create Boolean from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Byte instance based on JSONValue
+ *
+ * @param { Byte } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Byte } - byte value decoded from JSON
+ * @throws { JSONTypeError } if json does not encode a valid byte
+ */
+function createByteFromJSONValue(json: JSONValue): Byte {
+    if (json instanceof JSONNumber) {
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Byte.MIN_VALUE <= num && num <= Byte.MAX_VALUE) {
+            return num.toByte()
+        }
+    }
+    throw new JSONTypeError('Cannot create Byte from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Char instance based on JSONValue
+ *
+ * @param { Char } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Char } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createCharFromJSONValue(json: JSONValue): Char {
+    if (json instanceof JSONString) {
+        let str = (json as JSONString).value
+        if (str.getLength() == 1) {
+            return Char.valueOf(str.charAt(0))
+        }
+    }
+    throw new JSONTypeError('Cannot create Char from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Short instance based on JSONValue
+ *
+ * @param { Short } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Short } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createShortFromJSONValue(json: JSONValue): Short {
+    if (json instanceof JSONNumber) {
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {
+            return Short.valueOf(num.toShort())
+        }
+    }
+    throw new JSONTypeError('Cannot create Short from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Int instance based on JSONValue
+ *
+ * @param { Int } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Int } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createIntFromJSONValue(json: JSONValue): Int {
+    if (json instanceof JSONNumber) {
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {
+            return Int.valueOf(Double.toInt(num))
+        }
+    }
+    throw new JSONTypeError('Cannot create Int from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Long instance based on JSONValue
+ *
+ * @param { Long } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Long } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createLongFromJSONValue(json: JSONValue): Long {
+    if (json instanceof JSONNumber) {
+        let num = (json as JSONNumber).value
+        if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {
+            return Long.valueOf(num.toLong())
+        }
+    }
+    throw new JSONTypeError('Cannot create Long from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a Float instance based on JSONValue
+ *
+ * @param { Float } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Float } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createFloatFromJSONValue(json: JSONValue): Float {
+    if (json instanceof JSONNumber) {
+        let val = (json as JSONNumber).value
+        if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {
+            return Float.valueOf(((json as JSONNumber).value).toFloat())
+        }
+    }
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+/**
+ * Creates a Double instance based on JSONValue
+ *
+ * @param { Double } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { Double } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid boolean literal
+ */
+function createDoubleFromJSONValue(json: JSONValue): Double {
+    if (json instanceof JSONNumber) {
+        return Double.valueOf((json as JSONNumber).value)
+    }
+    throw new JSONTypeError('Cannot create Double from JSON', {cause: json as Object} as ErrorOptions)
+}
+
+/**
+ * Creates a String instance based on JSONValue
+ *
+ * @param { String } this JSONValue - a JSON representation
+ * @param { JSONValue } json
+ * @returns { String } - true if JSON encodes true literal, false if JSON encodes false literal
+ * @throws { JSONTypeError } if json does not encode a valid String
+ */
+function createStringFromJSONValue(json: JSONValue): String {
+    if (json instanceof JSONString) {
+        return (json as JSONString).value
+    }
+    throw new JSONTypeError('Cannot create String from JSON', {cause: json as Object} as ErrorOptions)
+}
+
