@@ -13,7 +13,9 @@
 
 project(pcre2)
 
-option(PANDA_ETS_PCRE2_NEWLINE_PATCH "Enable ETS PCRE2 newline patch" ON)
+set(PCRE2_ARKTS_DIR
+    ${PANDA_THIRD_PARTY_SOURCES_DIR}/pcre2/pcre2_ArkTS/
+)
 
 set(PCRE2_DIR
     ${PANDA_THIRD_PARTY_SOURCES_DIR}/pcre2/pcre2/
@@ -36,6 +38,9 @@ set(PCRE2_LINK_SIZE "2" CACHE STRING
 
 set(PCRE2_PARENS_NEST_LIMIT "250" CACHE STRING
     "Default nested parentheses limit. See PARENS_NEST_LIMIT in config.h.in for details.")
+
+set(PCRE2_MAX_VARLOOKBEHIND "255" CACHE STRING
+    "Default maximum varlookbehind length. See MAX_VARLOOKBEHIND in config.h.in for details.")
 
 set(PCRE2_HEAP_LIMIT "20000000" CACHE STRING
     "Default limit on heap memory (kibibytes). See HEAP_LIMIT in config.h.in for details.")
@@ -99,24 +104,16 @@ set(PCRE2_CFLAGS_CC
     -fPIC
 )
 
-if (PANDA_ETS_PCRE2_NEWLINE_PATCH)
-    set(PCRE2_ORIG_NEWLINE ${PCRE2_SRC_DIR}/pcre2_newline.c)
-    set(PCRE2_NEWLINE_PATCH
-        ${PANDA_ROOT}/plugins/ets/runtime/patches/pcre2_newline.patch)
-
-    add_custom_target(pcre2_newline_patch
-        COMMAND ${CMAKE_COMMAND} -E echo "Applying patch to ${PCRE2_ORIG_NEWLINE}"
-        COMMAND patch -N ${PCRE2_ORIG_NEWLINE} ${PCRE2_NEWLINE_PATCH} || true
-        DEPENDS ${PCRE2_ORIG_NEWLINE} ${PCRE2_NEWLINE_PATCH}
-        COMMENT "Applying patch to pcre2_newline.c"
-    )
-endif()
+# Generate pcre2_chartables.c from .dist file
+configure_file(${PCRE2_SRC_DIR}/pcre2_chartables.c.dist
+               ${PROJECT_BINARY_DIR}/pcre2_chartables.c COPYONLY)
 
 set(PCRE2_SOURCES
   ${PCRE2_SRC_DIR}/pcre2_auto_possess.c
-  ${PCRE2_SRC_DIR}/pcre2_chartables.c
+  ${PROJECT_BINARY_DIR}/pcre2_chartables.c
   ${PCRE2_SRC_DIR}/pcre2_chkdint.c
   ${PCRE2_SRC_DIR}/pcre2_compile.c
+  ${PCRE2_SRC_DIR}/pcre2_compile_class.c
   ${PCRE2_SRC_DIR}/pcre2_config.c
   ${PCRE2_SRC_DIR}/pcre2_context.c
   ${PCRE2_SRC_DIR}/pcre2_convert.c
@@ -128,7 +125,7 @@ set(PCRE2_SOURCES
   ${PCRE2_SRC_DIR}/pcre2_maketables.c
   ${PCRE2_SRC_DIR}/pcre2_match.c
   ${PCRE2_SRC_DIR}/pcre2_match_data.c
-  ${PCRE2_SRC_DIR}/pcre2_newline.c
+  ${PCRE2_ARKTS_DIR}/pcre2_newline_static.c
   ${PCRE2_SRC_DIR}/pcre2_ord2utf.c
   ${PCRE2_SRC_DIR}/pcre2_pattern_info.c
   ${PCRE2_SRC_DIR}/pcre2_script_run.c
@@ -229,12 +226,6 @@ set_target_properties(pcre2-16-static PROPERTIES
   SOVERSION ${LIBPCRE2_16_SOVERSION})
 panda_target_compile_definitions(pcre2-16-static PUBLIC PCRE2_STATIC)
 set(targets ${targets} pcre2-16-static)
-if (PANDA_ETS_PCRE2_NEWLINE_PATCH)
-    add_dependencies(pcre2-8-static pcre2_newline_patch)
-    add_dependencies(pcre2-16-static pcre2_newline_patch)
-    panda_target_compile_definitions(pcre2-8-static PUBLIC ARK_PCRE2_NEWLINE_PATCH)
-    panda_target_compile_definitions(pcre2-16-static PUBLIC ARK_PCRE2_NEWLINE_PATCH)
-endif()
 if(MSVC)
   set_target_properties(pcre2-16-static PROPERTIES OUTPUT_NAME pcre2-16-static)
 else(MSVC)
