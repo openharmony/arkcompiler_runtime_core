@@ -28,14 +28,14 @@ like :ref:`Block` or :ref:`if Statements`.
 
     ...
     i++    // statement consists of single expression
-    ... 
+    ...
     if (i > 100) // 'if' statement starts
     {          // 'block' statement starts, it is a part of 'if' statement
         i %= 100        // statement belonging to 'block'
         console.log(i)  // another statement belonging to 'block'
     }   //  'block' statement ends, 'if' statement end
-    
-.. note:: 
+
+.. note::
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
 
@@ -438,7 +438,7 @@ within ``loopStatement``, or is used in lambda expressions (see
             }
         }
         const f2 = () => {
-            do 
+            do
                 break label // Compile-time error
             while (true)
         }
@@ -640,7 +640,7 @@ declares a new variable accessible inside the loop body only. Otherwise, the
 variable declared elsewhere is used.
 
 The modifier ``const`` forbids assignment into *forVariable*,
-while ``let`` allows modifications. 
+while the modifier ``let`` allows modifications.
 
 The type of *forVariable* declared inside the loop is inferred to be that
 of the *iterated* elements, namely:
@@ -1028,8 +1028,6 @@ The syntax of *switch statement* is presented below:
         : 'default' ':' statement*
         ;
 
-A ``switch`` expression can be of any type.
-
 If available, an optional identifier allows the ``break`` statement to transfer
 control out of a nested ``switch`` or ``loop`` statement (see
 :ref:`Break statements`).
@@ -1046,20 +1044,14 @@ control out of a nested ``switch`` or ``loop`` statement (see
    loop statement
    break statement
 
-A :index:`compile-time error` occurs if at least one of case expression types
-is not assignable (see :ref:`Assignability`) to the type of the ``switch``
-statement expression.
-
-.. index::
-   expression
-   expression type
-   switch statement
-   assignability
+A ``switch`` expression can be of a numeric type, type ``string``,
+type ``char``, or an enumeration type. Otherwise,
+a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
-    let arg = prompt("Enter a value?");
+    let arg: string = prompt("Enter a value?");
     switch (arg) {
       case '0':
       case '1':
@@ -1072,22 +1064,20 @@ statement expression.
         console.log('An unknown value')
     }
 
-    class A {}
-    let a: A| null = assignIt()
-    switch (a) {
-      case null:
-      case null: // One may have several case clauses with the same expression in
-        console.log ("a is null")
-        break
-      case new A:
-        console.log ("Never matches as new A is a new unique object")
-        break
-      default:
-        console.log ("a is A")
-    }
-    function assignIt () {
-        return new A
-    }
+A :index:`compile-time error` occurs, if:
+
+- A *case expression* is not a *constant expression*
+  (see :ref:`Constant Expressions`); or
+
+- A *case expression* type is not assignable (see :ref:`Assignability`)
+  to the type of the ``switch`` expression.
+
+.. index::
+   expression
+   expression type
+   case expression
+   switch statement
+   assignability
 
 
 The execution of a ``switch`` statement starts from the evaluation of the
@@ -1213,7 +1203,7 @@ The syntax of *try statement* is presented below:
 
 A ``try`` statement must contain:
 
-- ``finally`` clause; 
+- ``finally`` clause;
 - ``catch`` clause, or
 - Both a ``finally`` clause and a ``catch`` clause.
 
@@ -1372,7 +1362,7 @@ can be performed while leaving the ``try-catch``:
 
 #. A ``try`` block and the entire ``try`` statement complete normally if no
    ``catch`` block is executed. The execution of a ``try`` block completes
-   abruptly if an error is thrown inside the ``try`` block. 
+   abruptly if an error is thrown inside the ``try`` block.
 
 #. The execution of a ``try`` block completes abruptly if error *x* is
    thrown inside the ``try`` block. If the ``catch`` clause is present, and the
