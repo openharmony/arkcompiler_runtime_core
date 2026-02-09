@@ -2345,17 +2345,13 @@ class JSONValueParser {
 
             let jsonFieldVal = jsonObjFields.get(classField.getName())
             if (jsonFieldVal === undefined) {
-                hasJsonStringifyIgnore = JSONAPI.getJSONStringifyIgnore(classField);
-                if (hasJsonStringifyIgnore) {
-                    continue
-                }
                 let fieldRename = JSONAPI.getJSONRename(classField);
                 if (fieldRename == undefined) {
-                    throw new Error('Cannot find ' + classField.getName() + ' in keys of ' + classType.getName())
+                    continue
                 }
                 jsonFieldVal = jsonObjFields.get(fieldRename)
                 if (jsonFieldVal === undefined) {
-                    throw new Error('Cannot find rename ' + fieldRename + ' in keys of ' + classType.getName())
+                    continue
                 }
             }
 

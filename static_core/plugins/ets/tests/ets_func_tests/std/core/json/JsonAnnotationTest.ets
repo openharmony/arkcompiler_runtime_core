@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,14 @@ class TestClass15 {
     fixArray: FixedArray<String> = ["\a", "\b"]
 }
 
+class TestClass16 {
+    @JSONStringifyIgnore
+    public name: string = 'TestClass16'
+    @JSONParseIgnore
+    public addr: string = 'addr'
+    public num: int = 10
+}
+
 function jsonStringify() {
     let obj: TestClass1 = new TestClass1()
     obj.setPassword(123456)
@@ -175,11 +183,15 @@ function jsonParseThrow() {
     let json1: string = '{"user":"tester","nickname":"test123"}'
     let json2: string = '{"nickname2":"tester","nickname":"test123"}'
     let json3: string = '{"nickname1":"tester","password":123456,"nickname":"test123"}'
-    const expectMsg1 = "Cannot find password in keys of JsonAnnotationTest.TestClass4"
-    const expectMsg2 = "Cannot find rename nickname1 in keys of JsonAnnotationTest.TestClass4"
-    checkThrow(() => {JSON.parse<TestClass4>(json1, Type.of(obj))}, expectMsg1)
-    checkThrow(() => {JSON.parse<TestClass4>(json2, Type.of(obj))}, expectMsg2)
-    let jsonObj: TestClass4 = JSON.parse<TestClass4>(json3, Type.of(obj)) as TestClass4
+    let obj1 = JSON.parse<TestClass4>(json1, Class.of(obj))
+    arktest.assertEQ(obj1!.user, 'tester')
+    arktest.assertEQ(obj1!.nickname, 'test123')
+    arktest.assertEQ(obj1!.password, 0)
+    let obj2 = JSON.parse<TestClass4>(json2, Class.of(obj))
+    arktest.assertEQ(obj2!.user, '')
+    arktest.assertEQ(obj2!.nickname, 'test123')
+    arktest.assertEQ(obj2!.password, 0)
+    let jsonObj: TestClass4 = JSON.parse<TestClass4>(json3, Class.of(obj))!
     arktest.assertEQ(Object.keys(jsonObj).length, 3)
     arktest.assertEQ(jsonObj?.user, "tester")
     arktest.assertEQ(jsonObj?.password, 123456)
@@ -243,16 +255,29 @@ function jsonTestWithTypes() {
     arktest.assertEQ(json, targetOutput)
 }
 
+function jsonIgnoreTest() {
+    let obj = new TestClass16()
+    let str = JSON.stringify(obj)
+    arktest.assertEQ(str, '{"addr":"addr","num":10}')
+
+    str = '{"name":"test_name","addr":"test_addr","num":20}'
+    obj = JSON.parse<TestClass16>(str, Class.from<TestClass16>())!
+    arktest.assertEQ(obj.name, 'test_name')
+    arktest.assertEQ(obj.addr, 'addr')
+    arktest.assertEQ(obj.num, 20)
+}
+
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Json stringify && parse for annotation tests ")
-    suite.addTest("JSON.stringify test with annotaion", jsonStringify)
-    suite.addTest("JSON throw test with annotaion", jsonThrowWithRename)
-    suite.addTest("JSON throw test with double annotaion", jsonThrowWithDoubleRename)
-    suite.addTest("JSON parse throw test", jsonParseThrow)
-    suite.addTest("JSON stringify extends test", jsonStringifyExtend)
-    suite.addTest("JSON stringify with nest field test", jsonStringifyNest)
-    suite.addTest("JSON throw test with extends", jsonThrowWithExtends)
-    suite.addTest("JSON test with extends", jsonTestWithExtends)
-    suite.addTest("JSON test with different types", jsonTestWithTypes)
+    const suite = new arktest.ArkTestsuite('Json stringify && parse for annotation tests ')
+    suite.addTest('JSON.stringify test with annotaion', jsonStringify)
+    suite.addTest('JSON throw test with annotaion', jsonThrowWithRename)
+    suite.addTest('JSON throw test with double annotaion', jsonThrowWithDoubleRename)
+    suite.addTest('JSON parse throw test', jsonParseThrow)
+    suite.addTest('JSON stringify extends test', jsonStringifyExtend)
+    suite.addTest('JSON stringify with nest field test', jsonStringifyNest)
+    suite.addTest('JSON throw test with extends', jsonThrowWithExtends)
+    suite.addTest('JSON test with extends', jsonTestWithExtends)
+    suite.addTest('JSON test with different types', jsonTestWithTypes)
+    suite.addTest('JSON test for ignore', jsonIgnoreTest)
     return suite.run()
 }
