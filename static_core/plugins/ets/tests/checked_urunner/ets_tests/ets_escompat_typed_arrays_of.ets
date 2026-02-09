@@ -14,7 +14,8 @@
  */
 
 //! CHECKER       TypedArray of()
-//! RUN           force_jit: true, options: "--compiler-regex=.*test.*ArrayOf.*", entry: "ets_escompat_typed_arrays_of.ETSGLOBAL::checkTypedArrayOf"
+//! RUN           force_jit: true, options: "--compiler-regex=.*test.*ArrayOf.*",
+//!               entry: "ets_escompat_typed_arrays_of.ETSGLOBAL::checkTypedArrayOf"
 //! METHOD        "ets_escompat_typed_arrays_of.ETSGLOBAL::testInt8ArrayOfByte"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int8ArrayOfByte"
@@ -66,8 +67,8 @@ function testInt8ArrayOfInt() {
 }
 
 function testInt8ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., 0, 0, 0]
-    let arr = Int8Array.of(12., 22., 32., 42., 33., NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0, 0, 0, 0]
+    let arr = Int8Array.of(12.0, 22.0, 32.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -84,8 +85,8 @@ function testInt16ArrayOfInt() {
 }
 
 function testInt16ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., 0, 0, 0]
-    let arr = Int16Array.of(12., 22., 32., 42., 33., NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0, 0, 0, 0]
+    let arr = Int16Array.of(12.0, 22.0, 32.0, 42.0, 33.0, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
@@ -96,14 +97,15 @@ function testInt32ArrayOfInt() {
 }
 
 function testInt32ArrayOfNumber() {
-    let expected: FixedArray<number> = [12., 22., 32., 42., 33., -2147483648, 0, 0, 0, 0]
-    let arr = Int32Array.of(12., 22., 32., 42., 33., 1.93428e+25, 3.86856e+25, NaN, Infinity, -Infinity)
+    let expected: FixedArray<number> = [12.0, 22.0, 32.0, 42.0, 33.0, -2147483648, 0, 0, 0, 0]
+    let arr = Int32Array.of(12.0, 22.0, 32.0, 42.0, 33.0, 1.93428e+25, 3.86856e+25, NaN, Infinity, -Infinity)
     checkArray(arr, expected)
 }
 
 function checkArray(arr: ArrayLike<number>, expected: FixedArray<number>) {
-    arktest.assertEQ(arr.length, expected.length, "Unexpected array length")
+    arktest.assertEQ(arr.length, expected.length, 'Unexpected array length')
     for (let i = 0; i < expected.length; i++) {
-        arktest.assertEQ(arr[i], expected[i], "Error in index: " + i + ", value: " + arr[i] + " expected value: " + expected[i])
+        arktest.assertEQ(arr[i], expected[i], 
+                         'Error in index: ' + i + ', value: ' + arr[i] + ' expected value: ' + expected[i])
     }
 }

@@ -17,61 +17,61 @@
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_AOT      options: "--compiler-inlining=false", entry: "bounds_analysis_phi_in_loops.ETSGLOBAL::main"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switch_case_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switchCaseLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simple_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simpleLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::two_vars_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::twoVarsLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nestedLoops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::triple_nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::tripleNestedLoops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loop_init_without_update"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loopInitWithoutUpdate"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "BoundsCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "BoundsCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::different_operations"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::differentOperations"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operations_chain"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operationsChain"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linked_vars"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linkedVars"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 3
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::not_countable_nested_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::notCountableNestedLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //! PASS_AFTER   "ChecksElimination"
@@ -80,84 +80,84 @@
 
 //! CHECKER      Check BoundsAnalysis work with phi functions in loop in JIT mode
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-inlining=false", entry: "bounds_analysis_phi_in_loops.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-inlining=false",
+//!              entry: "bounds_analysis_phi_in_loops.ETSGLOBAL::main"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switch_case_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::switchCaseLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simple_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::simpleLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::two_vars_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::twoVarsLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::nestedLoops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::triple_nested_loops"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::tripleNestedLoops"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "ZeroCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     "ZeroCheck"
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loop_init_without_update"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::loopInitWithoutUpdate"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST         "BoundsCheck"
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "BoundsCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::different_operations"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::differentOperations"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operations_chain"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::operationsChain"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linked_vars"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::linkedVars"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 3
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //!
-//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::not_countable_nested_loop"
+//! METHOD       "bounds_analysis_phi_in_loops.ETSGLOBAL::notCountableNestedLoop"
 //! PASS_BEFORE  "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   "ZeroCheck", 1
 
-function switch_case_loop() : number
-{
+function switchCaseLoop() : number {
     let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     for (let i = 0; i < arr.length; ++i) {
         switch (arr[i]) {
-        case 0:
+          case 0:
             a += 10;
             break;
-        case 1:
+          case 1:
             a += 5;
             break;
-        case 2:
+          case 2:
             a += 3;
             break;
-        default:
+          default:
             a += 1;
             break;
         }
@@ -165,8 +165,7 @@ function switch_case_loop() : number
     return 41 / a; // no ZeroCheck
 }
 
-function simple_loop() : int
-{
+function simpleLoop() : int {
     let count : int = 10000000;
     let i3 : int = 1;
     let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
@@ -183,8 +182,7 @@ function simple_loop() : int
     return i3;
 }
 
-function two_vars_loop() : number
-{
+function twoVarsLoop() : number {
     let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     let b : int = 1;
@@ -200,8 +198,7 @@ function two_vars_loop() : number
     return 15 / a + 17 / b; // no ZeroCheck
 }
 
-function nested_loops() : number
-{
+function nestedLoops() : number {
     let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, 3],
                             [1, 2, 3, 4],
                             [2, 3, 4, 5],
@@ -217,8 +214,7 @@ function nested_loops() : number
     return 2 / val; // no ZeroCheck
 }
 
-function triple_nested_loops() : number
-{
+function tripleNestedLoops() : number {
     let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, 3],
                             [1, 2, 3, 4],
                             [2, 3, 4, 5],
@@ -253,8 +249,7 @@ function triple_nested_loops() : number
     return 6 / global; // no ZeroCheck
 }
 
-function loop_init_without_update() : int
-{
+function loopInitWithoutUpdate() : int {
     let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     for (let i = 0; i < arr.length; ++i) {
@@ -267,8 +262,7 @@ function loop_init_without_update() : int
     return a;
 }
 
-function different_operations() : number
-{
+function differentOperations() : number {
     let count : int = 10000000;
     let i3 : int = 1;
     let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
@@ -285,8 +279,7 @@ function different_operations() : number
     return i3;
 }
 
-function operations_chain() : number
-{
+function operationsChain() : number {
     let count : int = 10000000;
     let i3 : int = 1;
     let resources : FixedArray<int> = [12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]
@@ -303,8 +296,7 @@ function operations_chain() : number
     return i3;
 }
 
-function linked_vars() : number
-{
+function linkedVars() : number {
     let arr : FixedArray<int> = [0, 1, 2, 3, 4, 4, 3, 2, 1, 0];
     let a : int = 1;
     let b : int = 1;
@@ -324,8 +316,7 @@ function linked_vars() : number
     return - 27 / a - 13 / b; // 1 ZeroCheck on a
 }
 
-function not_countable_nested_loop() : number
-{
+function notCountableNestedLoop() : number {
     let matrix : FixedArray<FixedArray<int>> = [[0, 1, 2, -1],
                             [1, 2, 3, -1],
                             [2, 3, 4, -1],
@@ -346,15 +337,15 @@ function not_countable_nested_loop() : number
 }
 
 function main(): void {
-    arktest.assertEQ(switch_case_loop(), 1);
-    arktest.assertEQ(simple_loop(), 15000001);
-    arktest.assertEQ(two_vars_loop(), 2);
-    arktest.assertEQ(nested_loops(), 1);
-    arktest.assertEQ(triple_nested_loops(), 1);
-    arktest.assertEQ(loop_init_without_update(), 21);
-    arktest.assertEQ(different_operations(), 9999997);
-    arktest.assertEQ(operations_chain(), 9999998);
-    arktest.assertEQ(linked_vars(), 2);
-    arktest.assertEQ(not_countable_nested_loop(), 1);
+    arktest.assertEQ(switchCaseLoop(), 1);
+    arktest.assertEQ(simpleLoop(), 15000001);
+    arktest.assertEQ(twoVarsLoop(), 2);
+    arktest.assertEQ(nestedLoops(), 1);
+    arktest.assertEQ(tripleNestedLoops(), 1);
+    arktest.assertEQ(loopInitWithoutUpdate(), 21);
+    arktest.assertEQ(differentOperations(), 9999997);
+    arktest.assertEQ(operationsChain(), 9999998);
+    arktest.assertEQ(linkedVars(), 2);
+    arktest.assertEQ(notCountableNestedLoop(), 1);
 }
 

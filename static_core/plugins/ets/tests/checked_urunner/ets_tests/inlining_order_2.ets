@@ -61,12 +61,24 @@
 //!#    /Inline,inlining_order_2.ETSGLOBAL::testLoops,inlining_order_2.ETSGLOBAL::hotCatch,.*,STATIC,SUCCESS/
 //!#    (Inlining in catch blocks is not supported)
 
-function cold(): int { return 30; }
-function if4th(i:int):int { return -i; }
-function ifNot4th(i:int):int { return -i; }
-function if2nd(i:int):int { return -i; }
-function hotCatch(i:int):int { return -i; }
-function hot(i:int):int { return -i; }
+function cold(): int {
+ return 30; 
+}
+function if4th(i:int):int {
+ return -i; 
+}
+function ifNot4th(i:int):int {
+ return -i; 
+}
+function if2nd(i:int):int {
+ return -i; 
+}
+function hotCatch(i:int):int {
+ return -i; 
+}
+function hot(i:int):int {
+ return -i; 
+}
 
 function testLoops(): void {
     let N = cold();

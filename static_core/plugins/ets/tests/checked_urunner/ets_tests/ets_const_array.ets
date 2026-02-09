@@ -14,8 +14,8 @@
  */
 
 //! CHECKER         Test ConstArrayResolver for array of std.core.String
-//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.const_array_str"
-//! METHOD          "const_array_str"
+//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.constArrayStr"
+//! METHOD          "constArrayStr"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "NewArray"
 //! INST_COUNT      "LoadString", 3
@@ -26,22 +26,22 @@
 //! INST_NOT        "NewArray"
 //! INST_NOT        "LoadString"
 //! INST_NOT        "StoreArray"
-//! BC_METHOD       "ets_const_array.ETSGLOBAL.const_array_str"
+//! BC_METHOD       "ets_const_array.ETSGLOBAL.constArrayStr"
 //! INST            "lda.const"
 //! INST_NOT        "newarr"
-//! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_str"
+//! RUN             entry: "ets_const_array.ETSGLOBAL::testConstArrayStr"
 
-function const_array_str(idx: int): String {
-    let a: FixedArray<String> = ["ab", "cd", "ef"];
+function constArrayStr(idx: int): String {
+    let a: FixedArray<String> = ['ab', 'cd', 'ef'];
     return a[idx];
 }
 
-function test_const_array_str(): int {
-    if (const_array_str(1) != "cd") {
+function testConstArrayStr(): int {
+    if (constArrayStr(1) != 'cd') {
         return 1;
     }
     try {
-        const_array_str(3);
+        constArrayStr(3);
     } catch(e) {
         return 0;
     }
@@ -49,8 +49,8 @@ function test_const_array_str(): int {
 }
 
 //! CHECKER         Test ConstArrayResolver for ArkTS int array
-//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.const_array_int"
-//! METHOD          "const_array_int"
+//! RUN_BCO         method: "ets_const_array.ETSGLOBAL.constArrayInt"
+//! METHOD          "constArrayInt"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "NewArray"
 //! INST_COUNT      "StoreArray", 3
@@ -58,22 +58,22 @@ function test_const_array_str(): int {
 //! INST            "LoadConstArray"
 //! INST_NOT        "NewArray"
 //! INST_NOT        "StoreArray"
-//! BC_METHOD       "ets_const_array.ETSGLOBAL.const_array_int"
+//! BC_METHOD       "ets_const_array.ETSGLOBAL.constArrayInt"
 //! INST            "lda.const"
 //! INST_NOT        "newarr"
-//! RUN             entry: "ets_const_array.ETSGLOBAL::test_const_array_int"
+//! RUN             entry: "ets_const_array.ETSGLOBAL::testConstArrayInt"
 
-function const_array_int(idx: int): int {
+function constArrayInt(idx: int): int {
     let a: FixedArray<int> = [5, 8, 13];
     return a[idx];
 }
 
-function test_const_array_int(): int {
-    if (const_array_int(1) != 8) {
+function testConstArrayInt(): int {
+    if (constArrayInt(1) != 8) {
         return 1;
     }
     try {
-        const_array_int(3);
+        constArrayInt(3);
     } catch(e) {
         return 0;
     }

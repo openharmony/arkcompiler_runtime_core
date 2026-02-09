@@ -14,7 +14,7 @@
  */
 
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_FRONTEND  options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER       AOT IR Builder, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
@@ -166,7 +166,9 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false", entry: "ets_stringbuilder.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false",
+//!               entry: "ets_stringbuilder.ETSGLOBAL::main"
 //!
 //! METHOD        "ets_stringbuilder.ETSGLOBAL::toString0"
 //! PASS_BEFORE   "BranchElimination"
@@ -352,7 +354,8 @@ function doSmthWithSB(sb: StringBuilder) : void {
 }
 
 function toString3(str: String): String {
-    let sb = new StringBuilder(str);            // not removed, due to potential inlining of doSmth with potential deoptimize instructions
+    let sb = new StringBuilder(str);            // not removed, due to potential inlining of doSmth
+                                                // with potential deoptimize instructions
     sb.toString();                              // applied
     doSmth();
     return sb.toString();                       // applied
@@ -421,7 +424,7 @@ function toString9(str: String): String {
 function toString10(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
-    let strings: FixedArray<string> = ["1"]               // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
+    let strings: FixedArray<string> = ['1']     // insert NegativeCheck, BoundsCheck, RefTypeCheck instructions
     sb.toString();                              // applied
     sb.append(strings[0]);
     return sb.toString();                       // not applied, due to dominating append()-call
@@ -430,24 +433,25 @@ function toString10(str: String): String {
 function toString11(str: String): String {
     let sb = new StringBuilder(str);
     sb.toString();                              // applied
-    if (str.getLength() > 0)
+    if (str.getLength() > 0) {
         sb.append(1 as int);
+    }
     return sb.toString();                       // not applied, due to dominating append()-call
 }
 
 function main(): int {
-    arktest.assertEQ(toString0("abcde"), "abcde", "Wrong at toString0")
-    arktest.assertEQ(toString1("abcde"), "abcde", "Wrong at toString1")
-    arktest.assertEQ(toString2("abcde"), "abcde1", "Wrong at toString2")
-    arktest.assertEQ(toString3("abcde"), "abcde", "Wrong at toString3")
-    arktest.assertEQ(toString4("abcde"), "abcde", "Wrong at toString4")
-    arktest.assertEQ(toString5("abcde"), "abcde", "Wrong at toString5")
-    arktest.assertEQ(toString6("abcde"), "abcde", "Wrong at toString6")
-    arktest.assertEQ(toString7("abcde"), "abcde", "Wrong at toString7")
-    arktest.assertEQ(toString8("abcde"), "abcde1", "Wrong at toString8")
-    arktest.assertEQ(toString9("abcde"), "abcde1", "Wrong at toString9")
-    arktest.assertEQ(toString10("abcde"), "abcde1", "Wrong at toString10")
-    arktest.assertEQ(toString11("abcde"), "abcde1", "Wrong at toString10")
+    arktest.assertEQ(toString0('abcde'), 'abcde', 'Wrong at toString0')
+    arktest.assertEQ(toString1('abcde'), 'abcde', 'Wrong at toString1')
+    arktest.assertEQ(toString2('abcde'), 'abcde1', 'Wrong at toString2')
+    arktest.assertEQ(toString3('abcde'), 'abcde', 'Wrong at toString3')
+    arktest.assertEQ(toString4('abcde'), 'abcde', 'Wrong at toString4')
+    arktest.assertEQ(toString5('abcde'), 'abcde', 'Wrong at toString5')
+    arktest.assertEQ(toString6('abcde'), 'abcde', 'Wrong at toString6')
+    arktest.assertEQ(toString7('abcde'), 'abcde', 'Wrong at toString7')
+    arktest.assertEQ(toString8('abcde'), 'abcde1', 'Wrong at toString8')
+    arktest.assertEQ(toString9('abcde'), 'abcde1', 'Wrong at toString9')
+    arktest.assertEQ(toString10('abcde'), 'abcde1', 'Wrong at toString10')
+    arktest.assertEQ(toString11('abcde'), 'abcde1', 'Wrong at toString10')
     return 0;
 }
 
@@ -456,9 +460,10 @@ function main(): int {
 
 //! CHECKER       AOT IR Builder, Bugfix 25869
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*encodePercentEncoding.*' --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC      options: "--compiler-regex='.*encodePercentEncoding.*' --compiler-inlining=false \
+//!                         --compiler-check-final=false"
 
-const HASH_TABLE: Array<string> = new Array<string>(256);
+const HASH_TABLE: string[] = new Array<string>(256);
 const NO_ESCAPE_TABLE = new Int8Array(256);
 
 function encodePercentEncoding(str: string) {
@@ -466,18 +471,19 @@ function encodePercentEncoding(str: string) {
 
     const len = str.length;
     let i = 0;
-    const UNICODE_0x80 = 0x80;
+    const uNICODE0x80 = 0x80;
 
     outer:
     for (; i < len; i++) {
         let c = str.charCodeAt(i).toInt();
 
-        while (c < UNICODE_0x80) {
+        while (c < uNICODE0x80) {
             if (NO_ESCAPE_TABLE[c] !== 1) {
                 outVal += HASH_TABLE[c];
             }
-            if (++i == len)
+            if (++i == len) {
                 break outer;
+            }
         }
     }
     return outVal;
@@ -613,9 +619,13 @@ function encodePercentEncoding(str: string) {
 //! CHECKER       INTERP-IRTOC, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder.ETSGLOBAL::main"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv",
+//!               entry: "ets_stringbuilder.ETSGLOBAL::main"
 
 //! CHECKER       INTERP-CPP, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder.ETSGLOBAL::main"
+//! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv",
+//!              entry: "ets_stringbuilder.ETSGLOBAL::main"

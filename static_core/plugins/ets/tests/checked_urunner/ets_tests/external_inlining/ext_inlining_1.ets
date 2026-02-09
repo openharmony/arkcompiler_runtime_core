@@ -23,19 +23,19 @@
 //! RUN_FRONTEND            options: "--opt-level=2 --ets-strings-concat=false"
 
 
-import { get_sum_element } from './ext_funcs.ets';
+import { getSumElement } from './ext_funcs.ets';
 
 //! CHECKER    Check external inlining with depth 1 and one panda file
 //! RUN_PAOC   options: "--panda-files=../ext_inlining_1_ext_funcs.ets.abc", entry: "ext_inlining_1.ETSGLOBAL::main"
-//! EVENT      /Inline,ext_funcs.ETSGLOBAL::get_sum_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
-//! EVENT_NEXT /Inline,ext_inlining_1.ETSGLOBAL::main,ext_funcs.ETSGLOBAL::get_sum_element,.*,STATIC,SUCCESS/
+//! EVENT      /Inline,ext_funcs.ETSGLOBAL::getSumElement,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
+//! EVENT_NEXT /Inline,ext_inlining_1.ETSGLOBAL::main,ext_funcs.ETSGLOBAL::getSumElement,.*,STATIC,SUCCESS/
 //! RUN        options: "--panda-files=../ext_inlining_1_ext_funcs.ets.abc", entry: "ext_inlining_1.ETSGLOBAL::main"
 //! METHOD     "ext_inlining_1.ETSGLOBAL::main"
 //! PASS_BEFORE "Inline"
-//! INST       /CallStatic.*ext_funcs\.ETSGLOBAL::get_sum_element.*\[file=\d+\]/
+//! INST       /CallStatic.*ext_funcs\.ETSGLOBAL::getSumElement.*\[file=\d+\]/
 
 function main(): int {
     let arr: int[] = [1, 2, 3, 4];
-    let val: int = get_sum_element(arr, 2);
+    let val: int = getSumElement(arr, 2);
     return val === 6 ? 0 : 1;
 }

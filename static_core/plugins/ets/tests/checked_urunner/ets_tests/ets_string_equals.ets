@@ -103,7 +103,7 @@ function equalsStrStr(lhs: String | null, rhs: String | null) {
     return lhs == rhs;
 }
 
-function equals_null_str(str: String | null) {
+function equalsNullStr(str: String | null) {
     return getnull() == str;
 }
 
@@ -179,12 +179,12 @@ function main() {
     arktest.assertTrue(!equalsStrStr(str, null));
     arktest.assertTrue(equalsStrStr(null, null));
 
-    arktest.assertTrue(!equals_null_str(str));
+    arktest.assertTrue(!equalsNullStr(str));
     arktest.assertTrue(notEqualsNullStr(str));
     arktest.assertTrue(!equalsStrNull(str));
     arktest.assertTrue(notEqualsStrNull(str));
 
-    arktest.assertTrue(equals_null_str(null));
+    arktest.assertTrue(equalsNullStr(null));
     arktest.assertTrue(!notEqualsNullStr(null));
     arktest.assertTrue(equalsStrNull(null));
     arktest.assertTrue(!notEqualsStrNull(null));

@@ -82,7 +82,7 @@
 
 function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
-        console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
+        console.print('Expected ' + arr2.toString() + ' but got ' + arr1.toString());
         return 1;
     }
     return 0;
@@ -101,26 +101,26 @@ class TestSupported {
     }
 
     static test_noAlias_locals_ref(): int {
-        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let src: FixedArray<string> = ['1', '2', '3', '4'];
         let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
-        return check(dst, ["1", "2", "3", "4"]);
+        return check(dst, ['1', '2', '3', '4']);
     }
 
     static test_noAlias_updateFirstOnly_ref(): int {
-        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let src: FixedArray<string> = ['1', '2', '3', '4'];
         let dst: FixedArray<string> = new FixedArray<string>(4);
         TestSupported.__noinline__updateFirst(dst);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
-        return check(dst, ["1", "2", "3", "4"]);
+        return check(dst, ['1', '2', '3', '4']);
     }
 
     static __noinline__updateFirst(a: FixedArray<string>) {
-        a[0] = "";
+        a[0] = '';
     }
 
     static test_noAlias_localAndParam(): int {
@@ -148,12 +148,12 @@ class TestSupported {
     }
 
     static test_backwardsClosed_ref(): int {
-        let src: FixedArray<string> = ["6", "7", "8"];
-        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let src: FixedArray<string> = ['6', '7', '8'];
+        let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = src.length - 1; i >= 0; i--) {
             dst[i + 1] = src[i];
         }
-        return check(dst, ["1", "6", "7", "8", "5"]);
+        return check(dst, ['1', '6', '7', '8', '5']);
     }
 
     static test_backwardsOpen(): int {
@@ -167,12 +167,12 @@ class TestSupported {
     }
 
     static test_backwardsOpen_ref(): int {
-        let src: FixedArray<string> = ["6", "7", "8"];
-        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let src: FixedArray<string> = ['6', '7', '8'];
+        let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = src.length - 1; i > 0; i--) {
             dst[i - 1] = src[i];
         }
-        return check(dst, ["7", "8", "3", "4", "5"]);
+        return check(dst, ['7', '8', '3', '4', '5']);
     }
 
     static test_forwardClosed(): int {
@@ -187,12 +187,12 @@ class TestSupported {
     }
 
     static test_forwardClosed_ref(): int {
-        let src: FixedArray<string> = ["6", "7", "8"];
-        let dst: FixedArray<string> = ["1", "2", "3", "4", "5"];
+        let src: FixedArray<string> = ['6', '7', '8'];
+        let dst: FixedArray<string> = ['1', '2', '3', '4', '5'];
         for (let i: int = 0; i <= src.length - 1; i++) {
             dst[i + 1] = src[i];
         }
-        return check(dst, ["1", "6", "7", "8", "5"]);
+        return check(dst, ['1', '6', '7', '8', '5']);
     }
 };
 

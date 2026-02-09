@@ -28,9 +28,9 @@
 //! ASM_INST      /Intrinsic\.StdCoreStringLastIndexOf/
 //! ASM_NEXT      arm64: /cmp.*wzr/
 
-let u8_line = new string('abcdefghijklmnopqrstuvwxyz');
+let u8Line = new string('abcdefghijklmnopqrstuvwxyz');
 
 function main() {
-    arktest.assertEQ(u8_line.lastIndexOf(c'a'), 0);
-    arktest.assertEQ(u8_line.lastIndexOf(c'a', 5), 0);
+    arktest.assertEQ(u8Line.lastIndexOf(c'a'), 0);
+    arktest.assertEQ(u8Line.lastIndexOf(c'a', 5), 0);
 }

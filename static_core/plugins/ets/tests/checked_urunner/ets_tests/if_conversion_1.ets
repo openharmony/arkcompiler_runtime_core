@@ -25,23 +25,23 @@
 //! PASS_AFTER      "IfConversion"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            /SelectImmTransform TST_EQ i32 INC/
-//! INST_NOT        /If(Imm)?/
+//! INST_NOT        /If(imm)?/
 //! METHOD          "if_conversion_1.ETSGLOBAL::__noinline__foo2"
 //! PASS_AFTER      "IfConversion"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            /SelectImmTransform TST_EQ i32 INV/
-//! INST_NOT        /If(Imm)?/
+//! INST_NOT        /If(imm)?/
 //! METHOD          "if_conversion_1.ETSGLOBAL::__noinline__foo3"
 //! PASS_AFTER      "IfConversion"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            /SelectImmTransform TST_EQ i32 NEG/
-//! INST_NOT        /If(Imm)?/
+//! INST_NOT        /If(imm)?/
 //! METHOD          "if_conversion_1.ETSGLOBAL::__noinline__foo4"
 //! PASS_AFTER      "IfConversion"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      /SelectImmTransform TST_EQ i32 INC/, 1
 //! INST_COUNT      /SelectImm.*/, 3
-//! INST_NOT        /If(Imm)?/
+//! INST_NOT        /If(imm)?/
 
 function __noinline__foo1(x: int, y: int) {
     if ((y & 1) != 0) {

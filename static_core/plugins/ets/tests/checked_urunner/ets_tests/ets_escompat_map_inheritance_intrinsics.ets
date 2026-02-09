@@ -14,8 +14,8 @@
  */
 
 class MapEntry<K, V> {
-    key: K
-    val: V
+    public key: K
+    public val: V
 
     constructor(key: K, val: V) {
         this.key = key
@@ -27,8 +27,9 @@ class MyMap<K, V> extends Map<K, V> {
     public arr: Array<MapEntry<K, V>> | undefined
 
     set(key: K, val: V): this {
-        if (this.arr == undefined)
-            this.arr = new Array<MapEntry<K, V>>()
+        if (this.arr == undefined) {
+            this.arr = [] as Array<MapEntry<K, V>>
+        }
         const newEntry = new MapEntry<K, V>(key, val)
         this.arr?.push(newEntry)
         return this;
@@ -36,88 +37,93 @@ class MyMap<K, V> extends Map<K, V> {
 
     public has(key: K): boolean {
         let elem = this.arr?.pop()
-        if (elem?.key == key)
+        if (elem?.key == key) {
             return false
+        }
         return true;
     }
 
     public get(key: K): V | undefined {
         let elem = this.arr?.pop()
-        if (elem?.key == key)
+        if (elem?.key == key) {
             return elem?.val
+        }
         return undefined
     }
 
     public delete(key: K): boolean {
         let elem = this.arr?.pop()
-        if (elem?.key == key)
+        if (elem?.key == key) {
             return false
+        }
         return true
     }
 }
 
 //! CHECKER       AOT: MyMap<boolean, double> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'", entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::test_map_bool_double_overrided2"
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
+//! RUN_PAOC      options: "--compiler-regex='.*(testMap|mapHas|mapGet|mapDelete).*'",
+//!               entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::testMapBoolDoubleOverrided2"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapHasBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapHas"
+//! INST_NOT      "Intrinsic.mapHas"
 //! INST          /CallVirtual.*std\.core\.Map::has/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapGetBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapGet"
+//! INST_NOT      "Intrinsic.mapGet"
 //! INST          /CallVirtual.*std\.core\.Map::get/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapDeleteBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapDelete"
+//! INST_NOT      "Intrinsic.mapDelete"
 //! INST          /CallVirtual.*std\.core\.Map::delete/
 
 //! CHECKER       AOT PGO: MyMap<boolean, double> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PGO_PROF entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::test_map_bool_double_overrided2"
-//! RUN_PGO_PAOC options: "--compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'"
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
+//! RUN_PGO_PROF entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::testMapBoolDoubleOverrided2"
+//! RUN_PGO_PAOC options: "--compiler-regex='.*(testMap|mapHas|mapGet|mapDelete).*'"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapHasBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapHas"
+//! INST_NOT      "Intrinsic.mapHas"
 //! INST          /CallVirtual.*ets_escompat_map_inheritance_intrinsics\.MyMap::has/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapGetBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapGet"
+//! INST_NOT      "Intrinsic.mapGet"
 //! INST          /CallVirtual.*ets_escompat_map_inheritance_intrinsics\.MyMap::get/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapDeleteBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapDelete"
+//! INST_NOT      "Intrinsic.mapDelete"
 //! INST          /CallVirtual.*ets_escompat_map_inheritance_intrinsics\.MyMap::delete/
 
 //! CHECKER       JIT: MyMap<boolean, double> overrided intrinsics
-//! RUN           force_jit: true, options: "--compiler-regex='.*(test_map|MapHas|MapGet|MapDelete)_.*'", entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::test_map_bool_double_overrided2"
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapHas_bool_double"
+//! RUN           force_jit: true, options: "--compiler-regex='.*(testMap|mapHas|mapGet|mapDelete).*'",
+//!               entry: "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::testMapBoolDoubleOverrided2"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapHasBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapHas"
+//! INST_NOT      "Intrinsic.mapHas"
 //! INST          /CallVirtual.*std\.core\.Map::has/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapGet_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapGetBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapGet"
+//! INST_NOT      "Intrinsic.mapGet"
 //! INST          /CallVirtual.*std\.core\.Map::get/
-//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__MapDelete_bool_double"
+//! METHOD        "ets_escompat_map_inheritance_intrinsics.ETSGLOBAL::__noinline__mapDeleteBoolDouble"
 //! PASS_AFTER    "Inline"
-//! INST_NOT      "Intrinsic.MapDelete"
+//! INST_NOT      "Intrinsic.mapDelete"
 //! INST          /CallVirtual.*std\.core\.Map::delete/
 
-function test_map_bool_double_overrided2() {
+function testMapBoolDoubleOverrided2() {
     let map: MyMap<boolean, double> = new MyMap<boolean, double>()
     map.set(false, 1.5)
-    arktest.assertTrue(__noinline__MapHas_bool_double(map))
-    arktest.assertEQ(__noinline__MapGet_bool_double(map), undefined)
-    arktest.assertTrue(__noinline__MapDelete_bool_double(map))
+    arktest.assertTrue(__noinline__mapHasBoolDouble(map))
+    arktest.assertEQ(__noinline__mapGetBoolDouble(map), undefined)
+    arktest.assertTrue(__noinline__mapDeleteBoolDouble(map))
 }
 
-function __noinline__MapHas_bool_double(map: Map<boolean, double>): boolean {
+function __noinline__mapHasBoolDouble(map: Map<boolean, double>): boolean {
     return map.has(true);
 }
-function __noinline__MapGet_bool_double(map: Map<boolean, double>): double | undefined {
+function __noinline__mapGetBoolDouble(map: Map<boolean, double>): double | undefined {
     return map.get(false);
 }
-function __noinline__MapDelete_bool_double(map: Map<boolean, double>): boolean {
+function __noinline__mapDeleteBoolDouble(map: Map<boolean, double>): boolean {
     return map.delete(true);
 }

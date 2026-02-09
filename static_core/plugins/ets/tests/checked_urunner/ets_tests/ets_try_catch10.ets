@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-//! CHECKER      Try Catch Resolving JIT IfImm is not replaced by DeoptimizeIf because of the first stmt in try-block isn't SaveState
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch10.IfCatch::__noinline__ifCatch", entry: "ets_try_catch10.ETSGLOBAL::main"
+//! CHECKER      Try Catch Resolving JIT IfImm is not replaced by DeoptimizeIf
+//!#              because of the first stmt in try-block isn't SaveState
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=5 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false --compiler-regex=ets_try_catch10.IfCatch::__noinline__ifCatch", 
+//!              entry: "ets_try_catch10.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch10.IfCatch::__noinline__ifCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch10.IfCatch::__noinline__ifCatch"
 //! PASS_AFTER   "Inline"
@@ -33,7 +37,8 @@
 //! INST_COUNT   "Throw",2
 //! INST_NOT     "DeoptimizeIf"
 
-//! CHECKER      Try Catch Resolving AOT+PGO IfImm is not replaced by DeoptimizeIf because of the first stmt in try-block isn't SaveState
+//! CHECKER      Try Catch Resolving AOT+PGO IfImm is not replaced by DeoptimizeIf
+//!#              because of the first stmt in try-block isn't SaveState
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PGO_PROF entry: "ets_try_catch10.ETSGLOBAL::main"
 //! RUN_PGO_PAOC options: "--compiler-regex=ets_try_catch10.IfCatch::__noinline__ifCatch"

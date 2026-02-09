@@ -15,7 +15,9 @@
 
 //! CHECKER       JIT: memmove unsupported tests
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*'", entry: "memmove_unsupported.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*'",
+//!               entry: "memmove_unsupported.ETSGLOBAL::main"
 //!
 //! METHOD        "memmove_unsupported.TestUnsupported::noAlias_underIf"
 //! PASS_AFTER    "LoopIdioms"
@@ -44,7 +46,9 @@
 
 //! CHECKER       AOT: memmove unsupported tests if there is not-inlined method (local or external)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*' --compiler-inlining-blacklist='std.core.Array::<ctor>'", entry: "memmove_unsupported.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN_PAOC      options: "--compiler-regex='memmove_unsupported.TestUnsupported::.*' \
+//!                         --compiler-inlining-blacklist='std.core.Array::<ctor>'",
+//!               entry: "memmove_unsupported.ETSGLOBAL::main"
 //!
 //! METHOD        "memmove_unsupported.TestUnsupported::__noinline__noAlias_RefTypeCheck"
 //! PASS_AFTER    "LoopIdioms"
@@ -60,7 +64,7 @@
 
 function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
-        console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
+        console.print('Expected ' + arr2.toString() + ' but got ' + arr1.toString());
         return 1;
     }
     return 0;
@@ -107,7 +111,7 @@ class TestUnsupported {
     }
 
     static noAlias_RefTypeCheck(): int {
-        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let src: FixedArray<string> = ['1', '2', '3', '4'];
         return check(TestUnsupported.__noinline__noAlias_RefTypeCheck(src), src);
     }
     static __noinline__noAlias_RefTypeCheck(src: FixedArray<string>): FixedArray<string> {
@@ -119,16 +123,16 @@ class TestUnsupported {
     }
     
     static noAlias_UpdateFirst_inLoop_ref(): int {
-        let src: FixedArray<string> = ["1", "2", "3", "4"];
+        let src: FixedArray<string> = ['1', '2', '3', '4'];
         let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             TestUnsupported.__noinline__updateFirst(dst);
             dst[i] = src[i];
         }
-        return check(dst, ["", "2", "3", "4"]);
+        return check(dst, ['', '2', '3', '4']);
     }
     static __noinline__updateFirst(a: FixedArray<string>) {
-        a[0] = "";
+        a[0] = '';
     }
 };
 

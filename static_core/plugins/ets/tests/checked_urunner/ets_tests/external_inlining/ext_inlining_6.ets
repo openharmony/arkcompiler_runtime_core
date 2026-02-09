@@ -29,10 +29,14 @@ import { top } from './ext_funcs_5.ets';
 import { top2 } from './ext_funcs_5.ets';
 
 //! CHECKER    Check external inlining with 3 files
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testin
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:" +
+//!                     "../ext_inlining_6_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_6.ETSGLOBAL::main1"
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top,ext_funcs_4_1.ETSGLOBAL::compute,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main1,ext_funcs_5.ETSGLOBAL::top,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN        options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:" +
+//!                     "../ext_inlining_6_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_6.ETSGLOBAL::main1"
 //! METHOD     "ext_inlining_6.ETSGLOBAL::main1"
 //! PASS_BEFORE "Inline"
 //! INST       /CallStatic.*ext_funcs_5\.ETSGLOBAL::top.*\[file=\d+\]/
@@ -47,10 +51,14 @@ function main1(): int {
 }
 
 //! CHECKER    Check external inlining with 3 files 2
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testin
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:" +
+//!                     "../ext_inlining_6_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_6.ETSGLOBAL::main2"
 //! EVENT      /Inline,ext_funcs_5.ETSGLOBAL::top2,ext_funcs_4_1.ETSGLOBAL::compute2,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_6.ETSGLOBAL::main2,ext_funcs_5.ETSGLOBAL::top2,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:../ext_inlining_6_ext_funcs_4_1.ets.abc", entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN        options: "--panda-files=../ext_inlining_6_ext_funcs_5.ets.abc:../ext_inlining_6_ext_funcs_4.ets.abc:" +
+//!                     "../ext_inlining_6_ext_funcs_4_1.ets.abc",
+//!            entry: "ext_inlining_6.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testing
 //! METHOD     "ext_inlining_6.ETSGLOBAL::main2"
 //! PASS_BEFORE "Inline"
 //! INST       /CallStatic.*ext_funcs_5\.ETSGLOBAL::top2.*\[file=\d+\]/

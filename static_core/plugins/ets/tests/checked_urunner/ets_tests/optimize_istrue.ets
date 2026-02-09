@@ -1495,11 +1495,11 @@ function testDoubleTrue() {
 }
 
 function testStringFalse() {
-    return !!(("") as Object);
+    return !!(('') as Object);
 }
 
 function testStringTrue() {
-    return !!(("test") as Object);
+    return !!(('test') as Object);
 }
 
 function testBooleanFalse() {
@@ -1593,8 +1593,8 @@ enum Color64 {
 }
 
 enum ColorString {
-    Red = "",
-    Green = "Green"
+    Red = '',
+    Green = 'Green'
 }
 
 function testEnumFalse() {
@@ -1685,7 +1685,7 @@ function testEnumStringTrue() {
 }
 
 function testNonConstString() {
-    let str = "test".substring(1);
+    let str = 'test'.substring(1);
     return !!(str as Object);
 }
 
@@ -1751,7 +1751,7 @@ function main() {
     // Negative cases.
     arktest.assertTrue(testNonConstString());
 
-    let o = new Object();
+    let o: Object = {};
     arktest.assertTrue(testObject(o));
 
     let m = new Map<int, int>();

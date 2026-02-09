@@ -83,7 +83,7 @@
 //! INST_NEXT     /Return.*v\d+\(acc\)/
 
 class A {
-    static x: Object = new String("foo")
+    public static x: Object = 'foo'
     getx():Object { 
         return A.x
     }
@@ -96,7 +96,7 @@ class B {
 }
 
 class C {
-    static x: Object = new String("bar")
+    public static x: Object = 'bar'
     getx():Object {
         C.x = 3.14
         return C.x
@@ -106,15 +106,14 @@ class C {
     }
 }
 
-function main(): void
-{
+function main(): void {
     let objA = new A
     let objB = new B
     let objC = new C
-    arktest.assertEQ(objA.getx(), "foo")
-    arktest.assertEQ(objB.getx(), "foo")
-    arktest.assertEQ(objC.isThat("bar"), true)
+    arktest.assertEQ(objA.getx(), 'foo')
+    arktest.assertEQ(objB.getx(), 'foo')
+    arktest.assertEQ(objC.isThat('bar'), true)
     arktest.assertEQ(objC.getx(), 3.14)
-    arktest.assertEQ(objC.isThat("bar"), false)
+    arktest.assertEQ(objC.isThat('bar'), false)
     arktest.assertEQ(objC.isThat(3.14), true)
 }

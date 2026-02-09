@@ -15,52 +15,52 @@
 
 //! CHECKER       Check loopunroll optimize correctly for shl shr ashr
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test_.*", entry: "loop_unroll_shl_shr_ashr.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*", entry: "loop_unroll_shl_shr_ashr.ETSGLOBAL::main"
 //! RUN           entry: "loop_unroll_shl_shr_ashr.ETSGLOBAL::main"
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_shl_neg"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testShlNeg"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shl", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shl", 6
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_shl_overflow"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testShlOverflow"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shl", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shl", 6
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_shl_not_one"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testShlNotOne"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shl", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shl", 6
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_shl_not_overflow"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testShlNotOverflow"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shl", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shl", 8
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_shr"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testShr"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shr", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shr", 8
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_ashr"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testAshr"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "AShr", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "AShr", 8
 //!
-//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::test_loop_uncounted"
+//! METHOD       "loop_unroll_shl_shr_ashr.ETSGLOBAL::testLoopUncounted"
 //! PASS_BEFORE  "LoopUnroll"
 //! INST_COUNT   "Shl", 1
 //! PASS_AFTER   "LoopUnroll"
 //! INST_COUNT   "Shl", 6
 
-function test_shl_neg() {
+function testShlNeg() {
     let m = -1;
     let ret = 0;
     while (m > -258) {
@@ -70,7 +70,7 @@ function test_shl_neg() {
     return ret;
 }
 
-function test_shl_overflow() {
+function testShlOverflow() {
     let m = 0x7FFFFFFFFFFFFFFF;
     let i = 0x100000000000000;
     let ret = 0;
@@ -81,7 +81,7 @@ function test_shl_overflow() {
     return ret;
 }
 
-function test_shl_not_one() {
+function testShlNotOne() {
     let m = 0xFFFFFFFFFF;
     let i = 0x1100;
     let ret = 0;
@@ -92,7 +92,7 @@ function test_shl_not_one() {
     return ret;
 }
 
-function test_shl_not_overflow() {
+function testShlNotOverflow() {
     let m = 0x100;
     let i = 1;
     let ret = 0;
@@ -103,7 +103,7 @@ function test_shl_not_overflow() {
     return ret;
 }
 
-function test_ashr() {
+function testAshr() {
     let m = 0xff;
     let ret = 0;
     while (m > 0) {
@@ -113,7 +113,7 @@ function test_ashr() {
     return ret;
 }
 
-function test_shr() {
+function testShr() {
     let m = 0xff;
     let ret = 0;
     while (m > 0) {
@@ -123,7 +123,7 @@ function test_shr() {
     return ret;
 }
 
-function test_loop_uncounted(m : int) {
+function testLoopUncounted(m : int) {
     let i = 1;
     let ret = 0;
     while (i < m) {
@@ -133,13 +133,12 @@ function test_loop_uncounted(m : int) {
     return ret;
 }
 
-function main()
-{
-    arktest.assertEQ(test_shl_not_overflow(), 255);
-    arktest.assertEQ(test_ashr(),502);
-    arktest.assertEQ(test_shr(), 502);
-    arktest.assertEQ(test_loop_uncounted(1024), 1023);
-    arktest.assertEQ(test_loop_uncounted(0), 0);
-    arktest.assertEQ(test_loop_uncounted(-5), 0);
-    arktest.assertEQ(test_loop_uncounted(5), 7);
+function main() {
+    arktest.assertEQ(testShlNotOverflow(), 255);
+    arktest.assertEQ(testAshr(),502);
+    arktest.assertEQ(testShr(), 502);
+    arktest.assertEQ(testLoopUncounted(1024), 1023);
+    arktest.assertEQ(testLoopUncounted(0), 0);
+    arktest.assertEQ(testLoopUncounted(-5), 0);
+    arktest.assertEQ(testLoopUncounted(5), 7);
 }

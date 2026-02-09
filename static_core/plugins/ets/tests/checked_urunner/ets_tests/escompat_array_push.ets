@@ -42,7 +42,7 @@
 
 function testArrayPush() {
     let arraySize: int = 3;
-    let array1: Array<number> = new Array<number>(arraySize);
+    let array1: number[] = new Array<number>(arraySize);
 
     array1.push(-1);
     arktest.assertEQ(array1[array1.length - 1], -1);
@@ -72,7 +72,7 @@ function testArrayPush() {
 //! INST          /CallStatic.*std.core.Array::push/
 //! INST_COUNT    /CallStatic.*std.core.Array::push/, 5
 function testArrayPushManagedObjects() {
-    let array: Array<Object> = [];
+    let array: Object[] = [];
 
     // test number
     let obj1 = 123;
@@ -85,30 +85,30 @@ function testArrayPushManagedObjects() {
     arktest.assertEQ(array[array.length - 1], arr);
 
     // test string
-    let str = "hello";
+    let str = 'hello';
     array.push(str);
     arktest.assertEQ(array[array.length - 1], str);
     arktest.assertEQ(array.length, 3);
 
-    let array1: Array<null> = [];
+    let array1: null[] = [];
     // test null and undefined
     array1.push(null);
     arktest.assertEQ(array1[array1.length - 1], null);
 
-    let array2: Array<undefined> = [];
+    let array2: undefined[] = [];
     array2.push(undefined);
     arktest.assertEQ(array2[array2.length - 1], undefined);
 }
 
 function testArrayPushUnions() {
-    let array: Array<Object | null | undefined | number | string> = [];
+    let array: (Object | null | undefined | number | string)[] = [];
     // test number
     array.push(123);
     arktest.assertEQ(array[array.length - 1], 123);
 
     // test string
-    array.push("abc");
-    arktest.assertEQ(array[array.length - 1], "abc");
+    array.push('abc');
+    arktest.assertEQ(array[array.length - 1], 'abc');
 
     // test object
     let obj: Object = {}
@@ -127,14 +127,14 @@ function testArrayPushUnions() {
 }
 
 function testArrayPushOne() {
-    let array: Array<Object | null | undefined | number | string> = [];
+    let array: (Object | null | undefined | number | string)[] = [];
     // test number
     array.pushOne(123);
     arktest.assertEQ(array[array.length - 1], 123);
 
     // test string
-    array.pushOne("abc");
-    arktest.assertEQ(array[array.length - 1], "abc");
+    array.pushOne('abc');
+    arktest.assertEQ(array[array.length - 1], 'abc');
 
     // test object
     let obj: Object = {}
@@ -153,14 +153,14 @@ function testArrayPushOne() {
 }
 
 function testArrayPushArray() {
-    let array: Array<Object | null | undefined | number | string> = [];
+    let array: (Object | null | undefined | number | string)[] = [];
     // test number
     array.pushArray(1, 2, 3);
     arktest.assertEQ(array[array.length - 1], 3);
 
     // test string
-    array.pushArray("a", "b", "c");
-    arktest.assertEQ(array[array.length - 1], "c");
+    array.pushArray('a', 'b', 'c');
+    arktest.assertEQ(array[array.length - 1], 'c');
 
     // test object
     let obj1: Object = {}

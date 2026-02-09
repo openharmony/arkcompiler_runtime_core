@@ -14,10 +14,11 @@
  */
 
 //! CHECKER      Check inlining of nested lambda calls
-//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "inlining_nested_lambdas.ETSGLOBAL::main"
-//! EVENT        /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-0::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-1::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-1::invoke1,.*,VIRTUAL,SUCCESS/
+//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'",
+//!              entry: "inlining_nested_lambdas.ETSGLOBAL::main"
+//! EVENT        /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-0::<ctor>,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-1::<ctor>,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-1::invoke1,.*,VIRTUAL,SUCCESS/
 //! METHOD       "inlining_nested_lambdas.ETSGLOBAL::test"
 //! PASS_AFTER   "Inline"
 //! INST         /CallResolvedVirtual.Inlined .* inlining_nested_lambdas.%%lambda-lambda_invoke-1::invoke1/
@@ -28,9 +29,9 @@
 //! CHECKER      Check inlining of nested lambda calls (AOT)
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: "--compiler-regex='.*test.*'"
-//! EVENT        /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-0::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-1::<ctor>,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_nested_lambdas.ETSGLOBAL::test,inlining_nested_lambdas.%%lambda-lambda_invoke-1::invoke1,.*,VIRTUAL,SUCCESS/
+//! EVENT        /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-0::<ctor>,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-1::<ctor>,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlin.*lambdas.ETSGLOBAL::test,inlin.*lambdas.%%lambda.*invoke-1::invoke1,.*,VIRTUAL,SUCCESS/
 //! METHOD       "inlining_nested_lambdas.ETSGLOBAL::test"
 //! PASS_AFTER   "Inline"
 //! INST         /CallResolvedVirtual.Inlined .* inlining_nested_lambdas.%%lambda-lambda_invoke-1::invoke1/
@@ -38,12 +39,15 @@
 //! RUN          options: "", entry: "inlining_nested_lambdas.ETSGLOBAL::main"
 
 function test(y: int): int {
-    let F1 = (x: int) => { return x + 1 }
-    let F2 = (x: int) => { return F1(x) + 10 }
+    let F1 = (x: int) => {
+        return x + 1
+    }
+    let F2 = (x: int) => {
+        return F1(x) + 10
+    }
     return F2(y);
 }
 
-function main(): void
-{
+function main(): void {
     arktest.assertEQ(test(3), 14)
 }

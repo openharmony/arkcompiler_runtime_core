@@ -14,7 +14,11 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT optimize with nested catches
-//! RUN          force_jit: true, options: "--compiler-regex='.*(multipleCatch|wrapper|main)' --compiler-hotness-threshold=5 --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 --compiler-enable-osr=false", entry: "ets_try_catch8.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*(multipleCatch|wrapper|main)' --compiler-hotness-threshold=5 \
+//!                        --compiler-profiling-threshold=0 --compiler-inlining-max-insts=160 \
+//!                        --compiler-enable-osr=false",
+//!              entry: "ets_try_catch8.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch8.MultipleCatch::multipleCatch,.*,COMPILED/
 //! EVENT        /Compilation,ets_try_catch8.MultipleCatch::wrapper,.*,COMPILED/
 //! EVENT        /Inline,ets_try_catch8.ETSGLOBAL::main,ets_try_catch8.MultipleCatch::wrapper,.*,SUCCESS/
@@ -86,7 +90,7 @@ class MultipleCatch {
 let mc = new MultipleCatch();
 
 function main(): int {
-    console.println("in main")
+    console.println('in main')
     let res :int = 0;
     let a :int = 3;
     let b :int = 2;

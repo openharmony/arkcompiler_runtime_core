@@ -15,7 +15,9 @@
 
 //! CHECKER           JIT - Positive : Check mod optimization.
 //! SKIP_IF           @architecture == "arm32"
-//! RUN               force_jit: true, options: "--compiler-regex='.*func[0-9]+.*' --compiler-inlining=false", entry: "optimize_mod.ETSGLOBAL::main"
+//! RUN               force_jit: true,
+//!                   options: "--compiler-regex='.*func[0-9]+.*' --compiler-inlining=false",
+//!                   entry: "optimize_mod.ETSGLOBAL::main"
 //! METHOD            "optimize_mod.ETSGLOBAL::func1"
 //! PASS_BEFORE       "Lowering"
 //! INST_COUNT        /Mod /, 12
@@ -36,7 +38,9 @@
 
 //! CHECKER           JIT - Negative : Check mod optimization.
 //! SKIP_IF           @architecture == "arm32"
-//! RUN               force_jit: true, options: "--compiler-regex='.*func[0-9]+.*' --compiler-inlining=false", entry: "optimize_mod.ETSGLOBAL::main"
+//! RUN               force_jit: true,
+//!                   options: "--compiler-regex='.*func[0-9]+.*' --compiler-inlining=false",
+//!                   entry: "optimize_mod.ETSGLOBAL::main"
 //! METHOD            "optimize_mod.ETSGLOBAL::func3"
 //! PASS_BEFORE       "Lowering"
 //! INST_COUNT        /Mod /, 12
@@ -74,13 +78,13 @@
 //! INST_COUNT        /SelectImm GE/, 0
 
 class Obj {
-    value : number = 0;
+    public value : number = 0;
     constructor(value : number) {
         this.value = value;
     }
 }
 
-function func1() : Array<Obj> {
+function func1() : Obj[] {
     let count : int = 3000;
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
@@ -93,7 +97,7 @@ function func1() : Array<Obj> {
     for (let i = 0; i < count; i++) {
         res[i % 5] = resources[i % 15];
     }
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     for (let i = 0; i < 5; i++) {
         result.push(res[i]);
         result.push(resources[i + 10]);
@@ -102,7 +106,7 @@ function func1() : Array<Obj> {
     return result;
 }
 
-function func2(i : int) : Array<Obj> {
+function func2(i : int) : Obj[] {
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
                                        new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
@@ -110,7 +114,7 @@ function func2(i : int) : Array<Obj> {
     res[i % 5] = resources[i % 15];
     res[(i + 1) % 5] = resources[(i + 1) % 15];
     res[(i + 2) % 5] = resources[(i + 2) % 15];
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     for (let j = 0; j < 3; j++) {
         result.push(res[j]);
         result.push(resources[j]);
@@ -119,7 +123,7 @@ function func2(i : int) : Array<Obj> {
     return result;
 }
 
-function func3(modVal : int) : Array<Obj> {
+function func3(modVal : int) : Obj[] {
     let count : int = 3000;
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
@@ -132,7 +136,7 @@ function func3(modVal : int) : Array<Obj> {
     for (let i = 0; i < count; i++) {
         res[i % modVal] = resources[i % 15];
     }
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     for (let i = 0; i < 5; i++) {
         result.push(res[i]);
         result.push(resources[i + 10]);
@@ -141,7 +145,7 @@ function func3(modVal : int) : Array<Obj> {
     return result;
 }
 
-function func4() : Array<Obj> {
+function func4() : Obj[] {
     let count : int = 3000;
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
@@ -154,7 +158,7 @@ function func4() : Array<Obj> {
     for (let i = count - 1; i >= 0; i--) {
         res[i % 5] = resources[i % 15];
     }
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     for (let i = 0; i < 5; i++) {
         result.push(res[i]);
         result.push(resources[i]);
@@ -163,14 +167,14 @@ function func4() : Array<Obj> {
     return result;
 }
 
-function func5(i : int) : Array<Obj> {
+function func5(i : int) : Obj[] {
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
                                        new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
                                        new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     res[i % 5] = resources[i % 15];
     res[(i + 6) % 5] = resources[(i + 1) % 15];
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     for (let j = 0; j < 2; j++) {
         result.push(res[j]);
         result.push(resources[j]);
@@ -179,12 +183,12 @@ function func5(i : int) : Array<Obj> {
     return result;
 }
 
-function func6(i : int) : Array<Obj> {
+function func6(i : int) : Obj[] {
     let res : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
     let resources : FixedArray<Obj> = [new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
                                        new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0),
                                        new Obj(0), new Obj(0), new Obj(0), new Obj(0), new Obj(0)];
-    let result : Array<Obj> = new Array<Obj>();
+    let result : Obj[] = [];
     if (i > 1) {
         res[i % 5] = resources[i % 15];
         result.push(res[i]);
@@ -203,7 +207,7 @@ function main() {
     // --------------------- Positive tests ---------------------- //
 
     // 1) normal case and some case which add constant is equal to mod constant
-    let res : Array<Obj> = func1();
+    let res : Obj[] = func1();
     arktest.assertEQ(res[0].value, res[1].value);
     arktest.assertEQ(res[2].value, res[3].value);
     arktest.assertEQ(res[4].value, res[5].value);

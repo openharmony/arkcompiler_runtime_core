@@ -18,17 +18,19 @@
 
 //! CHECKER       Invalid save states AOT (I9NI8P/16707)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop_test[0-9]+' --compiler-inlining=true", entry: "ets_string_concat_loop_part2.ETSGLOBAL::bugfix_concat_loop"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfixConcatLoopTest[0-9]+' --compiler-inlining=true",
+//!               entry: "ets_string_concat_loop_part2.ETSGLOBAL::bugfixConcatLoop"
 
 //! CHECKER       Invalid save states JIT (I9NI8P/16707)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*bugfix_concat_loop_test[0-9]+' --compiler-inlining=true", entry: "ets_string_concat_loop_part2.ETSGLOBAL::bugfix_concat_loop"
+//! RUN           force_jit: true, options: "--compiler-regex='.*bugfixConcatLoopTest[0-9]+' --compiler-inlining=true",
+//!               entry: "ets_string_concat_loop_part2.ETSGLOBAL::bugfixConcatLoop"
 
-const initial = "initial";
-const expected = "expected";
-const empty = "";
+const initial = 'initial';
+const expected = 'expected';
+const empty = '';
 
-function bugfix_concat_loop_test0(): string {
+function bugfixConcatLoopTest0(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
@@ -38,72 +40,77 @@ function bugfix_concat_loop_test0(): string {
     return c;
 }
 
-function bugfix_concat_loop_test1(): string {
+function bugfixConcatLoopTest1(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
-        if (a == 1)
+        if (a == 1) {
             b += empty;
-        else
+        } else {
             c = b;
+        }
     }
     return c;
 }
 
-function bugfix_concat_loop_test2(): string {
+function bugfixConcatLoopTest2(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
-        if (a == 1)
+        if (a == 1) {
             b += empty;
+        }
         c = b;
     }
     return c;
 }
 
-function bugfix_concat_loop_test3(): string {
+function bugfixConcatLoopTest3(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
         b += empty;
-        if (a == 0)
+        if (a == 0) {
             c = b;
+        }
     }
     return c;
 }
 
-function bugfix_concat_loop_test4(): string {
+function bugfixConcatLoopTest4(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
         b += empty;
-        if (a == 1) {}
-        else
+        if (a == 1) {
+        } else {
             c = b;
+        }
     }
     return c;
 }
 
-function bugfix_concat_loop_test5(): string {
+function bugfixConcatLoopTest5(): string {
     let c = initial;
     let b = expected;
     for(let a = 0; a < 1; a++) {
-        if (a == 1) {}
-        else
+        if (a == 1) {
+        } else {
             b += empty;
+        }
         c = b;
     }
     return c;
 }
 
 
-function bugfix_concat_loop() {
+function bugfixConcatLoop() {
     for(let i = 0; i < 1000; i++) {
-        arktest.assertEQ(bugfix_concat_loop_test0(), expected);
-        arktest.assertEQ(bugfix_concat_loop_test1(), expected);
-        arktest.assertEQ(bugfix_concat_loop_test2(), expected);
-        arktest.assertEQ(bugfix_concat_loop_test3(), expected);
-        arktest.assertEQ(bugfix_concat_loop_test4(), expected);
-        arktest.assertEQ(bugfix_concat_loop_test5(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest0(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest1(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest2(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest3(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest4(), expected);
+        arktest.assertEQ(bugfixConcatLoopTest5(), expected);
     }
 }

@@ -14,8 +14,8 @@
  */
 
 //! CHECKER         Check IsInstance elimination for LoadStatic result
-//! RUN             force_jit: true, options: "--compiler-regex='.*final_instanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::final_instanceof"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::final_instanceof"
+//! RUN             force_jit: true, options: "--compiler-regex='.*finalInstanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::finalInstanceof"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::finalInstanceof"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
@@ -24,14 +24,14 @@
 
 //! CHECKER         Check IsInstance elimination for LoadStatic result (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*final_instanceof.*'"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::final_instanceof"
+//! RUN_PAOC        options: "--compiler-regex='.*finalInstanceof.*'"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::finalInstanceof"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "IsInstance"
-//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::final_instanceof"
+//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::finalInstanceof"
 
 final class Final {}
 
@@ -39,7 +39,7 @@ class Unrelated {}
 
 const asFinal: Final = new Final()
 
-function final_instanceof(): int {
+function finalInstanceof(): int {
     if (asFinal instanceof Unrelated) {
         return 1
     }
@@ -47,8 +47,8 @@ function final_instanceof(): int {
 }
 
 //! CHECKER         Check checkcast elimination and complex instanceof non-elimination for LoadStatic result
-//! RUN             force_jit: true, options: "--compiler-regex='.*upcast_instanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::upcast_instanceof"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::upcast_instanceof"
+//! RUN             force_jit: true, options: "--compiler-regex='.*upcastInstanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::upcastInstanceof"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::upcastInstanceof"
 //! PASS_BEFORE     "ObjectTypeCheckElimination"
 //! INST            "CheckCast"
 //! PASS_AFTER      "ObjectTypeCheckElimination"
@@ -61,8 +61,8 @@ function final_instanceof(): int {
 
 //! CHECKER         Check checkcast elimination and complex instanceof non-elimination for LoadStatic result (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*upcast_instanceof.*'"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::upcast_instanceof"
+//! RUN_PAOC        options: "--compiler-regex='.*upcastInstanceof.*'"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::upcastInstanceof"
 //! PASS_BEFORE     "ObjectTypeCheckElimination"
 //! INST            "CheckCast"
 //! PASS_AFTER      "ObjectTypeCheckElimination"
@@ -72,14 +72,14 @@ function final_instanceof(): int {
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "IsInstance"
-//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::upcast_instanceof"
+//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::upcastInstanceof"
 
 class Base {}
 class Child extends Base {}
 
 const asChild: Child = new Child;
 
-function upcast_instanceof(): int {
+function upcastInstanceof(): int {
     let asBase = asChild as Base;
     if (asBase instanceof Unrelated) {
         return 1
@@ -88,8 +88,8 @@ function upcast_instanceof(): int {
 }
 
 //! CHECKER         Check complex checkcast and instanceof non-elimination for LoadStatic result
-//! RUN             force_jit: true, options: "--compiler-regex='.*downcast_nonfinal_instanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::downcast_nonfinal_instanceof"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::downcast_nonfinal_instanceof"
+//! RUN             force_jit: true, options: "--compiler-regex='.*downcastNonfinalInstanceof.*'", entry: "isinstance_elim_load_static.ETSGLOBAL::downcastNonfinalInstanceof"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::downcastNonfinalInstanceof"
 //! PASS_BEFORE     "ObjectTypeCheckElimination"
 //! INST            "CheckCast"
 //! PASS_AFTER      "ObjectTypeCheckElimination"
@@ -102,8 +102,8 @@ function upcast_instanceof(): int {
 
 //! CHECKER         Check complex checkcast and instanceof non-elimination for LoadStatic result (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*downcast_nonfinal_instanceof.*'"
-//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::downcast_nonfinal_instanceof"
+//! RUN_PAOC        options: "--compiler-regex='.*downcastNonfinalInstanceof.*'"
+//! METHOD          "isinstance_elim_load_static.ETSGLOBAL::downcastNonfinalInstanceof"
 //! PASS_BEFORE     "ObjectTypeCheckElimination"
 //! INST            "CheckCast"
 //! PASS_AFTER      "ObjectTypeCheckElimination"
@@ -113,11 +113,11 @@ function upcast_instanceof(): int {
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "IsInstance"
-//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::downcast_nonfinal_instanceof"
+//! RUN             options: "", entry: "isinstance_elim_load_static.ETSGLOBAL::downcastNonfinalInstanceof"
 
 const asBase: Base = new Child;
 
-function downcast_nonfinal_instanceof(): int {
+function downcastNonfinalInstanceof(): int {
     let asChild = asBase as Child;
     if (asChild instanceof Unrelated) {
         return 1

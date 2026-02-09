@@ -14,71 +14,75 @@
  */
 
 //! CHECKER       IR Builder inlining min int
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_i32.*'", entry: "ets_min.ETSGLOBAL::test_i32"
-//! METHOD        "ets_min.ETSGLOBAL::test_i32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*testI32.*'",
+//!               entry: "ets_min.ETSGLOBAL::testI32"
+//! METHOD        "ets_min.ETSGLOBAL::testI32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 6
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining min int
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*test_i32.*'"
-//! METHOD        "ets_min.ETSGLOBAL::test_i32"
+//! RUN_AOT       options: "--compiler-regex='.*testI32.*'"
+//! METHOD        "ets_min.ETSGLOBAL::testI32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 6
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_min.ETSGLOBAL::test_i32"
+//! RUN           entry: "ets_min.ETSGLOBAL::testI32"
 
 //! CHECKER       IR Builder inlining min long
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_i64.*'", entry: "ets_min.ETSGLOBAL::test_i64"
-//! METHOD        "ets_min.ETSGLOBAL::test_i64"
+//! RUN           force_jit: true, options: "--compiler-regex='.*testI64.*'",
+//!               entry: "ets_min.ETSGLOBAL::testI64"
+//! METHOD        "ets_min.ETSGLOBAL::testI64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 6
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining min long
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*test_i64.*'"
-//! METHOD        "ets_min.ETSGLOBAL::test_i64"
+//! RUN_AOT       options: "--compiler-regex='.*testI64.*'"
+//! METHOD        "ets_min.ETSGLOBAL::testI64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 6
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_min.ETSGLOBAL::test_i64"
+//! RUN           entry: "ets_min.ETSGLOBAL::testI64"
 
 //! CHECKER       IR Builder inlining min float
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_f32.*'", entry: "ets_min.ETSGLOBAL::test_f32"
-//! METHOD        "ets_min.ETSGLOBAL::test_f32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*testF32.*'",
+//!               entry: "ets_min.ETSGLOBAL::testF32"
+//! METHOD        "ets_min.ETSGLOBAL::testF32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 10
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining min float
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*test_f32.*'"
-//! METHOD        "ets_min.ETSGLOBAL::test_f32"
+//! RUN_AOT       options: "--compiler-regex='.*testF32.*'"
+//! METHOD        "ets_min.ETSGLOBAL::testF32"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 10
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_min.ETSGLOBAL::test_f32"
+//! RUN           entry: "ets_min.ETSGLOBAL::testF32"
 
 //! CHECKER      IR Builder inlining min double
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_f64.*'", entry: "ets_min.ETSGLOBAL::test_f64"
-//! METHOD       "ets_min.ETSGLOBAL::test_f64"
+//! RUN          force_jit: true, options: "--compiler-regex='.*testF64.*'",
+//!              entry: "ets_min.ETSGLOBAL::testF64"
+//! METHOD       "ets_min.ETSGLOBAL::testF64"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT    /Min/, 20
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining min double
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*test_f64.*'"
-//! METHOD        "ets_min.ETSGLOBAL::test_f64"
+//! RUN_AOT       options: "--compiler-regex='.*testF64.*'"
+//! METHOD        "ets_min.ETSGLOBAL::testF64"
 //! PASS_AFTER    "IrBuilder"
 //! INST_COUNT    /Min/, 20
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_min.ETSGLOBAL::test_f64"
+//! RUN           entry: "ets_min.ETSGLOBAL::testF64"
 
 
-function test_i32() : int {
+function testI32() : int {
     if (min(Int.MAX_VALUE as int, 0 as int) != 0 as int) return 1;
     if (min(Int.MIN_VALUE as int, 0 as int) != Int.MIN_VALUE as int) return 2;
     if (min(0 as int, -2 as int) != -2 as int) return 3;
@@ -89,7 +93,7 @@ function test_i32() : int {
     return 0;
 }
 
-function test_i64() : int {
+function testI64() : int {
     if (min(Long.MAX_VALUE, 0) != 0) return 11;
     if (min(Long.MIN_VALUE, 0) != Long.MIN_VALUE) return 12;
     if (min(0 as int, -2) != -2) return 13;
@@ -100,7 +104,7 @@ function test_i64() : int {
     return 0;
 }
 
-function test_f32() : int {
+function testF32() : int {
     if (min(Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 21;
     if (min(Float.MAX_VALUE, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 22;
     if (min(0.0f, Float.NEGATIVE_INFINITY) != Float.NEGATIVE_INFINITY) return 23;
@@ -115,7 +119,7 @@ function test_f32() : int {
     return 0;
 }
 
-function test_f64() : int {
+function testF64() : int {
     if (min(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 31;
     if (min(Double.MAX_VALUE, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 32;
     if (min(0, Double.NEGATIVE_INFINITY) != Double.NEGATIVE_INFINITY) return 33;

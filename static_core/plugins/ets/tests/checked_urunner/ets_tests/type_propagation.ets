@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-import { Runtime } from "std/core"
+import { Runtime } from 'std/core'
 
 //! CHECKER      Check type prop
 //! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "type_propagation.ETSGLOBAL::main"
@@ -30,15 +30,15 @@ import { Runtime } from "std/core"
 
 class A {
     // NOTE: class literal is not yet supported
-    static klass = Class.current()
+    public static klass = Class.current()
 }
 
 class B extends A {
-    static klass = Class.current()
+    public static klass = Class.current()
 }
 
 let boxClass = Class.of(new Box<Int>())
-let objectClass = Class.of(new Object())
+let objectClass = Class.of({})
 
 function testNewObjSimple() {
     let b = new B()
@@ -48,10 +48,11 @@ function testNewObjSimple() {
 
 function testNewObjPhi(x: boolean) {
     let a: Object | null = null
-    if (x)
+    if (x) {
         a = new A()
-    else
+    } else {
         a = new B()
+    }
     let klass1 = Runtime.__getTypeInfo(a)
     arktest.assertTrue(klass1 === undefined)
 }
@@ -115,9 +116,9 @@ function testInvalidateBeforeEdge(x: boolean) {
 
 let gObj: Object | null = null
 class Holder {
-    obj: Object | null = null
+    public obj: Object | null = null
 
-    static klass = Class.current()
+    public static klass = Class.current()
 }
 let gHolder: Holder = new Holder()
 

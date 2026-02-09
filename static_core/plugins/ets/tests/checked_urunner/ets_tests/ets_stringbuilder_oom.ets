@@ -17,16 +17,20 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER      OOM error for StringBuilder
-//! RUN          force_jit: true, options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::main'", entry: "ets_stringbuilder_oom.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-enable-osr=false --compiler-regex='ETSGLOBAL::main'",
+//!              entry: "ets_stringbuilder_oom.ETSGLOBAL::main"
 //! EVENT        /Error,ets_stringbuilder_oom.ETSGLOBAL::main.*NATIVE/
-function foo(n: int): int { return (n * 17 + 7) % 141;}
+function foo(n: int): int {
+ return (n * 17 + 7) % 141;
+}
 function main(): int {
     let c: char[] = new char[10000];
     let sb: StringBuilder = new StringBuilder();
     for (let i = 0; i < 10000000; ++i) {
         let n: int = foo(i);
         try {
-            sb.append(new String(c));
+            sb.append(c);
             n += 100;
         } catch (e) {
             if (e instanceof OutOfMemoryError) {

@@ -15,52 +15,58 @@
 
 //! CHECKER      AOT IR Builder, check null instructions
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*test_null.*' --compiler-inlining=false"
+//! RUN_PAOC     options: "--compiler-regex='.*testNull.*' --compiler-inlining=false"
 //!
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /LoadUniqueObject/
 //!
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null_dce"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNullDce"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     /LoadUniqueObject/
 //!  
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null_cse"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNullCse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /LoadUniqueObject/, 1
 //!
 
 //! CHECKER      Force JIT null
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null.*'", entry: "ets_nullish.ETSGLOBAL::test_null"
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*testNull.*'",
+//!              entry: "ets_nullish.ETSGLOBAL::testNull"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /LoadUniqueObject/
 
 //! CHECKER      Force JIT null dce
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_dce.*'", entry: "ets_nullish.ETSGLOBAL::test_null_dce"
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null_dce"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*testNullDce.*'",
+//!              entry: "ets_nullish.ETSGLOBAL::testNullDce"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNullDce"
 //! PASS_AFTER   "Codegen"
 //! INST_NOT     /LoadUniqueObject/
 
 //! CHECKER      Force JIT null cse
-//! RUN          force_jit: true, options: "--compiler-regex='.*test_null_cse.*'", entry: "ets_nullish.ETSGLOBAL::test_null_cse"
-//! METHOD       "ets_nullish.ETSGLOBAL::test_null_cse"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*testNullCse.*'",
+//!              entry: "ets_nullish.ETSGLOBAL::testNullCse"
+//! METHOD       "ets_nullish.ETSGLOBAL::testNullCse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /LoadUniqueObject/, 1
 
 let glob: Object | undefined | null = null;
 
-function test_null(): int {
+function testNull(): int {
     glob = null;
     return 0;
 }
 
-function test_null_dce(): int {
+function testNullDce(): int {
     let v: Object | null = null;
     return 0;
 }
 
-function test_null_cse(): int {
+function testNullCse(): int {
     glob = null;
     glob = null;
     return 0;

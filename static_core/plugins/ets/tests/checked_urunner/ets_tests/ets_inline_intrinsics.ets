@@ -15,8 +15,10 @@
 
 //! CHECKER      Inline StringEquals intrinsic
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ets_inline_intrinsics.ETSGLOBAL::main"
-//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equals_obj_obj"
+//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 \
+//!                        --compiler-regex='.*equalsObjObj.*'",
+//!              entry: "ets_inline_intrinsics.ETSGLOBAL::main"
+//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equalsObjObj"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /CallVirtual/
 //! INST_NOT     /Intrinsic/
@@ -30,26 +32,28 @@
 
 //! CHECKER      Not inline StringEquals intrinsic
 //! SKIP_IF      @architecture != "arm32"
-//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 --compiler-regex='.*equals_obj_obj.*'", entry: "ets_inline_intrinsics.ETSGLOBAL::main"
-//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equals_obj_obj"
+//! RUN          options: "--no-async-jit=true  --compiler-hotness-threshold=4 --compiler-profiling-threshold=2 \
+//!                        --compiler-regex='.*equalsObjObj.*'",
+//!               entry: "ets_inline_intrinsics.ETSGLOBAL::main"
+//! METHOD       "ets_inline_intrinsics.ETSGLOBAL::equalsObjObj"
 //! PASS_AFTER   "Inline"
 //! INST         /CallVirtual/
 //! INST_NOT     /Intrinsic/
 
-function equals_obj_obj(lhs: Object, rhs: Object | null): boolean {
+function equalsObjObj(lhs: Object, rhs: Object | null): boolean {
     return lhs == rhs;
 }
 
 class A {}
 
 function main() {
-    let str = "abc";
+    let str = 'abc';
     let obj = new A();
 
     for (let i:int = 0; i < 10; ++i) {
-        arktest.assertTrue(equals_obj_obj(str, str));
-        arktest.assertTrue(!equals_obj_obj("abcd", "abce"));
-        arktest.assertTrue(!equals_obj_obj(str, obj));
-        arktest.assertTrue(!equals_obj_obj(str, null));
+        arktest.assertTrue(equalsObjObj(str, str));
+        arktest.assertTrue(!equalsObjObj('abcd', 'abce'));
+        arktest.assertTrue(!equalsObjObj(str, obj));
+        arktest.assertTrue(!equalsObjObj(str, null));
     }
 }

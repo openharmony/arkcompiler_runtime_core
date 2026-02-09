@@ -195,7 +195,9 @@ function testUint8ArraySetIntCpp(): void {
 
 function testUint8ArraySetRangeErrorCpp(): void {
     let ar = new Uint8Array(6)
-    arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ ar[11] = 1 
+}, expectedRangeErrors)
 }
 
 function testUint8ArraySetIntIr(): void {
@@ -221,7 +223,9 @@ function testUint8ClampedArraySetIntCpp(): void {
 
 function testUint8ClampedArraySetRangeErrorCpp(): void {
     let ar = new Uint8ClampedArray(6)
-    arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ ar[11] = 1 
+}, expectedRangeErrors)
 }
 
 function testUint8ClampedArraySetIntIr(): void {
@@ -247,7 +251,9 @@ function testUint16ArraySetIntCpp(): void {
 
 function testUint16ArraySetRangeErrorCpp(): void {
     let ar = new Uint16Array(6)
-    arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ ar[11] = 1 
+}, expectedRangeErrors)
 }
 
 function testUint16ArraySetIntIr(): void {
@@ -271,7 +277,9 @@ function testUint32ArraySetIntCpp(): void {
 
 function testUint32ArraySetRangeErrorCpp(): void {
     let ar = new Uint32Array(6)
-    arktest.expectThrow(() => { ar[11] = 1 }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ ar[11] = 1 
+}, expectedRangeErrors)
 }
 
 function testUint32ArraySetIntIr(): void {
@@ -332,7 +340,9 @@ function testBigUint64ArraySetLongCpp(): void {
 
 function testBigUint64ArraySetRangeErrorCpp(): void {
     let ar = new BigUint64Array(6)
-    arktest.expectThrow(() => { ar[11] = 1n }, expectedRangeErrors)
+    arktest.expectThrow(() => {
+ ar[11] = 1n 
+}, expectedRangeErrors)
 }
 
 function testBigUint64ArraySetLongIr(): void {

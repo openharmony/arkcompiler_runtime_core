@@ -18,7 +18,8 @@
 
 //! CHECKER           AOT: EscapeAnalysis Phi aliasing regression
 //! SKIP_IF           @architecture == "arm32"
-//! RUN_PAOC          options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*test.*'", entry: "escape_analysis_check_phi.ETSGLOBAL::main"
+//! RUN_PAOC          options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*test.*'",
+//!                   entry: "escape_analysis_check_phi.ETSGLOBAL::main"
 //! METHOD            "escape_analysis_check_phi.ETSGLOBAL::test"
 //! PASS_BEFORE       "EscapeAnalysis"
 //! INST_COUNT        "Phi", 2
@@ -33,7 +34,9 @@
 //! INST_COUNT        /StoreObject.*HelperObject/, 2
 
 //! CHECKER           JIT: EscapeAnalysis Phi aliasing regression
-//! RUN               force_jit: true, options: "--compiler-regex='.*test.*'", entry: "escape_analysis_check_phi.ETSGLOBAL::main"
+//! RUN               force_jit: true,
+//!                   options: "--compiler-regex='.*test.*'",
+//!                   entry: "escape_analysis_check_phi.ETSGLOBAL::main"
 //! METHOD            "escape_analysis_check_phi.ETSGLOBAL::test"
 //! PASS_BEFORE       "EscapeAnalysis"
 //! INST_COUNT        "Phi", 2
@@ -48,8 +51,8 @@
 //! INST_COUNT        /StoreObject.*HelperObject/, 2
 
 class SomeObject {
-    val: number;
-    e: HelperObject;
+    public val: number;
+    public e: HelperObject;
 
     constructor(q: number) {
         this.val = q;
@@ -63,7 +66,7 @@ class SomeObject {
 }
 
 class HelperObject {
-    e: number;
+    public e: number;
     constructor(e: number) {
         this.e = e;
     }
@@ -87,26 +90,26 @@ function process(params: SomeObject): number {
     return s;
 }
 
-function __no_inline__do_some_job(j: SomeObject): void {
+function doSomeJob(j: SomeObject): void {
 }
 
-function test(HelperObject: HelperObject | undefined): void {
+function test(helperObject: HelperObject | undefined): void {
     const q1 = 120;
     const q2 = 450;
 
     let p1: SomeObject;
     let p2: SomeObject;
 
-    if (HelperObject == undefined) {
+    if (helperObject == undefined) {
         p1 = new SomeObject(q1);
         p2 = new SomeObject(q2);
     } else {
-        p1 = new SomeObject(q1, HelperObject);
-        p2 = new SomeObject(q2, HelperObject);
+        p1 = new SomeObject(q1, helperObject);
+        p2 = new SomeObject(q2, helperObject);
     }
 
-    __no_inline__do_some_job(p1);
-    __no_inline__do_some_job(p2);
+    doSomeJob(p1);
+    doSomeJob(p2);
 
     const r1 = process(p1);
     const r2 = process(p2);

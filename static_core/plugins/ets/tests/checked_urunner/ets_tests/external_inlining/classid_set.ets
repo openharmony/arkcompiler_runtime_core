@@ -23,8 +23,8 @@
 //! RUN_FRONTEND            inputs: "classid_set_c.ets", output: "classid_set_classid_set_c.ets.abc"
 //! RUN_FRONTEND            options: "--opt-level=2 --ets-strings-concat=false"
 
-import { Base, __noinline__createA as createA } from "./classid_set_b.ets";
-import { __noinline__createB as createB } from "./classid_set_c.ets";
+import { Base, __noinline__createA as createA } from './classid_set_b.ets';
+import { __noinline__createB as createB } from './classid_set_c.ets';
 
 //! CHECKER       Test classId monomorphic
 //! SKIP_IF       @architecture == "arm32"

@@ -14,72 +14,82 @@
  */
 
 // Prevents comparison elimination by frontend type inferrence
-function getfalse(): boolean { return false }
-function getnull(): Any { return null }
-function getundef(): Any { return undefined }
-function id(x: Any) { return x }
-function getobj(): Any { return new Object(); }
+function getfalse(): boolean {
+ return false 
+}
+function getnull(): Any {
+ return null 
+}
+function getundef(): Any {
+ return undefined 
+}
+function id(x: Any) {
+ return x 
+}
+function getobj(): Any {
+ return {} as Object; 
+}
 
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER      AOT ets.equals peepholes
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
+//! RUN_PAOC     options: "--compiler-regex='.*(equals).*'"
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_dce"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsDce"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_cse"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsCse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /Intrinsic.CompilerEtsEquals/, 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   /Intrinsic.CompilerEtsEquals/, 1
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_same_inputs"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsSameInputs"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_null"
-//! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsEquals/
-//! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsEquals/
-//! INST         /Compare/
-//!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_undefined"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST         /Compare/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_null_undefined"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsUndefined"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST_NOT     /Intrinsic.CompilerEtsEquals/
+//! INST         /Compare/
+//!
+//! METHOD       "ets_equals.ETSGLOBAL::equalsNullUndefined"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_reftyped_input"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsReftypedInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_union_input"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsUnionInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //!
-//! METHOD       "ets_equals.ETSGLOBAL::equals_object_input"
+//! METHOD       "ets_equals.ETSGLOBAL::equalsObjectInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsEquals/
 //! PASS_AFTER   "ChecksElimination"
@@ -87,31 +97,31 @@ function getobj(): Any { return new Object(); }
 //!
 //! RUN          entry: "ets_equals.ETSGLOBAL::main"
 
-function equals_dce(x: Any, y: Any) {
+function equalsDce(x: Any, y: Any) {
     return getfalse() && x == y;
 }
-function equals_cse(x: Any, y: Any) {
+function equalsCse(x: Any, y: Any) {
     return id(x) == id(y) && id(y) == id(x); // commutative
 }
-function equals_same_inputs(x: Any) {
+function equalsSameInputs(x: Any) {
     return id(x) == id(x);
 }
-function equals_null(x: Any) {
+function equalsNull(x: Any) {
     return getnull() == x;
 }
-function equals_undefined(x: Any) {
+function equalsUndefined(x: Any) {
     return x == getundef();
 }
-function equals_null_undefined() {
+function equalsNullUndefined() {
     return getnull() == getundef();
 }
-function equals_reftyped_input() {
+function equalsReftypedInput() {
     return getobj() == getobj();
 }
-function equals_union_input(x: double | string) {
+function equalsUnionInput(x: double | string) {
     return x == x;
 }
-function equals_object_input(x: Any) {
+function equalsObjectInput(x: Any) {
     return x == x;
 }
 
@@ -119,15 +129,15 @@ function main() {
     let a = new Int(123);
     let b = new Int(123);
 
-    arktest.assertTrue(!equals_dce(a, b));
-    arktest.assertTrue(equals_cse(a, b));
-    arktest.assertTrue(equals_same_inputs(a));
-    arktest.assertTrue(equals_null(null) && equals_null(undefined) && !equals_null(a));
-    arktest.assertTrue(equals_undefined(undefined) && equals_undefined(null) && !equals_undefined(a));
-    arktest.assertTrue(equals_null_undefined());
-    arktest.assertTrue(!equals_reftyped_input());
-    arktest.assertTrue(!equals_union_input(NaN));
+    arktest.assertTrue(!equalsDce(a, b));
+    arktest.assertTrue(equalsCse(a, b));
+    arktest.assertTrue(equalsSameInputs(a));
+    arktest.assertTrue(equalsNull(null) && equalsNull(undefined) && !equalsNull(a));
+    arktest.assertTrue(equalsUndefined(undefined) && equalsUndefined(null) && !equalsUndefined(a));
+    arktest.assertTrue(equalsNullUndefined());
+    arktest.assertTrue(!equalsReftypedInput());
+    arktest.assertTrue(!equalsUnionInput(NaN));
 
     let objNaN: object = NaN;
-    arktest.assertTrue(!equals_object_input(objNaN));
+    arktest.assertTrue(!equalsObjectInput(objNaN));
 }

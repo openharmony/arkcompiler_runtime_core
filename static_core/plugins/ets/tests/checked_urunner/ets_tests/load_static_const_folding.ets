@@ -14,7 +14,8 @@
  */
 
 //! CHECKER         Remove LoadStatic for static readonly fields
-//! RUN             force_jit: true, options: "--compiler-regex='.*test.*'", entry: "load_static_const_folding.ETSGLOBAL::main", return: 0
+//! RUN             force_jit: true, options: "--compiler-regex='.*test.*'",
+//!                 entry: "load_static_const_folding.ETSGLOBAL::main", return: 0
 //! METHOD          "load_static_const_folding.ETSGLOBAL::testInt"
 //! PASS_AFTER      "Peepholes"
 //! INST            /Constant\s+20 ->.+/

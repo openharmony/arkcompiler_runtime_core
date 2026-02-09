@@ -14,42 +14,69 @@
  */
 
 //! CHECKER                 ets.istrue JIT
-//! RUN                     force_jit: true, options: "--compiler-regex='.*check_istrue.*'", entry: "ets_istrue.ETSGLOBAL::main"
+//! RUN                     force_jit: true, options: "--compiler-regex='.*checkIstrue.*'",
+//!                         entry: "ets_istrue.ETSGLOBAL::main"
 //! CHECK_GROUP             CheckGroup1
 
 //! CHECKER                 ets.istrue AOT
-//! RUN_PAOC                options: "--compiler-regex='.*check_istrue.*'"
+//! RUN_PAOC                options: "--compiler-regex='.*checkIstrue.*'"
 //! CHECK_GROUP             CheckGroup1
 //! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
 //! DISABLED_CHECKER        ets.istrue LLVM AOT
-//! RUN_LLVM                options: "--compiler-regex='.*check_istrue.*'"
+//! RUN_LLVM                options: "--compiler-regex='.*checkIstrue.*'"
 //! RUN                     entry: "ets_istrue.ETSGLOBAL::main"
 
 //! CHECK_GROUP             CheckGroup1
-//! METHOD                  "ets_istrue.ETSGLOBAL::check_istrue"
+//! METHOD                  "ets_istrue.ETSGLOBAL::checkIstrue"
 //! PASS_AFTER              "Codegen"
 //! INST_COUNT              /Intrinsic.CompilerEtsIstrue/, 1
 
-function check_istrue(v: Any) { return !!v }
+function checkIstrue(v: Any) {
+ return !!v 
+}
 
 function erase<T>(v: T): Any {
     return v;
 }
 
 function main(): int {
-    if (check_istrue(erase(new Byte(0 as byte)))) return 1;
-    if (!check_istrue(erase(new Byte(1 as byte)))) return 2;
-    if (check_istrue(erase(new Short(0 as short)))) return 3;
-    if (!check_istrue(erase(new Short(1 as short)))) return 4;
-    if (check_istrue(erase(new Int(0)))) return 5;
-    if (!check_istrue(erase(new Int(1)))) return 6;
-    if (check_istrue(erase(new Long(0)))) return 7;
-    if (!check_istrue(erase(new Long(1)))) return 8;
-    if (check_istrue(erase(new Float(0.0)))) return 9;
-    if (!check_istrue(erase(new Float(0.5)))) return 10;
-    if (check_istrue(erase(new Double(0.0)))) return 11;
-    if (!check_istrue(erase(new Double(0.5)))) return 12;
+    if (checkIstrue(erase(new Byte(0 as byte)))) {
+        return 1;
+    }
+    if (!checkIstrue(erase(new Byte(1 as byte)))) {
+        return 2;
+    }
+    if (checkIstrue(erase(new Short(0 as short)))) {
+        return 3;
+    }
+    if (!checkIstrue(erase(new Short(1 as short)))) {
+        return 4;
+    }
+    if (checkIstrue(erase(new Int(0)))) {
+        return 5;
+    }
+    if (!checkIstrue(erase(new Int(1)))) {
+        return 6;
+    }
+    if (checkIstrue(erase(new Long(0)))) {
+        return 7;
+    }
+    if (!checkIstrue(erase(new Long(1)))) {
+        return 8;
+    }
+    if (checkIstrue(erase(new Float(0.0)))) {
+        return 9;
+    }
+    if (!checkIstrue(erase(new Float(0.5)))) {
+        return 10;
+    }
+    if (checkIstrue(erase(new Double(0.0)))) {
+        return 11;
+    }
+    if (!checkIstrue(erase(new Double(0.5)))) {
+        return 12;
+    }
     
     return 0;
 }
