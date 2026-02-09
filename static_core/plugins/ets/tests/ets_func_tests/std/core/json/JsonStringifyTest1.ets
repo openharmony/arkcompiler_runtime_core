@@ -173,7 +173,7 @@ function jsonStringifyNestedRecord(): void {
 
     const nestedRecord: Record<string, Any> = new Record<string, Any>();
     nestedRecord['inner'] = record;
-    nestedRecord['desc'] = new String('nested');
+    nestedRecord['desc'] = 'nested';
 
     let jsonStr = JSON.stringify(nestedRecord);
     let jsonObj = JSON.parseJsonElement(jsonStr)
