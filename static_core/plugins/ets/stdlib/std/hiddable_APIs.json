@@ -104,24 +104,6 @@
         ]
     },
     {
-        "file": "core/TypeCreator.ets",
-        "interfaces": [
-            "TypeAPICreateError",
-            "TypeCreator",
-            "ClassTypeCreator",
-            "InterfaceTypeCreator",
-            "LambdaTypeCreator",
-            "FieldCreator",
-            "ParameterCreator",
-            "MethodCreator",
-            "CallableBody",
-            "CallableBodyDefault",
-            "CallableBodyMethod",
-            "CallableBodyFunction",
-            "CallableBodyErasedFunction"
-        ]
-    },
-    {
         "file": "core/Parameter.ets",
         "interfaces": [
             "Parameter"

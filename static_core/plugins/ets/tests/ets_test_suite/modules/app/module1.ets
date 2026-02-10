@@ -104,15 +104,6 @@ function testStdCoreType() {
     arktest.assertEQ((method!.getType().getReceiverType() as ClassType).getName(), classType.getName(), "method 'foo' must be declared in interface 'Base'");
 }
 
-class Handler extends proxy.DefaultProxyHandler<Map<string, string>> { };
-function testStdCoreProxy() {
-    const map = new Map<string, string>();
-
-    const mapProxy = proxy.Proxy.create(map, new Handler());
-
-    arktest.assertTrue(map === mapProxy, "std.core.Proxy must work correctly in application context");
-}
-
 function testArrayClass() {
     const arr: FixedArray<foo.Dummy> = new FixedArray<foo.Dummy>(0);
     const arrClass = Class.of(arr);
@@ -163,7 +154,6 @@ function testNames() {
     arktest.assertEQ(getNameOfClass(module3.dummy()), "@app.module3.Dummy")
 
     testStdCoreType()
-    testStdCoreProxy()
 
     testArrayClass()
     testUnionClass()

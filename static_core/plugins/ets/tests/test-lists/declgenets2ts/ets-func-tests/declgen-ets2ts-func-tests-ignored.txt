@@ -25,12 +25,9 @@ spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.D
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0004.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0005.ets
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0006.ets
-std/core/TypeCreatePrimitiveNameTest.ets
-escompat/ArrayProxyTest.ets
 escompat/ArrayFlatMapTest.ets
 std/core/JsonParseTest.ets
 std/core/ProcessTest.ets
-escompat/ProxyTest.ets
 regression/15114.ets
 regression/Issue20610.ets
 regression/verify_generics.ets
@@ -91,7 +88,6 @@ spec/16.Support_for_GUI_Programming/struct-type/test-class-extends-struct.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_1.ets
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0012.ets
 spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
-std/TypeCreateVoidTest.ets
 std/concurrency/AsyncLockTest.ets
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 std/containers/array_blocking_queue/ArrayBlockingQueue_AddTest.ets
@@ -188,8 +184,6 @@ std/core/MirrorClassAllTests.ets
 std/core/ParameterAllTests.ets
 std/core/ValueAllTests.ets
 std/core/TypeClassTypeTest.ets
-std/core/TypeCreateClassTest.ets
-std/core/TypeCreateInterfaceTest.ets
 std/core/TypeInterfaceTypeTest.ets
 std/core/TypeLambdaTypeTest.ets
 std/core/TypeMethodInvoke.ets
@@ -215,7 +209,6 @@ std/core/std_core_typedarrays__Float64Array_001.ets
 std/core/std_core_typedarrays__Int16Array.ets
 std/core/std_core_typedarrays__Int32Array.ets
 std/core/std_core_typedarrays__Int8Array.ets
-std/core/ReadonlyArrayProxyTest.ets
 std/core/JsonReplacerTest.ets
 regression/23623.ets
 regression/23735.ets
