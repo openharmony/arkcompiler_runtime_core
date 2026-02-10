@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,6 +155,12 @@ AbckitIsaApiDynamic g_isaApiDynamicImpl = {
     IcreateDYNAMICCallthis1,
     IcreateDYNAMICCallthis2,
     IcreateDYNAMICCallthis3,
+    IcreateDYNAMICCallthis0withname,
+    IcreateDYNAMICCallthis1withname,
+    IcreateDYNAMICCallthis2withname,
+    IcreateDYNAMICCallthis3withname,
+    IcreateDYNAMICCallthisrangewithname,
+    IcreateDYNAMICWideCallthisrangewithname,
     IcreateDYNAMICCallthisrange,
     IcreateDYNAMICWideCallthisrange,
     IcreateDYNAMICSupercallthisrange,

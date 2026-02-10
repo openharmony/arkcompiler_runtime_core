@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"); * you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
@@ -170,6 +170,19 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis2(AbckitGraph *graph, AbckitInst *a
 // CC-OFFNXT(G.FUN.01-CPP) API function
 extern "C" AbckitInst *IcreateDYNAMICCallthis3(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0,
                                                AbckitInst *input1, AbckitInst *input2, AbckitInst *input3);
+extern "C" AbckitInst *IcreateDYNAMICCallthis0withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0);
+extern "C" AbckitInst *IcreateDYNAMICCallthis1withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1);
+extern "C" AbckitInst *IcreateDYNAMICCallthis2withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1, AbckitInst *input2);
+extern "C" AbckitInst *IcreateDYNAMICCallthis3withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
+                                                       AbckitInst *input3);
+extern "C" AbckitInst *IcreateDYNAMICCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                           size_t argCount, ...);
+extern "C" AbckitInst *IcreateDYNAMICWideCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc,
+                                                               AbckitString *string, size_t argCount, ...);
 extern "C" AbckitInst *IcreateDYNAMICCallthisrange(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
 extern "C" AbckitInst *IcreateDYNAMICWideCallthisrange(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...);
 extern "C" AbckitInst *IcreateDYNAMICSupercallthisrange(AbckitGraph *graph, size_t argCount, ...);

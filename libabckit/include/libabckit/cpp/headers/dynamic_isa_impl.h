@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1098,6 +1098,97 @@ inline Instruction DynamicIsa::CreateCallthis3(Instruction acc, Instruction inpu
     auto *conf = graph_.GetApiConfig();
     AbckitInst *inst = conf->cDynapi_->iCreateCallthis3(graph_.GetResource(), acc.GetView(), input0.GetView(),
                                                         input1.GetView(), input2.GetView(), input3.GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+inline Instruction DynamicIsa::CreateCallthis0withname(Instruction acc, std::string_view string, Instruction input0) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst =
+        conf->cDynapi_->iCreateCallthis0withname(graph_.GetResource(), acc.GetView(), abcStr, input0.GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+inline Instruction DynamicIsa::CreateCallthis1withname(Instruction acc, std::string_view string, Instruction input0,
+                                                       Instruction input1) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst = conf->cDynapi_->iCreateCallthis1withname(graph_.GetResource(), acc.GetView(), abcStr,
+                                                                input0.GetView(), input1.GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+inline Instruction DynamicIsa::CreateCallthis2withname(Instruction acc, std::string_view string, Instruction input0,
+                                                       Instruction input1, Instruction input2) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst = conf->cDynapi_->iCreateCallthis2withname(graph_.GetResource(), acc.GetView(), abcStr,
+                                                                input0.GetView(), input1.GetView(), input2.GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+inline Instruction DynamicIsa::CreateCallthis3withname(Instruction acc, std::string_view string, Instruction input0,
+                                                       Instruction input1, Instruction input2, Instruction input3) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst =
+        conf->cDynapi_->iCreateCallthis3withname(graph_.GetResource(), acc.GetView(), abcStr, input0.GetView(),
+                                                 input1.GetView(), input2.GetView(), input3.GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+/**
+ * @brief Creates instruction with opcode CALLTHISRANGEWITHNAME.
+ * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+ * `...`.
+ * @return `Instruction`
+ * @param [ in ] acc - Function object.
+ * @param [ in ] string - Method name.
+ * @param [ in ] instrs - Object + arguments.
+ */
+template <typename... Args>
+inline Instruction DynamicIsa::CreateCallthisrangewithname(Instruction acc, std::string_view string, Args... instrs) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst = conf->cDynapi_->iCreateCallthisrangewithname(graph_.GetResource(), acc.GetView(), abcStr,
+                                                                    sizeof...(instrs), (instrs.GetView())...);
+    CheckError(conf);
+    return Instruction(inst, conf, &graph_);
+}
+
+/**
+ * @brief Creates instruction with opcode WIDE_CALLTHISRANGEWITHNAME.
+ * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+ * `...`.
+ * @return `Instruction`
+ * @param [ in ] acc - Function object.
+ * @param [ in ] string - Method name.
+ * @param [ in ] instrs - Object + arguments.
+ */
+template <typename... Args>
+inline Instruction DynamicIsa::CreateWideCallthisrangewithname(Instruction acc, std::string_view string,
+                                                               Args... instrs) &&
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitString *abcStr = conf->cMapi_->createString(graph_.GetFile()->GetResource(), string.data(), string.size());
+    CheckError(conf);
+    AbckitInst *inst = conf->cDynapi_->iCreateWideCallthisrangewithname(graph_.GetResource(), acc.GetView(), abcStr,
+                                                                        sizeof...(instrs), (instrs.GetView())...);
     CheckError(conf);
     return Instruction(inst, conf, &graph_);
 }

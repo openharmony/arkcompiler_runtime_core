@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,12 +50,16 @@ enum AbckitIsaApiDynamicOpcode {
     ABCKIT_ISA_API_DYNAMIC_OPCODE_ASYNCGENERATORRESOLVE,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0WITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARGS2,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS2,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS2WITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARGS3,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS3,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS3WITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_COPYDATAPROPERTIES,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_COPYRESTARGS,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER,
@@ -172,6 +176,7 @@ enum AbckitIsaApiDynamicOpcode {
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_SUPERCALLFORWARDALLARGS,
 
     ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHISRANGE,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHISRANGEWITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEPROPERTYBYNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFIELDBYNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC,
@@ -222,6 +227,7 @@ enum AbckitIsaApiDynamicOpcode {
     ABCKIT_ISA_API_DYNAMIC_OPCODE_TONUMERIC,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLRANGE,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGE,
+    ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGEWITHNAME,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_COPYRESTARGS,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CREATEOBJECTWITHEXCLUDEDKEYS,
     ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_GETMODULENAMESPACE,
@@ -2075,6 +2081,140 @@ struct CAPI_EXPORT AbckitIsaApiDynamic {
      */
     AbckitInst *(*iCreateCallthis3)(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1,
                                     AbckitInst *input2, AbckitInst *input3);
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS0WITHNAME.
+     * Sets the value of this as `input0`, invokes the function object stored in `acc`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] input0 - This object.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateCallthis0withname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                            AbckitInst *input0);
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS1WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with argument `input1`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateCallthis1withname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                            AbckitInst *input0, AbckitInst *input1);
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS2WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with arguments `input1`, `input2`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @param [ in ] input2 - Second argument.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input2` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateCallthis2withname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                            AbckitInst *input0, AbckitInst *input1, AbckitInst *input2);
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS3WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with arguments `input1`, `input2`, and `input3`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @param [ in ] input2 - Second argument.
+     * @param [ in ] input3 - Third argument.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input1  is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input2` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitInst *input3  is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateCallthis3withname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                            AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
+                                            AbckitInst *input3);
+
+    /**
+     * @brief Creates instruction with opcode CALLTHISRANGEWITHNAME.
+     * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+     * `...`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] argCount - Number of arguments .
+     * @param [ in ] ... - Object + arguments.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateCallthisrangewithname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                size_t argCount, ...);
+
+    /**
+     * @brief Creates instruction with opcode WIDE_CALLTHISRANGEWITHNAME.
+     * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+     * `...`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] graph - Graph where instruction will be inserted.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - String containing method name.
+     * @param [ in ] argCount - Number of arguments .
+     * @param [ in ] ... - Object + arguments.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `string` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and `graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph`'s mode is not DYNAMIC.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is `argCount` type overflow.
+     * @note Allocates
+     */
+    AbckitInst *(*iCreateWideCallthisrangewithname)(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                    size_t argCount, ...);
 
     /**
      * @brief Creates instruction with opcode CALLTHISRANGE.

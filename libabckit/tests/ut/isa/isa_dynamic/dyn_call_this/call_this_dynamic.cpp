@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,6 +90,34 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchemaF
             };
             callInstSchema = {14, opcode, {9, 6, 10, 11, 12, 13}};
             break;
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0WITHNAME:
+            callInstSchema = {10, opcode, {9, 6}};
+            break;
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME:
+            params = {{0, paramOp, {}}, {1, paramOp, {}}, {2, paramOp, {}}, {10, constOp, {}}};
+            callInstSchema = {11, opcode, {9, 6, 10}};
+            break;
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS2WITHNAME:
+            params = {
+                {0, paramOp, {}}, {1, paramOp, {}}, {2, paramOp, {}}, {10, constOp, {}}, {11, constOp, {}},
+            };
+            callInstSchema = {12, opcode, {9, 6, 10, 11}};
+            break;
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS3WITHNAME:
+            params = {
+                {0, paramOp, {}},  {1, paramOp, {}},  {2, paramOp, {}},
+                {10, constOp, {}}, {11, constOp, {}}, {12, constOp, {}},
+            };
+            callInstSchema = {13, opcode, {9, 6, 10, 11, 12}};
+            break;
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHISRANGEWITHNAME:
+        case ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGEWITHNAME:
+            params = {
+                {0, paramOp, {}},  {1, paramOp, {}},  {2, paramOp, {}},  {10, constOp, {}},
+                {11, constOp, {}}, {12, constOp, {}}, {13, constOp, {}},
+            };
+            callInstSchema = {14, opcode, {9, 6, 10, 11, 12, 13}};
+            break;
         case ABCKIT_ISA_API_DYNAMIC_OPCODE_INVALID:
             break;
         default:
@@ -122,6 +150,47 @@ static void TestHelper(void (*transformIrCall)(AbckitGraph *graph, AbckitInst *o
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
             transformIrCall(graph, obj, func);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        },
+        [&](AbckitGraph *graph) {
+            std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> bbSchemas(CreateBBSchemaForDynCallThis(opcode));
+            helpers::VerifyGraph(graph, bbSchemas);
+        });
+
+    output = helpers::ExecuteDynamicAbc(
+        ABCKIT_ABC_DIR "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic_modified.abc", "call_this_dynamic");
+    EXPECT_TRUE(helpers::Match(output, expectedOutput));
+}
+
+static void TestHelperWithname(void (*transformIrCall)(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                                       AbckitString *methodName),
+                               AbckitIsaApiDynamicOpcode opcode, const std::string &expectedOutput)
+{
+    auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic.abc",
+                                             "call_this_dynamic");
+    EXPECT_TRUE(helpers::Match(output, ""));
+
+    helpers::TransformMethod(
+        ABCKIT_ABC_DIR "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic.abc",
+        ABCKIT_ABC_DIR "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic_modified.abc",
+        "call_this_dynamic.func_main_0",
+        [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+            auto obj = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
+            ASSERT_NE(obj, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            auto func = g_dynG->iCreateLdobjbyname(graph, obj, g_implM->createString(file, "func", strlen("func")));
+            ASSERT_NE(func, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            g_implG->iInsertAfter(func, obj);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            AbckitString *methodName = g_implM->createString(file, "func", strlen("func"));
+            ASSERT_NE(methodName, nullptr);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+            transformIrCall(graph, obj, func, methodName);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         [&](AbckitGraph *graph) {
@@ -227,6 +296,106 @@ static void TransformIrWideCallThisrange(AbckitGraph *graph, AbckitInst *obj, Ab
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+static void TransformIrCallThis0withname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                         AbckitString *methodName)
+{
+    auto call0 = g_dynG->iCreateCallthis0withname(graph, func, methodName, obj);
+    ASSERT_NE(call0, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call0, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+static void TransformIrCallThis1withname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                         AbckitString *methodName)
+{
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto call1 = g_dynG->iCreateCallthis1withname(graph, func, methodName, obj, param0);
+    ASSERT_NE(call1, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call1, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+static void TransformIrCallThis2withname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                         AbckitString *methodName)
+{
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto call2 = g_dynG->iCreateCallthis2withname(graph, func, methodName, obj, param0, param1);
+    ASSERT_NE(call2, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call2, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+static void TransformIrCallThis3withname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                         AbckitString *methodName)
+{
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto call3 = g_dynG->iCreateCallthis3withname(graph, func, methodName, obj, param0, param1, param2);
+    ASSERT_NE(call3, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call3, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+static void TransformIrCallThisrangewithname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                             AbckitString *methodName)
+{
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param3 = g_implG->gFindOrCreateConstantI64(graph, 4);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto call = g_dynG->iCreateCallthisrangewithname(graph, func, methodName, 4, obj, param0, param1, param2, param3);
+    ASSERT_NE(call, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+static void TransformIrWideCallThisrangewithname(AbckitGraph *graph, AbckitInst *obj, AbckitInst *func,
+                                                 AbckitString *methodName)
+{
+    auto param0 = g_implG->gFindOrCreateConstantI64(graph, 1);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param1 = g_implG->gFindOrCreateConstantI64(graph, 2);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param2 = g_implG->gFindOrCreateConstantI64(graph, 3);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    auto param3 = g_implG->gFindOrCreateConstantI64(graph, 4);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    auto call =
+        g_dynG->iCreateWideCallthisrangewithname(graph, func, methodName, 4, obj, param0, param1, param2, param3);
+    ASSERT_NE(call, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    g_implG->iInsertAfter(call, func);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis0)
 {
@@ -261,6 +430,47 @@ TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthisrange)
 TEST_F(LibAbcKitCreateDynCallThis, CreateDynWideCallthisrange)
 {
     TestHelper(TransformIrWideCallThisrange, ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGE, "func\n1\n2\n3\n4\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0withname, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis0withname)
+{
+    TestHelperWithname(TransformIrCallThis0withname, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0WITHNAME, "func\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis1withname, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis1withname)
+{
+    TestHelperWithname(TransformIrCallThis1withname, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME, "func\n1\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis2withname, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis2withname)
+{
+    TestHelperWithname(TransformIrCallThis2withname, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS2WITHNAME, "func\n1\n2\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis3withname, abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthis3withname)
+{
+    TestHelperWithname(TransformIrCallThis3withname, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS3WITHNAME,
+                       "func\n1\n2\n3\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthisrangewithname,
+// abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynCallthisrangewithname)
+{
+    TestHelperWithname(TransformIrCallThisrangewithname, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHISRANGEWITHNAME,
+                       "func\n1\n2\n3\n4\n");
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallthisrangewithname,
+// abc-kind=ArkTS1, category=positive, extension=c
+TEST_F(LibAbcKitCreateDynCallThis, CreateDynWideCallthisrangewithname)
+{
+    TestHelperWithname(TransformIrWideCallThisrangewithname, ABCKIT_ISA_API_DYNAMIC_OPCODE_WIDE_CALLTHISRANGEWITHNAME,
+                       "func\n1\n2\n3\n4\n");
 }
 
 }  // namespace libabckit::test

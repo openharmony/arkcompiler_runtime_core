@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,7 +145,10 @@ void TransformIrDynamic(AbckitGraph *graph)
     auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+    AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME);
+    if (callInst == nullptr) {
+        callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+    }
     ASSERT_NE(callInst, nullptr);
 
     g_implG->iSetInput(callInst, constant1, 0);
@@ -161,7 +164,11 @@ void TransformIrDynamic2(AbckitGraph *graph)
     auto constant2 = g_implG->gFindOrCreateConstantI64(graph, 20);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-    AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+    AbckitInst *callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME);
+    if (callInst == nullptr) {
+        callInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+    }
+    ASSERT_NE(callInst, nullptr);
     const size_t secondInput = 2;
     g_implG->iSetInputs(callInst, secondInput, constant1, constant2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

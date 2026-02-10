@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1158,6 +1158,138 @@ AbckitInst *IcreateDynCallthis3Static(AbckitGraph *graph, AbckitInst *acc, Abcki
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, input2, input3,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS3_IMM8_V8_V8_V8_V8);
+}
+
+AbckitInst *IcreateDynCallthis0withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0)
+{
+    LIBABCKIT_LOG_FUNC;
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS0WITHNAME_IMM8_ID16_V8);
+    size_t argsCount {2U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateDynCallthis1withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1)
+{
+    LIBABCKIT_LOG_FUNC;
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS1WITHNAME_IMM8_ID16_V8_V8);
+    size_t argsCount {3U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateDynCallthis2withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1, AbckitInst *input2)
+{
+    LIBABCKIT_LOG_FUNC;
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS2WITHNAME_IMM8_ID16_V8_V8_V8);
+    size_t argsCount {4U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input2->impl, compiler::DataType::ANY);
+    intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+// CC-OFFNXT(G.FUN.01) function args are necessary
+AbckitInst *IcreateDynCallthis3withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
+                                              AbckitInst *input3)
+{
+    LIBABCKIT_LOG_FUNC;
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS3WITHNAME_IMM8_ID16_V8_V8_V8_V8);
+    size_t argsCount {5U};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input0->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input1->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input2->impl, compiler::DataType::ANY);
+    intrImpl->AppendInput(input3->impl, compiler::DataType::ANY);
+    intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateDynCallthisrangewithnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                  size_t argCount, std::va_list args)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHISRANGEWITHNAME_IMM8_IMM8_ID16_V8);
+    size_t argsCount {argCount + 2};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    for (size_t index = 0; index < argCount + 1; ++index) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        AbckitInst *input = va_arg(args, AbckitInst *);
+        intrImpl->AppendInput(input->impl, compiler::DataType::ANY);
+    }
+    intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
+    intrImpl->AddImm(graph->impl->GetAllocator(), argCount);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
+}
+
+AbckitInst *IcreateDynWideCallthisrangewithnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                      size_t argCount, std::va_list args)
+{
+    LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto intrImpl = graph->impl->CreateInstIntrinsic(
+        compiler::DataType::ANY, 0,
+        compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CALLTHISRANGEWITHNAME_PREF_IMM16_ID16_V8);
+    size_t argsCount {argCount + 2};
+    intrImpl->ReserveInputs(argsCount);
+    intrImpl->AllocateInputTypes(graph->impl->GetAllocator(), argsCount);
+    intrImpl->AppendInput(acc->impl, compiler::DataType::ANY);
+    for (size_t index = 0; index < argCount + 1; ++index) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        AbckitInst *input = va_arg(args, AbckitInst *);
+        intrImpl->AppendInput(input->impl, compiler::DataType::ANY);
+    }
+    intrImpl->AddImm(graph->impl->GetAllocator(), argCount);
+    intrImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, string));
+    return CreateInstFromImpl(graph, intrImpl);
 }
 
 // CC-OFFNXT(G.FUN.01) function args are necessary

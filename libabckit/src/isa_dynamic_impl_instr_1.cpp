@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"); * you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
  *
@@ -311,6 +311,136 @@ extern "C" AbckitInst *IcreateDYNAMICCallthis3(AbckitGraph *graph, AbckitInst *a
     LIBABCKIT_WRONG_CTX(graph, input3->graph, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynCallthis3Static(graph, acc, input0, input1, input2, input3);
+}
+
+extern "C" AbckitInst *IcreateDYNAMICCallthis0withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+    return IcreateDynCallthis0withnameStatic(graph, acc, string, input0);
+}
+
+extern "C" AbckitInst *IcreateDYNAMICCallthis1withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+    return IcreateDynCallthis1withnameStatic(graph, acc, string, input0, input1);
+}
+
+extern "C" AbckitInst *IcreateDYNAMICCallthis2withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1, AbckitInst *input2)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input2, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input2->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+    return IcreateDynCallthis2withnameStatic(graph, acc, string, input0, input1, input2);
+}
+
+// CC-OFFNXT(G.FUN.01) This is function from public API
+extern "C" AbckitInst *IcreateDYNAMICCallthis3withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                       AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
+                                                       AbckitInst *input3)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input1, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input2, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(input3, nullptr);
+
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input1->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input2->graph, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, input3->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+    return IcreateDynCallthis3withnameStatic(graph, acc, string, input0, input1, input2, input3);
+}
+
+extern "C" AbckitInst *IcreateDYNAMICCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                           size_t argCount, ...)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::va_list args;
+    va_start(args, argCount);
+
+    auto *inst = IcreateDynCallthisrangewithnameStatic(graph, acc, string, argCount, args);
+    va_end(args);
+    return inst;
+}
+
+extern "C" AbckitInst *IcreateDYNAMICWideCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc,
+                                                               AbckitString *string, size_t argCount, ...)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+    LIBABCKIT_TIME_EXEC;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(acc, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(string, nullptr);
+    LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
+    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::va_list args;
+    va_start(args, argCount);
+
+    auto *inst = IcreateDynWideCallthisrangewithnameStatic(graph, acc, string, argCount, args);
+    va_end(args);
+    return inst;
 }
 
 extern "C" AbckitInst *IcreateDYNAMICCallthisrange(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...)
