@@ -99,9 +99,9 @@
   {'type1': 'Int', 'value1': '0b11111111111111111111111_1111_1111', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '2147483647', 'desc': '65. Multiplication of Max Int (binary) and 1.'},
 
   {'type1': 'Int', 'value1': '-2147483648', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483648', 'desc': '66. Multiplication of Min Int (decimal) and 1.'},
-  {'type1': 'Int', 'value1': '-0X80000_000', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483648', 'desc': '67. Multiplication of Min Int (hex) and 1.'},
-  {'type1': 'Int', 'value1': '-0o20000000000', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483648', 'desc': '68. Multiplication of Min Int (octal) and 1.'},
-  {'type1': 'Int', 'value1': '-0B10000000000000000000000000000000', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483648', 'desc': '69. Multiplication of Min Int (binary) and 1.'},
+  {'type1': 'Int', 'value1': '-0X7FFF_FFFF', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483647', 'desc': '67. Multiplication of a negated hex literal (Max Int) by 1.'},
+  {'type1': 'Int', 'value1': '-0o17777777777', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483647', 'desc': '68. Multiplication of a negated octal literal (Max Int) by 1.'},
+  {'type1': 'Int', 'value1': '-0b1111111111111111111111111111111', 'type2': 'int', 'value2': '1', 'resultType': 'int', 'result': '-2147483647', 'desc': '69. Multiplication of a negated binary literal (Max Int) by 1.'},
 
   {'type1': 'int', 'value1': '(+10).toInt()', 'type2': 'int', 'value2': '(+0b101).toInt()', 'resultType': 'int', 'result': '50','desc': '70. Multiplication of ints with the type conversion by toInt(). First operand - declared as int and positive decimal value with plus sign, second operand - declared as int and positive binary value with plus sign.'},
   {'type1': 'Int', 'value1': '(-0o007).toInt()', 'type2': 'Int', 'value2': '(0xb).toInt()', 'resultType': 'int', 'result': '-77','desc': '71. Multiplication of ints with the type conversion by toInt(). First operand - declared as alias Int and negative octal value, second operand - declared as alias Int and positive hex value.'},

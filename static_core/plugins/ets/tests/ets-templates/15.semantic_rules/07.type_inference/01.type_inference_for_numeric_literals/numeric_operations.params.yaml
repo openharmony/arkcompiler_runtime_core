@@ -27,8 +27,8 @@ cases:
   - { use: "-130 + 1", use_type: ": int", expected_type: int }
   - { use: "-32769 + 1", use_type: ": int", expected_type: int }
   - { use: "-32770 + 1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000 + 1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0002 + 1", use_type: ": long", expected_type: long }
+  - { use: "-0x7FFF_FFFF + 1", use_type: ": int", expected_type: int }
+  - { use: "-0x8000_0000 + 1", use_type: ": long", expected_type: long }
   - { use: "-0x8000_0000_0001 + (1).toLong()", use_type: ": long", expected_type: long }
   # subtract
   - { use: "1.0f - 1.0f", use_type: ": float", expected_type: float }
@@ -37,8 +37,8 @@ cases:
   - { use: "129 - 1", use_type: ": int", expected_type: int }
   - { use: "32768 - 1", use_type: ": int", expected_type: int }
   - { use: "32769 - 1", use_type: ": int", expected_type: int }
-  - { use: "2147483648 - 1", use_type: ": int", expected_type: int }
-  - { use: "2147483649 - 1", use_type: ": long", expected_type: long }
+  - { use: "2147483647 - 1", use_type: ": int", expected_type: int }
+  - { use: "2147483648 - 1", use_type: ": long", expected_type: long }
   - { use: "9223372036854775807 - 1", use_type: ": long", expected_type: long }
   - { use: "-127 - 1", use_type: ": int", expected_type: int }
   - { use: "-128 - 1", use_type: ": int", expected_type: int }
@@ -52,13 +52,14 @@ cases:
   - { use: "128 % 129", use_type: ": int", expected_type: int }
   - { use: "32767 % 32768", use_type: ": int", expected_type: int }
   - { use: "32768 % 32769", use_type: ": int", expected_type: int }
-  - { use: "2147483647 % 2147483648", use_type: ": int", expected_type: int }
-  - { use: "2147483648 % 2147483649", use_type: ": long", expected_type: long }
+  - { use: "2147483646 % 2147483647", use_type: ": int", expected_type: int }
+  - { use: "2147483647 % 2147483648", use_type: ": long", expected_type: long }
   - { use: "9223372036854775806 % 9223372036854775807", use_type: ": long", expected_type: long }
   - { use: "-128 % 129", use_type: ": int", expected_type: int }
   - { use: "-129 % 130", use_type: ": int", expected_type: int }
   - { use: "-32768 % 32769", use_type: ": int", expected_type: int }
   - { use: "-32769 % 32740", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000 % 0x8000_0001", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0001 % 0x8000_0002", use_type: ": long", expected_type: long }
+  - { use: "-0x7FFF_FFFE % 0x7FFF_FFFF", use_type: ": int", expected_type: int }
+  - { use: "-0x8000_0000 % 0x8000_0001", use_type: ": long", expected_type: long }
   - { use: "-0x8000_0000_0000 % 0x8000_0000_0001", use_type: ": long", expected_type: long }
+  

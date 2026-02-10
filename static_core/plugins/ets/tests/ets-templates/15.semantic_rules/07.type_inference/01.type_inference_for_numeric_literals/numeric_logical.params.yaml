@@ -13,53 +13,53 @@
 ---
 cases:
   # bitwise or
-  - { use: "14|1", use_type: ": int", expected_type: int }
-  - { use: "126|1", use_type: ": int", expected_type: int }
-  - { use: "126|2", use_type: ": int", expected_type: int }
-  - { use: "32766|1", use_type: ": int", expected_type: int }
-  - { use: "32766|2", use_type: ": int", expected_type: int }
-  - { use: "2147483646|1", use_type: ": int", expected_type: int }
-  - { use: "2147483646|2", use_type: ": long", expected_type: long }
-  - { use: "9223372036854775806|1", use_type: ": long", expected_type: long }
-  - { use: "-16|1", use_type: ": int", expected_type: int }
-  - { use: "-126|1", use_type: ": int", expected_type: int }
-  - { use: "-129|1", use_type: ": int", expected_type: int }
-  - { use: "-32766|2", use_type: ": int", expected_type: int }
-  - { use: "-32769|1", use_type: ": int", expected_type: int }
-  - { use: "-0x7FFF_FFFF|2", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000|-1", use_type: ": long", expected_type: long }
-  - { use: "-0x7FFF_FFFF_FFFF_FFFF|2", use_type: ": long", expected_type: long }
+  - { use: "14|1", use_type: "int", expected_type: int }
+  - { use: "126|1", use_type: "int", expected_type: int }
+  - { use: "126|2", use_type: "int", expected_type: int }
+  - { use: "32766|1", use_type: "int", expected_type: int }
+  - { use: "32766|2", use_type: "int", expected_type: int }
+  - { use: "2147483646|1", use_type: "int", expected_type: int }
+  - { use: "2147483646|2", use_type: "long", expected_type: long }
+  - { use: "9223372036854775806|1", use_type: "long", expected_type: long }
+  - { use: "-16|1", use_type: "int", expected_type: int }
+  - { use: "-126|1", use_type: "int", expected_type: int }
+  - { use: "-129|1", use_type: "int", expected_type: int }
+  - { use: "-32766|2", use_type: "int", expected_type: int }
+  - { use: "-32769|1", use_type: "int", expected_type: int }
+  - { use: "-0x7FFF_FFFF|2", use_type: "int", expected_type: int }
+  - { use: "-0x8000_0000|-1", use_type: "long", expected_type: long }
+  - { use: "-0x7FFF_FFFF_FFFF_FFFF|2", use_type: "long", expected_type: long }
   # bitwise and
-  - { use: "16&1", use_type: ": int", expected_type: int }
-  - { use: "127&1", use_type: ": int", expected_type: int }
-  - { use: "128&1", use_type: ": int", expected_type: int }
-  - { use: "32767&1", use_type: ": int", expected_type: int }
-  - { use: "32768&1", use_type: ": int", expected_type: int }
-  - { use: "2147483647&1", use_type: ": int", expected_type: int }
-  - { use: "2147483648&1", use_type: ": long", expected_type: long }
-  - { use: "9223372036854775807&1", use_type: ": long", expected_type: long }
-  - { use: "-16&1", use_type: ": int", expected_type: int }
-  - { use: "-128&1", use_type: ": int", expected_type: int }
-  - { use: "-129&1", use_type: ": int", expected_type: int }
-  - { use: "-32768&1", use_type: ": int", expected_type: int }
-  - { use: "-32769&1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000&1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0001&1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0000&1", use_type: ": long", expected_type: long }
+  - { use: "16&1", use_type: "int", expected_type: int }
+  - { use: "127&1", use_type: "int", expected_type: int }
+  - { use: "128&1", use_type: "int", expected_type: int }
+  - { use: "32767&1", use_type: "int", expected_type: int }
+  - { use: "32768&1", use_type: "int", expected_type: int }
+  - { use: "2147483647&1", use_type: "int", expected_type: int }
+  - { use: "2147483648&1", use_type: "long", expected_type: long }
+  - { use: "9223372036854775807&1", use_type: "long", expected_type: long }
+  - { use: "-16&1", use_type: "int", expected_type: int }
+  - { use: "-128&1", use_type: "int", expected_type: int }
+  - { use: "-129&1", use_type: "int", expected_type: int }
+  - { use: "-32768&1", use_type: "int", expected_type: int }
+  - { use: "-32769&1", use_type: "int", expected_type: int }
+  - { use: "-0x7FFF_FFFF&1", use_type: "int", expected_type: int }
+  - { use: "-0x8000_0000&1", use_type: "long", expected_type: long }
+  - { use: "-0x7FFF_FFFF_FFFF_FFFF&1", use_type: "long", expected_type: long }
   # bitwise xor
-  - { use: "16^1", use_type: ": int", expected_type: int }
-  - { use: "126^1", use_type: ": int", expected_type: int }
-  - { use: "129^1", use_type: ": int", expected_type: int }
-  - { use: "32766^1", use_type: ": int", expected_type: int }
-  - { use: "32769^1", use_type: ": int", expected_type: int }
-  - { use: "2147483646^1", use_type: ": int", expected_type: int }
-  - { use: "2147483649^1", use_type: ": long", expected_type: long }
-  - { use: "9223372036854775806^1", use_type: ": long", expected_type: long }
-  - { use: "-16^1", use_type: ": int", expected_type: int }
-  - { use: "-127^1", use_type: ": int", expected_type: int }
-  - { use: "-130^1", use_type: ": int", expected_type: int }
-  - { use: "-32767^1", use_type: ": int", expected_type: int }
-  - { use: "-32770^1", use_type: ": int", expected_type: int }
-  - { use: "-0x8001^1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000^1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0001^1", use_type: ": long", expected_type: long }
+  - { use: "16^1", use_type: "int", expected_type: int }
+  - { use: "126^1", use_type: "int", expected_type: int }
+  - { use: "129^1", use_type: "int", expected_type: int }
+  - { use: "32766^1", use_type: "int", expected_type: int }
+  - { use: "32769^1", use_type: "int", expected_type: int }
+  - { use: "2147483646^1", use_type: "int", expected_type: int }
+  - { use: "2147483649^1", use_type: "long", expected_type: long }
+  - { use: "9223372036854775806^1", use_type: "long", expected_type: long }
+  - { use: "-16^1", use_type: "int", expected_type: int }
+  - { use: "-127^1", use_type: "int", expected_type: int }
+  - { use: "-130^1", use_type: "int", expected_type: int }
+  - { use: "-32767^1", use_type: "int", expected_type: int }
+  - { use: "-32770^1", use_type: "int", expected_type: int }
+  - { use: "-0x8001^1", use_type: "int", expected_type: int }
+  - { use: "-0x8000_0000^1", use_type: "long", expected_type: long }
+  - { use: "-0x8000_0000_0001^1", use_type: "long", expected_type: long }

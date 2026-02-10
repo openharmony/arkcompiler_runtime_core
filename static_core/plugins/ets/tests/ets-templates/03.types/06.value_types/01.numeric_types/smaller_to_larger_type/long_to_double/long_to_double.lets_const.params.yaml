@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,8 +24,8 @@ testData:
   - { initialType: "long", value: "0o777777777777777777777", resultType: "double" , result: "9223372036854775807", absError: "0.1", desc: "9. Conversion of the positive octal long value (max long) to the double."}
   - { initialType: "Long", value: "0X7FFFFff_FFFFFFFFF", resultType: "double" , result: "9223372036854775807.0", absError: "0.01", desc: "10. Conversion of the hex max Long (alias) value to the double."}
   - { initialType: "Long", value: "Long.MAX_VALUE", resultType: "double" , result: "9223372036854775807.00_000", absError: "0.000001", desc: "11. Conversion of the max Long (alias) value to the double."}
-  - { initialType: "long", value: "Long.MIN_VALUE", resultType: "Double" , result: "-0b1000000000000000000000000000000000000000000000000000000000000000", absError: "0.1", desc: "12. Conversion of the min long value to the double (alias, as binary)."}
-  - { initialType: "long", value: "Long.MIN_VALUE", resultType: "Double" , result: "-0X8000000000000000", absError: "0.1", desc: "13. Conversion of the min long value to the double (alias, as hex)."}
+  - { initialType: "long", value: "Long.MIN_VALUE", resultType: "Double" , result: "-0b111111111111111111111111111111111111111111111111111111111111111", absError: "0.1", desc: "12. Conversion of the min long value to the double (alias, as binary)."}
+  - { initialType: "long", value: "Long.MIN_VALUE", resultType: "Double" , result: "-0x7FFF_FFFF_FFFF_FFFF", absError: "0.1", desc: "13. Conversion of the min long value to the double (alias, as hex)."}
   - { initialType: "Long", value: "new Long(-2147483648890)", resultType: "double" , result: "-0O37200000001572", absError: "0.1", desc: "14. Conversion of the negative decimal Long (alias, initialized by the constructor) value (min long) to the double."}
   - { initialType: "long", value: "new Long(0O37200000001573)", resultType: "Double" , result: "2147483648891E0", absError: "0.1", desc: "15. Conversion of the positive octal long (initialized by the constructor of alias) value (min long) to the Double (alias)."}
   - { initialType: "long", value: "+0o0", resultType: "double" , result: "0x00", absError: "0.1", desc: "16. Conversion of the octal long value (zero with plus sign) to the double."}
@@ -38,4 +38,3 @@ testData:
   - { initialType: "long", value: "-2147483648891", resultType: "double" , result: "-0O37200000_001573", absError: "0.1", desc: "23. Conversion of the negative decimal long value to the double (as octal)."}
   - { initialType: "Long", value: "-0B11111010000000000000000000000001101111010", resultType: "Double" , result: "-0B11111010000000000000000000000001101111010", absError: "0.1", desc: "24. Conversion of the negative binary Long (alias) value to the Double (alias, as binary)."}
 
-   
