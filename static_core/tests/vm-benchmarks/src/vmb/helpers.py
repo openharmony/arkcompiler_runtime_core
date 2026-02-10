@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -264,12 +264,13 @@ class ColorFormatter(logging.Formatter):
     def __init__(self, timestamps: bool = False):
         super().__init__()
         if timestamps:
-            ColorFormatter.ts = '[%(asctime)s.000Z] '
+            ColorFormatter.ts = '[%(asctime)s.%(nanos)sZ] '
 
     def format(self, record):
         """Format."""
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(ColorFormatter.ts + log_fmt, '%Y-%m-%dT%H:%M:%S')
+        record.nanos = str(int(record.created * 1e9))
         return formatter.format(record)
 
 
