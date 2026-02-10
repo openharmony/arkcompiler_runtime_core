@@ -40,7 +40,7 @@ function testStaticUnresolvedArgumentMethodGetArgument() {
     }, (e: Error) => { return e instanceof LinkerClassNotFoundError; });
 
     arktest.expectThrow(() => {
-        foo!.getParametersTypes()
+        foo!.getParameterTypes()
     }, (e: Error) => { return e instanceof LinkerClassNotFoundError; });
 }
 

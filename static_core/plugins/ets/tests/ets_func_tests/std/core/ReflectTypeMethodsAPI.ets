@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,10 +128,10 @@ function testGetInstanceMethods(classType: Class, expectedMethodsArr: Array<refl
 
     for (let expectedMethod of expectedMethodsArr) {
         let methodName = expectedMethod.getName()
-        let paramTypes = expectedMethod.getParametersTypes()
+        let paramTypes = expectedMethod.getParameterTypes()
 
         let actualMethod = actualMethods.find((method: reflect.InstanceMethod) => {
-            return method.getName() === methodName && compareTypes(method.getParametersTypes(), paramTypes)
+            return method.getName() === methodName && compareTypes(method.getParameterTypes(), paramTypes)
         });
         arktest.assertNE(actualMethod, undefined, `Method ${methodName} with specified parameters should exist`);
         arktest.assertTrue(actualMethod!.equals(expectedMethod))
@@ -148,11 +148,11 @@ function testGetStaticMethods(classType: Class, expectedMethodsArr: Array<reflec
 
     for (let expectedMethod of expectedMethodsArr) {
         let methodName = expectedMethod.getName()
-        let paramTypes = expectedMethod.getParametersTypes()
+        let paramTypes = expectedMethod.getParameterTypes()
 
         let actualMethod = actualMethods.find((method: reflect.StaticMethod) => {
             console.log(`current method = ${method.getName()}`)
-            return method.getName() === methodName && compareTypes(method.getParametersTypes(), paramTypes)
+            return method.getName() === methodName && compareTypes(method.getParameterTypes(), paramTypes)
         });
         arktest.assertNE(actualMethod, undefined, `Method ${methodName} with specified parameters should exist`);
         arktest.assertTrue(actualMethod!.equals(expectedMethod))
