@@ -33,6 +33,7 @@ module Constants
   ADDR_16_BYTE_ALIGNED_MASK = "0x0FULL"
   WRONG_CHAR_FLAG_MASK = "0x10000UL"
   ASCII_CHAR_CACHE_SIZE = "cross_values::GetPlatformTypesAsciiCharCacheSize(GetArch())"
+  ASCII_CHAR_CACHE_OFFSET = "cross_values::GetPlatformTypesAsciiCharCacheOffset(graph->GetArch())"
   STRING_PACKED_LENGTH_ZERO = "(((uint32_t)0xFFFFFFFF) << common::BaseString::STRING_LENGTH_BITS_NUM) >> common::BaseString::STRING_LENGTH_BITS_NUM"
   CHAR_FLIP_CASE_BIT = "1 << 5"
 end
@@ -2878,6 +2879,20 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
 
       If(charCount, Constants::SLICED_STRING_MIN_LENGTH).GE.b {
         Goto(:CreateSlicedString)
+      }
+
+      If(charCount, 1).EQ.Unlikely.b {
+        if string_compression_enabled
+          char := LoadCompressedStringChar(fromStr, resultStartIndex, length_packed).u16
+        else
+          char := LoadArray(fromStr, resultStartIndex).u16
+        end
+        If(char, Constants::ASCII_CHAR_CACHE_SIZE).B.b {
+          cache := get_platform_type_ref(Constants::ASCII_CHAR_CACHE_OFFSET)
+          If(cache, 0).NE.Likely.b {
+            Return(read_from_cache(cache, char)).ptr
+          }
+        }
       }
 
       # create line substring from line string
