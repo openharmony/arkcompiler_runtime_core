@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,35 +15,32 @@
 
 /*---
 desc: >-
-    Name-value pairs of the object literal are then executed from left to right
-    in the textual order they occur in the source code.
+    The execution of a Record object literal completes abruptly if so does
+    the execution of a name-value pair expression. Subsequent pairs are not evaluated.
 ---*/
 
-class X {
-    a: number
-    b: number
-    c: number
+let evaluationOrder: string = ""
+
+function track(n: number): number {
+    evaluationOrder += n.toString()
+    if (n == 2) {
+        throw new Error("abrupt")
+    }
+    return n
 }
 
-function mayThrow(n: number): number {
-    if (n == 1) {
-        throw new NullPointerError()
-    }
-    if (n == 2) {
-        throw new RangeError()
-    }
-    if (n == 3) {
-        throw new ArithmeticError()
-    }
-    return n;
-}
+let checkException = (e: Error): boolean => { return e instanceof Error }
 
 function foo(): void {
-    let x: X = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
+    let r: Record<string, number> = {
+        "a": track(1),
+        "b": track(2),
+        "c": track(3),
+    }
 }
 
-let checkException = (e: Error): boolean => { return e instanceof NullPointerError }
-
-function main() {
+function main(): void {
+    evaluationOrder = ""
     arktest.expectThrow(() => foo(), checkException)
+    arktest.assertEQ(evaluationOrder, "12")
 }
