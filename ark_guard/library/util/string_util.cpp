@@ -318,7 +318,7 @@ static bool MatchSimpleWildcardRegex(const std::string &str, const std::string &
 // Cache for compiled regexes - use optimize to reduce regex compilation cost
 static const std::regex &GetCachedRegex(const std::string &regexStr)
 {
-    static constexpr size_t maxCacheSize = 256;  // 256 is the maximum cache size limit
+    static constexpr size_t maxCacheSize = 2048;  // 2048 is the maximum cache size limit
     static std::unordered_map<std::string, std::regex> cache;
     static std::vector<std::string> keyOrder;  // For simple FIFO eviction
 
