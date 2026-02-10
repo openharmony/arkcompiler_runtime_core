@@ -521,24 +521,47 @@ is static and the other is not.
    static class
    non-static class
 
-If a class has both ``extends`` and ``implements`` clauses, and 
-methods with the same siganture but different method bodies
+If a class has both ``extends`` clause and ``implements`` clause, and 
+methods with the same name and the same or overload-equivalent signature (see
+:ref:`Overload-Equivalent Signatures`) but different method bodies
 are inherited from a superclass and at least one of superinterfaces,
-then a :index:`compile-time error` occurs. 
-
+then a method from a superclass overrides all other methods.
 
 .. code-block:: typescript
    :linenos:
 
     interface I {
-       foo () {}
+       foo () { console.log ("I.foo()") }
     }
     class C1 {
-       foo () {}
+       foo () { console.log ("C1.foo()") }
     }
-    class C2 extends C1 implements I {
-        // Compile-time error as foo() from I and foo() from C1 have different method bodies
+    class C2 extends C1 implements I {} // Valid class
+
+    (new C2).foo()      // Will output "C1.foo()"
+    (new C2 as I).foo() // Will output "C1.foo()"
+
+
+If a class has an ``implements`` clause and methods with the same name and the
+same or overload-equivalent signature (see
+:ref:`Overload-Equivalent Signatures`) but different method bodies are
+inherited from several superinterfaces but not from the superclass, then a 
+:index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+       foo () { console.log ("I1.foo()") }
     }
+    interface I2 {
+       foo () { console.log ("I2.foo()") }
+    }
+    class C1 {}
+    class C2 extends C1 implements I1, I2 {} // Compile-time error
+
+    abstract class C3 { abstract foo(): void }
+    class C4 extends C3 implements I1, I2 {} // Compile-time error
 
 
 |
