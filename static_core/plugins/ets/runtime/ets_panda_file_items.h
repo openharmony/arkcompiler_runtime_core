@@ -168,7 +168,7 @@ static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_ERROR          = "Lstd/c
 
 // stdlib Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
-static constexpr std::string_view ERROR_OPTIONS_IMPL                   = "Lescompat/ErrorOptionsImpl;";
+static constexpr std::string_view ERROR_OPTIONS_IMPL                   = "Lstd/core/ErrorOptionsImpl;";
 
 static constexpr std::string_view DOUBLE_TO_STRING_CACHE_ELEMENT       = "Lstd/core/DoubleToStringCacheElement;";
 static constexpr std::string_view FLOAT_TO_STRING_CACHE_ELEMENT        = "Lstd/core/FloatToStringCacheElement;";
