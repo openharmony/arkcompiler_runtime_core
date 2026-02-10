@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,17 +30,26 @@ class LangBase(ABC):
     name = ''
     short_name = ''
     _re_import = re.compile(
-        r'^\s*(import\s+)?(?P<what>[*\w{},\s]+)\s+from\s+'
+        r'^\s*(import\s+)?'
+        r'(?P<what>[*\w{},\s]+)\s+from\s+'
+        r'([\'"])?(?P<lib>[./\w]+)([\'"])?\s*(;\s*)?$')
+    _re_seamless = re.compile(
         r'([\'"])?(?P<lib>[./\w]+)([\'"])?\s*(;\s*)?$')
 
     def __init__(self):
         self.src = set()
         self.ext = ''
+        self.seamless_ext = ''
 
     @property
     def re_import(self):
         """Regexp for import module."""
         return self._re_import
+
+    @property
+    def re_seamless(self):
+        """Regexp for seamless module."""
+        return self._re_seamless
 
     @property
     @abstractmethod
@@ -102,4 +111,12 @@ class LangBase(ABC):
             lib = m.group('lib')
             what = m.group('what')
             return lib, self.get_import_line(lib, what)
+        return ret
+
+    def parse_seamless(self, line: str) -> Optional[str]:
+        m = re.search(self.re_seamless, line)
+        ret = None
+        if m:
+            lib = m.group('lib')
+            return lib
         return ret

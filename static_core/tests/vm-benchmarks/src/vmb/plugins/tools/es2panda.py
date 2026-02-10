@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,7 @@ from vmb.tool import ToolBase, VmbToolExecError, OptFlags
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
 from vmb.result import BuildResult, BUStatus
-from vmb.helpers import load_file, create_file
+from vmb.helpers import load_file, create_file, force_link
 from vmb.target import Target
 
 log = logging.getLogger('vmb')
@@ -57,11 +57,11 @@ def make_arktsconfig(configpath: Union[str, Path],
         parsed_template['compilerOptions']['paths'] = {
             **parsed_template['compilerOptions']['paths'],
             **paths
-            }
+        }
         parsed_template['compilerOptions']['dependencies'] = {
             **parsed_template['compilerOptions']['dependencies'],
             **dynamic_paths
-            }
+        }
     with create_file(configpath) as f:
         f.write(json.dumps(parsed_template, indent=4))
 
@@ -130,10 +130,16 @@ class Tool(ToolBase):
             self.es2panda = self.ensure_file(self.custom_path)
         else:
             self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
+        self.etsstdlib = self.ensure_file(self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
 
     @property
     def name(self) -> str:
         return 'ES to Panda compiler (ArkTS mode)'
+
+    @property
+    def version(self) -> str:
+        res = self.sh.run(f'{self.es2panda} --version')
+        return ' '.join(str(res.err).split())
 
     def update_config(self, bu: BenchUnit) -> str:
         static: Iterable[Path] = bu.libs('.ets')
@@ -147,8 +153,17 @@ class Tool(ToolBase):
             j['compilerOptions']['paths'][lib.name] = [str(lib), ]
         for d in dynamic:
             lib = d.with_suffix('')
-            # Note: no 'path'
             j['compilerOptions']['dependencies'][lib.name] = {'language': 'js', 'ohmUrl': str(lib)}
+        for libname, libpath in bu.seamless_paths.items():
+            entry = j['compilerOptions']['dependencies'].get(libname, None)
+            if entry is not None:
+                entry['path'] = str(libpath)
+
+        config_root = j['compilerOptions']['baseUrl']
+        etsstdlib_link = bu.path.joinpath(config_root, 'plugins', 'ets', 'etsstdlib.abc')
+        etsstdlib_link.parent.mkdir(parents=True, exist_ok=True)
+        force_link(etsstdlib_link, self.etsstdlib)
+
         conf = bu.path.joinpath('arktsconfig.json')
         with create_file(conf) as f:
             json.dump(j, f, indent=4)

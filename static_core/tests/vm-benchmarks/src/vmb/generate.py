@@ -109,7 +109,7 @@ class BenchGenerator:
         return files
 
     @staticmethod
-    def process_imports(lang_impl: LangBase, imports: str,
+    def process_imports(lang_impl: LangBase, imports: List[str],
                         bench_dir: Path, src: SrcPath) -> str:
         """Process @Import and return `import` statement(s)."""
         import_lines = ''
@@ -118,13 +118,34 @@ class BenchGenerator:
             if not m:
                 log.warning('Bad import: %s', import_doclet)
                 continue
-            libpath = src.full.parent.joinpath(m[0])
+            lib, import_line = m
+            libpath = src.full.parent.joinpath(lib)
             if not libpath.is_file():
                 log.warning('Lib does not exist: %s', libpath)
             else:
-                force_link(bench_dir.joinpath(libpath.name), libpath)
-                import_lines += m[1]
+                bench_libpath = bench_dir.joinpath(libpath.name)
+                force_link(bench_libpath, libpath)
+                import_lines += import_line
         return import_lines
+
+    @staticmethod
+    def process_seamless(lang_impl: LangBase, seamless: List[str],
+                         src: SrcPath) -> dict[str, Path]:
+        """Process @Seamless and return path(s)."""
+        seamless_paths = {}
+        for seamless_doclet in seamless:
+            lib = lang_impl.parse_seamless(seamless_doclet)
+            if not lib:
+                log.warning('Bad seamless: %s', seamless_doclet)
+                continue
+            libpath = src.full.parent.joinpath(lib)
+            if not libpath.is_file():
+                log.warning('Seamless lib does not exist: %s', libpath)
+            libname = libpath.name
+            if libname.endswith(lang_impl.seamless_ext):
+                libname = libname[:-len(lang_impl.seamless_ext)]
+            seamless_paths[libname] = libpath
+        return seamless_paths
 
     @staticmethod
     def check_common_files(full: Path, lang_name: str, includes: List[str]) -> str:
@@ -225,6 +246,8 @@ class BenchGenerator:
             lang_impl, values.imports, bench_dir, src)
         values.common = BenchGenerator.check_common_files(
             src.full, lang_impl.short_name, values.includes)
+        seamless_paths = BenchGenerator.process_seamless(
+            lang_impl, values.seamless, src)
         tpl_values = asdict(values)
         # create links to extra dirs if any
         custom_values = {
@@ -246,7 +269,8 @@ class BenchGenerator:
         if values.generator:
             BenchGenerator.process_generator(
                 src.full, bench_dir, values, outext)
-        return BenchUnit(bench_dir, src=src.full, tags=tags, bugs=bugs)
+        return BenchUnit(bench_dir, src=src.full, tags=tags, bugs=bugs,
+                         seamless_paths=seamless_paths)
 
     @staticmethod
     def create_links(bu: BenchUnit, settings: Optional[GenSettings], src: SrcPath) -> None:

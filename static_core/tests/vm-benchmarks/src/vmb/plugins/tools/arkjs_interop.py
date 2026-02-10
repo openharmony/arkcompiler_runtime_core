@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,10 +27,10 @@ class Tool(ToolBase):
         self.ets_vm_opts = '{}'  # no extra options by default, but still valid json
         ark_js = ToolBase.ensure_file(
             self.panda_root, 'bin', 'interop_js', 'ark_js_napi_cli')
-        etsstdlib = ToolBase.ensure_file(
+        self.etsstdlib = ToolBase.ensure_file(
             self.panda_root, 'plugins', 'ets', 'etsstdlib.abc')
         self.cmd = f'LD_LIBRARY_PATH={self.panda_root}/lib/interop_js/:{self.panda_root}/lib/ ' \
-                   f'ARK_ETS_STDLIB_PATH={etsstdlib} ' \
+                   f'ARK_ETS_STDLIB_PATH={self.etsstdlib} ' \
                    "ETS_VM_OPTS='{ets_vm_opts}' " \
                    'ARK_ETS_INTEROP_JS_GTEST_ABC_PATH={test_zip} ' \
                    'VMB_BENCH_NAME={bench_name} ' \
