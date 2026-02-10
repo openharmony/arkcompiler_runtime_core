@@ -81,6 +81,17 @@ function arr_perform_merge(arr: FixedArray<{{TT}}>, startIndex: int, midIndex: i
     }
 }
 
+/**
+ * Sorts the array in-place, stable sorting algorithm.
+ *
+ * @param { FixedArray<{{TT}}> } arr The array to sort.
+ * @param { int } startIndex The index to start sorting from.
+ * @param { int } endIndex The index to end sorting at.
+ * @param { function } comp The comparator function.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function arr_sort_stable(arr: FixedArray<{{TT}}>, startIndex: int, endIndex: int, comp: (lhs: {{T}}, rhs: {{T}}) => int): void {
     if (endIndex <= startIndex) {
         return;
@@ -155,6 +166,18 @@ function merge(left: FixedArray<{{T}}>, right: FixedArray<{{T}}>, cmp: (lhs: {{T
     return result
 }
 
+/**
+ * Sorts the array in-place.
+ *
+ * @param { FixedArray<{{T}}> } array The array to sort.
+ * @param { function } cmp The comparator function.
+ * @param { int } begin The index to start sorting from.
+ * @param { int } end The index to end sorting at.
+ * @returns { FixedArray<{{T}}> } The sorted array.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}) => int, begin: int = 0, end: int = 0): FixedArray<{{T}}> {
     if (end == 0) {
         end = array.length
@@ -177,6 +200,16 @@ export function mergeSort(array: FixedArray<{{T}}>, cmp: (lhs: {{T}}, rhs: {{T}}
 {%- endif %}
 
 {%- if arg != '' %}
+/**
+ * Swaps two elements in the array.
+ *
+ * @param { FixedArray<{{T}}> } arr The array to swap elements in.
+ * @param { int } i The index of the first element to swap.
+ * @param { int } j The index of the second element to swap.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function swap{{Tdef}}(arr: FixedArray<{{T}}>, i: int, j: int): void {
     let temp = arr[i]
     arr[i] = arr[j]
@@ -409,18 +442,14 @@ function quickSort{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: in
 {%- endif %}
 
 /**
- * sorts arr in-place
+ * Sorts the array in-place.
  *
- * @param arr an array to sort
- *
- * @param startIndex an index to start sorting with, inclusive
- *
- * @param endIndex an index to end sorting, exclusive
- *
- * @example: sort array arr
- * ```
- * sort(arr, 0, arr.length)
- * ```
+ * @param { FixedArray<{{T}}> } arr The array to sort.
+ * @param { int } startIndex The index to start sorting with, inclusive.
+ * @param { int } endIndex The index to end sorting, exclusive.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function sort{{sortNameSuff}}{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, endIndex: int{{arg}}): void {
     if (!checkRange(arr.length, startIndex, endIndex)) {
@@ -450,14 +479,28 @@ export function sort{{sortNameSuff}}{{Tdef}}(arr: FixedArray<{{T}}>, startIndex:
 {% endfor %}
 
 /**
- * sorts arr in-place
+ * Sorts the subarray of the array in-place.
  *
- * @param arr an array to sort
+ * @param { FixedArray<{{T}}> } arr The array to sort.
+ * @param { function } mustPrecede The must precede function.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
 export function sort_subarray{{Tdef}}(arr: FixedArray<{{T}}>, mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
     sort_subarray(arr, 0, arr.length, mustPrecede);
 }
 
+/**
+ * Sorts the subarray of the array in-place.
+ *
+ * @param { FixedArray<{{T}}> } arr The array to sort.
+ * @param { int } startIndex The index to start sorting from.
+ * @param { function } mustPrecede The must precede function.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function sort_subarray{{Tdef}}(arr: FixedArray<{{T}}>, startIndex: int, mustPrecede: (lhs: {{T}}, rhs: {{T}}) => boolean): void {
     sort_subarray(arr, startIndex, arr.length, mustPrecede)
 }

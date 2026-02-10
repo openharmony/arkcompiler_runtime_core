@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the Array for ArkTS
+ * @kit ArkTS
+ */
 
 package std.core;
 
@@ -45,20 +49,50 @@ class FromBuffer {}
 const FROM_BUFFER: FromBuffer;
 
 /**
- * Represents JS API-compatible Array
+ * Defines arrType for Array
+ * 
+ * @typedef { String | undefined } arrType
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
  */
-
 type arrType = String | undefined;
 
+/**
+ * Represents a Array.
+ * 
+ * @class Array
+ * @implements ReadonlyArray<T>, Iterable<T>
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: FixedArray<Any>
     protected actualLength: int
     private static INIT_CAPACITY: int = 4
 
+    /**
+     * Get the length of the array.
+     *
+     * @returns { int } The length of the array.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     override get length(): int {
         return this.actualLength
     }
 
+    /**
+     * Set the length of the array.
+     *
+     * @param { int } newLen The new length of the array.
+     * @returns { void }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     set length(newLen: int) {
         const len = newLen
         if (len < 0 || len > this.actualLength) {
@@ -73,16 +107,39 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = len
     }
 
+    /**
+     * Get the element at the specified index.
+     *
+     * @param { int } idx The index of the element to get.
+     * @returns { T } The element at the specified index.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public override native $_get(idx: int): T;
 
     private final native $_get_unsafe(idx: int): T
 
+    /**
+     * Set the element at the specified index.
+     *
+     * @param { int } idx The index of the element to set.
+     * @param { T } val The value to set at the specified index.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public native $_set(idx: int, val: T): void;
 
     private final native $_set_unsafe(idx: int, val: T | undefined): void
 
     /**
-     * Creates a new instance of Array
+     * Creates a new instance of Array with the specified initial length.
+     *
+     * @param { int } arrayLen The initial length of the array.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(arrayLen: int) {
         this.buffer = new FixedArray<Any>(arrayLen)
@@ -94,15 +151,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = buf.length
     }
 
+    /**
+     * Creates a new empty instance of Array.
+     *
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public constructor() {
         this.buffer = new FixedArray<Any>(Array.INIT_CAPACITY)
         this.actualLength = 0
     }
 
     /**
-     * Creates a new instance of Array based on Object[]
+     * Creates a new instance of Array with the given elements.
      *
-     * @param d Array initializer
+     * @param { T } first The first element of the array.
+     * @param { T[] } d The rest of the elements to initialize the array with.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(first: T, ...d: T[]) {
         this.buffer = new FixedArray<Any>(d.length + 1)
@@ -115,14 +183,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new instance of Array.
+     * Creates a new instance of Array with a specific length and initializes each element using a function.
      *
-     * @param arrayLen amount of elements.
-     *
-     * @param initializer custom initialization for each elements.
-     *
-     * @returns A new Array instance with the specified length
-     *
+     * @param { int } arrayLen The amount of elements in the array.
+     * @param { function } initializer A function that generates an element for a given index.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public constructor(arrayLen: int, initializer: (index: int) => T) {
         this.buffer = new FixedArray<Any>(arrayLen)
@@ -133,12 +200,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new instance of Array.
+     * Creates a new Array of the specified length, filled with the specified initial value.
      *
-     * @param arrayLength amount of elements.
-     *
-     * @param initialValue initial value of elements.
-     *
+     * @param { int } arrayLength The amount of elements in the new array.
+     * @param { T } initialValue The value to fill the array with.
+     * @returns { Array<T> } A new Array instance filled with the initial value.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static create<T>(arrayLength: int, initialValue: T): Array<T> {
         let other = new Array<T>(arrayLength)
@@ -147,12 +217,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Extends Array with new elements to specified length.
+     * Extends the Array with new elements up to the specified length.
      *
-     * @param arrayLength new length of the array.
-     *
-     * @param initialValue initial value of added elements.
-     *
+     * @param { int } arrayLength The new length of the array.
+     * @param { T } initialValue The initial value for the added elements.
+     * @throws { RangeError } Throws a RangeError if the array length is negative.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public extendTo(arrayLength: int, initialValue: T): void {
         if(arrayLength < 0){
@@ -170,10 +242,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Shrinks Array to specified length.
+     * Shrinks the Array to the specified length. Elements beyond the new length are removed.
      *
-     * @param arrayLength length at which to shrink.
-     *
+     * @param { int } arrayLength The length at which to shrink the array.
+     * @throws { RangeError } Throws a RangeError if the array length is negative.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public shrinkTo(arrayLength: int): void {
         if(arrayLength < 0){
@@ -193,22 +268,43 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new instance of an Array with the specified length
+     * Creates a new empty instance of Array.
      *
-     * @param arrayLength The length of the array to be created (optional).
+     * @returns { Array<T> } A new Array instance.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     * @example
+     * ```arkts
+     * // Using the constructor
+     * const a = new Array<number>();
      *
-     * @returns A new Array instance with the specified length
+     * // Using the invoke overload (behaves like calling Array() as a function)
+     * const b = Array<number>();
+     * ```
      */
     static $_invoke<T>(): Array<T> {
         return new Array<T>();
     }
 
     /**
-     * Creates a new instance of an Array with the specified length
+     * Creates a new instance of an Array with the specified length.
      *
-     * @param arrayLength The length of the array to be created (optional).
+     * @param { int } [arrayLength] The length of the array to be created (optional).
+     * @returns { Array<T> } A new Array instance with the specified length.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     * @example
+     * ```arkts
+     * // Constructor form
+     * const a = new Array<number>(3); // length = 3
      *
-     * @returns A new Array instance with the specified length
+     * // Invoke overload form (Array() as a function)
+     * const b = Array<number>(3);     // also creates an array of length 3
+     * ```
      */
     static $_invoke<T>(arrayLength?: int): Array<T> {
         if (arrayLength != undefined) {
@@ -219,11 +315,22 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new instance of an Array with the specified length
+     * Creates a new instance of Array with the given elements.
      *
-     * @param items array of values.
+     * @param { T[] } items The elements to initialize the array with.
+     * @returns { Array<T> } A new Array instance with the given elements.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     * @example
+     * ```arkts
+     * // Constructor form
+     * const a = new Array(1, 2, 3);
      *
-     * @returns A new Array instance with the specified length
+     * // Invoke overload form (Array() as a function)
+     * const b = Array(1, 2, 3);
+     * ```
      */
     static $_invoke<T>(...items: T[]): Array<T> {
         if (items.length == 0) {
@@ -233,12 +340,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-    * Creates a new `Array` instance from `Object[]` primitive array.
-    *
-    * @param arr primitive array.
-    *
-    * @returns `Array` intance constructed from `Object[]` primitive array.
-    */
+     * Creates a new `Array` instance from a `FixedArray`.
+     *
+     * @param { FixedArray<T> } arr The source primitive array.
+     * @returns { Array<T> } A new Array instance containing the elements from the source array.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from<T>(arr: FixedArray<T>): Array<T> {
         const len: int = arr.length
         const ret: FixedArray<Any> = new FixedArray<Any>(len)
@@ -249,11 +359,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new `Array` instance from `Object[]` ArrayLike.
+     * Creates a new `Array` instance from an `ArrayLike` object.
      *
-     * @param arr an iterable object to convert to an array.
-     *
-     * @returns `Array` intance constructed from `Object[]` ArrayLike.
+     * @param { ArrayLike<T> } arr An array-like object to convert to an array.
+     * @returns { Array<T> } A new Array instance containing the elements from the array-like object.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static from<T>(arr: ArrayLike<T>): Array<T> {
         const ret: Array<T> = new Array<T>(arr.length)
@@ -266,11 +379,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new `Array` instance from `Object[]` primitive array.
+     * Creates a new `Array` instance from an iterable or array-like object.
      *
-     * @param iterable an iterable object to convert to an array.
-     *
-     * @returns `Array` intance constructed from `Object[]` primitive array.
+     * @param { ArrayLike<T> | Iterable<T> } iterable An iterable or array-like object to convert to an array.
+     * @returns { Array<T> } A new Array instance containing the elements from the iterable.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
         const ret = new Array<T>()
@@ -280,6 +396,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
+    /**
+     * Creates a new `Array` instance from a `FixedArray` and applies a mapping function to each element.
+     *
+     * @param { FixedArray<T> } values The source primitive array.
+     * @param { function } mapfn A mapping function to call on every element of the array.
+     * @returns { Array<U> } A new Array instance with the mapped values.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     public static from<T, U>(values: FixedArray<T>, mapfn: (v: T, k: int) => U): Array<U> {
         const length: int = values.length
         const ret: Array<U> = new Array<U>(length)
@@ -290,15 +417,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new `Array` instance from `Object[]` primitive array.
+     * Creates a new `Array` instance from an iterable object, applying a mapping function to each element.
+     * Every value to be added to the array is first passed through this function, and `mapfn`'s return value is added
+     * to the array instead.
      *
-     * @param iterable an iterable object to convert to an array.
-     *
-     * @param mapfn a mapping function to call on every element of the array.
-     * Every value to be added to the array is first passed through this function, and `mapfn`'s return value
-     * is added to the array instead.
-     *
-     * @returns `Array` intance constructed from `Object[]` primitive array and given function.
+     * @param { ArrayLike<T> | Iterable<T> } iterable An iterable or array-like object to convert to an array.
+     * @param { function } mapfn A mapping function to call on every element of the array.
+     * @returns { Array<U> } A new Array instance with the mapped values.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: int) => U): Array<U> {
         const ret: Array<U> = new Array<U>()
@@ -423,14 +552,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     /**
      * Default comparison function for sort algorithm.
-     * Objects are compared as string. Both objects are convereted to string
-     * using `toString()` method and compared using `compareTo() method of `string` class.
+     * Objects are compared as string. Both objects are converted to string
+     * using `toString()` method and compared using `compareTo()` method of `String` class.
      *
-     * @param a: Object - Object to be compared
-     *
-     * @param b: Object - Object to be compared
-     *
-     * @returns Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
+     * @param { Any } a Object to be compared.
+     * @param { Any } b Object to be compared.
+     * @returns { int } One of -1 (less), 0 (equal), or 1 (greater).
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private static defaultComparator(a: Any, b: Any): int {
         if (a instanceof Number && b instanceof Number) {
@@ -488,7 +618,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Helper function preparing copy of `this` instance of `Array` class' data array.
      *
-     * @returns Copy of an `Array`'s primitive array data.
+     * @returns { FixedArray<Any> } Copy of this Array's primitive buffer.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
@@ -569,17 +702,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Reorders elements of `this` using comparator function.
+     * Sorts the elements of an array in place and returns the reference to the same array, now sorted.
      *
-     * @see ECMA-262, 23.1.3.30
-     *
-     * @param comparator function that defines the sort order.
-     *
-     * @returns `this` instance of `Array` class.
-     *
-     * @note Mutating method
-     *
-     * NOTE clarify UTF-16 or UTF-8
+     * @param { function } [comparator] Optional. A function that defines the sort order. If omitted, the array is sorted
+     *     according to each character's Unicode code point value, according to the string conversion of each element.
+     * @returns { this } The sorted array.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public sort(comparator?: (a: T, b: T) => int): this {
         if (this.actualLength <= 1)
@@ -599,10 +729,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Removes the first element from an array and returns that removed element.
-     * This method changes the length of the array.
+     * Removes the first element from an array and returns that removed element. This method changes the length of the array.
      *
-     * @returns shifted element, i.e. that was at index zero
+     * @returns { T | undefined } The removed element from the array; undefined if the array is empty.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public shift(): T | undefined {
         const len: int = this.actualLength
@@ -616,10 +748,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Removes the last element from an array and returns that element.
-     * This method changes the length of the array.
+     * Removes the last element from an array and returns that element. This method changes the length of the array.
      *
-     * @returns removed element
+     * @returns { T | undefined } The removed element from the array; undefined if the array is empty.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public pop(): T | undefined {
         const len: int = this.actualLength
@@ -640,7 +774,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Adds the specified elements to the end of an array and returns the new length of the array.
      *
-     * @returns new length
+     * @param { T[] } val The elements to add to the end of the array.
+     * @returns { int } The new length of the array upon which the method was called.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public pushArray(...val: T[]): int {
         const length: int = val.length
@@ -655,7 +793,11 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Adds the specified element to the end of an array and returns the new length of the array.
      *
-     * @returns new length
+     * @param { T } val The element to add to the end of the array.
+     * @returns { int } The new length of the array.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public pushOne(val: T): int {
         this.ensureUnusedCapacity(1)
@@ -678,14 +820,15 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
+     * Changes the contents of an array by removing or replacing existing elements and/or adding new elements in place.
      *
-     * @param start index
-     *
-     * @param delete number of items after start index
-     *
-     * @returns an Array with deleted elements
+     * @param { int } start The index at which to start changing the array.
+     * @param { int | undefined } delete The number of items to remove after the start index.
+     * @param { T[] } items The elements to add to the array, beginning from start.
+     * @returns { Array<T> } An array containing the deleted elements.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public splice(start: int, delete: int | undefined, ...items: T[]): Array<T> {
         if (delete === undefined) {
@@ -741,12 +884,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Changes the contents of an array by removing or replacing existing elements
-     * and/or adding new elements in place.
+     * Changes the contents of an array by removing existing elements in place from the start index to the end.
      *
-     * @param start index
-     *
-     * @returns an Array with deleted elements from start to the last element of the current instance
+     * @param { int } start The index at which to start changing the array.
+     * @returns { Array<T> } An array containing the deleted elements.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public splice(start: int): Array<T> {
         return this.splice(start, this.actualLength)
@@ -755,21 +899,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Checks whether the passed value is an Array.
      *
-     * @param arr
-     *
-     * @returns true is arr is a non-nullish array, false otherwise
+     * @param { Any } o The value to be checked.
+     * @returns { boolean } True if the value is an Array; otherwise, false.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static isArray(o: Any): boolean {
         return o instanceof Array
     }
 
     /**
-     * Creates a new Array instance from a variable number of arguments,
-     * regardless of number or type of the arguments.
+     * Creates a new Array instance from a variable number of arguments, regardless of number or type of the arguments.
      *
-     * @param values an initilizer
-     *
-     * @returns a newly created Array
+     * @param { T[] } values Elements of which to create the array.
+     * @returns { Array<T> } A new Array instance.
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public static of<T>(...values: T[]): Array<T> {
         const ret = new Array<T>()
@@ -782,12 +931,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Adds the specified elements to the beginning of an Array
-     * and returns the new length of the Array.
+     * Adds the specified elements to the beginning of an Array and returns the new length of the Array.
      *
-     * @param values data to be added
-     *
-     * @returns new length of the Array
+     * @param { T[] } values The elements to add to the front of the array.
+     * @returns { int } The new length of the array.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public unshift(...values: T[]): int {
         const length: int = this.buffer.length
@@ -806,7 +956,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private static native unshiftInternal<T>(self: FixedArray<Any>, selfLen: int, buffer: FixedArray<Any>, values: Array<T>): void
 
     /**
-     * Returns an iterator over all indices
+     * Returns a new Array Iterator object that contains the keys for each index in the array.
+     *
+     * @returns { IterableIterator<number> } A new Array Iterator object.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     // NOTE(zaytsevaekaterina): fix in #26615
     public override keys(): IterableIterator<number> {
@@ -815,18 +970,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     /**
      * Returns an iterator over all values
+     * 
+     * @returns { IterableIterator<T> } An iterator over all values.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public override $_iterator(): IterableIterator<T> {
         return this.values()
     }
 
-    // === methods with uncompatible implementation ===
+    // === methods with incompatible implementation ===
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
      *
-     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
-     *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+     * @param { function } predicate A function that accepts up to three arguments. The filter method calls the
+     *     predicate function one time for each element in the array.
+     * @returns { Array<T> } A new array with the elements that pass the test.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         const res = new Array<T>()
@@ -841,12 +1004,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new Array with all sub-array elements concatenated
-     * into it recursively up to the specified depth.
+     * Creates a new Array with all sub-array elements concatenated into it recursively up to the specified depth.
      *
-     * @param depth
-     *
-     * @returns a flattened Array with respect to depth
+     * @param { int } depth The depth level specifying how deep a nested array structure should be flattened.
+     * @returns { Array<U> } A new array with the sub-array elements concatenated into it.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public flat<U = T>(depth: int): Array<U> {
         let ret = new Array<U>()
@@ -857,28 +1021,34 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Determines whether obj is exactly an instance of the std.core.Array class.
      *
-     * @param obj
-     *
-     * @return true if obj is an instance of std.core.Array and false otherwise.
+     * @param { Object } obj The object to check.
+     * @returns { boolean } True if obj is an instance of std.core.Array; otherwise, false.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private static native isPlatformArray(obj: Object): boolean
 
     /**
-     * Returns the buffer from an instance arr of the std.core.Array class. We must be sure obj is an
-     * instance of std.core.Array, the isPlatfromArray(obj: Object) method may be used for this.
+     * Returns the buffer from an instance of the std.core.Array class.
+     * The caller must ensure obj is an instance of std.core.Array (e.g. via isPlatformArray).
      *
-     * @param obj
-     *
-     * @return a reference to the (obj as Array<T>).buffer field.
+     * @param { Object } obj An instance of std.core.Array.
+     * @returns { FixedArray<Any> } A reference to the (obj as Array<T>).buffer field.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     private static native getBuffer(obj: Object): FixedArray<Any>;
 
     /**
-     * Creates a new `Array` from this `Array` instance and given `Array` instance.
+     * Creates a new `Array` by merging this `Array` instance with given arrays and/or values.
      *
-     * @param other to concatenate into a new array.
-     *
-     * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
+     * @param { FixedArray<ConcatArray<T>> } items Arrays and/or values to concatenate into a new array.
+     * @returns { Array<T> } A new Array instance.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public concat(...items: FixedArray<ConcatArray<T>>): Array<T> {
         let totalAdd = this.actualLength;
@@ -921,20 +1091,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new Array with all sub-array elements concatenated
+     * Creates a new Array with all sub-array elements concatenated into it recursively with a default depth of 1.
      *
-     * @returns a flattened Array
+     * @returns { Array<U> } A new array with the sub-array elements concatenated into it.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public flat<U = T>(): Array<U> {
         return this.flat<U>(1)
     }
 
     /**
-     * Applies flat and than map
+     * Calls a defined callback function on each element of an array. Then, flattens the result into a new array.
+     * This is identical to a map() followed by a flat() with depth 1.
      *
-     * fn a function to apply
-     *
-     * @return new Array after map and than flat
+     * @param { function } fn A function that produces an element of the new Array.
+     * @returns { Array<U> } A new array with each element being the result of the callback function and flattened.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
      */
     public flatMap<U = T>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
         const result = new Array<U>();
@@ -1004,47 +1180,52 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
 %# When ['T'] is added to BuiltinArray, the copyToFast() function should be declared and for BuiltinArray too.
 /**
- * copies src array into dst with respect to passed indexes and without setting pre-write barriers.
- * dst must be a new allocated array and have enough space, otherwise out-of-bounds might occur
+ * Copies src array into dst with respect to passed indexes and without setting pre-write barriers.
+ * dst must be a newly allocated array with enough space; otherwise out-of-bounds may occur.
  *
- * @param src source array to be copied
- *
- * @param dst destination array
- *
- * @param dstStart index of dst to start from
- *
- * @param srcStart index of src to start from
- *
- * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
- *
- * @example: copy src to dst
- * ```
+ * @param { FixedArray<Any> } src Source array to be copied.
+ * @param { FixedArray<Any> } dst Destination array.
+ * @param { int } dstStart Index of dst to start from.
+ * @param { int } srcStart Index of src to start from.
+ * @param { int } srcEnd Last index of src to copy, exclusive (src[srcEnd] is not copied).
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ * @example
+ * ```arkts
  * copyToFast(src, dst, 0, 0, src.length)
  * ```
  */
 native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
 /**
- * copies src array into dst with respect to passed indexes and with setting pre-write barriers.
- * dst could be the same src array and must have enough space, otherwise out-of-bounds might occur
+ * Copies src array into dst with respect to passed indexes and with setting pre-write barriers.
+ * dst may be the same as src and must have enough space; otherwise out-of-bounds may occur.
  *
- * @param src source array to be copied
- *
- * @param dst destination array
- *
- * @param dstStart index of dst to start from
- *
- * @param srcStart index of src to start from
- *
- * @param srcEnd last index of src to copy, exclusive, i.e. src[srcEnd] is not copied
- *
- * @example: copy src to dst
- * ```
+ * @param { FixedArray<Any> } src Source array to be copied.
+ * @param { FixedArray<Any> } dst Destination array.
+ * @param { int } dstStart Index of dst to start from.
+ * @param { int } srcStart Index of src to start from.
+ * @param { int } srcEnd Last index of src to copy, exclusive (src[srcEnd] is not copied).
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ * @example
+ * ```arkts
  * copyToFastWithBarriers(src, dst, 0, 1, src.length)
  * ```
  */
 native function copyToFastWithBarriers(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
+/**
+ * Tries to get the length of the iterator from an object.
+ *
+ * @param { Object } obj The object to check for an iterator length.
+ * @returns { int | undefined } The length of the iterator if found; otherwise, undefined.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 export function tryGetIteratorLength(obj: Object): int | undefined {
     const objCls = Class.of(obj)
     for (const method of objCls.getInstanceMethods()) {
