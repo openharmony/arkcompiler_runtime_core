@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -145,19 +145,18 @@ function(run_ets_code_impl TARGET WORK_DIR ETS_SOURCES)
         get_filename_component(ARG_ENTRYPOINT ${ENTRY_SOURCE} NAME_WE)
     endif()
 
-    set(VERIFICATION_MODE "--verification-mode=on-the-fly")
+    set(VERIFICATION_MODE "ahead-of-time")
     # issues:22179: remove this loop after fix
     foreach(option IN LISTS ARG_RUNTIME_EXTRA_OPTIONS)
-        if(option STREQUAL "--verification-mode=disabled")
-            set(VERIFICATION_MODE "")
+        if(option STREQUAL "disabled")
+            set(VERIFICATION_MODE "disabled")
         endif()
     endforeach()
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${BOOT_PANDA_FILES}
         --panda-files=${ABC_FILES}
         --load-runtimes=ets
-        --verification-mode=ahead-of-time
-        ${VERIFICATION_MODE}
+        --verification-mode=${VERIFICATION_MODE}
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${ENTRY_ABC}
         "${ARG_ENTRYPOINT}.ETSGLOBAL::main"

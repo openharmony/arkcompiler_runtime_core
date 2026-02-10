@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -143,7 +143,7 @@ function(test_runtime_linker_extensions test)
 
 endfunction()
 
-test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 add '--verification-mode=on-the-fly',case failed
+test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 enable verifier after bugfix
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context
