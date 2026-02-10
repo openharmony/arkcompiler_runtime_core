@@ -687,8 +687,14 @@ ohos_shared_library("libarkruntime") {
   cflags_cc = [ "-fno-emulated-tls" ]
   ldflags = [ 
     "-fno-emulated-tls",
-    "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a",
   ]
+
+  if (!is_mac) {
+    # MacOS linker has no --exclude-libs flag
+    ldflags += [
+      "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a",
+    ]
+  }
 
   deps = []
   if (ark_ets_pcre2_newline_patch) {

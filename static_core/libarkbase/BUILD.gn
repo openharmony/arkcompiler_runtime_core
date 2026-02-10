@@ -142,7 +142,16 @@ if (is_mingw) {
       ]
     }
   } else {
-    libarkbase_sources += [ "$ark_root/libarkbase/os/mutex.cpp" ]
+    # Fixes deprecation error for ucontext.
+    defines = [
+      "_XOPEN_SOURCE",
+    ]
+    libarkbase_sources += [
+      "$ark_root/libarkbase/os/mutex.cpp",
+      "$ark_root/platforms/unix/libarkbase/exec.cpp",
+      "$ark_root/platforms/unix/libarkbase/pipe.cpp",
+      "$ark_root/platforms/unix/libarkbase/sighook.cpp",
+    ]
   }
 }
 libarkbase_libs = []

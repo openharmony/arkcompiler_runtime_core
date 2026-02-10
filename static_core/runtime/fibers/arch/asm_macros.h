@@ -44,8 +44,14 @@
     .hidden name;                  \
     FUNCTION_HEADER(name)
 
+#ifdef PANDA_TARGET_MACOS
+// CC-OFFNXT(G.PRE.09) code generation
+// CC-OFFNXT(G.PRE.02) list generation
+#define FUNCTION_END(name)
+#else
 // CC-OFFNXT(G.PRE.09) code generation
 // CC-OFFNXT(G.PRE.02) list generation
 #define FUNCTION_END(name) .size name, .- name;
+#endif
 
 #endif /* PANDA_RUNTIME_FIBERS_ARCH_ASM_MACROS_H */

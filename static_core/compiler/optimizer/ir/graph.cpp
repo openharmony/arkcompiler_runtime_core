@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS)
 #include "optimizer/code_generator/callconv.h"
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/code_generator/encode.h"
@@ -460,7 +460,7 @@ Encoder *Graph::GetEncoder()
         if (IsBytecodeOptimizer()) {
             return encoder_ = GetAllocator()->New<bytecodeopt::BytecodeEncoder>(GetAllocator());
         }
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS)
         encoder_ = Encoder::Create(GetAllocator(), GetArch(), g_options.IsCompilerEmitAsm(), IsDynamicMethod());
 #endif
     }
@@ -469,7 +469,7 @@ Encoder *Graph::GetEncoder()
 
 RegistersDescription *Graph::GetRegisters() const
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS)
     return nullptr;
 #else
     if (registers_ == nullptr) {
@@ -481,7 +481,7 @@ RegistersDescription *Graph::GetRegisters() const
 
 CallingConvention *Graph::GetCallingConvention()
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS)
     return nullptr;
 #else
     if (callconv_ == nullptr) {
@@ -499,7 +499,7 @@ CallingConvention *Graph::GetCallingConvention()
 
 const MethodProperties &Graph::GetMethodProperties()
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS)
     UNREACHABLE();
 #else
     if (!methodProperties_) {
@@ -511,7 +511,7 @@ const MethodProperties &Graph::GetMethodProperties()
 
 void Graph::ResetParameterInfo()
 {
-#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS) && !defined(PANDA_TARGET_MACOS)
+#if defined(PANDA_WITH_CODEGEN) && !defined(PANDA_TARGET_WINDOWS)
     auto callconv = GetCallingConvention();
     if (callconv == nullptr) {
         paramInfo_ = nullptr;
@@ -670,7 +670,7 @@ std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr me
 
 SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
 {
-#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_MACOS)
+#if !defined(PANDA_WITH_CODEGEN) || defined(PANDA_TARGET_WINDOWS)
     (void)type;
     return {};
 #else

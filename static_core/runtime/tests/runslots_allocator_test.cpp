@@ -16,6 +16,7 @@
 #include <sys/mman.h>
 
 #include "libarkbase/os/mem.h"
+#include "libarkbase/mem/mem.h"
 #include "libarkbase/utils/logger.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #include "runtime/mem/runslots_allocator_stl_adapter.h"
