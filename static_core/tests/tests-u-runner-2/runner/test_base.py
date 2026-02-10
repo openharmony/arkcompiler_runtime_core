@@ -126,8 +126,7 @@ class Test:
             return result
 
         if self.is_output_status():
-            Log.default(
-                _LOGGER,
+            _LOGGER.default(
                 f"\033[1mFinished:\033[0m \033[1;33m{self.test_id}\033[0m. Launch #{repeat}"
                 f"- {round(self.time, 2)} sec - {self.status_as_cstring()}")
         self.reproduce += f"\nTo reproduce with URunner run:\n{self.get_command_line()}"
@@ -135,9 +134,7 @@ class Test:
         if self.is_output_log():
             _LOGGER.default(f"{self.test_id}: steps: {self.reproduce}")
             if not self.report:
-                Log.default(
-                    _LOGGER,
-                    f"{self.test_id}: no information about test running neither output nor error")
+                _LOGGER.default(f"{self.test_id}: no information about test running neither output nor error")
 
         report_generator = ReportGenerator(self.test_id, self.test_env, repeat)
         self.reports = report_generator.generate_reports(result)

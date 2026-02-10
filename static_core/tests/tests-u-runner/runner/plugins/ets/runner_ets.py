@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -86,8 +86,8 @@ class RunnerETS(RunnerFileBased):
 
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
-        Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
-        Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         suite_name = self.__ets_suite_name if self.__ets_suite_name != "ets-custom" else self.config.custom.suite_name
         self.collect_excluded_test_lists(test_name=suite_name)

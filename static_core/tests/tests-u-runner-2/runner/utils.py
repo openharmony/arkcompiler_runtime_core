@@ -61,7 +61,7 @@ class FontColor(BaseEnum):
 
 
 def progress(block_num: int, block_size: int, total_size: int) -> None:
-    _LOGGER.summary(f"Downloaded block: {block_num} ({block_size}). Total: {total_size}")
+    _LOGGER.all(f"Downloaded block: {block_num} ({block_size}). Total: {total_size}")
 
 
 def download(name: str, *, git_url: str, revision: str, download_root: Path, target_path: Path,
@@ -69,7 +69,7 @@ def download(name: str, *, git_url: str, revision: str, download_root: Path, tar
     archive_file = path.join(download_root, f'{name}.zip')
     url_file = f'{git_url}/{revision}.zip'
 
-    _LOGGER.summary(f"Downloading from {url_file} to {archive_file}")
+    _LOGGER.short(f"Downloading from {url_file} to {archive_file}")
     try:
         if show_progress:
             request.urlretrieve(url_file, archive_file, progress)
@@ -78,7 +78,7 @@ def download(name: str, *, git_url: str, revision: str, download_root: Path, tar
     except URLError as exc:
         raise DownloadException(f'Downloading {url_file} file failed.') from exc
 
-    _LOGGER.summary(f"Extracting archive {archive_file} to {target_path}")
+    _LOGGER.short(f"Extracting archive {archive_file} to {target_path}")
     if path.exists(target_path):
         shutil.rmtree(target_path)
 
@@ -97,7 +97,7 @@ ProcessCopy = Callable[[Path, Path], None]
 def download_and_generate(name: str, url: str, revision: str, download_root: Path, generated_root: Path, *,
                           stamp_name: str | None = None, test_subdir: str = "test", show_progress: bool = False,
                           process_copy: ProcessCopy | None = None, force_download: bool = False) -> Path:
-    _LOGGER.summary("Prepare test files")
+    _LOGGER.all("Prepare test files")
     stamp_name = f'{name}-{revision}' if not stamp_name else stamp_name
     dest_path = generated_root / stamp_name
     makedirs(dest_path, exist_ok=True)
@@ -121,13 +121,13 @@ def download_and_generate(name: str, url: str, revision: str, download_root: Pat
     if dest_path.exists():
         shutil.rmtree(dest_path)
 
-    _LOGGER.summary("Copy and transform test files")
+    _LOGGER.all("Copy and transform test files")
     if process_copy is not None:
         process_copy(temp_path / test_subdir, dest_path)
     else:
         copy(temp_path / test_subdir, dest_path)
 
-    _LOGGER.summary(f"Create stamp file {stamp_file}")
+    _LOGGER.all(f"Create stamp file {stamp_file}")
     with os.fdopen(os.open(stamp_file, os.O_RDWR | os.O_CREAT, 0o755),
                    'w+', encoding="utf-8") as _:  # Create empty file-marker and close it at once
         pass

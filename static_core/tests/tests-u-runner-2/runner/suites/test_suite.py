@@ -133,11 +133,12 @@ class TestSuite(ITestSuite):
         main_counter = Counter([str(test) for test in original])
         dupes = [test for test, frequency in main_counter.items() if frequency > 1]
         if len(dupes) > 0:
-            _LOGGER.summary(f"There are {len(dupes)} duplicates in {kind} lists.")
+            _LOGGER.short(f"There are {len(dupes)} duplicates in {kind} lists. "
+                          "To see the full list run with the option `--verbose=all`")
             for test in dupes:
-                Log.short(_LOGGER, f"\t{test}")
+                _LOGGER.all(f"\t{test}")
         elif len(original) > 0:
-            _LOGGER.summary(f"No duplicates found in {kind} lists.")
+            _LOGGER.short(f"No duplicates found in {kind} lists.")
 
     @staticmethod
     def __is_path_excluded(collection: CollectionsOptions, tested_path: Path) -> bool:
@@ -180,8 +181,8 @@ class TestSuite(ITestSuite):
         self._search_both_excluded_and_ignored_tests()
         executed_set = self._get_by_groups(executed_set)
         tests = self._create_tests(executed_set)
-        Log.default(_LOGGER, f"Loaded {len(tests)} valid tests from the folder '{self.test_root}'. "
-                             f"Excluded {self.excluded} tests are not loaded.")
+        _LOGGER.default(f"Loaded {len(tests)} test files from the folder '{self.test_root}'. "
+                        f"Excluded {self.excluded} tests are not loaded.")
         return tests
 
     def set_preparation_steps(self) -> list[TestPreparationStep]:
@@ -279,7 +280,9 @@ class TestSuite(ITestSuite):
         tests = list(set(tests))
 
         if len(tests) == 0:
-            raise InvalidConfiguration("No tests loaded to execution")
+            message = "No tests loaded for execution"
+            _LOGGER.default(message)
+            raise InvalidConfiguration(message)
 
         util.create_report(self.test_root, tests)
 
@@ -294,7 +297,6 @@ class TestSuite(ITestSuite):
         return self.__load_test_files([Path(test) for test in set(tests)])
 
     def __get_explicit_test_path(self, test_id: str) -> Path | None:
-
         for collection in self.config.test_suite.collections:
             if test_id.startswith(collection.name):
                 test_path: Path = correct_path(self.test_root, test_id)
@@ -311,7 +313,7 @@ class TestSuite(ITestSuite):
         """
         Browse the directory, search for files with the specified extension
         """
-        _LOGGER.summary(f"Loading tests from the directory {self.test_root}")
+        _LOGGER.short(f"Loading tests from the directory {self.test_root}")
         test_files: list[Path] = []
         if self.explicit_file is not None:
             test_files.append(self.explicit_file)
@@ -433,9 +435,9 @@ class TestSuite(ITestSuite):
         return None
 
     def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:
-        tests = []
+        tests: list[Path] = []
         any_not_found = False
-        report = []
+        report: list[str] = []
         for list_path in lists:
             _LOGGER.default(f"Loading tests from the list {list_path}")
             prefixes: list[str] = []
@@ -445,11 +447,12 @@ class TestSuite(ITestSuite):
             tests.extend(loaded)
             if not_found:
                 any_not_found = True
-                report.append(f"List '{list_path}': following tests are not found on the file system:")
+                report.append(f"List '{list_path}': {len(report)} tests are not found on the file system. "
+                              "To see full list run with --verbose=all option")
                 for test in not_found:
                     report.append(str(test))
         if any_not_found:
-            _LOGGER.summary("\n".join(report))
+            _LOGGER.all("\n".join(report))
         return tests
 
     def _load_excluded_tests(self) -> list[Path]:
@@ -473,8 +476,9 @@ class TestSuite(ITestSuite):
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]
         if not already_excluded:
             return
-        _LOGGER.summary(f"Found {len(already_excluded)} tests present both "
-                        "in excluded and ignored test lists.")
+        _LOGGER.short(f"Found {len(already_excluded)} tests present both "
+                      "in excluded and ignored test lists. "
+                      "To see the full list run with the option `--verbose=all`")
         for test in already_excluded:
             _LOGGER.all(f"\t{test}")
             self.ignored_tests.remove(test)
@@ -668,8 +672,8 @@ class GTestSuite(TestSuite):
         self._search_both_excluded_and_ignored_tests()
         executed_set = self._get_by_groups(executed_set)
         tests = self._create_tests(executed_set)
-        Log.default(_LOGGER, f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
-                             f"Excluded {self.excluded} tests are not loaded.")
+        _LOGGER.default(f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
+                        f"Excluded {self.excluded} tests are not loaded.")
         return tests
 
     def _create_test(self, test_file: Path, is_ignored: bool) -> ITestFlow:
@@ -703,7 +707,7 @@ class GTestSuite(TestSuite):
         """
         Browse the directory, search for files with the specified extension
         """
-        _LOGGER.summary(f"Loading tests from the directory {self.test_root}")
+        _LOGGER.short(f"Loading tests from the directory {self.test_root}")
         test_files: list[Path] = []
         if self.explicit_file is not None:
             test_files.append(self.explicit_file)

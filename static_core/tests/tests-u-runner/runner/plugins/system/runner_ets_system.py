@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,10 +62,10 @@ class RunnerETSSystem(RunnerJS):
             self.list_root = self.list_root
         else:
             self.list_root = path.normpath(path.join(self.default_list_root, self.name))
-        Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.test_root = es2panda_test if self.test_root is None else self.test_root
-        Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
         self.collect_excluded_test_lists()

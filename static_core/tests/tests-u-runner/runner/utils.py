@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,14 +37,14 @@ EnumT = TypeVar("EnumT", bound=Enum)
 
 
 def progress(block_num: int, block_size: int, total_size: int) -> None:
-    Log.summary(_LOGGER, f"Downloaded block: {block_num} ({block_size}). Total: {total_size}")
+    Log.short(_LOGGER, f"Downloaded block: {block_num} ({block_size}). Total: {total_size}")
 
 
 def download(name: str, git_url: str, revision: str, target_path: str, show_progress: bool = False) -> None:
     archive_file = path.join(path.sep, 'tmp', f'{name}.zip')
     url_file = f'{git_url}/{revision}.zip'
 
-    Log.summary(_LOGGER, f"Downloading from {url_file} to {archive_file}")
+    Log.short(_LOGGER, f"Downloading from {url_file} to {archive_file}")
     try:
         if show_progress:
             request.urlretrieve(url_file, archive_file, progress)
@@ -53,7 +53,7 @@ def download(name: str, git_url: str, revision: str, target_path: str, show_prog
     except URLError:
         Log.exception_and_raise(_LOGGER, f'Downloading {url_file} file failed.')
 
-    Log.summary(_LOGGER, f"Extracting archive {archive_file} to {target_path}")
+    Log.short(_LOGGER, f"Extracting archive {archive_file} to {target_path}")
     if path.exists(target_path):
         shutil.rmtree(target_path)
 
@@ -72,7 +72,7 @@ ProcessCopy = Callable[[str, str], None]
 def generate(name: str, url: str, revision: str, generated_root: Path, *,
              stamp_name: Optional[str] = None, test_subdir: str = "test", show_progress: bool = False,
              process_copy: Optional[ProcessCopy] = None, force_download: bool = False) -> str:
-    Log.summary(_LOGGER, "Prepare test files")
+    Log.short(_LOGGER, "Prepare test files")
     stamp_name = f'{name}-{revision}' if not stamp_name else stamp_name
     dest_path = path.join(generated_root, stamp_name)
     makedirs(dest_path, exist_ok=True)
@@ -89,13 +89,13 @@ def generate(name: str, url: str, revision: str, generated_root: Path, *,
     if path.exists(dest_path):
         shutil.rmtree(dest_path)
 
-    Log.summary(_LOGGER, "Copy and transform test files")
+    Log.short(_LOGGER, "Copy and transform test files")
     if process_copy is not None:
         process_copy(path.join(temp_path, test_subdir), dest_path)
     else:
         copy(path.join(temp_path, test_subdir), dest_path)
 
-    Log.summary(_LOGGER, f"Create stamp file {stamp_file}")
+    Log.short(_LOGGER, f"Create stamp file {stamp_file}")
     with os.fdopen(os.open(stamp_file, os.O_RDWR | os.O_CREAT, 0o755),
                    'w+', encoding="utf-8") as _:  # Create empty file-marker and close it at once
         pass

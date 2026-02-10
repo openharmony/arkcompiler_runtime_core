@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -47,9 +47,9 @@ class RunnerDeclgenParser(RunnerJS):
         declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2sts"
         self.default_list_root = declgen_root / "test" / "test-lists"
         self.list_root = self.list_root if self.list_root else self.default_list_root
-        Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
         self.test_root = declgen_root / "test" if self.test_root is None else self.test_root
-        Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
 
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 

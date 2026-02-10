@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,10 +19,10 @@ import logging
 from os import makedirs, path
 from pathlib import Path
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.verbose_format import VerboseKind
 
-SUMMARY_LOG_LEVEL = 21
-NONE_LOG_LEVEL = 22
+DEFAULT_LOG_LEVEL = 22
 
 
 class Log:
@@ -49,8 +49,10 @@ class Log:
             console_handler.setLevel(logging.DEBUG)
         elif verbose == VerboseKind.SHORT:
             console_handler.setLevel(logging.INFO)
+        elif verbose == VerboseKind.SILENT:
+            console_handler.setLevel(DEFAULT_LOG_LEVEL)
         else:
-            console_handler.setLevel(NONE_LOG_LEVEL)
+            raise InvalidConfiguration(f"Logger cannot process unknown verbose level '{verbose.value}'")
 
         file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(message)s')
         file_handler.setFormatter(file_formatter)
@@ -82,14 +84,8 @@ class Log:
         """
         self.logger.info(message)
 
-    def summary(self, message: str) -> None:
-        """
-        Logs on the level verbose=SUMMARY (sum)
-        """
-        self.logger.log(SUMMARY_LOG_LEVEL, message)
-
     def default(self, message: str) -> None:
         """
-        Logs on the level verbose=None
+        Logs on the level verbose=SILENT
         """
-        self.logger.log(NONE_LOG_LEVEL, message)
+        self.logger.log(DEFAULT_LOG_LEVEL, message)

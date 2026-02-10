@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,7 +46,7 @@ class Runner(ABC):
         # the current folder (where this python file is located!) parent
         self.list_root: Path | None = config.test_suite.list_root
         if self.list_root is not None:
-            _LOGGER.summary(f"LIST_ROOT set to {self.list_root}")
+            _LOGGER.short(f"LIST_ROOT set to {self.list_root}")
 
         # runner init time
         self.start_time = datetime.now(pytz.UTC)

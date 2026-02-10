@@ -73,7 +73,7 @@ class EtsTemplatesGenerator(IGenerator):
             test_source = self._source / self.test_file
         self.__dfs(test_source, self._already_generated)
 
-        _LOGGER.all("Generation finished!")
+        _LOGGER.default(f"Generation finished! Generated {len(self.generated_tests)} test files")
         return self.generated_tests
 
     def _get_matched_paths(self) -> set[Path]:

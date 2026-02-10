@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -65,10 +65,10 @@ class EtsFuncTestsCodeGenerator:
         return generated_test_list
 
     def __find_all_templates(self, current_dir: pathlib.Path) -> typing.List[str]:
-        LOG.Log.summary(self._logger, f"Start searching in : {current_dir}")
-        LOG.Log.summary(self._logger, f"{str(current_dir) + self._TEMPLATE_PATTERN}")
+        LOG.Log.all(self._logger, f"Start searching in : {current_dir}")
+        LOG.Log.all(self._logger, f"{str(current_dir) + self._TEMPLATE_PATTERN}")
         templates_fname_list = glob.glob(str(current_dir) + self._TEMPLATE_PATTERN, recursive=False)
-        LOG.Log.summary(self._logger, f"Found {len(templates_fname_list)} templates")
+        LOG.Log.all(self._logger, f"Found {len(templates_fname_list)} templates")
         return templates_fname_list
 
     def __build_template_config_file_name(self, template_path_fname: str) -> str:
@@ -76,7 +76,7 @@ class EtsFuncTestsCodeGenerator:
         template_base_fname = self.__get_true_file_basename(template_path_fname)
         template_path = path_parser.parent
         config_fname = "config-" + template_base_fname + ".yaml"
-        LOG.Log.summary(self._logger, f"Config path {config_fname}")
+        LOG.Log.all(self._logger, f"Config path {config_fname}")
         result = os.path.join(template_path, config_fname)
         return result
 
@@ -89,7 +89,7 @@ class EtsFuncTestsCodeGenerator:
         path_parser = pathlib.Path(template_fname)
         template_relative_path = os.path.relpath(path_parser.parent, template_root_path)
         template_relative_fname = os.path.join(template_relative_path, path_parser.name)
-        LOG.Log.summary(self._logger, f"Load template from {template_relative_fname}")
+        LOG.Log.all(self._logger, f"Load template from {template_relative_fname}")
         template = self._jinja_env.get_template(template_relative_fname)
         params = self.__load_parameters(template_config_name)
         content = template.render(**params)
@@ -113,7 +113,7 @@ class EtsFuncTestsCodeGenerator:
             text = f_handle.read()
         try:
             params = yaml.safe_load(text)
-            LOG.Log.summary(self._logger, params)
+            LOG.Log.all(self._logger, params)
         except Exception as common_exp:
             raise Exception(f"Could not load YAML: {str(common_exp)} filepath={config_file_path}") from common_exp
         return params
@@ -121,6 +121,5 @@ class EtsFuncTestsCodeGenerator:
     def __split_tests(self, content : str) -> typing.List[str]:
         content = content.rstrip(self._TEST_SEPARATOR)
         content_list = content.split("---")
-        LOG.Log.summary(self._logger, f"size : {len(content_list)}")
+        LOG.Log.all(self._logger, f"size : {len(content_list)}")
         return content_list
-    

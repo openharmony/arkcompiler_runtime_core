@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,7 +40,7 @@ class RunnerDeclgenEts2Ets(RunnerJS):
             "plugins", "ets", "tests", "test-lists", "declgenets2ets"
         )
 
-        Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        Log.short(_LOGGER, f"TEST_ROOT set to {self.test_root}")
 
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()

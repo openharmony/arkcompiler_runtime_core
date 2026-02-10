@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,7 +38,7 @@ class RunnerJSTest262(RunnerJS):
 
         self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'test-lists'
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
-        Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        Log.short(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.collect_excluded_test_lists(test_name=self.ignored_name_prefix)
         self.collect_ignored_test_lists(test_name=self.ignored_name_prefix)
@@ -48,7 +48,7 @@ class RunnerJSTest262(RunnerJS):
         self.test_root = self.util.generate(
             harness_path=path.join(path.dirname(__file__), "test262harness.js"),
         )
-        Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
+        Log.short(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
         self.test_env.util = self.util
 
