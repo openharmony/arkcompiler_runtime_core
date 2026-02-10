@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ static bool IsIntrinsicRange(Inst *inst)
         case compiler::RuntimeInterface::IntrinsicId::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8:
         case compiler::RuntimeInterface::IntrinsicId::CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8:
         case compiler::RuntimeInterface::IntrinsicId::WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
+        case compiler::RuntimeInterface::IntrinsicId::CALLTHISRANGEWITHNAME_IMM8_IMM8_ID16_V8:
+        case compiler::RuntimeInterface::IntrinsicId::WIDE_CALLTHISRANGEWITHNAME_PREF_IMM16_ID16_V8:
             return true;
         default:
             return false;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -329,6 +329,19 @@ AbckitInst *IcreateDynCallthis2Static(AbckitGraph *graph, AbckitInst *acc, Abcki
 // CC-OFFNXT(G.FUN.01) This is function from public API
 AbckitInst *IcreateDynCallthis3Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1,
                                       AbckitInst *input2, AbckitInst *input3);
+AbckitInst *IcreateDynCallthis0withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0);
+AbckitInst *IcreateDynCallthis1withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1);
+AbckitInst *IcreateDynCallthis2withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1, AbckitInst *input2);
+AbckitInst *IcreateDynCallthis3withnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                              AbckitInst *input0, AbckitInst *input1, AbckitInst *input2,
+                                              AbckitInst *input3);
+AbckitInst *IcreateDynCallthisrangewithnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                  size_t argCount, std::va_list args);
+AbckitInst *IcreateDynWideCallthisrangewithnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string,
+                                                      size_t argCount, std::va_list args);
 AbckitInst *IcreateDynCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args);
 AbckitInst *IcreateDynWideCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args);
 AbckitInst *IcreateDynSupercallthisrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args);

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1080,6 +1080,82 @@ public:
      */
     Instruction CreateCallthis3(Instruction acc, Instruction input0, Instruction input1, Instruction input2,
                                 Instruction input3) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS0WITHNAME.
+     * Sets the value of this as `input0`, invokes the function object stored in `acc`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] input0 - This object.
+     */
+    Instruction CreateCallthis0withname(Instruction acc, std::string_view string, Instruction input0) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS1WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with argument `input1`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     */
+    Instruction CreateCallthis1withname(Instruction acc, std::string_view string, Instruction input0,
+                                        Instruction input1) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS2WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with arguments `input1`, `input2`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @param [ in ] input2 - Second argument.
+     */
+    Instruction CreateCallthis2withname(Instruction acc, std::string_view string, Instruction input0,
+                                        Instruction input1, Instruction input2) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS3WITHNAME.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with arguments `input1`, `input2`, and `input3`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @param [ in ] input2 - Second argument.
+     * @param [ in ] input3 - Third argument.
+     */
+    Instruction CreateCallthis3withname(Instruction acc, std::string_view string, Instruction input0,
+                                        Instruction input1, Instruction input2, Instruction input3) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHISRANGEWITHNAME.
+     * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+     * `...`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] instrs - Object + arguments.
+     */
+    template <typename... Args>
+    Instruction CreateCallthisrangewithname(Instruction acc, std::string_view string, Args... instrs) &&;
+
+    /**
+     * @brief Creates instruction with opcode WIDE_CALLTHISRANGEWITHNAME.
+     * Sets the value of this as first variadic argument, invokes the function object stored in `acc` with arguments
+     * `...`.
+     * @return Instruction
+     * @param [ in ] acc - Function object.
+     * @param [ in ] string - Method name.
+     * @param [ in ] instrs - Object + arguments.
+     */
+    template <typename... Args>
+    Instruction CreateWideCallthisrangewithname(Instruction acc, std::string_view string, Args... instrs) &&;
 
     /**
      * @brief Creates instruction with opcode CALLTHISRANGE.

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,11 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeTopropertykey_1)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/call_runtime/topropertykey_dynamic_modified.abc", "func_main_0",
         [&](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *ldundefFirts = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            auto *callCreate = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+            auto *callCreate = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME);
+            if (callCreate == nullptr) {
+                callCreate = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1);
+            }
+            ASSERT_NE(callCreate, nullptr);
 
             auto *ldhole = g_dynG->iCreateLdhole(graph);
             auto *stringX = g_implM->createString(file, "x", strlen("x"));
