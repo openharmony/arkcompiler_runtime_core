@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "typeof v === "float"" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "float""
+      type A = float | string
+
+      // type A - float is computed smart type on the negative branch
+      // after branching on "typeof v === "float""
+      type A_diff_FloatType = string
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "float"": on positive branch, on negative branch
+      enum VarType {FloatType, A_diff_FloatType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [17.47f, VarType.FloatType],
+        ["abc", VarType.A_diff_FloatType] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 17)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "float""
+      type A = long | int | byte | short | double | float |
+        boolean | bigint | char | string | null | undefined
+
+      // type A - float is computed smart type on the negative branch
+      // after branching on "typeof v === "float""
+      type A_diff_FloatType = long | int | byte | short | double |
+        boolean | bigint | char | string | null | undefined
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "float"": on positive branch, on negative branch
+      enum VarType {FloatType, A_diff_FloatType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [17.47f, VarType.FloatType],
+        [0x7FFF_FFFF_1, VarType.A_diff_FloatType],
+        [123, VarType.A_diff_FloatType],
+        [15 as byte, VarType.A_diff_FloatType],
+        [517 as short, VarType.A_diff_FloatType],
+        [4.59, VarType.A_diff_FloatType],
+        [567n, VarType.A_diff_FloatType],
+        [c'a', VarType.A_diff_FloatType],
+        ["abc", VarType.A_diff_FloatType],
+        [null, VarType.A_diff_FloatType],
+        [undefined, VarType.A_diff_FloatType],
+        [true, VarType.A_diff_FloatType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 17)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "float""
+      type A = Object
+
+      // type A - float is computed smart type on the negative branch
+      // after branching on "typeof v === "float""
+      type A_diff_FloatType = Object // nearest supertype for A - float
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "float"": on positive branch, on negative branch
+      enum VarType {FloatType, A_diff_FloatType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [17.47f, VarType.FloatType],
+        [0x7FFF_FFFF_1, VarType.A_diff_FloatType],
+        [123, VarType.A_diff_FloatType],
+        [15 as byte, VarType.A_diff_FloatType],
+        [517 as short, VarType.A_diff_FloatType],
+        [4.59, VarType.A_diff_FloatType],
+        [567n, VarType.A_diff_FloatType],
+        [c'a', VarType.A_diff_FloatType],
+        ["abc", VarType.A_diff_FloatType],
+        [true, VarType.A_diff_FloatType] ]
+      const check_values_number: int = 10
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 17)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "float""
+      type A = Any
+
+      // type A - float is computed smart type on the negative branch
+      // after branching on "typeof v === "float""
+      type A_diff_FloatType = Any // nearest supertype for A - float
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "float"": on positive branch, on negative branch
+      enum VarType {FloatType, A_diff_FloatType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [17.47f, VarType.FloatType],
+        [0x7FFF_FFFF_1, VarType.A_diff_FloatType],
+        [123, VarType.A_diff_FloatType],
+        [15 as byte, VarType.A_diff_FloatType],
+        [517 as short, VarType.A_diff_FloatType],
+        [4.59, VarType.A_diff_FloatType],
+        [567n, VarType.A_diff_FloatType],
+        [c'a', VarType.A_diff_FloatType],
+        ["abc", VarType.A_diff_FloatType],
+        [null, VarType.A_diff_FloatType],
+        [undefined, VarType.A_diff_FloatType],
+        [true, VarType.A_diff_FloatType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 17)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"

@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "typeof v === "int"" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "int""
+      type A = int | string
+
+      // type A - int is computed smart type on the negative branch
+      // after branching on "typeof v === "int""
+      type A_diff_IntType = string
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "int"": on positive branch, on negative branch
+      enum VarType {IntType, A_diff_IntType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [123, VarType.IntType],
+        ["abc", VarType.A_diff_IntType] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toByte(), 123 as byte)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "int""
+      type A = long | int | byte | short | double | float |
+        boolean | bigint | char | string | null | undefined
+
+      // type A - int is computed smart type on the negative branch
+      // after branching on "typeof v === "int""
+      type A_diff_IntType = long | byte | short | double | float |
+        boolean | bigint | char | string | null | undefined
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "int"": on positive branch, on negative branch
+      enum VarType {IntType, A_diff_IntType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [123, VarType.IntType],
+        [0x7FFF_FFFF_1, VarType.A_diff_IntType],
+        [15 as byte, VarType.A_diff_IntType],
+        [517 as short, VarType.A_diff_IntType],
+        [4.59, VarType.A_diff_IntType],
+        [17.8f, VarType.A_diff_IntType],
+        [567n, VarType.A_diff_IntType],
+        [c'a', VarType.A_diff_IntType],
+        ["abc", VarType.A_diff_IntType],
+        [null, VarType.A_diff_IntType],
+        [undefined, VarType.A_diff_IntType],
+        [true, VarType.A_diff_IntType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toByte(), 123 as byte)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "int""
+      type A = Object
+
+      // type A - int is computed smart type on the negative branch
+      // after branching on "typeof v === "int""
+      type A_diff_IntType = Object // nearest supertype for A - int
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "int"": on positive branch, on negative branch
+      enum VarType {IntType, A_diff_IntType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [123, VarType.IntType],
+        [0x7FFF_FFFF_1, VarType.A_diff_IntType],
+        [15 as byte, VarType.A_diff_IntType],
+        [517 as short, VarType.A_diff_IntType],
+        [4.59, VarType.A_diff_IntType],
+        [17.8f, VarType.A_diff_IntType],
+        [567n, VarType.A_diff_IntType],
+        [c'a', VarType.A_diff_IntType],
+        ["abc", VarType.A_diff_IntType],
+        [true, VarType.A_diff_IntType] ]
+      const check_values_number: int = 10
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toByte(), 123 as byte)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "int""
+      type A = Any
+
+      // type A - int is computed smart type on the negative branch
+      // after branching on "typeof v === "int""
+      type A_diff_IntType = Any // nearest supertype for A - int
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "int"": on positive branch, on negative branch
+      enum VarType {IntType, A_diff_IntType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [123, VarType.IntType],
+        [0x7FFF_FFFF_1, VarType.A_diff_IntType],
+        [15 as byte, VarType.A_diff_IntType],
+        [517 as short, VarType.A_diff_IntType],
+        [4.59, VarType.A_diff_IntType],
+        [17.8f, VarType.A_diff_IntType],
+        [567n, VarType.A_diff_IntType],
+        [c'a', VarType.A_diff_IntType],
+        ["abc", VarType.A_diff_IntType],
+        [null, VarType.A_diff_IntType],
+        [undefined, VarType.A_diff_IntType],
+        [true, VarType.A_diff_IntType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toByte(), 123 as byte)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"

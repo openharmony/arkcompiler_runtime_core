@@ -1,0 +1,150 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  # Note: each 'check_variant_decl_data'
+  # define different types A and related to them check values for check
+  # branching on "typeof v === "long"" where A is type of v variable
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "long""
+      type A = long | string
+
+      // type A - long is computed smart type on the negative branch
+      // after branching on "typeof v === "long""
+      type A_diff_LongType = string
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "long"": on positive branch, on negative branch
+      enum VarType {LongType, A_diff_LongType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [256 as long, VarType.LongType],
+        ["abc", VarType.A_diff_LongType] ]
+      const check_values_number: int = 2
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 256)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v.length, 3)"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "long""
+      type A = long | int | byte | short | double | float |
+        boolean | bigint | char | string | null | undefined
+
+      // type A - long is computed smart type on the negative branch
+      // after branching on "typeof v === "long""
+      type A_diff_LongType = int | byte | short | double | float |
+        boolean | bigint | char | string | null | undefined
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "long"": on positive branch, on negative branch
+      enum VarType {LongType, A_diff_LongType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [256 as long, VarType.LongType],
+        [123, VarType.A_diff_LongType],
+        [15 as byte, VarType.A_diff_LongType],
+        [517 as short, VarType.A_diff_LongType],
+        [4.59, VarType.A_diff_LongType],
+        [17.8f, VarType.A_diff_LongType],
+        [567n, VarType.A_diff_LongType],
+        [c'a', VarType.A_diff_LongType],
+        ["abc", VarType.A_diff_LongType],
+        [null, VarType.A_diff_LongType],
+        [undefined, VarType.A_diff_LongType],
+        [true, VarType.A_diff_LongType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 256)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "long""
+      type A = Object
+
+      // type A - long is computed smart type on the negative branch
+      // after branching on "typeof v === "long""
+      type A_diff_LongType = Object // nearest supertype for A - long
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "long"": on positive branch, on negative branch
+      enum VarType {LongType, A_diff_LongType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [256 as long, VarType.LongType],
+        [123, VarType.A_diff_LongType],
+        [15 as byte, VarType.A_diff_LongType],
+        [517 as short, VarType.A_diff_LongType],
+        [4.59, VarType.A_diff_LongType],
+        [17.8f, VarType.A_diff_LongType],
+        [567n, VarType.A_diff_LongType],
+        [c'a', VarType.A_diff_LongType],
+        ["abc", VarType.A_diff_LongType],
+        [true, VarType.A_diff_LongType] ]
+      const check_values_number: int = 10
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 256)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
+
+  - check_variant_decl_data: |-
+      // type A is type of v variable used for check
+      // branching on "typeof v === "long""
+      type A = Any
+
+      // type A - long is computed smart type on the negative branch
+      // after branching on "typeof v === "long""
+      type A_diff_LongType = Any // nearest supertype for A - long
+
+      // VarType is type of v variable after branching on
+      // "typeof v === "long"": on positive branch, on negative branch
+      enum VarType {LongType, A_diff_LongType}
+      type CheckValueData = [
+        A, // value
+        VarType // value_type
+      ]
+
+      let check_values: ReadonlyArray<CheckValueData> = [
+        [256 as long, VarType.LongType],
+        [123, VarType.A_diff_LongType],
+        [15 as byte, VarType.A_diff_LongType],
+        [517 as short, VarType.A_diff_LongType],
+        [4.59, VarType.A_diff_LongType],
+        [17.8f, VarType.A_diff_LongType],
+        [567n, VarType.A_diff_LongType],
+        [c'a', VarType.A_diff_LongType],
+        ["abc", VarType.A_diff_LongType],
+        [null, VarType.A_diff_LongType],
+        [undefined, VarType.A_diff_LongType],
+        [true, VarType.A_diff_LongType] ]
+      const check_values_number: int = 12
+    check_value_by_expression_on_the_positive_branch:
+      "arktest.assertEQ(v.toInt(), 256)"
+    check_value_by_expression_on_the_negative_branch:
+      "arktest.assertEQ(v, check_values[v_id][0])"
