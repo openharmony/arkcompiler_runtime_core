@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,5 +78,21 @@ class G {
 
     static callPrivateMethod(a0: long, a1: long): long {
         return G.privateMethod(a0, a1);
+    }
+}
+
+class Parent {
+    static parentStaticMethod(): long {
+        return 65 as long;
+    }
+}
+class Child extends Parent {
+    static childStaticMethod(): long {
+        return 78 as long;
+    }
+}
+final class Grandchild extends Child {
+    static grandchildStaticMethod(): long {
+        return 73 as long;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -326,31 +326,349 @@ TEST_F(CallStaticMethodTest, call_static_method_double_combine_scenes_8)
     ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 
-TEST_F(CallStaticMethodTest, check_initialization_double)
+TEST_F(CallStaticMethodTest, check_initialization0)
 {
     ani_class cls {};
-    ani_static_method method {};
-    GetMethodData(&cls, &method);
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Operations"));
-    ani_double value {};
-    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &value, VAL1, VAL2), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Operations"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
 }
 
-TEST_F(CallStaticMethodTest, check_initialization_double_a)
+TEST_F(CallStaticMethodTest, check_initialization0_a)
 {
     ani_class cls {};
-    ani_static_method method {};
-    GetMethodData(&cls, &method);
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Operations"));
-    ani_double value {};
-    ani_value args[2U];
-    args[0U].d = VAL1;
-    args[1U].d = VAL2;
-    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &value, args), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Operations"));
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization1_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization2_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Parent", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization3_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization4_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization5_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Child", &cls), ANI_OK);
+
+    ani_class methodClass {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &methodClass), ANI_OK);
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(methodClass, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization6_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "parentStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization7_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "childStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double(cls, method, &doubleValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+}
+
+TEST_F(CallStaticMethodTest, check_initialization8_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("call_static_method_double_test.Grandchild", &cls), ANI_OK);
+
+    ani_static_method method {};
+    ASSERT_EQ(env_->Class_FindStaticMethod(cls, "grandchildStaticMethod", ":d", &method), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
+    ani_value args;
+    ani_double doubleValue;
+    ASSERT_EQ(env_->Class_CallStaticMethod_Double_A(cls, method, &doubleValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("call_static_method_double_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

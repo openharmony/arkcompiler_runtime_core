@@ -576,3 +576,6 @@ class Child extends Parent {
     static childStaticMethod() {};
     static overridedStaticMethod() {};
 }
+final class Grandchild extends Child {
+    static grandchildStaticMethod() {};
+}

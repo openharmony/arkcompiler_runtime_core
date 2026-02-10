@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -403,41 +403,6 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, call_static_method_by_name_float_co
     ASSERT_EQ(valueA, FLOAT_VAL2 - FLOAT_VAL1);
 }
 
-TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization_float)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-    ani_float value {};
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "publicMethodx", "ff:f", &value, FLOAT_VAL1, FLOAT_VAL2),
-              ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "publicMethod", "ff:f", &value, FLOAT_VAL1, FLOAT_VAL2),
-              ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-}
-
-TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization_float_a)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-    ani_float value {};
-    ani_value args[2U];
-    args[0U].d = FLOAT_VAL1;
-    args[1U].d = FLOAT_VAL1;
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethodx", "ff:f", &value, args), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "publicMethod", "ff:f", &value, args), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.G"));
-}
-
 TEST_F(ClassCallStaticMethodByNameFloatTest, check_wrong_signature)
 {
     ani_class cls {};
@@ -462,6 +427,291 @@ TEST_F(ClassCallStaticMethodByNameFloatTest, check_wrong_signature)
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization0)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "parentStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization0_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "parentStaticMethod", ":f", &floatValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "childStaticMethod", ":f", &floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization1_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "childStaticMethod", ":f", &floatValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "grandchildStaticMethod", ":f", &floatValue),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization2_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "grandchildStaticMethod", ":f", &floatValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "parentStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization3_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "parentStaticMethod", ":f", &floatValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "childStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization4_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "childStaticMethod", ":f", &floatValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "grandchildStaticMethod", ":f", &floatValue),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization5_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "grandchildStaticMethod", ":f", &floatValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "parentStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization6_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "parentStaticMethod", ":f", &floatValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "childStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization7_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "childStaticMethod", ":f", &floatValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float(cls, "grandchildStaticMethod", ":f", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameFloatTest, check_initialization8_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
+    ani_value args;
+    ani_float floatValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Float_A(cls, "grandchildStaticMethod", ":f", &floatValue, &args),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_float_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

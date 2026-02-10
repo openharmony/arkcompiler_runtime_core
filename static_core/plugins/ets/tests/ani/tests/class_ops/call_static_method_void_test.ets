@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,4 +113,14 @@ class G {
     }
 
     static count: int = 0;
+}
+
+class Parent {
+    static parentStaticMethod(): void {}
+}
+class Child extends Parent {
+    static childStaticMethod(): void {}
+}
+final class Grandchild extends Child {
+    static grandchildStaticMethod(): void {}
 }

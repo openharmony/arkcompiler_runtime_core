@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -422,39 +422,6 @@ TEST_F(ClassCallStaticMethodByNameTest, call_static_method_by_name_byte_combine_
     ASSERT_EQ(valueA, VAL2 - VAL1);
 }
 
-TEST_F(ClassCallStaticMethodByNameTest, check_initialization_byte)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-    ani_byte value {};
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "publicMethodx", "bb:b", &value, VAL1, VAL2), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "publicMethod", "bb:b", &value, VAL1, VAL2), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-}
-
-TEST_F(ClassCallStaticMethodByNameTest, check_initialization_byte_a)
-{
-    ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.G", &cls), ANI_OK);
-
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-    ani_byte value {};
-    ani_value args[2U];
-    args[0U].b = VAL1;
-    args[1U].b = VAL2;
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "publicMethodx", "bb:b", &value, VAL1, VAL2), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-
-    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "publicMethod", "bb:b", &value, args), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.G"));
-}
-
 TEST_F(ClassCallStaticMethodByNameTest, check_wrong_signature)
 {
     ani_class cls {};
@@ -479,6 +446,289 @@ TEST_F(ClassCallStaticMethodByNameTest, check_wrong_signature)
 
     TestFuncVCorrectSignature(cls, &value, str);
     TestFuncVWrongSignature(cls, &value, str);
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization0)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "parentStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization0_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "parentStaticMethod", ":b", &byteValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "childStaticMethod", ":b", &byteValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization1_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "childStaticMethod", ":b", &byteValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "grandchildStaticMethod", ":b", &byteValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization2_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "grandchildStaticMethod", ":b", &byteValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "parentStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization3_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "parentStaticMethod", ":b", &byteValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "childStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization4_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "childStaticMethod", ":b", &byteValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "grandchildStaticMethod", ":b", &byteValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization5_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "grandchildStaticMethod", ":b", &byteValue, &args),
+              ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "parentStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization6_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "parentStaticMethod", ":b", &byteValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "childStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization7_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "childStaticMethod", ":b", &byteValue, &args), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte(cls, "grandchildStaticMethod", ":b", &byteValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+}
+
+TEST_F(ClassCallStaticMethodByNameTest, check_initialization8_a)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_call_static_method_by_name_byte_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
+    ani_value args;
+    ani_byte byteValue;
+    ASSERT_EQ(env_->Class_CallStaticMethodByName_Byte_A(cls, "grandchildStaticMethod", ":b", &byteValue, &args),
+              ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_call_static_method_by_name_byte_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

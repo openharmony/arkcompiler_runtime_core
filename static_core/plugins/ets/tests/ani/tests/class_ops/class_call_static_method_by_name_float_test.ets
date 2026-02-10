@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,5 +119,21 @@ class G {
 class CheckWrongSignature {
     static method(a: String): float {
         return Double.toFloat(1.1);
+    }
+}
+
+class Parent {
+    static parentStaticMethod(): float {
+        return Double.toFloat(21.01);
+    }
+}
+class Child extends Parent {
+    static childStaticMethod(): float {
+        return Double.toFloat(24.10);
+    }
+}
+final class Grandchild extends Child {
+    static grandchildStaticMethod(): float {
+        return Double.toFloat(21.03);
     }
 }
