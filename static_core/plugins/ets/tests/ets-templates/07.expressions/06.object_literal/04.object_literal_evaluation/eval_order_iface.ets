@@ -39,7 +39,7 @@ function mayThrow(n: number): number {
 }
 
 function foo(): void {
-	let x: I = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
+    let x: I = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
 }
 
 let checkException = (e: Error): boolean => { return e instanceof NullPointerError }

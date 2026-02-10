@@ -17,11 +17,14 @@
 /*---
 desc: >-
     If a key is a union type consisting of literals, then all variants must be listed
-    in the object literal; otherwise, a compile- time error occurs
+    in the object literal; otherwise, a compile-time error occurs
 tags: ['compile-only', 'negative']
+expected_out: |-
+    {{c.expected.replace('\n', ' ')}}
 ---*/
-
-{{c.decl}}
+{% if c.decl %}
+{{ c.decl }}
+{% endif %}
 
 function main() {
     {{c.use|indent}}

@@ -21,9 +21,43 @@ desc: >-
     initialize the value of such type.
 ---*/
 
-{{c.decl}}
+{% if c.decl %}
+{{ c.decl }}
+{% endif %}
 
 function main() {
-    {{c.use|indent}}
+{%- if c.use %}
+    {{ c.use|indent }}
+{% endif %}
+
+    let multipleAssertSuite = new arktest.ArkTestsuite("multiple asserts check");
+
+{%- if c.checks %}
+    {% for subcheck in c.checks %}
+    multipleAssertSuite.addTest('{{ subcheck.call }}', () => {
+        arktest.assertEQ({{ subcheck.call }}, {{ subcheck.value }});
+    });
+    {% endfor %}
+{%- endif %}
+
+    const result: int = multipleAssertSuite.run()
+
+{%- if c.second_checks %}
+
+    {{ c.after|indent }}
+
+    let multipleAssertSuite_second = new arktest.ArkTestsuite("multiple asserts check second");
+
+    {% for subcheck in c.second_checks %}
+    multipleAssertSuite_second.addTest('{{ subcheck.call }}', () => {
+        arktest.assertEQ({{ subcheck.call }}, {{ subcheck.value }});
+    });
+    {% endfor %}
+
+    const result_second: int = multipleAssertSuite_second.run()
+    arktest.assertEQ(result + result_second, 0)
+{%- else %}
+    arktest.assertEQ(result, 0)
+{%- endif %}
 }
 {% endfor %}

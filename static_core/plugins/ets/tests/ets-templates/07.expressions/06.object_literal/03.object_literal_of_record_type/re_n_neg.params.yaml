@@ -21,6 +21,8 @@ cases:
               "5": 5,
               "6": 6
           } // CTE, extra key "6"
+      expected: |-
+          Semantic error ESE0046: Type '"6"' is not compatible with type '"1"|"2"|"3"|"4"|"5"' at index 1
 
     - use: |-
           let a: Record< "1"|"2"|"3"|"4"|"5", number> = {
@@ -29,6 +31,8 @@ cases:
               "3": 3,
               "4": 4,
           } // CTE, missing key "5"
+      expected: |-
+          Semantic error ESE0265: All variants of literals listed in the union type must be listed in the object literal
 
     - use: |-
           let a: Record<string, number> = {
@@ -36,6 +40,8 @@ cases:
               "2": 2,
               null: 3,
           } // CTE, wrong key
+      expected: |-
+          Semantic error ESE0046: Type '*ERROR_TYPE*' is not compatible with type 'String' at index 1
 
     - use: |-
           let a: Record<string, number> = {
@@ -43,33 +49,46 @@ cases:
               "2": 2,
               undefined: 3,
           } // CTE, wrong key
+      expected: |-
+          Semantic error ESE0046: Type '*ERROR_TYPE*' is not compatible with type 'String' at index 1
 
     - use: |-
           let a: Record<string, number> = {
               1: 1,
               "a": 2,
           } // CTE, wrong key type
+      expected: |-
+          Semantic error ESE0046: Type 'Int' is not compatible with type 'String' at index 1
 
     - use: |-
           let a: Record<number, number> = {
               1: 1,
               "a": 2,
           } // CTE, wrong key type
+      expected: |-
+          Semantic error ESE0046: Type '"a"' is not compatible with type 'Double' at index 1
 
     - use: |-
           let a: Record<number | boolean, number> = {
               1: 1,
               true: 2,
           } // CTE, wrong key type, boolean is not allowed
+      expected: |-
+          Semantic error ESE0046: Type '*ERROR_TYPE*' is not compatible with type 'Double|Boolean' at index 1
 
     - use: |-
           let a: Record<Error, string> = {} // CTE, wrong key type, Error is not allowed
+      expected: |-
+          Semantic error ESE0228: Type argument 'Error' should be a subtype of
+          'Numeric|String|BaseEnum<Int>|BaseEnum<Long>|BaseEnum<String>' constraint
 
     - use: |-
           let a: Record<number, number> = {
               1: 1,
               2: "x",
           } // CTE, wrong value type
+      expected: |-
+          Semantic error ESE0046: Type '"x"' is not compatible with type 'Double' at index 2
 
     - use: |-
           let a: Record<number, string> = {
@@ -77,6 +96,8 @@ cases:
               2: "x",
               3: null,
           } // CTE, wrong value type
+      expected: |-
+          Semantic error ESE0046: Type 'null' is not compatible with type 'String' at index 2
 
     - use: |-
           let a: Record<number, string> = {
@@ -84,6 +105,8 @@ cases:
               2: "x",
               3: undefined,
           } // CTE, wrong value type
+      expected: |-
+          Semantic error ESE0046: Type 'undefined' is not compatible with type 'String' at index 2
 
     - use: |-
           let a: Record<string, number> = {
@@ -91,6 +114,8 @@ cases:
               "1": 2,
               "2": 3,
           } // CTE, duplicate key
+      expected: |-
+          Semantic error ESE0263: An object literal cannot multiple properties with same name
 
     - use: |-
           let a: Record<number, number> = {
@@ -98,6 +123,8 @@ cases:
               1: 2,
               2: 3,
           } // CTE, duplicate key
+      expected: |-
+          Semantic error ESE0263: An object literal cannot multiple properties with same name
 
     - use: |-
           let a: Record<number, number> = {
@@ -105,6 +132,8 @@ cases:
               2: 3,
           }
           let b = a["1"]  // CTE, wrong key type
+      expected: |-
+          Semantic error ESE0046: Type '"1"' is not compatible with type 'Double' at index 1
 
     - use: |-
           let a: Record<string, number> = {
@@ -112,6 +141,8 @@ cases:
               "2": 3,
           }
           let b = a[1]  // CTE, wrong key type
+      expected: |-
+          Semantic error ESE0046: Type 'Int' is not compatible with type 'String' at index 1
 
     - use: |-
           let a: Record<number | "10" | "2", string> = {
@@ -119,6 +150,9 @@ cases:
               2: "Feb",
               "10": "Dec",
           }  // CTE, missing required key
+      expected: |-
+          Semantic error ESE0265: All variants of literals
+          listed in the union type must be listed in the object literal
 
     - use: |-
           let a: Record<"10" | "1", string> = {
@@ -126,6 +160,8 @@ cases:
               "10": "Dec",
           }
           let b = a["2"]  // CTE, wrong key
+      expected: |-
+          Semantic error ESE0046: Type '"2"' is not compatible with type '"10"|"1"' at index 1
 
     - use: |-
           let a: Record<"10" | "1", string> = {
@@ -133,3 +169,24 @@ cases:
               "10": "Dec",
           }
           let b = a[2]  // CTE, wrong key
+      expected: |-
+          Semantic error ESE0046: Type 'Int' is not compatible with type '"10"|"1"' at index 1
+
+    - decl: |-
+          enum Season { Spring, Summer, Autumn, Winter }
+      use: |-
+          let a: Record<Season, string> = {
+              Season.Spring: "spring",
+              Season.Summer: "summer",
+              Season.Winter: "winter",
+          } // CTE, missing Season.Autumn
+      expected: |-
+          Semantic error ESE0265: All variants of literals listed in the enum type must be listed in the object literal
+
+    - use: |-
+          let a: Record<number, string> = {
+              1: "one",
+              1.0: "one point zero",
+          } // CTE, duplicate key
+      expected: |-
+          Semantic error ESE0263: An object literal cannot multiple properties with same name

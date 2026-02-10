@@ -20,8 +20,8 @@ cases:
               },
               "b": {},
           }
-          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
-          arktest.expectThrow(() => {a["a"]![1]!}, expectedException)
+      call: |-
+        a["a"]![1]!
 
     - use: |-
           // string to Record
@@ -31,5 +31,5 @@ cases:
               },
               "b": {},
           }
-          let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
-          arktest.expectThrow(() => {!a["a"]![42]!}, expectedException)
+      call: |-
+       !a["a"]![42]!
