@@ -151,7 +151,7 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
 {
     auto timerFunc = [](void *param) {
         auto *timerHandle = static_cast<uv_timer_t *>(param);
-        auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+        auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetPandaAniEnv();
         auto timerId = reinterpret_cast<uint64_t>(timerHandle->data);
         auto [info, exists] = FindTimerInfo(env, timerId);
         if (!exists) {
@@ -187,7 +187,7 @@ void TimerModule::RepeatTimer(uv_timer_t *timer, uint64_t timerId)
 {
     auto *coro = ark::ets::EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    auto *env = coro->GetEtsNapiEnv();
+    auto *env = coro->GetPandaAniEnv();
     auto [_, exists] = FindTimerInfo(env, timerId);
     if (exists) {
         uv_timer_again(timer);

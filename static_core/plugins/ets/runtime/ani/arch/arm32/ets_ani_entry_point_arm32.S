@@ -18,35 +18,35 @@
 #include "arch/arm/shorty.S"
 #include "shorty_values.h"
 
-// uint32_t EtsNapiCalcStackArgsSpaceSize (Method *method, bool is_critical)
-.extern EtsNapiCalcStackArgsSpaceSize
-// void EtsNapiBeginCritical (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBeginCritical
-// void EtsNapiBegin (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBegin
-// void EtsNapiBeginVerify (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBeginVerify
-// void EtsNapiEnd (Method *method)
-.extern EtsNapiEnd
-// void EtsNapiEndVerify (Method *method)
-.extern EtsNapiEndVerify
-// ObjectHeader *EtsNapiObjEnd (Method *method, Reference *ref)
-.extern EtsNapiObjEnd
-// ObjectHeader *EtsNapiObjEndVerify (Method *method, Reference *ref)
-.extern EtsNapiObjEndVerify
+// uint32_t AniCalcStackArgsSpaceSize (Method *method, bool is_critical)
+.extern AniCalcStackArgsSpaceSize
+// void AniBeginCritical (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBeginCritical
+// void AniBegin (Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBegin
+// void AniBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBeginVerify
+// void AniEnd (Method *method)
+.extern AniEnd
+// void AniEndVerify(Method *method)
+.extern AniEndVerify
+// ObjectHeader *AniObjEnd (Method *method, Reference *ref)
+.extern AniObjEnd
+// ObjectHeader *AniObjEndVerify(Method *method, Reference *ref)
+.extern AniObjEndVerify
 // bool IsEtsMethodFastNative (Method *method)
 .extern IsEtsMethodFastNative
 
-// The entrypoint for EtsNapi critical method.
+// The entrypoint for ANI critical method.
 // there are two nuances:
 // 1. Each panda method accepts Method* in the first argument.
 //    We have to drop this argument and shift others back
 // 2. We have to convert double arguments and the return value to floats
 //    Panda runtime operates only with doubles.
 // The function handles all the cases above.
-.global EtsNapiCriticalNativeEntryPoint
-.type EtsNapiCriticalNativeEntryPoint, %function
-EtsNapiCriticalNativeEntryPoint:
+.global AniCriticalNativeEntryPoint
+.type AniCriticalNativeEntryPoint, %function
+AniCriticalNativeEntryPoint:
     CFI_STARTPROC
     CFI_DEF_CFA(sp,0)
 
@@ -70,31 +70,31 @@ EtsNapiCriticalNativeEntryPoint:
     sub sp, sp, #(CFRAME_LOCALS_COUNT * 4)
 
     // save argument to the stack
-    vpush {d0 - d7}
     push {r0 - r3}
 
     mov r4, r0 // save method to r4 to survive the call
 
     // Update current frame in the thread
+    push {r0}
     blx GetCurrentManagedThread
     str fp, [r0, #MANAGED_THREAD_FRAME_OFFSET]
     ldrb r7, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     mov r1, #1
     strb r1, [r0, #MANAGED_THREAD_FRAME_KIND_OFFSET]
     mov THREAD_REG, r0
-    mov r0, r4
+    pop {r0}
 
     // Check num args. If all args could be settle in regs
     // don't calculate stack size
     ldr r0, [r4, #METHOD_NUM_ARGS_OFFSET]
     cmp r0, #2 // max 2 long argument
     // reserve space for GPR and FPR args
-    mov r0, #80
+    mov r0, #16
     ble .Lprepare_stack_critical
 
     mov r0, r4
     mov r1, #1
-    blx EtsNapiCalcStackArgsSpaceSize
+    blx AniCalcStackArgsSpaceSize
 
 .Lprepare_stack_critical:
     mov r1, sp
@@ -105,12 +105,11 @@ EtsNapiCriticalNativeEntryPoint:
     // necessary for stack alignment
     sub sp, sp, #4
     push {THREAD_REG}
-    blx EtsNapiBeginCritical
+    blx AniBeginCritical
     add sp, sp, #8
 
     // load the argument
     pop {r0 - r3}
-    vpop {d0 - d7}
 
     // call the method
     ldr lr, [r4, #METHOD_NATIVE_POINTER_OFFSET]
@@ -126,10 +125,10 @@ EtsNapiCriticalNativeEntryPoint:
     
     mov r2, r7
 
-    pop {r7}
-    CFI_RESTORE(r7)
-    ldr r4, [sp], #12
+    pop {r4}
     CFI_RESTORE(r4)
+    ldr r7, [sp], #12
+    CFI_RESTORE(r7)
     pop {fp}
     CFI_DEF_CFA(sp, 4)
     CFI_RESTORE(fp)
@@ -154,14 +153,16 @@ EtsNapiCriticalNativeEntryPoint:
     add lr, fp, #-CALLER_REG0_OFFSET
     ldm lr, {r0-r3}
 
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
     ldr lr, [fp, #(-CFRAME_FLAGS_SLOT * 4)]
     tst lr, #CFRAME_HAS_FLOAT_REGS_FLAG_MASK
-    beq 6f
+    beq 4f
 
     add lr, fp, #-CALLER_VREG0_OFFSET
     vldm lr, {d0-d7}
+4:
+#endif
 
-6:
     pop {lr}
     CFI_ADJUST_CFA_OFFSET(-4)
     CFI_RESTORE(lr)
@@ -219,54 +220,20 @@ EtsNapiCriticalNativeEntryPoint:
 // |   |   |        |    r4 | 22
 // |   |   |        | align | 23
 // |   +---+--------+-------+
-// |   |            |  d7.1 | 24
-// |   |            |  d7.0 | 25
-// |   |            |  d6.1 | 26
-// |   |            |  d6.0 | 27
-// |   |            |  d5.1 | 28
-// |   |            |  d5.0 | 29
-// |   |            |  d4.1 | 30
-// |   |            |  d4.0 | 31
-// |   |            |  d3.1 | 32
-// |   |            |  d3.0 | 33
-// |   |            |  d2.1 | 34
-// |   |    args    |  d2.0 | 35
-// |   |            |  d1.1 | 36
-// |   |            |  d1.0 | 37
-// |   |            |  d0.1 | 38
-// |   |            |  d0.0 | 39
-// |   |            +-------+ 
-// |   |            |    r3 | 40
-// |   |            |    r2 | 41
-// |   |            |    r1 | 42
-// |   |            |    r0 | 43
+// |   |            |    r3 | 24
+// |   |            |    r2 | 25
+// |   |    args    |    r1 | 26
+// |   |            |    r0 | 27
 // |   +-------+----+-------+
-// |   |       |  Napi d7.1 | 44
-// |   |       |  Napi d7.0 | 45
-// |   |       |  Napi d6.1 | 46
-// |   |       |  Napi d6.0 | 47
-// |   |       |  Napi d5.1 | 48
-// |   |       |  Napi d5.0 | 49
-// |   |       |  Napi d4.1 | 50
-// |   |       |  Napi d4.0 | 51
-// |   |       |  Napi d3.1 | 52
-// |   |       |  Napi d3.0 | 53
-// |   |       |  Napi d2.1 | 54
-// |   |  Napi |  Napi d2.0 | 55
-// |   |  args |  Napi d1.1 | 56
-// |   |       |  Napi d1.0 | 57
-// |   |       |  Napi d0.1 | 58
-// |   |       |  Napi d0.0 | 59
-// |   |       +------------+
-// |   |       |    Napi r3 | 60
-// |   |       |    Napi r2 | 61
-// |   |       |    Napi r1 | 62
-// |   |       |    Napi r0 | 63
-// |   |       +------------+
-// |   |       | stack_argN | 64
+// |   |       |    Napi r3 | 28
+// |   |       |    Napi r2 | 29
+// |   |       |    Napi r1 | 30
+// |   |  Napi |    Napi r0 | 31
+// |   |  args +------------+
+// |   |       | stack_argN | 32
 // |   |       |   ...      |
-// |   |       | stack_arg1 | 64+(N-1)
-// |   |       | stack_arg0 | 64+(N-0)
+// |   |       | stack_arg1 | 32+(N-1)
+// |   |       | stack_arg0 | 32+(N-0)
 // +---+-------+------------+
 // |                        |
 
@@ -298,6 +265,7 @@ EtsNapiCriticalNativeEntryPoint:
 
     // save all the callee saved registers to the stack
     // stack walker will read them during stack unwinding
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
     vpush {d8 - d15}
     CFI_REL_OFFSET(d15, -((CFRAME_LOCALS_COUNT + 2 + 2) * 4))
     CFI_REL_OFFSET(d14, -((CFRAME_LOCALS_COUNT + 2 + 4) * 4))
@@ -307,6 +275,9 @@ EtsNapiCriticalNativeEntryPoint:
     CFI_REL_OFFSET(d10, -((CFRAME_LOCALS_COUNT + 2 + 12) * 4))
     CFI_REL_OFFSET(d9,  -((CFRAME_LOCALS_COUNT + 2 + 14) * 4))
     CFI_REL_OFFSET(d8,  -((CFRAME_LOCALS_COUNT + 2 + 16) * 4))
+#else
+    sub sp, sp, #(8 * 8)
+#endif
     push {r4 - r10}
     CFI_REL_OFFSET(r10, -((CFRAME_LOCALS_COUNT + 18 + 1) * 4)) // Thread pointer
     CFI_REL_OFFSET(r9,  -((CFRAME_LOCALS_COUNT + 18 + 2) * 4)) // Shorty return value 
@@ -320,7 +291,6 @@ EtsNapiCriticalNativeEntryPoint:
     sub sp, sp, #4
 
     // save arguments to the stack
-    vpush {d0 - d7}
     push {r0 - r3}
 
     mov r4, r0 // save method to r4 to survive the call
@@ -348,12 +318,12 @@ EtsNapiCriticalNativeEntryPoint:
     ldr r0, [r4, #METHOD_NUM_ARGS_OFFSET]
     cmp r0, #1 // max one long argument
     // reserve space for GPR and FPR args
-    mov r0, #80
+    mov r0, #16
     ble .Lprepare_stack\@
 
     mov r0, r4
     mov r1, #0
-    blx EtsNapiCalcStackArgsSpaceSize
+    blx AniCalcStackArgsSpaceSize
 
 .Lprepare_stack\@:
     mov r1, sp
@@ -370,7 +340,9 @@ EtsNapiCriticalNativeEntryPoint:
     // load the arguments
     mov r5, r0
     ldmia r5!, {r0 - r3}
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
     fldmiax r5!, {d0 - d7}
+#endif
 
     // call the method
     ldr lr, [r4, #METHOD_NATIVE_POINTER_OFFSET]
@@ -381,7 +353,7 @@ EtsNapiCriticalNativeEntryPoint:
     // handle the result
     and r9, r9, #0xF
     cmp r9, #SHORTY_REFERENCE
-    bne 4f
+    bne 2f
     // it is a reference.
     mov r3, r8
     mov r2, THREAD_REG
@@ -390,20 +362,7 @@ EtsNapiCriticalNativeEntryPoint:
     blx \native_object_end_fn
     b .Lreturn\@
 
-4:  sub r3, r9, #SHORTY_FIRST_FLOAT
-    cmp r3, #(SHORTY_NUM_FLOAT_TYPES - 1)
-    bls 3f
-    b 1f
-
-3:  vmov r5, r6, d0
-    mov r0, r4
-    mov r1, THREAD_REG
-    mov r2, r8
-    blx \native_end_fn
-    vmov d0, r5, r6
-    b .Lreturn\@
-
-1:  mov r5, r0
+2:  mov r5, r0
     mov r6, r1
     mov r0, r4
     mov r1, THREAD_REG
@@ -418,11 +377,10 @@ EtsNapiCriticalNativeEntryPoint:
     mov r1, THREAD_REG
     mov r2, r8
     bl \native_end_fn
-    b .Lreturn\@
 
 .Lreturn\@:
     // Restore callee registers, since GC may change its values while moving objects.
-    sub sp, fp, #(CFRAME_ARM_HARD_CALLEE_REGS_OFFSET - 4)
+    sub sp, fp, #(CFRAME_ARM_SOFTFP_CALLEE_REGS_OFFSET - 4)
 
     mov r2, r7
 
@@ -446,28 +404,30 @@ EtsNapiCriticalNativeEntryPoint:
     // check native exception
     ldr r3, [THREAD_REG, #MANAGED_THREAD_EXCEPTION_OFFSET]
     cmp r3, #0
-    beq 5f
+    beq 3f
 
     // check frame is compiled
     cmp r2, #0
-    beq 5f
+    beq 3f
 
     // check prev frame is true CFRAME and not BYPASS
     ldr r3, [fp, #(SLOT_SIZE * COMP_METHOD_OFFSET)]
     cmp r3, #BYPASS_BRIDGE
-    beq 5f
+    beq 3f
 
     add lr, fp, #-CALLER_REG0_OFFSET
     ldm lr, {r0-r3}
 
+#ifndef PANDA_TARGET_ARM32_ABI_SOFT
     ldr lr, [fp, #(-CFRAME_FLAGS_SLOT * 4)]
     tst lr, #CFRAME_HAS_FLOAT_REGS_FLAG_MASK
-    beq 7f
+    beq 5f
 
     add lr, fp, #-CALLER_VREG0_OFFSET
     vldm lr, {d0-d7}
+5:
+#endif
 
-7:
     pop {lr}
     CFI_ADJUST_CFA_OFFSET(-4)
     CFI_RESTORE(lr)
@@ -475,7 +435,7 @@ EtsNapiCriticalNativeEntryPoint:
     b ThrowNativeExceptionBridge
     CFI_RESTORE_STATE
 
-5:
+3:
     pop {lr}
     CFI_ADJUST_CFA_OFFSET(-4)
     CFI_RESTORE(lr)
@@ -484,8 +444,7 @@ EtsNapiCriticalNativeEntryPoint:
 .endm
 
 // Generate the entrypoint for ANI methods
-ANI_ENTRY_POINT_GENERIC EtsNapiEntryPoint, EtsNapiBegin, EtsNapiEnd, EtsNapiObjEnd
+ANI_ENTRY_POINT_GENERIC AniEntryPoint, AniBegin, AniEnd, AniObjEnd
 
 // Generate the entrypoint for ANI methods in verifyANI mode
-ANI_ENTRY_POINT_GENERIC EtsNapiVerifyEntryPoint, EtsNapiBeginVerify, EtsNapiEndVerify, EtsNapiObjEndVerify
-
+ANI_ENTRY_POINT_GENERIC AniVerifyEntryPoint, AniBeginVerify, AniEndVerify, AniObjEndVerify

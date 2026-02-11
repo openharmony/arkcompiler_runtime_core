@@ -59,9 +59,9 @@ endfunction()
 function(prepare_spawn TARGET ABC_FILES WORK_DIR)
     # Build Spawn native module
     set(TARGET_LIB ${TARGET}-lib)
-    set(ETSNAPI_LIB_DIR "${WORK_DIR}/lib")
-    file(MAKE_DIRECTORY ${ETSNAPI_LIB_DIR})
-    build_spawn_native_module(${TARGET_LIB} ${ETSNAPI_LIB_DIR})
+    set(ANI_LIB_DIR "${WORK_DIR}/lib")
+    file(MAKE_DIRECTORY ${ANI_LIB_DIR})
+    build_spawn_native_module(${TARGET_LIB} ${ANI_LIB_DIR})
 
     # Build Spawn managed code. Produced abc files will be loaded into boot context
     set(TARGET_ABC ${TARGET}-abc)
@@ -70,7 +70,7 @@ function(prepare_spawn TARGET ABC_FILES WORK_DIR)
 
     # Add env variables required for spawn native module
     set(PANDA_RUN_PREFIX
-        LD_LIBRARY_PATH=${ETSNAPI_LIB_DIR}
+        LD_LIBRARY_PATH=${ANI_LIB_DIR}
         NATIVE_LIB_NAME=${TARGET_LIB}
         ${PANDA_RUN_PREFIX}
         PARENT_SCOPE)

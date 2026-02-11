@@ -137,7 +137,7 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
                        << "; shouldVerifyPermission: " << shouldVerifyPermission
                        << "; fileName: " << fileNameStr.c_str();
     ScopedNativeCodeThread snct(coroutine);
-    auto env = coroutine->GetEtsNapiEnv();
+    auto env = coroutine->GetPandaAniEnv();
     if (!coroutine->GetPandaVM()->LoadNativeLibrary(env, ResolveLibraryName(nameStr), shouldVerifyPermission,
                                                     fileNameStr)) {
         ScopedManagedCodeThread smct(coroutine);

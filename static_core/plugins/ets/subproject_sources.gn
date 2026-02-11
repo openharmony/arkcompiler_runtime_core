@@ -117,7 +117,7 @@ srcs_runtime = [
   "runtime/ets_exceptions.cpp",
   "runtime/ets_itable_builder.cpp",
   "runtime/ets_language_context.cpp",
-  "runtime/ets_napi_env.cpp",
+  "runtime/ets_ani_env.cpp",
   "runtime/ets_native_library.cpp",
   "runtime/ets_native_library_provider.cpp",
   "runtime/ets_namespace_manager.cpp",
@@ -341,19 +341,19 @@ if (ark_ets_interop_js) {
 
 if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
   srcs_runtime += [
-    "runtime/ani/arch/amd64/ets_napi_entry_point_amd64.S",
+    "runtime/ani/arch/amd64/ets_ani_entry_point_amd64.S",
     "runtime/ani/arch/amd64/ets_async_entry_point_amd64.S",
     "runtime/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S",
   ]
 } else if (current_cpu == "arm64") {
   srcs_runtime += [
-    "runtime/ani/arch/arm64/ets_napi_entry_point_aarch64.S",
+    "runtime/ani/arch/arm64/ets_ani_entry_point_aarch64.S",
     "runtime/ani/arch/arm64/ets_async_entry_point_aarch64.S",
     "runtime/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S",
   ]
 } else if (current_cpu == "arm") {
   srcs_runtime += [
-    "runtime/ani/arch/arm32/ets_napi_entry_point_arm32.S",
+    "runtime/ani/arch/arm32/ets_ani_entry_point_arm32.S",
     "runtime/ani/arch/arm32/ets_async_entry_point_arm32.S",
     "runtime/entrypoints/arch/arm32/ets_proxy_entry_point_arm32.S",
   ]

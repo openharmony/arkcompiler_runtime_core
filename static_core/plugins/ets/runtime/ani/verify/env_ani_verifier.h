@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -37,13 +38,13 @@ class VResolver;
 
 class EnvANIVerifier final {
 public:
-    EnvANIVerifier(ANIVerifier *verifier, const __ani_interaction_api *interactionAPI);
+    EnvANIVerifier(PandaAniEnv *ownerEnv, ANIVerifier *verifier, const __ani_interaction_api *interactionAPI);
     ~EnvANIVerifier() = default;
 
     VEnv *GetEnv();
     VEnv *AttachThread();
 
-    void PushNativeFrame();
+    void PushNativeFrame(PandaAniEnv *ownerEnv);
     [[nodiscard]] std::optional<PandaString> PopNativeFrame();
 
     void CreateLocalScope();
@@ -101,7 +102,7 @@ private:
         VEnv *venv;
     };
 
-    void DoPushNativeFrame();
+    void DoPushNativeFrame(PandaAniEnv *ownerEnv);
     static bool IsValidVerifiedRef(const Frame &frame, VRef *vref);
 
     ANIVerifier *verifier_ {};

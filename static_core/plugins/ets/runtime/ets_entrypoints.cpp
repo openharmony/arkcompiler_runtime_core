@@ -397,7 +397,7 @@ extern "C" void BeginGeneralNativeMethod()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
@@ -411,7 +411,7 @@ extern "C" void EndGeneralNativeMethodPrim()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     coroutine->NativeCodeEnd();
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
@@ -421,7 +421,7 @@ extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::ets::EtsReference *etsRe
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
     coroutine->NativeCodeEnd();
     ObjectHeader *ret = nullptr;
     if (LIKELY(!coroutine->HasPendingException())) {
@@ -436,7 +436,7 @@ extern "C" void BeginQuickNativeMethod()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
@@ -448,7 +448,7 @@ extern "C" void EndQuickNativeMethodPrim()
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
@@ -457,7 +457,7 @@ extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
     ObjectHeader *ret = nullptr;
     if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();

@@ -554,7 +554,7 @@ if(NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER))
     add_subdirectory(micro-benchmarks)
 endif()
 
-function(panda_ets_napi_add_gtest)
+function(panda_ets_native_add_gtest)
     if (CMAKE_CROSSCOMPILING)
         return()
     endif()

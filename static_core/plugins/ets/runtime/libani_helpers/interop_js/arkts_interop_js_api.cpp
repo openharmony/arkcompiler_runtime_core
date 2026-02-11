@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 #include "arkts_interop_js_api.h"
 #include "libarkbase/utils/expected.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
 
 static ark::Expected<ark::ets::EtsCoroutine *, std::string_view> GetCurrentCoroutine()
@@ -49,7 +49,7 @@ extern "C" bool arkts_napi_scope_open(ani_env *env, napi_env *result)
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, " << optCoro.Error();
         return false;
     }
-    auto *coro = ark::ets::PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine();
+    auto *coro = ark::ets::PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine();
     if (UNLIKELY(coro != optCoro.Value())) {
         LOG(WARNING, RUNTIME) << "Cannot open napi scope, input ani_env is taken from another coroutine";
         return false;

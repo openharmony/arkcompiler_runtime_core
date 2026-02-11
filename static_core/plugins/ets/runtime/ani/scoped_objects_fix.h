@@ -18,8 +18,8 @@
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/ani_checkers.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -32,7 +32,7 @@ class ManagedCodeAccessor {
     static constexpr long WREF_UNDEFINED_VALUE = -2UL;  // NOLINT(google-runtime-int)
 
 public:
-    explicit ManagedCodeAccessor(PandaEnv *env) : env_(env) {}
+    explicit ManagedCodeAccessor(PandaAniEnv *env) : env_(env) {}
     ~ManagedCodeAccessor() = default;
 
     EtsCoroutine *GetCoroutine() const
@@ -40,7 +40,7 @@ public:
         return env_->GetEtsCoroutine();
     }
 
-    PandaEnv *GetPandaEnv()
+    PandaAniEnv *GetPandaEnv()
     {
         return env_;
     }
@@ -356,7 +356,7 @@ private:
         return reinterpret_cast<ani_wref>(etsRef);
     }
 
-    PandaEnv *env_;
+    PandaAniEnv *env_;
 };
 
 class ScopedManagedCodeFix : public ManagedCodeAccessor {
@@ -385,10 +385,10 @@ class ScopedManagedCodeFix : public ManagedCodeAccessor {
     };
 
 public:
-    explicit ScopedManagedCodeFix(PandaEnv *env)
+    explicit ScopedManagedCodeFix(PandaAniEnv *env)
         : ManagedCodeAccessor(env), alreadyInManaged_(ManagedThread::IsManagedScope())
     {
-        ASSERT(env == PandaEnv::GetCurrent());
+        ASSERT(env == EtsCoroutine::GetCurrent()->GetPandaAniEnv());
         ASSERT(alreadyInManaged_ ? !StackWalker::Create(GetCoroutine()).GetMethod()->IsCriticalNative() : true);
 
         if (alreadyInManaged_ && IsAccessFromManagedAllowed()) {
@@ -397,7 +397,7 @@ public:
 
         GetCoroutine()->ManagedCodeBegin();
     }
-    explicit ScopedManagedCodeFix(ani_env *env) : ScopedManagedCodeFix(PandaEnv::FromAniEnv(env)) {}
+    explicit ScopedManagedCodeFix(ani_env *env) : ScopedManagedCodeFix(PandaAniEnv::FromAniEnv(env)) {}
 
     ~ScopedManagedCodeFix()
     {
@@ -438,7 +438,7 @@ private:
 template <typename Type>
 class LocalRef {
 public:
-    explicit LocalRef(ani_env *env) : env_(PandaEnv::FromAniEnv(env)), ref_(nullptr) {}
+    explicit LocalRef(ani_env *env) : env_(PandaAniEnv::FromAniEnv(env)), ref_(nullptr) {}
     ~LocalRef()
     {
         Reset();

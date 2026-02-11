@@ -31,9 +31,9 @@
 #include "plugins/ets/runtime/ani/ani_mangle.h"
 #include "plugins/ets/runtime/ani/ani_type_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -54,11 +54,11 @@
     } while (false)
 
 // CC-OFFNXT(G.PRE.02) should be with define
-#define CHECK_ENV(env)                                                                           \
-    do {                                                                                         \
-        CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);                                              \
-        bool hasPendingException = ::ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException(); \
-        ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                    \
+#define CHECK_ENV(env)                                                                              \
+    do {                                                                                            \
+        CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);                                                 \
+        bool hasPendingException = ::ark::ets::PandaAniEnv::FromAniEnv(env)->HasPendingException(); \
+        ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                       \
     } while (false)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
@@ -431,7 +431,7 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
 
 // Descriptor should conform to rules of runtime internal descriptors
 template <bool IS_MODULE, typename T>
-static ani_status DoFind(PandaEnv *pandaEnv, const char *descriptor, ScopedManagedCodeFix &s, T *result)
+static ani_status DoFind(PandaAniEnv *pandaEnv, const char *descriptor, ScopedManagedCodeFix &s, T *result)
 {
     ASSERT(pandaEnv != nullptr);
     ASSERT(descriptor != nullptr);
@@ -459,7 +459,7 @@ static ani_status DoFind(PandaEnv *pandaEnv, const char *descriptor, ScopedManag
 template <bool IS_MODULE, typename T>
 static ani_status DoFind(ani_env *env, const char *descriptor, T *result)
 {
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    auto *pandaEnv = PandaAniEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     return DoFind<IS_MODULE>(pandaEnv, descriptor, s, result);
 }
@@ -605,7 +605,7 @@ ani_status GetVM(ani_env *env, ani_vm **result)
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
 
-    *result = PandaEnv::FromAniEnv(env)->GetEtsVM();
+    *result = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
     return ANI_OK;
 }
 
@@ -990,7 +990,7 @@ NO_UB_SANITIZE static ani_status Array_Push(ani_env *env, ani_array array, ani_r
     CHECK_PTR_ARG(array);
     CHECK_PTR_ARG(ref);
 
-    const auto *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
+    const auto *cache = PandaAniEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
     ani_value arg;
     arg.r = ref;
     ani_int ignored = 0;
@@ -3177,7 +3177,7 @@ NO_UB_SANITIZE static ani_status ExistUnhandledError(ani_env *env, ani_boolean *
     CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    auto *pandaEnv = PandaAniEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     *result = pandaEnv->HasPendingException() ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
@@ -3188,7 +3188,7 @@ NO_UB_SANITIZE static ani_status ResetError(ani_env *env)
     ANI_DEBUG_TRACE(env);
     CHECK_PTR_ARG(env);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    auto *pandaEnv = PandaAniEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     pandaEnv->ClearException();
     return ANI_OK;
@@ -3204,7 +3204,7 @@ NO_UB_SANITIZE static ani_status ThrowError(ani_env *env, ani_error err)
     ScopedManagedCodeFix s(env);
     EtsThrowable *exception = s.ToInternalType(err);
     ANI_CHECK_RETURN_IF_EQ(exception, nullptr, ANI_ERROR);
-    PandaEnv::FromAniEnv(env)->SetException(exception);
+    PandaAniEnv::FromAniEnv(env)->SetException(exception);
     return ANI_OK;
 }
 
@@ -3249,7 +3249,7 @@ private:
 // NOLINTBEGIN(clang-analyzer-deadcode.DeadStores)
 static ani_status GetErrorDescriptionLines(ani_env *env, ani_error error, ani_string *errDesc)
 {
-    const StdlibCache *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
+    const StdlibCache *cache = PandaAniEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
 
     LocalRef<ani_type> errorType(env);
     auto status = env->Object_GetType(error, &errorType.GetRef());
@@ -3319,7 +3319,7 @@ NO_UB_SANITIZE static ani_status DescribeError(ani_env *env)
     ANI_DEBUG_TRACE(env);
     CHECK_PTR_ARG(env);
 
-    const StdlibCache *cache = PandaEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
+    const StdlibCache *cache = PandaAniEnv::FromAniEnv(env)->GetEtsVM()->GetStdlibCache();
 
     ani_boolean errorExists = ANI_FALSE;
     auto status = env->ExistUnhandledError(&errorExists);
@@ -3355,7 +3355,7 @@ NO_UB_SANITIZE static ani_status GetUnhandledError(ani_env *env, ani_error *resu
     CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    auto *pandaEnv = PandaAniEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     EtsThrowable *throwable = pandaEnv->GetThrowable();
     ANI_CHECK_RETURN_IF_EQ(throwable, nullptr, ANI_ERROR);
@@ -3375,7 +3375,7 @@ NO_UB_SANITIZE static ani_status GetNull(ani_env *env, ani_ref *result)
     CHECK_ENV(env);
     CHECK_PTR_ARG(result);
 
-    PandaEnv *pandaEnv = PandaEnv::FromAniEnv(env);
+    auto *pandaEnv = PandaAniEnv::FromAniEnv(env);
     ScopedManagedCodeFix s(pandaEnv);
     return s.GetNullRef(result);
 }

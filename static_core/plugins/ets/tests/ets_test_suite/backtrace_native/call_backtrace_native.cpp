@@ -72,7 +72,7 @@ static ani_int CallStepArkByNativeFrame([[maybe_unused]] ani_env *env, [[maybe_u
 
     // #0  GetCurrentFP <--- frame of currentFp
     // #1  CallStaticArkBacktrace
-    // #2  EtsNapiEntryPoint
+    // #2  AniEntryPoint
     // #3  InterpreterToCompiledCodeBridge
     // #4  HANDLE_FAST_CALL_SHORT_V4_V4_ID16
     uintptr_t currentFp = GetCurrentFP();

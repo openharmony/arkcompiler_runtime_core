@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@
 #include "plugins/ets/stdlib/native/core/IntlRelativeTimeFormat.h"
 
 #include "plugins/ets/stdlib/native/core/IntlDisplayNames.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 #include "ani/ani.h"
 
 namespace ark::ets::stdlib::intl {

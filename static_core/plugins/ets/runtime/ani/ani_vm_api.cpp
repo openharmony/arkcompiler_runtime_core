@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,7 +144,7 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
         LOG(ERROR, ANI) << "Cannot get environment, no current coroutine exists";
         return ANI_ERROR;
     }
-    ani_env *env = coro->GetEtsNapiEnv();
+    ani_env *env = coro->GetPandaAniEnv();
     // Each EtsCoroutine must have a valid ani_env
     ASSERT(env != nullptr);
     *result = env;
@@ -196,7 +196,7 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
         }
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     }
-    *result = PandaEtsNapiEnv::GetCurrent();
+    *result = EtsCoroutine::CastFromThread(exclusiveCoro)->GetPandaAniEnv();
     return ANI_OK;
 }
 

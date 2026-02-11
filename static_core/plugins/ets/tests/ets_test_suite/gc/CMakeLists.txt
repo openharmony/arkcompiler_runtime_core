@@ -1,4 +1,4 @@
-# Copyright (c)Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,7 +49,7 @@ function(add_ets_gc_test)
     add_dependencies(ets_test_suite_gc ${target})
 endfunction()
 
-function(add_ets_napi_gc_test)
+function(add_native_gc_test)
     set(prefix ARG)
     set(singleValues FILE CPP_SOURCE)
     set(multiValues OPTIONS)
@@ -131,5 +131,5 @@ add_ets_gc_test(FILE free_heap_size_test.ets OPTIONS "--gc-type=g1-gc" "--gc-tri
 add_ets_gc_test(FILE alloc_pinned.ets OPTIONS "--gc-type=g1-gc" "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post" MODE "INT")
 # Running tests via API calls
 if (NOT ENABLE_UNIT_TESTS_FULL_COVERAGE)
-    add_ets_napi_gc_test(FILE pending_exception_gc_test.ets CPP_SOURCE pending_exception_test.cpp OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never")
+    add_native_gc_test(FILE pending_exception_gc_test.ets CPP_SOURCE pending_exception_test.cpp OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never")
 endif()

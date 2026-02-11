@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include "ets_object_state_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/code_scopes-inl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
@@ -68,7 +68,7 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
 
     auto *coro = EtsCoroutine::GetCurrent();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (UNLIKELY(PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
+    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
         return false;
     }
     auto ctx = InteropCtx::Current(coro);
@@ -116,7 +116,7 @@ PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result)
     }
 
     auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
+    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
         return false;
     }
 
@@ -159,7 +159,7 @@ static bool ConvertNativeReferences(EtsCoroutine *coro, InteropCtx *ctx, Span<na
 {
     ASSERT(values.size() == results.size());
 
-    ani::ScopedManagedCodeFix s(coro->GetEtsNapiEnv());
+    ani::ScopedManagedCodeFix s(coro->GetPandaAniEnv());
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
     napi_env env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);

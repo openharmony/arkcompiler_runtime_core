@@ -15,21 +15,18 @@
 
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
 
+#include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::ets::ani::verify {
 
-PandaUniquePtr<VEnv> VEnv::Create()
+/* static */
+PandaUniquePtr<VEnv> VEnv::Create(PandaAniEnv *ownerEnv)
 {
-    return MakePandaUnique<VEnv>();
+    return MakePandaUnique<VEnv>(ownerEnv);
 }
 
-ani_env *VEnv::GetEnv()
-{
-    return EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
-}
-
-/*static*/
+/* static */
 VEnv *VEnv::GetCurrent()
 {
     if (Thread::GetCurrent() == nullptr) {
@@ -39,8 +36,22 @@ VEnv *VEnv::GetCurrent()
     if (coro == nullptr) {
         return nullptr;
     }
-    auto venv = coro->GetEtsNapiEnv()->GetEnvANIVerifier()->GetEnv();
+    auto venv = coro->GetPandaAniEnv()->GetEnvANIVerifier()->GetEnv();
     return venv;
+}
+
+/* static */
+bool VEnv::IsVEnv(ani_env *env)
+{
+    return env->c_api == ani::verify::GetVerifyInteractionAPI();
+}
+
+/* static */
+VEnv *VEnv::FromAniEnv(ani_env *env)
+{
+    ASSERT(env != nullptr);
+    ASSERT(IsVEnv(env));
+    return static_cast<VEnv *>(env);
 }
 
 void VEnv::CreateLocalScope()
@@ -132,7 +143,7 @@ bool VEnv::IsValidGlobalVerifiedResolver(VResolver *vresolver)
 
 EnvANIVerifier *VEnv::GetEnvANIVerifier()
 {
-    return PandaEnv::FromAniEnv(GetEnv())->GetEnvANIVerifier();
+    return PandaAniEnv::FromAniEnv(GetEnv())->GetEnvANIVerifier();
 }
 
 }  // namespace ark::ets::ani::verify

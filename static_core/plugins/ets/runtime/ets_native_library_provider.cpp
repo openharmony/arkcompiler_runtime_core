@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ std::optional<std::string> NativeLibraryProvider::CallAniCtor(ani_env *env, cons
         using AniCtor = ani_status (*)(ani_vm *, uint32_t *);
         auto ctor = reinterpret_cast<AniCtor>(res.Value());
         uint32_t version;
-        ani_vm *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
+        ani_vm *vm = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
         ani_status status = ctor(vm, &version);
         if (status != ANI_OK) {
             return "ANI_Constructor returns an error: " + std::to_string(status);
@@ -132,7 +132,7 @@ std::optional<std::string> NativeLibraryProvider::CallAniCtor(ani_env *env, cons
 
 std::optional<std::string> NativeLibraryProvider::GetCallerClassName(ani_env *env)
 {
-    auto coroutine = PandaEnv::FromAniEnv(env)->GetEtsCoroutine();
+    auto coroutine = PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine();
     if (coroutine == nullptr) {
         LOG(ERROR, RUNTIME) << "Coroutine is null, failed to get class name.";
         return std::nullopt;

@@ -13,85 +13,91 @@
  * limitations under the License.
  */
 
-#include "runtime/include/managed_thread.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
+
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ani/verify/types/venv.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
-Expected<PandaEtsNapiEnv *, const char *> PandaEtsNapiEnv::Create(EtsCoroutine *coroutine,
-                                                                  mem::InternalAllocatorPtr allocator)
+
+/* static */
+Expected<PandaAniEnv *, const char *> PandaAniEnv::Create(EtsCoroutine *coroutine, mem::InternalAllocatorPtr allocator)
 {
-    auto etsVm = coroutine->GetVM();
+    auto *etsVm = coroutine->GetVM();
     auto referenceStorage = MakePandaUnique<EtsReferenceStorage>(etsVm->GetGlobalObjectStorage(), allocator, false);
     if (!referenceStorage || !referenceStorage->GetAsReferenceStorage()->Init()) {
         return Unexpected("Cannot allocate EtsReferenceStorage");
     }
 
-    auto *etsNapiEnv = allocator->New<PandaEtsNapiEnv>(coroutine, std::move(referenceStorage));
-    if (etsNapiEnv == nullptr) {
-        return Unexpected("Cannot allocate PandaEtsNapiEnv");
+    auto *aniEnv = allocator->New<PandaAniEnv>(coroutine, std::move(referenceStorage));
+    if (aniEnv == nullptr) {
+        return Unexpected("Cannot allocate PandaAniEnv");
     }
 
-    return Expected<PandaEtsNapiEnv *, const char *>(etsNapiEnv);
+    return Expected<PandaAniEnv *, const char *>(aniEnv);
 }
 
-PandaEtsNapiEnv *PandaEtsNapiEnv::GetCurrent()
+/* static */
+PandaAniEnv *PandaAniEnv::FromAniEnv(ani_env *env)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    return coro->GetEtsNapiEnv();
+    ASSERT(env != nullptr);
+    if (UNLIKELY(ani::verify::VEnv::IsVEnv(env))) {
+        env = ani::verify::VEnv::FromAniEnv(env)->GetEnv();
+    }
+    return static_cast<PandaAniEnv *>(env);
 }
 
-PandaEtsNapiEnv::PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
+PandaAniEnv::PandaAniEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
     : ani_env {ani::GetInteractionAPI()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
 {
-    if (coroutine->GetPandaVM()->IsVerifyANI()) {
-        ani::verify::ANIVerifier *verifier = GetEtsVM()->GetANIVerifier();
-        envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(verifier, c_api);
+    auto *vm = coroutine->GetPandaVM();
+    if (vm->IsVerifyANI()) {
+        ani::verify::ANIVerifier *verifier = vm->GetANIVerifier();
+        envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(this, verifier, c_api);
     }
 }
 
-PandaEtsVM *PandaEtsNapiEnv::GetEtsVM() const
+PandaEtsVM *PandaAniEnv::GetEtsVM() const
 {
     return coroutine_->GetPandaVM();
 }
 
-void PandaEtsNapiEnv::FreeInternalMemory()
+void PandaAniEnv::FreeInternalMemory()
 {
     referenceStorage_.reset();
 }
 
-void PandaEtsNapiEnv::CleanUp()
+void PandaAniEnv::CleanUp()
 {
     referenceStorage_->CleanUp();
 }
 
-void PandaEtsNapiEnv::ReInitialize()
+void PandaAniEnv::ReInitialize()
 {
     referenceStorage_->ReInitialize();
 }
 
-void PandaEtsNapiEnv::SetException(EtsThrowable *thr)
+void PandaAniEnv::SetException(EtsThrowable *thr)
 {
     ASSERT_MANAGED_CODE();
     coroutine_->SetException(thr->GetCoreType());
 }
 
-EtsThrowable *PandaEtsNapiEnv::GetThrowable() const
+EtsThrowable *PandaAniEnv::GetThrowable() const
 {
     ASSERT_MANAGED_CODE();
     return reinterpret_cast<EtsThrowable *>(coroutine_->GetException());
 }
 
-bool PandaEtsNapiEnv::HasPendingException() const
+bool PandaAniEnv::HasPendingException() const
 {
     return coroutine_->HasPendingException();
 }
 
-void PandaEtsNapiEnv::ClearException()
+void PandaAniEnv::ClearException()
 {
     ASSERT_MANAGED_CODE();
     coroutine_->ClearException();

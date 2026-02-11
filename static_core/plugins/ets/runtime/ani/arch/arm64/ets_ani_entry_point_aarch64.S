@@ -17,27 +17,27 @@
 #include "arch/aarch64/shorty.S"
 #include "shorty_values.h"
 
-// uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool is_critical)
-.extern MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
-// void EtsNapiBeginCritical(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern MAKE_ASM_NAME(EtsNapiBeginCritical)
-// void EtsNapiBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern MAKE_ASM_NAME(EtsNapiBegin)
-// void EtsNapiBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern MAKE_ASM_NAME(EtsNapiBeginVerify)
-// void EtsNapiEnd(Method *method)
-.extern MAKE_ASM_NAME(EtsNapiEnd)
-// void EtsNapiEndVerify(Method *method)
-.extern MAKE_ASM_NAME(EtsNapiEndVerify)
-// ObjectHeader *EtsNapiObjEnd(Method *method, Reference *ref)
-.extern MAKE_ASM_NAME(EtsNapiObjEnd)
-// ObjectHeader *EtsNapiObjEndVerify(Method *method, Reference *ref)
-.extern MAKE_ASM_NAME(EtsNapiObjEndVerify)
+// uint32_t AniCalcStackArgsSpaceSize(Method *method, bool is_critical)
+.extern MAKE_ASM_NAME(AniCalcStackArgsSpaceSize)
+// void AniBeginCritical(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern MAKE_ASM_NAME(AniBeginCritical)
+// void AniBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern MAKE_ASM_NAME(AniBegin)
+// void AniBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern MAKE_ASM_NAME(AniBeginVerify)
+// void AniEnd(Method *method)
+.extern MAKE_ASM_NAME(AniEnd)
+// void AniEndVerify(Method *method)
+.extern MAKE_ASM_NAME(AniEndVerify)
+// ObjectHeader *AniObjEnd(Method *method, Reference *ref)
+.extern MAKE_ASM_NAME(AniObjEnd)
+// ObjectHeader *AniObjEndVerify(Method *method, Reference *ref)
+.extern MAKE_ASM_NAME(AniObjEndVerify)
 // bool IsEtsMethodFastNative(Method *method)
 .extern MAKE_ASM_NAME(IsEtsMethodFastNative)
 
 
-// The entrypoint for EtsNapi critical method.
+// The entrypoint for ANI critical method.
 // there are two nuances:
 // 1. Each panda method accepts Method* in the first argument.
 //    We have to drop this argument and shift others back
@@ -45,9 +45,9 @@
 //    Panda runtime operates only with doubles.
 // The function handles all the cases above.
 
-.global MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint)
-TYPE_FUNCTION(EtsNapiCriticalNativeEntryPoint)
-MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
+.global MAKE_ASM_NAME(AniCriticalNativeEntryPoint)
+TYPE_FUNCTION(AniCriticalNativeEntryPoint)
+MAKE_ASM_NAME(AniCriticalNativeEntryPoint):
     CFI_STARTPROC
     CFI_DEF_CFA(sp, 0)
 
@@ -95,7 +95,7 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
 
     mov x0, x19
     mov w1, #1
-    bl MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
+    bl MAKE_ASM_NAME(AniCalcStackArgsSpaceSize)
 
 .Lprepare_stack_critical:
     mov x1, sp
@@ -104,7 +104,7 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
     mov x3, sp
     mov x4, THREAD_REG
     mov x0, x19
-    bl MAKE_ASM_NAME(EtsNapiBeginCritical)
+    bl MAKE_ASM_NAME(AniBeginCritical)
 
     // load the arguments
     ldp x0, x1, [sp], #16
@@ -358,7 +358,7 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
 
     mov x0, x19
     mov w1, #0
-    bl MAKE_ASM_NAME(EtsNapiCalcStackArgsSpaceSize)
+    bl MAKE_ASM_NAME(AniCalcStackArgsSpaceSize)
 
 .Lprepare_stack\@:
     mov x1, sp
@@ -513,7 +513,7 @@ MAKE_ASM_NAME(EtsNapiCriticalNativeEntryPoint):
 .endm
 
 // Generate the entrypoint for ANI methods
-ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(EtsNapiEntryPoint), MAKE_ASM_NAME(EtsNapiBegin), MAKE_ASM_NAME(EtsNapiEnd), MAKE_ASM_NAME(EtsNapiObjEnd)
+ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(AniEntryPoint), MAKE_ASM_NAME(AniBegin), MAKE_ASM_NAME(AniEnd), MAKE_ASM_NAME(AniObjEnd)
 
 // Generate the entrypoint for ANI methods in verifyANI mode
-ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(EtsNapiVerifyEntryPoint), MAKE_ASM_NAME(EtsNapiBeginVerify), MAKE_ASM_NAME(EtsNapiEndVerify), MAKE_ASM_NAME(EtsNapiObjEndVerify)
+ANI_ENTRY_POINT_GENERIC MAKE_ASM_NAME(AniVerifyEntryPoint), MAKE_ASM_NAME(AniBeginVerify), MAKE_ASM_NAME(AniEndVerify), MAKE_ASM_NAME(AniObjEndVerify)

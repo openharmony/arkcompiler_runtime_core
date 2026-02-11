@@ -14,7 +14,7 @@
  */
 #include "plugins/ets/runtime/integrate/ets_ani_expo.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -24,7 +24,7 @@
 namespace ark::ets {
 PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napienv)
 {
-    PandaEtsVM *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
+    PandaEtsVM *vm = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
     ProcessTaskpoolWorker(true);
     vm->PreZygoteFork();
 #ifdef PANDA_ETS_INTEROP_JS
@@ -57,7 +57,7 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
         }
     }
 
-    PandaEtsVM *vm = PandaEnv::FromAniEnv(env)->GetEtsVM();
+    PandaEtsVM *vm = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
     if (vm->GetLanguageContext().IsEnabledCHA()) {
         vm->GetRuntime()->GetClassLinker()->GetAotManager()->VerifyClassHierarchy();
     }

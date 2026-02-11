@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ set(profiler_test_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_custom_target(ets_test_suite_profiler)
 
-function(add_ets_napi_profiler_test)
+function(add_profiler_saver_test)
     set(prefix ARG)
     set(singleValues FILE CPP_SOURCE)
     set(multiValues OPTIONS)
@@ -54,4 +54,4 @@ endfunction()
 
 # Running tests via API calls
 
-add_ets_napi_profiler_test(FILE profile_saver_test.ets CPP_SOURCE profile_saver_test.cpp OPTIONS "")
+add_profiler_saver_test(FILE profile_saver_test.ets CPP_SOURCE profile_saver_test.cpp OPTIONS "")

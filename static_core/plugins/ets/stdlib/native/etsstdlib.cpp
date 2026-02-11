@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 
 namespace ark::ets::stdlib {
 
-// EtsNapiOnLoad needs to implement issue #18135
+// Need to implement issue #18135
 /* And provide symbol after fix #18135: extern "C"*/
 // NOLINTNEXTLINE(readability-identifier-naming)
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

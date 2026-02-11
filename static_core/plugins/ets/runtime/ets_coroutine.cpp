@@ -57,11 +57,11 @@ CoroutineManager *EtsCoroutine::GetCoroutineManager() const
 void EtsCoroutine::Initialize()
 {
     auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
-    auto etsNapiEnv = PandaEtsNapiEnv::Create(this, allocator);
-    if (!etsNapiEnv) {
-        LOG(FATAL, RUNTIME) << "Cannot create PandaEtsNapiEnv: " << etsNapiEnv.Error();
+    auto aniEnv = PandaAniEnv::Create(this, allocator);
+    if (!aniEnv) {
+        LOG(FATAL, RUNTIME) << "Cannot create PandaAniEnv: " << aniEnv.Error();
     }
-    etsNapiEnv_ = etsNapiEnv.Value();
+    aniEnv_ = aniEnv.Value();
     // Main EtsCoroutine is Initialized before class linker and promise_class_ptr_ will be set after creating the class
     if (Runtime::GetCurrent()->IsInitialized()) {
         promiseClassPtr_ = PlatformTypes(GetPandaVM())->corePromise->GetRuntimeClass();
@@ -83,21 +83,21 @@ void EtsCoroutine::Initialize()
 void EtsCoroutine::ReInitialize(PandaString name, CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo,
                                 CoroutinePriority priority)
 {
-    etsNapiEnv_->ReInitialize();
+    aniEnv_->ReInitialize();
     Coroutine::ReInitialize(std::move(name), context, std::move(epInfo), priority);
 }
 
 void EtsCoroutine::CleanUp()
 {
     taskpoolTaskid_ = INVALID_TASKPOOL_TASK_ID;
-    etsNapiEnv_->CleanUp();
+    aniEnv_->CleanUp();
     Coroutine::CleanUp();
     // add the required local storage entries cleanup here!
 }
 
 void EtsCoroutine::FreeInternalMemory()
 {
-    etsNapiEnv_->FreeInternalMemory();
+    aniEnv_->FreeInternalMemory();
     ManagedThread::FreeInternalMemory();
 }
 

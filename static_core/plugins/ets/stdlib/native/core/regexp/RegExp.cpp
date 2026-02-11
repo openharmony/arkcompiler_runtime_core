@@ -25,8 +25,8 @@
 #include "plugins/ets/runtime/ani/ani_type_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -119,7 +119,7 @@ uint32_t CastToBitMask(ani_env *env, ani_string checkStr)
 
 bool IsUtf16(ani_env *env, ani_string str)
 {
-    ark::ets::ani::ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env));
+    ark::ets::ani::ScopedManagedCodeFix s(env);
     auto internalString = s.ToInternalType(str);
     return internalString->IsUtf16();
 }

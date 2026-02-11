@@ -16,7 +16,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_COROUTINE_H
 
 #include "runtime/coroutines/coroutine_context.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/external_iface_table.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
@@ -58,7 +58,7 @@ public:
     ~EtsCoroutine() override
     {
         auto allocator = GetVM()->GetHeapManager()->GetInternalAllocator();
-        allocator->Delete(etsNapiEnv_);
+        allocator->Delete(aniEnv_);
     }
 
     static EtsCoroutine *CastFromThread(Thread *thread)
@@ -110,9 +110,9 @@ public:
         return MEMBER_OFFSET(EtsCoroutine, nullValue_);
     }
 
-    static constexpr uint32_t GetTlsNapiEnvOffset()
+    static constexpr uint32_t GetTlsAniEnvOffset()
     {
-        return MEMBER_OFFSET(EtsCoroutine, etsNapiEnv_);
+        return MEMBER_OFFSET(EtsCoroutine, aniEnv_);
     }
 
     static constexpr uint32_t GetLocalStorageOffset()
@@ -123,9 +123,9 @@ public:
     PANDA_PUBLIC_API PandaEtsVM *GetPandaVM() const;
     PANDA_PUBLIC_API CoroutineManager *GetCoroutineManager() const;
 
-    PandaEtsNapiEnv *GetEtsNapiEnv() const
+    PandaAniEnv *GetPandaAniEnv() const
     {
-        return etsNapiEnv_;
+        return aniEnv_;
     }
 
     void Initialize() override;
@@ -188,7 +188,7 @@ private:
 
     void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
-    PandaEtsNapiEnv *etsNapiEnv_ {nullptr};
+    PandaAniEnv *aniEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};
     void *jobClassPtr_ {nullptr};
 
@@ -198,7 +198,7 @@ private:
 
     LocalStorage localStorage_;
 
-    static_assert(std::is_pointer_v<decltype(etsNapiEnv_)>,
+    static_assert(std::is_pointer_v<decltype(aniEnv_)>,
                   "we load a raw pointer in compiled code, please don't change the type!");
 
     // Allocator calls our protected ctor

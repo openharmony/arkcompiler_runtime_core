@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,20 +19,24 @@
 #include "runtime/include/thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
-#include "plugins/ets/tests/mock/mock_test_helper.h"
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
 namespace ark::ets::test {
 
-static const char *g_testBinFileName = "RegisterNativeAllocationTest.abc";
+static constexpr std::string_view TEST_BIN_FILE_NAME = "RegisterNativeAllocationTest.abc";
 
-class CallingMethodsTestGeneral : public MockEtsNapiTestBaseClass {
+class RegisterNativeAllocationTest : public testing::Test {
 public:
-    CallingMethodsTestGeneral() : MockEtsNapiTestBaseClass(g_testBinFileName) {}
-};
+    static void SetUpTestCase()
+    {
+        if (std::getenv("PANDA_STD_LIB") == nullptr) {
+            std::cerr << "PANDA_STD_LIB not set" << std::endl;
+            std::abort();
+        }
+    }
 
-class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
     void SetUp() override
     {
         const char *stdlib = std::getenv("PANDA_STD_LIB");
@@ -40,7 +44,7 @@ class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
 
         // Create boot-panda-files options
         std::string bootFileString =
-            std::string("--ext:boot-panda-files=") + std::string(stdlib) + ":" + g_testBinFileName;
+            std::string("--ext:boot-panda-files=") + std::string(stdlib) + ":" + std::string(TEST_BIN_FILE_NAME);
 
         // clang-format off
         std::vector<ani_option> optionsVector{
@@ -55,6 +59,16 @@ class RegisterNativeAllocationTest : public CallingMethodsTestGeneral {
         ASSERT_EQ(ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vm_), ANI_OK) << "Cannot create ETS VM";
         ASSERT_EQ(vm_->GetEnv(ANI_VERSION_1, &env_), ANI_OK) << "Cannot get ani env";
     }
+
+    void TearDown() override
+    {
+        ASSERT_EQ(vm_->DestroyVM(), ANI_OK) << "Cannot destroy ETS VM";
+    }
+
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    ani_env *env_ {nullptr};
+    ani_vm *vm_ {nullptr};
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 TEST_F(RegisterNativeAllocationTest, testNativeAllocation)

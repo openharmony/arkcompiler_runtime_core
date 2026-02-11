@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,7 @@ if (PANDA_TARGET_ARM32 OR PANDA_QEMU_BUILD)
     return()
 endif()
 
-add_custom_target(sampler_test_suite COMMENT "Running sampler etsnapi tests")
+add_custom_target(sampler_test_suite COMMENT "Running sampler tests")
 
 if(CMAKE_CROSSCOMPILING)
     ExternalProject_Get_Property(panda_host_tools binary_dir)

@@ -18,36 +18,36 @@
 #include "arch/amd64/shorty.S"
 #include "shorty_values.h"
 
-// uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool is_critical)
-.extern EtsNapiCalcStackArgsSpaceSize
-// void EtsNapiBeginCritical(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBeginCritical
-// void EtsNapiBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBegin
-// void EtsNapiBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
-.extern EtsNapiBeginVerify
-// void EtsNapiEnd(Method *method)
-.extern EtsNapiEnd
-// void EtsNapiEndVerify(Method *method)
-.extern EtsNapiEndVerify
-// ObjectHeader *EtsNapiObjEnd(Method *method, Reference *ref)
-.extern EtsNapiObjEnd
-// ObjectHeader *EtsNapiObjEndVerify(Method *method, Reference *ref)
-.extern EtsNapiObjEndVerify
+// uint32_t AniCalcStackArgsSpaceSize(Method *method, bool is_critical)
+.extern AniCalcStackArgsSpaceSize
+// void AniBeginCritical(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBeginCritical
+// void AniBegin(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBegin
+// void AniBeginVerify(Method *method, uintptr_t args, uintptr_t stack_args, uintptr_t out_args)
+.extern AniBeginVerify
+// void AniEnd(Method *method)
+.extern AniEnd
+// void AniEndVerify(Method *method)
+.extern AniEndVerify
+// ObjectHeader *AniObjEnd(Method *method, Reference *ref)
+.extern AniObjEnd
+// ObjectHeader *AniObjEndVerify(Method *method, Reference *ref)
+.extern AniObjEndVerify
 // bool IsEtsMethodFastNative(Method *method)
 .extern IsEtsMethodFastNative
 
 
-// The entrypoint for EtsNapi critical method.
+// The entrypoint for ANI critical method.
 // there are two nuances:
 // 1. Each panda method accepts Method* in the first argument.
 //    We have to drop this argument and shift others back
 // 2. We have to convert double arguments and the return value to floats
 //    Panda runtime operates only with doubles.
 // The function handles all the cases above.
-.global EtsNapiCriticalNativeEntryPoint
-.type EtsNapiCriticalNativeEntryPoint, %function
-EtsNapiCriticalNativeEntryPoint:
+.global AniCriticalNativeEntryPoint
+.type AniCriticalNativeEntryPoint, %function
+AniCriticalNativeEntryPoint:
     CFI_STARTPROC
     CFI_DEF_CFA(rsp, 8)
 
@@ -97,7 +97,7 @@ EtsNapiCriticalNativeEntryPoint:
     // Update native_stack_args_space_size_ if native_stack_args_space_size_ == 0
     movq %rbx, %rdi
     movq $1, %rsi
-    callq EtsNapiCalcStackArgsSpaceSize@plt
+    callq AniCalcStackArgsSpaceSize@plt
 
 .Lprepare_stack_critical:
     movq %rsp, %rsi
@@ -106,7 +106,7 @@ EtsNapiCriticalNativeEntryPoint:
     movq %rsp, %rcx
     movq %rbx, %rdi
     movq %THREAD_REG, %r8
-    callq EtsNapiBeginCritical@plt
+    callq AniBeginCritical@plt
 
     // load the arguments
     POP_GENERAL_REGS
@@ -323,7 +323,7 @@ EtsNapiCriticalNativeEntryPoint:
 
     movq %rbx, %rdi
     xorq %rsi, %rsi
-    callq EtsNapiCalcStackArgsSpaceSize@plt
+    callq AniCalcStackArgsSpaceSize@plt
 
 .Lprepare_stack\@:
     movq %rsp, %rsi
@@ -481,7 +481,7 @@ EtsNapiCriticalNativeEntryPoint:
 .endm
 
 // Generate the entrypoint for ANI methods
-ANI_ENTRY_POINT_GENERIC EtsNapiEntryPoint, EtsNapiBegin, EtsNapiEnd, EtsNapiObjEnd
+ANI_ENTRY_POINT_GENERIC AniEntryPoint, AniBegin, AniEnd, AniObjEnd
 
 // Generate the entrypoint for ANI methods in verifyANI mode
-ANI_ENTRY_POINT_GENERIC EtsNapiVerifyEntryPoint, EtsNapiBeginVerify, EtsNapiEndVerify, EtsNapiObjEndVerify
+ANI_ENTRY_POINT_GENERIC AniVerifyEntryPoint, AniBeginVerify, AniEndVerify, AniObjEndVerify
