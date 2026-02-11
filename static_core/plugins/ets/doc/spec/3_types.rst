@@ -2025,37 +2025,43 @@ An empty tuple type is identical to ``Tuple``:
 Type ``Tuple`` is preserved by :ref:`Type Erasure`, and can be used
 in :ref:`instanceof Expression` and :ref:`Cast Expression`.
 
-An element of a ``Tuple`` value cannot be accessed directly. A developer must use the
-``unsafeGet`` or  ``unsafeSet`` methods instead, which has the following signatures:
+An element of a ``Tuple`` value cannot be accessed directly.
+To get an element value, the method ``unsafeGet``
+with the following signature can be used:
 
 .. code-block:: typescript
    :linenos:
 
     unsafeGet(index: int): Any
-    unsafeSet(index: int, value: Any): void
 
-A runtime error error is caused in calls of these methods, if:
+Calls of the method ``unsafeGet`` cause a :index:`runtime error` if:
 
 -  ``index`` value is less than zero; or
--  ``index`` value is greater or equal than tuple length.
+-  ``index`` value is greater than or equal to the actual tuple length.
 
-Methods usage is illustrated below:
+.. index::
+   runtime error
+
+The usage of the method ``unsafeGet`` is illustrated below:
 
 .. code-block:: typescript
    :linenos:
 
-    function modify(x: Object) {
+    function log_1(x: Object) {
         if (x instanceof Tuple) {
-            console.log(x.unsafeGet(0))
-            x.unsafeSet(1, "aa")
+            console.log(x.unsafeGet(1))
         }
     }
 
     let a: [string, string] = ["aa", "bb"]
-    modify(a) // ok
+    log_1(a) // ok, output: 2, "bb"
 
     let b: [string] = ["aa"]
-    modify(b)     // runtime error in the 'modify' body
+    log_1(b)     // runtime error in ``unsafeGet`` call
+
+No element of a ``Tuple`` value can be changed. |LANG| does not support
+such change as it can cause a :index:`runtime error` at an unpredictable
+place during execution.
 
 |
 
