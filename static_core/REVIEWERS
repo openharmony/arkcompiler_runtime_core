@@ -152,10 +152,11 @@ static_core/plugins/ets/runtime/intrinsics/std_*                              ^a
 static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcFile.cpp               @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
+static_core/plugins/ets/runtime/intrinsics/std_core_Timers.cpp                ^anton-sysoev @magikarp777 @molotkovmikhail ^ivan-tyulyandin @Nojpg @schernykh ^slynkodenis ^vpukhov
 static_core/plugins/ets/runtime/intrinsics/std_core_finalization_registry.cpp ^dmitriitr @udav
 static_core/plugins/ets/runtime/intrinsics/std_core_gc.cpp                    ^dmitriitr @udav
 static_core/plugins/ets/runtime/libani_helpers/                               @wanzixuan330 @v-cherkashin ^slynkodenis
-static_core/plugins/ets/runtime/libani_helpers/concurrency_*                  ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/libani_helpers/concurrency_*                  @molotkovmikhail ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/libani_helpers/interop_js                     @igelhaus @wanzixuan330 @v-cherkashin @slynkodenis @benzunfu
 static_core/plugins/ets/runtime/mem/                                          ^dmitriitr @udav @xucheng46 ^gitee-dakeQI
 static_core/plugins/ets/runtime/regexp/                                       ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
