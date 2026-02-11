@@ -263,7 +263,9 @@ function cancelExecutedGroupTest1() {
     g.addTask(returnAbc);
     g.addTask(returnDef);
     arktest.expectError(() => {
-        await taskpool.execute(g);
+        waitForCompletion(async (): Promise<void> => {
+            await taskpool.execute(g);
+        })
         // Group tasks finished, so 'cancel' should produce the Error
         taskpool.cancel(g);
     }, new Error('taskpool:: taskGroup is not executed or has been executed'));
@@ -379,17 +381,19 @@ function addTaskWithDifferentParamsTest() {
     taskGroup.addTask(task3);
     taskGroup.addTask(task4);
     arktest.expectError(() => { taskGroup.addTask(longTask) },
-                new Error('taskpool:: The interface does not support the long task'));
-    let res = await taskpool.execute(taskGroup);
-    arktest.assertEQ(res[0], 'testWithZeroParam');
-    arktest.assertEQ(res[1], 30);
-    arktest.assertEQ(res[2], 'testWithThreeParams res: 30');
-    arktest.assertEQ(res[3], 'TEST res: 6');
-    arktest.assertEQ(task1.isDone(), true);
-    arktest.assertEQ(task2.isDone(), true);
-    arktest.assertEQ(task3.isDone(), true);
-    arktest.assertEQ(task4.isDone(), true);
-    arktest.assertEQ(longTask.isDone(), false);
+        new Error('taskpool:: The interface does not support the long task'));
+    waitForCompletion(async () => {
+        let res = await taskpool.execute(taskGroup);
+        arktest.assertEQ(res[0], 'testWithZeroParam');
+        arktest.assertEQ(res[1], 30);
+        arktest.assertEQ(res[2], 'testWithThreeParams res: 30');
+        arktest.assertEQ(res[3], 'TEST res: 6');
+        arktest.assertEQ(task1.isDone(), true);
+        arktest.assertEQ(task2.isDone(), true);
+        arktest.assertEQ(task3.isDone(), true);
+        arktest.assertEQ(task4.isDone(), true);
+        arktest.assertEQ(longTask.isDone(), false);
+    });
 }
 
 async function groupTaskFailedNoSuccessCallbackTest() {

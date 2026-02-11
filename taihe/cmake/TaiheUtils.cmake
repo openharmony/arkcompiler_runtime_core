@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -203,7 +203,7 @@ function(add_taihe_runtime)
     set(TAIHE_RUNTIME_SOURCES
       "${TAIHE_RUNTIME_SOURCE_DIR}/string.cpp"
       "${TAIHE_RUNTIME_SOURCE_DIR}/object.cpp"
-      "${TAIHE_RUNTIME_SOURCE_DIR}/runtime.cpp"
+      "${TAIHE_RUNTIME_SOURCE_DIR}/runtime_ani.cpp"
     )
 
     add_library(taihe_runtime STATIC

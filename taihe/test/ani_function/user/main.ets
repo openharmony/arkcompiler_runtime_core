@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,14 +91,16 @@ function test_from_callback() {
             }
         });
     });
-    let res: int;
-    let err: BusinessError = new BusinessError();
-    try {
-        res = await p;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-    arktest.assertEQ(res, 30);
+    waitForCompletion(async () => {
+        let res: int;
+        let err: BusinessError = new BusinessError();
+        try {
+            res = await p;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+        arktest.assertEQ(res, 30);
+    })
 }
 
 function test_static_func_add() {

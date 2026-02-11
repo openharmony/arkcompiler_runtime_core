@@ -383,7 +383,7 @@ function testDoubleRemoveMessage() {
     let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
 
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
-        await waiter;
+        waitForCompletion(async ()=>{await waiter;})
     }, worker);
 
     let message = new concurrency.Message(1, handler);

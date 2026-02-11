@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,14 +42,16 @@ function test_ani_graphics3d_scene_createCamera_promise() {
     let param = sNodePara;
     let info = SceneTest.getCamera();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createCamera(param);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createCamera is: " + info.fov);
-    arktest.assertEQ(info.fov, 5.24f);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createCamera(param);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createCamera is: " + info.fov);
+        arktest.assertEQ(info.fov, 5.24f);
+    })
 }
 
 function test_ani_graphics3d_scene_createCamera_sync() {
@@ -68,14 +70,16 @@ function test_ani_graphics3d_scene_createCamera_sync() {
 
     let info = SceneTest.getCamera();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createCamera is: " + info.fov);
-    arktest.assertEQ(info.fov, 5.24f);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createCamera is: " + info.fov);
+        arktest.assertEQ(info.fov, 5.24f);
+    })
 }
 
 function test_ani_graphics3d_scene_createLight() {
@@ -98,14 +102,16 @@ function test_ani_graphics3d_scene_createLight_promise() {
     let lightType = SceneTest.LightType.SPOT;
     let info = SceneTest.getLight();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createLight(param, lightType);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createLightPro is: " + info.intensity);
-    arktest.assertEQ(info.intensity, 5.24f);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createLight(param, lightType);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createLightPro is: " + info.intensity);
+        arktest.assertEQ(info.intensity, 5.24f);
+    })
 }
 
 function test_ani_graphics3d_scene_createLight_sync() {
@@ -125,14 +131,16 @@ function test_ani_graphics3d_scene_createLight_sync() {
 
     let info = SceneTest.getLight();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createLightPro is: " + info.intensity);
-    arktest.assertEQ(info.intensity, 5.24f);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createLight(param, lightType);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createLightPro is: " + info.intensity);
+        arktest.assertEQ(info.intensity, 5.24f);
+    })
 }
 
 function test_ani_graphics3d_scene_createNode() {
@@ -153,14 +161,16 @@ function test_ani_graphics3d_scene_createNode_promise() {
     let param = sNodePara;
     let info = SceneTest.getNode();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createNode(param);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createNode is: " + info.visible);
-    arktest.assertEQ(info.visible, true);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createNode(param);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createNode is: " + info.visible);
+        arktest.assertEQ(info.visible, true);
+    })
 }
 
 function test_ani_graphics3d_scene_createNode_sync() {
@@ -179,14 +189,16 @@ function test_ani_graphics3d_scene_createNode_sync() {
 
     let info = SceneTest.getNode();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createNode is: " + info.visible);
-    arktest.assertEQ(info.visible, true);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createNode is: " + info.visible);
+        arktest.assertEQ(info.visible, true);
+    })
 }
 
 function test_ani_graphics3d_scene_createMaterial() {
@@ -209,14 +221,16 @@ function test_ani_graphics3d_scene_createMaterial_promise() {
     let materialType = SceneTest.MaterialType.SHADER;
     let info = SceneTest.getMaterial();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createMaterial(param, materialType);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createMaterial is: " + info.materialType);
-    arktest.assertEQ(info.materialType, 122 as byte);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createMaterial(param, materialType);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createMaterial is: " + info.materialType);
+        arktest.assertEQ(info.materialType, 122 as byte);
+    })
 }
 
 function test_ani_graphics3d_scene_createMaterial_sync() {
@@ -236,14 +250,16 @@ function test_ani_graphics3d_scene_createMaterial_sync() {
 
     let info = SceneTest.getMaterial();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createMaterial is: " + info.materialType);
-    arktest.assertEQ(info.materialType, 122 as byte);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createMaterial is: " + info.materialType);
+        arktest.assertEQ(info.materialType, 122 as byte);
+    })
 }
 
 function test_ani_graphics3d_scene_createShader() {
@@ -264,14 +280,16 @@ function test_ani_graphics3d_scene_createShader_promise() {
     let param = sResPara;
     let info = SceneTest.getShader();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createShader(param);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createShader is: " + info.inputs);
-    arktest.assertEQ(info.inputs.size, 1);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createShader(param);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createShader is: " + info.inputs);
+        arktest.assertEQ(info.inputs.size, 1);
+    })
 }
 
 function test_ani_graphics3d_scene_createShader_sync() {
@@ -290,14 +308,16 @@ function test_ani_graphics3d_scene_createShader_sync() {
 
     let info = SceneTest.getShader();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createShader is: " + info.inputs);
-    arktest.assertEQ(info.inputs.size, 1);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createShader is: " + info.inputs);
+        arktest.assertEQ(info.inputs.size, 1);
+    })
 }
 
 function test_ani_graphics3d_scene_createImage() {
@@ -318,14 +338,16 @@ function test_ani_graphics3d_scene_createImage_promise() {
     let param = sResPara;
     let info = SceneTest.getImage();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createImage(param);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createImage is: " + info);
-    arktest.assertEQ(info.height, 600);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createImage(param);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createImage is: " + info);
+        arktest.assertEQ(info.height, 600);
+    })
 }
 
 function test_ani_graphics3d_scene_createImage_sync() {
@@ -344,14 +366,16 @@ function test_ani_graphics3d_scene_createImage_sync() {
 
     let info = SceneTest.getImage();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createImage is: " + info);
-    arktest.assertEQ(info.height, 600);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createImage is: " + info);
+        arktest.assertEQ(info.height, 600);
+    })
 }
 
 function test_ani_graphics3d_scene_createEnvironment() {
@@ -372,14 +396,16 @@ function test_ani_graphics3d_scene_createEnvironment_promise() {
     let param = sResPara;
     let info = SceneTest.getEnvironment();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await sResFactory.createEnvironment(param);
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createEnvironment is: " + info);
-    arktest.assertEQ(info.backgroundType, 0);
+    waitForCompletion(async () => {
+        try {
+            info = await sResFactory.createEnvironment(param);
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createEnvironment is: " + info);
+        arktest.assertEQ(info.backgroundType, 0);
+    })
 }
 
 function test_ani_graphics3d_scene_createEnvironment_sync() {
@@ -399,14 +425,16 @@ function test_ani_graphics3d_scene_createEnvironment_sync() {
 
     let info = SceneTest.getEnvironment();
     let err: BusinessError = new BusinessError();
-    try {
-        info = await promise;
-    } catch (e) {
-        err = e as BusinessError;
-    }
-
-    console.log("createEnvironment is: " + info);
-    arktest.assertEQ(info.backgroundType, 0);
+    waitForCompletion(async () => {
+        try {
+            info = await promise;
+        } catch (e) {
+            err = e as BusinessError;
+        }
+    
+        console.log("createEnvironment is: " + info);
+        arktest.assertEQ(info.backgroundType, 0);
+    })
 }
 
 function main() {

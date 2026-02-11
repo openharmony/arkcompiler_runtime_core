@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,9 @@ function cleanupInWorkerTest() {
     doInWorker(() => {
         startGCWithCleanup(GC.Cause.YOUNG);
     }).Await();
-    await cleanupFinished;
+    waitForCompletion(async () => {
+        await cleanupFinished;
+    })
     arktest.assertEQ(cleanupInMainHappened.get(), false);
     arktest.assertEQ(cleanupInWorkerHappened.get(), true);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), false);
@@ -151,7 +153,9 @@ function cleanupInEAWorkerTest() {
     eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.YOUNG);
     }).Await();
-    await cleanupFinished;
+    waitForCompletion(async () => {
+        await cleanupFinished;
+    })
     arktest.assertEQ(cleanupInMainHappened.get(), false);
     arktest.assertEQ(cleanupInWorkerHappened.get(), false);
     arktest.assertEQ(cleanupInEAWorkerHappened.get(), true);
@@ -186,7 +190,9 @@ function cleanupInSameEAWorkerTest() {
     eaWorker2.run<void>((): void => {
         Coroutine.Schedule();
     }).Await();
-    await cleanupFinished;
+    waitForCompletion(async () => {
+        await cleanupFinished;
+    })
     arktest.assertEQ(cleanup1Happened.get(), true);
     arktest.assertEQ(cleanup2Happened.get(), false);
 }
@@ -208,7 +214,9 @@ function surviveGCTest() {
     eaWorker1.run<void>((): void => {
         startGCWithCleanup(GC.Cause.FULL);
     }).Await();
-    await cleanupFinished;
+    waitForCompletion(async () => {
+        await cleanupFinished;
+    })
 }
 
 function main() {

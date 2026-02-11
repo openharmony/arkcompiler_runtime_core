@@ -23,7 +23,7 @@ desc: Test to wait for Nested Promises<{{type_name}}>.
 
 const value: {{type_name}} = {{c.value}}
 
-function nestedPromise(): Promise<{{type_name}}> {
+async function nestedPromise(): Promise<{{type_name}}> {
   // Asynchronous simulation
   return new Promise<{{type_name}}>((resolve) => {
     setTimeout(() => {
@@ -32,7 +32,7 @@ function nestedPromise(): Promise<{{type_name}}> {
   });
 }
 
-function waitedPromise(): Promise<{{type_name}}> {
+async function waitedPromise(): Promise<{{type_name}}> {
   
   // Asynchronous simulation
   return new Promise<{{type_name}}>((resolve) => {
