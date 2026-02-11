@@ -107,6 +107,11 @@ function jsonStringifyPromise(): void {
     arktest.assertEQ('{}', JSON.stringify(pro));
 }
 
+function jsonStringifyResolvedPromise(): void {
+    let pro = Promise.resolve("value");
+    arktest.assertEQ(JSON.stringify(pro), '{}');
+}
+
 function jsonStringifySet(): void {
     let set: Set<string> = new Set<string>();
     set.add("foo");
@@ -366,6 +371,7 @@ function main(): int {
     suite.addTest('JSON.stringify for Float32Array', jsonStringifyFloat32Array)
     suite.addTest('JSON.stringify for Float64Array', jsonStringifyFloat64Array)
     suite.addTest('JSON.stringify for Promise', jsonStringifyPromise)
+    suite.addTest('JSON.stringify for resolved Promise', jsonStringifyResolvedPromise)
     suite.addTest('JSON.stringify for Set', jsonStringifySet)
     suite.addTest('JSON.stringify for empty Map', jsonStringifyMapEmpty);
     suite.addTest('JSON.stringify for Map with entries', jsonStringifyMapWithEntries);
