@@ -367,7 +367,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
 #ifdef ARK_HYBRID
-        co->GetThreadHolder()->UnregisterCoroutine(co);
+        co->GetMutator()->UnregisterCoroutine(co);
 #endif
         // We need collect TLAB metrics and clear TLAB before calling the manage thread destructor
         // because of the possibility heap use after free. This happening when GC starts execute ResetYoungAllocator

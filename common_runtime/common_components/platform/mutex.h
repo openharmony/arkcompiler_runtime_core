@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define COMMON_COMPONENTS_PLATFORM_MUTEX_H
 
 #include "common_interfaces/base/common.h"
-#include "common_interfaces/thread/thread_state_transition.h"
+#include "common_interfaces/thread/mutator_state_transition.h"
 
 #ifdef DEBUG
 #define FATAL_IF_ERROR(f, rc)                             \

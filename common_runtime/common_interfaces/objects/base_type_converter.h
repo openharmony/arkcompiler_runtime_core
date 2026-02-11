@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,14 @@
 #define COMMON_INTERFACES_OBJECTS_BASE_TYPE_CONVERTER_H
 
 #include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
 
 namespace common {
 // Type Converter implemented for dynamic vm.
 class DynamicTypeConverterInterface {
 public:
     // convert BaseType to JSTaggedValue
-    virtual JSTaggedValue WrapTagged(ThreadHolder *thread, BaseType value) = 0;
+    virtual JSTaggedValue WrapTagged(Mutator *mutator, BaseType value) = 0;
 
     // convert JSTaggedValue to BaseType
     virtual BaseType UnWrapTagged(JSTaggedValue value) = 0;

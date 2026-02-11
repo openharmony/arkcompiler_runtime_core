@@ -19,8 +19,8 @@
 
 #include "runtime/include/thread_interface.h"
 
-#include "common_interfaces/thread/thread_holder.h"
-#include "common_interfaces/thread/thread_holder-inl.h"
+#include "common_interfaces/thread/mutator.h"
+#include "common_interfaces/thread/mutator-inl.h"
 
 namespace ark {
 
@@ -69,20 +69,20 @@ public:
 
     void UnbindMutator();
 
-    /// @returns true if holder was created
-    bool CreateExternalHolderIfNeeded(bool useSharedHolder, common::ThreadHolder *th);
+    /// @returns true if mutator was created
+    bool CreateExternalMutatorIfNeeded(bool useSharedMutator, common::Mutator *m);
 
-    common::ThreadHolder *GetThreadHolder() const
+    common::Mutator *GetMutator() const
     {
-        ASSERT(threadHolder_ != nullptr);
-        return threadHolder_;
+        ASSERT(mutator_ != nullptr);
+        return mutator_;
     }
 
 private:
-    static void SetSharedExternalHolder(common::ThreadHolder *externalHolder);
-    static common::ThreadHolder *GetSharedExternalHolder();
+    static void SetSharedExternalMutator(common::Mutator *mutator);
+    static common::Mutator *GetSharedExternalMutator();
 
-    common::ThreadHolder *threadHolder_ = nullptr;
+    common::Mutator *mutator_ = nullptr;
 };
 
 }  // namespace ark

@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,7 +184,7 @@ inline HashTrieMapIndirect* HashTrieMapNode::AsIndirect()
     return static_cast<HashTrieMapIndirect*>(this);
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 class HashTrieMap {
 public:
     using WeakRefFieldVisitor = std::function<bool(RefField<>&)>;
@@ -278,23 +278,23 @@ public:
     LoadResult Load(ReadBarrier&& readBarrier, const uint32_t key, BaseString* value);
 
     template <bool threadState = true, typename ReadBarrier, typename HandleType>
-    BaseString* StoreOrLoad(ThreadHolder* holder, ReadBarrier&& readBarrier, const uint32_t key, LoadResult loadResult,
+    BaseString* StoreOrLoad(MutatorType* mutator, ReadBarrier&& readBarrier, const uint32_t key, LoadResult loadResult,
                             HandleType str);
     template <typename ReadBarrier>
     LoadResult Load(ReadBarrier&& readBarrier, const uint32_t key, const ReadOnlyHandle<BaseString>& string,
                     uint32_t offset, uint32_t utf8Len);
     template <typename LoaderCallback, typename EqualsCallback>
-    BaseString* StoreOrLoad(ThreadHolder* holder, const uint32_t key, LoadResult loadResult,
+    BaseString* StoreOrLoad(MutatorType* mutator, const uint32_t key, LoadResult loadResult,
                             LoaderCallback loaderCallback, EqualsCallback equalsCallback);
 
     template <bool IsCheck, typename ReadBarrier>
     BaseString* Load(ReadBarrier&& readBarrier, const uint32_t key, BaseString* value);
     template <bool IsLock, typename LoaderCallback, typename EqualsCallback>
-    BaseString* LoadOrStore(ThreadHolder* holder, const uint32_t key, LoaderCallback loaderCallback,
+    BaseString* LoadOrStore(MutatorType* mutator, const uint32_t key, LoaderCallback loaderCallback,
                             EqualsCallback equalsCallback);
 
     template <typename LoaderCallback, typename EqualsCallback>
-    BaseString* LoadOrStoreForJit(ThreadHolder* holder, const uint32_t key, LoaderCallback loaderCallback,
+    BaseString* LoadOrStoreForJit(MutatorType* mutator, const uint32_t key, LoaderCallback loaderCallback,
                                   EqualsCallback equalsCallback);
 
     static void ProcessHash(uint32_t &hash)
@@ -464,10 +464,10 @@ private:
     }
 };
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 class HashTrieMapInUseScope {
 public:
-    HashTrieMapInUseScope(HashTrieMap<Mutex, ThreadHolder, SlotBarrier>* hashTrieMap) : hashTrieMap_(hashTrieMap)
+    HashTrieMapInUseScope(HashTrieMap<Mutex, MutatorType, SlotBarrier>* hashTrieMap) : hashTrieMap_(hashTrieMap)
     {
         hashTrieMap_->IncreaseInuseCount();
     }
@@ -481,7 +481,7 @@ public:
     NO_MOVE_SEMANTIC_CC(HashTrieMapInUseScope);
 
 private:
-    HashTrieMap<Mutex, ThreadHolder, SlotBarrier>* hashTrieMap_;
+    HashTrieMap<Mutex, MutatorType, SlotBarrier>* hashTrieMap_;
 };
 }
 #endif //COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_H

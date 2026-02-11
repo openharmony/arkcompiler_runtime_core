@@ -41,7 +41,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
                                                               "[fiber_sch] " + GetName(), Coroutine::Type::SCHEDULER,
                                                               CoroutinePriority::MEDIUM_PRIORITY);
         ASSERT(scheduleLoopCtx_ != nullptr);
-        scheduleLoopCtx_->LinkToExternalHolder(true);
+        scheduleLoopCtx_->LinkToExternalMutator(true);
         AddRunnableCoroutine(scheduleLoopCtx_);
     }
 }
@@ -291,7 +291,7 @@ void StackfulCoroutineWorker::ThreadProc()
         coroManager_->CreateEntrypointlessCoroutine(GetRuntime(), GetPandaVM(), false, "[thr_sch] " + GetName(),
                                                     Coroutine::Type::SCHEDULER, CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(scheduleLoopCtx_ != nullptr);
-    scheduleLoopCtx_->LinkToExternalHolder(false);
+    scheduleLoopCtx_->LinkToExternalMutator(false);
     Coroutine::SetCurrent(scheduleLoopCtx_);
     scheduleLoopCtx_->RequestResume();
     AddRunningCoroutine(scheduleLoopCtx_);
@@ -382,7 +382,7 @@ void StackfulCoroutineWorker::RegisterIncomingActiveCoroutine(Coroutine *newCoro
     newCoro->SetWorker(this);
     auto canMigrate = newCoro->GetContext<StackfulCoroutineContext>()->IsMigrationAllowed();
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    newCoro->LinkToExternalHolder((IsMainWorker() || InExclusiveMode()) && !canMigrate, this);
+    newCoro->LinkToExternalMutator((IsMainWorker() || InExclusiveMode()) && !canMigrate, this);
 }
 
 void StackfulCoroutineWorker::RequestScheduleImpl()

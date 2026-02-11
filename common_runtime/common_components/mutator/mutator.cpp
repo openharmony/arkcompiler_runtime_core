@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <cstdint>
 #include <stack>
 #include <unistd.h>
@@ -29,9 +30,12 @@
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/mutator/mutator_manager.h"
 
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator-inl.h"
+#include "common_interfaces/thread/mutator_state_transition.h"
 
 namespace common {
+thread_local Mutator *currentMutator = nullptr;
+
 ThreadLocalData *GetThreadLocalData()
 {
     uintptr_t tlDataAddr = reinterpret_cast<uintptr_t>(ThreadLocal::GetThreadLocalData());
@@ -166,18 +170,18 @@ static SatbBuffer::TreapNode*& CastSatbNode(void *&satbNode)
 
 void Mutator::Init()
 {
-    holder_ = new ThreadHolder(this);
+    SetCurrent(this);
     mutatorPhase_.store(GCPhase::GC_PHASE_IDLE);
 }
 
 Mutator::~Mutator()
 {
+    SetCurrent(nullptr);
     tid_ = 0;
     if (satbNode_ != nullptr) {
         SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
         satbNode_ = nullptr;
     }
-    delete holder_;
 }
 
 Mutator* Mutator::NewMutator()
@@ -332,6 +336,145 @@ void PreRunManagedCode(Mutator* mutator, int layers, ThreadLocalData* threadData
     }
     mutator->LeaveSaferegion();
     mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
+}
+
+Mutator *Mutator::CreateAndRegisterNewMutator(void *vm)
+{
+    if (ThreadLocal::IsArkProcessor()) {
+        LOG_COMMON(FATAL) << "CreateAndRegisterNewMutator fail";
+        return nullptr;
+    }
+    Mutator* mutator = Mutator::NewMutator();
+    CHECK_CC(mutator != nullptr);
+    mutator->SetEcmaVMPtr(vm);
+
+    auto& mutator_manager = MutatorManager::Instance();
+    mutator_manager.MutatorManagementRLock();
+    {
+        std::lock_guard<std::mutex> guard(mutator_manager.allMutatorListLock_);
+        mutator_manager.allMutatorList_.push_back(mutator);
+    }
+    mutator->SetMutatorPhase(Heap::GetHeap().GetGCPhase());
+    mutator_manager.MutatorManagementRUnlock();
+
+    return mutator;
+}
+
+Mutator *Mutator::GetCurrent()
+{
+    return currentMutator;
+}
+
+void Mutator::SetCurrent(Mutator *mutator)
+{
+    currentMutator = mutator;
+}
+
+void Mutator::RegisterCoroutine(Coroutine *coroutine)
+{
+    MutatorManagedScope scope(this);
+    DCHECK_CC(coroutines_.find(coroutine) == coroutines_.end());
+    coroutines_.insert(coroutine);
+}
+
+void Mutator::UnregisterCoroutine(Coroutine *coroutine)
+{
+    if (coroutines_.find(coroutine) == coroutines_.end()) {
+        return;
+    }
+    DCHECK_CC(!IsInRunningState());
+    TransferToRunning();
+    DCHECK_CC(coroutines_.find(coroutine) != coroutines_.end());
+    coroutines_.erase(coroutine);
+    if (coroutines_.empty() && jsThread_ == nullptr) {
+        Mutator::DestroyMutator(this);
+    }
+}
+
+bool Mutator::TryBindMutator()
+{
+    if (ThreadLocal::IsArkProcessor()) {
+        return false;
+    }
+
+    auto& mutator_manager = MutatorManager::Instance();
+    mutator_manager.MutatorManagementRLock();
+
+    mutator_manager.BindMutator(*this);
+
+    mutator_manager.MutatorManagementRUnlock();
+
+    allocBuffer_ = ThreadLocal::GetAllocBuffer();
+    reinterpret_cast<AllocationBuffer*>(allocBuffer_)->IncreaseRefCount();
+    DCHECK_CC(allocBuffer_ != nullptr);
+    return true;
+}
+
+void Mutator::BindMutator()
+{
+    if (!TryBindMutator()) {
+        LOG_COMMON(FATAL) << "BindMutator fail";
+        return;
+    }
+}
+
+void Mutator::UnbindMutator()
+{
+    allocBuffer_ = nullptr;
+    auto& mutator_manager = MutatorManager::Instance();
+    mutator_manager.MutatorManagementRLock();
+
+    mutator_manager.UnbindMutator(*this);
+
+    mutator_manager.MutatorManagementRUnlock();
+}
+
+void Mutator::ReleaseAllocBuffer()
+{
+    MutatorManagedScope scope(this);
+    if (allocBuffer_) {
+        auto buf = reinterpret_cast<AllocationBuffer*>(allocBuffer_);
+        if (buf->DecreaseRefCount()) {
+            buf->Unregister();
+            delete buf;
+        }
+        allocBuffer_ = nullptr;
+    }
+}
+
+void Mutator::DestroyMutator(Mutator *mutator)
+{
+    mutator->ReleaseAllocBuffer();
+    mutator->TransferToNative();
+
+    auto& mutator_manager = MutatorManager::Instance();
+    mutator_manager.MutatorManagementRLock();
+    {
+        std::lock_guard<std::mutex> guard(mutator_manager.allMutatorListLock_);
+        auto& list = mutator_manager.allMutatorList_;
+        auto it = std::find(list.begin(), list.end(), mutator);
+        if (it != list.end()) {
+            list.erase(it);
+        }
+    }
+    mutator->ResetMutator();
+    mutator_manager.MutatorManagementRUnlock();
+}
+
+Mutator::TryBindMutatorScope::TryBindMutatorScope(Mutator *mutator) : mutator_(nullptr)
+{
+    if (mutator != nullptr && mutator->TryBindMutator()) {
+        mutator_ = mutator;
+    }
+}
+
+Mutator::TryBindMutatorScope::~TryBindMutatorScope()
+{
+    if (mutator_ != nullptr) {
+        mutator_->ReleaseAllocBuffer();
+        mutator_->UnbindMutator();
+        mutator_ = nullptr;
+    }
 }
 
 } // namespace common

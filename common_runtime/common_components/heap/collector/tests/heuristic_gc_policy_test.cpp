@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,8 +41,8 @@ protected:
 
     void SetUp() override
     {
-        holder_ = ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
-        scope_ = new ThreadHolder::TryBindMutatorScope(holder_);
+        mutator_ = Mutator::CreateAndRegisterNewMutator(nullptr);
+        scope_ = new Mutator::TryBindMutatorScope(mutator_);
     }
 
     void TearDown() override
@@ -53,8 +53,8 @@ protected:
         }
     }
 
-    ThreadHolder *holder_ {nullptr};
-    ThreadHolder::TryBindMutatorScope *scope_ {nullptr};
+    Mutator *mutator_ {nullptr};
+    Mutator::TryBindMutatorScope *scope_ {nullptr};
 };
 
 HWTEST_F_L0(HeuristicGCPolicyTest, ShouldRestrainGCOnStartupOrSensitive_Test1)

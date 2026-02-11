@@ -16,7 +16,7 @@
 #include "common_components/log/log.h"
 #include "common_components/mutator/mutator_manager.h"
 
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/profiler/heap_profiler_listener.h"
 
 namespace common {
@@ -57,7 +57,7 @@ void HeapProfilerListener::OnOutOfMemoryEventCb()
 {
     void *thread = nullptr;
     if (!IsGcThread()) {
-        thread = Mutator::GetMutator()->GetThreadHolder()->GetJSThread();
+        thread = Mutator::GetMutator()->GetJSThread();
     }
     outOfMemoryEventCb_(thread);
 }
