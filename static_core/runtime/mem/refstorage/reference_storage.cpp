@@ -76,7 +76,8 @@ void ReferenceStorage::CleanUp()
     if (cachedBlock_ != nullptr) {
         RemoveBlock(std::exchange(cachedBlock_, nullptr));
     }
-    for (auto *refBlockHead : *localStorage_) {
+    for (auto rit = localStorage_->rbegin(); rit != localStorage_->rend(); rit++) {
+        auto *refBlockHead = *rit;
         while (refBlockHead != nullptr) {
             RemoveBlock(std::exchange(refBlockHead, refBlockHead->GetPrev()));
         }
