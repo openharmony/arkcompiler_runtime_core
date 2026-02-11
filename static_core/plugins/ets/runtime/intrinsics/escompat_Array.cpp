@@ -84,151 +84,6 @@ EtsInt NormalizeArrayIndex(EtsInt index, EtsInt actualLength)
     return index;
 }
 
-EtsDouble EtsEscompatArrayIndexOfString(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex, EtsInt actualLength)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    auto valueString = coretypes::String::Cast(value->GetCoreType());
-    VMHandle<coretypes::String> strHandle(coroutine, valueString);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        if (element != nullptr && element->IsStringClass() &&
-            strHandle->Compare(coretypes::String::Cast(element->GetCoreType()), ctx) == 0) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfString(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    auto valueString = coretypes::String::Cast(value->GetCoreType());
-    VMHandle<coretypes::String> strHandle(coroutine, valueString);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        if (element != nullptr && element->IsStringClass() &&
-            strHandle->Compare(coretypes::String::Cast(element->GetCoreType()), ctx) == 0) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayIndexOfEnum(EtsObjectArray *buffer, EtsCoroutine *coro, EtsObject *value, EtsInt fromIndex,
-                                      EtsInt actualLength)
-{
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *valueEnum = EtsBaseEnum::FromEtsObject(value)->GetValue();
-    VMHandle<EtsBaseEnum> valueEnumHandle(coro, valueEnum->GetCoreType());
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        auto elementClass = element->GetClass();
-        if (elementClass->IsEtsEnum()) {
-            auto *elementEnum = EtsBaseEnum::FromEtsObject(element)->GetValue();
-            if (EtsReferenceEquals(coro, valueEnumHandle.GetPtr(), elementEnum)) {
-                return index;
-            }
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfEnum(EtsObjectArray *buffer, EtsCoroutine *coro, EtsObject *value,
-                                          EtsInt fromIndex)
-{
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *valueEnum = EtsBaseEnum::FromEtsObject(value)->GetValue();
-    VMHandle<EtsBaseEnum> valueEnumHandle(coro, valueEnum->GetCoreType());
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        auto elementClass = element->GetClass();
-        if (elementClass->IsEtsEnum()) {
-            auto *elementEnum = EtsBaseEnum::FromEtsObject(element)->GetValue();
-            if (EtsReferenceEquals(coro, valueEnumHandle.GetPtr(), elementEnum)) {
-                return index;
-            }
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayIndexOfNull(EtsObjectArray *buffer, EtsCoroutine *coroutine, EtsInt fromIndex,
-                                      EtsInt actualLength)
-{
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        if (element == EtsObject::FromCoreType(coroutine->GetNullValue())) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayIndexOfUndefined(EtsObjectArray *buffer, EtsInt fromIndex, EtsInt actualLength)
-{
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        if (element == nullptr) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfUndefined(EtsObjectArray *buffer, EtsInt fromIndex)
-{
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        if (element == nullptr) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfNull(EtsObjectArray *buffer, EtsCoroutine *coroutine, EtsInt fromIndex)
-{
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        if (element == EtsObject::FromCoreType(coroutine->GetNullValue())) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayIndexOfBigInt(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex, EtsInt actualLength)
-{
-    auto valueBigInt = EtsBigInt::FromEtsObject(value);
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        auto elementClass = element == nullptr ? nullptr : element->GetClass();
-        if (elementClass != nullptr && elementClass->IsBigInt() &&
-            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(element))) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfBigInt(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex)
-{
-    auto valueBigInt = EtsBigInt::FromEtsObject(value);
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        auto elementClass = element == nullptr ? nullptr : element->GetClass();
-        if (elementClass != nullptr && elementClass->IsBigInt() &&
-            EtsBigIntEquality(valueBigInt, EtsBigInt::FromEtsObject(element))) {
-            return index;
-        }
-    }
-    return -1;
-}
-
 template <typename T>
 static auto GetNumericValue(EtsObject *element)
 {
@@ -246,36 +101,32 @@ static bool IsNumericClass(EtsClass *objClass, const EtsPlatformTypes *ptypes)
     return (objClass == ptypes->coreDouble || objClass == ptypes->coreFloat);
 }
 
-template <typename T>
-EtsDouble EtsEscompatArrayIndexOfNumeric(EtsObjectArray *buffer, EtsClass *valueCls, EtsObject *value, EtsInt fromIndex,
-                                         EtsInt actualLength)
+extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
+                                                  EtsInt fromIndex)
 {
-    auto valTyped = GetNumericValue<T>(value);
-    if (std::isnan(valTyped)) {
-        return -1;
-    }
-
+    auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
+    fromIndex = NormalizeArrayIndex(fromIndex, actualLength);
     if (actualLength <= fromIndex) {
         return -1;
     }
-
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
+    EtsHandle<EtsObject> valueHandle(coro, value);
 
     auto count = actualLength - fromIndex;
     constexpr std::size_t chunkSize = 1U << 9;
     auto iterCount = count / chunkSize;
     auto remainder = count % chunkSize;
 
-    auto processChunk = [fromIndex, &valueCls, valTyped, &bufferHandle](std::size_t iter,
-                                                                        std::size_t size) -> std::optional<EtsDouble> {
+    auto processChunk = [fromIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
+                                                                       std::size_t size) -> std::optional<EtsInt> {
         auto startOffset = iter * chunkSize;
         auto endOffset = startOffset + size;
         for (size_t j = startOffset; j < endOffset; ++j) {
             auto currentIndex = fromIndex + j;
             auto element = bufferHandle.GetPtr()->Get(currentIndex);
-            if (element != nullptr && element->GetClass() == valueCls && valTyped == GetNumericValue<T>(element)) {
+            if (EtsReferenceEquals<true>(coro, element, valueHandle.GetPtr())) {
                 return currentIndex;
             }
         }
@@ -297,113 +148,6 @@ EtsDouble EtsEscompatArrayIndexOfNumeric(EtsObjectArray *buffer, EtsClass *value
     return -1;
 }
 
-template <typename T>
-EtsDouble EtsEscompatArrayLastIndexOfNumeric(EtsObjectArray *buffer, EtsClass *valueCls, EtsObject *value,
-                                             EtsInt fromIndex)
-{
-    auto valTyped = GetNumericValue<T>(value);
-    if (std::isnan(valTyped)) {
-        return -1;
-    }
-
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        if (element != nullptr && element->GetClass() == valueCls && valTyped == GetNumericValue<T>(element)) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-template <typename T>
-static EtsDouble DispatchIndexOf(EtsObjectArray *buf, EtsClass *cls, EtsObject *val, EtsInt idx, EtsInt len)
-{
-    return EtsEscompatArrayIndexOfNumeric<T>(buf, cls, val, idx, len);
-}
-
-template <typename T>
-static EtsDouble DispatchLastIndexOf(EtsObjectArray *buf, EtsClass *cls, EtsObject *val, EtsInt idx)
-{
-    return EtsEscompatArrayLastIndexOfNumeric<T>(buf, cls, val, idx);
-}
-
-struct IndexOfDispatcher {
-    template <typename T>
-    static EtsDouble Call(EtsObjectArray *buf, EtsClass *cls, EtsObject *val, EtsInt idx, EtsInt len)
-    {
-        return DispatchIndexOf<T>(buf, cls, val, idx, len);
-    }
-};
-
-struct LastIndexOfDispatcher {
-    template <typename T>
-    static EtsDouble Call(EtsObjectArray *buf, EtsClass *cls, EtsObject *val, EtsInt idx)
-    {
-        return DispatchLastIndexOf<T>(buf, cls, val, idx);
-    }
-};
-
-EtsDouble EtsEscompatArrayIndexOfCommon(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex, EtsInt actualLength)
-{
-    for (EtsInt index = fromIndex; index < actualLength; index++) {
-        auto element = buffer->Get(index);
-        if (element == value) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-EtsDouble EtsEscompatArrayLastIndexOfCommon(EtsObjectArray *buffer, EtsObject *value, EtsInt fromIndex)
-{
-    for (EtsInt index = fromIndex; index >= 0; index--) {
-        auto element = buffer->Get(index);
-        if (element == value) {
-            return index;
-        }
-    }
-    return -1;
-}
-
-extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
-                                                  EtsInt fromIndex)
-{
-    auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
-    fromIndex = NormalizeArrayIndex(fromIndex, actualLength);
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
-
-    if (value == nullptr) {
-        return EtsEscompatArrayIndexOfUndefined(buffer, fromIndex, actualLength);
-    }
-
-    auto valueCls = value->GetClass();
-    static const auto TYPE_MAP = CreateTypeMap<IndexOfDispatcher>(ptypes);
-    for (const auto &[type, handler] : TYPE_MAP) {
-        if (valueCls == type) {
-            return handler(buffer, valueCls, value, fromIndex, actualLength);
-        }
-    }
-
-    if (valueCls->IsBigInt()) {
-        return EtsEscompatArrayIndexOfBigInt(buffer, value, fromIndex, actualLength);
-    }
-
-    if (valueCls->IsStringClass()) {
-        return EtsEscompatArrayIndexOfString(buffer, value, fromIndex, actualLength);
-    }
-
-    if (valueCls->IsEtsEnum()) {
-        return EtsEscompatArrayIndexOfEnum(buffer, coroutine, value, fromIndex, actualLength);
-    }
-
-    if (value == EtsObject::FromCoreType(coroutine->GetNullValue())) {
-        return EtsEscompatArrayIndexOfNull(buffer, coroutine, fromIndex, actualLength);
-    }
-
-    return EtsEscompatArrayIndexOfCommon(buffer, value, fromIndex, actualLength);
-}
-
 extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject, EtsInt actualLength, EtsObject *value,
                                                       EtsInt fromIndex)
 {
@@ -412,8 +156,6 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
     }
     auto *buffer = EtsObjectArray::FromCoreType(bufferObject);
 
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    const EtsPlatformTypes *ptypes = PlatformTypes(coroutine);
     EtsInt startIndex = 0;
 
     if (fromIndex >= 0) {
@@ -422,35 +164,46 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
         startIndex = actualLength + fromIndex;
     }
 
-    if (value == nullptr) {
-        return EtsEscompatArrayLastIndexOfUndefined(buffer, startIndex);
+    if (startIndex < 0) {
+        return -1;
     }
 
-    auto valueCls = value->GetClass();
-    static const auto TYPE_MAP = CreateTypeMap<LastIndexOfDispatcher>(ptypes);
-    for (const auto &[type, handler] : TYPE_MAP) {
-        if (valueCls == type) {
-            return handler(buffer, valueCls, value, startIndex);
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsObjectArray> bufferHandle(coro, buffer);
+    EtsHandle<EtsObject> valueHandle(coro, value);
+
+    auto count = startIndex + 1;
+    constexpr std::size_t chunkSize = 1U << 9;
+    auto iterCount = count / chunkSize;
+    auto remainder = count % chunkSize;
+
+    auto processChunk = [startIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
+                                                                        std::size_t size) -> std::optional<EtsInt> {
+        auto startOffset = iter * chunkSize;
+        for (size_t j = 0; j < size; ++j) {
+            auto currentIndex = startIndex - (startOffset + j);
+            auto element = bufferHandle.GetPtr()->Get(currentIndex);
+            if (EtsReferenceEquals<true>(coro, element, valueHandle.GetPtr())) {
+                return currentIndex;
+            }
+        }
+        return std::nullopt;
+    };
+
+    for (size_t i = 0; i < iterCount; ++i) {
+        if (auto result = processChunk(i, chunkSize); result.has_value()) {
+            return result.value();
+        }
+        ark::interpreter::RuntimeInterface::Safepoint();
+    }
+    if (remainder > 0) {
+        if (auto result = processChunk(iterCount, remainder); result.has_value()) {
+            return result.value();
         }
     }
 
-    if (valueCls->IsBigInt()) {
-        return EtsEscompatArrayLastIndexOfBigInt(buffer, value, startIndex);
-    }
-
-    if (valueCls->IsStringClass()) {
-        return EtsEscompatArrayLastIndexOfString(buffer, value, startIndex);
-    }
-
-    if (valueCls->IsEtsEnum()) {
-        return EtsEscompatArrayLastIndexOfEnum(buffer, coroutine, value, startIndex);
-    }
-
-    if (value == EtsObject::FromCoreType(coroutine->GetNullValue())) {
-        return EtsEscompatArrayLastIndexOfNull(buffer, coroutine, startIndex);
-    }
-
-    return EtsEscompatArrayLastIndexOfCommon(buffer, value, startIndex);
+    return -1;
 }
 
 static uint32_t NormalizeIndex(int32_t idx, int64_t len)
