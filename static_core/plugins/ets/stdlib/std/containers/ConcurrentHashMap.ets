@@ -364,8 +364,8 @@ export namespace containers {
             const buck = this.getOrCreateBucket(key);
             const buckIndex = this.getBucketIndex(key);
             ConcurrencyHelpers.mutexUnlock(this.bucketsMutex);
-            const buckSize = buck.length;
             ConcurrencyHelpers.mutexLock(this.mutex);
+            const buckSize = buck.length;
             for (let i = 0; i < buckSize; i++) {
                 const node = this.atomicBucketAt(buckIndex, buck, i);
                 if (node === null) {
@@ -391,10 +391,10 @@ export namespace containers {
             headNode.prev.next = newNode;
             headNode.prev = newNode;
             this.sizeVal.increase();
-            ConcurrencyHelpers.mutexUnlock(this.mutex);
 
             this.atomicSetBucketAt(buckIndex, buck, 0, newNode, true);
             this.setVal.decrease();
+            ConcurrencyHelpers.mutexUnlock(this.mutex);
 
             this.rehash();
 
