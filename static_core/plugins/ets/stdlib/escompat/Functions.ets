@@ -288,7 +288,7 @@ function unhex(c: char): int {
 function encodedURIHexAt(str: string, i: int): int {
     try {
         if (str.charAt(i) !== c'%') {
-            throw new AssertionError("Char at " + i + "equals c'%'")
+            throw new URIError("Malformed URI sequence at " + i)
         }
         return unhex(str.charAt(i + 1)) << 4 | unhex(str.charAt(i + 2))
     } catch (e) {

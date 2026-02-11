@@ -119,7 +119,7 @@ export class Object {
      * Converts this object to a string
      *
      * @returns { String } A string representing the object.
-     * @throws { AssertionError } The object is an unexpected fixedarray.
+     * @throws { TypeError } The object is an unexpected fixedarray.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
@@ -163,7 +163,7 @@ export class Object {
             } else if (thisObj instanceof FixedArray<double>) {
                 return join(thisObj, ",")
             } else {
-                throw new AssertionError("unexpected FixedArray type: " + thisType.getName())
+                throw new TypeError("unexpected FixedArray type: " + thisType.getName())
             }
         }
 
@@ -292,7 +292,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type");
+        throw new TypeError("Invalid object type");
     }
 
     public static values(rec: Record<PropertyKey, Any>): Any[] {
@@ -381,7 +381,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     /**
@@ -476,7 +476,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     public static getOwnPropertyNames(rec: Record<PropertyKey, Any>): string[] {
@@ -524,7 +524,7 @@ export class Object {
             throw new Error("Invalid TupleType")
         }
 
-        throw new AssertionError("Invalid object type")
+        throw new TypeError("Invalid object type")
     }
 
     /**

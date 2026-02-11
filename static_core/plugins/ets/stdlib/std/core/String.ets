@@ -337,14 +337,14 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { int } begin index to start from
      * @param { int } end past the ending index
      * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
-     * @throws { AssertionError } if begin > end
+     * @throws { RangeError } if begin > end
      * @returns { int } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
      * @since 24
      */
     public codePointCount(begin: int, end: int): int {
         if (begin > end) {
-            throw new AssertionError('Begin idx must be less than end idx')
+            throw new RangeError('Begin idx must be less than end idx')
         }
         let counter: int = 0;
         for (let i: int = begin; i < end; i++) {
@@ -366,7 +366,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { number } begin index to start from
      * @param { number } end past the ending index
      * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
-     * @throws { AssertionError } AssertionError if begin > end
+     * @throws { RangeError } if begin > end
      * @returns { number } the amount of completed codepoints
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -422,7 +422,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { int } begin index to start from
      * @param { int } end past the ending index
      * @throws { StringIndexOutOfBoundsError } if begin is negative or >= length, if end >= length
-     * @throws { AssertionError } if begin > end
+     * @throws { RangeError } if begin > end
      * @returns { byte[] } byte[] array
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1729,7 +1729,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { int } [begin] Start index
      * @param { int } [end] End index
      * @returns { String }
-     * @throws { AssertionError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
@@ -1752,7 +1751,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @param { String[] } captures string array
      * @param { Record<String, String | undefined> | undefined } namedCaptures captures
      * @param { String } replacement string
-     * @throws { AssertionError } - Input parameter error.
+     * @throws { StringIndexOutOfBoundsError } - Input parameter error.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1762,7 +1761,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         let matchLength = matched.getLength()
         let stringLength = str.getLength()
         if (position < 0 || position > stringLength) {
-            throw new AssertionError('Position ' + position + ' has to be in range 0..' + stringLength)
+            throw new StringIndexOutOfBoundsError('Position ' + position + ' has to be in range 0..' + stringLength)
         }
         let tailPos = position + matchLength
         let m = captures.length

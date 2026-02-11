@@ -159,13 +159,13 @@ export namespace containers {
          * Pops a value from the end of the List
          *
          * @returns { UndefinableObject } Popped value
-         * @throws { AssertionError } When the array is empty, attempting to pop an element will throw this exception
+         * @throws { RangeError } When the array is empty, attempting to pop an element will throw this exception
          * @syscap SystemCapability.Utils.Lang
          * @since 24
          */
         public popBack(): UndefinableObject {
             if (this.curSize === 0) {
-                throw new AssertionError("No data to popBack from UndefinableObjectArray!")
+                throw new RangeError("No data to popBack from UndefinableObjectArray!")
             }
             --this.curSize
             return this.data[this.curSize]
