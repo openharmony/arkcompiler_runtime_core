@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,28 @@
  */
 
 /*---
-desc: Call Error.
-assert: In most case errors are caused by Virtial Machine or by standard libraries. In case it is necessary to cause an error explicitly, use “Error Statements”.
-tags: [negative]
-expected_error: |-
-    Unhandled exception: error_call_n.TestError
-      Error
-        at escompat.Error.<ctor> (Error.ets:56:0)
-        at error_call_n.TestError.<ctor> (error_call_n.ets:26:0)
-        at error_call_n.ETSGLOBAL.main (error_call_n.ets:29:0)
+desc: handleAll pattern wrapping actions with error handling callback.
 ---*/
 
-class TestError extends Error {}
+function handleAll(
+    actions: () => void,
+    handling_actions: () => void)
+{
+    try {
+        actions()
+    }
+    catch (x) { // Type of x is Error
+        handling_actions()
+    }
+}
 
 function main(): void {
-  throw new TestError();
+    let handled = false
+
+    handleAll(
+        (): void => { throw new Error("action failed") },
+        (): void => { handled = true }
+    )
+
+    arktest.assertTrue(handled)
 }
