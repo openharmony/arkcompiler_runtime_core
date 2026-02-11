@@ -69,24 +69,6 @@ cases:
           - '-128.0f'
 
     - case1:
-          - c'\u007f'
-      case2:
-          - '127 as byte'
-          - '127 as short'
-          - '127'
-          - '127 as long'
-          - '127.0f'
-          - '127.0'
-
-    - case1:
-          - c'\uffff'
-      case2:
-          - '65535'
-          - '65535 as long'
-          - '65535.0f'
-          - '65535.0'
-
-    - case1:
           - '0'
       case2:
           - '0 as byte'
@@ -94,7 +76,6 @@ cases:
           - '0 as long'
           - '0.0f'
           - '0.0'
-          - c'\u0000'
 
     - case1:
           - new Double(0.0)
@@ -104,7 +85,6 @@ cases:
           - new Int(0)
           - new Long(0 as long)
           - new Float(0.0f)
-          - new Char(c'\u0000')
 
     # string equality
     - case1:

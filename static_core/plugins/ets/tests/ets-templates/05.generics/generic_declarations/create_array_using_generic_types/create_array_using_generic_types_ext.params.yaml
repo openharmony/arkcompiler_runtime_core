@@ -192,10 +192,3 @@ case:
         arktest.assertEQ(numArray[0], 1);
         arktest.assertEQ(numArray[1], 2);
         arktest.assertEQ(numArray[2], 3);
-
-  - desc: Instantiate built-in generic arrays(Array<T>) with char types.
-    logic: |-
-        let numArray: Array<char> = new Array<char>(Int.toChar(1), Int.toChar(2), Int.toChar(3));
-        arktest.assertEQ(numArray[0], 1);
-        arktest.assertEQ(numArray[1], 2);
-        arktest.assertEQ(numArray[2], 3);

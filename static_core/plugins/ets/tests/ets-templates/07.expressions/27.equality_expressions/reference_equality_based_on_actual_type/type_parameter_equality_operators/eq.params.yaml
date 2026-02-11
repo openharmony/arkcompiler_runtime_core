@@ -30,7 +30,6 @@ cases:
           - new Long(127 as long)
           - new Float(127.0f)
           - new Double(127.0)
-          - new Char(c'\u007f')
 
     - case1:
           - '0.0f'
@@ -38,11 +37,9 @@ cases:
       case2:
           - '0 as short'
           - '0.0'
-          - c'\u0000'
           - new Short(0 as short)
           - new Int(0)
           - new Long(0 as long)
-          - new Char(c'\u0000')
 
     # string equality
     - case1:
