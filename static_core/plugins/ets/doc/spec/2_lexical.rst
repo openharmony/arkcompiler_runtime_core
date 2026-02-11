@@ -674,6 +674,37 @@ The concept is represented by the examples below:
    int
    long
 
+.. note::
+
+    For better compatibility with |TS|, an integer literal cannot
+    be used to define a negative value. Several corner cases are
+    represented in the following example:
+    
+
+    .. code-block:: typescript
+      :linenos:
+
+       const max_int1 = 0x7FFFFFFF  // ok, type: int, value: max(int)
+       const max_int2 = 21474836477  // the same
+       
+       const x1 = 0x80000000 // ok, type: long (!), value: 2147483648
+       const x2 = 2147483648  // the same
+       
+       const err1: int = 2147483648 // compile-time error, value is out or range for 'int'
+       
+       const min_int = - 21474836477 - 1 // ok, type: int, value: min(int)
+       
+       const max_long1 = 0x7FFF_FFFF_FFFF_FFFF // ok, type: long, value: max(long)
+       const max_long2 = 9223372036854775807   // the same (decimal literal)
+       
+       const err2 = 0x8000_0000_0000_0000 // compile-time error, value is too large
+       const err3 = 9223372036854775808   // compile-time error, value is too large
+       
+       // integer negation cannot be applied to value that is too large:
+       const err4 = -9223372036854775808  // compile-time error, value is too large
+       
+       const min_long = - max_long - 1  // ok, type: long, value: min(long)
+
 |
 
 .. _Floating-Point Literals:
