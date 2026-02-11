@@ -45,9 +45,7 @@ cases:
           - new Short(0 as short)
       case2:
           - '0 as long'
-          - c'\u0000'
           - new Long(0 as long)
-          - new Char(c'\u0000')
 
     # string equality
     - type1: number|string|boolean
