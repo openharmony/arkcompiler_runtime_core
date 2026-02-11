@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "runtime/jit/profile_saver_worker.h"
+#include "compiler/aot/aot_manager.h"
 #include "include/runtime.h"
 #include "runtime/jit/profiling_saver.h"
 #include "libarkbase/taskmanager/task_manager.h"
@@ -89,20 +90,44 @@ void ProfileSaverWorker::AddTask()
 {
     profileSaverTaskQueue_->AddBackgroundTask([this]() mutable {
         auto instance = Runtime::GetCurrent();
-        if (instance->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
-            LOG(INFO, RUNTIME) << "[profile_saver] increamental saving profile data...";
-            ProfilingSaver profileSaver;
-            auto classCtxStr = instance->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
-                               instance->GetClassLinker()->GetAotManager()->GetAppClassContext();
-            auto &profiledMethods = instance->GetClassLinker()->GetAotManager()->GetProfiledMethods();
-            auto profiledMethodsFinal = instance->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
-            auto savingPath = PandaString(instance->GetOptions().GetProfileOutput());
-            auto profiledPandaFiles = instance->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-            profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal,
-                                     profiledPandaFiles);
-        } else {
+        auto *aotManager = instance->GetClassLinker()->GetAotManager();
+        if (!aotManager->HasProfiledMethods()) {
             LOG(INFO, RUNTIME) << "[profile_saver] No profiled method, skip saver task.";
+            this->EndTask();
+            return;
         }
+
+        LOG(INFO, RUNTIME) << "[profile_saver] increamental saving profile data...";
+        auto &profiledMethods = aotManager->GetProfiledMethods();
+        auto profiledMethodsFinal = aotManager->GetProfiledMethodsFinal();
+
+        auto pathMapSnapshot = aotManager->GetProfiledPandaFilesMapSnapshot();
+        ProfilingSaver profileSaver;
+
+        // All panda files (boot + app) for inline cache pfIdx resolution
+        auto allPandaFiles = aotManager->GetProfiledPandaFiles();
+
+        if (!pathMapSnapshot.empty()) {
+            // Multi-path mode: each app ABC saves to its own profile, no boot context needed
+            auto classCtxStr = aotManager->GetAppClassContext();
+            // Group ABC files by their output profile path
+            PandaUnorderedMap<PandaString, PandaUnorderedSet<std::string>> pathToAbcs;
+            for (const auto &[abcPath, pathInfo] : pathMapSnapshot) {
+                pathToAbcs[pathInfo.curProfilePath].insert(std::string(abcPath));
+            }
+            // Save each group to its corresponding profile path
+            for (auto &[profilePath, abcSet] : pathToAbcs) {
+                profileSaver.SaveProfile(profilePath, classCtxStr, profiledMethods, profiledMethodsFinal, allPandaFiles,
+                                         abcSet);
+            }
+        } else {
+            // Fallback: save all (including boot) to the default profile output path
+            auto classCtxStr = aotManager->GetBootClassContext() + ":" + aotManager->GetAppClassContext();
+            auto savingPath = PandaString(instance->GetOptions().GetProfileOutput());
+            profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, allPandaFiles,
+                                     allPandaFiles);
+        }
+
         this->EndTask();
     });
 }

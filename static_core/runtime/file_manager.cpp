@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,9 @@ Expected<bool, std::string> FileManager::LoadAnFile(std::string_view anLocation,
     auto gcType = Runtime::GetGCType(Runtime::GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
     ASSERT(gcType != ark::mem::GCType::INVALID_GC);
     auto realAnFilePath = os::GetAbsolutePath(anLocation);
+    if (realAnFilePath.empty()) {
+        return Unexpected(std::string("AN file not found: ") + std::string(anLocation));
+    }
     return runtime->GetClassLinker()->GetAotManager()->AddFile(realAnFilePath, &runtimeIface,
                                                                static_cast<uint32_t>(gcType), force);
 }

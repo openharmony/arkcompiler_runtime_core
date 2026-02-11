@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,7 +198,7 @@ public:
         auto writtenMethodsFinal = runtime->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
         auto profiledPandaFiles = runtime->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
         profileSaver.SaveProfile(PandaString(pgoFilePath_), PandaString(classCtxStr_), writtenMethods,
-                                 writtenMethodsFinal, profiledPandaFiles);
+                                 writtenMethodsFinal, profiledPandaFiles, profiledPandaFiles);
     }
 
     void LoadProfileFail(ProfilingLoader &profilingLoader)

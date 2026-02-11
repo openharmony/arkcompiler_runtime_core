@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 
 #include <iostream>
 #include <iomanip>
+
+#if !defined(PANDA_TARGET_WINDOWS)
+#include "libarkbase/os/file_lock.h"
+#endif
 
 namespace ark::pgo {
 // NOLINTNEXTLINE(readability-magic-numbers)
@@ -372,6 +376,14 @@ uint32_t AotPgoFile::WriteFileHeader(std::ofstream &fd, const std::array<char, M
 
 uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObject, const PandaString &classCtxStr)
 {
+#if !defined(PANDA_TARGET_WINDOWS)
+    os::file_lock::ScopedFileLock lock(fileName.c_str(), LOCK_EX);
+    if (!lock.IsLocked()) {
+        LOG(ERROR, RUNTIME) << "Failed to acquire exclusive lock on " << fileName;
+        return 0;
+    }
+#endif
+
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     std::ofstream fd(fileName.data(), std::ios::binary | std::ios::out);
@@ -636,6 +648,13 @@ Expected<AotProfilingData, PandaString> AotPgoFile::Load(const PandaString &file
 {
     using namespace std::string_literals;
     AotProfilingData data;
+
+#if !defined(PANDA_TARGET_WINDOWS)
+    os::file_lock::ScopedFileLock lock(fileName.c_str(), LOCK_SH);
+    if (!lock.IsLocked()) {
+        return UnexpectedS("Failed to acquire shared lock on file");
+    }
+#endif
 
     std::ifstream inputFile(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
     if (!inputFile.is_open()) {

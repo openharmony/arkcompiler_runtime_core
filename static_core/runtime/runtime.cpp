@@ -564,14 +564,28 @@ bool Runtime::Destroy()
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
     if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
+        auto *aotManager = instance_->GetClassLinker()->GetAotManager();
         ProfilingSaver profileSaver;
-        auto classCtxStr = instance_->GetClassLinker()->GetAotManager()->GetBootClassContext() + ":" +
-                           instance_->GetClassLinker()->GetAotManager()->GetAppClassContext();
-        auto &profiledMethods = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethods();
-        auto profiledMethodsFinal = instance_->GetClassLinker()->GetAotManager()->GetProfiledMethodsFinal();
-        auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
-        auto profiledPandaFiles = instance_->GetClassLinker()->GetAotManager()->GetProfiledPandaFiles();
-        profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, profiledPandaFiles);
+        auto classCtxStr = aotManager->GetBootClassContext() + ":" + aotManager->GetAppClassContext();
+        auto &profiledMethods = aotManager->GetProfiledMethods();
+        auto profiledMethodsFinal = aotManager->GetProfiledMethodsFinal();
+
+        auto allPandaFiles = aotManager->GetProfiledPandaFiles();
+        auto pathMapSnapshot = aotManager->GetProfiledPandaFilesMapSnapshot();
+        if (!pathMapSnapshot.empty()) {
+            PandaUnorderedMap<PandaString, PandaUnorderedSet<std::string>> pathToAbcs;
+            for (const auto &[abcPath, pathInfo] : pathMapSnapshot) {
+                pathToAbcs[pathInfo.curProfilePath].insert(std::string(abcPath));
+            }
+            for (auto &[profilePath, abcSet] : pathToAbcs) {
+                profileSaver.SaveProfile(profilePath, classCtxStr, profiledMethods, profiledMethodsFinal, allPandaFiles,
+                                         abcSet);
+            }
+        } else {
+            auto savingPath = PandaString(instance_->GetOptions().GetProfileOutput());
+            profileSaver.SaveProfile(savingPath, classCtxStr, profiledMethods, profiledMethodsFinal, allPandaFiles,
+                                     allPandaFiles);
+        }
     }
 
     if (GetOptions().ShouldLoadBootPandaFiles()) {

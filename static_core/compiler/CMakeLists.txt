@@ -376,6 +376,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/class_hash_table_test.cpp
     tests/linear_order_test.cpp
     tests/profiling_merger_test.cpp
+    tests/profiling_multi_path_test.cpp
     tests/profiling_runner_test.cpp
     tests/lower_boxed_boolean.cpp
 )

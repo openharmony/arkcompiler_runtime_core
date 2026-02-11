@@ -54,6 +54,7 @@ public:
 
     PandaString GetBootClassContext() const
     {
+        os::memory::LockHolder lock {profiledFilesLock_};
         return bootClassContext_;
     }
 
@@ -61,21 +62,49 @@ public:
 
     void SetBootClassContext(PandaString context, bool isArkAot)
     {
-        bootClassContext_ = std::move(context);
-        ParseClassContextToFile(bootClassContext_);
+        {
+            os::memory::LockHolder lock {profiledFilesLock_};
+            bootClassContext_ = std::move(context);
+            ReparseProfiledPandaFilesLocked();
+        }
         UpdatePandaFilesSnapshot(isArkAot, true, false);
     }
 
     PandaString GetAppClassContext() const
     {
+        os::memory::LockHolder lock {profiledFilesLock_};
         return appClassContext_;
     }
 
     void SetAppClassContext(PandaString context, bool isArkAot)
     {
-        appClassContext_ = std::move(context);
-        ParseClassContextToFile(appClassContext_);
+        {
+            os::memory::LockHolder lock {profiledFilesLock_};
+            appClassContext_ = std::move(context);
+            ReparseProfiledPandaFilesLocked();
+        }
         UpdatePandaFilesSnapshot(isArkAot, false, true);
+    }
+
+    void AddProfiledPandaFile(const panda_file::File &pf)
+    {
+        auto path = PandaString(pf.GetFullFileName());
+        {
+            os::memory::LockHolder mapLock {profilePathMapLock_};
+            if (!profiledPandaFilesMap_.empty() && profiledPandaFilesMap_.find(path) == profiledPandaFilesMap_.end()) {
+                return;
+            }
+        }
+        os::memory::LockHolder lock {profiledFilesLock_};
+        auto entry = path + HASH_DELIM + PandaString(pf.GetPaddedChecksum());
+        if (appClassContext_.find(entry) != PandaString::npos) {
+            return;
+        }
+        if (!appClassContext_.empty()) {
+            appClassContext_.push_back(DELIM);
+        }
+        appClassContext_.append(entry);
+        ReparseProfiledPandaFilesLocked();
     }
 
     void VerifyClassHierarchy();
@@ -142,10 +171,16 @@ public:
     void TryAddMethodToProfile(Method *method)
     {
         auto pfName = method->GetPandaFile()->GetFullFileName();
-        if (profiledPandaFiles_.find(pfName) != profiledPandaFiles_.end()) {
-            os::memory::LockHolder lock {profiledMethodsLock_};
-            profiledMethods_.push_back(method);
+        bool shouldCollectMethod = false;
+        {
+            os::memory::LockHolder filesLock {profiledFilesLock_};
+            shouldCollectMethod = profiledPandaFiles_.find(pfName) != profiledPandaFiles_.end();
         }
+        if (!shouldCollectMethod) {
+            return;
+        }
+        os::memory::LockHolder methodsLock {profiledMethodsLock_};
+        profiledMethods_.push_back(method);
     }
 
     bool HasProfiledMethods()
@@ -170,8 +205,9 @@ public:
 
     PandaUnorderedMap<PandaString, ProfilePathInfo> GetProfiledPandaFilesMapSnapshot() const;
 
-    PandaUnorderedSet<std::string> &GetProfiledPandaFiles()
+    PandaUnorderedSet<std::string> GetProfiledPandaFiles()
     {
+        os::memory::LockHolder lock {profiledFilesLock_};
         return profiledPandaFiles_;
     }
 
@@ -182,14 +218,20 @@ public:
     const panda_file::File *GetPandaFileBySnapshotIndex(uint32_t index) const;
 
 private:
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char HASH_DELIM = '*';
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr char DELIM = ':';
     PandaVector<std::unique_ptr<AotFile>> aotFiles_;
     PandaUnorderedMap<std::string, AotPandaFile> filesMap_;
-    PandaString bootClassContext_;
-    PandaString appClassContext_;
+    PandaString bootClassContext_ GUARDED_BY(profiledFilesLock_);
+    PandaString appClassContext_ GUARDED_BY(profiledFilesLock_);
 
     mutable os::memory::Mutex profiledMethodsLock_;
     PandaList<Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
-    PandaUnorderedSet<std::string> profiledPandaFiles_;
+
+    mutable os::memory::Mutex profiledFilesLock_;
+    PandaUnorderedSet<std::string> profiledPandaFiles_ GUARDED_BY(profiledFilesLock_);
 
     mutable os::memory::Mutex profilePathMapLock_;
     PandaUnorderedMap<PandaString, ProfilePathInfo> profiledPandaFilesMap_ GUARDED_BY(profilePathMapLock_);
@@ -200,11 +242,24 @@ private:
     bool hasYoungAotStringRefs_ {false};
     PandaVector<BitSetElement> aotStringYoungSet_;
 
+    void ReparseProfiledPandaFiles()
+    {
+        os::memory::LockHolder lock {profiledFilesLock_};
+        ReparseProfiledPandaFilesLocked();
+    }
+
     mutable os::memory::Mutex snapshotFilesLock_;
     PandaVector<std::pair<std::string_view, PandaFileLoadData>> pandaFilesSnapshot_ GUARDED_BY(snapshotFilesLock_);
     PandaUnorderedMap<std::string_view, PandaFileLoadData> pandaFilesLoaded_ GUARDED_BY(snapshotFilesLock_);
 
     void UpdatePandaFilesSnapshot(bool isArkAot, bool bootContext, bool appContext);
+    void ReparseProfiledPandaFilesLocked() REQUIRES(profiledFilesLock_)
+    {
+        profiledPandaFiles_.clear();
+        ParseClassContextToFileLocked(bootClassContext_);
+        ParseClassContextToFileLocked(appClassContext_);
+    }
+    void ParseClassContextToFileLocked(std::string_view context) REQUIRES(profiledFilesLock_);
 };
 
 class AotClassContextCollector {

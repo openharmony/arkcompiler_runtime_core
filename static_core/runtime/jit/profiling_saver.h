@@ -38,10 +38,12 @@ public:
     void CreateThrowData(pgo::AotProfilingData::AotMethodProfilingData *profilingData, Span<ThrowData> &runtimeThrow);
     void AddMethod(pgo::AotProfilingData *profileData, Method *method, int32_t pandaFileIdx);
     void AddProfiledMethods(pgo::AotProfilingData *profileData, PandaList<Method *> &profiledMethods,
-                            PandaList<Method *>::const_iterator profiledMethodsFinal);
+                            PandaList<Method *>::const_iterator profiledMethodsFinal,
+                            const PandaUnorderedSet<std::string> &saveablePandaFiles);
     void SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
                      PandaList<Method *> &profiledMethods, PandaList<Method *>::const_iterator profiledMethodsFinal,
-                     PandaUnorderedSet<std::string> &profiledPandaFiles);
+                     PandaUnorderedSet<std::string> &allPandaFiles,
+                     const PandaUnorderedSet<std::string> &saveablePandaFiles);
 };
 }  // namespace ark
 #endif  // PROFILING_SAVE_H

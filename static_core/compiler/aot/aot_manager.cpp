@@ -124,7 +124,8 @@ void AotManager::UpdatePandaFilesSnapshot(bool isArkAot, [[maybe_unused]] bool b
     };
 
     // NOTE: Possibly not optimal #31915
-    os::memory::LockHolder lock {snapshotFilesLock_};
+    os::memory::LockHolder filesLock {profiledFilesLock_};
+    os::memory::LockHolder snapshotLock {snapshotFilesLock_};
     pandaFilesSnapshot_.clear();
     parseClassContext(bootClassContext_, pandaFilesLoaded_, pandaFilesSnapshot_);
     parseClassContext(appClassContext_, pandaFilesLoaded_, pandaFilesSnapshot_);
@@ -179,6 +180,8 @@ static bool CheckFilesInClassContext(std::string_view context, std::string_view 
 
 void AotManager::VerifyClassHierarchy()
 {
+    // Hold profiledFilesLock_ for the entire function since it is only called during VM initialization.
+    os::memory::LockHolder lock {profiledFilesLock_};
     auto completeContext = bootClassContext_;
     if (!appClassContext_.empty()) {
         if (!completeContext.empty()) {
@@ -254,11 +257,19 @@ void AotManager::RegisterProfilePaths(PandaVector<ProfilePathEntry> &&entries)
 
 PandaUnorderedMap<PandaString, ProfilePathInfo> AotManager::GetProfiledPandaFilesMapSnapshot() const
 {
+    // Returns a copy (snapshot) of the map under lock; the caller receives an independent copy
+    // and subsequent modifications to profiledPandaFilesMap_ do not affect it.
     os::memory::LockHolder lock {profilePathMapLock_};
     return profiledPandaFilesMap_;
 }
 
 void AotManager::ParseClassContextToFile(std::string_view context)
+{
+    os::memory::LockHolder lock {profiledFilesLock_};
+    ParseClassContextToFileLocked(context);
+}
+
+void AotManager::ParseClassContextToFileLocked(std::string_view context) REQUIRES(profiledFilesLock_)
 {
     size_t start = 0;
     size_t end;

@@ -107,9 +107,9 @@ void ProfilingSaver::AddMethod(pgo::AotProfilingData *profileData, Method *metho
 }
 
 void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, PandaList<Method *> &profiledMethods,
-                                        PandaList<Method *>::const_iterator profiledMethodsFinal)
+                                        PandaList<Method *>::const_iterator profiledMethodsFinal,
+                                        const PandaUnorderedSet<std::string> &saveablePandaFiles)
 {
-    auto pfMap = profileData->GetPandaFileMap();
     bool notFinal = true;
     for (auto it = profiledMethods.cbegin(); notFinal; it++) {
         if ((*it) == (*profiledMethodsFinal)) {
@@ -117,13 +117,13 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, Pand
         }
         auto method = *it;
         ASSERT((method->GetProfilingData()) != nullptr);
+        auto pandaFileName = method->GetPandaFile()->GetFullFileName();
+        if (saveablePandaFiles.find(std::string(pandaFileName)) == saveablePandaFiles.end()) {
+            continue;
+        }
         if (method->GetProfilingData()->IsUpdateSinceLastSave()) {
             method->GetProfilingData()->DataSaved();
         } else {
-            continue;
-        }
-        auto pandaFileName = method->GetPandaFile()->GetFullFileName();
-        if (pfMap.find(PandaString(pandaFileName)) == pfMap.end()) {
             continue;
         }
         auto pandaFileIdx = profileData->GetPandaFileIdxByName(pandaFileName);
@@ -134,7 +134,8 @@ void ProfilingSaver::AddProfiledMethods(pgo::AotProfilingData *profileData, Pand
 void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
                                  PandaList<Method *> &profiledMethods,
                                  PandaList<Method *>::const_iterator profiledMethodsFinal,
-                                 PandaUnorderedSet<std::string> &profiledPandaFiles)
+                                 PandaUnorderedSet<std::string> &allPandaFiles,
+                                 const PandaUnorderedSet<std::string> &saveablePandaFiles)
 {
     ProfilingLoader profilingLoader;
     pgo::AotProfilingData profData;
@@ -147,9 +148,10 @@ void ProfilingSaver::SaveProfile(const PandaString &saveFilePath, const PandaStr
         profData = std::move(profilingLoader.GetAotProfilingData());
     }
 
-    // Add new profile data to the existing data
-    profData.AddPandaFiles(profiledPandaFiles);
-    AddProfiledMethods(&profData, profiledMethods, profiledMethodsFinal);
+    // Add all panda files for pfIdx resolution (inline caches may reference classes from any file)
+    profData.AddPandaFiles(allPandaFiles);
+    // Only save methods from the saveable set
+    AddProfiledMethods(&profData, profiledMethods, profiledMethodsFinal, saveablePandaFiles);
 
     // Save the updated profile data
     pgo::AotPgoFile pgoFile;
