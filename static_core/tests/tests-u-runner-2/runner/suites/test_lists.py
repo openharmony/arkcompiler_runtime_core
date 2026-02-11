@@ -347,6 +347,8 @@ class TestLists:
             full_template_name += "(-FULLASTV)?"
         if self.is_simultaneous():
             full_template_name += "(-SIMULTANEOUS)?"
+        if "--stackless-coros=true" in self.get_es2panda_args():
+            full_template_name += "(-STACKLESS)?"
         if self.conf_kind == ConfigurationKind.JIT and self.is_jit_with_repeats:
             full_template_name += "(-(repeats|REPEATS))?"
         gc_type = cast(str, self.config.workflow.get_parameter('gc-type', 'g1-gc')).upper()

@@ -71,7 +71,7 @@ public:
 
     const uint8_t *GetAsyncAnnotationDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lets/coroutine/Async;");
+        return utf::CStringAsMutf8("Larkruntime/annotation/Async;");
     }
 
     const uint8_t *GetAsyncContextClassDescriptor() const override
