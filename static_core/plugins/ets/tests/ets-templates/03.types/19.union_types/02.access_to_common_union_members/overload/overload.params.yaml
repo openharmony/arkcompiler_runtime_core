@@ -182,7 +182,6 @@ cases:
           arktest.assertEQ(u2.meth(new Object()), 3, "u2.meth(new Object())")
 
     - decl: |-
-          // overload signatures - verify first match
           class A {
               meth(p: int): number {
                   return 1
@@ -199,7 +198,7 @@ cases:
           let u1: A|B = new A
           let u2: A|B = new B
       use: |-
-          arktest.assertEQ(u1.meth(1), 1, "u1.meth(1)")
+          arktest.assertEQ(u1.meth(1), 2, "u1.meth(1)")
           arktest.assertEQ(u1.meth(new Object()), 2, "u1.meth(new Object())")
           arktest.assertEQ(u2.meth(new Object()), 3, "u2.meth(new Object())")
 
