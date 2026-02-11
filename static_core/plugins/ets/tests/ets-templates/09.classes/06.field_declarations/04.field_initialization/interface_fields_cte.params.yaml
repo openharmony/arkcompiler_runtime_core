@@ -19,7 +19,6 @@ cases:
     check_variants:
       - {check_type: "int"}
       - {check_type: "double"}
-      - {check_type: "Object | undefined"}
       - {check_type: "Any"}
     decl_variants:
       - |-

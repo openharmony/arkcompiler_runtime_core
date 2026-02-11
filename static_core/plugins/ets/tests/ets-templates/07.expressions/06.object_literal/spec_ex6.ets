@@ -20,7 +20,7 @@ desc: >-
     or provide its own version of method
 ---*/
 
-class Base {
+abstract class Base {
     method () { console.log ("method() from Base is called") }
 }
 
