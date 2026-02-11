@@ -37,6 +37,7 @@ function main(): int {
     suite.addTest('JsonElement createInterge asLong test', testJsonElementAsLong);
     suite.addTest('JsonElement test long to int', testLongToInt);
     suite.addTest('JsonElement test long to double', testLongToDouble);
+    suite.addTest('JsonElement test asInteger throw Error', testAsIntegerErrorTest);
 
     return suite.run();
 }
@@ -708,4 +709,28 @@ function testLongToDouble(): void {
     arktest.assertEQ(doubleElem.asLong(), -9007199254740992)
     arktest.assertEQ(doubleElem.tryAsDouble(), undefined)
     arktest.expectError((): void => { doubleElem.asDouble() }, new RangeError(`'-9007199254740992' is not a double`))
+}
+
+function testAsIntegerErrorTest(): void {
+    let str = '9007199254740991'  // MAX_SAFE_INTEGER
+    let opt: jsonx.ParseOptions = {bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as jsonx.ParseOptions;
+    let elem = JSON.parseJsonElement(str, opt)
+    arktest.expectError((): void => { elem.asInteger() }, new jsonx.JsonTypeError('Expected integer, but element stores different value type.'))
+
+    str = '9223372036854775807'  // MAX_VALUE
+    elem = JSON.parseJsonElement(str, opt)
+    arktest.expectError((): void => { elem.asInteger() }, new jsonx.JsonTypeError('Expected integer, but element stores different value type.'))
+
+    str = '1000000000000000000000000'  // 10^24
+    elem = JSON.parseJsonElement(str, opt)
+    arktest.expectError((): void => { elem.asInteger() }, new jsonx.JsonTypeError('Expected integer, but element stores different value type.'))
+
+    str = '9223372036854775808' // MAX_VALUE + 1
+    opt = {bigIntMode: jsonx.BigIntMode.PARSE_AS_BIGINT} as jsonx.ParseOptions;
+    elem = JSON.parseJsonElement(str, opt)
+    arktest.expectError((): void => { elem.asInteger() }, new jsonx.JsonTypeError('Expected integer, but element stores different value type.'))
+
+    str = '1000000000000000000000000'  // 10^24
+    elem = JSON.parseJsonElement(str, opt)
+    arktest.expectError((): void => { elem.asInteger() }, new jsonx.JsonTypeError('Expected integer, but element stores different value type.'))
 }
