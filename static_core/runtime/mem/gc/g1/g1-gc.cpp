@@ -294,6 +294,20 @@ void G1GC<LanguageConfig>::IterateOverRefsInMemRange(const MemRange &memRange, R
     }
 }
 
+// method should be here to help clang analyzer parse it correctly in intrusive test
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::InterruptReleasePagesIfNeeded()
+{
+    if (this->GetSettings()->GCWorkersCount() != 0) {
+        auto oldStatus = ReleasePagesStatus::RELEASING_PAGES;
+        if (releasePagesInterruptFlag_.compare_exchange_strong(oldStatus, ReleasePagesStatus::NEED_INTERRUPT)) {
+            /* @sync 1
+             * @description Interrupt release pages
+             */
+        }
+    }
+}
+
 template <class LanguageConfig, bool CONCURRENTLY, bool COLLECT_CLASSES>
 class NonRegularObjectsDeathChecker {
 public:
@@ -351,14 +365,15 @@ template <bool ATOMIC, bool CONCURRENTLY>
 void G1GC<LanguageConfig>::CollectEmptyRegions(GCTask &task, PandaVector<Region *> &&emptyTenuredRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-    CollectNonRegularObjects<ATOMIC, CONCURRENTLY>();
-    ClearEmptyTenuredMovableRegions<ATOMIC, CONCURRENTLY>(std::move(emptyTenuredRegions));
+    auto [nonmovableFreeRegions, humongousFreeRegions] = CollectNonRegularObjects<ATOMIC, CONCURRENTLY>();
+    ClearEmptyRegions<ATOMIC, CONCURRENTLY>(std::move(emptyTenuredRegions), std::move(nonmovableFreeRegions),
+                                            std::move(humongousFreeRegions));
     task.UpdateGCCollectionType(GCCollectionType::TENURED);
 }
 
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::CollectNonRegularObjects()
+std::pair<PandaVector<Region *>, PandaVector<Region *>> G1GC<LanguageConfig>::CollectNonRegularObjects()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     size_t deleteSize = 0;
@@ -373,31 +388,27 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
             : GCObjectVisitor(
                   // CC-OFFNXT(G.FMT.06-CPP) project code style
                   NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&deleteSize, &deleteCount));
-    auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
-    auto regionVisitor = [this, &allRegions]([[maybe_unused]] PandaVector<Region *> &regions) {
-        for (auto region : regions) {
-            region->AddFlag(RegionFlag::IS_INVALID);
-        }
-        if constexpr (CONCURRENTLY) {
-            updateRemsetWorker_->InvalidateRegions(&allRegions);
-        } else {
-            updateRemsetWorker_->GCInvalidateRegions(&allRegions);
-        }
-    };
-    this->GetG1ObjectAllocator()->CollectNonRegularRegions(regionVisitor, deathChecker);
+    auto nonRegularRegions = this->GetG1ObjectAllocator()->CollectNonRegularRegions(deathChecker);
     this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
     this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
+
+    return nonRegularRegions;
 }
 
 template <class LanguageConfig>
 template <bool ATOMIC, bool CONCURRENTLY>
-void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *> &&emptyTenuredRegions)
+void G1GC<LanguageConfig>::ClearEmptyRegions(PandaVector<Region *> &&emptyTenuredRegions,
+                                             PandaVector<Region *> &&nonmovableFreeRegions,
+                                             PandaVector<Region *> &&humongousFreeRegions)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     {
-        for (auto *region : emptyTenuredRegions) {
-            region->AddFlag(RegionFlag::IS_INVALID);
-        }
+        std::for_each(emptyTenuredRegions.begin(), emptyTenuredRegions.end(),
+                      [](auto *region) { region->AddFlag(RegionFlag::IS_INVALID); });
+        std::for_each(nonmovableFreeRegions.begin(), nonmovableFreeRegions.end(),
+                      [](auto *region) { region->AddFlag(RegionFlag::IS_INVALID); });
+        std::for_each(humongousFreeRegions.begin(), humongousFreeRegions.end(),
+                      [](auto *region) { region->AddFlag(RegionFlag::IS_INVALID); });
         ScopedTiming t1("Region Invalidation", *this->GetTiming());
         auto allRegions = GetG1ObjectAllocator()->GetAllRegions();
         if constexpr (CONCURRENTLY) {
@@ -420,22 +431,46 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
             region->IterateOverObjects(deathVisitor);
         }
     }
-    {
-        ScopedTiming t2("Reset regions", *this->GetTiming());
-        if (CONCURRENTLY) {
-            this->GetG1ObjectAllocator()
-                ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
-                                        OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
-                    // CC-OFFNXT(G.FMT.06-CPP) project code style
-                    emptyTenuredRegions);
-        } else {
-            this->GetG1ObjectAllocator()
-                ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
-                                        OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(emptyTenuredRegions);
-        }
-    }
+    ResetRegions<CONCURRENTLY>(std::move(emptyTenuredRegions), std::move(nonmovableFreeRegions),
+                               std::move(humongousFreeRegions));
     this->memStats_.template RecordCountFreedTenured<ATOMIC>(deleteCount);
     this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
+}
+
+template <class LanguageConfig>
+template <bool CONCURRENTLY>
+void G1GC<LanguageConfig>::ResetRegions(PandaVector<Region *> &&emptyTenuredRegions,
+                                        PandaVector<Region *> &&nonmovableFreeRegions,
+                                        PandaVector<Region *> &&humongousFreeRegions)
+{
+    ScopedTiming t2("Reset regions", *this->GetTiming());
+    auto objectAllocator = this->GetG1ObjectAllocator();
+    if constexpr (CONCURRENTLY) {
+        objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
+            // CC-OFFNXT(G.FMT.06-CPP) project code style
+            emptyTenuredRegions);
+        objectAllocator->template ResetRegions<RegionFlag::IS_NONMOVABLE, RegionSpace::ReleaseRegionsPolicy::Release,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
+            // CC-OFFNXT(G.FMT.06-CPP) project code style
+            nonmovableFreeRegions);
+        objectAllocator->template ResetRegions<RegionFlag::IS_LARGE_OBJECT, RegionSpace::ReleaseRegionsPolicy::Release,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
+            // CC-OFFNXT(G.FMT.06-CPP) project code style
+            humongousFreeRegions);
+    } else {
+        objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
+                                               OSPagesPolicy::NO_RETURN, false, PandaVector<Region *>>(
+            emptyTenuredRegions);
+        objectAllocator->template ResetRegions<RegionFlag::IS_NONMOVABLE, RegionSpace::ReleaseRegionsPolicy::Release,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, false, PandaVector<Region *>>(
+            // CC-OFFNXT(G.FMT.06-CPP) project code style
+            nonmovableFreeRegions);
+        objectAllocator->template ResetRegions<RegionFlag::IS_LARGE_OBJECT, RegionSpace::ReleaseRegionsPolicy::Release,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, false, PandaVector<Region *>>(
+            // CC-OFFNXT(G.FMT.06-CPP) project code style
+            humongousFreeRegions);
+    }
 }
 
 template <class LanguageConfig>
@@ -2338,19 +2373,6 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet(PandaVector<std::pair<u
         collectionSet.AddRegion(region);
     }
     return collectionSet;
-}
-
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::InterruptReleasePagesIfNeeded()
-{
-    if (this->GetSettings()->GCWorkersCount() != 0) {
-        auto oldStatus = ReleasePagesStatus::RELEASING_PAGES;
-        if (releasePagesInterruptFlag_.compare_exchange_strong(oldStatus, ReleasePagesStatus::NEED_INTERRUPT)) {
-            /* @sync 1
-             * @description Interrupt release pages
-             */
-        }
-    }
 }
 
 template <class LanguageConfig>

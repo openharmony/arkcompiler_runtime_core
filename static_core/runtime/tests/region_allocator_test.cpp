@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -802,10 +802,7 @@ TEST_F(RegionNonmovableLargeObjectAllocatorTest, MemStatsAllocatorTest)
 
 using RegionHumongousObjectAllocator =
     RegionHumongousAllocator<ObjectAllocConfig, RegionAllocatorLockConfig::CommonLock>;
-class RegionHumongousObjectAllocatorTest : public RegionAllocatorTestBase<RegionHumongousObjectAllocator, false> {
-protected:
-    static constexpr auto REGION_VISITOR = []([[maybe_unused]] PandaVector<Region *> &regions) {};
-};
+class RegionHumongousObjectAllocatorTest : public RegionAllocatorTestBase<RegionHumongousObjectAllocator, false> {};
 
 TEST_F(RegionHumongousObjectAllocatorTest, AllocatorTest)
 {
@@ -875,7 +872,7 @@ TEST_F(RegionHumongousObjectAllocatorTest, CollectTest)
         return ObjectStatus::ALIVE_OBJECT;
     };
     // Collect all objects into unordered_set via allocator's method
-    allocator.CollectAndRemoveFreeRegions(REGION_VISITOR, deleteAll);
+    allocator.CollectFreeRegions(deleteAll);
     for (auto i : allocatedElements) {
         auto element = foundedElements.find(i);
         ASSERT_TRUE(element != foundedElements.end());
@@ -899,8 +896,10 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectAliveObject)
     object->SetClass(testClass);
     Region *region = ObjectToRegion(object);
 
-    allocator.CollectAndRemoveFreeRegions(REGION_VISITOR, [](ObjectHeader *) { return ObjectStatus::ALIVE_OBJECT; });
+    auto freeRegions = allocator.CollectFreeRegions([](ObjectHeader *) { return ObjectStatus::ALIVE_OBJECT; });
     bool hasRegion = false;
+    allocator.ResetSeveralSpecificRegions<RegionSpace::ReleaseRegionsPolicy::Release, OSPagesPolicy::IMMEDIATE_RETURN,
+                                          false>(freeRegions);
     allocator.GetSpace()->IterateRegions([region, &hasRegion](Region *r) { hasRegion |= region == r; });
     ASSERT_TRUE(hasRegion);
     ASSERT(!region->HasFlag(RegionFlag::IS_FREE));
@@ -921,8 +920,10 @@ TEST_F(RegionHumongousObjectAllocatorTest, TestCollectDeadObject)
     object->SetClass(testClass);
     Region *region = ObjectToRegion(object);
 
-    allocator.CollectAndRemoveFreeRegions(REGION_VISITOR, [](ObjectHeader *) { return ObjectStatus::DEAD_OBJECT; });
+    auto freeRegions = allocator.CollectFreeRegions([](ObjectHeader *) { return ObjectStatus::DEAD_OBJECT; });
     bool hasRegion = false;
+    allocator.ResetSeveralSpecificRegions<RegionSpace::ReleaseRegionsPolicy::Release, OSPagesPolicy::IMMEDIATE_RETURN,
+                                          false>(freeRegions);
     allocator.GetSpace()->IterateRegions([region, &hasRegion](Region *r) { hasRegion |= region == r; });
     ASSERT_TRUE(!hasRegion);
 }

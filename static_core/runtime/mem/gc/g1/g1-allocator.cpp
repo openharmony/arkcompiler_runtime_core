@@ -334,12 +334,13 @@ PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetNonRegularRegions()
 }
 
 template <MTModeT MT_MODE>
-void ObjectAllocatorG1<MT_MODE>::CollectNonRegularRegions(const RegionsVisitor &regionVisitor,
-                                                          const GCObjectVisitor &gcObjectVisitor)
+std::pair<PandaVector<Region *>, PandaVector<Region *>> ObjectAllocatorG1<MT_MODE>::CollectNonRegularRegions(
+    const GCObjectVisitor &gcObjectVisitor)
 {
     nonmovableAllocator_->Collect(gcObjectVisitor);
-    nonmovableAllocator_->VisitAndRemoveFreeRegions(regionVisitor);
-    humongousObjectAllocator_->CollectAndRemoveFreeRegions(regionVisitor, gcObjectVisitor);
+    auto nonmovableFreeRegions = nonmovableAllocator_->VisitAndRemoveFreeRegions();
+    auto humongousFreeRegions = humongousObjectAllocator_->CollectFreeRegions(gcObjectVisitor);
+    return std::make_pair(nonmovableFreeRegions, humongousFreeRegions);
 }
 
 template <MTModeT MT_MODE>

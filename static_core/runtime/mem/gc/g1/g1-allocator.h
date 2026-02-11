@@ -103,7 +103,8 @@ public:
      * Collect non regular regions (i.e. remove dead objects from Humongous and NonMovable regions
      * and remove empty regions).
      */
-    void CollectNonRegularRegions(const RegionsVisitor &regionVisitor, const GCObjectVisitor &gcObjectVisitor);
+    std::pair<PandaVector<Region *>, PandaVector<Region *>> CollectNonRegularRegions(
+        const GCObjectVisitor &gcObjectVisitor);
 
     size_t GetRegularObjectMaxSize() final;
 
@@ -143,6 +144,16 @@ public:
               OSPagesPolicy OS_PAGES_POLICY, bool NEED_LOCK, typename Container>
     void ResetRegions(const Container &regions)
     {
+        if constexpr (REGIONS_TYPE == RegionFlag::IS_NONMOVABLE) {
+            nonmovableAllocator_->ResetSeveralSpecificRegions<REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(
+                regions);
+            return;
+        }
+        if constexpr (REGIONS_TYPE == RegionFlag::IS_LARGE_OBJECT) {
+            humongousObjectAllocator_->ResetSeveralSpecificRegions<REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(
+                regions);
+            return;
+        }
         objectAllocator_->ResetSeveralSpecificRegions<REGIONS_TYPE, REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(
             regions);
     }
