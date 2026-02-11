@@ -30,34 +30,32 @@ namespace ark::helpers::math {
  * @param X - should be power of 2
  * @return log2(X) or undefined if X 0
  */
-inline constexpr uint32_t GetIntLog2(const uint32_t x)
+constexpr unsigned GetIntLog2(const unsigned x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint32_t>(PANDA_BIT_UTILS_CTZ(x));
+    return static_cast<unsigned>(PANDA_BIT_UTILS_CTZ(x));
 }
 
 /**
  * @brief returns log2 for argument
- * @param X - of type uint64_t, should be power of 2
+ * @param X - of type long, should be power of 2
  * @return log2(X) or undefined if X 0
  */
-inline constexpr uint64_t GetIntLog2(const uint64_t x)
+constexpr unsigned long GetIntLog2(const unsigned long x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint64_t>(PANDA_BIT_UTILS_CTZLL(x));
+    return static_cast<unsigned long>(PANDA_BIT_UTILS_CTZLL(x));
 }
 
 /**
  * @brief returns log2 for argument
- * @param X - of type T, should be power of 2
+ * @param X - of type long long, should be power of 2
  * @return log2(X) or undefined if X 0
  */
-template <typename T>
-inline constexpr T GetIntLog2(T x)
+constexpr unsigned long long GetIntLog2(const unsigned long long x)
 {
-    static_assert(sizeof(T) == sizeof(uint32_t) || sizeof(T) == sizeof(uint64_t));
-    using U = std::make_unsigned_t<T>;
-    return static_cast<T>(GetIntLog2(static_cast<U>(x)));
+    ASSERT((x > 0) && !(x & (x - 1U)));
+    return static_cast<unsigned long long>(PANDA_BIT_UTILS_CTZLL(x));
 }
 
 template <typename T>
