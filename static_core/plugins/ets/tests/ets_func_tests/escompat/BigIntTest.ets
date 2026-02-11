@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,7 @@ function testBigIntToString11() {
 
 function testBigIntConstructor1() {
     let n = BigInt(0x0102030405060708)
-    arktest.assertEQ(n, BigInt("72623859790382848"))
+    arktest.assertEQ(n, BigInt("72623859790382856"))
 
     const errorcheck = (e: Error) => { 
         return (e instanceof RangeError) &&
@@ -179,6 +179,16 @@ function testBigIntNumberMax(): void {
   arktest.assertFalse(bi1 >  Number.MAX_VALUE);
 }
 
+function testBigIntWithLongMax(): void {
+    let a = BigInt(9223372036854775807)
+    arktest.assertEQ(a, 9223372036854775807n)
+    a = BigInt(9223372036854775806)
+    arktest.assertEQ(a, 9223372036854775806n)
+    a = BigInt(-9223372036854775807)
+    arktest.assertEQ(a, -9223372036854775807n)
+    a = BigInt(-9223372036854775808)
+    arktest.assertEQ(a, -9223372036854775808n)
+}
 
 function main(): int {
     const suite = new arktest.ArkTestsuite("test bigint toString by undefined")
@@ -207,6 +217,7 @@ function main(): int {
     suite.addTest("bigint from double: -4e10", testBigIntFromDoubleNegativeExp);
     suite.addTest("bigint from double: float32 underflow", testBigIntFromDoubleFloat32Underflow);
     suite.addTest("bigint from number max value", testBigIntNumberMax);
+    suite.addTest('bigint from long max value', testBigIntWithLongMax)
     
     return suite.run()
 }
