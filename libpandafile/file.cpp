@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -819,9 +819,16 @@ void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::s
         uint32_t cal_checksum = 0;
         bool is_checksum_match = ValidateChecksum(&cal_checksum);
         if (!is_checksum_match) {
+#ifdef ENABLE_HILOG
+            HILOG_COMM_FATAL(
+                "%{public}s, checksum mismatch. The abc file has been corrupted. "\
+                "Expected checksum: 0x%{public}X, Actual checksum: 0x%{public}X",
+                msg.data(), GetHeader()->checksum, cal_checksum);
+#else
             LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted. "
                                          << "Expected checksum: 0x" << std::hex << GetHeader()->checksum
                                          << ", Actual checksum: 0x" << std::hex << cal_checksum;
+#endif
         }
 
         if (!tag.empty()) {
