@@ -74,8 +74,6 @@ crt_sources = [
   "taskpool/runner.cpp",
   "taskpool/task_queue.cpp",
   "taskpool/taskpool.cpp",
-  "thread/thread_holder.cpp",
-  "thread/thread_holder_manager.cpp",
 ]
 
 if (is_mingw) {

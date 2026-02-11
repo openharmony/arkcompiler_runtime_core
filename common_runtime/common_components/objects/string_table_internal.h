@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 
 #include "common_components/base/globals.h"
 #include "common_components/platform/mutex.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
+#include "common_interfaces/thread/mutator_state_transition.h"
 #include "common_interfaces/objects/base_string_table.h"
 #include "common_components/objects/string_table/hashtriemap.h"
 #include "common_components/taskpool/task.h"
@@ -29,7 +30,7 @@ class BaseStringTableMutex {
 public:
     explicit BaseStringTableMutex(bool isInit = true) : mtx_(isInit) {}
 
-    void LockWithThreadState(ThreadHolder* holder)
+    void LockWithThreadState(Mutator* mutator)
     {
         if (mtx_.TryLock()) {
             return;
@@ -37,7 +38,7 @@ public:
 #ifndef NDEBUG
         BaseRuntime::RequestGC(GC_REASON_USER, true, GC_TYPE_FULL);  // Trigger CMC FULL GC
 #endif
-        ThreadStateTransitionScope<ThreadHolder, ThreadState::WAIT> ts(holder);
+        MutatorStateTransitionScope<Mutator, ThreadState::WAIT> ts(mutator);
         mtx_.Lock();
     }
 
@@ -123,8 +124,8 @@ class BaseStringTableInternal {
 public:
     using HandleCreator = BaseStringTableInterface<BaseStringTableImpl>::HandleCreator;
     using HashTrieMapType = std::conditional_t<ConcurrentSweep,
-        HashTrieMap<BaseStringTableMutex, ThreadHolder, TrieMapConfig::NeedSlotBarrier>,
-        HashTrieMap<BaseStringTableMutex, ThreadHolder, TrieMapConfig::NoSlotBarrier>>;
+        HashTrieMap<BaseStringTableMutex, Mutator, TrieMapConfig::NeedSlotBarrier>,
+        HashTrieMap<BaseStringTableMutex, Mutator, TrieMapConfig::NoSlotBarrier>>;
 
     template <bool B = ConcurrentSweep, std::enable_if_t<B, int> = 0>
     BaseStringTableInternal(): cleaner_(new BaseStringTableCleaner(this)) {}
@@ -139,16 +140,16 @@ public:
         }
     }
 
-    BaseString *GetOrInternFlattenString(ThreadHolder *holder, const HandleCreator &handleCreator, BaseString *string);
+    BaseString *GetOrInternFlattenString(Mutator *mutator, const HandleCreator &handleCreator, BaseString *string);
 
-    BaseString *GetOrInternStringFromCompressedSubString(ThreadHolder *holder, const HandleCreator &handleCreator,
+    BaseString *GetOrInternStringFromCompressedSubString(Mutator *mutator, const HandleCreator &handleCreator,
                                                          const ReadOnlyHandle<BaseString> &string, uint32_t offset,
                                                          uint32_t utf8Len);
 
-    BaseString *GetOrInternString(ThreadHolder *holder, const HandleCreator &handleCreator, const uint8_t *utf8Data,
+    BaseString *GetOrInternString(Mutator *mutator, const HandleCreator &handleCreator, const uint8_t *utf8Data,
                                   uint32_t utf8Len, bool canBeCompress);
 
-    BaseString *GetOrInternString(ThreadHolder *holder, const HandleCreator &handleCreator, const uint16_t *utf16Data,
+    BaseString *GetOrInternString(Mutator *mutator, const HandleCreator &handleCreator, const uint16_t *utf16Data,
                                   uint32_t utf16Len, bool canBeCompress);
 
     BaseString *TryGetInternString(const ReadOnlyHandle<BaseString> &string);
@@ -182,16 +183,16 @@ private:
 
 class BaseStringTableImpl : public BaseStringTableInterface<BaseStringTableImpl> {
 public:
-    BaseString* GetOrInternFlattenString(ThreadHolder* holder, const HandleCreator& handleCreator, BaseString* string);
+    BaseString* GetOrInternFlattenString(Mutator* mutator, const HandleCreator& handleCreator, BaseString* string);
 
-    BaseString* GetOrInternStringFromCompressedSubString(ThreadHolder* holder, const HandleCreator& handleCreator,
+    BaseString* GetOrInternStringFromCompressedSubString(Mutator* mutator, const HandleCreator& handleCreator,
                                                          const ReadOnlyHandle<BaseString>& string, uint32_t offset,
                                                          uint32_t utf8Len);
 
-    BaseString* GetOrInternString(ThreadHolder* holder, const HandleCreator& handleCreator, const uint8_t* utf8Data,
+    BaseString* GetOrInternString(Mutator* mutator, const HandleCreator& handleCreator, const uint8_t* utf8Data,
                                   uint32_t utf8Len, bool canBeCompress);
 
-    BaseString* GetOrInternString(ThreadHolder* holder, const HandleCreator& handleCreator, const uint16_t* utf16Data,
+    BaseString* GetOrInternString(Mutator* mutator, const HandleCreator& handleCreator, const uint16_t* utf16Data,
                                   uint32_t utf16Len, bool canBeCompress);
 
     BaseString* TryGetInternString(const ReadOnlyHandle<BaseString>& string);

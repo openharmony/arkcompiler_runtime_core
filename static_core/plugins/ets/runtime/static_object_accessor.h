@@ -22,20 +22,19 @@
 namespace ark::ets {
 class StaticObjectAccessor : public common::StaticObjectAccessorInterface {
 public:
-    bool HasProperty(common::ThreadHolder *thread, const common::BaseObject *obj, const char *name) override;
+    bool HasProperty(common::Mutator *mutator, const common::BaseObject *obj, const char *name) override;
 
-    common::BoxedValue GetProperty(common::ThreadHolder *thread, const common::BaseObject *obj,
-                                   const char *name) override;
+    common::BoxedValue GetProperty(common::Mutator *mutator, const common::BaseObject *obj, const char *name) override;
 
-    bool SetProperty(common::ThreadHolder *thread, common::BaseObject *obj, const char *name,
+    bool SetProperty(common::Mutator *mutator, common::BaseObject *obj, const char *name,
                      common::BoxedValue value) override;
 
-    bool HasElementByIdx(common::ThreadHolder *thread, const common::BaseObject *obj, const uint32_t index) override;
+    bool HasElementByIdx(common::Mutator *mutator, const common::BaseObject *obj, const uint32_t index) override;
 
-    common::BoxedValue GetElementByIdx(common::ThreadHolder *thread, const common::BaseObject *obj,
+    common::BoxedValue GetElementByIdx(common::Mutator *mutator, const common::BaseObject *obj,
                                        const uint32_t index) override;
 
-    bool SetElementByIdx(common::ThreadHolder *thread, common::BaseObject *obj, uint32_t index,
+    bool SetElementByIdx(common::Mutator *mutator, common::BaseObject *obj, uint32_t index,
                          const common::BoxedValue value) override;
 
 private:

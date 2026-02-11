@@ -28,12 +28,22 @@
 #include <condition_variable>
 #include <mutex>
 #include <pthread.h>
+#include <unordered_set>
+
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/heap/heap_visitor.h"
 #include "common_interfaces/objects/base_object.h"
+
+namespace panda::ecmascript {
+class JSThread;
+}
+
+namespace ark {
+class Coroutine;
+}
 
 namespace common {
 class Mutator;
-class ThreadHolder;
 struct ThreadLocalData;
 
 // GCPhase describes phases for stw/concurrent gc.
@@ -57,6 +67,10 @@ class Mutator;
 using FlipFunction = std::function<void(Mutator&)>;
 class PUBLIC_API Mutator {
 public:
+    // NOTE(ivagin): language specififc code will be removed in the next patches
+    using JSThread = panda::ecmascript::JSThread;
+    using Coroutine = ark::Coroutine;
+
     // flag which indicates the reason why mutator should suspend. flag is set by some external thread.
     enum SuspensionType : uint32_t {
         SUSPENSION_FOR_GC_PHASE = 1 << 0,
@@ -376,12 +390,7 @@ public:
         return obj;
     }
 
-    ThreadHolder *GetThreadHolder()
-    {
-        return holder_;
-    }
-
-    void RegisterJSThread(void *jsThread)
+    void RegisterJSThread(JSThread *jsThread)
     {
         CHECK_CC(jsThread_ == nullptr);
         jsThread_ = jsThread;
@@ -397,6 +406,83 @@ public:
         return MEMBER_OFFSET_CC(Mutator, safepointActive_);
     }
 
+    static Mutator *GetCurrent();
+    static void SetCurrent(Mutator *mutator);
+
+    // This is a temporary impl so we need pass vm from JSThread, or nullptr otherwise
+    static Mutator *CreateAndRegisterNewMutator(void *vm);
+    // Transfer to Running no matter in Running or Native.
+    inline void TransferToRunning();
+
+    // Transfer to Native no matter in Running or Native.
+    inline void TransferToNative();
+
+    // If current in Native, transfer to Running and return true;
+    // If current in Running, do nothing and return false.
+    inline bool TransferToRunningIfInNative();
+
+    // If current in Running, transfer to Native and return true;
+    // If current in Native, do nothing and return false.
+    inline bool TransferToNativeIfInRunning();
+
+    bool CheckSafepointIfSuspended()
+    {
+        if (UNLIKELY_CC(HasSuspendRequest())) {
+            WaitSuspension();
+            return true;
+        }
+        return false;
+    }
+
+    void WaitSuspension() {
+        HandleSuspensionRequest();
+    }
+
+    bool HasSuspendRequest() const
+    {
+        return HasAnySuspensionRequest();
+    }
+
+    bool IsInRunningState() const
+    {
+        return !InSaferegion();
+    }
+
+    // Thread must be binded mutator before to allocate. Otherwise it cannot allocate heap object in this thread.
+    // One thread only allow to bind one muatator. If try bind sencond mutator, will be fatal.
+    void BindMutator();
+    // One thread only allow to bind one muatator. So it must be unbinded mutator before bind another one.
+    void UnbindMutator();
+    // unify JSThread* and Coroutine*
+    // When register a thread, it must be initialized, i.e. it's safe to visit GC-Root.
+    void RegisterCoroutine(Coroutine *coroutine);
+    void UnregisterCoroutine(Coroutine *coroutine);
+
+    void* GetAllocBuffer() const
+    {
+        DCHECK_CC(allocBuffer_ != nullptr);
+        return allocBuffer_;
+    }
+
+    void ReleaseAllocBuffer();
+
+    static void DestroyMutator(Mutator *mutator);
+
+    JSThread* GetJSThread() const
+    {
+        return jsThread_;
+    }
+
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
+    class TryBindMutatorScope {
+    public:
+        TryBindMutatorScope(Mutator *mutator);
+        ~TryBindMutatorScope();
+
+    private:
+        Mutator *mutator_ {nullptr};
+    };
+
 protected:
     // for exception ref
     void VisitRawObjects(const RootVisitor& func);
@@ -404,6 +490,9 @@ protected:
 
 private:
     void RememberObjectImpl(const BaseObject* obj);
+
+    // Return false if thread has already binded mutator. Otherwise bind a mutator.
+    bool TryBindMutator();
 
     // Indicate whether execution thread should check safepoint suspension request
     uint32_t safepointActive_ = 0;
@@ -417,9 +506,6 @@ private:
     std::atomic<GCPhaseTransitionState> transitionState_ = { NO_TRANSITION };
 
     std::atomic<CpuProfileState> cpuProfileState_ = { NO_CPUPROFILE };
-
-    // used to synchronize cmc-gc phase to JSThread
-    void *jsThread_ {nullptr};
 
     // thread id
     uint32_t tid_ = 0;
@@ -437,9 +523,14 @@ private:
     GCInfos gcInfos_;
 #endif
 
-    ThreadHolder *holder_;
+    // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
+    void* allocBuffer_ {nullptr};
 
-    friend ThreadHolder;
+    // Access jsThread/coroutines must happen in RunningState from the current Mutator, or
+    // in SuspendAll from others.
+    JSThread *jsThread_ {nullptr};
+    std::unordered_set<Coroutine *> coroutines_ {};
+
 };
 
 // This function is mainly used to initialize the context of mutator.

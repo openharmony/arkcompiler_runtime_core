@@ -22,7 +22,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
 #ifdef ARK_HYBRID
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
 #endif
 
 namespace ark {
@@ -332,7 +332,7 @@ public:
     }
 #endif
 
-    void LinkToExternalHolder(bool useSharedHolder, CoroutineWorker *w = nullptr);
+    void LinkToExternalMutator(bool useSharedMutator, CoroutineWorker *w = nullptr);
 
     /**
      * Set a coroutine parameter abortFlag

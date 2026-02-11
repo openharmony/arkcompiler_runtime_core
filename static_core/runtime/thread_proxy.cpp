@@ -221,11 +221,11 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
 
 using namespace common;
 
-static thread_local ThreadHolder *g_SharedExternalHolder = nullptr;
+static thread_local Mutator *g_SharedExternalMutator = nullptr;
 
 enum ThreadStatus ThreadProxyHybrid::GetStatus() const
 {
-    if (GetThreadHolder()->IsInRunningState()) {
+    if (GetMutator()->IsInRunningState()) {
         return ThreadStatus::RUNNING;
     }
     return ThreadStatus::NATIVE;
@@ -235,32 +235,32 @@ void ThreadProxyHybrid::UpdateStatus([[maybe_unused]] enum ThreadStatus status)
 {
     ThreadStatus oldStatus = GetStatus();
     if (oldStatus == ThreadStatus::RUNNING && status != ThreadStatus::RUNNING) {
-        GetThreadHolder()->TransferToNativeIfInRunning();
+        GetMutator()->TransferToNativeIfInRunning();
         GetMutatorLock()->Unlock();
     } else if (oldStatus != ThreadStatus::RUNNING && status == ThreadStatus::RUNNING) {
-        GetThreadHolder()->TransferToRunningIfInNative();
+        GetMutator()->TransferToRunningIfInNative();
         GetMutatorLock()->ReadLock();
     }
 }
 
 bool ThreadProxyHybrid::TestAllFlags() const
 {
-    return GetThreadHolder()->HasSuspendRequest();
+    return GetMutator()->HasSuspendRequest();
 }
 
 bool ThreadProxyHybrid::IsSuspended() const
 {
-    return GetThreadHolder()->HasSuspendRequest();
+    return GetMutator()->HasSuspendRequest();
 }
 
 void ThreadProxyHybrid::SafepointPoll()
 {
-    GetThreadHolder()->CheckSafepointIfSuspended();
+    GetMutator()->CheckSafepointIfSuspended();
 }
 
 void ThreadProxyHybrid::WaitSuspension()
 {
-    GetThreadHolder()->WaitSuspension();
+    GetMutator()->WaitSuspension();
 }
 
 void ThreadProxyHybrid::InitializeThreadFlag() {}
@@ -305,52 +305,52 @@ void ThreadProxyHybrid::MakeTSANHappyForThreadState()
 
 void ThreadProxyHybrid::BindMutator()
 {
-    GetThreadHolder()->BindMutator();
+    GetMutator()->BindMutator();
 }
 
 void ThreadProxyHybrid::UnbindMutator()
 {
-    GetThreadHolder()->UnbindMutator();
+    GetMutator()->UnbindMutator();
 }
 
-bool ThreadProxyHybrid::CreateExternalHolderIfNeeded(bool useSharedHolder, ThreadHolder *th)
+bool ThreadProxyHybrid::CreateExternalMutatorIfNeeded(bool useSharedMutator, Mutator *m)
 {
-    if (th != nullptr) {
-        threadHolder_ = th;
+    if (m != nullptr) {
+        mutator_ = m;
         return false;
     }
-    if (threadHolder_ != nullptr) {
+    if (mutator_ != nullptr) {
         return false;
     }
 
-    if (useSharedHolder) {
-        if (GetSharedExternalHolder() != nullptr) {
-            threadHolder_ = GetSharedExternalHolder();
+    if (useSharedMutator) {
+        if (GetSharedExternalMutator() != nullptr) {
+            mutator_ = GetSharedExternalMutator();
             return true;
         }
-        // NOTE(panferovi): replace ThreadHolder::GerCurrent by new interface
-        // that obtain ThreadHolder from JS, when it is implemented
-        threadHolder_ = ThreadHolder::GetCurrent() != nullptr ? ThreadHolder::GetCurrent()
-                                                              : ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
-        ASSERT(threadHolder_ != nullptr);
-        SetSharedExternalHolder(threadHolder_);
+        // NOTE(panferovi): replace Mutator::GerCurrent by new interface
+        // that obtain Mutator from JS, when it is implemented
+        mutator_ =
+            Mutator::GetCurrent() != nullptr ? Mutator::GetCurrent() : Mutator::CreateAndRegisterNewMutator(nullptr);
+        ASSERT(mutator_ != nullptr);
+        SetSharedExternalMutator(mutator_);
         return true;
     }
 
-    threadHolder_ = ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+    mutator_ = Mutator::CreateAndRegisterNewMutator(nullptr);
     return true;
 }
 
 /* static */
-void ThreadProxyHybrid::SetSharedExternalHolder(ThreadHolder *externalHolder)
+void ThreadProxyHybrid::SetSharedExternalMutator(Mutator *externalMutator)
 {
-    g_SharedExternalHolder = externalHolder;
+    g_SharedExternalMutator = externalMutator;
 }
 
 /* static */
-ThreadHolder *ThreadProxyHybrid::GetSharedExternalHolder()
+Mutator *ThreadProxyHybrid::GetSharedExternalMutator()
 {
-    return g_SharedExternalHolder;
+    return g_SharedExternalMutator;
 }
 
 #endif

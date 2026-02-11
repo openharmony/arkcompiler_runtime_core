@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_type.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
 
 namespace panda::ecmascript {
 class HandlerBase;
@@ -30,22 +30,22 @@ using HandlerBase = panda::ecmascript::HandlerBase;
 class DynamicObjectDescriptorInterface {
     // GetProperty is used to get the value of a property and its ic information
     // from a dynamic object with the given name.
-    virtual std::pair<JSTaggedValue, HandlerBase> GetProperty(ThreadHolder *thread, const BaseObject *obj,
+    virtual std::pair<JSTaggedValue, HandlerBase> GetProperty(Mutator *mutator, const BaseObject *obj,
                                                               const char *name) const = 0;
 
     // SetProperty is used to set the value of a property and get its ic information
     // from a dynamic object with the given name.
-    virtual std::pair<bool, HandlerBase> SetProperty(ThreadHolder *thread, BaseObject *obj, const char *name,
+    virtual std::pair<bool, HandlerBase> SetProperty(Mutator *mutator, BaseObject *obj, const char *name,
                                                      JSTaggedValue value) = 0;
 
     // GetElementByIdx is used to get the value of an element and its ic information
     // from a dynamic object with the give index.
-    virtual std::pair<JSTaggedValue, HandlerBase> GetElementByIdx(ThreadHolder *thread, const BaseObject *obj,
+    virtual std::pair<JSTaggedValue, HandlerBase> GetElementByIdx(Mutator *mutator, const BaseObject *obj,
                                                                   const uint32_t index) const = 0;
 
     // SetElementByIdx is used to set the value of an element and get its ic information
     // from a dynamic object with the given index.
-    virtual std::pair<bool, HandlerBase> SetElementByIdx(ThreadHolder *thread, BaseObject *obj, const uint32_t index,
+    virtual std::pair<bool, HandlerBase> SetElementByIdx(Mutator *mutator, BaseObject *obj, const uint32_t index,
                                                          JSTaggedValue value) = 0;
 };
 

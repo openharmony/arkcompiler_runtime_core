@@ -53,7 +53,7 @@ public:
         : runtime_(runtime), vm_(vm), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
     {
 #ifdef ARK_HYBRID
-        threadHolder_ = common::ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+        mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
 #endif
     }
     virtual ~CoroutineWorker()
@@ -137,9 +137,9 @@ public:
     }
 
 #ifdef ARK_HYBRID
-    common::ThreadHolder *GetThreadHolder()
+    common::Mutator *GetMutator()
     {
-        return threadHolder_;
+        return mutator_;
     }
 #endif
 
@@ -158,7 +158,7 @@ private:
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> extSchedulingPoster_;
 #ifdef ARK_HYBRID
-    common::ThreadHolder *threadHolder_ = nullptr;
+    common::Mutator *mutator_ = nullptr;
 #endif
 };
 

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 #include "common_interfaces/objects/base_type_converter.h"
 #include "common_interfaces/objects/static_object_accessor_interface.h"
 #include "common_interfaces/objects/static_type_converter_interface.h"
-#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/mutator.h"
 
 namespace common {
 class BaseObjectDispatcher {
@@ -68,226 +68,226 @@ public:
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    JSTaggedValue GetTaggedProperty(ThreadHolder *thread, const BaseObject *obj, const char *name) const
+    JSTaggedValue GetTaggedProperty(Mutator *mutator, const BaseObject *obj, const char *name) const
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->GetProperty(thread, obj, name);
+            return dynObjAccessor_->GetProperty(mutator, obj, name);
         } else if constexpr (objType == ObjectType::STATIC) {
-            BoxedValue value = stcObjAccessor_->GetProperty(thread, obj, name);
+            BoxedValue value = stcObjAccessor_->GetProperty(mutator, obj, name);
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            return dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
+            return dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->GetProperty(thread, obj, name);
+                return dynObjAccessor_->GetProperty(mutator, obj, name);
             } else {  // NOLINT(readability-else-after-return)
-                BoxedValue value = stcObjAccessor_->GetProperty(thread, obj, name);
+                BoxedValue value = stcObjAccessor_->GetProperty(mutator, obj, name);
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                return dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
+                return dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    BoxedValue GetBoxedProperty(ThreadHolder *thread, const BaseObject *obj, const char *name) const
+    BoxedValue GetBoxedProperty(Mutator *mutator, const BaseObject *obj, const char *name) const
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
-            JSTaggedValue value = dynObjAccessor_->GetProperty(thread, obj, name);
-            // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
-        } else if constexpr (objType == ObjectType::STATIC) {
-            // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->GetProperty(thread, obj, name);
-        } else {
-            if (obj->IsDynamic()) {
-                JSTaggedValue value = dynObjAccessor_->GetProperty(thread, obj, name);
-                // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
-            } else {  // NOLINT(readability-else-after-return)
-                // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->GetProperty(thread, obj, name);
-            }
-        }
-    }
-
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <ObjectType objType = ObjectType::UNKNOWN>
-    JSTaggedValue GetTaggedElementByIdx(ThreadHolder *thread, const BaseObject *obj, const uint32_t index) const
-    {
-        if constexpr (objType == ObjectType::DYNAMIC) {
-            // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->GetElementByIdx(thread, obj, index);
-        } else if constexpr (objType == ObjectType::STATIC) {
-            BoxedValue value = stcObjAccessor_->GetElementByIdx(thread, obj, index);
-            // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            return dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
-        } else {
-            if (obj->IsDynamic()) {
-                // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->GetElementByIdx(thread, obj, index);
-            } else {  // NOLINT(readability-else-after-return)
-                BoxedValue value = stcObjAccessor_->GetElementByIdx(thread, obj, index);
-                // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                return dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
-            }
-        }
-    }
-
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <ObjectType objType = ObjectType::UNKNOWN>
-    BoxedValue GetBoxedElementByIdx(ThreadHolder *thread, const BaseObject *obj, const uint32_t index) const
-    {
-        if constexpr (objType == ObjectType::DYNAMIC) {
-            JSTaggedValue value = dynObjAccessor_->GetElementByIdx(thread, obj, index);
+            JSTaggedValue value = dynObjAccessor_->GetProperty(mutator, obj, name);
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
             return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->GetElementByIdx(thread, obj, index);
+            return stcObjAccessor_->GetProperty(mutator, obj, name);
         } else {
             if (obj->IsDynamic()) {
-                JSTaggedValue value = dynObjAccessor_->GetElementByIdx(thread, obj, index);
+                JSTaggedValue value = dynObjAccessor_->GetProperty(mutator, obj, name);
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->GetElementByIdx(thread, obj, index);
+                return stcObjAccessor_->GetProperty(mutator, obj, name);
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool SetTaggedProperty(ThreadHolder *thread, BaseObject *obj, const char *name, JSTaggedValue value)
+    JSTaggedValue GetTaggedElementByIdx(Mutator *mutator, const BaseObject *obj, const uint32_t index) const
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->SetProperty(thread, obj, name, value);
+            return dynObjAccessor_->GetElementByIdx(mutator, obj, index);
+        } else if constexpr (objType == ObjectType::STATIC) {
+            BoxedValue value = stcObjAccessor_->GetElementByIdx(mutator, obj, index);
+            // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
+            return dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
+        } else {
+            if (obj->IsDynamic()) {
+                // fix(hewei): exceptions may occur, check here and return default value.
+                return dynObjAccessor_->GetElementByIdx(mutator, obj, index);
+            } else {  // NOLINT(readability-else-after-return)
+                BoxedValue value = stcObjAccessor_->GetElementByIdx(mutator, obj, index);
+                // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
+                return dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
+            }
+        }
+    }
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    template <ObjectType objType = ObjectType::UNKNOWN>
+    BoxedValue GetBoxedElementByIdx(Mutator *mutator, const BaseObject *obj, const uint32_t index) const
+    {
+        if constexpr (objType == ObjectType::DYNAMIC) {
+            JSTaggedValue value = dynObjAccessor_->GetElementByIdx(mutator, obj, index);
+            // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
+            return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->SetProperty(thread, obj, name,
+            return stcObjAccessor_->GetElementByIdx(mutator, obj, index);
+        } else {
+            if (obj->IsDynamic()) {
+                JSTaggedValue value = dynObjAccessor_->GetElementByIdx(mutator, obj, index);
+                // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
+                return stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value));
+            } else {  // NOLINT(readability-else-after-return)
+                // fix(hewei): exceptions may occur, check here and return default value.
+                return stcObjAccessor_->GetElementByIdx(mutator, obj, index);
+            }
+        }
+    }
+
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    template <ObjectType objType = ObjectType::UNKNOWN>
+    bool SetTaggedProperty(Mutator *mutator, BaseObject *obj, const char *name, JSTaggedValue value)
+    {
+        if constexpr (objType == ObjectType::DYNAMIC) {
+            // fix(hewei): exceptions may occur, check here and return default value.
+            return dynObjAccessor_->SetProperty(mutator, obj, name, value);
+        } else if constexpr (objType == ObjectType::STATIC) {
+            // fix(hewei): exceptions may occur, check here and return default value.
+            return stcObjAccessor_->SetProperty(mutator, obj, name,
                                                 stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->SetProperty(thread, obj, name, value);
+                return dynObjAccessor_->SetProperty(mutator, obj, name, value);
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return stcObjAccessor_->SetProperty(
-                    thread, obj, name, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
+                    mutator, obj, name, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool SetBoxedProperty(ThreadHolder *thread, BaseObject *obj, const char *name, BoxedValue value)
+    bool SetBoxedProperty(Mutator *mutator, BaseObject *obj, const char *name, BoxedValue value)
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-            auto wrapedValue = dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
-            return dynObjAccessor_->SetProperty(thread, obj, name, wrapedValue);
+            auto wrapedValue = dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
+            return dynObjAccessor_->SetProperty(mutator, obj, name, wrapedValue);
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->SetProperty(thread, obj, name, value);
+            return stcObjAccessor_->SetProperty(mutator, obj, name, value);
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
-                auto wrapedValue = dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value));
-                return dynObjAccessor_->SetProperty(thread, obj, name, wrapedValue);
+                auto wrapedValue = dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value));
+                return dynObjAccessor_->SetProperty(mutator, obj, name, wrapedValue);
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->SetProperty(thread, obj, name, value);
+                return stcObjAccessor_->SetProperty(mutator, obj, name, value);
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool SetTaggedElementByIdx(ThreadHolder *thread, BaseObject *obj, const uint32_t index, JSTaggedValue value)
+    bool SetTaggedElementByIdx(Mutator *mutator, BaseObject *obj, const uint32_t index, JSTaggedValue value)
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->SetElementByIdx(thread, obj, index, value);
+            return dynObjAccessor_->SetElementByIdx(mutator, obj, index, value);
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
             return stcObjAccessor_->SetElementByIdx(
-                thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
+                mutator, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->SetElementByIdx(thread, obj, index, value);
+                return dynObjAccessor_->SetElementByIdx(mutator, obj, index, value);
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return stcObjAccessor_->SetElementByIdx(
-                    thread, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
+                    mutator, obj, index, stcTypeConverter_->WrapBoxed(dynTypeConverter_->UnWrapTagged(value)));
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool SetBoxedElementByIdx(ThreadHolder *thread, BaseObject *obj, const uint32_t index, BoxedValue value)
+    bool SetBoxedElementByIdx(Mutator *mutator, BaseObject *obj, const uint32_t index, BoxedValue value)
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
             return dynObjAccessor_->SetElementByIdx(
-                thread, obj, index, dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value)));
+                mutator, obj, index, dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value)));
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->SetElementByIdx(thread, obj, index, value);
+            return stcObjAccessor_->SetElementByIdx(mutator, obj, index, value);
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return. Also, check exceptions in Wrap functions.
                 return dynObjAccessor_->SetElementByIdx(
-                    thread, obj, index, dynTypeConverter_->WrapTagged(thread, stcTypeConverter_->UnwrapBoxed(value)));
+                    mutator, obj, index, dynTypeConverter_->WrapTagged(mutator, stcTypeConverter_->UnwrapBoxed(value)));
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->SetElementByIdx(thread, obj, index, value);
+                return stcObjAccessor_->SetElementByIdx(mutator, obj, index, value);
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool HasProperty(ThreadHolder *thread, const BaseObject *obj, const char *name) const
+    bool HasProperty(Mutator *mutator, const BaseObject *obj, const char *name) const
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->HasProperty(thread, obj, name);
+            return dynObjAccessor_->HasProperty(mutator, obj, name);
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->HasProperty(thread, obj, name);
+            return stcObjAccessor_->HasProperty(mutator, obj, name);
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->HasProperty(thread, obj, name);
+                return dynObjAccessor_->HasProperty(mutator, obj, name);
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->HasProperty(thread, obj, name);
+                return stcObjAccessor_->HasProperty(mutator, obj, name);
             }
         }
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <ObjectType objType = ObjectType::UNKNOWN>
-    bool HasElementByIdx(ThreadHolder *thread, const BaseObject *obj, const uint32_t index) const
+    bool HasElementByIdx(Mutator *mutator, const BaseObject *obj, const uint32_t index) const
     {
         if constexpr (objType == ObjectType::DYNAMIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return dynObjAccessor_->HasElementByIdx(thread, obj, index);
+            return dynObjAccessor_->HasElementByIdx(mutator, obj, index);
         } else if constexpr (objType == ObjectType::STATIC) {
             // fix(hewei): exceptions may occur, check here and return default value.
-            return stcObjAccessor_->HasElementByIdx(thread, obj, index);
+            return stcObjAccessor_->HasElementByIdx(mutator, obj, index);
         } else {
             if (obj->IsDynamic()) {
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return dynObjAccessor_->HasElementByIdx(thread, obj, index);
+                return dynObjAccessor_->HasElementByIdx(mutator, obj, index);
             } else {  // NOLINT(readability-else-after-return)
                 // fix(hewei): exceptions may occur, check here and return default value.
-                return stcObjAccessor_->HasElementByIdx(thread, obj, index);
+                return stcObjAccessor_->HasElementByIdx(mutator, obj, index);
             }
         }
     }

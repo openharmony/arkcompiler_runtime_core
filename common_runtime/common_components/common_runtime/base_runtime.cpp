@@ -22,7 +22,7 @@
 #include "common_components/heap/heap.h"
 #include "common_components/heap/heap_manager.h"
 #include "common_components/mutator/mutator_manager.h"
-#include "common_interfaces/thread/thread_state_transition.h"
+#include "common_interfaces/thread/mutator_state_transition.h"
 
 namespace common {
 
@@ -156,12 +156,12 @@ void BaseRuntime::FiniFromDynamic()
     initialized_ = false;
 }
 
-void BaseRuntime::PreFork(ThreadHolder *holder)
+void BaseRuntime::PreFork(Mutator *mutator)
 {
     // Need appspawn space and compress gc.
     RequestGC(GC_REASON_APPSPAWN, false, GC_TYPE_FULL);
     {
-        ThreadNativeScope scope(holder);
+        MutatorNativeScope scope(mutator);
         HeapManager::StopRuntimeThreads();
     }
 }
