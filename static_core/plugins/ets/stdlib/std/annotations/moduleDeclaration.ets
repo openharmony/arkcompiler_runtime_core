@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,11 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @file Defines the moduleDeclaration for ArkTS
+ * @kit ArkTS
+ */
+
 
 package std.annotations;
 
+/**
+ * Defines ModuleDeclaration annotation
+ * Support import from .abc file.
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
 @Retention({policy: "BYTECODE"})
 export @interface ModuleDeclaration {
-    // string with declaration text, which is used for typecheck when binary import is performed
+    /**
+     * string with declaration text, which is used for typecheck when binary import is performed
+     * @type { string }
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
     declaration: string;
 }
