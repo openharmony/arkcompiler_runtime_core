@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,6 +139,73 @@ export class UserAccount {
         this._age = newAge;
     }
 }
+
+export class TestBoolean {
+    boolTrue: boolean = true;
+    boolFalse: boolean = false;
+    boolNull: Object | null = null;
+}
+
+export let testBooleanInstance = new TestBoolean();
+
+export class TestArrayOps {
+    arr: number[] = [1, 2, 3];
+}
+
+export let testArrayOpsInstance = new TestArrayOps();
+
+export class TestTypeChecks {
+    num: number = 42;
+    str: string = 'hello';
+    bool: boolean = true;
+    obj: Object = { key: 'value' };
+}
+
+export let testTypeChecksInstance = new TestTypeChecks();
+
+export class TestChainedCalls {
+    value: number = 0;
+
+    add(n: number): TestChainedCalls {
+        this.value += n;
+        return this;
+    }
+
+    subtract(n: number): TestChainedCalls {
+        this.value -= n;
+        return this;
+    }
+
+    multiply(n: number): TestChainedCalls {
+        this.value *= n;
+        return this;
+    }
+
+    getResult(): number {
+        return this.value;
+    }
+}
+
+export let testChainedCallsInstance = new TestChainedCalls();
+
+export class TestMultipleGetters {
+    private _firstName: string = 'John';
+    private _lastName: string = 'Doe';
+
+    get firstName(): string {
+        return this._firstName;
+    }
+
+    get lastName(): string {
+        return this._lastName;
+    }
+
+    get fullName(): string {
+        return `${this._firstName} ${this._lastName}`;
+    }
+}
+
+export let testMultipleGettersInstance = new TestMultipleGetters();
 
 function main() {
     testAll();

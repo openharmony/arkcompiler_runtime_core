@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,3 +71,39 @@ export declare class UserAccount {
     get age(): number;
     set age(newAge: number);
 }
+
+export declare class TestBoolean {
+    boolTrue: boolean;
+    boolFalse: boolean;
+    boolNull: Object | null;
+}
+export declare let testBooleanInstance: TestBoolean;
+
+export declare class TestArrayOps {
+    arr: number[];
+}
+export declare let testArrayOpsInstance: TestArrayOps;
+
+export declare class TestTypeChecks {
+    num: number;
+    str: string;
+    bool: boolean;
+    obj: Object;
+}
+export declare let testTypeChecksInstance: TestTypeChecks;
+
+export declare class TestChainedCalls {
+    value: number;
+    add(n: number): TestChainedCalls;
+    subtract(n: number): TestChainedCalls;
+    multiply(n: number): TestChainedCalls;
+    getResult(): number;
+}
+export declare let testChainedCallsInstance: TestChainedCalls;
+
+export declare class TestMultipleGetters {
+    get firstName(): string;
+    get lastName(): string;
+    get fullName(): string;
+}
+export declare let testMultipleGettersInstance: TestMultipleGetters;
