@@ -112,19 +112,18 @@
 // |      ...     |
 // +--------------+
 // |  stack argN  |
-// +--------------+ <- Callee-saved registers of this bridge
-// |   prev x19   |  |
-// +--------------+  |
-// |     prev     |  |
-// |  THREAD_REG  |  |
-// +--------------+ <-  Callee-saved registers of this bridge
-// |    iframe    | (or prev FP for StackWalker if current bridge is bypass)
+// +--------------+
+// |      x19     |
+// +--------------+
+// |  THREAD_REG  |
+// +--------------+
+// |     fp       |
 // +--------------+
 // | INTERPRETER_ |
 // | TO_COMPILED_ |
 // | CODE_BRIDGE  |
 // +--------------+ <- fp
-// |   prev fp    |
+// |    iframe    |
 // +--------------+
 // |      lr      |
 // +--------------+
@@ -183,33 +182,37 @@ PrepareArgStack:
 TYPE_FUNCTION(InterpreterToCompiledCodeBridge)
 MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
     CFI_STARTPROC
+    CFI_DEF_CFA(sp, 0)
 
-    stp fp, lr, [sp, #-16]!
-    CFI_ADJUST_CFA_OFFSET(16)
-    CFI_REL_OFFSET(fp, 0)
+    // Construct bridge frame:
+    // lr
+    // iframe    <- fp
+    // INTERPRETER_TO_COMPILED_CODE_BRIDGE/BYPASS_BRIDGE
+    // fp
+    // THREAD_REG
+    // x19   <- sp
+
+    stp x1, lr, [sp, #-16]!
+    CFI_ADJUST_CFA_OFFSET(2 * 8)
     CFI_REL_OFFSET(lr, 8)
-    mov fp, sp
-    CFI_DEF_CFA_REGISTER(fp)
+    stp x19, THREAD_REG, [sp, #-32]!
+    CFI_ADJUST_CFA_OFFSET(4 * 8)
+    CFI_REL_OFFSET(THREAD_REG, 8)
+    CFI_REL_OFFSET(x19, 0)
+    str fp, [sp, #16]
+    CFI_REL_OFFSET(fp, 16)
+    add fp, sp, #32
+    CFI_DEF_CFA(fp, (2 * 8))
+    mov THREAD_REG, x3
 
     // According to the current frame kind set the bridge type
-    ldrb w4, [x3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w4, #0x1
-    mov w5, #BYPASS_BRIDGE
-    mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    csel w4, w5, w6, ne
-
-    // x1 - iframe (or prev FP for StackWalker if current bridge is bypass)
-    // x4 - bridge tag (see above)
-    stp x1, x4, [sp, #-16]!
-
-    // x19 - callee saved register used in this bridge
-    stp x19, THREAD_REG, [sp, #-16]!
-    CFI_REL_OFFSET(x19, -32)
-    CFI_REL_OFFSET(THREAD_REG, -24)
-
+    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    tst w3, #0x1
+    mov w4, #BYPASS_BRIDGE
+    mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    csel w3, w4, w5, ne
+    str x3, [sp, #24]
     // sp should be 16 byte aligned.
-
-    mov THREAD_REG, x3
 
     // setup regs as follow
     // x0 - SHORTY_PTR_REG, w1 - SHORTY_REG, w2 - shorty value, x6 - insn_ptr,
@@ -288,7 +291,7 @@ MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
 
     cmp w2, #SHORTY_VOID
     beq .Lreturn
-    ldr x3, [fp, #-16] // load iframe from the stack
+    ldr x3, [fp] // load iframe from the stack
     add x3, x3, #FRAME_ACC_OFFSET
 
     // get tag in x1
@@ -334,13 +337,13 @@ MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
 .Lreturn:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
-    ldp x19, THREAD_REG, [fp, #-32]
+    sub sp, fp, #32
+    ldp x19, THREAD_REG, [sp], #16
     CFI_RESTORE(THREAD_REG)
     CFI_RESTORE(x19)
-
-    mov sp, fp
-    ldp fp, lr, [sp], #16
+    ldr lr, [sp, #24]
     CFI_RESTORE(lr)
+    ldr fp, [sp], #32
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, 0)
     ret
@@ -351,33 +354,29 @@ MAKE_ASM_NAME(InterpreterToCompiledCodeBridge):
 TYPE_FUNCTION(InvokeCompiledCodeWithArgArray)
 MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
     CFI_STARTPROC
+    CFI_DEF_CFA(sp, 0)
 
-    stp fp, lr, [sp, #-16]!
-    CFI_ADJUST_CFA_OFFSET(16)
-    CFI_REL_OFFSET(fp, 0)
+    stp x1, lr, [sp, #-16]!
+    CFI_ADJUST_CFA_OFFSET(2 * 8)
     CFI_REL_OFFSET(lr, 8)
-    mov fp, sp
-    CFI_DEF_CFA_REGISTER(fp)
+    stp x19, THREAD_REG, [sp, #-32]!
+    CFI_ADJUST_CFA_OFFSET(4 * 8)
+    CFI_REL_OFFSET(THREAD_REG, 8)
+    CFI_REL_OFFSET(x19, 0)
+    str fp, [sp, #16]
+    CFI_REL_OFFSET(fp, 16)
+    add fp, sp, #32
+    CFI_DEF_CFA(fp, (2 * 8))
+    mov THREAD_REG, x3
 
     // According to the current frame kind set the bridge type
-    ldrb w4, [x3, #MANAGED_THREAD_FRAME_KIND_OFFSET]
-    tst w4, #0x1
-    mov w5, #BYPASS_BRIDGE
-    mov w6, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
-    csel w4, w5, w6, ne
-
-    // x1 - iframe (or prev FP for StackWalker if current bridge is bypass)
-    // x4 - bridge tag (see above)
-    stp x1, x4, [sp, #-16]!
-
-    // x19 - callee saved register used in this bridge
-    stp x19, THREAD_REG, [sp, #-16]!
-    CFI_REL_OFFSET(x19, -32)
-    CFI_REL_OFFSET(THREAD_REG, -24)
-
+    ldrb w3, [THREAD_REG, #MANAGED_THREAD_FRAME_KIND_OFFSET]
+    tst w3, #0x1
+    mov w4, #BYPASS_BRIDGE
+    mov w5, #INTERPRETER_TO_COMPILED_CODE_BRIDGE
+    csel w3, w4, w5, ne
+    str x3, [sp, #24]
     // sp should be 16 bytes aligned
-
-    mov THREAD_REG, x3
 
     // store method.shorty_ to x19
     ldr x19, [x2, #METHOD_SHORTY_OFFSET]
@@ -488,14 +487,15 @@ MAKE_ASM_NAME(InvokeCompiledCodeWithArgArray):
 .Lreturn_:
     // Signal handler of the sampling profiler use stack space below sp, 
     // so change it carefully only after registers restoration
-    ldp x19, THREAD_REG, [fp, #-32]
+    sub sp, fp, #32
+    ldp x19, THREAD_REG, [sp], #16
     CFI_RESTORE(THREAD_REG)
     CFI_RESTORE(x19)
-
-    mov sp, fp
-    ldp fp, lr, [sp], #16
+    ldr lr, [sp, #24]
     CFI_RESTORE(lr)
+    ldr fp, [sp], #32
     CFI_RESTORE(fp)
     CFI_DEF_CFA(sp, 0)
+
     ret
     CFI_ENDPROC

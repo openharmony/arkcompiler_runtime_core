@@ -16,7 +16,6 @@
 #include <llvm/IR/Intrinsics.h>
 #include "optimizer/code_generator/codegen.h"
 #include "intrinsic_string_flat_check.inl"
-#include "irtoc/backend/compiler/constants.h"
 #include "runtime/include/coretypes/string.h"
 
 #include "llvm_ir_constructor.h"
@@ -1075,7 +1074,9 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
     // We only support it for Irtoc interpreters on AArch64
     ASSERT(GetGraph()->GetMode().IsInterpreter());
 
-    CFrameLayout fl(GetGraph()->GetArch(), IRTOC_NUM_SPILL_SLOTS);
+    // This constant is hardcoded in codegen_interpreter.h and in interpreter.irt
+    constexpr size_t SPILL_SLOTS = 32;
+    CFrameLayout fl(GetGraph()->GetArch(), SPILL_SLOTS);
     constexpr bool SAVE_UNUSED_CALLEE_REGS = true;
 
     // Restore callee-registers
@@ -1128,36 +1129,6 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
     builder_.CreateUnreachable();
 
     return true;
-}
-
-bool LLVMIrConstructor::EmitInitInterpreterCallRecord([[maybe_unused]] Inst *inst)
-{
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
-}
-
-bool LLVMIrConstructor::EmitPushInterpreterCallRecord([[maybe_unused]] Inst *inst)
-{
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
-}
-
-bool LLVMIrConstructor::EmitPopInterpreterCallRecord([[maybe_unused]] Inst *inst)
-{
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
-}
-
-bool LLVMIrConstructor::EmitPopMultipleInterpreterCallRecords([[maybe_unused]] Inst *inst)
-{
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
-}
-
-bool LLVMIrConstructor::EmitUpdateInterpreterCallRecord([[maybe_unused]] Inst *inst)
-{
-    ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
 }
 
 bool LLVMIrConstructor::EmitTailCall(Inst *inst)

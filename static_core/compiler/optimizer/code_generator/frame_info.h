@@ -86,7 +86,6 @@ public:
     FRAME_INFO_FIELD(PositionedCallees, bool);
     FRAME_INFO_FIELD(CallersRelativeFp, bool);
     FRAME_INFO_FIELD(CalleesRelativeFp, bool);
-    FRAME_INFO_FIELD(SpillsRelativeFp, bool);
     // SaveFrameAndLinkRegs - save/restore FP and LR registers in prologue/epilogue.
     FRAME_INFO_FIELD(SaveFrameAndLinkRegs, bool);
     // SetupFrame - setup CFrame (aka. 'managed' frame).
@@ -103,8 +102,7 @@ public:
     using PositionedCallees = PositionedCallers::NextFlag;
     using CallersRelativeFp = PositionedCallees::NextFlag;
     using CalleesRelativeFp = CallersRelativeFp::NextFlag;
-    using SpillsRelativeFp = CalleesRelativeFp::NextFlag;
-    using SaveFrameAndLinkRegs = SpillsRelativeFp::NextFlag;
+    using SaveFrameAndLinkRegs = CalleesRelativeFp::NextFlag;
     using SetupFrame = SaveFrameAndLinkRegs::NextFlag;
     using SaveUnusedCalleeRegs = SetupFrame::NextFlag;
     using AdjustSpReg = SaveUnusedCalleeRegs::NextFlag;
@@ -137,11 +135,6 @@ public:
     {
         return FrameInfo(AdjustSpReg::Encode(true) | SaveFrameAndLinkRegs::Encode(true) |
                          SaveUnusedCalleeRegs::Encode(true) | SetupFrame::Encode(true));
-    }
-
-    CFrameLayout::OffsetOrigin GetSpillsOffsetOrigin() const
-    {
-        return GetSpillsRelativeFp() ? CFrameLayout::OffsetOrigin::FP : CFrameLayout::OffsetOrigin::SP;
     }
 
 #undef FRAME_INFO_GET_ATTR

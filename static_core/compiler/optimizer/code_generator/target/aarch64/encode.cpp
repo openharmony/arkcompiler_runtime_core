@@ -133,7 +133,7 @@ static vixl::aarch64::Operand VixlShift(Shift shift)
     UNREACHABLE();
 }
 
-static vixl::aarch64::MemOperand ConvertMem(MemRef mem, vixl::aarch64::AddrMode mode = vixl::aarch64::Offset)
+static vixl::aarch64::MemOperand ConvertMem(MemRef mem)
 {
     bool base = mem.HasBase() && (mem.GetBase().GetId() != vixl::aarch64::xzr.GetCode());
     bool hasIndex = mem.HasIndex();
@@ -142,17 +142,14 @@ static vixl::aarch64::MemOperand ConvertMem(MemRef mem, vixl::aarch64::AddrMode 
     auto baseReg = Reg(mem.GetBase().GetId(), INT64_TYPE);
     if (base && !hasIndex && !shift) {
         // Memory address = x_reg(base) + imm(offset)
-        // Pre-indexing:  [base, offset]!
-        // Post-indexing: [base], offset
         if (mem.GetDisp() != 0) {
             auto disp = mem.GetDisp();
-            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlImm(disp), mode);
+            return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlImm(disp));
         }
         // Memory address = x_reg(base)
-        // mode has no effect.
         return vixl::aarch64::MemOperand(VixlReg(mem.GetBase(), DOUBLE_WORD_SIZE));
     }
-    if (base && hasIndex && !offset && mode == vixl::aarch64::Offset) {
+    if (base && hasIndex && !offset) {
         auto scale = mem.GetScale();
         auto indexReg = mem.GetIndex();
         // Memory address = x_reg(base) + (SXTW(w_reg(index)) << scale)
@@ -168,7 +165,7 @@ static vixl::aarch64::MemOperand ConvertMem(MemRef mem, vixl::aarch64::AddrMode 
         // Memory address = x_reg(base) + x_reg(index)
         return vixl::aarch64::MemOperand(VixlReg(baseReg), VixlReg(indexReg));
     }
-    // Wrong memRef or AddrMode
+    // Wrong memRef
     // Return invalid memory operand
     auto tmp = vixl::aarch64::MemOperand();
     ASSERT(!tmp.IsValid());
@@ -2464,15 +2461,10 @@ void Aarch64Encoder::EncodeMov(Reg dst, Imm src)
     }
 }
 
-// CC-OFFNXT(G.FUN.01-CPP) solid logic
-static void EncodeLdrImpl(Aarch64Encoder *self, Reg dst, bool dstSigned, MemRef mem, vixl::aarch64::AddrMode mode)
+void Aarch64Encoder::EncodeLdr(Reg dst, bool dstSigned, MemRef mem)
 {
-    auto rzero = self->GetRegfile()->GetZeroReg().GetId();
-    auto convertedMem = ConvertMem(mem, mode);
-    if (!convertedMem.IsValid() || (dst.GetId() == rzero && dst.IsScalar())) {
-        // Check: invalid conversion is not due to unsupported mode.
-        ASSERT(mode == vixl::aarch64::Offset);
-
+    auto rzero = GetRegfile()->GetZeroReg().GetId();
+    if (!ConvertMem(mem).IsValid() || (dst.GetId() == rzero && dst.IsScalar())) {
         // Try move zero reg to dst (for do not create temp-reg)
         // Check: dst not vector, dst not index, dst not rzero
         [[maybe_unused]] auto baseReg = mem.GetBase();
@@ -2485,63 +2477,48 @@ static void EncodeLdrImpl(Aarch64Encoder *self, Reg dst, bool dstSigned, MemRef 
             (indexReg.GetId() != dst.GetId()) &&  // not index
             (dst.GetId() != rzero)) {             // not rzero
             // May use dst like rzero
-            self->EncodeMov(dst, Imm(0));
+            EncodeMov(dst, Imm(0));
 
             auto fixMem = MemRef(dst, indexReg, mem.GetScale(), mem.GetDisp());
             ASSERT(ConvertMem(fixMem).IsValid());
-            self->EncodeLdr(dst, dstSigned, fixMem);
+            EncodeLdr(dst, dstSigned, fixMem);
         } else {
             // Use tmp-reg
-            ScopedTmpReg tmpReg(self);
-            self->EncodeMov(tmpReg, Imm(0));
+            ScopedTmpReg tmpReg(this);
+            EncodeMov(tmpReg, Imm(0));
 
             auto fixMem = MemRef(tmpReg, indexReg, mem.GetScale(), mem.GetDisp());
             ASSERT(ConvertMem(fixMem).IsValid());
             // Used for zero-dst
-            self->EncodeLdr(tmpReg, dstSigned, fixMem);
+            EncodeLdr(tmpReg, dstSigned, fixMem);
         }
         return;
     }
-    ASSERT(convertedMem.IsValid());
+    ASSERT(ConvertMem(mem).IsValid());
     if (dst.IsFloat()) {
-        self->GetMasm()->Ldr(VixlVReg(dst), convertedMem);
+        GetMasm()->Ldr(VixlVReg(dst), ConvertMem(mem));
         return;
     }
     if (dstSigned) {
         if (dst.GetSize() == BYTE_SIZE) {
-            self->GetMasm()->Ldrsb(VixlReg(dst, DOUBLE_WORD_SIZE), convertedMem);
+            GetMasm()->Ldrsb(VixlReg(dst, DOUBLE_WORD_SIZE), ConvertMem(mem));
             return;
         }
         if (dst.GetSize() == HALF_SIZE) {
-            self->GetMasm()->Ldrsh(VixlReg(dst), convertedMem);
+            GetMasm()->Ldrsh(VixlReg(dst), ConvertMem(mem));
             return;
         }
     } else {
         if (dst.GetSize() == BYTE_SIZE) {
-            self->GetMasm()->Ldrb(VixlReg(dst, WORD_SIZE), convertedMem);
+            GetMasm()->Ldrb(VixlReg(dst, WORD_SIZE), ConvertMem(mem));
             return;
         }
         if (dst.GetSize() == HALF_SIZE) {
-            self->GetMasm()->Ldrh(VixlReg(dst), convertedMem);
+            GetMasm()->Ldrh(VixlReg(dst), ConvertMem(mem));
             return;
         }
     }
-    self->GetMasm()->Ldr(VixlReg(dst), convertedMem);
-}
-
-void Aarch64Encoder::EncodeLdr(Reg dst, bool dstSigned, MemRef mem)
-{
-    EncodeLdrImpl(this, dst, dstSigned, mem, vixl::aarch64::Offset);
-}
-
-void Aarch64Encoder::EncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset)
-{
-    EncodeLdrImpl(this, dst, dstSigned, MemRef {srcBase, offset.GetAsInt()}, vixl::aarch64::PreIndex);
-}
-
-void Aarch64Encoder::EncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset)
-{
-    EncodeLdrImpl(this, dst, dstSigned, MemRef {srcBase, offset.GetAsInt()}, vixl::aarch64::PostIndex);
+    GetMasm()->Ldr(VixlReg(dst), ConvertMem(mem));
 }
 
 void Aarch64Encoder::EncodeLdrAcquireInvalid(Reg dst, bool dstSigned, MemRef mem)
@@ -2688,59 +2665,40 @@ void Aarch64Encoder::EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem)
     EncodeLdrAcquireScalar(dst, dstSigned, MemRef(dst64));
 }
 
-static void EncodeStrImpl(Aarch64Encoder *self, Reg src, MemRef mem, vixl::aarch64::AddrMode mode)
+void Aarch64Encoder::EncodeStr(Reg src, MemRef mem)
 {
-    auto convertedMem = ConvertMem(mem, mode);
-    if (!convertedMem.IsValid()) {
-        // Check: invalid conversion is not due to unsupported mode.
-        ASSERT(mode == vixl::aarch64::Offset);
-
+    if (!ConvertMem(mem).IsValid()) {
         auto indexReg = mem.GetIndex();
-        auto rzero = self->GetRegfile()->GetZeroReg().GetId();
+        auto rzero = GetRegfile()->GetZeroReg().GetId();
         // Invalid == base is rzero or invalid
         ASSERT(mem.GetBase().GetId() == rzero || !mem.GetBase().IsValid());
         // Use tmp-reg
-        ScopedTmpReg tmpReg(self);
-        self->EncodeMov(tmpReg, Imm(0));
+        ScopedTmpReg tmpReg(this);
+        EncodeMov(tmpReg, Imm(0));
 
         auto fixMem = MemRef(tmpReg, indexReg, mem.GetScale(), mem.GetDisp());
         ASSERT(ConvertMem(fixMem).IsValid());
         if (src.GetId() != rzero) {
-            self->EncodeStr(src, fixMem);
+            EncodeStr(src, fixMem);
         } else {
-            self->EncodeStr(tmpReg, fixMem);
+            EncodeStr(tmpReg, fixMem);
         }
         return;
     }
-    ASSERT(convertedMem.IsValid());
+    ASSERT(ConvertMem(mem).IsValid());
     if (src.IsFloat()) {
-        self->GetMasm()->Str(VixlVReg(src), convertedMem);
+        GetMasm()->Str(VixlVReg(src), ConvertMem(mem));
         return;
     }
     if (src.GetSize() == BYTE_SIZE) {
-        self->GetMasm()->Strb(VixlReg(src), convertedMem);
+        GetMasm()->Strb(VixlReg(src), ConvertMem(mem));
         return;
     }
     if (src.GetSize() == HALF_SIZE) {
-        self->GetMasm()->Strh(VixlReg(src), convertedMem);
+        GetMasm()->Strh(VixlReg(src), ConvertMem(mem));
         return;
     }
-    self->GetMasm()->Str(VixlReg(src), convertedMem);
-}
-
-void Aarch64Encoder::EncodeStr(Reg src, MemRef mem)
-{
-    EncodeStrImpl(this, src, mem, vixl::aarch64::Offset);
-}
-
-void Aarch64Encoder::EncodeStrPreIndex(Reg src, Reg dstBase, Imm offset)
-{
-    EncodeStrImpl(this, src, MemRef {dstBase, offset.GetAsInt()}, vixl::aarch64::PreIndex);
-}
-
-void Aarch64Encoder::EncodeStrPostIndex(Reg src, Reg dstBase, Imm offset)
-{
-    EncodeStrImpl(this, src, MemRef {dstBase, offset.GetAsInt()}, vixl::aarch64::PostIndex);
+    GetMasm()->Str(VixlReg(src), ConvertMem(mem));
 }
 
 void Aarch64Encoder::EncodeStrRelease(Reg src, MemRef mem)
@@ -3197,77 +3155,42 @@ void Aarch64Encoder::EncodeSelectTestTransform(const ArgsSelectImmTransform &arg
     EncodeCselTransformForSelect(this, dst, src0, src1, cc, transform);
 }
 
-static void EncodeLdpImpl(Aarch64Encoder *self, Reg dst0, Reg dst1, bool dstSigned, MemRef mem,
-                          vixl::aarch64::AddrMode mode)
+void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem)
 {
     ASSERT(dst0.IsFloat() == dst1.IsFloat());
     ASSERT(dst0.GetSize() == dst1.GetSize());
-
-    auto convertedMem = ConvertMem(mem, mode);
-    if (!convertedMem.IsValid()) {
+    if (!ConvertMem(mem).IsValid()) {
         // Encode one Ldr - will fix inside
-        self->EncodeLdr(dst0, dstSigned, mem);
+        EncodeLdr(dst0, dstSigned, mem);
         return;
     }
 
     if (dst0.IsFloat()) {
-        self->GetMasm()->Ldp(VixlVReg(dst0), VixlVReg(dst1), convertedMem);
+        GetMasm()->Ldp(VixlVReg(dst0), VixlVReg(dst1), ConvertMem(mem));
         return;
     }
     if (dstSigned && dst0.GetSize() == WORD_SIZE) {
-        self->GetMasm()->Ldpsw(VixlReg(dst0, DOUBLE_WORD_SIZE), VixlReg(dst1, DOUBLE_WORD_SIZE), convertedMem);
+        GetMasm()->Ldpsw(VixlReg(dst0, DOUBLE_WORD_SIZE), VixlReg(dst1, DOUBLE_WORD_SIZE), ConvertMem(mem));
         return;
     }
-    self->GetMasm()->Ldp(VixlReg(dst0), VixlReg(dst1), convertedMem);
-}
-
-void Aarch64Encoder::EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem)
-{
-    EncodeLdpImpl(this, dst0, dst1, dstSigned, mem, vixl::aarch64::Offset);
-}
-
-void Aarch64Encoder::EncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset)
-{
-    EncodeLdpImpl(this, dst0, dst1, dstSigned, MemRef {srcBase, offset.GetAsInt()}, vixl::aarch64::PreIndex);
-}
-
-void Aarch64Encoder::EncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset)
-{
-    EncodeLdpImpl(this, dst0, dst1, dstSigned, MemRef {srcBase, offset.GetAsInt()}, vixl::aarch64::PostIndex);
-}
-
-static void EncodeStpImpl(Aarch64Encoder *self, Reg src0, Reg src1, MemRef mem, vixl::aarch64::AddrMode mode)
-{
-    ASSERT(src0.IsFloat() == src1.IsFloat());
-    ASSERT(src0.GetSize() == src1.GetSize());
-
-    auto convertedMem = ConvertMem(mem, mode);
-    if (!convertedMem.IsValid()) {
-        // Encode one Str - will fix inside
-        self->EncodeStr(src0, mem);
-        return;
-    }
-
-    if (src0.IsFloat()) {
-        self->GetMasm()->Stp(VixlVReg(src0), VixlVReg(src1), convertedMem);
-        return;
-    }
-    self->GetMasm()->Stp(VixlReg(src0), VixlReg(src1), convertedMem);
+    GetMasm()->Ldp(VixlReg(dst0), VixlReg(dst1), ConvertMem(mem));
 }
 
 void Aarch64Encoder::EncodeStp(Reg src0, Reg src1, MemRef mem)
 {
-    EncodeStpImpl(this, src0, src1, mem, vixl::aarch64::Offset);
-}
+    ASSERT(src0.IsFloat() == src1.IsFloat());
+    ASSERT(src0.GetSize() == src1.GetSize());
+    if (!ConvertMem(mem).IsValid()) {
+        // Encode one Str - will fix inside
+        EncodeStr(src0, mem);
+        return;
+    }
 
-void Aarch64Encoder::EncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, Imm offset)
-{
-    EncodeStpImpl(this, src0, src1, MemRef {dstBase, offset.GetAsInt()}, vixl::aarch64::PreIndex);
-}
-
-void Aarch64Encoder::EncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, Imm offset)
-{
-    EncodeStpImpl(this, src0, src1, MemRef {dstBase, offset.GetAsInt()}, vixl::aarch64::PostIndex);
+    if (src0.IsFloat()) {
+        GetMasm()->Stp(VixlVReg(src0), VixlVReg(src1), ConvertMem(mem));
+        return;
+    }
+    GetMasm()->Stp(VixlReg(src0), VixlReg(src1), ConvertMem(mem));
 }
 
 void Aarch64Encoder::EncodeMAdd(Reg dst, Reg src0, Reg src1, Reg src2)

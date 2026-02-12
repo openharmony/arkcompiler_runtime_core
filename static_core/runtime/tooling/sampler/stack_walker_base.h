@@ -116,8 +116,10 @@ public:
     template <FrameKind KIND>
     static SlotType *GetPrevFromBoundary(void *ptr)
     {
+        // In current implementation fp must point to previous fp
+        static_assert(BoundaryFrame<KIND>::FP_OFFSET == 0);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return *(reinterpret_cast<SlotType **>(ptr) + BoundaryFrame<KIND>::FP_OFFSET);
+        return *(reinterpret_cast<SlotType **>(ptr));
     }
 
     static bool IsMethodInBoundaryFrame(const Method *method)

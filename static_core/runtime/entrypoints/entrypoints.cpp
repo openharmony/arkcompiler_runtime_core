@@ -1763,10 +1763,8 @@ extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **currThread,
     uint32_t inst = pc - (*currFrame)->GetInstruction();
     Frame *frame = *currFrame;
 
-    ManagedThread *thread = *currThread;
-    thread->ResetUnwindingDepth();
-
     while (frame != nullptr) {
+        ManagedThread *thread = *currThread;
         Frame *prev = frame->GetPrevFrame();
         ASSERT(thread->HasPendingException());
 
@@ -1788,7 +1786,6 @@ extern "C" uint32_t FindCatchBlockInIFramesStackless(ManagedThread **currThread,
         *currFrame = prev;
 
         thread->GetVM()->HandleReturnFrame();
-        thread->IncrementUnwindingDepth();
 
         interpreter::RuntimeInterface::SetCurrentFrame(thread, prev);
 

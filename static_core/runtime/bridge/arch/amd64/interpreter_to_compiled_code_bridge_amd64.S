@@ -139,13 +139,13 @@
 // +--------------+
 // |  THREAD_REG  |
 // +--------------+
-// |    iframe    | (or prev FP for StackWalker if current bridge is bypass)
+// |     %rbp     |
 // +--------------+
 // | INTERPRETER_ |
 // | TO_COMPILED_ |
 // | CODE_BRIDGE  |
 // +--------------+ <- %rbp
-// |  prev %rbp   |
+// |    iframe    |
 // +--------------+
 // | return addr  |
 // +--------------+
@@ -219,13 +219,13 @@
 TYPE_FUNCTION(InterpreterToCompiledCodeBridge)
 InterpreterToCompiledCodeBridge:
     CFI_STARTPROC
+    CFI_DEF_CFA(rsp, 8)
 
-    pushq %rbp
+    pushq %rsi // iframe*
     CFI_ADJUST_CFA_OFFSET(8)
-    CFI_REL_OFFSET(rbp, 0)
 
-    movq %rsp, %rbp
-    CFI_DEF_CFA_REGISTER(rbp)
+    movq %rsp, %rax
+    CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
@@ -235,8 +235,11 @@ InterpreterToCompiledCodeBridge:
     cmovne %r10, %r11
     pushq %r11
 
-    // iframe (or prev FP for StackWalker if current bridge is bypass)
-    pushq %rsi
+    pushq %rbp
+    CFI_REL_OFFSET(rbp, -(2 * 8))
+
+    movq %rax, %rbp // set frame pointer
+    CFI_DEF_CFA_REGISTER(rbp)
 
     pushq %THREAD_REG
     CFI_REL_OFFSET(THREAD_REG, -(3 * 8))
@@ -337,7 +340,7 @@ InterpreterToCompiledCodeBridge:
     cmpl $SHORTY_VOID, %r14d
     je .Lreturn
 
-    movq -16(%rbp), %r12 // load iframe from the stack
+    movq (%rbp), %r12 // load iframe from the stack
     addq $FRAME_ACC_OFFSET, %r12
 
     // get tag in rdx
@@ -400,12 +403,11 @@ InterpreterToCompiledCodeBridge:
     CFI_RESTORE(r14)
     popq %THREAD_REG
     CFI_RESTORE(THREAD_REG)
-
-    // iframe and tag slots
-    addq $16, %rsp
     popq %rbp
-    CFI_DEF_CFA(rsp, 8)
     CFI_RESTORE(rbp)
+    CFI_DEF_CFA(rsp, (3 * 8))
+    addq $16, %rsp
+    CFI_ADJUST_CFA_OFFSET(-(2 * 8))
     retq
     CFI_ENDPROC
 
@@ -414,13 +416,13 @@ InterpreterToCompiledCodeBridge:
 TYPE_FUNCTION(InvokeCompiledCodeWithArgArray)
 InvokeCompiledCodeWithArgArray:
     CFI_STARTPROC
+    CFI_DEF_CFA(rsp, 8)
 
-    pushq %rbp
+    pushq %rsi // iframe*
     CFI_ADJUST_CFA_OFFSET(8)
-    CFI_REL_OFFSET(rbp, 0)
 
-    movq %rsp, %rbp
-    CFI_DEF_CFA_REGISTER(rbp)
+    movq %rsp, %rax
+    CFI_DEF_CFA_REGISTER(rax)
 
     // According to the current frame kind set the bridge type
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%rcx), %r10b
@@ -430,8 +432,11 @@ InvokeCompiledCodeWithArgArray:
     cmovne %r10, %r11
     pushq %r11
 
-    // iframe (or prev FP for StackWalker if current bridge is bypass)
-    pushq %rsi
+    pushq %rbp
+    CFI_REL_OFFSET(rbp, -(2 * 8))
+
+    movq %rax, %rbp // set frame pointer
+    CFI_DEF_CFA_REGISTER(rbp)
 
     pushq %THREAD_REG
     CFI_REL_OFFSET(THREAD_REG, -(3 * 8))
@@ -585,11 +590,11 @@ InvokeCompiledCodeWithArgArray:
     CFI_RESTORE(r14)
     popq %THREAD_REG
     CFI_RESTORE(THREAD_REG)
-
-    // iframe and tag slots
-    addq $16, %rsp
     popq %rbp
-    CFI_DEF_CFA(rsp, 8)
     CFI_RESTORE(rbp)
+    CFI_DEF_CFA(rsp, (3 * 8))
+    addq $16, %rsp
+    CFI_ADJUST_CFA_OFFSET(-(2 * 8))
     retq
     CFI_ENDPROC
+

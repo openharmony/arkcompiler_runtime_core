@@ -247,8 +247,6 @@ module Constants
     STACK_FRAME_ALLOCATOR_END_ADDR_OFFSET = "cross_values::GetStackFrameAllocatorEndAddrOffset(GetArch())"
     STACK_FRAME_ALLOCATOR_RELEASE_PAGES_SHIFT = "ark::mem::StackLikeAllocator<>::RELEASE_PAGES_SHIFT"
 
-    MANAGED_THREAD_UNWINDING_DEPTH_OFFSET = "cross_values::GetManagedThreadUnwindingDepthOffset(GetArch())"
-
     # StringBuilder
     SB_BUFFER_OFFSET = "RuntimeInterface::GetSbBufferOffset()"
     SB_INDEX_OFFSET = "RuntimeInterface::GetSbIndexOffset()"

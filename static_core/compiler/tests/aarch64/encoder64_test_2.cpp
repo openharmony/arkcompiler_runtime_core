@@ -1267,17 +1267,7 @@ public:
     }
     void EncoderApiTestEncodeMov(Reg dst, Reg src, const char *asmStr);
     void EncoderApiTestEncodeLdr(Reg dst, bool dstSigned, MemRef ref, const char *asmStr);
-    void EncoderApiTestEncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, int offset, const char *asmStr);
-    void EncoderApiTestEncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, int offset, const char *asmStr);
     void EncoderApiTestEncodeStr(Reg src, MemRef ref, const char *asmStr);
-    void EncoderApiTestEncodeStrPreIndex(Reg src, Reg dstBase, int offset, const char *asmStr);
-    void EncoderApiTestEncodeStrPostIndex(Reg src, Reg dstBase, int offset, const char *asmStr);
-    void EncoderApiTestEncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, int offset,
-                                         const char *asmStr);
-    void EncoderApiTestEncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, int offset,
-                                          const char *asmStr);
-    void EncoderApiTestEncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, int offset, const char *asmStr);
-    void EncoderApiTestEncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, int offset, const char *asmStr);
     void EncoderApiTestEncodeMemCopy(size_t size, const char *asmStr);
 
 private:
@@ -1332,54 +1322,6 @@ TEST_F(Encoder64ApiTest, TestEncodeLdr)
     EncoderApiTestEncodeLdr(Reg(0, INT64_TYPE), false, MemRef(Reg(0, INT64_TYPE)), "ldr x0, [x0]");
 }
 
-void Encoder64ApiTest::EncoderApiTestEncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, int offset,
-                                                       const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeLdrPreIndex(dst, dstSigned, srcBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeLdrPreIndex)
-{
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, FLOAT64_TYPE), true, Reg(0, INT64_TYPE), 16, "ldr d0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT8_TYPE), true, Reg(0, INT64_TYPE), 16, "ldrsb x0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT16_TYPE), true, Reg(0, INT64_TYPE), 16, "ldrsh w0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT32_TYPE), true, Reg(0, INT64_TYPE), 16, "ldr w0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT8_TYPE), false, Reg(0, INT64_TYPE), 16, "ldrb w0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT16_TYPE), false, Reg(0, INT64_TYPE), 16, "ldrh w0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT32_TYPE), false, Reg(0, INT64_TYPE), 16, "ldr w0, [x0, #16]!");
-    EncoderApiTestEncodeLdrPreIndex(Reg(0, INT64_TYPE), false, Reg(0, INT64_TYPE), 16, "ldr x0, [x0, #16]!");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, int offset,
-                                                        const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeLdrPostIndex(dst, dstSigned, srcBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeLdrPostIndex)
-{
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, FLOAT64_TYPE), true, Reg(0, INT64_TYPE), 16, "ldr d0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT8_TYPE), true, Reg(0, INT64_TYPE), 16, "ldrsb x0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT16_TYPE), true, Reg(0, INT64_TYPE), 16, "ldrsh w0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT32_TYPE), true, Reg(0, INT64_TYPE), 16, "ldr w0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT8_TYPE), false, Reg(0, INT64_TYPE), 16, "ldrb w0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT16_TYPE), false, Reg(0, INT64_TYPE), 16, "ldrh w0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT32_TYPE), false, Reg(0, INT64_TYPE), 16, "ldr w0, [x0], #16");
-    EncoderApiTestEncodeLdrPostIndex(Reg(0, INT64_TYPE), false, Reg(0, INT64_TYPE), 16, "ldr x0, [x0], #16");
-}
-
 void Encoder64ApiTest::EncoderApiTestEncodeStr(Reg src, MemRef ref, const char *asmStr)
 {
     aarch64::Aarch64Encoder encoder(GetAllocator());
@@ -1398,144 +1340,6 @@ TEST_F(Encoder64ApiTest, TestEncodeStr)
     EncoderApiTestEncodeStr(Reg(0, INT16_TYPE), MemRef(Reg(0, INT64_TYPE)), "strh w0, [x0]");
     EncoderApiTestEncodeStr(Reg(0, INT32_TYPE), MemRef(Reg(0, INT64_TYPE)), "str w0, [x0]");
     EncoderApiTestEncodeStr(Reg(0, INT64_TYPE), MemRef(Reg(0, INT64_TYPE)), "str x0, [x0]");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeStrPreIndex(Reg src, Reg dstBase, int offset, const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeStrPreIndex(src, dstBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeStrPreIndex)
-{
-    EncoderApiTestEncodeStrPreIndex(Reg(0, FLOAT64_TYPE), Reg(0, INT64_TYPE), -16, "str d0, [x0, #-16]!");
-    EncoderApiTestEncodeStrPreIndex(Reg(0, INT8_TYPE), Reg(0, INT64_TYPE), -16, "strb w0, [x0, #-16]!");
-    EncoderApiTestEncodeStrPreIndex(Reg(0, INT16_TYPE), Reg(0, INT64_TYPE), -16, "strh w0, [x0, #-16]!");
-    EncoderApiTestEncodeStrPreIndex(Reg(0, INT32_TYPE), Reg(0, INT64_TYPE), -16, "str w0, [x0, #-16]!");
-    EncoderApiTestEncodeStrPreIndex(Reg(0, INT64_TYPE), Reg(0, INT64_TYPE), -16, "str x0, [x0, #-16]!");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeStrPostIndex(Reg src, Reg dstBase, int offset, const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeStrPostIndex(src, dstBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeStrPostIndex)
-{
-    EncoderApiTestEncodeStrPostIndex(Reg(0, FLOAT64_TYPE), Reg(0, INT64_TYPE), -16, "str d0, [x0], #-16");
-    EncoderApiTestEncodeStrPostIndex(Reg(0, INT8_TYPE), Reg(0, INT64_TYPE), -16, "strb w0, [x0], #-16");
-    EncoderApiTestEncodeStrPostIndex(Reg(0, INT16_TYPE), Reg(0, INT64_TYPE), -16, "strh w0, [x0], #-16");
-    EncoderApiTestEncodeStrPostIndex(Reg(0, INT32_TYPE), Reg(0, INT64_TYPE), -16, "str w0, [x0], #-16");
-    EncoderApiTestEncodeStrPostIndex(Reg(0, INT64_TYPE), Reg(0, INT64_TYPE), -16, "str x0, [x0], #-16");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, int offset,
-                                                       const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeLdpPreIndex(dst0, dst1, dstSigned, srcBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeLdpPreIndex)
-{
-    EncoderApiTestEncodeLdpPreIndex(Reg(1, FLOAT64_TYPE), Reg(2, FLOAT64_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                    "ldp d1, d2, [x0, #16]!");
-    EncoderApiTestEncodeLdpPreIndex(Reg(1, FLOAT32_TYPE), Reg(2, FLOAT32_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                    "ldp s1, s2, [x0, #16]!");
-    EncoderApiTestEncodeLdpPreIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                    "ldpsw x1, x2, [x0, #16]!");
-    EncoderApiTestEncodeLdpPreIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), false, Reg(0, INT64_TYPE), 16,
-                                    "ldp w1, w2, [x0, #16]!");
-    EncoderApiTestEncodeLdpPreIndex(Reg(1, INT64_TYPE), Reg(2, INT64_TYPE), false, Reg(0, INT64_TYPE), 16,
-                                    "ldp x1, x2, [x0, #16]!");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, int offset,
-                                                        const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeLdpPostIndex(dst0, dst1, dstSigned, srcBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeLdpPostIndex)
-{
-    EncoderApiTestEncodeLdpPostIndex(Reg(1, FLOAT64_TYPE), Reg(2, FLOAT64_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                     "ldp d1, d2, [x0], #16");
-    EncoderApiTestEncodeLdpPostIndex(Reg(1, FLOAT32_TYPE), Reg(2, FLOAT32_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                     "ldp s1, s2, [x0], #16");
-    EncoderApiTestEncodeLdpPostIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), true, Reg(0, INT64_TYPE), 16,
-                                     "ldpsw x1, x2, [x0], #16");
-    EncoderApiTestEncodeLdpPostIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), false, Reg(0, INT64_TYPE), 16,
-                                     "ldp w1, w2, [x0], #16");
-    EncoderApiTestEncodeLdpPostIndex(Reg(1, INT64_TYPE), Reg(2, INT64_TYPE), false, Reg(0, INT64_TYPE), 16,
-                                     "ldp x1, x2, [x0], #16");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, int offset, const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeStpPreIndex(src0, src1, dstBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeStpPreIndex)
-{
-    EncoderApiTestEncodeStpPreIndex(Reg(1, FLOAT64_TYPE), Reg(2, FLOAT64_TYPE), Reg(0, INT64_TYPE), 16,
-                                    "stp d1, d2, [x0, #16]!");
-    EncoderApiTestEncodeStpPreIndex(Reg(1, FLOAT32_TYPE), Reg(2, FLOAT32_TYPE), Reg(0, INT64_TYPE), 16,
-                                    "stp s1, s2, [x0, #16]!");
-    EncoderApiTestEncodeStpPreIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), Reg(0, INT64_TYPE), 16,
-                                    "stp w1, w2, [x0, #16]!");
-    EncoderApiTestEncodeStpPreIndex(Reg(1, INT64_TYPE), Reg(2, INT64_TYPE), Reg(0, INT64_TYPE), 16,
-                                    "stp x1, x2, [x0, #16]!");
-}
-
-void Encoder64ApiTest::EncoderApiTestEncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, int offset, const char *asmStr)
-{
-    aarch64::Aarch64Encoder encoder(GetAllocator());
-    encoder.InitMasm();
-    encoder.SetRegfile(GetRegfile());
-    encoder.EncodeStpPostIndex(src0, src1, dstBase, Imm(offset));
-    encoder.Finalize();
-    EXPECT_TRUE(encoder.GetResult());
-    EXPECT_STREQ(asmStr, GetOutput(encoder).c_str());
-}
-
-TEST_F(Encoder64ApiTest, TestEncodeStpPostIndex)
-{
-    EncoderApiTestEncodeStpPostIndex(Reg(1, FLOAT64_TYPE), Reg(2, FLOAT64_TYPE), Reg(0, INT64_TYPE), 16,
-                                     "stp d1, d2, [x0], #16");
-    EncoderApiTestEncodeStpPostIndex(Reg(1, FLOAT32_TYPE), Reg(2, FLOAT32_TYPE), Reg(0, INT64_TYPE), 16,
-                                     "stp s1, s2, [x0], #16");
-    EncoderApiTestEncodeStpPostIndex(Reg(1, INT32_TYPE), Reg(2, INT32_TYPE), Reg(0, INT64_TYPE), 16,
-                                     "stp w1, w2, [x0], #16");
-    EncoderApiTestEncodeStpPostIndex(Reg(1, INT64_TYPE), Reg(2, INT64_TYPE), Reg(0, INT64_TYPE), 16,
-                                     "stp x1, x2, [x0], #16");
 }
 
 void Encoder64ApiTest::EncoderApiTestEncodeMemCopy(size_t size, const char *asmStr)
