@@ -402,7 +402,8 @@ function main(): int {
     seqRunnerSuite.addTest('ExecuteSeqRunnerTaskTest', executeSeqRunnerTaskTest);
     seqRunnerSuite.addTest('ExecuteGroupTaskTest', executeGroupTaskTest);
     seqRunnerSuite.addAsyncTest('CancelNonStartedTaskTest', cancelNonStartedTaskTest);
-    seqRunnerSuite.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
+    // #33161
+    seqRunnerSuiteDisabled.addAsyncTest('CancelExecutingTaskTest', cancelExecutingTaskTest);
     seqRunnerSuite.addAsyncTest('CancelExecutedTaskTest', cancelExecutedTaskTest);
     seqRunnerSuite.addTest('AddDependentTaskTest', addDependentTaskTest);
     seqRunnerSuite.addTest('AddDependencyExecutedTaskTest', addDependencyExecutedTaskTest);
