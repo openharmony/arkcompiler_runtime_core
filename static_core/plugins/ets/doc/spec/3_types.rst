@@ -1924,9 +1924,9 @@ It implies that each element of a tuple has its own type.
 The operator ``'[]'`` (square brackets) is used to access the elements of a
 tuple in a manner similar to accessing the elements of an array.
 
-An index expression must be of integer type. The index of the first tuple
-element is *0*. Only constant expressions can be used as the index providing
-access to tuple elements:
+An index expression operand must be a *constant expression*
+(see :ref:`Constant Expressions`) of an integer type. The index of the first
+tuple element is *0*:
 
 .. code-block:: typescript
    :linenos:
