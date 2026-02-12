@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "common_components/heap/allocator/alloc_util.h"
 #include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/allocator/region_manager.h"
-#include "common_components/mutator/mutator.h"
+#include "common_interfaces/thread/mutator.h"
 #include "common_components/heap/allocator/fix_heap.h"
 #include "common_components/heap/space/regional_space.h"
 #if defined(COMMON_SANITIZER_SUPPORT)

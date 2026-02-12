@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -313,8 +313,12 @@ void ThreadProxyHybrid::UnbindMutator()
     GetThreadHolder()->UnbindMutator();
 }
 
-bool ThreadProxyHybrid::CreateExternalHolderIfNeeded(bool useSharedHolder)
+bool ThreadProxyHybrid::CreateExternalHolderIfNeeded(bool useSharedHolder, ThreadHolder *th)
 {
+    if (th != nullptr) {
+        threadHolder_ = th;
+        return false;
+    }
     if (threadHolder_ != nullptr) {
         return false;
     }

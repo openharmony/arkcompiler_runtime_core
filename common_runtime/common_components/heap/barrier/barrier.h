@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
 #define COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
 
-#include "common_components/common/base_object.h"
+#include "common_interfaces/objects/base_object.h"
 #include "common_components/common/type_def.h"
 #include <vector>
 

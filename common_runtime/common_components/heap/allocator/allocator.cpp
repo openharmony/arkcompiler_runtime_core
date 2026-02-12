@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,10 @@
 #include <cstdint>
 
 #include "common_components/base/immortal_wrapper.h"
-#include "common_components/common/base_object.h"
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/mutator/thread_local.h"
+
+#include "common_interfaces/objects/base_object.h"
 
 namespace common {
 using namespace std;

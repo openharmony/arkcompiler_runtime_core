@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,21 +17,24 @@
 //             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //             readability-else-after-return, readability-duplicate-include,
 //             misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
-//             google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
-//             modernize-use-auto, llvm-namespace-comment,
+//             cppcoreguidelines-pro-type-union-access, modernize-use-auto, llvm-namespace-comment,
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
-#define COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+#ifndef COMMON_INTERFACES_THREAD_MUTATOR_H
+#define COMMON_INTERFACES_THREAD_MUTATOR_H
 
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <pthread.h>
 #include "common_interfaces/base/common.h"
+#include "common_interfaces/objects/base_object.h"
+
 namespace common {
 class Mutator;
 class ThreadHolder;
+struct ThreadLocalData;
 
 // GCPhase describes phases for stw/concurrent gc.
 enum GCPhase : uint8_t {
@@ -50,7 +53,9 @@ enum GCPhase : uint8_t {
     GC_PHASE_FIX = 16,
 };
 
-class PUBLIC_API MutatorBase {
+class Mutator;
+using FlipFunction = std::function<void(Mutator&)>;
+class PUBLIC_API Mutator {
 public:
     // flag which indicates the reason why mutator should suspend. flag is set by some external thread.
     enum SuspensionType : uint32_t {
@@ -81,6 +86,11 @@ public:
         CALLBACKS_TO_PROCESS = SUSPENSION_FOR_FINALIZE,
     };
 
+    enum SaferegionState : uint32_t {
+        SAFE_REGION_TRUE = 0x17161514,
+        SAFE_REGION_FALSE = 0x03020100,
+    };
+
     enum GCPhaseTransitionState : uint32_t {
         NO_TRANSITION,
         NEED_TRANSITION,
@@ -95,23 +105,37 @@ public:
         FINISH_CPUPROFILE,
     };
 
-    // Indicate whether mutator is in saferegion
-    enum SaferegionState : uint32_t {
-        SAFE_REGION_TRUE = 0x17161514,
-        SAFE_REGION_FALSE = 0x03020100,
-    };
+    // Called when a mutator starts and finishes, respectively
+    void Init();
 
-    // // Indicate whether mutator need SafepointPolling
-    // enum class SafepointPollingState : uint64_t {
-    //     SAFEPOINT_POLLING_FALSE = 0,
-    //     SAFEPOINT_POLLING_TRUE = 1,
-    // };
+    ~Mutator();
 
-    // Called when a mutator starts and finishes, respectively.
-    void Init()
+    static Mutator* NewMutator();
+
+    void ResetMutator();
+
+    static Mutator* GetMutator() noexcept;
+
+    void InitTid();
+    void SetArkthreadPtr(void* threadPtr) { this->thread_ = threadPtr;}
+    void SetEcmaVMPtr(void* ecmaVMPtr) { this->ecmavm_ = ecmaVMPtr;}
+    uint32_t GetTid() const { return tid_; }
+    void* GetArkthreadPtr() const {return thread_;}
+    void* GetEcmaVMPtr() const {return ecmavm_;}
+
+    static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
     {
-        observerCnt_ = 0;
-        mutatorPhase_.store(GCPhase::GC_PHASE_IDLE);
+        return (flag & ~clearFlag) | setFlag;
+    }
+
+    __attribute__((always_inline)) inline void SetSafepointActive(bool state)
+    {
+        safepointActive_ = static_cast<uint32_t>(state);
+    }
+
+    bool GetSafepointActiveState() const
+    {
+        return safepointActive_;
     }
 
     // Sets saferegion state of this mutator.
@@ -125,27 +149,6 @@ public:
     __attribute__((always_inline)) inline bool InSaferegion() const
     {
         return inSaferegion_.load(std::memory_order_seq_cst) != SAFE_REGION_FALSE;
-    }
-
-    inline void IncObserver()
-    {
-        observerCnt_.fetch_add(1);
-    }
-
-    inline void DecObserver()
-    {
-        observerCnt_.fetch_sub(1);
-    }
-
-    // Return true indicate there are some observer is visitting this mutator
-    inline bool HasObserver()
-    {
-        return observerCnt_.load() != 0;
-    }
-
-    inline size_t GetObserverCount() const
-    {
-        return observerCnt_.load();
     }
 
     // Force current mutator enter saferegion, internal use only.
@@ -167,19 +170,6 @@ public:
     // If current mutator has left saferegion, return false
     __attribute__((always_inline)) inline bool LeaveSaferegion() noexcept;
 
-    // Called if current mutator should do corresponding task by suspensionFlag value
-    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
-    // Called if current mutator should handle stw request
-    void SuspendForStw();
-
-    // temporary impl to clean GC callback, and need to refact to flip function
-    __attribute__((visibility ("default"))) void HandleJSGCCallback();
-
-    static uint32_t ConstructSuspensionFlag(uint32_t flag, uint32_t clearFlag, uint32_t setFlag)
-    {
-        return (flag & ~clearFlag) | setFlag;
-    }
-
     __attribute__((always_inline)) inline bool FinishedTransition() const
     {
         return transitionState_ == FINISH_TRANSITION;
@@ -193,6 +183,28 @@ public:
     __attribute__((always_inline)) inline void SetCpuProfileState(CpuProfileState state)
     {
         cpuProfileState_.store(state, std::memory_order_relaxed);
+    }
+
+    // Spin wait phase transition finished when GC is tranverting this mutator's phase
+    __attribute__((always_inline)) inline void WaitForPhaseTransition() const
+    {
+        GCPhaseTransitionState state = transitionState_.load(std::memory_order_acquire);
+        while (state != FINISH_TRANSITION) {
+            if (state != IN_TRANSITION) {
+                return;
+            }
+            // Give up CPU to avoid overloading
+            (void)sched_yield();
+            state = transitionState_.load(std::memory_order_acquire);
+        }
+    }
+
+    __attribute__((always_inline)) inline void WaitForCpuProfiling() const
+    {
+        while (cpuProfileState_.load(std::memory_order_acquire) != FINISH_CPUPROFILE) {
+            // Give up CPU to avoid overloading
+            (void)sched_yield();
+        }
     }
 
     __attribute__((always_inline)) inline void SetSuspensionFlag(SuspensionType flag)
@@ -233,9 +245,9 @@ public:
         return (flag & ~CALLBACKS_TO_PROCESS) != 0;
     }
 
-    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
+    __attribute__((always_inline)) inline void ClearFinalizeRequest()
     {
-        return suspensionFlag_.compare_exchange_strong(oldFlag, newFlag);
+        ClearSuspensionFlag(SUSPENSION_FOR_FINALIZE);
     }
 
     __attribute__((always_inline)) inline void SetFinalizeRequest()
@@ -243,52 +255,13 @@ public:
         SetSuspensionFlag(SUSPENSION_FOR_FINALIZE);
     }
 
-    __attribute__((always_inline)) inline void ClearFinalizeRequest()
+    __attribute__((always_inline)) inline bool CASSetSuspensionFlag(uint32_t oldFlag, uint32_t newFlag)
     {
-        ClearSuspensionFlag(SUSPENSION_FOR_FINALIZE);
+        return suspensionFlag_.compare_exchange_strong(oldFlag, newFlag);
     }
 
-    void SetSafepointActive(bool value)
-    {
-        safepointActive_ = static_cast<uint32_t>(value);
-    }
-
-    // Spin wait phase transition finished when GC is tranverting this mutator's phase
-    __attribute__((always_inline)) inline void WaitForPhaseTransition() const
-    {
-        GCPhaseTransitionState state = transitionState_.load(std::memory_order_acquire);
-        while (state != FINISH_TRANSITION) {
-            if (state != IN_TRANSITION) {
-                return;
-            }
-            // Give up CPU to avoid overloading
-            (void)sched_yield();
-            state = transitionState_.load(std::memory_order_acquire);
-        }
-    }
-
-    __attribute__((always_inline)) inline void WaitForCpuProfiling() const
-    {
-        while (cpuProfileState_.load(std::memory_order_acquire) != FINISH_CPUPROFILE) {
-            // Give up CPU to avoid overloading
-            (void)sched_yield();
-        }
-    }
-
-    inline void GcPhaseEnum(GCPhase newPhase);
-    inline void GCPhasePreForward(GCPhase newPhase);
-    inline void HandleGCPhase(GCPhase newPhase);
-
-    inline void HandleCpuProfile();
-
-    void TransitionToGCPhaseExclusive(GCPhase newPhase);
-
-    void TransitionToCpuProfileExclusive();
-
-    // Ensure that mutator phase is changed only once by mutator itself or GC
-    bool TransitionGCPhase(bool bySelf);
-
-    __attribute__((always_inline)) inline bool TransitionToCpuProfile(bool bySelf);
+    // Called if current mutator should do corresponding task by suspensionFlag value
+    __attribute__((visibility ("default"))) void HandleSuspensionRequest();
 
     __attribute__((always_inline)) inline void SetMutatorPhase(const GCPhase newPhase)
     {
@@ -300,18 +273,112 @@ public:
         return mutatorPhase_.load(std::memory_order_acquire);
     }
 
-    bool GetSafepointActiveState() const
+    // Called if current mutator should handle stw request
+    void SuspendForStw();
+
+    // temporary impl to clean GC callback, and need to refact to flip function
+    __attribute__((visibility ("default"))) void HandleJSGCCallback();
+
+    void GcPhaseEnum(GCPhase newPhase);
+    void GCPhasePreForward(GCPhase newPhase);
+    void HandleGCPhase(GCPhase newPhase);
+
+    inline void HandleCpuProfile();
+
+    void TransitionToCpuProfileExclusive();
+
+    // Ensure that mutator phase is changed only once by mutator itself or GC
+    bool TransitionGCPhase(bool bySelf);
+
+    __attribute__((always_inline)) inline bool TransitionToCpuProfile(bool bySelf);
+
+    void VisitMutatorRoots(const RootVisitor& visitor);
+
+    void DumpMutator() const;
+
+    // Init after fork.
+    void InitAfterFork()
     {
-        return safepointActive_;
+        // tid changed after fork, so we re-initialize it.
+        InitTid();
     }
 
-    void MutatorBaseLock()
+    void SetFlipFunction(FlipFunction *flipFunction)
     {
-        mutatorBaseLock_.lock();
+        flipFunction_ = flipFunction;
     }
 
-    void MutatorBaseUnlock() {
-        mutatorBaseLock_.unlock();
+    void TransitionToGCPhaseExclusive(GCPhase newPhase);
+
+    bool TryRunFlipFunction()
+    {
+        while (true) {
+            uint32_t oldFlag = GetSuspensionFlag();
+            if ((oldFlag & SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK) != 0) {
+                uint32_t newFlag =
+                    Mutator::ConstructSuspensionFlag(oldFlag, SuspensionType::SUSPENSION_FOR_PENDING_CALLBACK,
+                                                         SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK);
+                if (CASSetSuspensionFlag(oldFlag, newFlag)) {
+                    DCHECK_CC(flipFunction_);
+                    (*flipFunction_)(*this);
+                    flipFunction_ = nullptr;
+                    std::unique_lock<std::mutex> lock(flipFunctionMtx_);
+                    ClearSuspensionFlag(SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK);
+                    flipFunctionCV_.notify_all();
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+
+    void WaitFlipFunctionFinish()
+    {
+        while (true) {
+            std::unique_lock<std::mutex> lock(flipFunctionMtx_);
+            if (HasSuspensionRequest(SuspensionType::SUSPENSION_FOR_RUNNING_CALLBACK)) {
+                flipFunctionCV_.wait(lock);
+            } else {
+                return;
+            }
+        }
+    }
+
+#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
+    void PushFrameInfoForMarking(const GCInfoNode& frameGCInfo) { gcInfos_.PushFrameInfoForMarking(frameGCInfo); }
+
+    void PushFrameInfoForMarking(const GCInfoNode&& frameGCInfo) { gcInfos_.PushFrameInfoForMarking(frameGCInfo); }
+
+    void PushFrameInfoForFix(const GCInfoNodeForFix& frameGCInfo) { gcInfos_.PushFrameInfoForFix(frameGCInfo); }
+
+    void PushFrameInfoForFix(const GCInfoNodeForFix&& frameGCInfo) { gcInfos_.PushFrameInfoForFix(frameGCInfo); }
+
+    void DumpGCInfos() const
+    {
+        DLOG(ENUM, "dump mutator gc info thread id: %d", tid);
+        gcInfos_.DumpGCInfos();
+    }
+#endif
+
+    NO_INLINE_CC void RememberObjectInSatbBuffer(const BaseObject* obj) { RememberObjectImpl(obj); }
+
+    const void* GetSatbBufferNode() const;
+
+    void ClearSatbBufferNode();
+
+    void PushRawObject(BaseObject* obj) { rawObject_.object = obj; }
+
+    BaseObject* PopRawObject()
+    {
+        BaseObject* obj = rawObject_.object;
+        rawObject_.object = nullptr;
+        return obj;
+    }
+
+    ThreadHolder *GetThreadHolder()
+    {
+        return holder_;
     }
 
     void RegisterJSThread(void *jsThread)
@@ -327,46 +394,66 @@ public:
 
     static constexpr size_t GetSafepointActiveOffset()
     {
-        return MEMBER_OFFSET_CC(MutatorBase, safepointActive_);
+        return MEMBER_OFFSET_CC(Mutator, safepointActive_);
     }
 
+protected:
+    // for exception ref
+    void VisitRawObjects(const RootVisitor& func);
+    void CreateCurrentGCInfo();
+
 private:
+    void RememberObjectImpl(const BaseObject* obj);
+
     // Indicate whether execution thread should check safepoint suspension request
     uint32_t safepointActive_ = 0;
     // Indicate the current mutator phase and use which barrier in concurrent gc
     std::atomic<GCPhase> mutatorPhase_ = { GCPhase::GC_PHASE_UNDEF };
     // in saferegion, it will not access any managed objects and can be visitted by observer
     std::atomic<uint32_t> inSaferegion_ = { SAFE_REGION_TRUE };
-    // Protect observerCnt
-    std::mutex observeCntMutex_;
-    // Increase when this mutator is observed by some observer
-    std::atomic<size_t> observerCnt_ = { 0 };
-
     // If set implies this mutator should process suspension requests
     std::atomic<uint32_t> suspensionFlag_ = { 0 };
     // Indicate the state of mutator's phase transition
     std::atomic<GCPhaseTransitionState> transitionState_ = { NO_TRANSITION };
 
-    std::mutex mutatorBaseLock_;
-
     std::atomic<CpuProfileState> cpuProfileState_ = { NO_CPUPROFILE };
-
-    // This is stored for process `satbNode`, merge Mutator & MutatorBase & SatbNode
-    void *mutator_ {nullptr};
 
     // used to synchronize cmc-gc phase to JSThread
     void *jsThread_ {nullptr};
 
-    friend Mutator;
+    // thread id
+    uint32_t tid_ = 0;
+    // thread ptr
+    void* thread_;
+    // ecmavm
+    void* ecmavm_ = nullptr;
+
+    ObjectRef rawObject_{ nullptr };
+    std::mutex flipFunctionMtx_;
+    std::condition_variable flipFunctionCV_;
+    FlipFunction* flipFunction_ {nullptr};
+    void* satbNode_ = nullptr;
+#if defined(GCINFO_DEBUG) && GCINFO_DEBUG
+    GCInfos gcInfos_;
+#endif
+
+    ThreadHolder *holder_;
+
     friend ThreadHolder;
 };
+
+// This function is mainly used to initialize the context of mutator.
+// Ensured that updated fa is the caller layer of the managed function to be called.
+void PreRunManagedCode(Mutator* mutator, int layers, ThreadLocalData* threadData);
+
+ThreadLocalData *GetThreadLocalData();
+
 }  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_H
+#endif  // COMMON_INTERFACES_THREAD_MUTATOR_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,
 //           misc-non-private-member-variables-in-classes, cppcoreguidelines-pro-type-member-init,
-//           google-explicit-constructor, cppcoreguidelines-pro-type-union-access,
-//           modernize-use-auto, llvm-namespace-comment,
+//           cppcoreguidelines-pro-type-union-access, modernize-use-auto, llvm-namespace-comment,
 //           cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //           readability-implicit-bool-conversion)

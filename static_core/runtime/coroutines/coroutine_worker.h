@@ -52,6 +52,9 @@ public:
     CoroutineWorker(Runtime *runtime, PandaVM *vm, PandaString name, Id id, bool isMainWorker)
         : runtime_(runtime), vm_(vm), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
     {
+#ifdef ARK_HYBRID
+        threadHolder_ = common::ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+#endif
     }
     virtual ~CoroutineWorker()
     {
@@ -133,6 +136,13 @@ public:
         return false;
     }
 
+#ifdef ARK_HYBRID
+    common::ThreadHolder *GetThreadHolder()
+    {
+        return threadHolder_;
+    }
+#endif
+
 private:
     void CreateWorkerLocalObjects();
     virtual void CacheLocalObjectsInCoroutines() {}
@@ -147,6 +157,9 @@ private:
     // event loop poster
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> extSchedulingPoster_;
+#ifdef ARK_HYBRID
+    common::ThreadHolder *threadHolder_ = nullptr;
+#endif
 };
 
 }  // namespace ark

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,27 +19,27 @@
 #include <unordered_set>
 
 #include "common_interfaces/thread/thread_holder.h"
-#include "common_interfaces/thread/mutator_base-inl.h"
+#include "common_interfaces/thread/mutator-inl.h"
 
 namespace common {
 void ThreadHolder::TransferToRunning()
 {
-    mutatorBase_->DoLeaveSaferegion();
+    mutator_->DoLeaveSaferegion();
 }
 
 void ThreadHolder::TransferToNative()
 {
-    mutatorBase_->DoEnterSaferegion();
+    mutator_->DoEnterSaferegion();
 }
 
 bool ThreadHolder::TransferToRunningIfInNative()
 {
-    return mutatorBase_->LeaveSaferegion();
+    return mutator_->LeaveSaferegion();
 }
 
 bool ThreadHolder::TransferToNativeIfInRunning()
 {
-    return mutatorBase_->EnterSaferegion(false);
+    return mutator_->EnterSaferegion(false);
 }
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_THREAD_HOLDER_INL_H

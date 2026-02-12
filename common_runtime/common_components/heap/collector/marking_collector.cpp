@@ -423,7 +423,7 @@ bool MarkingCollector::MarkSatbBuffer(GlobalMarkStack &globalMarkStack)
     auto visitSatbObj = [this, &globalMarkStack]() {
         std::vector<BaseObject *> remarkStack;
         auto func = [&remarkStack](Mutator& mutator) {
-            const SatbBuffer::TreapNode* node = mutator.GetSatbBufferNode();
+            const SatbBuffer::TreapNode* node = static_cast<const SatbBuffer::TreapNode*>(mutator.GetSatbBufferNode());
             if (node != nullptr) {
                 const_cast<SatbBuffer::TreapNode*>(node)->GetObjects(remarkStack);
             }

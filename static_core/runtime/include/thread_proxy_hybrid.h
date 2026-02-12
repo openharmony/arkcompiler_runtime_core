@@ -19,7 +19,8 @@
 
 #include "runtime/include/thread_interface.h"
 
-#include "common_interfaces/thread/base_thread.h"
+#include "common_interfaces/thread/thread_holder.h"
+#include "common_interfaces/thread/thread_holder-inl.h"
 
 namespace ark {
 
@@ -69,7 +70,7 @@ public:
     void UnbindMutator();
 
     /// @returns true if holder was created
-    bool CreateExternalHolderIfNeeded(bool useSharedHolder);
+    bool CreateExternalHolderIfNeeded(bool useSharedHolder, common::ThreadHolder *th);
 
     common::ThreadHolder *GetThreadHolder() const
     {

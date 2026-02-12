@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "common_components/common_runtime/hooks.h"
 #include "common_components/common/type_def.h"
+#include "mutator/satb_buffer.h"
 #if defined(_WIN64)
 #define NOGDI
 #include <windows.h>
@@ -27,6 +28,8 @@
 #include "common_components/heap/collector/marking_collector.h"
 #include "common_components/common/scoped_object_access.h"
 #include "common_components/mutator/mutator_manager.h"
+
+#include "common_interfaces/thread/thread_holder.h"
 
 namespace common {
 ThreadLocalData *GetThreadLocalData()
@@ -44,8 +47,9 @@ ThreadLocalData *GetThreadLocalData()
 }
 
 // Ensure that mutator phase is changed only once by mutator itself or GC
-bool MutatorBase::TransitionGCPhase(bool bySelf)
+bool Mutator::TransitionGCPhase(bool bySelf)
 {
+    // CC-OFFNXT(G.CTL.03): false positive
     do {
         GCPhaseTransitionState state = transitionState_.load();
         // If this mutator phase transition has finished, just return
@@ -82,8 +86,9 @@ bool MutatorBase::TransitionGCPhase(bool bySelf)
     } while (true);
 }
 
-void MutatorBase::HandleSuspensionRequest()
+void Mutator::HandleSuspensionRequest()
 {
+    // CC-OFFNXT(G.CTL.03): false positive
     for (;;) {
         SetInSaferegion(SAFE_REGION_TRUE);
         if (HasSuspensionRequest(SUSPENSION_FOR_STW)) {
@@ -98,17 +103,18 @@ void MutatorBase::HandleSuspensionRequest()
         } else if (HasSuspensionRequest(SUSPENSION_FOR_CPU_PROFILE)) {
             TransitionToCpuProfile(true);
         } else if (HasSuspensionRequest(SUSPENSION_FOR_EXIT)) {
+            // CC-OFFNXT(G.CTL.03): required by program logic
             while (true) {
                 sleep(INT_MAX);
             }
         } else if (HasSuspensionRequest(SUSPENSION_FOR_PENDING_CALLBACK)) {
-            reinterpret_cast<Mutator*>(mutator_)->TryRunFlipFunction();
+            TryRunFlipFunction();
         } else if (HasSuspensionRequest(SUSPENSION_FOR_RUNNING_CALLBACK)) {
-            reinterpret_cast<Mutator*>(mutator_)->WaitFlipFunctionFinish();
+            WaitFlipFunctionFinish();
         }
         SetInSaferegion(SAFE_REGION_FALSE);
         // Leave saferegion if current mutator has no suspend request, otherwise try again
-        if (LIKELY_CC(!HasAnySuspensionRequestExceptCallbacks() && !HasObserver())) {
+        if (LIKELY_CC(!HasAnySuspensionRequestExceptCallbacks())) {
             if (HasSuspensionRequest(SUSPENSION_FOR_FINALIZE)) {
                 ClearFinalizeRequest();
                 HandleJSGCCallback();
@@ -118,17 +124,15 @@ void MutatorBase::HandleSuspensionRequest()
     }
 }
 
-void MutatorBase::HandleJSGCCallback()
+void Mutator::HandleJSGCCallback()
 {
-    if (mutator_ != nullptr) {
-        void *vm = reinterpret_cast<Mutator*>(mutator_)->GetEcmaVMPtr();
-        if (vm != nullptr) {
-            JSGCCallback(vm);
-        }
+    void *vm = GetEcmaVMPtr();
+    if (vm != nullptr) {
+        JSGCCallback(vm);
     }
 }
 
-void MutatorBase::SuspendForStw()
+void Mutator::SuspendForStw()
 {
     ClearSuspensionFlag(SUSPENSION_FOR_STW);
     // wait until StartTheWorld
@@ -153,6 +157,86 @@ void MutatorBase::SuspendForStw()
         // safe region.
         SetSuspensionFlag(SUSPENSION_FOR_STW);
     }
+}
+
+static SatbBuffer::TreapNode*& CastSatbNode(void *&satbNode)
+{
+    return reinterpret_cast<SatbBuffer::TreapNode*&>(satbNode);
+}
+
+void Mutator::Init()
+{
+    holder_ = new ThreadHolder(this);
+    mutatorPhase_.store(GCPhase::GC_PHASE_IDLE);
+}
+
+Mutator::~Mutator()
+{
+    tid_ = 0;
+    if (satbNode_ != nullptr) {
+        SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
+        satbNode_ = nullptr;
+    }
+    delete holder_;
+}
+
+Mutator* Mutator::NewMutator()
+{
+    Mutator* mutator = new (std::nothrow) Mutator();
+    LOGF_CHECK(mutator != nullptr) << "new Mutator failed";
+    mutator->Init();
+    return mutator;
+}
+
+void Mutator::RememberObjectImpl(const BaseObject* obj)
+{
+    if (LIKELY_CC(Heap::IsHeapAddress(obj))) {
+        if (SatbBuffer::ShouldEnqueue(obj)) {
+            SatbBuffer::Instance().EnsureGoodNode(CastSatbNode(satbNode_));
+            CastSatbNode(satbNode_)->Push(obj);
+        }
+    }
+}
+
+void Mutator::ResetMutator()
+{
+    rawObject_.object = nullptr;
+    if (satbNode_ != nullptr) {
+        SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
+        satbNode_ = nullptr;
+    }
+}
+
+void Mutator::InitTid()
+{
+    tid_ = ThreadLocal::GetThreadLocalData()->tid;
+    if (tid_ == 0) {
+        tid_ = static_cast<uint32_t>(GetTid());
+        ThreadLocal::GetThreadLocalData()->tid = tid_;
+    }
+}
+
+const void* Mutator::GetSatbBufferNode() const { return satbNode_; }
+
+void Mutator::ClearSatbBufferNode()
+{
+    if (satbNode_ == nullptr) {
+        return;
+    }
+    CastSatbNode(satbNode_)->Clear();
+}
+
+void Mutator::VisitMutatorRoots(const RootVisitor& visitor)
+{
+    LOG_COMMON(FATAL) << "Unresolved fatal";
+    UNREACHABLE_CC();
+}
+
+void Mutator::DumpMutator() const
+{
+    LOG_COMMON(ERROR) << "mutator " << this << ": inSaferegion " <<
+        inSaferegion_.load(std::memory_order_relaxed) << ", tid " << tid_ <<
+        ", gc phase: " << mutatorPhase_.load() << ", suspension request "<< suspensionFlag_.load();
 }
 
 #if defined(GCINFO_DEBUG) && GCINFO_DEBUG
@@ -183,40 +267,36 @@ inline void CheckAndPush(BaseObject* obj, std::set<BaseObject*>& rootSet, std::s
     }
 }
 
-inline void MutatorBase::GcPhaseEnum(GCPhase newPhase)
+void Mutator::GcPhaseEnum(GCPhase newPhase)
 {
 }
 
 // comment all
-inline void MutatorBase::GCPhasePreForward(GCPhase newPhase)
+void Mutator::GCPhasePreForward(GCPhase newPhase)
 {
 }
 
-inline void MutatorBase::HandleGCPhase(GCPhase newPhase)
+void Mutator::HandleGCPhase(GCPhase newPhase)
 {
     if (newPhase == GCPhase::GC_PHASE_POST_MARK) {
-        std::lock_guard<std::mutex> lg(mutatorBaseLock_);
-        Mutator *actMutator = reinterpret_cast<Mutator*>(mutator_);
-        if (actMutator->satbNode_ != nullptr) {
-            DCHECK_CC(actMutator->satbNode_->IsEmpty());
-            SatbBuffer::Instance().RetireNode(actMutator->satbNode_);
-            actMutator->satbNode_ = nullptr;
+        if (satbNode_ != nullptr) {
+            DCHECK_CC(CastSatbNode(satbNode_)->IsEmpty());
+            SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
+            satbNode_ = nullptr;
         }
     } else if (newPhase == GCPhase::GC_PHASE_ENUM) {
         GcPhaseEnum(newPhase);
     } else if (newPhase == GCPhase::GC_PHASE_PRECOPY) {
         GCPhasePreForward(newPhase);
     } else if (newPhase == GCPhase::GC_PHASE_REMARK_SATB || newPhase == GCPhase::GC_PHASE_FINAL_MARK) {
-        std::lock_guard<std::mutex> lg(mutatorBaseLock_);
-        Mutator *actMutator = reinterpret_cast<Mutator*>(mutator_);
-        if (actMutator->satbNode_ != nullptr) {
-            SatbBuffer::Instance().RetireNode(actMutator->satbNode_);
-            actMutator->satbNode_ = nullptr;
+        if (satbNode_ != nullptr) {
+            SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
+            satbNode_ = nullptr;
         }
     }
 }
 
-void MutatorBase::TransitionToGCPhaseExclusive(GCPhase newPhase)
+void Mutator::TransitionToGCPhaseExclusive(GCPhase newPhase)
 {
     HandleGCPhase(newPhase);
     SetSafepointActive(false);
@@ -231,13 +311,13 @@ void MutatorBase::TransitionToGCPhaseExclusive(GCPhase newPhase)
     ClearSuspensionFlag(SUSPENSION_FOR_GC_PHASE); // atomic seq-cst
 }
 
-inline void MutatorBase::HandleCpuProfile()
+inline void Mutator::HandleCpuProfile()
 {
     LOG_COMMON(FATAL) << "Unresolved fatal";
     UNREACHABLE_CC();
 }
 
-void MutatorBase::TransitionToCpuProfileExclusive()
+void Mutator::TransitionToCpuProfileExclusive()
 {
     HandleCpuProfile();
     SetSafepointActive(false);

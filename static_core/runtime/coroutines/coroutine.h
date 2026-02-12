@@ -332,7 +332,7 @@ public:
     }
 #endif
 
-    void LinkToExternalHolder(bool useSharedHolder);
+    void LinkToExternalHolder(bool useSharedHolder, CoroutineWorker *w = nullptr);
 
     /**
      * Set a coroutine parameter abortFlag

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 #include "common_components/heap/ark_collector/marking_barrier.h"
+#include "common_components/heap/heap.h"
 
-#include "common_components/mutator/mutator.h"
 #if defined(COMMON_TSAN_SUPPORT)
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
+
+#include "common_interfaces/thread/mutator.h"
 
 namespace common {
 // Because gc thread will also have impact on tagged pointer in enum and marking phase,

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
-#define COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
+#ifndef COMMON_INTERFACES_THREAD_MUTATOR_INL_H
+#define COMMON_INTERFACES_THREAD_MUTATOR_INL_H
 
-#include "common_interfaces/thread/mutator_base.h"
+#include "common_interfaces/thread/mutator.h"
 
 #include "common_interfaces/base/common.h"
 
 namespace common {
-inline void MutatorBase::DoEnterSaferegion()
+inline void Mutator::DoEnterSaferegion()
 {
     // set current mutator in saferegion.
     SetInSaferegion(SAFE_REGION_TRUE);
 }
 
-inline bool MutatorBase::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
+inline bool Mutator::EnterSaferegion([[maybe_unused]] bool updateUnwindContext) noexcept
 {
     if (LIKELY_CC(!InSaferegion())) {
         DoEnterSaferegion();
@@ -36,7 +36,7 @@ inline bool MutatorBase::EnterSaferegion([[maybe_unused]] bool updateUnwindConte
     return false;
 }
 
-inline bool MutatorBase::LeaveSaferegion() noexcept
+inline bool Mutator::LeaveSaferegion() noexcept
 {
     if (LIKELY_CC(InSaferegion())) {
         DoLeaveSaferegion();
@@ -46,8 +46,9 @@ inline bool MutatorBase::LeaveSaferegion() noexcept
 }
 
 // Ensure that mutator is changed only once by mutator itself or Profile
-bool MutatorBase::TransitionToCpuProfile(bool bySelf)
+bool Mutator::TransitionToCpuProfile(bool bySelf)
 {
+    // CC-OFFNXT(G.CTL.03): false positive
     do {
         CpuProfileState state = cpuProfileState_.load();
         // If this mutator profile has finished, just return
@@ -76,4 +77,4 @@ bool MutatorBase::TransitionToCpuProfile(bool bySelf)
     } while (true);
 }
 }  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_MUTATOR_BASE_INL_H
+#endif  // COMMON_INTERFACES_THREAD_MUTATOR_INL_H

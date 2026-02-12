@@ -26,12 +26,12 @@
 #include "common_interfaces/objects/ref_field.h"
 #include "mutator/mutator_manager.h"
 #include "securec.h"
-#include "common_interfaces/thread/mutator_base.h"
+#include "common_interfaces/thread/mutator.h"
 #include <iomanip>
 #include <sstream>
 #include <unordered_set>
 
-/*
+/**
  * Heap Verify:
  * Checks heap invariants after each GC mark, copy and fix phase. During the check, the world is stopped.
  * Enabled by default for debug mode. Controlled by gn option `ets_runtime_enable_heap_verify`.

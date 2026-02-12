@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
 #define COMMON_COMPONENTS_COMMON_SCOPED_LOCK_OBJECT_H
 
-#include "common_components/common/base_object.h"
+#include "common_interfaces/objects/base_object.h"
 #include "common_components/log/log.h"
 namespace common {
 class ScopedObjectLock {

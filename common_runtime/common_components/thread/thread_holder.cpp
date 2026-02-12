@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #include "common_interfaces/thread/thread_holder-inl.h"
 
 #include "common_components/common_runtime/hooks.h"
-#include "common_components/mutator/mutator.h"
+#include "common_interfaces/thread/mutator.h"
+#include "common_components/log/log.h"
+#include "common_components/heap/allocator/alloc_buffer.h"
 #include "common_components/mutator/thread_local.h"
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/thread/base_thread.h"
@@ -108,8 +110,8 @@ void ThreadHolder::RegisterJSThread(JSThread *jsThread)
     TransferToRunning();
     DCHECK_CC(jsThread_ == nullptr);
     jsThread_ = jsThread;
-    mutatorBase_->RegisterJSThread(jsThread);
-    SynchronizeGCPhaseToJSThread(jsThread, mutatorBase_->GetMutatorPhase());
+    mutator_->RegisterJSThread(jsThread);
+    SynchronizeGCPhaseToJSThread(jsThread, mutator_->GetMutatorPhase());
     TransferToNative();
 }
 
@@ -119,7 +121,7 @@ void ThreadHolder::UnregisterJSThread(JSThread *jsThread)
     TransferToRunning();
     DCHECK_CC(jsThread_ == jsThread);
     jsThread_ = nullptr;
-    mutatorBase_->UnregisterJSThread();
+    mutator_->UnregisterJSThread();
     if (coroutines_.empty()) {
         ThreadHolder::DestroyThreadHolder(this);
     }
@@ -135,6 +137,9 @@ void ThreadHolder::RegisterCoroutine(Coroutine *coroutine)
 
 void ThreadHolder::UnregisterCoroutine(Coroutine *coroutine)
 {
+    if (coroutines_.find(coroutine) == coroutines_.end()) {
+        return;
+    }
     DCHECK_CC(!IsInRunningState());
     TransferToRunning();
     DCHECK_CC(coroutines_.find(coroutine) != coroutines_.end());
@@ -173,7 +178,7 @@ void ThreadHolder::UnbindMutator()
 
 void ThreadHolder::WaitSuspension()
 {
-    mutatorBase_->HandleSuspensionRequest();
+    mutator_->HandleSuspensionRequest();
 }
 
 void ThreadHolder::VisitAllThreads(CommonRootVisitor visitor)
