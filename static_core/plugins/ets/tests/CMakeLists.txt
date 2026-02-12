@@ -612,6 +612,10 @@ add_dependencies(ets_gtests ets_common_gtests)
 add_subdirectory(mock)
 add_subdirectory(native)
 
+if(PANDA_COMPILER_ENABLE OR PANDA_ETS_INTEROP_JS)
+    add_subdirectory(jitinterface)
+endif()
+
 if(PANDA_COMPILER_ENABLE)
     add_subdirectory(checked)
     add_dependencies(ets_tests ets_checked_tests)

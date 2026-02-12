@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@
 <%= Common::include_plugin_files "any", "handlers_path" %>
 
 namespace ark::intrinsics {
-ObjectHeader *AnyLdbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame, ObjectHeader *thisObj,
-                          [[maybe_unused]] uint32_t id)
+inline ObjectHeader *DoAnyLdbyname([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                                   [[maybe_unused]] panda_file::File::StringData propName)
 {
     if (thisObj == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
@@ -30,13 +30,11 @@ ObjectHeader *AnyLdbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused
     }
     auto *cls = thisObj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
-    [[maybe_unused]] auto pf = frame->GetMethod()->GetPandaFile();
     switch (cls->GetSourceLang()) {
 % Common::plugins.each_value do |plugin_opts|
         case <%= plugin_opts["lang_enum"] %>:
 % if plugin_opts.include?('any')
-            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyname(thread, thisObj,
-                pf->GetStringData(panda_file::File::EntityId(id)));
+            return <%= plugin_opts["directive_name"].upcase %>AnyLdbyname(thread, thisObj, propName);
 % else
             // Any handlers unimplemented for plugin
             UNREACHABLE();
@@ -48,8 +46,15 @@ ObjectHeader *AnyLdbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused
     }
 }
 
-void AnyStbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame *frame, ObjectHeader *thisObj,
-                 [[maybe_unused]]uint32_t id, [[maybe_unused]] ObjectHeader *val)
+ObjectHeader *AnyLdbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id)
+{
+    auto file = frame->GetMethod()->GetPandaFile();
+    auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+    return DoAnyLdbyname(thread, thisObj, propertyName);
+}
+
+inline void DoAnyStbyname([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
+                          [[maybe_unused]] panda_file::File::StringData propName, [[maybe_unused]] ObjectHeader *val)
 {
     if (thisObj == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
@@ -57,13 +62,11 @@ void AnyStbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame 
     }
     auto *cls = thisObj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
-    [[maybe_unused]] auto pf = frame->GetMethod()->GetPandaFile();
     switch (cls->GetSourceLang()) {
 % Common::plugins.each_value do |plugin_opts|
         case <%= plugin_opts["lang_enum"] %>:
 % if plugin_opts.include?('any')
-            return <%= plugin_opts["directive_name"].upcase %>AnyStbyname(thread, thisObj,
-                pf->GetStringData(panda_file::File::EntityId(id)), val);
+            return <%= plugin_opts["directive_name"].upcase %>AnyStbyname(thread, thisObj, propName, val);
 % else
             // Any handlers unimplemented for plugin
             UNREACHABLE();
@@ -73,6 +76,13 @@ void AnyStbyname([[maybe_unused]] ManagedThread *thread, [[maybe_unused]] Frame 
         default:
             UNREACHABLE();
     }
+}
+
+void AnyStbyname(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj, uint32_t id, ObjectHeader *val)
+{
+    auto file = frame->GetMethod()->GetPandaFile();
+    auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+    return DoAnyStbyname(thread, thisObj, propertyName, val);
 }
 
 ObjectHeader *AnyLdbyidx([[maybe_unused]] ManagedThread *thread, ObjectHeader *thisObj,
@@ -364,6 +374,23 @@ extern "C" ObjectHeader *AnyCallNewShort(ManagedThread *thread, ObjectHeader *ct
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
     return AnyCallNew(thread, ctor, Span<VMHandle<ObjectHeader>>(args));
 }
+
+extern "C" ObjectHeader *CompilerAnyLdbyname(Method *method, ObjectHeader *thisObj, uint32_t id)
+{
+    ASSERT(method != nullptr);
+    auto file = method->GetPandaFile();
+    auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+    return DoAnyLdbyname(ManagedThread::GetCurrent(), thisObj, propertyName);
+}
+
+extern "C" void CompilerAnyStbyname(Method *method, ObjectHeader *thisObj, uint32_t id, ObjectHeader *val)
+{
+    ASSERT(method != nullptr);
+    auto file = method->GetPandaFile();
+    auto propertyName = file->GetStringData(panda_file::File::EntityId(id));
+    return DoAnyStbyname(ManagedThread::GetCurrent(), thisObj, propertyName, val);
+}
+
 }  // namespace ark::intrinsics
 
 #endif  // CORE_ANY_INTRINSICS_INL

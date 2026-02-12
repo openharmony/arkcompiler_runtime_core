@@ -294,7 +294,7 @@ panda_isa_gen(
 
 panda_gen_file(
         DATA ${CMAKE_BINARY_DIR}/plugin_options.yaml
-        TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/interpreter/templates/core_any_intrinsics.inc.erb
+        TEMPLATE ${CMAKE_CURRENT_LIST_DIR}/templates/core_any_intrinsics.inc.erb
         API ${PANDA_ROOT}/templates/plugin_options.rb
         EXTRA_DEPENDENCIES plugin_options_merge
         OUTPUTFILE ${GEN_INCLUDE_DIR}/core_any_intrinsics.inc

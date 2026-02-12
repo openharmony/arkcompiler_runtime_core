@@ -1,4 +1,4 @@
-#Copyright(c) 2022 - 2025 Huawei Device Co., Ltd.
+#Copyright(c) 2022 - 2026 Huawei Device Co., Ltd.
 #Licensed under the Apache License, Version 2.0(the "License");
 #you may not use this file except in compliance with the License.
 #You may obtain a copy of the License at
@@ -13,7 +13,6 @@
 
 add_custom_target(ets_checked_tests COMMENT "Running ets core tests with checkers")
 add_dependencies(ets_checked_tests ark)
-add_subdirectory(jitinterface)
 
 function(panda_add_checked_test_ets)
     set(prefix ARG)
@@ -151,7 +150,6 @@ function(panda_add_checked_test_ets)
 
     if (ARG_JITINTERFACE)
         add_dependencies(${TEST_NAME} jitinterface)
-        add_dependencies(${TEST_NAME} string_tlab_repeat)
     endif()
 
     if (ARG_NATIVE)
