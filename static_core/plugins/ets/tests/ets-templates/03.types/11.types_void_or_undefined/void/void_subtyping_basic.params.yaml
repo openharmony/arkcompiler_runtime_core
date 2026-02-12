@@ -22,3 +22,21 @@ cases:
     statements:
       - "let f3: () => undefined = () => {}"
       - "arktest.assertEQ(f3(), undefined)"
+  - description: "Assigning void as type annotation"
+    statements:
+      - "let x: void = undefined"
+      - "arktest.assertEQ(x, undefined)"
+  - description: "Assigning variable of type undefined to variable of type void"
+    statements:
+      - "let v: void = undefined"
+      - "let u: undefined = undefined"
+      - "v = u"
+      - "arktest.assertEQ(v, undefined)"
+      - "arktest.assertEQ(u, v)"
+  - description: "Assigning variable of type void to variable of type undefined"
+    statements:
+      - "let v: void = undefined"
+      - "let u: undefined = undefined"
+      - "u = v"
+      - "arktest.assertEQ(u, undefined)"
+      - "arktest.assertEQ(v, u)"
