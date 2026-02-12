@@ -754,7 +754,15 @@ Grammar Summary
         ;
 
     moduleDeclaration:
-        importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        moduleHeader? importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        ;
+
+    moduleHeader:
+        'export'? 'module' moduleIdentifier
+        ;
+
+    moduleIdentifier:
+        StringLiteral
         ;
 
     importDirective:

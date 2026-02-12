@@ -53,7 +53,8 @@ The syntax of *ambient declaration* is presented below:
 
     ambientDeclaration:
         'declare'
-        ( ambientConstantOrVariableDeclaration
+        ( ambientModuleHeaderDeclaration
+        | ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
         | explicitFunctionOverload
         | ambientClassDeclaration
@@ -92,6 +93,54 @@ context that is already ambient:
    compatibility
    ambient
 
+
+|
+
+.. _Ambient Module Header Declaration:
+
+Ambient Module Header Declaration
+*********************************
+
+.. meta:
+    frontend_status: Done
+
+The syntax of *ambient module header declaration* is presented below:
+
+.. code-block:: abnf
+
+    ambientModuleHeaderDeclaration:
+        'export'? 'module' moduleIdentifier
+        ;
+
+Requirements for *ambient declaration*:
+
+-  Mandatory *ambient module header declaration*.
+   Otherwise, a :index:`compile-time error` occurs;
+-  *Ambient module header declaration* is not placed first.
+   Otherwise, a :index:`compile-time error` occurs;
+
+The usage of *ambient module header declaration* is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+    declare module "x"      // ok
+    import {A} from "some module"
+    declare let v1: number
+
+.. code-block:: typescript
+   :linenos:
+
+    declare let v1: number  // compile-time error: no ambient module header declaration
+
+.. code-block:: typescript
+   :linenos:
+    import {A} from "some module"
+    declare module "x"      // compile-time error: ambient module header declaration is not placed first
+
+.. index::
+   ambient module header
+   module header declaration
+   declaration
 
 |
 

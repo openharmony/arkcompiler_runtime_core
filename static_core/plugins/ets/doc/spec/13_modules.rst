@@ -46,10 +46,14 @@ a module must be imported first by the module that is to use them.
    Only exported declarations are available for the third party tools and
    programs written in other programming languages.
 
+The modules can consist of one or more files (see :ref:`Multi-file module`).
+
 All *modules* are stored in a file system or a database
 (see :ref:`Modules in Host System`).
 
-A *module* can optionally consist of the following four parts:
+A *module* can optionally consist of the following five parts:
+
+#. The module header that assigns an identifier to the module;
 
 #. Import directives that enable referring imported declarations in a module;
 
@@ -64,8 +68,11 @@ The syntax of *module* is presented below:
 .. code-block:: abnf
 
     moduleDeclaration:
-        importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        moduleHeader? importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
+
+The module accessibility (see :ref:`Accessible`) in other modules by import is
+determined by the build system (see :ref:`Build System`).
 
 Every module can directly use a set of exported entities defined in the
 standard library (see :ref:`Standard Library Usage`).
@@ -93,6 +100,7 @@ Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    module
+   module header
    import directive
    imported declaration
    module
@@ -105,6 +113,46 @@ Otherwise, a :index:`compile-time error` occurs.
    syntax
    standard library
    console
+
+|
+
+.. _Module Header:
+
+Module Header
+*************
+
+.. meta:
+    frontend_status: Done
+
+*Module header* introduce the *export* modifier and a *module identifier*.
+
+The syntax of *module header* is presented below:
+
+.. code-block:: abnf
+
+    moduleHeader:
+        'export'? 'module' moduleIdentifier
+        ;
+
+    moduleIdentifier:
+        StringLiteral
+        ;
+
+The *export* modifier is used by build system (see :ref:`Build System`) to make
+module accessible (see :ref:`Accessible`) in other modules by import (see :ref:`Import Directives`).
+
+The usage of *module header* is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    export module "x"
+    import {A} from "some module"
+    export class B extends A {}
+
+.. index::
+    module header
+    module identifier
 
 |
 
@@ -1972,6 +2020,76 @@ appearance within the module until an error situation is thrown (see
    type declaration
    module
    error
+
+|
+
+.. _Multi-file Module:
+
+Multi-file Module
+*****************
+
+*Multi-file module* is a module that consist of several files which have the same
+*module header* (see :ref:`Module header`)
+
+The *multi-file module* combines :ref:`Import Directives`, :ref:`Top-Level Declarations`
+and :ref:`Export Directives` for all files of module.
+
+The *multi-file module* has the following limitations:
+
+- Each top-level statements (see :ref:`Top-Level Statements`) must not be located
+  in several files. Otherwise, a :index:`compile-time error` occurs.
+
+The correct *multi-file module* is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // file1
+    export module "x"
+    import {A} from "some module"
+    export a
+
+    // file2
+    export module "mod1"
+    let a = new A()
+
+.. code-block:: typescript
+   :linenos:
+
+    // file1
+    module "x"
+    function foo() {}
+    function bar() {}
+    namespace NS1 {
+        function foo() {}
+        function bar() {}
+    }
+
+    // file2
+    module "x"
+    class A {}
+
+The incorrect *multi-file module* is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // file1
+    module "y"
+    function foo() {}
+    namespace NS1 {
+        function foo() {}
+    }
+
+    // file2
+    module "y"
+    function bar() {}       // CTE, the top-level statements located in several files
+    namespace NS1 {
+        function bar() {}   // CTE, the top-level statements located in several files
+    }
+
+.. index::
+    multi-file module
 
 |
 
