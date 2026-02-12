@@ -1,0 +1,190 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("$ark_root/plugins/plugins.gni")
+import("irtoc.gni")
+
+# Template to compile Irtoc scripts into object files
+# Matches CMake's irtoc_compile() function behavior
+# Parameters:
+#   scripts - list of input .irt script files
+#   use_llvm_inline - bool: whether to use LLVM inline module (default: false)
+#   NOTE: not implemented
+#       skip_validation - bool: skip validation for debug builds (default: false)
+#
+# Creates three targets:
+#   1. {target_name}_generate - Ruby script → C++ code generation
+#   2. {target_name}_exec - Internal executable
+#   3. {target_name} - Final action that generates object files
+template("irtoc_modular_compile") {
+  assert(defined(invoker.scripts), "scripts must be defined")
+  _target_name = target_name
+  _scripts = invoker.scripts
+  _use_llvm_inline = defined(invoker.use_llvm_inline) && invoker.use_llvm_inline
+
+  # Build directory for this target
+  _build_dir = "${target_gen_dir}/${_target_name}"
+
+  # Step 1: Ruby script generation → *_generate action
+  action("${_target_name}_generate") {
+    script = "$ark_root/irtoc/lang/irtoc.rb"
+    _code_output = "${_build_dir}/${_target_name}_code.cpp"
+    outputs = [ _code_output ]
+
+    if (is_llvm_interpreter || is_llvm_fastpath) {
+      _llvm_output = "${_build_dir}/${_target_name}_code_llvm.cpp"
+      outputs += [ _llvm_output ]
+    }
+
+    sources = _scripts
+    inputs = sources + [
+               "$ark_root/irtoc/scripts/common.irt",
+               irtoc_plugins_file,
+             ]
+    inputs += plugin_irtoc_plugins
+    _irt_args = rebase_path(_scripts, root_build_dir)
+    _outputs_rebased = rebase_path(outputs, root_build_dir)
+    args = [
+      "--input",
+      string_join(":", _irt_args),
+      "--output",
+      string_join(":", _outputs_rebased),
+      "--ark_source_dir",
+      rebase_path(ark_root, root_build_dir),
+      "--isa",
+      rebase_path(ark_isa_yaml, root_build_dir),
+      "--arch",
+      target_cpu,
+      "--ir-api",
+      "ir-constructor",
+      "{{defines}}",
+      "--plugins",
+      rebase_path(irtoc_plugins_file, root_build_dir),
+    ]
+
+    configs = [ "${ark_root}:ark_config(${default_toolchain})" ]
+
+    deps = [
+      "$ark_root/irtoc:irtoc_plugins_file",
+      "$ark_root/isa:isa_combine",
+    ]
+  }
+
+  # Step 2: Internal executable
+  ohos_executable("${_target_name}_exec") {
+    _code_output = "${_build_dir}/${_target_name}_code.cpp"
+    sources = [
+      "$ark_root/irtoc/backend/irtoc.cpp",
+      _code_output,
+    ]
+
+    if (is_llvm_interpreter || is_llvm_fastpath) {
+      _llvm_output = "${_build_dir}/${_target_name}_code_llvm.cpp"
+      sources += [ _llvm_output ]
+    }
+
+    configs = [
+      "$ark_root/runtime:arkruntime_public_config",
+      "$ark_root/compiler:arkcompiler_public_config",
+      "$ark_root/irtoc:irtoc_public_config",
+      "$ark_root:ark_config",
+    ]
+
+    deps = [
+      ":${_target_name}_generate",
+      "$ark_root/compiler:libarktscompiler",
+      "$ark_root/irtoc:irtoc(${host_toolchain})",
+      "$ark_root/libarkbase:libarktsbase",
+    ]
+    if (is_llvm_interpreter || is_llvm_fastpath) {
+      configs += [ "$ark_root/libllvmbackend:libllvmbackend_public_config" ]
+      deps += [ "$ark_root/libllvmbackend:libllvmbackend" ]
+    }
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
+  }
+
+  # Step 3: Object file generation (RUN IRTOC command)
+  action(_target_name) {
+    if (ark_static_standalone_build) {
+      _irtoc_root_out_dir =
+          get_label_info(":${_target_name}_exec(${host_toolchain})",
+                         "root_out_dir") + "/bin"
+      _irtoc_bin = "${_irtoc_root_out_dir}/${_target_name}_exec"
+    } else {
+      _irtoc_root_out_dir =
+          get_label_info(":${_target_name}_exec(${host_toolchain})",
+                         "root_out_dir") +
+          "/${ark_subsystem_name}/${ark_part_name}"
+      _irtoc_bin = "${_irtoc_root_out_dir}/${_target_name}_exec"
+    }
+
+    _output_dir = "$ark_root_gen_dir"
+    _irtoc_output = "${_output_dir}/${_target_name}.o"
+    outputs = [ _irtoc_output ]
+
+    _irtoc_args = [
+      "--irtoc-output",
+      rebase_path(_irtoc_output, root_build_dir),
+      "--compiler-cross-arch",
+      target_cpu,
+    ]
+
+    if (is_debug) {
+      _irtoc_args += [ "--compiler-disasm-dump:single-file" ]
+    }
+
+    # LLVM support
+    if (is_llvm_interpreter || is_llvm_fastpath) {
+      _irtoc_output_llvm = "${_output_dir}/${_target_name}_llvm.o"
+      outputs += [ _irtoc_output_llvm ]
+      _irtoc_args += [
+        "--irtoc-output-llvm",
+        rebase_path(_irtoc_output_llvm, root_build_dir),
+      ]
+    }
+    deps = [ ":${_target_name}_exec(${host_toolchain})" ]
+
+    # LLVM inline module support (ONLY for interpreter with use_llvm_inline=true)
+    if (_use_llvm_inline && (is_llvm_interpreter || is_llvm_fastpath)) {
+      # Get the path to interpreter_inline.bc from libllvmbackend target
+      # Use host_toolchain for cross-compilation
+      _llvm_bc_target = "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module"
+      _llvm_inline_bc = get_label_info(_llvm_bc_target, "target_gen_dir") +
+                        "/interpreter_inline.bc"
+      _irtoc_args += [
+        "--llvm-inline-module",
+        rebase_path(_llvm_inline_bc, root_build_dir),
+      ]
+      deps += [ _llvm_bc_target ]
+    }
+
+    if (ark_static_standalone_build) {
+      script = _irtoc_bin
+      args = _irtoc_args
+    } else {
+      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
+      args = [
+        "--script-file",
+        rebase_path(_irtoc_bin),
+        "--script-args",
+        string_join(" ", _irtoc_args),
+        "--env-path",
+        rebase_path(_irtoc_root_out_dir),
+        "--expect-output",
+        "0",
+      ]
+    }
+  }
+}
