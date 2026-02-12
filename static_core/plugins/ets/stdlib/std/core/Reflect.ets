@@ -62,4 +62,48 @@ export function isFuncObjAsync(target: Function): boolean {
     return isFuncObjAsyncImpl(target)
 }
 
+/*
+ * Returns public instance getters of a class and its parents
+ *
+ * @param { Class } targetClass Class to get fields from
+ * @returns { Array<InstanceMethod> } A new array instance filled with all the class getters
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function getInstanceGettersRecursive(targetClass: Class): Array<InstanceMethod> {
+    let res = new Array<InstanceMethod>()
+    let cls: Class | undefined = targetClass
+    while (cls != undefined) {
+        for (let method of cls!.getInstanceMethods()) {
+            if (method.isGetter()) {
+                res.push(method)
+            }
+        }
+        cls = cls!.getSuper()
+    }
+    return res
+}
+
+/**
+ * Returns public instance fields of a class and its parents
+ *
+ * @param { Class } targetClass Class to get fields from
+ * @returns { Array<InstanceField> } A new array instance filled with all the class fields
+ * @syscap SystemCapability.Utils.Lang
+ * @FaAndStageModel
+ * @since 24
+ */
+export function getInstanceFieldsRecursive(targetClass: Class): Array<InstanceField> {
+    let res = new Array<InstanceField>()
+    let cls: Class | undefined = targetClass
+    while (cls != undefined) {
+        for (let field of cls!.getInstanceFields()) {
+            res.push(field)
+        }
+        cls = cls!.getSuper()
+    }
+    return res
+}
+
 } // namespace reflect
