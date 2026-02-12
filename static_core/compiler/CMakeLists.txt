@@ -493,12 +493,12 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64 AND PANDA_WITH_TESTS)
     set(PANDA_CODEGEN_TESTS_SOURCES
         tests/unit_test.cpp
         tests/spill_fill_encoder_test.cpp
-        tests/codegen/codegen_optional_inputs_test.cpp
         )
     if(PANDA_COMPILER_TARGET_AARCH64)
         list(APPEND PANDA_CODEGEN_TESTS_SOURCES
             tests/codegen/codegen_test_1.cpp
             tests/codegen/codegen_test_2.cpp
+            tests/codegen/codegen_optional_inputs_test.cpp
         )
     endif()
     panda_add_gtest(
