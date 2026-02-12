@@ -22,7 +22,6 @@
 #include "compiler/compiler_options.h"
 #include "compiler/optimizer/ir/inst.h"
 #include "runtime/deoptimization.h"
-#include "runtime/arch/memory_helpers.h"
 #include "runtime/jit/profiling_data.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/coretypes/array.h"
@@ -385,7 +384,7 @@ extern "C" ObjectHeader *CreateObjectByClassEntrypoint(Class *klass)
 {
     BEGIN_ENTRYPOINT();
 
-    // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
+    // We need annotation here for the FullMemoryBarrier used in ClassLinker::AvoidLoadedClassPointerLeak
     TSAN_ANNOTATE_HAPPENS_AFTER(klass);
     if (klass->IsStringClass()) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
@@ -893,12 +892,6 @@ extern "C" Class *InitializeClassByIdEntrypoint(const Method *caller, FileEntity
         HandlePendingException();
         UNREACHABLE();
     }
-    // Later we store klass pointer into .aot_got section.
-    // Without full memory barrier on the architectures with weak memory order
-    // we can read klass pointer, but fetch klass data before it's set in GetClass and InitializeClass
-    arch::FullMemoryBarrier();
-    // Full barrier is not visible by TSAN so we need annotation here
-    TSAN_ANNOTATE_HAPPENS_BEFORE(klass);
     InitializeClassEntrypoint(klass);
     return klass;
 }

@@ -41,6 +41,7 @@
 #include "libarkbase/trace/trace.h"
 #include "libarkbase/utils/utils.h"
 #include "runtime/trace.h"
+#include "runtime/arch/memory_helpers.h"
 
 namespace ark {
 
@@ -1009,6 +1010,19 @@ static void HandleNoExtensionError(LanguageContext &ctx, const uint8_t *descript
     OnError(errorHandler, ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
 }
 
+static void AnnounceClassInContext(Class *klass)
+{
+    // We publish klass pointer and it becomes accessible by other threads.
+    // Without memory barrier on the architectures with weak memory order
+    // another thread can read klass pointer, but fetch klass data before it's set by ClassLinker.
+    // With memory barrier other threads can access klass data via klass pointer without additional
+    // synchronization, e.g. IRTOC load_class/store_class.
+    arch::FullMemoryBarrier();
+    // Full barrier is not visible by TSAN so we need annotation here
+    TSAN_ANNOTATE_HAPPENS_BEFORE(klass);
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
+}
+
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
                               ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler,
@@ -1080,7 +1094,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     }
 
     if (LIKELY(addToRuntime)) {
-        Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
+        AnnounceClassInContext(klass);
 
         auto *otherKlass = context->InsertClass(klass);
         if (otherKlass != nullptr) {
@@ -1169,7 +1183,7 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
 
     klass->SetState(Class::State::LOADED);
 
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
+    AnnounceClassInContext(klass);
 
     auto *otherKlass = context->InsertClass(klass);
     if (otherKlass != nullptr) {
@@ -1471,7 +1485,7 @@ Class *ClassLinker::LoadUnionClass(const uint8_t *descriptor, bool needCopyDescr
         return nullptr;
     }
 
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(unionClass);
+    AnnounceClassInContext(unionClass);
 
     auto *otherKlass = commonContext->InsertClass(unionClass);
     if (otherKlass != nullptr) {
@@ -1545,7 +1559,7 @@ Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescr
         return nullptr;
     }
 
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(arrayClass);
+    AnnounceClassInContext(arrayClass);
 
     auto *otherKlass = componentClassContext->InsertClass(arrayClass);
     if (otherKlass != nullptr) {

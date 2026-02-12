@@ -144,4 +144,7 @@ class << Options
     self.cpu_features.include?(:atomics)
   end
 
+  def atomic_aligned_data_access?
+    self.arch == :x86_64 || self.arch == :arm64
+  end
 end
