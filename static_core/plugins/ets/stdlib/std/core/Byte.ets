@@ -126,19 +126,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { byte }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override byteValue(): byte {
-        return this.toByte();
-    }
-
-
-    /**
      * Returns value of this instance
      *
      * @returns { short }
@@ -151,19 +138,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { short }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override shortValue(): short {
-        return this.toShort();
-    }
-
-
-    /**
      * Returns value of this instance
      *
      * @returns { int }
@@ -173,18 +147,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      */
     public override toInt(): int {
         return this.value.toInt();
-    }
-
-    /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { int }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override intValue(): int {
-        return this.toInt();
     }
 
     /**
@@ -200,18 +162,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { long }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override longValue(): long {
-        return this.toLong();
-    }
-
-    /**
      * Returns value of this instance
      *
      * @returns { float }
@@ -224,18 +174,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { float }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override floatValue(): float {
-        return this.toFloat();
-    }
-
-    /**
      * Returns value of this instance
      *
      * @returns { double }
@@ -245,18 +183,6 @@ export final class Byte extends Integral implements Comparable<Byte> {
      */
     public override toDouble(): double {
         return this.value.toDouble();
-    }
-
-    /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { double }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override doubleValue(): double {
-        return this.toDouble();
     }
 
     /**

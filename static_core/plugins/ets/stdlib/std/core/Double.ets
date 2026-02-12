@@ -304,18 +304,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns value of this instance. Supportive interface
-     *
-     * @returns { byte } return the current value convert byte value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override byteValue(): byte {
-        return this.toByte();
-    }
-
-    /**
      * Returns value of this instance
      *
      * @returns { short } return the current value convert short value
@@ -325,18 +313,6 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     public override toShort(): short {
         return this.value.toShort();
-    }
-
-    /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { short } return the current value convert short value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override shortValue(): short {
-        return this.toShort();
     }
 
     /**
@@ -352,18 +328,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { int } return the current value convert int value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override intValue(): int {
-        return this.toInt();
-    }
-
-    /**
      * Returns value of this instance
      *
      * @returns { long } return the current value convert long value
@@ -373,18 +337,6 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     public override toLong(): long {
         return this.value.toLong();
-    }
-
-    /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { long } return the current value convert long value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override longValue(): long {
-        return this.toLong();
     }
 
     /**
@@ -400,18 +352,6 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { float } return the current value convert float value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override floatValue(): float {
-        return this.toFloat();
-    }
-
-    /**
      * Returns value of this instance
      *
      * @returns { double } return the current value convert double value
@@ -421,18 +361,6 @@ export final class Double extends Floating implements Comparable<Double> {
      */
     public override toDouble(): double {
         return this.value;
-    }
-
-    /**
-     * Returns value of this instance Supportive interface
-     *
-     * @returns { double } return the current value convert double value
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override doubleValue(): double {
-        return this.toDouble();
     }
 
     /**

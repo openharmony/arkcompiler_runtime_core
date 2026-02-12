@@ -119,20 +119,6 @@ export final class Short extends Integral implements Comparable<Short> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns { byte } value as byte
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override byteValue(): byte {
-        return this.toByte();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns { short } value as short
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -140,20 +126,6 @@ export final class Short extends Integral implements Comparable<Short> {
      */
     public override toShort(): short {
         return this.value;
-    }
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns { short } value as short
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override shortValue(): short {
-        return this.toShort();
     }
 
     /**
@@ -171,20 +143,6 @@ export final class Short extends Integral implements Comparable<Short> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns { int } value as int
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override intValue(): int {
-        return this.toInt();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns { long } value as long
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -192,20 +150,6 @@ export final class Short extends Integral implements Comparable<Short> {
      */
     public override toLong(): long {
         return this.value.toLong();
-    }
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns { long } value as long
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override longValue(): long {
-        return this.toLong();
     }
 
     /**
@@ -223,20 +167,6 @@ export final class Short extends Integral implements Comparable<Short> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns { float } value as float
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override floatValue(): float {
-        return this.toFloat();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns { double } value as double
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -244,20 +174,6 @@ export final class Short extends Integral implements Comparable<Short> {
      */
     public override toDouble(): double {
         return Short.toDouble(this.value);
-    }
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns { double } value as double
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override doubleValue(): double {
-        return this.toDouble();
     }
 
     /**

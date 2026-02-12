@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,32 +127,10 @@ export final class Float extends Floating implements Comparable<Float> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns value as byte
-     */
-    public override byteValue(): byte {
-        return this.toByte();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns value as short
      */
     public override toShort(): short {
         return this.value.toShort();
-    }
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns value as short
-     */
-    public override shortValue(): short {
-        return this.toShort();
     }
 
     /**
@@ -167,32 +145,10 @@ export final class Float extends Floating implements Comparable<Float> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns value as int
-     */
-    public override intValue(): int {
-        return this.toInt();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns value as long
      */
     public override toLong(): long {
         return this.value.toLong();
-    }
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns value as long
-     */
-    public override longValue(): long {
-        return this.toLong();
     }
 
     /**
@@ -207,33 +163,10 @@ export final class Float extends Floating implements Comparable<Float> {
     /**
      * Returns value of this instance
      *
-     * Supportive interface
-     *
-     * @returns value as float
-     */
-    public override floatValue(): float {
-        return this.toFloat();
-    }
-
-    /**
-     * Returns value of this instance
-     *
      * @returns value as double
      */
     public override toDouble(): double {
         return this.value.toDouble();
-    }
-
-
-    /**
-     * Returns value of this instance
-     *
-     * Supportive interface
-     *
-     * @returns value as double
-     */
-    public override doubleValue(): double {
-        return this.toDouble();
     }
 
     /**

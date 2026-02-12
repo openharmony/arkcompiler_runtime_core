@@ -90,66 +90,6 @@ export abstract class Numeric extends Object {
      * @since 24
      */
     public abstract toDouble(): double;
-
-    /**
-     * Gets the byte type value of the object, this is a compatibility interface.
-     *
-     * @returns {byte} The byte type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract byteValue(): byte;
-
-    /**
-     * Gets the int type value of the object, this is a compatibility interface.
-     *
-     * @returns {int} The int type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract intValue(): int;
-
-    /**
-     * Gets the short type value of the object, this is a compatibility interface.
-     *
-     * @returns {short} The short type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract shortValue(): short;
-
-    /**
-     * Gets the long type value of the object, this is a compatibility interface.
-     *
-     * @returns {long} The long type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract longValue(): long;
-
-    /**
-     * Gets the float type value of the object, this is a compatibility interface.
-     *
-     * @returns {float} The float type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract floatValue(): float;
-
-    /**
-     * Gets the double type value of the object, this is a compatibility interface.
-     *
-     * @returns {double} The double type value of the object.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public abstract doubleValue(): double;
 }
 
 /**
