@@ -151,6 +151,7 @@ if (is_mingw) {
       "$ark_root/platforms/unix/libarkbase/exec.cpp",
       "$ark_root/platforms/unix/libarkbase/pipe.cpp",
       "$ark_root/platforms/unix/libarkbase/sighook.cpp",
+      "$ark_root/platforms/darwin/libarkbase/mem_hooks.cpp"
     ]
   }
 }
@@ -274,6 +275,8 @@ ohos_shared_library("libarktsbase") {
   deps = [ ":libarktsbase_static" ]
   if (is_mingw || is_win) {
     output_extension = "dll"
+  } else if (is_mac) {
+    output_extension = "dylib"
   } else {
     output_extension = "so"
   }

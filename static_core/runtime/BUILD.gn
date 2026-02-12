@@ -738,8 +738,10 @@ ohos_shared_library("libarkruntime") {
     ldflags += [ "-latomic" ]
   }
 
-  if (is_mingw || is_mac) {
+  if (is_mingw || is_win) {
     output_extension = "dll"
+  } else if (is_mac) {
+    output_extension = "dylib"
   } else {
     output_extension = "so"
   }
