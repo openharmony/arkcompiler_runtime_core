@@ -132,6 +132,7 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Classes`;
 - :ref:`Interfaces`;
 - :ref:`Enumerations`;
+- :ref:`Const Enumerations`;
 - :ref:`Local Declarations`;
 - :ref:`Top-Level Declarations`;
 - :ref:`Explicit Overload Declarations`;
@@ -503,7 +504,7 @@ of two names overlap, then:
 -  The innermost declaration takes precedence; and
 -  Access to the outer name is not possible.
 
-Class, interface, and enum members can only be accessed by applying the dot
+Class, interface, enum and const enum members can only be accessed by applying the dot
 operator ``'.'`` to an instance. Accessing them otherwise is not possible.
 
 .. index::
@@ -517,6 +518,7 @@ operator ``'.'`` to an instance. Accessing them otherwise is not possible.
    class member
    interface member
    enum member
+   const enum member
    instance
    dot operator
 
@@ -568,7 +570,8 @@ Type Declarations
     frontend_status: Done
 
 An interface declaration (see :ref:`Interfaces`), a class declaration (see
-:ref:`Classes`), an enum declaration (see :ref:`Enumerations`), or a type alias
+:ref:`Classes`), an enum declaration (see :ref:`Enumerations`), a const enum
+declaration (see :ref:`Const Enumerations`) or a type alias
 (see :ref:`Type Alias Declaration`) are type declarations.
 
 The syntax of *type declaration* is presented below:
@@ -579,6 +582,7 @@ The syntax of *type declaration* is presented below:
         classDeclaration
         | interfaceDeclaration
         | enumDeclaration
+        | constEnumDeclaration
         | typeAlias
         ;
 

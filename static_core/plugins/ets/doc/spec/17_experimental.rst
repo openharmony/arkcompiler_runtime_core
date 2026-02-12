@@ -738,7 +738,7 @@ Enumeration with Explicit Type
 
 All enumeration constants of a declared enumeration are of the *explicit type*
 specified in the declaration, i.e., the *explicit type* is the
-*enumeration base type* (see :ref:`Enumerations`).
+*enumeration base type* (see :ref:`Enumerations` and :ref:`Const Enumerations`).
 
 .. index::
    enumeration base type

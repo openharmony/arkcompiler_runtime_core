@@ -88,6 +88,7 @@ Grammar Summary
         classDeclaration
         | interfaceDeclaration
         | enumDeclaration
+        | constEnumDeclaration
         | typeAlias
         ;
 
@@ -737,7 +738,7 @@ Grammar Summary
         ;
 
     enumDeclaration:
-        'const'? 'enum' identifier (':' type)? '{' enumConstantList? '}'
+        'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -746,6 +747,10 @@ Grammar Summary
 
     enumConstant:
         identifier ('=' constantExpression)?
+        ;
+
+    constEnumDeclaration:
+        'const' 'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     moduleDeclaration:

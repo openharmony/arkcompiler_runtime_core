@@ -172,7 +172,7 @@ Some of the changes that can make some compiled code not *resolvable*:
     cause a conflict during the method resolution.
 
 - Adding a *required property* or *method* without a *default implementation*
-  to an interface may cause a method 
+  to an interface can cause a method.
 
 - Adding an *abstract* method to an existing *exported* *abstract* class.
 
@@ -187,11 +187,24 @@ Some of the changes that can make some compiled code not *loadable*:
 
 For *Enum Declarations*:
 
-Changes that don't affect the binary compatibility:
+Changes that do not affect binary compatibility:
 
 - Adding new enum constants.
 
 - Changing the value of enum constants while preserving its type.
+
+
+For *Const Enumeration Declarations*:
+
+Changes that do not affect binary compatibility:
+
+- Adding new enumeration constants.
+
+Changes that break the binary compatibility:
+
+- Changing a value of an enumeration constants.
+
+- Changing enumeration base type.
 
 .. raw:: pdf
 

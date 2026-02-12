@@ -4272,8 +4272,8 @@ is defined as follows:
 | interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| enumeration type                | name of enumeration     | .. code-block:: typescript  |
-|                                 | base type               |                             |
+| enumeration type,               | name of enumeration     | .. code-block:: typescript  |
+| const enumeration type          | base type               |                             |
 |                                 |                         |  enum C {R, G, B}           |
 |                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c // "int"          |
@@ -6329,16 +6329,17 @@ Enumeration Relational Operators
 .. meta:
     frontend_status: Done
 
-If both operands are of the same enumeration type (see :ref:`Enumerations`),
-then :ref:`Numeric Relational Operators` or :ref:`String Relational Operators`
-are used depending on the kind of enumeration constant value
-( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
+If both operands are of the same enumeration (see :ref:`Enumerations`) or const
+enumeration (see :ref:`Const Enumerations`) type, then :ref:`Numeric Relational Operators`
+or :ref:`String Relational Operators` are used depending on the kind of enumeration
+constant value ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    enumeration relational operator
    enumeration constant
    enumeration type
+   const enumeration type
    value
    string value
    relational operator
@@ -6423,9 +6424,9 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   operands represent the same Unicode code point
   (see :ref:`Character Equality and Relational Operators`);
 
-- Both operands are of the same enumeration type (see :ref:`Enumerations`)
-  and have the same numeric value or the same string contents, depending on
-  the type of enumeration constant values;
+- Both operands are of the same enumeration (see :ref:`Enumerations`) or const enumeration
+  (see :ref:`Const Enumerations`) type and have the same numeric value or the same string
+  contents, depending on the type of enumeration constant values;
 
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
@@ -6440,6 +6441,7 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    NaN
    numeric equality operator
    enumeration type
+   const enumeration type
    numeric value
    string
    equality operator
@@ -8124,7 +8126,7 @@ following:
 -  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
 
--  Enumeration type constants;
+-  Const enumeration type values;
 
 -  Unary operators ``'+'``, ``'-'``, ``'~'``, and ``'!'``, but not ``'++'``
    or ``'--'`` (see :ref:`Unary Plus`, :ref:`Unary Minus`,

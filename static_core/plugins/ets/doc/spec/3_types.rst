@@ -73,7 +73,7 @@ source code in |LANG|.
    ``never``, ``void``,      type parameters
 
    ``undefined``, ``null``,  enumeration types
-   ``Array<T>`` or ``T[]``,
+   ``Array<T>`` or ``T[]``,  const enumeration types
    ``FixedArray<T>``
    ========================= =========================
 
@@ -93,6 +93,7 @@ source code in |LANG|.
    function type
    type parameter
    enumeration type
+   const enumeration type
    alias
 
 Most *predefined types* have aliases to improve |TS| compatibility as follows:
@@ -186,6 +187,7 @@ User-Defined Types
 -  Class types (see :ref:`Classes`);
 -  Interface types (see :ref:`Interfaces`);
 -  Enumeration types (see :ref:`Enumerations`);
+-  Const enumeration types (see :ref:`Const Enumerations`);
 -  :ref:`Function Types`;
 -  :ref:`Tuple Types`;
 -  :ref:`Union Types`;
@@ -197,6 +199,7 @@ User-Defined Types
    class type
    interface type
    enumeration type
+   const enumeration type
    function type
    union type
    type parameter
@@ -360,14 +363,15 @@ Named Types
 .. meta:
     frontend_status: Done
 
-*Named types* are classes, interfaces, enumerations, aliases, type parameters,
-and predefined types (see :ref:`Predefined Types`), except built-in arrays.
-Other types (i.e., array, function, and union types) are anonymous unless
-aliased. Respective named types are introduced by the following:
+*Named types* are classes, interfaces, enumerations, const enumerations, aliases,
+type parameters, and predefined types (see :ref:`Predefined Types`), except
+built-in arrays. Other types (i.e., array, function, and union types) are anonymous
+unless aliased. Respective named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
 -  Enumeration declarations (see :ref:`Enumerations`),
+-  Const enumeration declarations (see :ref:`Const enumerations`),
 -  Type alias declarations (see :ref:`Type Alias Declaration`), and
 -  Type parameter declarations (see :ref:`Type Parameters`).
 
@@ -384,6 +388,7 @@ substituted for the type parameters of a named type.
    class
    interface
    enumeration
+   const enumeration type
    alias
    type parameter
    predefined type
@@ -505,8 +510,9 @@ Value Types
 :ref:`Integer Types and Operations`), floating-point types (see
 :ref:`Floating-Point Types and Operations`), the boolean type (see
 :ref:`Type boolean`), character types (see
-:ref:`Type char`), and user-defined enumeration types (see
-:ref:`Enumerations`). The values of such types do *not* share state with other
+:ref:`Type char`), user-defined enumeration types (see
+:ref:`Enumerations`) and const enumeration types (see :ref:`Const Enumerations`).
+The values of such types do *not* share state with other
 values.
 
 .. index::
@@ -519,6 +525,7 @@ values.
    enumeration
    user-defined type
    enumeration type
+   const enumeration type
    value
    state
 

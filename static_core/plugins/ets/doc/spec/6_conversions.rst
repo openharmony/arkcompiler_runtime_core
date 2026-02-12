@@ -175,9 +175,9 @@ String Operator Contexts
 -  An operand of type ``boolean`` is converted to type ``string`` with the
    values ``true`` or ``false``.
 
--  An operand of enumeration type (see :ref:`Enumerations`) is converted to
-   type ``string`` with the value of the corresponding enumeration constant
-   if values of enumeration are of type ``string``.
+-  An operand of enumeration type (see :ref:`Enumerations`) or const enumeration type
+   (see :ref:`Const Enumerations`) is converted to type ``string`` with the value of
+   the corresponding enumeration constant if values of enumeration are of type ``string``.
 
 -  The operand of a nullish type that has a nullish value is converted as
    follows:
@@ -205,6 +205,7 @@ The target type in this context is always ``string``:
    floating-point type
    loss of information
    enumeration type
+   const enumeration type
    string type
    nullish type
    boolean
@@ -242,9 +243,10 @@ expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
 An operand of enumeration type (see :ref:`Enumerations` and
-:ref:`Enumeration with Explicit Type`) can be used in
-a numeric context if enumeration base type is a numeric type.
-The type of this operand is assumed to be the same as the enumeration base type.
+:ref:`Enumeration with Explicit Type`) or const enumeration type
+(see :ref:`Const Enumerations`) can be used in a numeric context if enumeration
+base type is a numeric type. The type of this operand is assumed to be the same
+as the enumeration base type.
 
 .. index::
    numeric context
@@ -486,10 +488,10 @@ All cases are represented in the following example:
 
 |
 
-.. _Enumeration to Numeric Type Conversion:
+.. _Enumeration and Const Enumeration to Numeric Type Conversion:
 
-Enumeration to Numeric Type Conversion
-======================================
+Enumeration and Const Enumeration to Numeric Type Conversion
+============================================================
 
 .. meta:
     frontend_status: Done
@@ -520,6 +522,7 @@ This conversion never causes a runtime error.
 
 .. index::
    enumeration type
+   const enumeration type
    numeric base type
    base type
    conversion
@@ -529,10 +532,10 @@ This conversion never causes a runtime error.
 
 |
 
-.. _Enumeration to string Type Conversion:
+.. _Enumeration and Const Enumeration to string Type Conversion:
 
-Enumeration to ``string`` Type Conversion
-=========================================
+Enumeration and Const Enumeration to ``string`` Type Conversion
+===============================================================
 
 .. meta:
     frontend_status: Done
@@ -552,6 +555,7 @@ This conversion never causes a runtime error.
 
 .. index::
    enumeration type
+   const enumeration type
    string type
    conversion
    constant

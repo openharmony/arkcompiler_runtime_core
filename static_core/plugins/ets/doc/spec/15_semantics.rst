@@ -2184,7 +2184,7 @@ At an **assignment to the variable** ``v``: ``v = e``:
    namely:
 
     - Larger numeric type if *x* is a numeric type;
-    - *Enumeration base type* if *x* is an enumeration type.
+    - *Enumeration base type* if *x* is an enumeration or const enumeration type.
 
 The following table summarizes the contexts for map evaluation at an
 *assumption node*:
@@ -4202,6 +4202,8 @@ member is excluded in the right-hand-side column for brevity):
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
+   * - :ref:`Const Enumerations`
+     - Enumeration base type
    * - Awaited<T>
      - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then
          the Effective type (Awaited<T>) is the Effective type (T);
@@ -4258,7 +4260,7 @@ Otherwise, the original type is *preserved*.
    string
    literal type
    enumeration base type
-   const enum type
+   const enumeration type
    enumeration
    invariant type parameter
    parameter type

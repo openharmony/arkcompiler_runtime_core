@@ -189,6 +189,7 @@ The choice of *types for annotation fields* is limited to the following:
 - Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
+- Const Enumeration types (see :ref:`Const Enumerations`);
 - Array of the above types (e.g., ``string[]``), including arrays of arrays
   (e.g., ``string[][]``).
 
@@ -202,6 +203,7 @@ an *annotation field*.
    boolean type
    string type
    enumeration type
+   const enumeration type
    array
 
 |
