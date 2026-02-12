@@ -671,9 +671,9 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   }
 
   //with large Number
-  let large_number: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+  let large_number: FixedArray<number> = [Long.MIN_VALUE, 0x7FFFFFFFFFFFFFFF];
   {%- if item.objectType == 'Float32Array' or item.objectType == 'Float64Array' %}
-    let convertedValues: FixedArray<number> = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+    let convertedValues: FixedArray<number> = [Long.MIN_VALUE, 0x7FFFFFFFFFFFFFFF];
   {%- else %}
     let convertedValues: FixedArray<number> = [0, 0];
   {%- endif %}
