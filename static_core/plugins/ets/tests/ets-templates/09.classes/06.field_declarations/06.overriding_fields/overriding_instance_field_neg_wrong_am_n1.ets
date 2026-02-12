@@ -19,7 +19,7 @@ desc: >-
     of a member that is inherited or implemented.
     Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-expected_out: "Expected CTE output is unknown"
+expected_out: "Semantic error ESE771273: `num` narrows the access modifier of the implemented field."
 ---*/
 
 class C {

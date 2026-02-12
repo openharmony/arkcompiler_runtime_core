@@ -240,6 +240,7 @@
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_7.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_8.ets
 09.classes/06.field_declarations/field_declaration_with_busy_name_negative_9.ets
+09.classes/06.field_declarations/06.overriding_fields/overriding_instance_field_neg_wrong_am_n1.ets
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_15.ets
 09.classes/07.method_declarations/08.methods_returning_this/methods_returning_this_interface_02.ets
 09.classes/10.inheritance/inheritance_abstract_methods_that_not_member.ets
