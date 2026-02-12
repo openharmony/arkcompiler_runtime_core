@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,10 @@ private:
     bool IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited);
     bool IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited);
     void CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users);
+    void CheckSaveStateSuspendInputs();
+    void CheckSaveStateSuspendInputsForInstruction(SaveStateInst *ss);
+    bool SaveStateSuspendDominatesAnyUser(SaveStateInst *ss, const Inst *otherInst);
+    void ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, const Inst *otherInst);
 #endif  // COMPILER_DEBUG_CHECKS
     void CheckSaveStateInputs();
     void CheckSaveStatesWithRuntimeCallUsers();
@@ -224,6 +228,7 @@ private:
     static PANDA_PUBLIC_API void VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSafePoint([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitSaveStateOsr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static PANDA_PUBLIC_API void VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static PANDA_PUBLIC_API void VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);

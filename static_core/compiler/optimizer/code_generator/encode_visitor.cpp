@@ -616,6 +616,13 @@ void EncodeVisitor::VisitSaveStateOsr(GraphVisitor *visitor, Inst *inst)
     static_cast<EncodeVisitor *>(visitor)->GetCodegen()->CreateOsrEntry(inst->CastToSaveStateOsr());
 }
 
+void EncodeVisitor::VisitSaveStateSuspend([[maybe_unused]] GraphVisitor *visitor, [[maybe_unused]] Inst *inst)
+{
+    // NOTE(compiler): Implement encoding for SaveStateSuspend
+    auto enc = static_cast<EncodeVisitor *>(visitor);
+    enc->GetEncoder()->SetFalseResult();
+}
+
 void EncodeVisitor::VisitLoadArray(GraphVisitor *visitor, Inst *inst)
 {
     auto instLoadArray = inst->CastToLoadArray();

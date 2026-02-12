@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -537,7 +537,7 @@ void InstBuilder::FixInstructions()
 SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
 {
     ASSERT(opc == Opcode::SaveState || opc == Opcode::SafePoint || opc == Opcode::SaveStateOsr ||
-           opc == Opcode::SaveStateDeoptimize);
+           opc == Opcode::SaveStateDeoptimize || opc == Opcode::SaveStateSuspend);
     SaveStateInst *inst;
     bool withoutNumericInputs = false;
     auto liveVergsCount =
@@ -546,6 +546,8 @@ SaveStateInst *InstBuilder::CreateSaveState(Opcode opc, size_t pc)
         inst = GetGraph()->CreateInstSaveState(pc, GetMethod(), callerInst_, inliningDepth_);
     } else if (opc == Opcode::SaveStateOsr) {
         inst = GetGraph()->CreateInstSaveStateOsr(pc, GetMethod(), callerInst_, inliningDepth_);
+    } else if (opc == Opcode::SaveStateSuspend) {
+        inst = GetGraph()->CreateInstSaveStateSuspend(pc, GetMethod(), callerInst_, inliningDepth_);
     } else if (opc == Opcode::SafePoint) {
         inst = GetGraph()->CreateInstSafePoint(pc, GetMethod(), callerInst_, inliningDepth_);
         withoutNumericInputs = true;

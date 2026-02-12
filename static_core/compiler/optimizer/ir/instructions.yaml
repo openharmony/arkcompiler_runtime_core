@@ -1188,6 +1188,14 @@ instructions:
     description: >-
       Contains information about virtual registers to fill OSR stackmaps. Constructed for all loop headers in OSR mode.
 
+  - opcode: SaveStateSuspend
+    base: SaveStateInst
+    signature: [d-real-pseudo, real-dyn]
+    flags: [no_dce, no_hoist, no_cse, barrier, heap_inv]
+    modes: [jit_aot]
+    description: >-
+      Do coroutines suspension. Contains information about virtual registers that must be saved before suspension.
+
   - opcode: Select
     base: SelectInst
     signature: [d-real-any, real-any, real-any, real-any, real-any]

@@ -1621,7 +1621,7 @@ public:
     bool IsSaveState() const
     {
         return opcode_ == Opcode::SaveState || opcode_ == Opcode::SafePoint || opcode_ == Opcode::SaveStateOsr ||
-               opcode_ == Opcode::SaveStateDeoptimize;
+               opcode_ == Opcode::SaveStateDeoptimize || opcode_ == Opcode::SaveStateSuspend;
     }
 
     bool IsClassInst() const
