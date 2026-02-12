@@ -164,16 +164,15 @@ if (is_mingw || current_os == "win" || current_os == "mingw" ||
   enable_codegen = false
 }
 
-if (ark_standalone_build ||
-    ((!ark_static_standalone_build &&
-      (target_cpu == "x64" || target_cpu == "x86_64")) ||
-     (current_os == "win" || current_os == "mingw" || current_os == "winuwp" ||
-      current_os == "mac")) || ark_hybrid) {
+if (ark_static_use_64_bit_managed_pointer || current_os == "win" ||
+    current_os == "mingw" || current_os == "winuwp" || current_os == "mac" ||
+    ark_hybrid) {
   is_llvmbackend = false
   is_llvm_interpreter = false
   is_llvm_fastpath = false
   is_llvm_aot = false
 }
+
 if (target_cpu == "arm") {
   is_llvmbackend = false
   is_llvm_interpreter = false
