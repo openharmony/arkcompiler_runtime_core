@@ -171,16 +171,19 @@ scoped_macro(:try_use_cached_flat_str_accept_sliced) do |str, slowpath|
   result := Phi(str, strCached).ref
 end  # try_use_cached_flat_str_accept_sliced
 
+macro(:load_core_string_class) do ||
+  _string_klass := LoadI(%tr).Imm(Constants::CORE_STRING_CLASS_OFFSET).ref
+end
+
 # Try to allocate String in TLAB.
 # The result is either a pointer to a new string or null if there is no enough space in TLAB.
-macro(:allocate_string_tlab) do |string_klass_dummy, data_size, cgmode|
+macro(:allocate_string_tlab) do |string_klass, data_size, cgmode|
   if Options.arch == :arm32
     Intrinsic(:UNREACHABLE).Terminator.void
     ReturnVoid().void
     next
   end
 
-  string_klass := LoadI(%tr).Imm(Constants::CORE_STRING_CLASS_OFFSET).ref
   # Add sizeof(String) and do align
   _data_size := Cast(data_size).word
   _size := AndI(AddI(_data_size).Imm(Constants::STRING_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word

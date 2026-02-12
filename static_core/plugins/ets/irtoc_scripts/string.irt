@@ -48,7 +48,7 @@ macro(:fast_substring) do |_str, _str_len, _begin_index, _char_count, _uncompres
     _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
     Goto(:_Fast_Substring_Result_No_Barrier)
   }
-  _klass := load_class(_str)
+  _klass := load_core_string_class()
   If(_char_count, 0).EQ.Unlikely.b {
     # Allocate and return an empty string
     _empty_str := allocate_string_tlab(_klass, 0, _cgmode)
@@ -241,8 +241,7 @@ function(:StringEmpty,
     next
   end
 
-  klass := load_class(str)
-  empty_str := allocate_string_tlab(klass, 0, :FastPath)
+  empty_str := allocate_string_tlab(load_core_string_class(), 0, :FastPath)
   # String is supposed to be a constant object, so all its data should be visible by all threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   Return(empty_str).ptr
@@ -1035,7 +1034,7 @@ def GenerateStringGetBytesTlab(cgmode)
   src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
   src_str_data := Add(src_str_data, Cast(offset).u64).ptr
 
-# Allocate a new array of u8 (bytes)
+  # Allocate a new array of u8 (bytes)
   count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
   new_arr := allocate_array_of_bytes_tlab(array_klass, Cast(count).word, cgmode)
   new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
@@ -1046,6 +1045,8 @@ def GenerateStringGetBytesTlab(cgmode)
   compress_u16_to_u8_chars(src_str_data, new_arr_data, count)
 
   Label(:End)
+  # Array data should be stored before publishing reference to array
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   Return(new_arr).ptr
 
   LabelGlobal(:SlowPathEntrypoint)
@@ -2306,8 +2307,9 @@ def GenerateStringRepeatTlab(cgmode)
   end
 
   IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
-    klass := load_class(str)
-    new_str := allocate_string_tlab(klass, Cast(0).u64, cgmode);
+    new_str := allocate_string_tlab(load_core_string_class(), Cast(0).u64, cgmode);
+    # String is supposed to be a constant object, so all its data should be visible by all threads
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
   }
 
@@ -2316,14 +2318,13 @@ def GenerateStringRepeatTlab(cgmode)
   }
 
   length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
-  klass := load_class(str)
   old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
   uncompressed := is_string_uncompressed_u32(length)
   codes_count := ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32
   length := Shl(ShrI(length).Imm(Constants::STRING_LENGTH_SHIFT).u32, uncompressed).u32
   size := Mul(length, count).u32
   codes_count := Mul(codes_count, count).u32
-  new_str := allocate_string_tlab(klass, Cast(size).u64, cgmode);
+  new_str := allocate_string_tlab(load_core_string_class(), Cast(size).u64, cgmode);
   new_buf := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
   If(new_str, 0).EQ {
@@ -2357,6 +2358,8 @@ Label(:End)
   } Else {
     StoreI(new_str, OrI(ShlI(codes_count).Imm(Constants::STRING_LENGTH_SHIFT).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
   }
+  # String is supposed to be a constant object, so all its data should be visible by all threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   Return(new_str).ptr
 
 LabelGlobal(:SlowPathEntrypoint)
@@ -2387,7 +2390,6 @@ def GenerateStringConcat2Tlab(cgmode)
     str1 := try_use_cached_flat_str_reject_sliced(str1_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
-    klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
 
@@ -2400,7 +2402,7 @@ def GenerateStringConcat2Tlab(cgmode)
     size := Add(count1, count2).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size, cgmode)
+    new_str := allocate_string_tlab(load_core_string_class(), data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2472,7 +2474,6 @@ def GenerateStringConcat3Tlab(cgmode)
     str2 := try_use_cached_flat_str_reject_sliced(str2_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str3 := try_use_cached_flat_str_reject_sliced(str3_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
-    klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2486,7 +2487,7 @@ def GenerateStringConcat3Tlab(cgmode)
     size := Add(count1, Add(count2, count3).u32).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size, cgmode)
+    new_str := allocate_string_tlab(load_core_string_class(), data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2574,7 +2575,6 @@ def GenerateStringConcat4Tlab(cgmode)
     str3 := try_use_cached_flat_str_reject_sliced(str3_orig, AsGlobalLabel(:SlowPathEntrypoint))
     str4 := try_use_cached_flat_str_reject_sliced(str4_orig, AsGlobalLabel(:SlowPathEntrypoint))
 
-    klass := load_class(str1)
     length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
     length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).u32
@@ -2592,7 +2592,7 @@ def GenerateStringConcat4Tlab(cgmode)
     size := Add(count1, Add(count2, Add(count3, count4).u32).u32).u32
     data_size := Shl(size, has_uncompressed).u32
     length := Or(ShlI(size).Imm(Constants::STRING_LENGTH_SHIFT).u32, has_uncompressed).u32
-    new_str := allocate_string_tlab(klass, data_size, cgmode)
+    new_str := allocate_string_tlab(load_core_string_class(), data_size, cgmode)
 
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
@@ -2802,8 +2802,6 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       str := try_use_cached_flat_str_reject_sliced(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
     else
       check_not_tree_string_type(str_orig) if defines.DEBUG
-      # it still can be slice
-      check_string_type(str_orig, AsGlobalLabel(:SlowPathEntrypoint))
       str := str_orig
     end
 
@@ -2857,8 +2855,8 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       offset := ShlI(bx6).Imm(1).u32
     end
 
-	# NativePlus is not yet supported for unified strings
-    if all_strings_enabled  && cgmode == :FastPath
+    # NativePlus is not yet supported for unified strings
+    if all_strings_enabled && cgmode == :FastPath
       baseClass := load_class(str)
       stringType := LoadI(baseClass).Imm(Constants::STRING_TYPE_OFFSET).u64
 
@@ -2867,13 +2865,10 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
         strStartIndexAndBits := LoadI(str).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
         strStartIndex := ShrI(strStartIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
         addedStartIndex := Add(bx6, strStartIndex).u32
-      } Else {
-        str0 := str
-        startIndex := bx6
       }
 
-      fromStr := Phi(strParent, str0).ref
-      resultStartIndex := Phi(addedStartIndex, startIndex).u32
+      fromStr := Phi(str, strParent).ref
+      resultStartIndex := Phi(bx6, addedStartIndex).u32
 
       If(charCount, Constants::SLICED_STRING_MIN_LENGTH).GE.b {
         Goto(:CreateSlicedString)
@@ -2898,6 +2893,9 @@ def GenerateSubstringFromStringTlab(all_strings_enabled, string_compression_enab
       # hasBackingStoreBit become zero after shift left
       startIndexAndBits := ShlI(resultStartIndex).Imm(Constants::SLICED_STRING_STARTINDEX_SHIFT).u32
       StoreI(result, startIndexAndBits).Imm(Constants::SLICED_STRING_STARTINDEX_AND_FLAGS_OFFSET).u32
+
+      # String is supposed to be a constant object, so all its data should be visible by all threads
+      Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
 
       Return(result).ptr
     else

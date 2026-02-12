@@ -500,7 +500,11 @@ def GenerateStringBuilderToString(cgmode)
   }
   data_size := Phi(data_size1, data_size2).u32
   # Allocate a string
-  new_str := allocate_string_tlab(string_klass, Cast(data_size).word, cgmode)
+  if cgmode == :NativePlus
+    new_str := allocate_string_tlab(load_core_string_class(), Cast(data_size).word, cgmode)
+  else
+    new_str := allocate_string_tlab(string_klass, Cast(data_size).word, cgmode)
+  end
   # Let the memory writes (TLAB) be visible to other threads
   Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
   # Set new string's length

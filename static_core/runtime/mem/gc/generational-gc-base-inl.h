@@ -38,7 +38,7 @@ void GenerationalGC<LanguageConfig>::MarkStack(Marker *marker, GCMarkingStackTyp
         ASSERT(marker->IsMarked(object));
         ValidateObject(nullptr, object);
         auto *objectClass = object->template NotAtomicClassAddr<BaseClass>();
-        // We need annotation here for the FullMemoryBarrier used in InitializeClassByIdEntrypoint
+        // We need annotation here for the FullMemoryBarrier used in class_linker.cpp:AvoidLoadedClassPointerLeak
         TSAN_ANNOTATE_HAPPENS_AFTER(objectClass);
         LOG_DEBUG_GC << "Current object: " << GetDebugInfoAboutObject(object);
 
