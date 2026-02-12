@@ -1156,6 +1156,32 @@ in |JS| are the same.
 
 |
 
+.. _Undefined Literal:
+
+``Undefined`` Literal
+=====================
+
+.. meta:
+    frontend_status: Done
+
+*Undefined literal* is the only literal of types ``void`` and ``undefined``
+(see :ref:`Types void or undefined`) to denote a reference with a value that is
+not defined. The *undefined literal* is represented by the keyword ``undefined``:
+
+.. code-block:: abnf
+
+    UndefinedLiteral:
+        'undefined'
+        ;
+
+.. index::
+   undefined literal
+   type undefined
+   type void
+   keyword
+
+|
+
 .. _Null Literal:
 
 ``Null`` Literal
@@ -1182,32 +1208,6 @@ The value is typically used for types like ``T | null``
    null reference
    nullish type
    type null
-
-|
-
-.. _Undefined Literal:
-
-``Undefined`` Literal
-=====================
-
-.. meta:
-    frontend_status: Done
-
-*Undefined literal* is the only literal of types ``void`` and ``undefined``
-(see :ref:`Types void or undefined`) to denote a reference with a value that is
-not defined. The *undefined literal* is represented by the keyword ``undefined``:
-
-.. code-block:: abnf
-
-    UndefinedLiteral:
-        'undefined'
-        ;
-
-.. index::
-   undefined literal
-   type undefined
-   type void
-   keyword
 
 |
 

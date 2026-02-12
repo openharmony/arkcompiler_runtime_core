@@ -1385,15 +1385,22 @@ Type ``null``
 The only value of type ``null`` is the literal ``null`` (see
 :ref:`Null Literal`).
 
-Using type ``null`` as type annotation is not recommended, except in
-nullish types (see :ref:`Nullish Types`).
+.. note::
+
+    - Type ``null`` is supported for |TS| compatibility. 
+      
+    - Using ``undefined`` instead of ``null`` is considered best practice in 
+      |TS| and |JS|.
+
+    - If not specifically required, using type ``null`` as type annotation
+      or in :ref:`Nullish Types` is not recommended.
+      Use type ``undefined`` instead.
+
+    - Type ``undefined`` provides better performance than type ``null``.
 
 .. index::
    null type
    null literal
-   keyword null
-   type annotation
-   nullish type
 
 |
 
@@ -2716,10 +2723,18 @@ Nullish Types
     frontend_status: Done
 
 |LANG| has *nullish types* that are in fact a specific form of union types (see
-:ref:`Union Types`).
+:ref:`Union Types`). Unions
 
-``T | null`` or ``T | undefined`` or ``T | undefined | null``
+- ``T | undefined``; 
+- ``T | null``;  or 
+- ``T | undefined | null``
+
 can be used as the type to specify a nullish version of type ``T``.
+
+.. note::
+
+    Using type ``T | undefined`` in *nullish types* is recommended.
+    See :ref:`Type null` for detail.
 
 All predefined types except :ref:`Type Any`, and all user-defined types are
 non-nullish types. Non-nullish types cannot have a ``null`` or ``undefined``
