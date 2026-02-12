@@ -957,6 +957,19 @@ events:
     - name: inlined_method
       type: const char*
 
+- name: inlining-cache
+  fields:
+    - name: operation
+      type: const char*
+    - name: callee
+      type: const char*
+    - name: external_state
+      type: const char*
+    - name: inline_state
+      type: const char*
+    - name: has_runtime_calls
+      type: bool
+
 - name: lse
   fields:
     - name: removed_inst_id

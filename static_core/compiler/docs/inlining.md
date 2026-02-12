@@ -89,7 +89,7 @@ Disassembly of the CHA guard:
 ```
 # [inst]    60.b    IsMustDeoptimize           r7 (v61)
   00a0: ldrb w7, [sp, #592]
-  00a4: and w7, w7, #0x1 
+  00a4: and w7, w7, #0x1
 # [inst]    61.     DeoptimizeIf               v60(r7), v14
   00c0: cbnz w7, #+0x3f4 (addr 0x400316e8fc)
 ```
@@ -146,6 +146,32 @@ for pred in inlined_graph.end_block:
     pred.replace_succ(inlined_graph.end_block, second_bb)
 
 ```
+
+### AOT inlinability cache
+
+To reduce repeated bytecode analysis work in AOT mode, Inlining keeps a local cache of analysis results per callee
+method.
+
+What is cached:
+- Result of `IrBuilderInliningAnalysis` (`inlineOk`).
+- Whether inlining analysis has been already performed (`inlineChecked`).
+- Whether callee has runtime calls (`hasRuntimeCalls`).
+- Result of `IrBuilderExternalInliningAnalysis` for external methods (`externalState`: `UNKNOWN`/`OK`/`FAIL`).
+
+Key and scope:
+- Key: `RuntimeInterface::MethodPtr` of the callee.
+- Scope: One `Inlining` pass instance (cache is not global across whole AOT process).
+
+How it is used:
+1. At `CheckBytecode`, Inlining gets or creates cache entry for callee method.
+2. For external methods, `CheckExternalInliningBytecode` first checks cached `externalState`.
+3. For common inlinability checks, `CheckInliningBytecodeAnalysis` uses cached values if available, otherwise it runs
+   analysis once and stores the result.
+
+Rationale:
+- Recursive/iterative inlining often revisits the same method many times.
+- Without cache, both bytecode analyses are rerun for each visit.
+- Caching removes repeated pass invocations and improves AOT compile time while preserving inlining decisions.
 
 ## Dependencies
 

@@ -32,7 +32,6 @@
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "runtime/include/class.h"
-#include "libarkbase/events/events.h"
 
 namespace ark::compiler {
 using MethodPtr = RuntimeInterface::MethodPtr;
@@ -79,7 +78,8 @@ size_t Inlining::CalculateInstructionsCount(Graph *graph)
 }
 
 Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInlined,
-                   const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack)
+                   const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack,
+                   InlinabilityCacheMap *sharedInlinabilityCache)
     : Optimization(graph),
       methodsInlined_(methodsInlined),
       instructionsCount_(instructionsCount != 0 ? instructionsCount : CalculateInstructionsCount(graph)),
@@ -88,7 +88,9 @@ Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInl
       blacklist_(graph->GetLocalAllocator()->Adapter()),
       inlinedStack_(graph->GetLocalAllocator()->Adapter()),
       vregsCount_(graph->GetVRegsCount()),
-      cha_(graph->GetRuntime()->GetCha())
+      cha_(graph->GetRuntime()->GetCha()),
+      ownedInlinabilityCache_(graph->GetAllocator()->Adapter()),
+      inlinabilityCache_(sharedInlinabilityCache != nullptr ? sharedInlinabilityCache : &ownedInlinabilityCache_)
 {
     if (inlinedStack != nullptr) {
         inlinedStack_.reserve(inlinedStack->size() + 1U);
@@ -105,23 +107,40 @@ bool Inlining::IsInlineCachesEnabled() const
 }
 
 #ifdef PANDA_EVENTS_ENABLED
-static void EmitEvent(const Graph *graph, const CallInst *callInst, const InlineContext &ctx, events::InlineResult res)
+static events::InlineKind GetInlineEventKind(const CallInst *callInst, const InlineContext &ctx)
+{
+    if (ctx.chaDevirtualize) {
+        return events::InlineKind::VIRTUAL_CHA;
+    }
+    if (CanReplaceWithCallStatic(callInst->GetOpcode()) || ctx.replaceToStatic) {
+        return events::InlineKind::VIRTUAL;
+    }
+    return events::InlineKind::STATIC;
+}
+
+static void EmitEvent(Graph *graph, const std::string &callee, uint32_t callId, events::InlineKind kind,
+                      events::InlineResult res)
+{
+    auto caller = graph->GetRuntime()->GetMethodFullName(graph->GetMethod());
+    EVENT_INLINE(caller, callee, callId, kind, res);
+    if (res == events::InlineResult::SUCCESS && g_options.IsCompilerEnableEvents()) {
+        graph->GetEventWriter().EventInlining(callee.c_str());
+    }
+}
+
+static void EmitEvent(Graph *graph, const CallInst *callInst, const InlineContext &ctx, events::InlineResult res)
 {
     auto runtime = graph->GetRuntime();
-    events::InlineKind kind;
-    if (ctx.chaDevirtualize) {
-        kind = events::InlineKind::VIRTUAL_CHA;
-    } else if (CanReplaceWithCallStatic(callInst->GetOpcode()) || ctx.replaceToStatic) {
-        kind = events::InlineKind::VIRTUAL;
-    } else {
-        kind = events::InlineKind::STATIC;
-    }
-    EVENT_INLINE(runtime->GetMethodFullName(graph->GetMethod()),
-                 ctx.method != nullptr ? runtime->GetMethodFullName(ctx.method) : "null", callInst->GetId(), kind, res);
+    auto kind = GetInlineEventKind(callInst, ctx);
+    EmitEvent(graph, ctx.method != nullptr ? runtime->GetMethodFullName(ctx.method) : "null", callInst->GetId(), kind,
+              res);
 }
 #else
 // NOLINTNEXTLINE(readability-named-parameter)
-static void EmitEvent(const Graph *, const CallInst *, const InlineContext &, events::InlineResult) {}
+static void EmitEvent(Graph *, const std::string &, uint32_t, events::InlineKind, events::InlineResult) {}
+
+// NOLINTNEXTLINE(readability-named-parameter)
+static void EmitEvent(Graph *, const CallInst *, const InlineContext &, events::InlineResult) {}
 #endif
 
 bool Inlining::RunImpl()
@@ -312,8 +331,8 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
         for (auto receiver : receivers) {
             if (runtime->IsClassExternal(GetGraph()->GetMethod(), receiver)) {
                 LOG_INLINING(INFO) << "AOT inline caches external inlining is not supported";
-                EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetClassName(receiver),
-                             callInst->GetId(), events::InlineKind::VIRTUAL, events::InlineResult::SKIP_EXTERNAL);
+                EmitEvent(GetGraph(), runtime->GetClassName(receiver), callInst->GetId(), events::InlineKind::VIRTUAL,
+                          events::InlineResult::SKIP_EXTERNAL);
                 return false;
                 // We don't support offline external inline caches yet
             }
@@ -322,8 +341,8 @@ bool Inlining::TryInlineWithInlineCaches(CallInst *callInst)
 
     switch (callKind) {
         case InlineCachesInterface::CallKind::MEGAMORPHIC:
-            EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), "-", callInst->GetId(),
-                         events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::FAIL_MEGAMORPHIC);
+            EmitEvent(GetGraph(), "-", callInst->GetId(), events::InlineKind::VIRTUAL_POLYMORPHIC,
+                      events::InlineResult::FAIL_MEGAMORPHIC);
             return false;
         case InlineCachesInterface::CallKind::UNKNOWN:
             return false;
@@ -392,8 +411,8 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
         callBb->AppendInst(deoptInst);
     }
 
-    EVENT_INLINE(runtime->GetMethodFullName(currMethod), runtime->GetMethodFullName(ctx.method), callInst->GetId(),
-                 events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
+    EmitEvent(GetGraph(), runtime->GetMethodFullName(ctx.method), callInst->GetId(),
+              events::InlineKind::VIRTUAL_MONOMORPHIC, events::InlineResult::SUCCESS);
     return true;
 }
 
@@ -653,8 +672,8 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
                        {&hasUnreachableBlocks, &hasRuntimeCalls}, receivers->size(), inlGraph);
 
         GetGraph()->GetPassManager()->GetStatistics()->AddInlinedMethods(1);
-        EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetMethodFullName(ctx.method),
-                     callInst->GetId(), events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::SUCCESS);
+        EmitEvent(GetGraph(), runtime->GetMethodFullName(ctx.method), callInst->GetId(),
+                  events::InlineKind::VIRTUAL_POLYMORPHIC, events::InlineResult::SUCCESS);
         LOG_INLINING(DEBUG) << "Successfully inlined: " << GetMethodFullName(GetGraph(), ctx.method);
         methodsInlined_++;
     }
@@ -1172,6 +1191,25 @@ void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *cal
 
 bool Inlining::CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime)
 {
+    if (!CheckVregsLimit(callInst, ctx)) {
+        return false;
+    }
+
+    if (GetGraph()->IsAotMode()) {
+        // AOT: Cache bytecode-analysis result per callee method.
+        auto *cache = GetOrCreateInlinabilityCacheEntry(ctx.method);
+        ASSERT(cache != nullptr);
+        if (!CheckExternalInliningBytecode(callInst, ctx, cache)) {
+            return false;
+        }
+        return CheckInliningBytecodeAnalysis<true>(callInst, ctx, cache, calleeCallRuntime);
+    }
+
+    return CheckInliningBytecodeAnalysis<false>(callInst, ctx, nullptr, calleeCallRuntime);
+}
+
+bool Inlining::CheckVregsLimit(CallInst *callInst, const InlineContext &ctx) const
+{
     auto vregsNum = GetGraph()->GetRuntime()->GetMethodArgumentsCount(ctx.method) +
                     GetGraph()->GetRuntime()->GetMethodRegistersCount(ctx.method) + 1;
     if ((vregsCount_ + vregsNum) >= g_options.GetCompilerMaxVregsNum()) {
@@ -1179,36 +1217,130 @@ bool Inlining::CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool 
         LOG_INLINING(DEBUG) << "Reached vregs limit: current=" << vregsCount_ << ", inlined=" << vregsNum;
         return false;
     }
-    if (GetGraph()->IsAotMode()) {
-        // Check bytecode in external methods including nested ones
-        auto *rootGraph = GetGraph();
-        while (rootGraph->GetParentGraph() != nullptr) {
-            rootGraph = rootGraph->GetParentGraph();
-        }
-        auto isExternal = GetGraph()->GetRuntime()->IsMethodExternal(rootGraph->GetMethod(), ctx.method);
-        if (isExternal && !IsIntrinsic(&ctx)) {
-            IrBuilderExternalInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
-            if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
-                EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
-                LOG_INLINING(DEBUG) << "We can't inline external method: '" << GetMethodFullName(GetGraph(), ctx.method)
-                                    << "', because it contains unsuitable bytecode";
-                return false;
-            }
+    return true;
+}
+
+void Inlining::EmitInliningCacheEvent(RuntimeInterface::MethodPtr method, const InlinabilityCacheEntry &cache,
+                                      bool isPut)
+{
+    ASSERT(g_options.IsCompilerEnableEvents());
+    auto externalState =
+        cache.externalState == InlinabilityCacheEntry::ExternalState::OK
+            ? "OK"
+            : (cache.externalState == InlinabilityCacheEntry::ExternalState::FAIL ? "FAIL" : "UNKNOWN");
+    auto inlineState = !cache.inlineChecked ? "UNKNOWN" : (cache.inlineOk ? "OK" : "FAIL");
+    auto methodName = GetGraph()->GetRuntime()->GetMethodFullName(method, false);
+    GetGraph()->GetEventWriter().EventInliningCache(isPut ? "PUT" : "GET", methodName.c_str(), externalState,
+                                                    inlineState, cache.hasRuntimeCalls);
+}
+
+Inlining::InlinabilityCacheEntry *Inlining::GetOrCreateInlinabilityCacheEntry(RuntimeInterface::MethodPtr method)
+{
+    ASSERT(GetGraph()->IsAotMode() && inlinabilityCache_ != nullptr);
+    // AOT: One entry per callee method. Existing entry means analysis results can be reused.
+    auto res = inlinabilityCache_->try_emplace(method, InlinabilityCacheEntry {});
+    auto *cache = &res.first->second;
+    if (CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::INLINING)) {
+        auto externalState =
+            cache->externalState == InlinabilityCacheEntry::ExternalState::OK
+                ? "OK"
+                : (cache->externalState == InlinabilityCacheEntry::ExternalState::FAIL ? "FAIL" : "UNKNOWN");
+        auto inlineState = !cache->inlineChecked ? "UNKNOWN" : (cache->inlineOk ? "OK" : "FAIL");
+        if (res.second) {
+            LOG_INLINING(DEBUG) << "Put entry to cache method='"
+                                << GetGraph()->GetRuntime()->GetMethodFullName(method, true)
+                                << "' method_ptr=" << method << " cache_ptr=" << static_cast<const void *>(cache)
+                                << " external=" << externalState << " inline=" << inlineState
+                                << " hasRuntimeCalls=" << cache->hasRuntimeCalls;
+        } else {
+            LOG_INLINING(DEBUG) << "Get entry from cache method='"
+                                << GetGraph()->GetRuntime()->GetMethodFullName(method, true)
+                                << "' method_ptr=" << method << " cache_ptr=" << static_cast<const void *>(cache)
+                                << " external=" << externalState << " inline=" << inlineState
+                                << " hasRuntimeCalls=" << cache->hasRuntimeCalls;
         }
     }
-    IrBuilderInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
-    if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
-        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
-        LOG_INLINING(DEBUG) << "Method contains unsuitable bytecode";
-        return false;
+    if (g_options.IsCompilerEnableEvents()) {
+        EmitInliningCacheEvent(method, *cache, res.second);
+    }
+    return cache;
+}
+
+bool Inlining::CheckExternalInliningBytecode(CallInst *callInst, const InlineContext &ctx,
+                                             InlinabilityCacheEntry *cache)
+{
+    ASSERT(GetGraph()->IsAotMode() && cache != nullptr);
+
+    // Check bytecode in external methods including nested ones.
+    auto *rootGraph = GetGraph()->GetOutermostParentGraph();
+    auto isExternal = GetGraph()->GetRuntime()->IsMethodExternal(rootGraph->GetMethod(), ctx.method);
+    if (!isExternal || IsIntrinsic(&ctx)) {
+        return true;
     }
 
-    if (bytecodeAnalysis.HasRuntimeCalls() && g_options.IsCompilerInlineSimpleOnly()) {
+    // AOT: Stable negative result for external bytecode suitability.
+    if (cache->externalState == InlinabilityCacheEntry::ExternalState::FAIL) {
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
+        LOG_INLINING(DEBUG) << "We can't inline external method: '" << GetMethodFullName(GetGraph(), ctx.method)
+                            << "', because it contains unsuitable bytecode";
+        return false;
+    }
+    // AOT: Already checked and known to be suitable.
+    if (cache->externalState != InlinabilityCacheEntry::ExternalState::UNKNOWN) {
+        return true;
+    }
+
+    IrBuilderExternalInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
+    if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
+        cache->externalState = InlinabilityCacheEntry::ExternalState::FAIL;
+        EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
+        LOG_INLINING(DEBUG) << "We can't inline external method: '" << GetMethodFullName(GetGraph(), ctx.method)
+                            << "', because it contains unsuitable bytecode";
+        return false;
+    }
+    cache->externalState = InlinabilityCacheEntry::ExternalState::OK;
+    return true;
+}
+
+template <bool USE_CACHE>
+bool Inlining::CheckInliningBytecodeAnalysis(CallInst *callInst, const InlineContext &ctx,
+                                             [[maybe_unused]] InlinabilityCacheEntry *cache, bool *calleeCallRuntime)
+{
+    bool hasRuntimeCalls = false;
+
+    if constexpr (!USE_CACHE) {
+        IrBuilderInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
+        if (!GetGraph()->RunPass(&bytecodeAnalysis)) {
+            EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
+            LOG_INLINING(DEBUG) << "Method contains unsuitable bytecode";
+            return false;
+        }
+        hasRuntimeCalls = bytecodeAnalysis.HasRuntimeCalls();
+    } else {
+        ASSERT(cache != nullptr);
+
+        // AOT: Run IrBuilderInliningAnalysis at most once per method.
+        if (!cache->inlineChecked) {
+            IrBuilderInliningAnalysis bytecodeAnalysis(GetGraph(), ctx.method);
+            cache->inlineOk = GetGraph()->RunPass(&bytecodeAnalysis);
+            cache->inlineChecked = true;
+            cache->hasRuntimeCalls = cache->inlineOk ? bytecodeAnalysis.HasRuntimeCalls() : false;
+        }
+
+        if (!cache->inlineOk) {
+            EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
+            LOG_INLINING(DEBUG) << "Method contains unsuitable bytecode";
+            return false;
+        }
+        hasRuntimeCalls = cache->hasRuntimeCalls;
+    }
+
+    if (hasRuntimeCalls && g_options.IsCompilerInlineSimpleOnly()) {
         EmitEvent(GetGraph(), callInst, ctx, events::InlineResult::UNSUITABLE);
         return false;
     }
     if (calleeCallRuntime != nullptr) {
-        *calleeCallRuntime = bytecodeAnalysis.HasRuntimeCalls();
+        *calleeCallRuntime = hasRuntimeCalls;
     }
     return true;
 }
@@ -1301,6 +1433,12 @@ void Inlining::PropagateObjectInfo(Graph *graphInl, CallInst *callInst)
     }
 }
 
+static InlinedGraph RestorePbcAndReturnEmpty(PassManagerStatistics *stats, uint64_t savedPbcInstNum)
+{
+    stats->SetPbcInstNum(savedPbcInstNum);
+    return InlinedGraph();
+}
+
 InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst)
 {
     bool calleeCallRuntime = false;
@@ -1317,8 +1455,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     auto stats = GetGraph()->GetPassManager()->GetStatistics();
     auto savedPbcInstNum = stats->GetPbcInstNum();
     if (!TryBuildGraph(*ctx, graphInl, callInst, polyCallInst)) {
-        stats->SetPbcInstNum(savedPbcInstNum);
-        return InlinedGraph();
+        return RestorePbcAndReturnEmpty(stats, savedPbcInstNum);
     }
 
     PropagateObjectInfo(graphInl, callInst);
@@ -1333,8 +1470,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
         graphInl->RunPass<LoopAnalyzer>();
         if (graphInl->HasInfiniteLoop()) {
             EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::INF_LOOP);
-            stats->SetPbcInstNum(savedPbcInstNum);
-            return InlinedGraph();
+            return RestorePbcAndReturnEmpty(stats, savedPbcInstNum);
         }
     }
     graphInl->RunPass<Cleanup>(false);
@@ -1346,7 +1482,9 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
                         << GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method) << ") = "
                         << (double)inlinedInstsCount / GetGraph()->GetRuntime()->GetMethodCodeSize(ctx->method);
 
-    graphInl->RunPass<Inlining>(instructionsCount_ + inlinedInstsCount, methodsInlined_ + 1, &inlinedStack_);
+    // AOT: Reuse the same cache for nested inlining.
+    graphInl->RunPass<Inlining>(instructionsCount_ + inlinedInstsCount, methodsInlined_ + 1, &inlinedStack_,
+                                inlinabilityCache_);
 
     instructionsCount_ += CalculateInstructionsCount(graphInl);
 
@@ -1358,13 +1496,11 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     if (ctx->chaDevirtualize && !GetCha()->IsSingleImplementation(ctx->method)) {
         EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LOST_SINGLE_IMPL);
         LOG_INLINING(WARNING) << "Method lost single implementation property while we build IR for it";
-        stats->SetPbcInstNum(savedPbcInstNum);
-        return InlinedGraph();
+        return RestorePbcAndReturnEmpty(stats, savedPbcInstNum);
     }
 
     if (!CheckLoops(&calleeCallRuntime, graphInl)) {
-        stats->SetPbcInstNum(savedPbcInstNum);
-        return InlinedGraph();
+        return RestorePbcAndReturnEmpty(stats, savedPbcInstNum);
     }
     return {graphInl, calleeCallRuntime};
 }

@@ -40,6 +40,20 @@ struct InlinedGraph {
 };
 
 class Inlining : public Optimization {
+private:
+    // AOT: Per-method cached results of inlinability checks.
+    struct InlinabilityCacheEntry {
+        enum class ExternalState : uint8_t { UNKNOWN = 0, OK = 1, FAIL = 2 };
+        // Result of IrBuilderInliningAnalysis.
+        bool inlineChecked {false};
+        bool inlineOk {false};
+        bool hasRuntimeCalls {false};
+        // Result of IrBuilderExternalInliningAnalysis for external methods.
+        ExternalState externalState {InlinabilityCacheEntry::ExternalState::UNKNOWN};
+    };
+
+    using InlinabilityCacheMap = ArenaUnorderedMap<RuntimeInterface::MethodPtr, InlinabilityCacheEntry>;
+
 public:
     static constexpr auto MAX_CALL_DEPTH = 20U;
     using InstPair = std::pair<Inst *, Inst *>;
@@ -47,14 +61,15 @@ public:
     using BasicBlockPair = std::pair<BasicBlock *, BasicBlock *>;
     using FlagPair = std::pair<bool *, bool *>;
 
-    explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, nullptr) {}
+    explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, nullptr, nullptr) {}
     Inlining(Graph *graph, bool resolveWoInline) : Inlining(graph)
     {
         resolveWoInline_ = resolveWoInline;
     }
 
     Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInlined,
-             const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack);
+             const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack,
+             InlinabilityCacheMap *sharedInlinabilityCache = nullptr);
 
     NO_MOVE_SEMANTIC(Inlining);
     NO_COPY_SEMANTIC(Inlining);
@@ -159,6 +174,15 @@ protected:
 
     virtual bool SkipBlock(const BasicBlock *block) const;
 
+private:
+    bool CheckVregsLimit(CallInst *callInst, const InlineContext &ctx) const;
+    InlinabilityCacheEntry *GetOrCreateInlinabilityCacheEntry(RuntimeInterface::MethodPtr method);
+    void EmitInliningCacheEvent(RuntimeInterface::MethodPtr method, const InlinabilityCacheEntry &cache, bool isPut);
+    bool CheckExternalInliningBytecode(CallInst *callInst, const InlineContext &ctx, InlinabilityCacheEntry *cache);
+    template <bool USE_CACHE>
+    bool CheckInliningBytecodeAnalysis(CallInst *callInst, const InlineContext &ctx,
+                                       [[maybe_unused]] InlinabilityCacheEntry *cache, bool *calleeCallRuntime);
+
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     uint32_t methodsInlined_ {0};
@@ -173,6 +197,10 @@ private:
     uint32_t vregsCount_ {0};
     bool resolveWoInline_ {false};
     IClassHierarchyAnalysis *cha_ {nullptr};
+    // AOT: Owned storage used when no shared cache is passed in constructor.
+    InlinabilityCacheMap ownedInlinabilityCache_;
+    // AOT: Active cache map for this inlining run (from parent inliner).
+    InlinabilityCacheMap *inlinabilityCache_ {nullptr};
 };
 }  // namespace ark::compiler
 
