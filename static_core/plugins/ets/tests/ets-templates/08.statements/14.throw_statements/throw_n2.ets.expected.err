@@ -13,7 +13,6 @@
 #
 Unhandled exception: throw_n2.Ex
 Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
 	at throw_n2.Ex.<ctor> (throw_n2.ets:25:0)
 	at throw_n2.ETSGLOBAL.getEx (throw_n2.ets:28:0)
 	at throw_n2.ETSGLOBAL.main (throw_n2.ets:34:0)

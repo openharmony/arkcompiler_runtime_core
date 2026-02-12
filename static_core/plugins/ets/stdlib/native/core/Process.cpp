@@ -77,12 +77,14 @@ static void SpawnChildProcess(ani_env *env, ani_object child, ani_string cmd, an
 {
     auto stdOutFd = os::CreatePipe();
     if (!stdOutFd.first.IsValid()) {
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return;
     }
     auto stdErrFd = os::CreatePipe();
     if (!stdErrFd.first.IsValid()) {
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return;
     }
 
@@ -100,7 +102,8 @@ static void SpawnChildProcess(ani_env *env, ani_object child, ani_string cmd, an
     } else {
         stdOutFd.first.Reset();
         stdErrFd.first.Reset();
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Failed to create a child process",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return;
     }
 
@@ -276,7 +279,7 @@ static void WaitChildProcess(ani_env *env, ani_object child)
         if (result.HasValue()) {
             ANI_FATAL_IF_ERROR(env->Object_SetField_Int(child, exitCodeId, result.Value()));
         } else {
-            ThrowNewError(env, "std.core.RuntimeError", "Wait failed", "C{std.core.String}:");
+            ThrowNewError(env, "std.core.RuntimeError", "Wait failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
             return;
         }
     }
@@ -308,7 +311,7 @@ static void KillChildProcess(ani_env *env, ani_object child, ani_int signal)
         return;
     }
 
-    ThrowNewError(env, "std.core.RuntimeError", "Kill failed", "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", "Kill failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static void CloseChildProcess(ani_env *env, ani_object child)
@@ -343,7 +346,7 @@ static void CloseChildProcess(ani_env *env, ani_object child)
         return;
     }
 
-    ThrowNewError(env, "std.core.RuntimeError", "Close failed", "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", "Close failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 static ani_boolean PManagerIsAppUid([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object process,
@@ -359,7 +362,8 @@ static ani_boolean PManagerIsAppUid([[maybe_unused]] ani_env *env, [[maybe_unuse
 
     return ANI_FALSE;
 #else
-    ThrowNewError(env, "std.core.RuntimeError", "not implemented for Non-OHOS target", "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", "not implemented for Non-OHOS target",
+                  ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     return ANI_FALSE;
 #endif
 }
@@ -400,7 +404,8 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     int integerPid = static_cast<int>(pid);
     auto ownPid = ark::os::thread::GetPid();
     if (integerPid == 0 || integerPid == -1 || integerPid == ownPid || integerPid == -ownPid) {
-        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid pid argument", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid pid argument",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return 0U;
     }
 
@@ -408,7 +413,8 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
     constexpr int MAX_SINAL_VALUE = 64;
 
     if (std::trunc(signal) != signal || signal < MIN_SIGNAL_VALUE || signal > MAX_SINAL_VALUE) {
-        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid signal argument", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid signal argument",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return 0U;
     }
 
@@ -431,7 +437,8 @@ static ani_boolean IsIsolatedProcImpl([[maybe_unused]] ani_env *env)
                ? ANI_TRUE
                : ANI_FALSE;
 #else
-    ThrowNewError(env, "std.core.RuntimeError", "not implemented for Non-OHOS target", "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RuntimeError", "not implemented for Non-OHOS target",
+                  ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     return ANI_FALSE;
 #endif
 }
@@ -477,7 +484,8 @@ static ani_array GetGroupIDs(ani_env *env)
     ANI_FATAL_IF_ERROR(env->Array_New(groups.size(), undefined, &result));
 
     if (groups.empty()) {
-        ThrowNewError(env, "std.core.RuntimeError", "Failed to get process groups", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Failed to get process groups",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return result;
     }
 

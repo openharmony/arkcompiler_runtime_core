@@ -13,6 +13,5 @@
 #
 Unhandled exception: escompat.Error
 Error
-	at escompat.Error.<ctor> (Error.ets:56:0)
 	at abstract_class_initializer_declaration_try_neg_1.A.<cctor> (abstract_class_initializer_declaration_try_neg_1.ets:27:0)
 	at abstract_class_initializer_declaration_try_neg_1.ETSGLOBAL.main (abstract_class_initializer_declaration_try_neg_1.ets:31:0)

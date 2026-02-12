@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,9 +44,12 @@ ANI_EXPORT void ThrowNewError(ani_env *env, ani_class errorClass, std::string_vi
         return;
     }
 
+    ani_ref undefined;
+    ANI_FATAL_IF_ERROR(env->GetUndefined(&undefined));
+
     ani_object errorObject;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    ANI_FATAL_IF_ERROR(env->Object_New(errorClass, ctor, &errorObject, message));
+    ANI_FATAL_IF_ERROR(env->Object_New(errorClass, ctor, &errorObject, message, undefined));
 
     ANI_FATAL_IF_ERROR(env->ThrowError(reinterpret_cast<ani_error>(errorObject)));
 }

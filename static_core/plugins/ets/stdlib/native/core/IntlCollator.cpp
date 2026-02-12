@@ -47,7 +47,7 @@ std::string RemoveAccents(ani_env *env, const std::string &str)
     delete accentsConverter;
     if (UNLIKELY(U_FAILURE(status))) {
         ThrowNewError(env, "std.core.RuntimeError", "Removing accents failed, transliterate failed",
-                      "C{std.core.String}:");
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return std::string();
     }
 
@@ -97,7 +97,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     icu::Collator *collator = g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst);
     if (collator == nullptr) {
         ThrowNewError(env, "std.core.RuntimeError", "Failed to create Collator instance for comparison",
-                      "C{std.core.String}:");
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return 0;
     }
 
@@ -106,7 +106,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     icu::UnicodeString target = StdStrToUnicode(str2);
     auto res = collator->compare(source, target, status);
     if (UNLIKELY(U_FAILURE(status))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
     }
     return res;
 }

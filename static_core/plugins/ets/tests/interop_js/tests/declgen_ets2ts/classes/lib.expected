@@ -140,7 +140,7 @@ export declare class Dog {
     public get n(): number;
     public set n(value: number);
     public foo1(s?: string, n?: number): void;
-    public constructor(s?: string | undefined, n?: number | undefined);
+    public constructor(s?: string, n?: number);
 }
 export declare interface I2 {
     test(): void;

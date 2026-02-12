@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,10 @@ abstract class TagBase {
 }
 
 class ObjTag extends TagBase {
-	constructor(val: string = "") {
+	constructor() {
+		super("")
+	}
+	constructor(val: string) {
 		super(val)
 	}
 }
@@ -43,7 +46,11 @@ class Obj {
 	f: float = 0.0f
 	d: double = 0.0
 
-	constructor(id: int = 0, name: string | undefined = undefined) {
+	constructor() {
+		this(0, undefined)
+	}
+
+	constructor(id: int, name: string | undefined) {
 		this.id = id
 		this.name = name
 	}

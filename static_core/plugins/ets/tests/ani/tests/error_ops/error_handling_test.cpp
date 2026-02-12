@@ -220,8 +220,7 @@ TEST_F(ErrorHandlingTest, describe_error_test_one_frame)
     std::string output;
     TestDescribeError(env_, func, MAGIC_NUMBER, output);
 
-    CheckErrorDescription(output, std::string(MESSAGE_FROM_THROW_ERROR),
-                          {"at escompat.Error.<ctor>", GetTraceLine("throwError")});
+    CheckErrorDescription(output, std::string(MESSAGE_FROM_THROW_ERROR), {GetTraceLine("throwError")});
 }
 
 #if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
@@ -236,9 +235,9 @@ TEST_F(ErrorHandlingTest, describe_error_test_nested)
     std::string output;
     TestDescribeError(env_, func, MAGIC_NUMBER, output);
 
-    CheckErrorDescription(output, std::string(MESSAGE_FROM_THROW_ERROR),
-                          {"at escompat.Error.<ctor>", GetTraceLine("throwError"), GetTraceLine("bar"),
-                           GetTraceLine("baz"), GetTraceLine("throwErrorNested")});
+    CheckErrorDescription(
+        output, std::string(MESSAGE_FROM_THROW_ERROR),
+        {GetTraceLine("throwError"), GetTraceLine("bar"), GetTraceLine("baz"), GetTraceLine("throwErrorNested")});
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -286,8 +285,8 @@ TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
     TestDescribeError(env_, func, MAGIC_NUMBER, output);
 
     CheckErrorDescription(output, "Error",
-                          {"at escompat.Error.<ctor>", GetTraceLine("throwToNativeCaller"),
-                           GetTraceLine("callThroughNative"), GetTraceLine("throwErrorThroughNative")});
+                          {GetTraceLine("throwToNativeCaller"), GetTraceLine("callThroughNative"),
+                           GetTraceLine("throwErrorThroughNative")});
 }
 
 TEST_F(ErrorHandlingTest, exist_invalid_args_test)
@@ -494,7 +493,8 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     ASSERT_NE(errorClass, nullptr);
 
     ani_method constructor {};
-    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}:", &constructor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(errorClass, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &constructor),
+              ANI_OK);
     ASSERT_NE(constructor, nullptr);
 
     ani_string errorMessage {};
@@ -502,8 +502,11 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
               ANI_OK);
     ASSERT_NE(errorMessage, nullptr);
 
+    ani_ref undefinedArgument {};
+    ASSERT_EQ(env_->GetUndefined(&undefinedArgument), ANI_OK);
+
     ani_object errorObject {};
-    ASSERT_EQ(env_->Object_New(errorClass, constructor, &errorObject, errorMessage), ANI_OK);
+    ASSERT_EQ(env_->Object_New(errorClass, constructor, &errorObject, errorMessage, undefinedArgument), ANI_OK);
     ASSERT_NE(errorObject, nullptr);
 
     ani_boolean hasError = ANI_TRUE;
@@ -520,7 +523,8 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
 
     std::string errorDescription {};
     GetErrorDescription(env_, errorDescription);
-    CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR), {"at escompat.Error.<ctor>"});
+    CheckErrorDescription(errorDescription, std::string(MESSAGE_FROM_THROW_ERROR),
+                          {"at escompat.Error.<ctor> (Error.ets:99:0)", "at escompat.Error.<ctor> (Error.ets:82:0)"});
 
     ASSERT_EQ(env_->ResetError(), ANI_OK);
     ASSERT_EQ(env_->ExistUnhandledError(&hasError), ANI_OK);

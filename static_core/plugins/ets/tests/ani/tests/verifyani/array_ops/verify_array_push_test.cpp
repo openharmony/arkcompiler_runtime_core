@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <ani.h>
 #include "verify_ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
@@ -112,9 +113,11 @@ TEST_F(ArrayPushTest, err_input_array)
     ani_class cls {};
     ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
+    ani_ref undefinedArgument {};
+    ASSERT_EQ(env_->GetUndefined(&undefinedArgument), ANI_OK);
     ani_object errObj {};
-    ASSERT_EQ(env_->Object_New(cls, ctor, &errObj), ANI_OK);
+    ASSERT_EQ(env_->Object_New(cls, ctor, &errObj, undefinedArgument, undefinedArgument), ANI_OK);
 
     ani_object intObj;
     CreateInt(env_, magicNumber, &intObj);

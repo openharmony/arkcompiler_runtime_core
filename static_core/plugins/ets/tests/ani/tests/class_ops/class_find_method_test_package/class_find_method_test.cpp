@@ -14,6 +14,7 @@
  */
 
 #include <ani.h>
+#include <gtest/gtest.h>
 #include "ani_gtest.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
@@ -403,10 +404,62 @@ TEST_F(ClassFindMethodTest, FindOverloadedConstructor)
     ASSERT_EQ(env_->FindClass("test.FindConstructorWithDefaultParams", &cls), ANI_OK);
     ASSERT_NE(cls, nullptr);
 
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", nullptr, &ctor), ANI_AMBIGUOUS);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", ":", &ctor), ANI_OK);
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}:", &ctor), ANI_OK);
     ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Int}C{std.core.Int}:", &ctor), ANI_OK);
+}
+
+TEST_F(ClassFindMethodTest, FindCtor_NumberDefaultParam_BoxedDoubleSignature)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("test.FindCtorNumberDefaultParam", &cls), ANI_OK);
+    ASSERT_NE(cls, nullptr);
+
+    // Expect boxed std.core.Double constructor signature.
+    ani_method ctorBoxed {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.Double}:", &ctorBoxed), ANI_OK);
+    ASSERT_NE(ctorBoxed, nullptr);
+
+    // Must NOT be primitive double in signature.
+    ani_method ctorDouble {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "d:", &ctorDouble), ANI_NOT_FOUND);
+
+    // Runtime sanity: default value path yields p == 1.0
+    ani_method getP {};
+    ASSERT_EQ(env_->Class_FindMethod(cls, "getP", ":d", &getP), ANI_OK);
+    ASSERT_NE(getP, nullptr);
+
+    // Call with undefined to trigger default parameter value.
+    ani_ref undef {};
+    ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
+    ASSERT_NE(undef, nullptr);
+
+    ani_object o1 {};
+    ASSERT_EQ(env_->Object_New(cls, ctorBoxed, &o1, undef), ANI_OK);
+    ASSERT_NE(o1, nullptr);
+
+    ani_double p1 = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Double(o1, getP, &p1), ANI_OK);
+    ASSERT_EQ(p1, 1.0);
+
+    // Call with actual std.core.Double instance.
+    ani_class doubleCls {};
+    ASSERT_EQ(env_->FindClass("std.core.Double", &doubleCls), ANI_OK);
+    ASSERT_NE(doubleCls, nullptr);
+    ani_method doubleCtor {};
+    ASSERT_EQ(env_->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor), ANI_OK);
+    ASSERT_NE(doubleCtor, nullptr);
+
+    ani_object o2 {};
+    constexpr ani_double K_ARG = 2.5;
+    ani_object boxed {};
+    ASSERT_EQ(env_->Object_New(doubleCls, doubleCtor, &boxed, K_ARG), ANI_OK);
+    ASSERT_NE(boxed, nullptr);
+
+    ASSERT_EQ(env_->Object_New(cls, ctorBoxed, &o2, boxed), ANI_OK);
+    ASSERT_NE(o2, nullptr);
+
+    ani_double p2 = 0;
+    ASSERT_EQ(env_->Object_CallMethod_Double(o2, getP, &p2), ANI_OK);
+    ASSERT_EQ(p2, K_ARG);
 }
 
 TEST_F(ClassFindMethodTest, find_intrinsics)

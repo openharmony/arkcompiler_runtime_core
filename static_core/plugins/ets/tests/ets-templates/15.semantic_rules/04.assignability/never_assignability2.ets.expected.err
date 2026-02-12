@@ -13,6 +13,5 @@
 #
 Unhandled exception: escompat.Error
 Error: This function never returns
-	at escompat.Error.<ctor> (Error.ets:56:0)
 	at never_assignability2.ETSGLOBAL.neverFunction (never_assignability2.ets:37:0)
 	at never_assignability2.ETSGLOBAL.<cctor> (never_assignability2.ets:24:0)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             if (UNLIKELY(ptr == nullptr)) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create Icu LocalizedNumberFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumFmt;
             }
 
@@ -59,7 +59,7 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             if (!isNumFmtInserted) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create and insert Icu LocalizedNumberFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumFmt;
             }
             it = iter;
@@ -69,7 +69,7 @@ LocNumFmt &IntlFormattersCache::NumFmtsCacheInvalidation(ani_env *env, const Par
             if (UNLIKELY(ptr == nullptr)) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create Icu LocalizedNumberFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumFmt;
             }
             status = InitNumFormatter(env, options, *ptr);
@@ -100,7 +100,7 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             if (UNLIKELY(ptr == nullptr)) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create Icu LocalizedNumberRangeFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumRangeFmt;
             }
 
@@ -117,7 +117,7 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             if (!isNumRangeFmtInserted) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create and insert Icu LocalizedNumberRangeFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumRangeFmt;
             }
             it = iter;
@@ -127,7 +127,7 @@ LocNumRangeFmt &IntlFormattersCache::NumRangeFmtsCacheInvalidation(ani_env *env,
             if (UNLIKELY(ptr == nullptr)) {
                 status = ANI_PENDING_ERROR;
                 std::string message = "Create Icu LocalizedNumberRangeFormatter failed";
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return defaultLocNumRangeFmt;
             }
 

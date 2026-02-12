@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,8 @@ std::string GenUuid4(ani_env *env)
                        (GenRandUint<uint16_t>() & NULL_TWO_HIGH_BITS_IN_16) | RFC4122_UUID_RESERVED_BITS,
                        GenRandUint<uint32_t>(), GenRandUint<uint16_t>());
     if ((n < 0) || (n > static_cast<int>(UUID_LEN))) {
-        stdlib::ThrowNewError(env, "std.core.RuntimeError", "GenerateRandomUUID failed", "C{std.core.String}:");
+        stdlib::ThrowNewError(env, "std.core.RuntimeError", "GenerateRandomUUID failed",
+                              ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return std::string();
     }
     std::stringstream res;

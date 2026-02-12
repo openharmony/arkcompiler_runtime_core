@@ -82,7 +82,6 @@ cases:
     # optional parameters
     - expected_out: |-
           Syntax error ESY0219: A required parameter cannot follow an optional parameter.
-          Syntax error ESY0014: Required parameter follows default parameter(s).
       decl: |-
           class A<T, U, V> {
               fld: Array<T|U|V|undefined>
@@ -94,7 +93,6 @@ cases:
     # optional parameters with default value
     - expected_out: |-
           Syntax error ESY0219: A required parameter cannot follow an optional parameter.
-          Syntax error ESY0014: Required parameter follows default parameter(s).
       decl: |-
           enum Color { Red, Green, Blue }
           class A<T> {

@@ -27,7 +27,7 @@ ANI_EXPORT ani_status LocTagToIcuLocale(ani_env *env, const std::string &localeT
     locale = icu::Locale::forLanguageTag(sp, status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Language tag '" + localeTag + std::string("' is invalid or not supported");
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
     return ANI_OK;
@@ -40,7 +40,7 @@ ani_status SetNumberingSystemIntoLocale(ani_env *env, const ParsedOptions &optio
         locale.setKeywordValue("nu", options.numberingSystem.c_str(), status);
         if (UNLIKELY(U_FAILURE(status))) {
             std::string message = "Invalid numbering system " + options.numberingSystem;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -93,14 +93,14 @@ ani_status ConfigureNotation(ani_env *env, const ParsedOptions &options, Formatt
         } else {
             if (!options.compactDisplay.empty()) {
                 std::string message = "Invalid compactDisplay " + options.compactDisplay;
-                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+                ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
                 return ANI_PENDING_ERROR;
             }
         }
     } else {
         if (!options.notation.empty()) {
             std::string message = "Invalid compactDisplay " + options.notation;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -120,7 +120,7 @@ ani_status StdStrToIcuUnit(ani_env *env, const std::string &str, icu::MeasureUni
     icuUnit = icu::MeasureUnit::forIdentifier(icu::StringPiece(str.c_str()), status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Unit input is illegal " + str;
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
     return ANI_OK;
@@ -147,7 +147,7 @@ ani_status ConfigureUnit(ani_env *env, const ParsedOptions &options, FormatterTy
     size_t afterPos = pos + PER_UNIT_STR_SIZE;
     if (pos == std::string::npos || options.unit.find("-per-", afterPos) != std::string::npos) {
         std::string message = "Unit input is illegal " + options.unit;
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
 
@@ -155,13 +155,13 @@ ani_status ConfigureUnit(ani_env *env, const ParsedOptions &options, FormatterTy
     std::string numerator = options.unit.substr(0, pos);
     std::string errMessage = "Not a wellformed " + numerator;
     if (!IsCorrectUnitIdentifier(numerator)) {
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, errMessage, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, errMessage, ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
     err = StdStrToIcuUnit(env, numerator, icuUnit);
     if (err != ANI_OK) {
         std::string message = "Unit input is illegal " + options.unit;
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, ERROR_CTOR_SIGNATURE);
         return err;
     }
 
@@ -170,13 +170,13 @@ ani_status ConfigureUnit(ani_env *env, const ParsedOptions &options, FormatterTy
     icu::MeasureUnit icuPerUnit = icu::MeasureUnit();
     errMessage = "Not a wellformed  " + denominator;
     if (!IsCorrectUnitIdentifier(denominator)) {
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, errMessage, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, errMessage, ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
     err = StdStrToIcuUnit(env, denominator, icuPerUnit);
     if (err != ANI_OK) {
         std::string message = "Unit input is illegal " + options.unit;
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message, ERROR_CTOR_SIGNATURE);
         return err;
     }
 
@@ -208,7 +208,7 @@ ani_status ConfigureStyleUnit(ani_env *env, const ParsedOptions &options, Format
     } else {
         if (!options.unitDisplay.empty()) {
             std::string message = "Invalid unitDisplay " + options.unitDisplay;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -222,7 +222,7 @@ ani_status ConfigureStyleCurrency(ani_env *env, const ParsedOptions &options, Fo
     icu::CurrencyUnit currency(icu::StringPiece(options.currency.c_str()), status);
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Invalid currency " + options.currency;
-        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+        ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
         return ANI_PENDING_ERROR;
     }
     fmt = fmt.unit(currency);
@@ -239,7 +239,7 @@ ani_status ConfigureStyleCurrency(ani_env *env, const ParsedOptions &options, Fo
         // Default style, no need to set anything
         if (!options.currencyDisplay.empty()) {
             std::string message = "Invalid currencyDisplay " + options.currencyDisplay;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -261,7 +261,7 @@ ani_status ConfigureStyle(ani_env *env, const ParsedOptions &options, FormatterT
         // Default style, no need to set anything
         if (!options.style.empty() && options.style != STYLE_DECIMAL) {
             std::string message = "Invalid style " + options.style;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -281,7 +281,7 @@ ani_status ConfigureUseGrouping(ani_env *env, const ParsedOptions &options, Form
         // Default is UNumberGroupingStrategy::UNUM_GROUPING_AUTO
         if (!options.useGrouping.empty()) {
             std::string message = "Invalid useGrouping " + options.useGrouping;
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }
@@ -320,7 +320,7 @@ ani_status ConfigureSignDisplay(ani_env *env, const ParsedOptions &options, Form
         }
     } else {
         if (!options.signDisplay.empty()) {
-            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, "Invalid signDisplay", CTOR_SIGNATURE_STR);
+            ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, "Invalid signDisplay", ERROR_CTOR_SIGNATURE);
             return ANI_PENDING_ERROR;
         }
     }

@@ -40,7 +40,7 @@ static void ThrowRangeError(ani_env *env, Args &&...args)
 {
     std::stringstream message;
     (message << ... << args);
-    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), "C{std.core.String}:");
+    ThrowNewError(env, "std.core.RangeError", message.str().c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
 }
 
 std::vector<std::string> GetAvailableLocales()
@@ -213,7 +213,7 @@ icu::Locale GetLocale(ani_env *env, std::string &locTag)
     icu::Locale locale = icu::Locale::forLanguageTag(icu::StringPiece(locTag.c_str()), status);
     if (UNLIKELY(U_FAILURE(status))) {
         const auto errorMessage = std::string("Language tag '").append(locTag).append("' is invalid or not supported");
-        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", errorMessage.c_str(), ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     return locale;
@@ -230,24 +230,27 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
     auto success = UErrorCode::U_ZERO_ERROR;
     auto matcher = BuildLocaleMatcher(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     auto it = intl::LanguageTagListIterator(tags);
     auto bestfit = matcher.getBestMatchResult(it, success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to get best match result", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Unable to get best match result",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     auto locale = bestfit.makeResolvedLocale(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to make resolved locale", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Unable to make resolved locale",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     auto tag = locale.toLanguageTag<std::string>(success);
     if (UNLIKELY(U_FAILURE(success))) {
         ThrowNewError(env, "std.core.RuntimeError", "Unable to convert locale into language tag",
-                      "C{std.core.String}:");
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
     if (tag == "en_US_POSIX" || tag == "c") {
@@ -297,7 +300,8 @@ ani_array StdCoreIntlBestFitLocales(ani_env *env, [[maybe_unused]] ani_class kla
     auto success = UErrorCode::U_ZERO_ERROR;
     auto matcher = BuildLocaleMatcher(success);
     if (UNLIKELY(U_FAILURE(success))) {
-        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher", "C{std.core.String}:");
+        ThrowNewError(env, "std.core.RuntimeError", "Unable to build locale matcher",
+                      ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return nullptr;
     }
 
