@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,33 +405,35 @@ function testStaticGetSetPrimitive(): void {
     const parentCls = Class.from<Parent>()
     const parentIdFld = parentCls.getStaticField('ID')!
     const localNum = 3.14
+    const localNumMod = 2.7
 
     arktest.assertNE(localNum, Parent.ID)
     arktest.assertNE(localNum, parentIdFld.getValue())
-    parentIdFld.setValue(localNum)
-    arktest.assertEQ(localNum, Parent.ID)
-    arktest.assertEQ(localNum, parentIdFld.getValue())
+    parentIdFld.setValue(localNumMod)
+    arktest.assertEQ(localNumMod, Parent.ID)
+    arktest.assertEQ(localNumMod, parentIdFld.getValue())
 
     const childCls = Class.from<Child>()
     const childIdFld = childCls.getStaticField('ID')!
 
     arktest.assertNE(localNum, Child.ID)
     arktest.assertNE(localNum, childIdFld.getValue())
-    childIdFld.setValue(localNum)
-    arktest.assertEQ(localNum, Child.ID)
-    arktest.assertEQ(localNum, childIdFld.getValue())
+    childIdFld.setValue(localNumMod)
+    arktest.assertEQ(localNumMod, Child.ID)
+    arktest.assertEQ(localNumMod, childIdFld.getValue())
 }
 
 function testStaticGetSetReference(): void {
     const parentCls = Class.from<Parent>()
     const parentStrFld = parentCls.getStaticField('STR')!
     const localStr = 'I\'m a string'
+    const localStrMod = 'I\'m another string'
 
     arktest.assertNE(localStr, Parent.STR)
     arktest.assertNE(localStr, parentStrFld.getValue())
-    parentStrFld.setValue(localStr)
-    arktest.assertEQ(localStr, Parent.STR)
-    arktest.assertEQ(localStr, parentStrFld.getValue())
+    parentStrFld.setValue(localStrMod)
+    arktest.assertEQ(localStrMod, Parent.STR)
+    arktest.assertEQ(localStrMod, parentStrFld.getValue())
 }
 
 function testStaticGetSetUnion(): void {
@@ -484,19 +486,20 @@ function testStaticGetSetEnum(): void {
     const parentCls = Class.from<Parent>()
     const parentEnmFld = parentCls.getStaticField('ENM')!
     const localEnum = TestFieldEnum.TWO
+    const localEnumMod = TestFieldEnum.THREE
 
     arktest.assertNE(localEnum, Parent.ENM)
     arktest.assertNE(localEnum, parentEnmFld.getValue())
-    parentEnmFld.setValue(localEnum)
-    arktest.assertEQ(localEnum, Parent.ENM)
-    arktest.assertEQ(localEnum, parentEnmFld.getValue())
+    parentEnmFld.setValue(localEnumMod)
+    arktest.assertEQ(localEnumMod, Parent.ENM)
+    arktest.assertEQ(localEnumMod, parentEnmFld.getValue())
 }
 
 function testStaticGetSetPrimitiveNegative(): void {
     const parentCls = Class.from<Parent>()
     const parentIdFld = parentCls.getStaticField('ID')!
     const parentRdonlyPrimFld = parentCls.getStaticField('RDONLYPRIM')!
-    const localNum = 3.14
+    const localNumMod = 2.7
     const localStr = 'I\'m a string'
 
     arktest.expectError(() => {
@@ -510,23 +513,23 @@ function testStaticGetSetPrimitiveNegative(): void {
     }, new TypeError("Value is not assignable to the provided field"))
     arktest.assertNE(localStr, Parent.ID)
     arktest.assertNE(localStr, parentIdFld.getValue())
-    arktest.assertEQ(localNum, Parent.ID)
-    arktest.assertEQ(localNum, parentIdFld.getValue())
+    arktest.assertEQ(localNumMod, Parent.ID)
+    arktest.assertEQ(localNumMod, parentIdFld.getValue())
 }
 
 function testStaticGetSetReferenceNegative(): void {
     const parentCls = Class.from<Parent>()
     const parentStrFld = parentCls.getStaticField('STR')!
     const localNum = 3.14
-    const localStr = 'I\'m a string'
+    const localStrMod = 'I\'m another string'
 
     arktest.expectError(() => {
         parentStrFld.setValue(localNum)
     }, new TypeError("Value is not assignable to the provided field"))
     arktest.assertNE(localNum, Parent.STR)
     arktest.assertNE(localNum, parentStrFld.getValue())
-    arktest.assertEQ(localStr, Parent.STR)
-    arktest.assertEQ(localStr, parentStrFld.getValue())
+    arktest.assertEQ(localStrMod, Parent.STR)
+    arktest.assertEQ(localStrMod, parentStrFld.getValue())
 }
 
 function testStaticGetSetUnionNegative(): void {
