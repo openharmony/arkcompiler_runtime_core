@@ -421,6 +421,9 @@
 08.statements/15.try_statements/01.catch_clause/catch_n_0.ets
 08.statements/15.try_statements/01.catch_clause/catch_n_3.ets
 
+#33182
+09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
+
 #26730
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call.ets
 09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call_2.ets
