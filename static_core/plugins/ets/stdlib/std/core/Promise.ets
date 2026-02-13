@@ -321,7 +321,8 @@ export final class Promise<out T> implements PromiseLike<T> {
      */
     static all<U>(promises: FixedArray<U|PromiseLike<U>|undefined>): Promise<Array<Awaited<U>>> {
         return new Promise<Array<Awaited<U>>>((resolve: (value: Array<Awaited<U>>) => void, reject: (error: Error) => void): void => {
-            let resolvedCnt = 0;
+            let resolvedCnt = new Int32Array(new ArrayBuffer(4));
+            Atomics.store(resolvedCnt, 0, 0);
             const values: Array<Awaited<U>> = new Array<Awaited<U>>(promises.length);
             
             if (promises.length === 0) {
@@ -334,8 +335,8 @@ export final class Promise<out T> implements PromiseLike<T> {
                 Promise.toPromiseLike<U>(promises[idx]).then<void, void>(
                     (value: Awaited<U>): void => {
                         values[idx] = value;
-                        ++resolvedCnt;
-                        if (resolvedCnt === promises.length) {
+                        const oldValue = Atomics.add(resolvedCnt, 0, 1);
+                        if (oldValue + 1 === promises.length) {
                             resolve(values);
                         }
                     }, 
