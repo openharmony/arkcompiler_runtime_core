@@ -24,7 +24,7 @@ package std.core;
  * Represents an error that occurs when assertion fails.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class AssertionError extends Error {
     /**
@@ -33,7 +33,7 @@ export class AssertionError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("AssertionError", message, options)
@@ -45,7 +45,7 @@ export class AssertionError extends Error {
  * Represents an error that occurs when division by zero is performed.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class DivideByZeroError extends Error {
     /**
@@ -54,7 +54,7 @@ export class DivideByZeroError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("DivideByZeroError", message, options)
@@ -65,7 +65,7 @@ export class DivideByZeroError extends Error {
  * Represents an error that occurs when null pointer is dereferenced.
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class NullPointerError extends Error {
     /**
@@ -74,7 +74,7 @@ export class NullPointerError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("NullPointerError", message, options)
@@ -85,7 +85,7 @@ export class NullPointerError extends Error {
  * Represents an error that occurs when exception is thrown and not caught
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class UncaughtExceptionError extends Error {
     /**
@@ -94,7 +94,7 @@ export class UncaughtExceptionError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("UncaughtExceptionError", message, options)
@@ -105,7 +105,7 @@ export class UncaughtExceptionError extends Error {
  * Represents an error that occurs when trying to interpret syntactically invalid code
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class SyntaxError extends Error {
     /**
@@ -114,7 +114,7 @@ export class SyntaxError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("SyntaxError", message, options)
@@ -128,7 +128,7 @@ export class SyntaxError extends Error {
      * @returns { SyntaxError }
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): SyntaxError {
         return new SyntaxError(message, options)
@@ -139,7 +139,7 @@ export class SyntaxError extends Error {
  * Represents an error that occurs when JSONValue can not be assigned to a type
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class JSONTypeError extends Error {
     /**
@@ -148,7 +148,7 @@ export class JSONTypeError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("JSONTypeError", message, options)
@@ -159,7 +159,7 @@ export class JSONTypeError extends Error {
  * Represents an error that occurs when provided collection index is out of range
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class RangeError extends Error {
     /**
@@ -168,7 +168,7 @@ export class RangeError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("RangeError", message, options)
@@ -182,7 +182,7 @@ export class RangeError extends Error {
      * @returns { RangeError }
      * @static
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     static $_invoke(message?: String, options?: ErrorOptions): RangeError {
         return new RangeError(message, options)
@@ -193,7 +193,7 @@ export class RangeError extends Error {
  * Represents error that is thrown when negative array size is supplied
  * @extends RangeError
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class NegativeArraySizeError extends RangeError {
     /**
@@ -202,7 +202,7 @@ export final class NegativeArraySizeError extends RangeError {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super(message, options)
@@ -214,7 +214,7 @@ export final class NegativeArraySizeError extends RangeError {
  * Represents an error that occurs when array is oging to be indexed out of its bounds
  * @extends RangeError
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class ArrayIndexOutOfBoundsError extends RangeError {
     /**
@@ -223,7 +223,7 @@ export final class ArrayIndexOutOfBoundsError extends RangeError {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super(message, options)
@@ -235,7 +235,7 @@ export final class ArrayIndexOutOfBoundsError extends RangeError {
  * Represents error that is thrown when illegal arithmetic operation is occured (e.g. division by zero)
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class ArithmeticError extends Error {
     /**
@@ -244,7 +244,7 @@ export final class ArithmeticError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ArithmeticError", message, options)
@@ -255,7 +255,7 @@ export final class ArithmeticError extends Error {
  * Represents an error that occurs when memory allocation fails
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class OutOfMemoryError extends Error {
     /**
@@ -264,7 +264,7 @@ export class OutOfMemoryError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("OutOfMemoryError", message, options)
@@ -275,7 +275,7 @@ export class OutOfMemoryError extends Error {
  * Represents an error that occurs when the available memory is not sufficient to create the activation frame
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class StackOverflowError extends Error {
     /**
@@ -284,7 +284,7 @@ export class StackOverflowError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("StackOverflowError", message, options)
@@ -295,7 +295,7 @@ export class StackOverflowError extends Error {
  * Represents an error that occurs when attempting to instantiate abstract class or an interface
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class InstantiationError extends Error {
     /**
@@ -304,7 +304,7 @@ export class InstantiationError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("InstantiationError", message, options)
@@ -315,7 +315,7 @@ export class InstantiationError extends Error {
  * Represents an error that occurs when an internal error occured
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class InternalError extends Error {
     /**
@@ -324,7 +324,7 @@ export class InternalError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("InternalError", message, options)
@@ -335,7 +335,7 @@ export class InternalError extends Error {
  * Represents an error that is thrown when attempting to wait, notify or notifyAll on object, that hasn't been synchronised
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class IllegalMonitorStateError extends Error {
     /**
@@ -344,7 +344,7 @@ export class IllegalMonitorStateError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalMonitorStateError", message, options)
@@ -355,7 +355,7 @@ export class IllegalMonitorStateError extends Error {
  * Represents error that is thrown when provided collection index is out of bounds
  * @extends RangeError
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class IndexOutOfBoundsError extends RangeError {
     /**
@@ -364,7 +364,7 @@ export class IndexOutOfBoundsError extends RangeError {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super(message, options)
@@ -376,7 +376,7 @@ export class IndexOutOfBoundsError extends RangeError {
  * Represents error that is thrown when provided string index is out of bounds
  * @extends RangeError
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class StringIndexOutOfBoundsError extends RangeError {
     /**
@@ -385,7 +385,7 @@ export final class StringIndexOutOfBoundsError extends RangeError {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super(message, options)
@@ -397,7 +397,7 @@ export final class StringIndexOutOfBoundsError extends RangeError {
  * Represents error that is thrown in case of illegal class casting
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class ClassCastError extends Error {
     /**
@@ -406,7 +406,7 @@ export final class ClassCastError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ClassCastError", message, options)
@@ -417,7 +417,7 @@ export final class ClassCastError extends Error {
  * Represents error that is thrown when attempting to store an object of different type in array of type-erased objects
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export final class ArrayStoreError extends Error {
     /**
@@ -426,7 +426,7 @@ export final class ArrayStoreError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ArrayStoreError", message, options)
@@ -437,7 +437,7 @@ export final class ArrayStoreError extends Error {
  * Represents error that is thrown when there is an error in initializer
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class ExceptionInInitializerError extends Error {
     /**
@@ -446,7 +446,7 @@ export class ExceptionInInitializerError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ExceptionInInitializerError", message, options)
@@ -457,7 +457,7 @@ export class ExceptionInInitializerError extends Error {
  * Represents error that is thrown when coroutines limit is reached
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class CoroutinesLimitExceedError extends Error {
     /**
@@ -466,7 +466,7 @@ export class CoroutinesLimitExceedError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("CoroutinesLimitExceedError", message, options)
@@ -477,7 +477,7 @@ export class CoroutinesLimitExceedError extends Error {
  * Represents error that is thrown when lock is in an illegal state
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class IllegalLockStateError extends Error {
     /**
@@ -486,7 +486,7 @@ export class IllegalLockStateError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("IllegalLockStateError", message, options)
@@ -497,7 +497,7 @@ export class IllegalLockStateError extends Error {
  * Represents the error that is thrown when invalid operation is called on coroutine
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class InvalidCoroutineOperationError extends Error {
     /**
@@ -506,7 +506,7 @@ export class InvalidCoroutineOperationError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("InvalidCoroutineOperationError", message, options)
@@ -517,7 +517,7 @@ export class InvalidCoroutineOperationError extends Error {
  * Represents the error that is thrown when there is a wrong unsafe call to Function
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class ArgumentsUnderapplicationError extends Error {
     /**
@@ -526,7 +526,7 @@ export class ArgumentsUnderapplicationError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("ArgumentsUnderapplicationError", message, options)
@@ -537,7 +537,7 @@ export class ArgumentsUnderapplicationError extends Error {
  * Represents the error that is thrown when there is store access error
  * @extends Error
  * @syscap SystemCapability.Utils.Lang
- * @since 24 static
+ * @since 24
  */
 export class InvalidStoreAccessError extends Error {
     /**
@@ -546,7 +546,7 @@ export class InvalidStoreAccessError extends Error {
      * @param { String | undefined } message - Error text
      * @param { ErrorOptions | undefined } options - Error options
      * @syscap SystemCapability.Utils.Lang
-     * @since 24 static
+     * @since 24
      */
     constructor(message?: String, options?: ErrorOptions) {
         super("InvalidStoreAccessError", message, options)
