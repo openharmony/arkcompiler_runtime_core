@@ -14,15 +14,15 @@
  */
 
 #include "intrinsics.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/execution/job_execution_context.h"
 #include "runtime/include/object_header.h"
 #include "types/ets_object.h"
 
@@ -30,19 +30,19 @@ namespace ark::ets::intrinsics {
 extern "C" {
 EtsObject *EtsAwaitJob(EtsJob *job)
 {
-    EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     if (job == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, currentCoro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return nullptr;
     }
-    if (currentCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(currentCoro, PlatformTypes(currentCoro)->coreInvalidCoroutineOperationError,
+    if (JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()->IsJobSwitchDisabled()) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot await in the current context!");
         return nullptr;
     }
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
-    EtsHandle<EtsJob> jobHandle(currentCoro, job);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsJob> jobHandle(executionCtx, job);
 
     LOG(DEBUG, COROUTINES) << "Job::await: starting await() for a job...";
     jobHandle->Wait();
@@ -51,52 +51,52 @@ EtsObject *EtsAwaitJob(EtsJob *job)
 
     if (jobHandle->IsFinished()) {
         LOG(DEBUG, COROUTINES) << "Job::await: job is already successfully finished!";
-        return jobHandle->GetValue(currentCoro);
+        return jobHandle->GetValue(executionCtx);
     }
     LOG(DEBUG, COROUTINES) << "Job::await: job is failed!";
 
     if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-        currentCoro->GetPandaVM()->GetUnhandledObjectManager()->RemoveFailedJob(jobHandle.GetPtr());
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveFailedJob(jobHandle.GetPtr());
     }
 
-    auto *exc = jobHandle->GetValue(currentCoro);
-    currentCoro->SetException(exc->GetCoreType());
+    auto *exc = jobHandle->GetValue(executionCtx);
+    executionCtx->GetMT()->SetException(exc->GetCoreType());
     return nullptr;
 }
 
 void EtsFinishJob(EtsJob *job, EtsObject *value)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     if (job == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsJob> hjob(coro, job);
-    EtsHandle<EtsObject> hvalue(coro, value);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsJob> hjob(executionCtx, job);
+    EtsHandle<EtsObject> hvalue(executionCtx, value);
     EtsMutex::LockHolder lh(hjob);
     if (!hjob->IsRunning()) {
         return;
     }
-    hjob->Finish(coro, hvalue.GetPtr());
+    hjob->Finish(executionCtx, hvalue.GetPtr());
 }
 
 void EtsFailJob(EtsJob *job, EtsObject *error)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     if (job == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowNullPointerException(ctx, coro);
+        ThrowNullPointerException(ctx, executionCtx->GetMT());
         return;
     }
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsJob> hjob(coro, job);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsJob> hjob(executionCtx, job);
     ASSERT(error != nullptr);
-    EtsHandle<EtsObject> herror(coro, error);
+    EtsHandle<EtsObject> herror(executionCtx, error);
     EtsMutex::LockHolder lh(hjob);
 
-    auto *errorClass = PlatformTypes(coro)->escompatError;
+    auto *errorClass = PlatformTypes(executionCtx)->escompatError;
     if (!herror->IsInstanceOf(errorClass)) {
         ThrowRuntimeException("fail() argument is not an Error object");
         return;
@@ -105,7 +105,7 @@ void EtsFailJob(EtsJob *job, EtsObject *error)
     if (!hjob->IsRunning()) {
         return;
     }
-    hjob->Fail(coro, herror.GetPtr());
+    hjob->Fail(executionCtx, herror.GetPtr());
 }
 }
 }  // namespace ark::ets::intrinsics

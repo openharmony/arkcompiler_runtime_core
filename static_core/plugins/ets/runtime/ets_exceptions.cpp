@@ -15,8 +15,9 @@
 
 #include "plugins/ets/runtime/ets_exceptions.h"
 
+#include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -29,16 +30,16 @@
 
 namespace ark::ets {
 
-static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHandle<EtsString> msg,
+static EtsObject *CreateErrorInstance(EtsExecutionContext *executionCtx, EtsClass *cls, EtsHandle<EtsString> msg,
                                       EtsHandle<EtsObject> pending)
 {
-    EtsHandle<EtsErrorOptions> errOptions(coro, EtsErrorOptions::Create(coro));
+    EtsHandle<EtsErrorOptions> errOptions(executionCtx, EtsErrorOptions::Create(executionCtx));
     if (UNLIKELY(errOptions.GetPtr() == nullptr)) {
         return nullptr;
     }
     errOptions->SetCause(pending.GetPtr());
 
-    EtsHandle<EtsObject> error(coro, EtsObject::Create(cls));
+    EtsHandle<EtsObject> error(executionCtx, EtsObject::Create(cls));
     if (UNLIKELY(error.GetPtr() == nullptr)) {
         return nullptr;
     }
@@ -57,69 +58,74 @@ static EtsObject *CreateErrorInstance(EtsCoroutine *coro, EtsClass *cls, EtsHand
 
     std::array args {Value(error.GetPtr()->GetCoreType()), Value(msg.GetPtr()->GetCoreType()),
                      Value(errOptions.GetPtr()->AsObject()->GetCoreType())};
-    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(coro, args.data());
+    EtsMethod::ToRuntimeMethod(ctor)->InvokeVoid(executionCtx->GetMT(), args.data());
 
-    if (UNLIKELY(coro->HasPendingException())) {
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return nullptr;
     }
     return error.GetPtr();
 }
 
-EtsObject *SetupEtsException(EtsCoroutine *coro, EtsClass *cls, const char *msg)
+EtsObject *SetupEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, const char *msg)
 {
-    ASSERT(PlatformTypes(coro)->escompatError->IsAssignableFrom(cls));
+    ASSERT(PlatformTypes(executionCtx)->escompatError->IsAssignableFrom(cls));
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> pending(coro, EtsObject::FromCoreType(coro->GetException()));
-    coro->ClearException();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> pending(executionCtx, EtsObject::FromCoreType(executionCtx->GetMT()->GetException()));
+    executionCtx->GetMT()->ClearException();
 
-    EtsHandle<EtsString> etsMsg(coro,
+    EtsHandle<EtsString> etsMsg(executionCtx,
                                 msg == nullptr ? EtsString::CreateNewEmptyString() : EtsString::CreateFromMUtf8(msg));
     if (UNLIKELY(etsMsg.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    if (!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, cls)) {
+    if (!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, cls)) {
         LOG(ERROR, CLASS_LINKER) << "Class " << cls->GetDescriptor() << " cannot be initialized";
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    return CreateErrorInstance(coro, cls, etsMsg, pending);
+    return CreateErrorInstance(executionCtx, cls, etsMsg, pending);
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *cls, const char *msg)
+void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, const char *msg)
 {
-    if (coroutine->IsUsePreAllocObj()) {
-        coroutine->SetUsePreAllocObj(false);
-        coroutine->SetException(coroutine->GetVM()->GetOOMErrorObject());
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx->GetMT() == ManagedThread::GetCurrent());
+
+    if (executionCtx->GetMT()->IsUsePreAllocObj()) {
+        executionCtx->GetMT()->SetUsePreAllocObj(false);
+        executionCtx->GetMT()->SetException(executionCtx->GetPandaVM()->GetOOMErrorObject());
         return;
     }
-
-    EtsObject *exc = SetupEtsException(coroutine, cls, msg);
+    EtsObject *exc = SetupEtsException(executionCtx, cls, msg);
     if (LIKELY(exc != nullptr)) {
-        coroutine->SetException(exc->GetCoreType());
+        executionCtx->GetMT()->SetException(exc->GetCoreType());
     }
-    ASSERT(coroutine->HasPendingException());
+    ASSERT(executionCtx->GetMT()->HasPendingException());
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
+void ThrowEtsException(EtsExecutionContext *executionCtx, const char *classDescriptor, const char *msg)
 {
-    if (coroutine->IsUsePreAllocObj()) {
-        coroutine->SetUsePreAllocObj(false);
-        coroutine->SetException(coroutine->GetVM()->GetOOMErrorObject());
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx->GetMT() == ManagedThread::GetCurrent());
+
+    if (executionCtx->GetMT()->IsUsePreAllocObj()) {
+        executionCtx->GetMT()->SetUsePreAllocObj(false);
+        executionCtx->GetMT()->SetException(executionCtx->GetPandaVM()->GetOOMErrorObject());
         return;
     }
 
     // "mock stdlib" used in gtests is broken
     ASSERT(Runtime::GetOptions().ShouldInitializeIntrinsics());
-    EtsClass *cls = coroutine->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor, true);
+    EtsClass *cls = executionCtx->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor, true);
     if (cls == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Class " << cls->GetDescriptor() << " not found";
-        ASSERT(coroutine->HasPendingException());
+        LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " not found";
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
 
-    ThrowEtsException(coroutine, cls, msg);
+    ThrowEtsException(executionCtx, cls, msg);
 }
 
 }  // namespace ark::ets

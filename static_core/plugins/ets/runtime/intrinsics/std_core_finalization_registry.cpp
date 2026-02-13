@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,26 +14,27 @@
  */
 
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
 namespace ark::ets::intrinsics {
 extern "C" EtsInt StdFinalizationRegistryGetWorkerId()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    return static_cast<EtsInt>(coro->GetWorker()->GetId());
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    return static_cast<EtsInt>(executionCtx->GetWorker()->GetId());
 }
 
 extern "C" EtsInt StdFinalizationRegistryGetWorkerDomain()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    return static_cast<EtsInt>(FinalizationRegistryManager::GetCoroDomain(coro));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return static_cast<EtsInt>(FinalizationRegistryManager::GetExecCtxDomain(executionCtx));
 }
 
 extern "C" void StdFinalizationRegistryFinishCleanup()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    coro->GetPandaVM()->GetFinalizationRegistryManager()->CleanupCoroFinished();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    executionCtx->GetPandaVM()->GetFinalizationRegistryManager()->CleanupJobFinished();
 }
 }  // namespace ark::ets::intrinsics

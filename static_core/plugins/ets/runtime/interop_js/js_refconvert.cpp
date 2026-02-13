@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,17 +90,17 @@ template <bool ALLOW_INIT>
 JSRefConvert *JSRefConvertCreate(InteropCtx *ctx, Class *klass)
 {
     INTEROP_TRACE();
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     if (!CheckClassInitialized<ALLOW_INIT>(klass)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     auto conv = JSRefConvertCreateImpl(ctx, klass);
     if (UNLIKELY(conv == nullptr)) {
-        if (!coro->HasPendingException()) {
-            ctx->ThrowETSError(coro, std::string("Seamless conversion for class ") +
-                                         utf::Mutf8AsCString(klass->GetDescriptor()) +
-                                         std::string(" is not supported"));
+        if (!executionCtx->GetMT()->HasPendingException()) {
+            ctx->ThrowETSError(executionCtx, std::string("Seamless conversion for class ") +
+                                                 utf::Mutf8AsCString(klass->GetDescriptor()) +
+                                                 std::string(" is not supported"));
         }
         return nullptr;
     }

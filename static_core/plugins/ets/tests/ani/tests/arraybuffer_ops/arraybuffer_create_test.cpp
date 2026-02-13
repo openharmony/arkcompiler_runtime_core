@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/gc_task.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 namespace ark::ets::ani::testing {
@@ -144,9 +144,9 @@ TEST_F(ArrayBufferCreateTest, TestGC)
     data[2U] = 3U;
 
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *vm = coro->GetPandaVM();
-        ScopedManagedCodeThread managedScope(coro);
+        auto *mThread = ManagedThread::GetCurrent();
+        auto *vm = EtsExecutionContext::FromMT(mThread)->GetPandaVM();
+        ScopedManagedCodeThread managedScope(mThread);
         vm->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::OOM_CAUSE));
     }
 

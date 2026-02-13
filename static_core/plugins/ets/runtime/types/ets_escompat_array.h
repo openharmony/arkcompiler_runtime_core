@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include "libarkbase/mem/object_pointer.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 
@@ -63,18 +62,19 @@ public:
     }
 
     /// @brief Creates instance of `std.core.Array` with given length
-    static EtsEscompatArray *Create(EtsCoroutine *coro, size_t length);
+    static EtsEscompatArray *Create(EtsExecutionContext *executionCtx, size_t length);
 
     /// @brief Checks whether the object's real type is `std.core.Array`
-    static bool IsExactlyEscompatArray(const EtsObject *obj, EtsCoroutine *coro)
+    static bool IsExactlyEscompatArray(const EtsObject *obj, EtsExecutionContext *executionCtx)
     {
-        return obj->GetClass() == PlatformTypes(coro)->escompatArray;  // NOLINT (readability-implicit-bool-conversion)
+        return obj->GetClass() ==
+               PlatformTypes(executionCtx)->escompatArray;  // NOLINT (readability-implicit-bool-conversion)
     }
 
     /// @brief Checks whether the object's real type is `std.core.Array`
-    bool IsExactlyEscompatArray(EtsCoroutine *coro) const
+    bool IsExactlyEscompatArray(EtsExecutionContext *executionCtx) const
     {
-        return EtsEscompatArray::IsExactlyEscompatArray(this, coro);
+        return EtsEscompatArray::IsExactlyEscompatArray(this, executionCtx);
     }
 
     /// @brief Implementation of `std.core.Array` method `$_get`
@@ -99,14 +99,14 @@ public:
     /// @brief Returns underlying buffer, object must be exactly `std.core.Array`
     EtsObjectArray *GetDataFromEscompatArray()
     {
-        ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));
+        ASSERT(IsExactlyEscompatArray(EtsExecutionContext::GetCurrent()));
         return GetDataFromEscompatArrayImpl();
     }
 
     /// @brief Returns `actualLength` of array, object must be exactly `std.core.Array`
     EtsInt GetActualLengthFromEscompatArray()
     {
-        ASSERT(IsExactlyEscompatArray(EtsCoroutine::GetCurrent()));
+        ASSERT(IsExactlyEscompatArray(EtsExecutionContext::GetCurrent()));
         return GetActualLengthFromEscompatArrayImpl();
     }
 
@@ -114,25 +114,25 @@ public:
      * @brief Returns length of array according to possible inheritance of underlying array
      * Note that this method is potentially throwing
      */
-    bool GetLength(EtsCoroutine *coro, EtsInt *result);
+    bool GetLength(EtsExecutionContext *executionCtx, EtsInt *result);
 
     /**
      * @brief Sets value at index according to possible inheritance of underlying array
      * Note that this method is potentially throwing
      */
-    bool SetRef(EtsCoroutine *coro, size_t index, EtsObject *ref);
+    bool SetRef(EtsExecutionContext *executionCtx, size_t index, EtsObject *ref);
 
     /**
      * @brief Gets value at index according to possible inheritance of underlying array
      * Note that this method is potentially throwing
      */
-    std::optional<EtsObject *> GetRef(EtsCoroutine *coro, size_t index);
+    std::optional<EtsObject *> GetRef(EtsExecutionContext *executionCtx, size_t index);
 
     /**
      * @brief Pop from array according to possible inheritance of underlying array
      * Note that this method is potentially throwing
      */
-    EtsObject *Pop(EtsCoroutine *coro);
+    EtsObject *Pop(EtsExecutionContext *executionCtx);
 
 private:
     EtsObjectArray *GetDataFromEscompatArrayImpl()

@@ -14,7 +14,6 @@
  */
 
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_typeapi.h"
@@ -23,29 +22,30 @@
 namespace ark::ets {
 
 /* static */
-EtsReflectMethod *EtsReflectMethod::Create(EtsCoroutine *etsCoroutine, bool isStatic, bool isConstructor)
+EtsReflectMethod *EtsReflectMethod::Create(EtsExecutionContext *executionCtx, bool isStatic, bool isConstructor)
 {
-    EtsClass *klass = isConstructor ? PlatformTypes(etsCoroutine)->coreReflectConstructor
-                                    : (isStatic ? PlatformTypes(etsCoroutine)->coreReflectStaticMethod
-                                                : PlatformTypes(etsCoroutine)->coreReflectInstanceMethod);
-    EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+    EtsClass *klass = isConstructor ? PlatformTypes(executionCtx)->coreReflectConstructor
+                                    : (isStatic ? PlatformTypes(executionCtx)->coreReflectStaticMethod
+                                                : PlatformTypes(executionCtx)->coreReflectInstanceMethod);
+    EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
     return EtsReflectMethod::FromEtsObject(etsObject);
 }
 
 /* static */
-EtsReflectMethod *EtsReflectMethod::CreateFromEtsMethod(EtsCoroutine *coro, EtsMethod *method)
+EtsReflectMethod *EtsReflectMethod::CreateFromEtsMethod(EtsExecutionContext *executionCtx, EtsMethod *method)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     ASSERT(method != nullptr);
 
     bool isStatic = method->IsStatic();
     bool isConstructor = method->IsConstructor();
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto reflectMethod = EtsHandle<EtsReflectMethod>(coro, EtsReflectMethod::Create(coro, isStatic, isConstructor));
+    auto reflectMethod =
+        EtsHandle<EtsReflectMethod>(executionCtx, EtsReflectMethod::Create(executionCtx, isStatic, isConstructor));
     if (UNLIKELY(reflectMethod.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 

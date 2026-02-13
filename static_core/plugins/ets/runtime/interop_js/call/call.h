@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,15 +33,16 @@ class Reference;
 namespace ark::ets {
 class EtsObject;
 class EtsString;
-class EtsCoroutine;
+class EtsExecutionContext;
 }  // namespace ark::ets
 
 namespace ark::ets::interop::js {
 class InteropCtx;
 
-PANDA_PUBLIC_API napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method,
+PANDA_PUBLIC_API napi_value CallETSInstance(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method,
                                             Span<napi_value> jsargv, EtsObject *thisObj);
-PANDA_PUBLIC_API napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
+PANDA_PUBLIC_API napi_value CallETSStatic(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method,
+                                          Span<napi_value> jsargv);
 
 PANDA_PUBLIC_API Expected<Method *, PandaString> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
 uint8_t JSRuntimeInitJSCallClass();

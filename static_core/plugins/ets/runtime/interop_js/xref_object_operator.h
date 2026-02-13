@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,47 +28,51 @@ class XRefObjectOperator {
 public:
     static XRefObjectOperator FromEtsObject(EtsHandle<EtsObject> &etsObject);
 
-    EtsObject *GetProperty(EtsCoroutine *coro, const PandaString &name) const;
+    EtsObject *GetProperty(EtsExecutionContext *executionCtx, const PandaString &name) const;
 
-    EtsObject *GetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject) const;
+    EtsObject *GetProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject) const;
 
-    EtsObject *GetProperty(EtsCoroutine *coro, const uint32_t index) const;
+    EtsObject *GetProperty(EtsExecutionContext *executionCtx, const uint32_t index) const;
 
-    bool SetProperty(EtsCoroutine *coro, const std::string &name, EtsHandle<EtsObject> &valueObject) const;
+    bool SetProperty(EtsExecutionContext *executionCtx, const std::string &name,
+                     EtsHandle<EtsObject> &valueObject) const;
 
-    bool SetProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject, EtsHandle<EtsObject> &valueObject) const;
+    bool SetProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject,
+                     EtsHandle<EtsObject> &valueObject) const;
 
-    bool SetProperty(EtsCoroutine *coro, const uint32_t index, EtsHandle<EtsObject> &valueObject) const;
+    bool SetProperty(EtsExecutionContext *executionCtx, const uint32_t index, EtsHandle<EtsObject> &valueObject) const;
 
-    bool IsInstanceOf(EtsCoroutine *coro, const XRefObjectOperator &rhsObject) const;
+    bool IsInstanceOf(EtsExecutionContext *executionCtx, const XRefObjectOperator &rhsObject) const;
 
-    EtsObject *Invoke(EtsCoroutine *coro, Span<VMHandle<ObjectHeader>> args) const;
+    EtsObject *Invoke(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
 
-    EtsObject *InvokeMethod(EtsCoroutine *coro, EtsHandle<EtsObject> &methodObject,
+    EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
                             Span<VMHandle<ObjectHeader>> args) const;
 
-    EtsObject *InvokeMethod(EtsCoroutine *coro, const std::string &name, Span<VMHandle<ObjectHeader>> args) const;
+    EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
+                            Span<VMHandle<ObjectHeader>> args) const;
 
-    bool HasProperty(EtsCoroutine *coro, const std::string &name, bool isOwnProperty = false) const;
+    bool HasProperty(EtsExecutionContext *executionCtx, const std::string &name, bool isOwnProperty = false) const;
 
-    bool HasProperty(EtsCoroutine *coro, EtsHandle<EtsObject> &keyObject, bool isOwnProperty = false) const;
+    bool HasProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject,
+                     bool isOwnProperty = false) const;
 
-    bool HasProperty(EtsCoroutine *coro, const uint32_t index) const;
+    bool HasProperty(EtsExecutionContext *executionCtx, const uint32_t index) const;
 
-    EtsObject *Instantiate(EtsCoroutine *coro, Span<VMHandle<ObjectHeader>> args) const;
+    EtsObject *Instantiate(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
 
-    static std::string TypeOf(EtsCoroutine *coro, EtsObject *obj);
+    static std::string TypeOf(EtsExecutionContext *executionCtx, EtsObject *obj);
 
-    static bool IsTrue(EtsCoroutine *coro, EtsObject *obj);
+    static bool IsTrue(EtsExecutionContext *executionCtx, EtsObject *obj);
 
-    napi_value GetNapiValue(EtsCoroutine *coro) const;
+    napi_value GetNapiValue(EtsExecutionContext *executionCtx) const;
 
-    static bool StrictEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2);
+    static bool StrictEquals(EtsExecutionContext *executionCtx, EtsObject *obj1, EtsObject *obj2);
 
 private:
-    static napi_value ConvertStaticObjectToDynamic(EtsCoroutine *coro, EtsHandle<EtsObject> &object);
+    static napi_value ConvertStaticObjectToDynamic(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &object);
 
-    static napi_valuetype GetValueType(EtsCoroutine *coro, EtsObject *obj);
+    static napi_valuetype GetValueType(EtsExecutionContext *executionCtx, EtsObject *obj);
 
     explicit XRefObjectOperator(EtsHandle<EtsObject> &etsObject);
 

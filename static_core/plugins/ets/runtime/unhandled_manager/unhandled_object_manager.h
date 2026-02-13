@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,16 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_UNHANDLED_OBJECT_MANAGER_H
 #define PANDA_PLUGINS_ETS_RUNTIME_UNHANDLED_OBJECT_MANAGER_H
 
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "runtime/execution/job_worker_thread.h"
 
 namespace ark::ets {
 
 class PandaEtsVM;
 class EtsJob;
 class EtsPromise;
+class EtsExecutionContext;
 
 /// @brief The class manages all unhandled rejected objects
 class UnhandledObjectManager final {
@@ -41,30 +42,30 @@ public:
     void RemoveFailedJob(EtsJob *job);
 
     /// @brief Invokes managed method to apply custom handler on stored failed jobs
-    void ListFailedJobs(EtsCoroutine *coro);
+    void ListFailedJobs(EtsExecutionContext *executionCtx);
 
     /// @brief Adds rejected promise to an internal storage
-    void AddRejectedPromise(EtsPromise *promise, EtsCoroutine *adderCoro);
+    void AddRejectedPromise(EtsPromise *promise, EtsExecutionContext *adderExecutionCtx);
 
     /// @brief Removes rejected promise from internal storage
-    void RemoveRejectedPromise(EtsPromise *promise, EtsCoroutine *removerCoro);
+    void RemoveRejectedPromise(EtsPromise *promise, EtsExecutionContext *removerExecutionCtx);
 
     /**
      * Invokes managed method to apply custom handler on stored rejected promises
-     * @param coro - current coroutine
+     * @param executionCtx - current execution context
      * @param listAllObjects - if false, list objects associated with current worker
      */
-    void ListRejectedPromises(EtsCoroutine *coro, bool listAllObjects);
+    void ListRejectedPromises(EtsExecutionContext *executionCtx, bool listAllObjects);
 
     /// @brief Checks if manager has unhandled failed job objects captured
     bool HasFailedJobObjects() const;
 
     /**
      * Checks if manager has unhandled rejected promise objects captured
-     * @param coro - current coroutine
+     * @param executionCtx - current execution context
      * @param listAllObjects - if false, checks for the current worker
      */
-    bool HasRejectedPromiseObjects(EtsCoroutine *coro, bool listAllObjects) const;
+    bool HasRejectedPromiseObjects(EtsExecutionContext *executionCtx, bool listAllObjects) const;
 
     /// @brief Updates references to objects moved by GC
     void UpdateObjects(const GCRootUpdater &gcRootUpdater);
@@ -73,11 +74,11 @@ public:
     void VisitObjects(const GCRootVisitor &visitor);
 
     /// @brief Applies handler to the exception and exits the program
-    void InvokeErrorHandler(EtsCoroutine *coro, EtsHandle<EtsObject> exception);
+    void InvokeErrorHandler(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> exception);
 
 private:
     PandaUnorderedSet<EtsObject *> failedJobs_ GUARDED_BY(mutex_);
-    PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> rejectedPromises_ GUARDED_BY(mutex_);
+    PandaUnorderedMap<JobWorkerThread::Id, PandaUnorderedSet<EtsObject *>> rejectedPromises_ GUARDED_BY(mutex_);
     // NOTE: The current implementation doesn't handle the case where a promise is
     // rejected in one worker and handled in another. This is considered undefined behavior.
 

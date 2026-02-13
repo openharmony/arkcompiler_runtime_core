@@ -48,23 +48,23 @@ EtsBoolean StdCoreJSONGetJSONParseIgnore(EtsReflectField *reflectField)
 
 EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
 {
-    auto *thread = ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     EtsField *field = reflectField->GetEtsField();
-    VMHandle<EtsString> retStrHandle;
+    EtsHandle<EtsString> retStrHandle;
     auto *runtimeClass = field->GetDeclaringClass()->GetRuntimeClass();
     const panda_file::File &pf = *runtimeClass->GetPandaFile();
     panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
-    fda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
+    fda.EnumerateAnnotations([&pf, &retStrHandle, &executionCtx](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_coreJSONRename),
                          pf.GetStringData(ada.GetClassId()).data)) {
             const auto value = ada.GetElement(0).GetScalarValue();
             const auto id = value.Get<panda_file::File::EntityId>();
             auto stringData = pf.GetStringData(id);
-            retStrHandle = VMHandle<EtsString>(
-                thread, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data))->GetCoreType());
+            retStrHandle = EtsHandle<EtsString>(
+                executionCtx, EtsString::CreateFromMUtf8(reinterpret_cast<const char *>(stringData.data)));
         }
     });
     return retStrHandle.GetPtr();
@@ -72,11 +72,11 @@ EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
 
 extern "C" EtsString *StdCoreJSONStringifyFast(EtsObject *value)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->HasPendingException() == false);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx->GetMT()->HasPendingException() == false);
 
-    EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> valueHandle(coro, value);
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> valueHandle(executionCtx, value);
 
     helpers::JSONStringifier stringifier;
     return stringifier.Stringify(valueHandle);

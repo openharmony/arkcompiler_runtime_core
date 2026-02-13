@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,7 +69,7 @@ template <bool IS_ADD_NATIVE_SCOPE = false>
 static bool IsConstructor(napi_env &env, napi_value &jsValue, const char *constructorName)
 {
     if constexpr (IS_ADD_NATIVE_SCOPE) {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         return DoIsConstructor(env, jsValue, constructorName);
     } else {
         ASSERT_NATIVE_CODE();
@@ -92,7 +92,7 @@ template <bool IS_ADD_NATIVE_SCOPE = false>
 static bool GetValueByValueOf(napi_env env, napi_value &jsValue, const char *constructorName, napi_value *result)
 {
     if constexpr (IS_ADD_NATIVE_SCOPE) {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         return DoGetValueByValueOf(env, jsValue, constructorName, result);
     } else {
         ASSERT_NATIVE_CODE();

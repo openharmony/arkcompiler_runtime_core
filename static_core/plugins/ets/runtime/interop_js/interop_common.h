@@ -133,15 +133,15 @@ ALWAYS_INLINE void InteropTrace(const char *func, const char *file, int line);
         }                                   \
     } while (0)
 
-#define CHECK_NAPI_STATUS(jsStatus, ctx, coro, result)   \
-    do {                                                 \
-        napi_status local_status = (jsStatus);           \
-        if (local_status != napi_ok) {                   \
-            if ((ctx) != nullptr && (coro) != nullptr) { \
-                (ctx)->ForwardJSException(coro);         \
-            }                                            \
-            (result) = false;                            \
-        }                                                \
+#define CHECK_NAPI_STATUS(jsStatus, ctx, executionCtx, result)   \
+    do {                                                         \
+        napi_status local_status = (jsStatus);                   \
+        if (local_status != napi_ok) {                           \
+            if ((ctx) != nullptr && (executionCtx) != nullptr) { \
+                (ctx)->ForwardJSException(executionCtx);         \
+            }                                                    \
+            (result) = false;                                    \
+        }                                                        \
     } while (0)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
@@ -151,14 +151,14 @@ public:
     explicit NapiScope(napi_env env) : env_(env)
     {
         ASSERT_MANAGED_CODE();
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         [[maybe_unused]] auto status = napi_open_handle_scope(env_, &scope_);
         ASSERT(status == napi_ok);
     }
 
     ~NapiScope()
     {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         [[maybe_unused]] auto status = napi_close_handle_scope(env_, scope_);
         ASSERT(status == napi_ok);
     }
@@ -205,7 +205,7 @@ inline napi_valuetype GetValueType(napi_env env, napi_value val)
 {
     napi_valuetype vtype;
     if constexpr (IS_ADD_NATIVE_SCOPE) {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         NAPI_CHECK_FATAL(napi_typeof(env, val, &vtype));
     } else {
         ASSERT_NATIVE_CODE();

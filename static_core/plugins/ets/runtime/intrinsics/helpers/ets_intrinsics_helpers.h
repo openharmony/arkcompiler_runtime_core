@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "ets_coroutine.h"
+#include "runtime/include/managed_thread.h"
 #include "libarkbase/utils/bit_helpers.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -394,7 +394,7 @@ EtsString *FpToString(FpType number, int radix)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         snprintf_s(buf.data(), buf.size(), buf.size() - 1, "radix must be %.f to %.f", helpers::MIN_RADIX,
                    helpers::MAX_RADIX);
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError, buf.data());
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError, buf.data());
         return nullptr;
     }
 
@@ -427,7 +427,7 @@ EtsString *FpToString(FpType number, int radix)
     return EtsString::CreateFromMUtf8(result.c_str());
 }
 
-bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b);
+bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b);
 
 }  // namespace ark::ets::intrinsics::helpers
 

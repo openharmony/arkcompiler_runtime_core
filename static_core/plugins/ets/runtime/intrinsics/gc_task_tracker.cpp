@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
@@ -70,12 +71,12 @@ void GCTaskTracker::GCPhaseStarted(mem::GCPhase phase)
     if (phase != mem::GCPhase::GC_PHASE_MARK || callbackRef_ == nullptr || currentTaskId_ != callbackTaskId_) {
         return;
     }
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *obj = reinterpret_cast<EtsObject *>(coroutine->GetPandaVM()->GetGlobalObjectStorage()->Get(callbackRef_));
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *obj = reinterpret_cast<EtsObject *>(mThread->GetVM()->GetGlobalObjectStorage()->Get(callbackRef_));
     Value arg(obj->GetCoreType());
-    os::memory::ReadLockHolder lock(*coroutine->GetPandaVM()->GetRendezvous()->GetMutatorLock());
-    LambdaUtils::InvokeVoid(coroutine, obj);
+    os::memory::ReadLockHolder lock(*mThread->GetVM()->GetRendezvous()->GetMutatorLock());
+    LambdaUtils::InvokeVoid(mThread, obj);
 }
 
 void GCTaskTracker::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
@@ -88,9 +89,9 @@ void GCTaskTracker::RemoveId(uint64_t id)
 {
     currentTaskId_ = 0;
     if (id == callbackTaskId_ && callbackRef_ != nullptr) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        ASSERT(coroutine != nullptr);
-        coroutine->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+        executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
         callbackRef_ = nullptr;
     }
     if (id != 0) {

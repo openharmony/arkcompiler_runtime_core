@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 
 #include "libarkbase/utils/bit_utils.h"
 #include "libarkbase/macros.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets::intrinsics {
@@ -76,7 +75,7 @@ uint32_t ToUint32(double x)
 
 extern "C" double StdMathRandom()
 {
-    uint64_t threadRandom = XorShift64(EtsCoroutine::GetCurrent()->GetThreadRandomState());
+    uint64_t threadRandom = XorShift64(ManagedThread::GetCurrent()->GetThreadRandomState());
     uint64_t random = (threadRandom >> RIGHT_12) | DOUBLE_MASK;
     // The use of security functions 'memcpy_s' here will have a greater impact on performance
     Uint64ToDouble data {};

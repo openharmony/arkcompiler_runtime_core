@@ -16,17 +16,17 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 
+#include "runtime/include/managed_thread.h"
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "runtime/coroutines/coroutine_events.h"
+#include "runtime/execution/job_events.h"
 
 namespace ark::ets {
-
-class EtsCoroutine;
 
 namespace test {
 class EtsPromiseTest;
@@ -46,7 +46,7 @@ public:
     NO_COPY_SEMANTIC(EtsPromise);
     NO_MOVE_SEMANTIC(EtsPromise);
 
-    PANDA_PUBLIC_API static EtsPromise *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
+    PANDA_PUBLIC_API static EtsPromise *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
     static EtsPromise *FromCoreType(ObjectHeader *promise)
     {
@@ -73,26 +73,27 @@ public:
         return reinterpret_cast<EtsPromise *>(promise);
     }
 
-    EtsObjectArray *GetCallbackQueue(EtsCoroutine *coro) const
+    EtsObjectArray *GetCallbackQueue(EtsExecutionContext *executionCtx) const
     {
         return EtsObjectArray::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_)));
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, callbackQueue_)));
     }
 
-    void SetCallbackQueue(EtsCoroutine *coro, EtsObjectArray *callbackQueue)
+    void SetCallbackQueue(EtsExecutionContext *executionCtx, EtsObjectArray *callbackQueue)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), callbackQueue->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, callbackQueue_),
+                                  callbackQueue->GetCoreType());
     }
 
-    EtsIntArray *GetWorkerDomainQueue(EtsCoroutine *coro) const
+    EtsIntArray *GetWorkerDomainQueue(EtsExecutionContext *executionCtx) const
     {
         return reinterpret_cast<EtsIntArray *>(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_)));
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_)));
     }
 
-    void SetWorkerDomainQueue(EtsCoroutine *coro, EtsIntArray *workerDomainQueue)
+    void SetWorkerDomainQueue(EtsExecutionContext *executionCtx, EtsIntArray *workerDomainQueue)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_),
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_),
                                   workerDomainQueue->GetCoreType());
     }
 
@@ -123,99 +124,102 @@ public:
 
     bool IsProxy() const
     {
-        return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
+        return GetLinkedPromise(EtsExecutionContext::GetCurrent()) != nullptr;
     }
 
-    EtsObject *GetInteropObject(EtsCoroutine *coro) const
+    EtsObject *GetInteropObject(EtsExecutionContext *executionCtx) const
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, interopObject_));
         return EtsObject::FromCoreType(obj);
     }
 
-    void SetInteropObject(EtsCoroutine *coro, EtsObject *o)
+    void SetInteropObject(EtsExecutionContext *executionCtx, EtsObject *o)
     {
         ASSERT(o != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_), o->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, interopObject_),
+                                  o->GetCoreType());
     }
 
-    EtsObject *GetLinkedPromise(EtsCoroutine *coro) const
+    EtsObject *GetLinkedPromise(EtsExecutionContext *executionCtx) const
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, linkedPromise_));
         return EtsObject::FromCoreType(obj);
     }
 
-    void SetLinkedPromise(EtsCoroutine *coro, EtsObject *p)
+    void SetLinkedPromise(EtsExecutionContext *executionCtx, EtsObject *p)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, linkedPromise_),
+                                  p->GetCoreType());
     }
 
     static void CreateLink(EtsObject *source, EtsPromise *target)
     {
         ASSERT(target != nullptr);
-        EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
-        auto *jobQueue = currentCoro->GetExternalIfaceTable()->GetJobQueue();
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto *jobQueue = executionCtx->GetExternalIfaceTable()->GetJobQueue();
         if (jobQueue != nullptr) {
             ASSERT(target != nullptr);
             jobQueue->CreateLink(source, target->AsObject());
         }
     }
 
-    EtsMutex *GetMutex(EtsCoroutine *coro) const
+    EtsMutex *GetMutex(EtsExecutionContext *executionCtx) const
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, mutex_));
         return EtsMutex::FromCoreType(obj);
     }
 
-    void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
+    void SetMutex(EtsExecutionContext *executionCtx, EtsMutex *mutex)
     {
         ASSERT(mutex != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
     }
 
-    EtsEvent *GetEvent(EtsCoroutine *coro) const
+    EtsEvent *GetEvent(EtsExecutionContext *executionCtx) const
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_));
         return EtsEvent::FromCoreType(obj);
     }
 
-    void SetEvent(EtsCoroutine *coro, EtsEvent *event)
+    void SetEvent(EtsExecutionContext *executionCtx, EtsEvent *event)
     {
         ASSERT(event != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
     }
 
-    void Resolve(EtsCoroutine *coro, EtsObject *value)
+    void Resolve(EtsExecutionContext *executionCtx, EtsObject *value)
     {
         ASSERT(IsPending() || IsLinked());
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
-        OnPromiseCompletion(coro);
+        OnPromiseCompletion(executionCtx);
     }
 
-    void Reject(EtsCoroutine *coro, EtsObject *error)
+    void Reject(EtsExecutionContext *executionCtx, EtsObject *error)
     {
         ASSERT(IsPending() || IsLinked());
         ASSERT(error != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
-        OnPromiseCompletion(coro);
+        OnPromiseCompletion(executionCtx);
     }
 
-    void SubmitCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineWorkerDomain workerDomain)
+    void SubmitCallback(EtsExecutionContext *executionCtx, EtsObject *callback, JobWorkerThreadDomain workerDomain)
     {
         ASSERT(IsLocked());
-        ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(coro)->GetLength()));
-        auto *cbQueue = GetCallbackQueue(coro);
-        auto *workerDomainQueue = GetWorkerDomainQueue(coro);
+        ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(executionCtx)->GetLength()));
+        auto *cbQueue = GetCallbackQueue(executionCtx);
+        auto *workerDomainQueue = GetWorkerDomainQueue(executionCtx);
         workerDomainQueue->Set(queueSize_, static_cast<int>(workerDomain));
         cbQueue->Set(queueSize_, callback);
         queueSize_++;
     }
 
-    EtsObject *GetValue(EtsCoroutine *coro) const
+    EtsObject *GetValue(EtsExecutionContext *executionCtx) const
     {
-        return EtsObject::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_)));
+        return EtsObject::FromCoreType(
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, value_)));
     }
 
     uint32_t GetState() const
@@ -231,14 +235,14 @@ public:
     /// Allows to get exclusive access to the promise state
     void Lock()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         mutex->Lock();
     }
 
     void Unlock()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         ASSERT(mutex->IsHeld());
         mutex->Unlock();
@@ -246,7 +250,7 @@ public:
 
     bool IsLocked()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         return mutex->IsHeld();
     }
@@ -254,7 +258,7 @@ public:
     /// Blocks current coroutine until promise is resolved/rejected
     void Wait()
     {
-        auto *event = GetEvent(EtsCoroutine::GetCurrent());
+        auto *event = GetEvent(EtsExecutionContext::GetCurrent());
         ASSERT(event != nullptr);
         event->Wait();
     }
@@ -266,15 +270,16 @@ public:
     }
 
     // launch promise then/catch callback: void()
-    static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const CoroutineWorkerGroup::Id &groupId);
+    static void LaunchCallback(EtsExecutionContext *executionCtx, EtsObject *callback,
+                               const JobWorkerThreadGroup::Id &groupId);
 
 private:
-    void OnPromiseCompletion(EtsCoroutine *coro);
+    void OnPromiseCompletion(EtsExecutionContext *executionCtx);
 
-    void ClearQueues(EtsCoroutine *coro)
+    void ClearQueues(EtsExecutionContext *executionCtx)
     {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_), nullptr);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_), nullptr);
         queueSize_ = 0;
     }
 

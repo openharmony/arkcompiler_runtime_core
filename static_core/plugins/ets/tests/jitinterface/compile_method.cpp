@@ -31,7 +31,7 @@ ani_int CompileMethod(ani_env *env, ani_string name)
     }
     ScopedManagedCodeFix s(env);
     auto str = s.ToInternalType(name);
-    auto *caller = GetMethodOwnerClassInFrames(s.GetCoroutine(), 0);
+    auto *caller = GetMethodOwnerClassInFrames(s.GetExecutionContext(), 0);
     ClassLinkerContext *ctx = nullptr;
     if (caller != nullptr) {
         ctx = caller->GetLoadContext();

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "include/object_header.h"
 #include "intrinsics.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -30,8 +32,8 @@ Field *TryGetField(ark::Method *method, Field *rawField, uint32_t pc, ark::Class
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
-    ASSERT(EtsCoroutine::GetCurrent() != nullptr);
-    InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
+    ASSERT(ManagedThread::GetCurrent() != nullptr);
+    InterpreterCache *cache = ManagedThread::GetCurrent()->GetInterpreterCache();
     return GetFieldByName<IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
 
@@ -41,8 +43,8 @@ ark::Method *TryGetCallee(ark::Method *method, Field *rawField, uint32_t pc, ark
     bool useIc = pc != ark::compiler::INVALID_PC;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto address = method->GetInstructions() + (useIc ? pc : 0);
-    ASSERT(EtsCoroutine::GetCurrent() != nullptr);
-    InterpreterCache *cache = EtsCoroutine::GetCurrent()->GetInterpreterCache();
+    ASSERT(ManagedThread::GetCurrent() != nullptr);
+    InterpreterCache *cache = ManagedThread::GetCurrent()->GetInterpreterCache();
     return GetAccessorByName<FIELD_TYPE, IS_GETTER>(cache->GetEntry(address), method, rawField, address, klass);
 }
 
@@ -105,9 +107,9 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
     ark::Class *klass;
     ark::Field *rawField;
     {
-        auto *thread = ManagedThread::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handleObj(thread, obj);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        VMHandle<ObjectHeader> handleObj(executionCtx->GetMT(), obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         ASSERT(handleObj.GetPtr() != nullptr);
         klass = static_cast<ark::Class *>(handleObj.GetPtr()->ClassAddr<ark::BaseClass>());
@@ -125,7 +127,7 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
         auto callee = TryGetCallee<FIELD_TYPE, true>(method, rawField, pc, klass);
         if (callee != nullptr) {
             Value val(handleObj.GetPtr());
-            Value result = callee->Invoke(Coroutine::GetCurrent(), &val);
+            Value result = callee->Invoke(executionCtx->GetMT(), &val);
             return result.GetAs<T>();
         }
     }
@@ -204,9 +206,9 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
     ark::Class *klass;
     ark::Field *rawField;
     {
-        auto *thread = ManagedThread::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handleObj(thread, obj);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        VMHandle<ObjectHeader> handleObj(executionCtx->GetMT(), obj);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
         rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
@@ -224,7 +226,7 @@ void CompilerEtsStObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::O
         auto callee = TryGetCallee<FIELD_TYPE, false>(method, rawField, pc, klass);
         if (callee != nullptr) {
             PandaVector<Value> args {Value(handleObj.GetPtr()), Value(storeValue)};
-            callee->Invoke(Coroutine::GetCurrent(), args.data());
+            callee->Invoke(ManagedThread::GetCurrent(), args.data());
             return;
         }
     }
@@ -240,10 +242,10 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
     ark::Class *klass;
     ark::Field *rawField;
     {
-        auto *thread = ManagedThread::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-        VMHandle<ObjectHeader> handleObj(thread, obj);
-        VMHandle<ObjectHeader> handleStore(thread, storeValue);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        VMHandle<ObjectHeader> handleObj(executionCtx->GetMT(), obj);
+        VMHandle<ObjectHeader> handleStore(executionCtx->GetMT(), storeValue);
         auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
         klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
         rawField = classLinker->GetField(*method, panda_file::File::EntityId(id), false);
@@ -257,7 +259,7 @@ void CompilerEtsStObjByNameRef(ark::Method *method, int32_t id, uint32_t pc, ark
         auto callee = TryGetCallee<panda_file::Type::TypeId::REFERENCE, false>(method, rawField, pc, klass);
         if (callee != nullptr) {
             PandaVector<Value> args {Value(handleObj.GetPtr()), Value(handleStore.GetPtr())};
-            callee->Invoke(Coroutine::GetCurrent(), args.data());
+            callee->Invoke(ManagedThread::GetCurrent(), args.data());
             return;
         }
     }
@@ -338,27 +340,28 @@ extern "C" void CompilerEtsStObjByNameObj(ark::Method *method, int32_t id, uint3
 
 extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    return static_cast<uint8_t>(EtsReferenceEquals(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return static_cast<uint8_t>(
+        EtsReferenceEquals(executionCtx, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
 }
 
 extern "C" uint8_t CompilerEtsStrictEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
-    auto coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     return static_cast<uint8_t>(
-        EtsReferenceEquals<true>(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+        EtsReferenceEquals<true>(executionCtx, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
 }
 
 extern "C" EtsString *CompilerEtsTypeof(ObjectHeader *obj)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    return EtsReferenceTypeof(coro, EtsObject::FromCoreType(obj));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return EtsReferenceTypeof(executionCtx, EtsObject::FromCoreType(obj));
 }
 
 extern "C" uint8_t CompilerEtsIstrue(ObjectHeader *obj)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    return static_cast<uint8_t>(EtsIstrue(coro, EtsObject::FromCoreType(obj)));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    return static_cast<uint8_t>(EtsIstrue(executionCtx, EtsObject::FromCoreType(obj)));
 }
 
 extern "C" void CompilerEtsNullcheck(ObjectHeader *obj)
@@ -374,7 +377,7 @@ extern "C" EtsString *CompilerLongToStringDecimal(int64_t number, [[maybe_unused
     if (UNLIKELY(cache == nullptr)) {
         return LongToStringCache::GetNoCache(number);
     }
-    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number);
+    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number);
 }
 
 extern "C" EtsString *CompilerFloatToStringDecimal(uint32_t number, [[maybe_unused]] uint64_t unused)
@@ -383,7 +386,8 @@ extern "C" EtsString *CompilerFloatToStringDecimal(uint32_t number, [[maybe_unus
     if (UNLIKELY(cache == nullptr)) {
         return FloatToStringCache::GetNoCache(bit_cast<float>(number));
     }
-    return FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<float>(number));
+    return FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(),
+                                                               bit_cast<float>(number));
 }
 
 extern "C" EtsString *CompilerDoubleToStringDecimal(uint64_t number, [[maybe_unused]] uint64_t unused)
@@ -392,7 +396,8 @@ extern "C" EtsString *CompilerDoubleToStringDecimal(uint64_t number, [[maybe_unu
     if (UNLIKELY(cache == nullptr)) {
         return DoubleToStringCache::GetNoCache(bit_cast<double>(number));
     }
-    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number));
+    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(),
+                                                                bit_cast<double>(number));
 }
 
 }  // namespace ark::ets::intrinsics

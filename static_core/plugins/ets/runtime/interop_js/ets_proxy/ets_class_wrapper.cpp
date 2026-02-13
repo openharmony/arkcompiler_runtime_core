@@ -90,15 +90,15 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
 
     napi_value jsValue;
     // etsObject will be wrapped in jsValue in responce to jsCtor call
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     // See (CheckClassInitialized) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    EtsHandle<EtsObject> handle(coro, etsObject);
+    EtsHandle<EtsObject> handle(executionCtx, etsObject);
     ctx->SetPendingNewInstance(handle);
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         NAPI_CHECK_FATAL(napi_new_instance(env, GetJsCtor(env), 0, nullptr, &jsValue));
     }
 
@@ -181,13 +181,13 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
 
     EtsObject *etsObject = EtsObject::Create(jsproxyWrapper_->GetProxyClass());
     if (UNLIKELY(etsObject == nullptr)) {
-        ctx->ForwardEtsException(EtsCoroutine::GetCurrent());
+        ctx->ForwardEtsException(EtsExecutionContext::GetCurrent());
         return nullptr;
     }
 
-    auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsObject> objHandle(coro, etsObject);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
     SharedReference *sharedRef = storage->CreateJSObjectRefwithWrap(ctx, objHandle, jsValue);
     if (UNLIKELY(sharedRef == nullptr)) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
@@ -270,7 +270,7 @@ public:
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
         napi_env env = ctx->GetJSEnv();
         SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
         if (LIKELY(sharedRef != nullptr)) {
@@ -304,7 +304,7 @@ public:
             proxy = js_proxy::JSProxy::CreateInterfaceProxy(interfaces, interfaceName);
             ctx->SetInterfaceProxyInstance(interfaceName, proxy);
         }
-        EtsHandle<EtsObject> etsObject(coro, EtsObject::Create(proxy->GetProxyClass()));
+        EtsHandle<EtsObject> etsObject(executionCtx, EtsObject::Create(proxy->GetProxyClass()));
         if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
             ctx->ThrowJSTypeError(ctx->GetJSEnv(),
                                   "Interface Proxy EtsObject create failed, interfaceList: " + interfaceName);
@@ -330,11 +330,11 @@ protected:
         PandaSet<Class *> interfaceList;
         std::istringstream iss {interfaces};
         std::string descriptor;
-        auto *coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro != nullptr);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
         while (std::getline(iss, descriptor, ',')) {
             auto interfaceCls =
-                coro->GetPandaVM()->GetClassLinker()->GetClass(descriptor.data(), true, ctx->LinkerCtx());
+                executionCtx->GetPandaVM()->GetClassLinker()->GetClass(descriptor.data(), true, ctx->LinkerCtx());
             ASSERT(interfaceCls != nullptr);
             interfaceList.insert(interfaceCls->GetRuntimeClass());
         }
@@ -365,8 +365,8 @@ public:
 
         std::array args = {Value {ret->GetCoreType()}};
         auto *method = PlatformTypes()->interopJSRuntime->GetStaticMethod("CreateIterator", nullptr);
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto resObject = method->GetPandaMethod()->Invoke(coro, args.data());
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        auto resObject = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
         ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());
         if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(GetKlass()))) {
             ctx->ThrowJSTypeError(ctx->GetJSEnv(), "object of type " + ret->GetClass()->GetRuntimeClass()->GetName() +
@@ -960,9 +960,9 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
 {
     INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
@@ -973,7 +973,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
     napi_value property = jsArgs[1];
 
     if (GetValueType(env, property) == napi_number) {
-        ScopedManagedCodeThread managedCode(coro);
+        ScopedManagedCodeThread managedCode(executionCtx->GetMT());
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         ASSERT(storage != nullptr);
         ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
@@ -989,7 +989,7 @@ napi_value EtsClassWrapper::MimicGetHandler(napi_env env, napi_callback_info inf
         Span sp(jsArgs->begin(), jsArgs->end());
         const size_t startIndex = 1;
         const size_t argSize = 1;
-        return CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+        return CallETSInstance(executionCtx, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
     }
 
     napi_value result;
@@ -1002,16 +1002,16 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
 {
     INTEROP_TRACE();
     ASSERT_SCOPED_NATIVE_CODE();
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, jsArgs->data(), nullptr, nullptr));
 
-    ScopedManagedCodeThread managedCode(coro);
+    ScopedManagedCodeThread managedCode(executionCtx->GetMT());
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ASSERT(storage != nullptr);
     ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsArgs[0]);
@@ -1043,7 +1043,7 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
         InteropCtx::ThrowJSError(env, "there is no setter method on target object.");
         return nullptr;
     }
-    CallETSInstance(coro, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
+    CallETSInstance(executionCtx, ctx, method->GetPandaMethod(), sp.SubSpan(startIndex, argSize), etsThis);
 
     napi_value trueValue;
     NAPI_CHECK_FATAL(napi_get_boolean(env, true, &trueValue));
@@ -1053,9 +1053,9 @@ napi_value EtsClassWrapper::MimicSetHandler(napi_env env, napi_callback_info inf
 /*static*/
 napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinfo)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     napi_value jsThis;
     size_t argc;
@@ -1063,7 +1063,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     auto etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
 
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
     EtsObject *etsObject = ctx->AcquirePendingNewInstance();
 
     if (LIKELY(etsObject != nullptr)) {
@@ -1075,8 +1075,8 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
             jsObject = jsThis;
         }
 
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
         // Create shared reference for existing ets object
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         if (UNLIKELY(!storage->CreateETSObjectRef(ctx, objHandle, jsObject))) {
@@ -1111,11 +1111,11 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
 
 bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_value jsThis, Span<napi_value> jsArgs)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
 
     if (UNLIKELY(!CheckClassInitialized<true>(etsClass_->GetRuntimeClass()))) {
-        ctx->ForwardEtsException(coro);
+        ctx->ForwardEtsException(executionCtx);
         return false;
     }
 
@@ -1138,8 +1138,8 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
         instanceClass = jsproxyWrapper_->GetProxyClass();
     }
 
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsObject> etsObject(coro, EtsObject::Create(instanceClass));
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, EtsObject::Create(instanceClass));
     if (UNLIKELY(etsObject.GetPtr() == nullptr)) {
         return false;
     }
@@ -1165,7 +1165,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     EtsMethod *ctorMethod = ctorWrapper->GetEtsMethod(jsArgs.Size());
     ASSERT(ctorMethod->IsInstanceConstructor());
 
-    napi_value callRes = CallETSInstance(coro, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());
+    napi_value callRes = CallETSInstance(executionCtx, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());
     return callRes != nullptr;
 }
 

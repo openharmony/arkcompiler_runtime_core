@@ -15,7 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_method.h"
@@ -23,19 +23,19 @@
 namespace ark::ets {
 
 /* static */
-EtsEscompatArray *EtsEscompatArray::Create(EtsCoroutine *coro, size_t length)
+EtsEscompatArray *EtsEscompatArray::Create(EtsExecutionContext *executionCtx, size_t length)
 {
-    ASSERT(!coro->HasPendingException());
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
 
-    EtsHandleScope scope(coro);
+    EtsHandleScope scope(executionCtx);
 
-    const EtsPlatformTypes *platformTypes = PlatformTypes(coro);
+    const EtsPlatformTypes *platformTypes = PlatformTypes(executionCtx);
 
     // Create std.core array
     EtsClass *klass = platformTypes->escompatArray;
-    EtsHandle<EtsEscompatArray> arrayHandle(coro, FromEtsObject(EtsObject::Create(coro, klass)));
+    EtsHandle<EtsEscompatArray> arrayHandle(executionCtx, FromEtsObject(EtsObject::Create(executionCtx, klass)));
     if (UNLIKELY(arrayHandle.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -43,10 +43,10 @@ EtsEscompatArray *EtsEscompatArray::Create(EtsCoroutine *coro, size_t length)
     EtsClass *cls = platformTypes->coreObject;
     auto buffer = EtsObjectArray::Create(cls, length);
     if (UNLIKELY(buffer == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    ObjectAccessor::SetObject(coro, arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), arrayHandle.GetPtr(), GetBufferOffset(), buffer->GetCoreType());
 
     // Set length
     arrayHandle->actualLength_ = length;
@@ -57,7 +57,7 @@ EtsEscompatArray *EtsEscompatArray::Create(EtsCoroutine *coro, size_t length)
 static bool IsOutOfBounds(EtsInt index, EtsInt actualLength)
 {
     if (UNLIKELY(index < 0 || index >= actualLength)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, "Out of bounds");
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, "Out of bounds");
         return true;
     }
     return false;
@@ -97,81 +97,81 @@ void EtsEscompatArray::EscompatArraySetUnsafe(EtsInt index, EtsObject *value)
     GetDataFromEscompatArrayImpl()->Set(index, value);
 }
 
-bool EtsEscompatArray::GetLength(EtsCoroutine *coro, EtsInt *result)
+bool EtsEscompatArray::GetLength(EtsExecutionContext *executionCtx, EtsInt *result)
 {
-    ASSERT(coro != nullptr);
-    ASSERT(!coro->HasPendingException());
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
     ASSERT(result != nullptr);
-    if (LIKELY(IsExactlyEscompatArray(coro))) {
+    if (LIKELY(IsExactlyEscompatArray(executionCtx))) {
         // Fast path, object is exactly `std.core.Array`
         *result = GetActualLengthFromEscompatArray();
         return true;
     }
     // Slow path, because `length` getter might be overriden
-    EtsMethod *lengthGetter = GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->escompatArrayGetLength);
+    EtsMethod *lengthGetter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->escompatArrayGetLength);
     ASSERT(lengthGetter != nullptr);
     Value args(GetCoreType());
-    Value resultLength = lengthGetter->GetPandaMethod()->Invoke(coro, &args);
-    if (coro->HasPendingException()) {
+    Value resultLength = lengthGetter->GetPandaMethod()->Invoke(executionCtx->GetMT(), &args);
+    if (executionCtx->GetMT()->HasPendingException()) {
         return false;
     }
     *result = resultLength.GetAs<EtsInt>();
     return true;
 }
 
-bool EtsEscompatArray::SetRef(EtsCoroutine *coro, size_t index, EtsObject *ref)
+bool EtsEscompatArray::SetRef(EtsExecutionContext *executionCtx, size_t index, EtsObject *ref)
 {
-    ASSERT(coro != nullptr);
-    ASSERT(!coro->HasPendingException());
-    if (LIKELY(IsExactlyEscompatArray(coro))) {
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyEscompatArray(executionCtx))) {
         // Fast path, object is exactly `std.core.Array`
         EscompatArraySet(index, ref);
     } else {
         // Slow path, because `$_set` might be overriden
-        EtsMethod *setter = GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->escompatArraySet);
+        EtsMethod *setter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->escompatArraySet);
         ASSERT(setter != nullptr);
         std::array args = {Value(GetCoreType()), Value(static_cast<EtsInt>(index)), Value(ref->GetCoreType())};
-        setter->GetPandaMethod()->InvokeVoid(coro, args.data());
+        setter->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
     }
-    return !coro->HasPendingException();
+    return !executionCtx->GetMT()->HasPendingException();
 }
 
-std::optional<EtsObject *> EtsEscompatArray::GetRef(EtsCoroutine *coro, size_t index)
+std::optional<EtsObject *> EtsEscompatArray::GetRef(EtsExecutionContext *executionCtx, size_t index)
 {
-    ASSERT(coro != nullptr);
-    ASSERT(!coro->HasPendingException());
-    if (LIKELY(IsExactlyEscompatArray(coro))) {
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyEscompatArray(executionCtx))) {
         // Fast path, object is exactly `std.core.Array`
         auto *obj = EscompatArrayGet(index);
-        return coro->HasPendingException() ? std::nullopt : std::optional<EtsObject *>(obj);
+        return executionCtx->GetMT()->HasPendingException() ? std::nullopt : std::optional<EtsObject *>(obj);
     }
     // Slow path, because `$_get` might be overriden
-    EtsMethod *getter = GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->escompatArrayGet);
+    EtsMethod *getter = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->escompatArrayGet);
     ASSERT(getter != nullptr);
     std::array args = {Value(GetCoreType()), Value(static_cast<EtsInt>(index))};
-    Value result = getter->GetPandaMethod()->Invoke(coro, args.data());
-    if (coro->HasPendingException()) {
+    Value result = getter->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+    if (executionCtx->GetMT()->HasPendingException()) {
         return {};
     }
     return EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());
 }
 
-EtsObject *EtsEscompatArray::Pop(EtsCoroutine *coro)
+EtsObject *EtsEscompatArray::Pop(EtsExecutionContext *executionCtx)
 {
-    ASSERT(coro != nullptr);
-    ASSERT(!coro->HasPendingException());
-    if (LIKELY(IsExactlyEscompatArray(coro))) {
+    ASSERT(executionCtx != nullptr);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    if (LIKELY(IsExactlyEscompatArray(executionCtx))) {
         // Fast path, object is exactly `std.core.Array`
         return EscompatArrayPop();
     }
 
     // Slow path, because `pop` might be overriden
-    auto *popMethod = GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->escompatArrayPop);
+    auto *popMethod = GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->escompatArrayPop);
     ASSERT(popMethod != nullptr);
 
     Value arg(GetCoreType());
-    Value result = popMethod->GetPandaMethod()->Invoke(coro, &arg);
-    if (coro->HasPendingException()) {
+    Value result = popMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), &arg);
+    if (executionCtx->GetMT()->HasPendingException()) {
         return nullptr;
     }
     return EtsObject::FromCoreType(result.GetAs<ObjectHeader *>());

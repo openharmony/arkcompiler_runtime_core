@@ -16,7 +16,6 @@
 #include <sys/syscall.h>
 #include <atomic>
 
-#include "coroutines/coroutine_stats.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/os/thread.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
@@ -25,7 +24,7 @@
 #include "runtime/tooling/sampler/stack_walker_base.h"
 #include "runtime/tooling/pt_thread_info.h"
 #include "runtime/signal_handler.h"
-#include "runtime/coroutines/coroutine.h"
+#include "runtime/execution/coroutines/coroutine.h"
 
 namespace ark::tooling::sampler {
 

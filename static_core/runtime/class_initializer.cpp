@@ -25,8 +25,8 @@
 #include "runtime/monitor.h"
 #include "runtime/monitor_object_lock.h"
 #include "runtime/class_lock.h"
-#include "runtime/coroutines/coroutine.h"
-#include "runtime/coroutines/coroutine_manager.h"
+#include "runtime/execution/coroutines/coroutine.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
 #include "verification/util/is_system.h"
 #include "verify_app_install.h"
 
@@ -102,10 +102,10 @@ class ClassInitGuard<MT_MODE_TASK> {
 public:
     using Guard = class Adapter {
     public:
-        explicit Adapter(ThreadManager *tm) : s_(static_cast<CoroutineManager *>(tm)) {}
+        explicit Adapter(ThreadManager *tm) : s_(static_cast<JobManager *>(tm)) {}
 
     private:
-        ScopedDisableCoroutineSwitch s_;
+        ScopedDisableJobSwitch s_;
     };
 };
 
@@ -229,7 +229,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread 
 
         if (klass->IsInitializing()) {
             if constexpr (MODE == MT_MODE_TASK) {
-                if (klass->GetInitTid() == Coroutine::CastFromMutator(thread)->GetCoroutineId()) {
+                if (klass->GetInitTid() == JobExecutionContext::CastFromMutator(thread)->GetJob()->GetId()) {
                     return true;
                 }
             } else {
@@ -246,7 +246,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread 
         }
 
         if constexpr (MODE == MT_MODE_TASK) {
-            klass->SetInitTid(Coroutine::CastFromMutator(thread)->GetCoroutineId());
+            klass->SetInitTid(JobExecutionContext::CastFromMutator(thread)->GetJob()->GetId());
         } else {
             klass->SetInitTid(thread->GetId());
         }

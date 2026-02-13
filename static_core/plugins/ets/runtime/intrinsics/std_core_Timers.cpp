@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_launch.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
-#include "runtime/coroutines/coroutine.h"
-#include "runtime/coroutines/coroutine_events.h"
+#include "runtime/execution/coroutines/coroutine.h"
+#include "runtime/execution/job_events.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
@@ -94,17 +97,17 @@ static std::atomic<TimerId> g_internalEventId = 0;
 
 static void InvokeCallback(mem::Reference *callback)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ScopedManagedCodeThread managedScope(coro);
-    auto *lambda = coro->GetVM()->GetGlobalObjectStorage()->Get(callback);
-    LambdaUtils::InvokeVoid(coro, EtsObject::FromCoreType(lambda));
+    auto *mThread = ManagedThread::GetCurrent();
+    ScopedManagedCodeThread managedScope(mThread);
+    auto *lambda = mThread->GetVM()->GetGlobalObjectStorage()->Get(callback);
+    LambdaUtils::InvokeVoid(mThread, EtsObject::FromCoreType(lambda));
 }
 
-static bool CheckCoroutineSwitchEnabled(EtsCoroutine *etsCoro)
+static bool CheckCoroutineSwitchEnabled(JobExecutionContext *executionCtx)
 {
-    ASSERT(etsCoro != nullptr);
-    if (etsCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(etsCoro, PlatformTypes()->coreInvalidCoroutineOperationError,
+    ASSERT(executionCtx != nullptr);
+    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
+        ThrowEtsException(EtsExecutionContext::FromMT(executionCtx), PlatformTypes()->coreInvalidJobOperationError,
                           "setTimeout/setInterval is not allowed in global scope or during static initialization "
                           "(<cctor>). Move the call into a function invoked after initialization.");
         return false;
@@ -114,37 +117,36 @@ static bool CheckCoroutineSwitchEnabled(EtsCoroutine *etsCoro)
 
 TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodic)
 {
-    auto *etsCoro = EtsCoroutine::GetCurrent();
-    if (!CheckCoroutineSwitchEnabled(etsCoro)) {
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    if (!CheckCoroutineSwitchEnabled(executionCtx)) {
         return 0;
     }
     // Atomic with relaxed order reason: sync is not needed here
     auto timerId = g_nextTimerId.fetch_add(1, std::memory_order_relaxed);
-    auto *coro = Coroutine::GetCurrent();
-    auto *refStorage = coro->GetVM()->GetGlobalObjectStorage();
+    auto *refStorage = executionCtx->GetVM()->GetGlobalObjectStorage();
     auto *callbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto *timerInfo =
         Runtime::GetCurrent()->GetInternalAllocator()->New<TimerInfo>(callbackRef, delay, periodic, timerId);
 
     auto timerEntrypoint = [](void *param) {
         auto *timer = static_cast<TimerInfo *>(param);
-        auto *timerCoro = Coroutine::GetCurrent();
-        auto *coroMan = timerCoro->GetManager();
+        auto *executionCtx = JobExecutionContext::GetCurrent();
+        auto *jobMan = executionCtx->GetManager();
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto usDelay = timer->GetDelay() * 1000U;
 
         while (true) {
             // Atomic with relaxed order reason: sync is not needed here
-            TimerEvent timerEvent(coroMan, g_internalEventId.fetch_add(1, std::memory_order_relaxed));
+            TimerEvent timerEvent(jobMan, g_internalEventId.fetch_add(1, std::memory_order_relaxed));
 
             if (!g_timerTable.RegisterTimer(timer->GetId(), &timerEvent)) {
                 break;
             }
 
             timerEvent.Lock();
-            timerEvent.SetExpirationTime(coroMan->GetCurrentTime() + usDelay);
-            timerCoro->GetWorker()->TriggerSchedulerExternally(timerCoro, timer->GetDelay());
-            coroMan->Await(&timerEvent);
+            timerEvent.SetExpirationTime(jobMan->GetCurrentTime() + usDelay);
+            executionCtx->GetWorker()->PostSchedulingTask(timer->GetDelay());
+            jobMan->Await(&timerEvent);
 
             if (g_timerTable.IsTimerDisarmed(timer->GetId())) {
                 break;
@@ -160,17 +162,20 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         }
 
         g_timerTable.RemoveTimer(timer->GetId());
-        timerCoro->GetVM()->GetGlobalObjectStorage()->Remove(timer->GetCallback());
+        executionCtx->GetVM()->GetGlobalObjectStorage()->Remove(timer->GetCallback());
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(timer);
     };
 
-    auto coroName = "Timer callback: " + ark::ToPandaString(timerId);
-    auto wGroup = ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId());
-    auto launchRes = coro->GetManager()->LaunchNative(timerEntrypoint, timerInfo, std::move(coroName), wGroup,
-                                                      ark::ets::EtsCoroutine::TIMER_CALLBACK, true, true);
+    auto jobName = "Timer callback: " + ark::ToPandaString(timerId);
+    auto *jobMan = executionCtx->GetManager();
+    auto epInfo = Job::NativeEntrypointInfo {timerEntrypoint, timerInfo};
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    auto *job = jobMan->CreateJob(std::move(jobName), std::move(epInfo), EtsCoroutine::TIMER_CALLBACK,
+                                  Job::Type::MUTATOR, true);
+    auto launchRes = jobMan->Launch(job, LaunchParams {true});
     if (launchRes != LaunchResult::OK) {
         refStorage->Remove(callbackRef);
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(timerInfo);
+        jobMan->DestroyJob(job);
     }
     return timerId;
 }

@@ -28,8 +28,8 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napie
     ProcessTaskpoolWorker(true);
     vm->PreZygoteFork();
 #ifdef PANDA_ETS_INTEROP_JS
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    if (!interop::js::CreateMainInteropContext(coroutine, napienv)) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (!interop::js::CreateMainInteropContext(executionCtx, napienv)) {
         LOG(ERROR, RUNTIME) << "Cannot create interop context";
     }
 #endif
@@ -149,8 +149,9 @@ bool ETSAni::PreCreateExclusiveWorkerForTaskpool()
         LOG(ERROR, COROUTINES) << "Load taskpool initWorkerPool failed in post zygote fork";
         return false;
     }
-    ScopedManagedCodeThread managedScope(Coroutine::GetCurrent());
-    method->GetPandaMethod()->Invoke(Coroutine::GetCurrent(), nullptr);
+    auto *mThread = ManagedThread::GetCurrent();
+    ScopedManagedCodeThread managedScope(mThread);
+    method->GetPandaMethod()->Invoke(mThread, nullptr);
     return true;
 }
 
@@ -170,8 +171,9 @@ bool ETSAni::DestroyExclusiveWorkerForTaskpoolIfExists()
         LOG(ERROR, COROUTINES) << "Load taskpool::stopAllWorkers failed in pre zygote fork";
         return false;
     }
-    ScopedManagedCodeThread managedScope(Coroutine::GetCurrent());
-    method->GetPandaMethod()->Invoke(Coroutine::GetCurrent(), nullptr);
+    auto *mThread = ManagedThread::GetCurrent();
+    ScopedManagedCodeThread managedScope(mThread);
+    method->GetPandaMethod()->Invoke(mThread, nullptr);
     return true;
 }
 

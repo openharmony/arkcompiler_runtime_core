@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "include/managed_thread.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -45,34 +46,34 @@ bool IsEtsGlobalClassName(const std::string &descriptor)
     return etsGlobalClass || etsGlobalClassInPackage;
 }
 
-EtsObject *GetBoxedValue(EtsCoroutine *coro, Value value, EtsType type)
+EtsObject *GetBoxedValue(EtsExecutionContext *executionCtx, Value value, EtsType type)
 {
     switch (type) {
         case EtsType::BOOLEAN:
-            return EtsBoxPrimitive<EtsBoolean>::Create(coro, value.GetAs<EtsBoolean>());
+            return EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, value.GetAs<EtsBoolean>());
         case EtsType::BYTE:
-            return EtsBoxPrimitive<EtsByte>::Create(coro, value.GetAs<EtsByte>());
+            return EtsBoxPrimitive<EtsByte>::Create(executionCtx, value.GetAs<EtsByte>());
         case EtsType::CHAR:
-            return EtsBoxPrimitive<EtsChar>::Create(coro, value.GetAs<EtsChar>());
+            return EtsBoxPrimitive<EtsChar>::Create(executionCtx, value.GetAs<EtsChar>());
         case EtsType::SHORT:
-            return EtsBoxPrimitive<EtsShort>::Create(coro, value.GetAs<EtsShort>());
+            return EtsBoxPrimitive<EtsShort>::Create(executionCtx, value.GetAs<EtsShort>());
         case EtsType::INT:
-            return EtsBoxPrimitive<EtsInt>::Create(coro, value.GetAs<EtsInt>());
+            return EtsBoxPrimitive<EtsInt>::Create(executionCtx, value.GetAs<EtsInt>());
         case EtsType::LONG:
-            return EtsBoxPrimitive<EtsLong>::Create(coro, value.GetAs<EtsLong>());
+            return EtsBoxPrimitive<EtsLong>::Create(executionCtx, value.GetAs<EtsLong>());
         case EtsType::FLOAT:
-            return EtsBoxPrimitive<EtsFloat>::Create(coro, value.GetAs<EtsFloat>());
+            return EtsBoxPrimitive<EtsFloat>::Create(executionCtx, value.GetAs<EtsFloat>());
         case EtsType::DOUBLE:
-            return EtsBoxPrimitive<EtsDouble>::Create(coro, value.GetAs<EtsDouble>());
+            return EtsBoxPrimitive<EtsDouble>::Create(executionCtx, value.GetAs<EtsDouble>());
         default:
             UNREACHABLE();
     }
 }
 
-Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj)
+Value GetUnboxedValue(EtsExecutionContext *executionCtx, EtsObject *obj)
 {
     auto *cls = obj->GetClass();
-    auto ptypes = PlatformTypes(coro);
+    auto ptypes = PlatformTypes(executionCtx);
     if (cls == ptypes->coreBoolean) {
         return Value((reinterpret_cast<EtsBoxPrimitive<EtsBoolean> *>(obj))->GetValue());
     }
@@ -100,31 +101,31 @@ Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj)
     return Value(reinterpret_cast<ObjectHeader *>(obj));
 }
 
-void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
+void LambdaUtils::InvokeVoid(ManagedThread *mThread, EtsObject *lambda)
 {
     ASSERT(lambda != nullptr);
     ASSERT(lambda->GetClass()->IsFunction());
-    auto resolvedMethod = PlatformTypes(coro)->coreFunctionUnsafeCall;
+    auto resolvedMethod = PlatformTypes(mThread)->coreFunctionUnsafeCall;
     EtsMethod *call = lambda->GetClass()->ResolveVirtualMethod(resolvedMethod);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto handledLambda = EtsHandle<EtsObject>(coro, lambda);
+    [[maybe_unused]] EtsHandleScope scope(EtsExecutionContext::FromMT(mThread));
+    auto handledLambda = EtsHandle<EtsObject>(EtsExecutionContext::FromMT(mThread), lambda);
 
-    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    auto argArray = EtsObjectArray::Create(PlatformTypes(mThread)->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(mThread->HasPendingException());
         return;
     }
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     Value arg[2] = {Value(handledLambda->GetCoreType()), Value(argArray->GetCoreType())};
 
-    auto ret = call->GetPandaMethod()->Invoke(coro, arg);
+    auto ret = call->GetPandaMethod()->Invoke(mThread, arg);
     ASSERT(ret.IsReference());
 
     auto resObj = ret.GetAs<ObjectHeader *>();
     if (resObj != nullptr) {
-        ThrowEtsException(coro, PlatformTypes()->coreClassCastError,
+        ThrowEtsException(EtsExecutionContext::FromMT(mThread), PlatformTypes()->coreClassCastError,
                           std::string(utf::Mutf8AsCString(resObj->ClassAddr<Class>()->GetDescriptor())) +
                               " cannot be cast to void");
     }
@@ -164,41 +165,41 @@ EtsField *ManglingUtils::GetFieldIDByDisplayName(EtsClass *klass, const PandaStr
     return field;
 }
 
-EtsObject *GetPropertyValue(EtsCoroutine *coro, const EtsObject *etsObj, EtsField *field)
+EtsObject *GetPropertyValue(EtsExecutionContext *executionCtx, const EtsObject *etsObj, EtsField *field)
 {
     EtsType type = field->GetEtsType();
     switch (type) {
         case EtsType::BOOLEAN: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsBoolean>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::BYTE: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsByte>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::CHAR: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsChar>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::SHORT: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsShort>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::INT: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsInt>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::LONG: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsLong>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::FLOAT: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsFloat>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::DOUBLE: {
             auto etsVal = etsObj->GetFieldPrimitive<EtsDouble>(field);
-            return reinterpret_cast<EtsObject *>(GetBoxedValue(coro, ark::Value(etsVal), field->GetEtsType()));
+            return reinterpret_cast<EtsObject *>(GetBoxedValue(executionCtx, ark::Value(etsVal), field->GetEtsType()));
         }
         case EtsType::OBJECT: {
             return reinterpret_cast<EtsObject *>(etsObj->GetFieldObject(field));
@@ -208,9 +209,9 @@ EtsObject *GetPropertyValue(EtsCoroutine *coro, const EtsObject *etsObj, EtsFiel
     }
 }
 
-bool SetPropertyValue(EtsCoroutine *coro, EtsObject *etsObj, EtsField *field, EtsObject *valToSet)
+bool SetPropertyValue(EtsExecutionContext *executionCtx, EtsObject *etsObj, EtsField *field, EtsObject *valToSet)
 {
-    ark::Value etsVal = GetUnboxedValue(coro, valToSet);
+    ark::Value etsVal = GetUnboxedValue(executionCtx, valToSet);
     EtsType type = field->GetEtsType();
     switch (type) {
         case EtsType::BOOLEAN:

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include "ani_gtest.h"
 #include "libani_helpers/concurrency_helpers.h"
 #include "include/thread_scopes.h"
-#include "coroutines/coroutine_manager.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
 
 namespace ark::ets::ani_helpers::testing {
 
@@ -34,12 +34,12 @@ class SendEventTest : public ark::ets::ani::testing::AniTest {};
 
 class AsyncEvent {
 public:
-    AsyncEvent() : event_(Coroutine::GetCurrent()->GetManager()) {}
+    AsyncEvent() : event_(JobExecutionContext::GetCurrent()->GetManager()) {}
 
     void Wait()
     {
         event_.Lock();
-        Coroutine::GetCurrent()->GetManager()->Await(&event_);
+        JobExecutionContext::GetCurrent()->GetManager()->Await(&event_);
     }
 
     void Fire()

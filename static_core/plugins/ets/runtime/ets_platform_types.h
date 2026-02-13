@@ -16,14 +16,18 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_PLATFORM_TYPES_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_PLATFORM_TYPES_H_
 
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_platform_types_defs.h"
+
+namespace ark {
+class ManagedThread;
+}  // namespace ark
 
 namespace ark::ets {
 
+class EtsExecutionContext;
 class EtsClass;
 class EtsMethod;
-class EtsCoroutine;
 class EtsClassLinker;
 template <typename T>
 class EtsTypedObjectArray;
@@ -82,23 +86,30 @@ private:
     void PreloadType(EtsClassLinker *linker, EtsClass **slot, std::string_view descriptor);
     PandaUnorderedMap<const uint8_t *, Entry, utf::Mutf8Hash, utf::Mutf8Equal> entryTable_;
 
-    explicit EtsPlatformTypes(EtsCoroutine *coro);
+    explicit EtsPlatformTypes(EtsExecutionContext *executionCtx);
 
     /**
      * @brief Initialize all classes.
      * This method must be called after construction of `EtsPlatformTypes`
      * to ensure correct initialization of all classes
      */
-    void InitializeClasses(EtsCoroutine *coro);
+    void InitializeClasses(EtsExecutionContext *executionCtx);
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-// Obtain EtsPlatformTypes pointer cached in the coroutine
-ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(EtsCoroutine *coro)
+ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(EtsExecutionContext *executionCtx)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
-    return coro->GetLocalStorage().Get<EtsCoroutine::DataIdx::ETS_PLATFORM_TYPES_PTR, EtsPlatformTypes *>();
+    return executionCtx->GetLocalStorage()
+        .Get<EtsExecutionContext::DataIdx::ETS_PLATFORM_TYPES_PTR, EtsPlatformTypes *>();
+}
+
+// Obtain EtsPlatformTypes pointer cached in the coroutine
+ALWAYS_INLINE inline EtsPlatformTypes const *PlatformTypes(ManagedThread *mThread)
+{
+    ASSERT(mThread != nullptr);
+    return PlatformTypes(EtsExecutionContext::FromMT(mThread));
 }
 
 // Obtain EtsPlatfromTypes pointer from the VM

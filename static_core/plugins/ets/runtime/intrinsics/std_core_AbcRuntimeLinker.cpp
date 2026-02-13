@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "ets_platform_types.h"
+#include "runtime/include/managed_thread.h"
 #include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -34,19 +35,20 @@ namespace ark::ets::intrinsics {
 
 void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, ObjectHeader *newAbcFilesArray)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hs(coro);
-    EtsHandle newAbcFilesHandle(coro, EtsTypedObjectArray<EtsAbcFile>::FromCoreType(newAbcFilesArray));
-    EtsHandle linkerHandle(coro, runtimeLinker);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope hs(executionCtx);
+    EtsHandle newAbcFilesHandle(executionCtx, EtsTypedObjectArray<EtsAbcFile>::FromCoreType(newAbcFilesArray));
+    EtsHandle linkerHandle(executionCtx, runtimeLinker);
     auto *ctx = EtsClassLinkerContext::FromCoreType(linkerHandle->GetClassLinkerContext());
 
     os::memory::LockHolder lock(ctx->GetAbcFilesMutex());
-    EtsHandle currentAbcFilesHandle(coro, linkerHandle->GetAbcFiles());
+    EtsHandle currentAbcFilesHandle(executionCtx, linkerHandle->GetAbcFiles());
     auto currentLength = currentAbcFilesHandle->GetLength();
     auto resultLength = newAbcFilesHandle->GetLength() + currentLength;
-    EtsHandle resultAbcFilesHandle(coro, EtsObjectArray::Create(PlatformTypes(coro)->coreAbcFile, resultLength));
+    EtsHandle resultAbcFilesHandle(executionCtx,
+                                   EtsObjectArray::Create(PlatformTypes(executionCtx)->coreAbcFile, resultLength));
     if (UNLIKELY(resultAbcFilesHandle.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
 
@@ -60,7 +62,6 @@ void EtsAbcRuntimeLinkerAddNewAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, Objec
 EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeLinker, EtsString *clsName,
                                                    EtsBoolean init)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
     auto clsNameUtf8 = clsName->GetMutf8();
     PandaString descriptor;
     const auto *classDescriptor = ClassHelper::GetDescriptor(utf::CStringAsMutf8(clsNameUtf8.c_str()), &descriptor);
@@ -68,6 +69,7 @@ EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeL
         return nullptr;
     }
 
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto *errorHandler = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension()->GetErrorHandler();
     auto *ctx = reinterpret_cast<EtsClassLinkerContext *>(runtimeLinker->GetClassLinkerContext());
@@ -85,13 +87,13 @@ EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeL
 
         auto *klass = classLinker->LoadClass(*pf, classId, ctx, errorHandler, true);
         if (UNLIKELY(klass == nullptr)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
 
         if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
-            if (UNLIKELY(!classLinker->InitializeClass(coro, klass))) {
-                ASSERT(coro->HasPendingException());
+            if (UNLIKELY(!classLinker->InitializeClass(executionCtx->GetMT(), klass))) {
+                ASSERT(executionCtx->GetMT()->HasPendingException());
                 return nullptr;
             }
         }

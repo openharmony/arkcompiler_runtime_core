@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "runtime/include/managed_thread.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
@@ -63,7 +65,7 @@ public:
 template <typename T>
 class Boxer final : public BoxerBase {
 public:
-    explicit Boxer(T other, EtsCoroutine *coroutine) : BoxerBase(), coroutine_(coroutine)
+    explicit Boxer(T other, EtsExecutionContext *executionCtx) : BoxerBase(), executionCtx_(executionCtx)
     {
         static_assert(!std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, ObjectHeader **>);
         value_ = other;
@@ -71,17 +73,17 @@ public:
 
     std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() override
     {
-        auto *boxPrimitive = EtsBoxPrimitive<T>::Create(coroutine_, value_);
+        auto *boxPrimitive = EtsBoxPrimitive<T>::Create(executionCtx_, value_);
         if (UNLIKELY(boxPrimitive == nullptr)) {
-            ASSERT(coroutine_->HasPendingException());
+            ASSERT(executionCtx_->GetMT()->HasPendingException());
             return std::nullopt;
         }
-        EtsHandle<EtsObject> handle(coroutine_, boxPrimitive->AsObject());
+        EtsHandle<EtsObject> handle(executionCtx_, boxPrimitive->AsObject());
         return handle;
     }
 
 private:
-    EtsCoroutine *coroutine_ {nullptr};
+    EtsExecutionContext *executionCtx_ {nullptr};
 
     T value_;
 };
@@ -89,8 +91,9 @@ private:
 template <>
 class Boxer<ObjectHeader **> final : public BoxerBase {
 public:
-    explicit Boxer(ObjectHeader **other, EtsCoroutine *coroutine) : value_(coroutine, EtsObject::FromCoreType(*other))
+    explicit Boxer(ObjectHeader **other, EtsExecutionContext *executionCtx)
     {
+        value_ = EtsHandle<EtsObject>(executionCtx, EtsObject::FromCoreType(*other));
     }
 
     std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() override
@@ -104,8 +107,8 @@ private:
 
 class BoxValueWriter final {
 public:
-    explicit BoxValueWriter(PandaVector<PandaUniquePtr<BoxerBase>> *values, EtsCoroutine *coroutine)
-        : coroutine_(coroutine), allocator_(Runtime::GetCurrent()->GetInternalAllocator()), values_(values)
+    explicit BoxValueWriter(PandaVector<PandaUniquePtr<BoxerBase>> *values, EtsExecutionContext *executionCtx)
+        : executionCtx_(executionCtx), allocator_(Runtime::GetCurrent()->GetInternalAllocator()), values_(values)
     {
     }
     ~BoxValueWriter() = default;
@@ -113,7 +116,7 @@ public:
     template <class T>
     ALWAYS_INLINE void Write(T v)
     {
-        PandaUniquePtr<BoxerBase> obj(allocator_->New<Boxer<T>>(v, coroutine_));
+        PandaUniquePtr<BoxerBase> obj(allocator_->New<Boxer<T>>(v, executionCtx_));
         values_->push_back(std::move(obj));
     }
 
@@ -121,17 +124,17 @@ public:
     NO_MOVE_SEMANTIC(BoxValueWriter);
 
 private:
-    EtsCoroutine *coroutine_ {nullptr};
+    EtsExecutionContext *executionCtx_ {nullptr};
     mem::InternalAllocatorPtr allocator_;
     PandaVector<PandaUniquePtr<BoxerBase>> *values_ {nullptr};
 };
 
-static bool UnboxValue(EtsObject *boxedValue, EtsType type, Value *unboxedValue, EtsCoroutine *coroutine)
+static bool UnboxValue(EtsObject *boxedValue, EtsType type, Value *unboxedValue, EtsExecutionContext *executionCtx)
 {
     ASSERT(unboxedValue != nullptr);
-    ASSERT(coroutine != nullptr);
+    ASSERT(executionCtx != nullptr);
 
-    auto *platformTypes = PlatformTypes(coroutine);
+    auto *platformTypes = PlatformTypes(executionCtx);
 
 // CC-OFFNXT(G.PRE.02-CPP) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -179,9 +182,9 @@ static bool UnboxValue(EtsObject *boxedValue, EtsType type, Value *unboxedValue,
     return false;
 }
 
-static int64_t UnboxResult(EtsCoroutine *coroutine, EtsMethod *ifaceMethod, Value value)
+static int64_t UnboxResult(EtsExecutionContext *executionCtx, EtsMethod *ifaceMethod, Value value)
 {
-    if (UNLIKELY(coroutine->HasPendingException())) {
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return 0;
     }
 
@@ -192,24 +195,25 @@ static int64_t UnboxResult(EtsCoroutine *coroutine, EtsMethod *ifaceMethod, Valu
     }
 
     Value unboxedResult;
-    if (!UnboxValue(EtsObject::FromCoreType(boxedResult), effectiveReturnType, &unboxedResult, coroutine)) {
+    if (!UnboxValue(EtsObject::FromCoreType(boxedResult), effectiveReturnType, &unboxedResult, executionCtx)) {
         PandaOStringStream msg;
         msg << "result has type " << EtsTypeToString(effectiveReturnType) << ", but got "
             << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName()->GetMutf8();
-        ark::ets::ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, msg.str().c_str());
+        ark::ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalArgumentError,
+                                    msg.str().c_str());
     }
     return unboxedResult.GetAsLong();
 }
 
 Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *ifaceMethod,
-                                const PandaVector<EtsHandle<EtsObject>> &handledArgs, EtsCoroutine *coroutine)
+                                const PandaVector<EtsHandle<EtsObject>> &handledArgs, EtsExecutionContext *executionCtx)
 {
-    auto *platformTypes = PlatformTypes(coroutine);
+    auto *platformTypes = PlatformTypes(executionCtx);
 
-    EtsHandle<EtsReflectMethod> reflectMethodH(coroutine,
-                                               EtsReflectMethod::CreateFromEtsMethod(coroutine, ifaceMethod));
+    EtsHandle<EtsReflectMethod> reflectMethodH(executionCtx,
+                                               EtsReflectMethod::CreateFromEtsMethod(executionCtx, ifaceMethod));
     if (UNLIKELY(reflectMethodH.GetPtr() == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return Value(0U);
     }
 
@@ -232,10 +236,9 @@ Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *if
         invokeArgs.push_back(Value(reflectMethodH->AsObject()->GetCoreType()));
         methodToInvoke = platformTypes->coreReflectProxyInvokeGet;
     } else {
-        auto *argsArrayRaw = EtsObjectArray::Create(
-            coroutine->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT), handledArgs.size());
+        auto *argsArrayRaw = EtsObjectArray::Create(platformTypes->coreObject, handledArgs.size());
         if (UNLIKELY(argsArrayRaw == nullptr)) {
-            ASSERT(coroutine->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return Value(0U);
         }
 
@@ -248,7 +251,7 @@ Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *if
         methodToInvoke = platformTypes->coreReflectProxyInvoke;
     }
 
-    return methodToInvoke->GetPandaMethod()->Invoke(coroutine, invokeArgs.data(), true);
+    return methodToInvoke->GetPandaMethod()->Invoke(executionCtx->GetMT(), invokeArgs.data(), true);
 }
 
 /*
@@ -298,8 +301,8 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
     auto *ifaceMethod = EtsMethod::FromRuntimeMethod(method)->GetInterfaceMethodIfProxy();
     ASSERT(ifaceMethod != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     // Passed pointer to stack `args`, because it passed as GPR and FPR due to calling proxy bridge from i2c.
     Span<uint8_t> gprArgs(args, arch::ExtArchTraits<RUNTIME_ARCH>::GP_ARG_NUM_BYTES);
@@ -311,13 +314,13 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
 
     // When i2c bridge calls proxy bridge, `this` should be always passed as second argument (method is first).
     auto *thisObj = EtsObject::FromCoreType(argReader.Read<ObjectHeader *>());
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsObject> thisH(coroutine, thisObj);
+    EtsHandle<EtsObject> thisH(executionCtx, thisObj);
 
     // Collect values from stack and create handles for reference types. It should be done before any allocation.
     PandaVector<PandaUniquePtr<BoxerBase>> values;
-    BoxValueWriter writer(&values, coroutine);
+    BoxValueWriter writer(&values, executionCtx);
 
     ARCH_COPY_METHOD_ARGS(ifaceMethod->GetPandaMethod(), argReader, writer);
 
@@ -327,16 +330,16 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
     for (auto &entry : values) {
         auto obj = entry->BoxIfNeededAndCreateHandle();
         if (UNLIKELY(!obj.has_value())) {
-            ASSERT(coroutine->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return 0;
         }
         handledArgs.emplace_back(*obj);
     }
 
     // After all handles are created we can do allocations.
-    Value result = PrepareArgumentsAndInvoke(thisH, ifaceMethod, handledArgs, coroutine);
+    Value result = PrepareArgumentsAndInvoke(thisH, ifaceMethod, handledArgs, executionCtx);
     // result is boxed Any value.
-    return UnboxResult(coroutine, ifaceMethod, result);
+    return UnboxResult(executionCtx, ifaceMethod, result);
 }
 
 #if defined(__clang__)

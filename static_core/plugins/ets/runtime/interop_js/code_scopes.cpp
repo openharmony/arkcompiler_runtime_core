@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,39 +19,42 @@
 
 namespace ark::ets::interop::js {
 
-ScopedInteropCallStackRecord::ScopedInteropCallStackRecord(EtsCoroutine *coro, char const *descr) : coro_(coro)
+ScopedInteropCallStackRecord::ScopedInteropCallStackRecord(EtsExecutionContext *executionCtx, char const *descr)
+    : executionCtx_(executionCtx)
 {
-    [[maybe_unused]] auto status = OpenInteropCodeScope<false>(coro_, descr);
+    [[maybe_unused]] auto status = OpenInteropCodeScope<false>(executionCtx_, descr);
     ASSERT(status);
 }
 
 ScopedInteropCallStackRecord::~ScopedInteropCallStackRecord()
 {
-    [[maybe_unused]] auto status = CloseInteropCodeScope<false>(coro_);
+    [[maybe_unused]] auto status = CloseInteropCodeScope<false>(executionCtx_);
     ASSERT(status);
 }
 
-InteropETSToJSCodeScope::InteropETSToJSCodeScope(EtsCoroutine *coro, char const *descr) : coro_(coro)
+InteropETSToJSCodeScope::InteropETSToJSCodeScope(EtsExecutionContext *executionCtx, char const *descr)
+    : executionCtx_(executionCtx)
 {
-    [[maybe_unused]] auto status = OpenETSToJSScope(coro_, descr);
+    [[maybe_unused]] auto status = OpenETSToJSScope(executionCtx_, descr);
     ASSERT(status);
 }
 
 InteropETSToJSCodeScope::~InteropETSToJSCodeScope()
 {
-    [[maybe_unused]] auto status = CloseETSToJSScope(coro_);
+    [[maybe_unused]] auto status = CloseETSToJSScope(executionCtx_);
     ASSERT(status);
 }
 
-InteropJSToETSCodeScope::InteropJSToETSCodeScope(EtsCoroutine *coro, char const *descr) : coro_(coro)
+InteropJSToETSCodeScope::InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr)
+    : executionCtx_(executionCtx)
 {
-    [[maybe_unused]] auto status = OpenJSToETSScope(coro_, descr);
+    [[maybe_unused]] auto status = OpenJSToETSScope(executionCtx_, descr);
     ASSERT(status);
 }
 
 InteropJSToETSCodeScope::~InteropJSToETSCodeScope()
 {
-    [[maybe_unused]] auto status = CloseJSToETSScope(coro_);
+    [[maybe_unused]] auto status = CloseJSToETSScope(executionCtx_);
     ASSERT(status);
 }
 

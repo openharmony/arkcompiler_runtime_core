@@ -98,11 +98,12 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
     static constexpr int EXPECTED_LEN = 24;
 
     auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::Create(coro, EXPECTED_LEN));
+    auto *executionCtx = EtsExecutionContext::FromMT(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, EtsStdCoreArrayBuffer::Create(executionCtx, EXPECTED_LEN));
     ASSERT_NE(handle.GetPtr(), nullptr);
 
-    ASSERT_FALSE(EtsStdCoreArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
+    ASSERT_FALSE(EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, handle.GetPtr()));
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
     auto data = Span<uint8_t>(handle->GetData<uint8_t *>(), EXPECTED_LEN);
@@ -112,9 +113,9 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
     data[1U] = 2U;
     data[2U] = 3U;
 
-    EtsStdCoreArrayBuffer::ReallocateNonMovableArray(coro, handle.GetPtr(), EXPECTED_LEN);
+    EtsStdCoreArrayBuffer::ReallocateNonMovableArray(executionCtx, handle.GetPtr(), EXPECTED_LEN);
 
-    ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNonMovableArray(coro, handle.GetPtr()));
+    ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, handle.GetPtr()));
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
     // Validate ArrayBuffer after data reallocation.

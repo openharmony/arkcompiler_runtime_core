@@ -14,18 +14,16 @@
  */
 
 
-function out_of_coro_test() {
+async function out_of_coro_test() {
     const coro_to_create = 2000;
     let arr = new Int32Array(new ArrayBuffer(1024))
 
     let jobs = new Array<Job<void>>();
 
     arktest.expectError(() => {
-        let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
-        let mainWaitJob = launch() {
-            wait_func(arr)
-        }
-        let awaitIt = ()=>{ mainWaitJob.Await(); }
+        let wait_func = async (arr: Int32Array) => { await Atomics.asyncWait(arr, 0, 0); }
+        let mainWaitJob = launch() { wait_func(arr) }
+        let awaitIt = async () => { mainWaitJob.Await() }
 
         for (let i = 1; i < coro_to_create; ++ i) {
             jobs.push(launch(awaitIt));
@@ -52,7 +50,7 @@ function out_of_coro_test() {
 
 function main() {
     let testsuite = new arktest.ArkTestsuite("EAWorker");
-    testsuite.addTest("out_of_coro_test", out_of_coro_test)
+    testsuite.addAsyncTest("out_of_coro_test", out_of_coro_test)
     return testsuite.run();
 }
 

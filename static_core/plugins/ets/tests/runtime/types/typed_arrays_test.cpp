@@ -17,6 +17,7 @@
 
 #include "ets_coroutine.h"
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
 #include "types/ets_typed_arrays.h"
@@ -265,7 +266,8 @@ protected:
         using TypedArray = EtsCoreTypedArray<Elem>;
         auto *arrayKlass = GetClassInManagedCode(GetTypedArrayClassName<Elem>());
         ASSERT(arrayKlass != nullptr);
-        auto *array = static_cast<TypedArray *>(TypedArray::Create(coroutine_, arrayKlass));
+        auto *array =
+            static_cast<TypedArray *>(TypedArray::Create(EtsExecutionContext::FromMT(coroutine_), arrayKlass));
         ASSERT(array != nullptr);
         *static_cast<EtsInt *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetLengthIntOffset())) =
             static_cast<EtsInt>(values.size());
@@ -274,7 +276,7 @@ protected:
         *static_cast<EtsDouble *>(ToVoidPtr(ToUintPtr(array) + TypedArray::GetByteLengthOffset())) =
             static_cast<EtsDouble>(byteLength);
 
-        auto *arrayBuffer = EtsStdCoreArrayBuffer::Create(coroutine_, byteLength);
+        auto *arrayBuffer = EtsStdCoreArrayBuffer::Create(EtsExecutionContext::FromMT(coroutine_), byteLength);
         ASSERT(arrayBuffer != nullptr);
         auto *buffer = arrayBuffer->GetData();
         ASSERT(buffer != nullptr);

@@ -18,23 +18,24 @@
 #include <cstdint>
 #include "plugins/ets/runtime/ets_mark_word.h"
 #include "plugins/ets/runtime/ets_object_state_info.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/handle_base-inl.h"
 
 namespace ark::ets {
 
 /* static */
-EtsObject *EtsObject::Create(EtsCoroutine *etsCoroutine, EtsClass *klass)
+EtsObject *EtsObject::Create(EtsExecutionContext *executionCtx, EtsClass *klass)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
     ASSERT(klass != nullptr);
-    return static_cast<EtsObject *>(ObjectHeader::Create(etsCoroutine, klass->GetRuntimeClass()));
+    return static_cast<EtsObject *>(ObjectHeader::Create(executionCtx->GetMT(), klass->GetRuntimeClass()));
 }
 
 /* static */
 EtsObject *EtsObject::Create(EtsClass *klass)
 {
-    return Create(EtsCoroutine::GetCurrent(), klass);
+    return Create(EtsExecutionContext::GetCurrent(), klass);
 }
 
 /* static */

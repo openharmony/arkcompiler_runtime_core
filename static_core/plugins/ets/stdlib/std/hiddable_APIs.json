@@ -52,7 +52,7 @@
         "interfaces": [
             "JSONTypeError",
             "CoroutinesLimitExceedError",
-            "InvalidCoroutineOperationError"
+            "InvalidJobOperationError"
         ]
     },
     {

@@ -17,6 +17,8 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 
 #include "ets_platform_types.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_worker_thread.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/app_state_manager.h"
@@ -158,24 +160,24 @@ public:
     NO_COPY_SEMANTIC(InteropCtx);
     NO_MOVE_SEMANTIC(InteropCtx);
 
-    PANDA_PUBLIC_API static void Init(EtsCoroutine *coro, napi_env env);
-    virtual ~InteropCtx();
+    PANDA_PUBLIC_API static void Init(EtsExecutionContext *executionCtx, napi_env env);
+    ~InteropCtx();
 
     static void Destroy(void *ptr);
 
-    static InteropCtx *Current(Coroutine *coro)
+    static InteropCtx *Current(EtsExecutionContext *executionCtx)
     {
         // NOTE(konstanting): we may want to optimize this and take the cached pointer from the coroutine
         // itself. Just need to make sure that the worker's interop context ptr state is coherent
         // with coroutine's.
-        ASSERT(coro != nullptr);
-        auto *w = coro->GetWorker();
+        ASSERT(executionCtx != nullptr);
+        auto *w = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker();
         return Current(w);
     }
 
     static InteropCtx *Current()
     {
-        return Current(Coroutine::GetCurrent());
+        return Current(EtsExecutionContext::GetCurrent());
     }
 
     const PandaEtsVM *GetPandaEtsVM() const
@@ -236,7 +238,8 @@ public:
     }
 
     // NOTE(vpukhov): implement in native code
-    [[nodiscard]] bool PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg);
+    [[nodiscard]] bool PushOntoFinalizationRegistry(EtsExecutionContext *executionCtx, EtsObject *obj,
+                                                    EtsObject *cbarg);
 
     // NOTE(vpukhov): replace with stack-like allocator
     template <typename T, size_t OPT_SZ>
@@ -322,13 +325,13 @@ public:
         sharedEtsVmState_->SetInterfaceProxyInstance(interfaceName, proxy);
     }
 
-    EtsObject *CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject);
+    EtsObject *CreateETSCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject);
 
-    static void ThrowETSError(EtsCoroutine *coro, napi_value val);
-    static void ThrowETSError(EtsCoroutine *coro, const char *msg);
-    static void ThrowETSError(EtsCoroutine *coro, const std::string &msg)
+    static void ThrowETSError(EtsExecutionContext *executionCtx, napi_value val);
+    static void ThrowETSError(EtsExecutionContext *executionCtx, const char *msg);
+    static void ThrowETSError(EtsExecutionContext *executionCtx, const std::string &msg)
     {
-        ThrowETSError(coro, msg.c_str());
+        ThrowETSError(executionCtx, msg.c_str());
     }
 
     PANDA_PUBLIC_API static void ThrowJSError(napi_env env, const std::string &msg);
@@ -339,21 +342,21 @@ public:
     static void InitializeDefaultLinkerCtxIfNeeded(EtsRuntimeLinker *linker);
     static void SetDefaultLinkerContext(EtsRuntimeLinker *linker);
     static EtsRuntimeLinker *GetDefaultInteropLinker();
-    void ForwardEtsException(EtsCoroutine *coro);
-    void ForwardJSException(EtsCoroutine *coro);
+    void ForwardEtsException(EtsExecutionContext *executionCtx);
+    void ForwardJSException(EtsExecutionContext *executionCtx);
 
     [[nodiscard]] static bool SanityETSExceptionPending()
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        auto env = InteropCtx::Current(coro)->GetJSEnv();
-        return coro->HasPendingException() && !NapiIsExceptionPending(env);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        auto env = InteropCtx::Current(executionCtx)->GetJSEnv();
+        return executionCtx->GetMT()->HasPendingException() && !NapiIsExceptionPending(env);
     }
 
     [[nodiscard]] static bool SanityJSExceptionPending()
     {
-        auto coro = EtsCoroutine::GetCurrent();
-        auto env = InteropCtx::Current(coro)->GetJSEnv();
-        return !coro->HasPendingException() && NapiIsExceptionPending(env);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        auto env = InteropCtx::Current(executionCtx)->GetJSEnv();
+        return !executionCtx->GetMT()->HasPendingException() && NapiIsExceptionPending(env);
     }
 
     // Die and print execution stacks
@@ -438,17 +441,17 @@ public:
     PANDA_PUBLIC_API static InteropCallStack &GetOrCreateCallStack();
 
 protected:
-    static InteropCtx *Current(CoroutineWorker *worker)
+    static InteropCtx *Current(JobWorkerThread *worker)
     {
-        return worker->GetLocalStorage().Get<CoroutineWorker::DataIdx::INTEROP_CTX_PTR, InteropCtx *>();
+        return worker->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_CTX_PTR, InteropCtx *>();
     }
 
 private:
-    explicit InteropCtx(EtsCoroutine *coro, napi_env env);
-    void InitJsValueFinalizationRegistry(EtsCoroutine *coro);
+    explicit InteropCtx(EtsExecutionContext *executionCtx, napi_env env);
+    void InitJsValueFinalizationRegistry(EtsExecutionContext *executionCtx);
     void InitExternalInterfaces();
 
-    void VmHandshake(napi_env env, EtsCoroutine *coro, arkplatform::STSVMInterface *stsVmIface);
+    void VmHandshake(napi_env env, EtsExecutionContext *executionCtx, arkplatform::STSVMInterface *stsVmIface);
 
     void SetJSEnv(napi_env env)
     {

@@ -28,10 +28,13 @@ function testMain() {
     arr = new Int32Array(buf, 0, 1);
     bytearr = new Int8Array(buf, 0, 4)
 
-    launch(writer)
+    let w = new EAWorker();
+    w.start();
+    w.run<Int>(writer);
 
     let res = Atomics.wait(arr, 0, 0) as string
     arktest.assertTrue(res == 'ok' || res == 'not-equal')
+    w.join();
 }
 
 function writer(): Int {

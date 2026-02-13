@@ -14,6 +14,7 @@
  */
 
 #include "include/thread_scopes.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -60,7 +61,7 @@ void JSONStringifier::AppendJSONPrimitive(const PandaString &value, bool hasCont
     }
 }
 
-bool JSONStringifier::SerializeFields(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent)
+bool JSONStringifier::SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent)
 {
     ASSERT(value.GetPtr() != nullptr);
     auto keys = PandaUnorderedSet<PandaString>();
@@ -69,7 +70,7 @@ bool JSONStringifier::SerializeFields(EtsCoroutine *coro, EtsHandle<EtsObject> &
     value->GetClass()->EnumerateBaseClasses([&](EtsClass *c) {
         auto fields = c->GetRuntimeClass()->GetFields();
         for (auto &field : fields) {
-            if (!HandleField(coro, value, EtsField::FromRuntimeField(&field), hasContent, keys)) {
+            if (!HandleField(executionCtx, value, EtsField::FromRuntimeField(&field), hasContent, keys)) {
                 isSuccessful = false;
                 return true;
             }
@@ -80,7 +81,7 @@ bool JSONStringifier::SerializeFields(EtsCoroutine *coro, EtsHandle<EtsObject> &
     return isSuccessful;
 }
 
-bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> &obj, bool &hasContent)
+bool JSONStringifier::SerializeGetters(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, bool &hasContent)
 {
     ASSERT(obj.GetPtr() != nullptr);
 
@@ -96,13 +97,14 @@ bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> 
             // but it's still possible to manually emit bytecode with arbitrary number of parameters
             // in "%%get-" method.
             // `TypeError` is thrown here to align native implementation with managed `getGettersKeyValuePairs`.
-            ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Expected zero arguments in getter");
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+                              "Expected zero arguments in getter");
             return false;
         }
 
         Value selfArg(obj->GetCoreType());
-        auto *result = helpers::InvokeAndResolveReturnValue(method, coro, &selfArg);
-        if (UNLIKELY(coro->HasPendingException())) {
+        auto *result = helpers::InvokeAndResolveReturnValue(method, executionCtx, &selfArg);
+        if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
             return false;
         }
 
@@ -110,7 +112,7 @@ bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> 
             continue;
         }
         key_ = methodName.substr(std::string_view(GETTER_BEGIN).size());
-        EtsHandle value(coro, result);
+        EtsHandle value(executionCtx, result);
         if (!AppendJSONString(value, hasContent)) {
             return false;
         }
@@ -119,7 +121,8 @@ bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> 
     return true;
 }
 
-bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent)
+bool JSONStringifier::SerializeInterfaceList(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value,
+                                             bool &hasContent)
 {
     ASSERT(value.GetPtr() != nullptr);
     auto *cls = value->GetClass();
@@ -161,8 +164,8 @@ bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsOb
         }
 
         Value selfArg(value->GetCoreType());
-        auto *result = helpers::InvokeAndResolveReturnValue(etsMethod, coro, &selfArg);
-        if (UNLIKELY(coro->HasPendingException())) {
+        auto *result = helpers::InvokeAndResolveReturnValue(etsMethod, executionCtx, &selfArg);
+        if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
             isSuccessful = false;
             return true;
         }
@@ -172,7 +175,7 @@ bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsOb
         }
 
         key_ = keyStr;
-        EtsHandle val(coro, result);
+        EtsHandle val(executionCtx, result);
         if (!AppendJSONString(val, hasContent)) {
             isSuccessful = false;
             return true;
@@ -186,27 +189,28 @@ bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsOb
 
 bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
         return false;
     }
 
     bool hasContent = false;
 
     buffer_ += "{";
-    if (!SerializeFields(coro, value, hasContent)) {
+    if (!SerializeFields(executionCtx, value, hasContent)) {
         return false;
     }
 
     // The code below mirrors managed `writeClassValue`. Ideally we'd like a single implementation
     // of `JSON.stringify`, but native code must exist to satisfy performance requirements
-    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr())) && !SerializeGetters(coro, value, hasContent)) {
+    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr())) &&
+        !SerializeGetters(executionCtx, value, hasContent)) {
         return false;
     }
 
-    if (!SerializeInterfaceList(coro, value, hasContent)) {
+    if (!SerializeInterfaceList(executionCtx, value, hasContent)) {
         return false;
     }
     buffer_ += "}";
@@ -216,32 +220,32 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
 
 bool JSONStringifier::SerializeJSONObjectArray(EtsHandle<EtsObject> &value)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    EtsHandleScope scope(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    EtsHandleScope scope(executionCtx);
 
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
         return false;
     }
 
     bool isSuccessful = false;
     buffer_ += "[";
 
-    auto array = EtsHandle<EtsEscompatArray>(coro, EtsEscompatArray::FromEtsObject(value.GetPtr()));
+    auto array = EtsHandle<EtsEscompatArray>(executionCtx, EtsEscompatArray::FromEtsObject(value.GetPtr()));
     EtsInt length = 0;
-    if (UNLIKELY(!array->GetLength(coro, &length))) {
-        ASSERT(coro->HasPendingException());
+    if (UNLIKELY(!array->GetLength(executionCtx, &length))) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return false;
     }
 
     for (EtsInt i = 0; i < length; ++i) {
-        auto optElement = array->GetRef(coro, i);
+        auto optElement = array->GetRef(executionCtx, i);
         if (UNLIKELY(!optElement)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return false;
         }
-        auto elem = EtsHandle<EtsObject>(coro, optElement.value());
+        auto elem = EtsHandle<EtsObject>(executionCtx, optElement.value());
         if (elem.GetPtr() == nullptr || elem->GetClass()->IsFunction()) {
             buffer_ += "null";
             isSuccessful = true;
@@ -370,10 +374,11 @@ void JSONStringifier::AppendUtf8ToQuotedString(const Span<const uint8_t> &sp)
 
 bool JSONStringifier::SerializeJSONString(EtsHandle<EtsObject> &value)
 {
-    EtsHandleScope scope(EtsCoroutine::GetCurrent());
+    EtsHandleScope scope(EtsExecutionContext::GetCurrent());
     PandaVector<uint8_t> tree8Buf;
     PandaVector<uint16_t> tree16Buf;
-    auto stringHandle = EtsHandle<EtsString>(EtsCoroutine::GetCurrent(), EtsString::FromEtsObject(value.GetPtr()));
+    auto stringHandle =
+        EtsHandle<EtsString>(EtsExecutionContext::GetCurrent(), EtsString::FromEtsObject(value.GetPtr()));
     ASSERT(stringHandle.GetPtr() != nullptr);
     if (stringHandle->IsEmpty()) {
         buffer_ += "\"\"";
@@ -510,7 +515,7 @@ bool JSONStringifier::HandleRecordKey(EtsHandle<EtsObject> &key)
     if (key->IsStringClass()) {
         key_ = EtsString::FromEtsObject(key.GetPtr())->GetMutf8();
     } else {
-        auto platformTypes = PlatformTypes(EtsCoroutine::GetCurrent());
+        auto platformTypes = PlatformTypes(EtsExecutionContext::GetCurrent());
         if (key->IsInstanceOf(platformTypes->coreBoolean)) {
             key_ = HandleNumeric<EtsBoolean>(key);
         } else if (key->IsInstanceOf(platformTypes->coreDouble)) {
@@ -534,10 +539,10 @@ bool JSONStringifier::HandleRecordKey(EtsHandle<EtsObject> &key)
 
 bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 {
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
 
-    EtsHandleScope scope(coro);
-    auto recordObj = EtsHandle<EtsEscompatMap>(coro, reinterpret_cast<EtsEscompatMap *>(value->GetCoreType()));
+    EtsHandleScope scope(executionCtx);
+    auto recordObj = EtsHandle<EtsEscompatMap>(executionCtx, reinterpret_cast<EtsEscompatMap *>(value->GetCoreType()));
     if (recordObj->GetSize() == 0) {
         buffer_ += "{}";
         return true;
@@ -545,21 +550,21 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "cyclic object value");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "cyclic object value");
         return false;
     }
 
     auto hasContent = false;
-    EtsEscompatMap::MapIdx recIdx = recordObj->GetFirstIdx(coro);
+    EtsEscompatMap::MapIdx recIdx = recordObj->GetFirstIdx(executionCtx);
     if (recIdx == EtsEscompatMap::MAP_IDX_END) {
         buffer_ += "{}";
         return true;
     }
     buffer_ += "{";
     do {
-        EtsHandle<EtsObject> key(coro, recordObj->GetKey(coro, recIdx));
-        EtsHandle<EtsObject> val(coro, recordObj->GetValue(coro, recIdx));
-        recIdx = recordObj->GetNextIdx(coro, recIdx);
+        EtsHandle<EtsObject> key(executionCtx, recordObj->GetKey(executionCtx, recIdx));
+        EtsHandle<EtsObject> val(executionCtx, recordObj->GetValue(executionCtx, recIdx));
+        recIdx = recordObj->GetNextIdx(executionCtx, recIdx);
         if (key.GetPtr() == nullptr || val.GetPtr() == nullptr) {
             continue;
         }
@@ -616,8 +621,8 @@ bool JSONStringifier::CheckUnsupportedAnnotation(EtsField *field)
 
 bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *platformTypes = PlatformTypes(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *platformTypes = PlatformTypes(executionCtx);
     auto *cls = platformTypes->coreJsonSerializable;
 
     if (cls == nullptr || !value->IsInstanceOf(cls)) {
@@ -630,8 +635,8 @@ bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
     }
 
     Value selfArg(value->GetCoreType());
-    auto *result = helpers::InvokeAndResolveReturnValue(method, coro, &selfArg);
-    if (UNLIKELY(coro->HasPendingException())) {
+    auto *result = helpers::InvokeAndResolveReturnValue(method, executionCtx, &selfArg);
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return false;
     }
 
@@ -640,9 +645,9 @@ bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
         return true;
     }
 
-    EtsHandle<EtsObject> resObj(coro, result);
+    EtsHandle<EtsObject> resObj(executionCtx, result);
     if (!resObj->IsStringClass()) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "toJSON must return string");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "toJSON must return string");
         return false;
     }
 
@@ -657,16 +662,16 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         return true;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
 
     if (SerializeJsonSerializable(value)) {
         return true;
     }
-    if (UNLIKELY(coro->HasPendingException())) {
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return false;
     }
 
-    auto *platformTypes = PlatformTypes(coro);
+    auto *platformTypes = PlatformTypes(executionCtx);
     bool isSuccessful = false;
 
     auto *valueCls = value->GetClass();
@@ -698,21 +703,21 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = SerializeJSONString(value);
     } else if (valueCls == platformTypes->coreRecord) {
         // Note that exact match of classes is expected, since `Record` can be extended
-        coro->ManagedCodeEnd();
+        executionCtx->GetMT()->ManagedCodeEnd();
         {
-            ScopedManagedCodeThread v(coro);
+            ScopedManagedCodeThread v(executionCtx->GetMT());
             isSuccessful = SerializeJSONRecord(value);
         }
-        coro->ManagedCodeBegin();
+        executionCtx->GetMT()->ManagedCodeBegin();
     } else if (value->IsInstanceOf(platformTypes->coreDate)) {
         isSuccessful = false;
     } else if (value->IsInstanceOf(platformTypes->escompatArray)) {
-        coro->ManagedCodeEnd();
+        executionCtx->GetMT()->ManagedCodeEnd();
         {
-            ScopedManagedCodeThread v(coro);
+            ScopedManagedCodeThread v(executionCtx->GetMT());
             isSuccessful = SerializeJSONObjectArray(value);
         }
-        coro->ManagedCodeBegin();
+        executionCtx->GetMT()->ManagedCodeBegin();
     } else if (value->IsInstanceOf(platformTypes->corePromise) || value->IsInstanceOf(platformTypes->coreSet) ||
                value->IsInstanceOf(platformTypes->coreDataView) || value->IsInstanceOf(platformTypes->coreRegExp) ||
                value->IsInstanceOf(platformTypes->coreArrayBuffer) || valueCls == platformTypes->coreMap) {
@@ -720,7 +725,7 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         // Such behavior is required to correctly fall back in case of user-extended `Record`, which is
         // also subtype of `Map`
         isSuccessful = SerializeEmptyObject();
-    } else if (value->GetCoreType() == coro->GetNullValue()) {
+    } else if (value->GetCoreType() == executionCtx->GetNullValue()) {
         isSuccessful = SerializeJSONNullValue();
     } else if (value->IsInstanceOf(platformTypes->interopJSValue) ||
                value->IsInstanceOf(platformTypes->interopESValue)) {
@@ -731,27 +736,27 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         isSuccessful = false;
     } else {
         if (value->IsInstanceOf(platformTypes->coreRegExpResultArray)) {
-            coro->ManagedCodeEnd();
+            executionCtx->GetMT()->ManagedCodeEnd();
             {
-                ScopedManagedCodeThread v(coro);
+                ScopedManagedCodeThread v(executionCtx->GetMT());
                 isSuccessful = SerializeJSONObjectArray(value);
             }
-            coro->ManagedCodeBegin();
+            executionCtx->GetMT()->ManagedCodeBegin();
         } else if (value->IsInstanceOf(platformTypes->coreJsonReplacer)) {
             auto *jsonReplacerMethod = valueCls->GetInstanceMethod("jsonReplacer", nullptr);
             ASSERT(jsonReplacerMethod != nullptr);
             Value selfArg(value->GetCoreType());
-            auto ret = jsonReplacerMethod->GetPandaMethod()->Invoke(coro, &selfArg);
-            if (UNLIKELY(coro->HasPendingException())) {
+            auto ret = jsonReplacerMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), &selfArg);
+            if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
                 return false;
             }
-            auto retobj = EtsHandle<EtsObject>(coro, EtsObject::FromCoreType(ret.GetAs<ObjectHeader *>()));
-            coro->ManagedCodeEnd();
+            auto retobj = EtsHandle<EtsObject>(executionCtx, EtsObject::FromCoreType(ret.GetAs<ObjectHeader *>()));
+            executionCtx->GetMT()->ManagedCodeEnd();
             {
-                ScopedManagedCodeThread v(coro);
+                ScopedManagedCodeThread v(executionCtx->GetMT());
                 isSuccessful = SerializeJSONRecord(retobj);
             }
-            coro->ManagedCodeBegin();
+            executionCtx->GetMT()->ManagedCodeBegin();
         } else if (valueCls->IsFunction()) {
             buffer_ += "undefined";
         } else if (value->IsInstanceOf(platformTypes->coreTuple)) {
@@ -761,12 +766,12 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
         } else if (valueRtCls->Implements(platformTypes->coreJsonElementSerializable->GetRuntimeClass())) {
             isSuccessful = false;
         } else if (valueCls->IsClass()) {
-            coro->ManagedCodeEnd();
+            executionCtx->GetMT()->ManagedCodeEnd();
             {
-                ScopedManagedCodeThread v(coro);
+                ScopedManagedCodeThread v(executionCtx->GetMT());
                 isSuccessful = SerializeJSONObject(value);
             }
-            coro->ManagedCodeBegin();
+            executionCtx->GetMT()->ManagedCodeBegin();
         } else {
             LOG(ERROR, ETS) << "Unsupported type: " << valueCls->GetDescriptor();
             return false;
@@ -776,8 +781,8 @@ bool JSONStringifier::SerializeObject(EtsHandle<EtsObject> &value)
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
-bool JSONStringifier::HandleField([[maybe_unused]] EtsCoroutine *coro, EtsHandle<EtsObject> &obj, EtsField *etsField,
-                                  bool &hasContent, PandaUnorderedSet<PandaString> &keys)
+bool JSONStringifier::HandleField([[maybe_unused]] EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj,
+                                  EtsField *etsField, bool &hasContent, PandaUnorderedSet<PandaString> &keys)
 {
     if (!etsField->IsPublic() || etsField->IsStatic()) {
         return true;
@@ -840,7 +845,7 @@ bool JSONStringifier::HandleField([[maybe_unused]] EtsCoroutine *coro, EtsHandle
             break;
         }
         default:
-            auto fieldObj = EtsHandle<EtsObject>(EtsCoroutine::GetCurrent(), obj->GetFieldObject(etsField));
+            auto fieldObj = EtsHandle<EtsObject>(EtsExecutionContext::GetCurrent(), obj->GetFieldObject(etsField));
             if (fieldObj.GetPtr() == nullptr || fieldObj->GetClass()->IsFunction()) {
                 return true;
             }
@@ -856,10 +861,10 @@ bool JSONStringifier::HandleField([[maybe_unused]] EtsCoroutine *coro, EtsHandle
 EtsString *JSONStringifier::Stringify(EtsHandle<EtsObject> &value)
 {
     bool result = false;
-    auto coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     result = SerializeObject(value);
-    if (!result || coro->HasPendingException()) {
+    if (!result || executionCtx->GetMT()->HasPendingException()) {
         return nullptr;
     }
     return EtsString::CreateFromUtf8(buffer_.c_str(), buffer_.length());

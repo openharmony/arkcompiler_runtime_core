@@ -34,7 +34,8 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/mutator_status.h"
 #include "runtime/interpreter/frame.h"
-#include "runtime/coroutines/coroutine_manager.h"
+
+#include "runtime/execution/coroutines/coroutine_manager.h"
 #include "libarkbase/utils/math_helpers.h"
 #include "intrinsics.h"
 
@@ -318,16 +319,14 @@ void SystemExit(int32_t status)
 
 void SystemScheduleCoroutine()
 {
-    auto *coro = Coroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *cm = static_cast<CoroutineManager *>(coro->GetVM()->GetThreadManager());
-    cm->Schedule();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    executionCtx->GetManager()->ExecuteJobs();
 }
 
 int32_t SystemCoroutineGetWorkerId()
 {
-    // return os::thread::GetCurrentThreadId();
-    return Coroutine::GetCurrent()->GetWorker()->GetId();
+    return JobExecutionContext::GetCurrent()->GetWorker()->GetId();
 }
 
 ObjectHeader *ObjectCreateNonMovable(coretypes::Class *cls)

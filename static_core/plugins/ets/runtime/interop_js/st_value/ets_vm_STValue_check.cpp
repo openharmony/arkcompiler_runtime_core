@@ -513,8 +513,8 @@ template <typename CheckFunc>
 napi_value CheckSTypeImpl(napi_env env, napi_callback_info info, CheckFunc &&checkFunc)
 {
     ASSERT_SCOPED_NATIVE_CODE();
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *ctx = InteropCtx::Current(coro);
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    auto *ctx = InteropCtx::Current();
 
     std::array<napi_value, 2U> jsArgv {};
     size_t jsArgc = 1;
@@ -533,9 +533,9 @@ napi_value CheckSTypeImpl(napi_env env, napi_callback_info info, CheckFunc &&che
 
     bool result = false;
     {
-        ScopedManagedCodeThread managedScope(coro);
+        ScopedManagedCodeThread managedScope(execCtx->GetMT());
         auto *etsObject = sharedRef->GetEtsObject();
-        result = checkFunc(etsObject, coro);
+        result = checkFunc(etsObject, execCtx);
     }
     napi_value jsBoolean {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, result, &jsBoolean));
@@ -544,21 +544,21 @@ napi_value CheckSTypeImpl(napi_env env, napi_callback_info info, CheckFunc &&che
 
 napi_value STValueIsSTArrayImpl(napi_env env, napi_callback_info info)
 {
-    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, EtsCoroutine *coro) {
-        return EtsEscompatArray::IsExactlyEscompatArray(etsObject, coro);
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, EtsExecutionContext *execCtx) {
+        return EtsEscompatArray::IsExactlyEscompatArray(etsObject, execCtx);
     });
 }
 
 napi_value STValueIsSTSetImpl(napi_env env, napi_callback_info info)
 {
-    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsCoroutine *coro) {
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsExecutionContext *execCtx) {
         return etsObject->GetClass() == PlatformTypes()->coreSet;
     });
 }
 
 napi_value STValueIsSTMapImpl(napi_env env, napi_callback_info info)
 {
-    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsCoroutine *coro) {
+    return CheckSTypeImpl(env, info, [](EtsObject *etsObject, [[maybe_unused]] EtsExecutionContext *execCtx) {
         return etsObject->GetClass() == PlatformTypes()->coreMap;
     });
 }

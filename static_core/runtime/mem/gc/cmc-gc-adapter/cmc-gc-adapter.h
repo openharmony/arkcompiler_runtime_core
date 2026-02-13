@@ -18,7 +18,6 @@
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/include/managed_thread.h"
-#include "runtime/coroutines/coroutine.h"
 
 namespace ark::mem {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,24 +16,26 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_BOX_PRIMITIVE_INL_H
 
+#include "include/managed_thread.h"
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
 namespace ark::ets {
 template <typename T>
-EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
+EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsExecutionContext *executionCtx, T value)
 {
-    auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, GetBoxClass(coro)));
+    auto *instance =
+        reinterpret_cast<EtsBoxPrimitive<T> *>(EtsObject::Create(executionCtx, GetEtsBoxClass(executionCtx)));
     ASSERT(instance != nullptr);
     instance->SetValue(value);
     return instance;
 }
 
 template <typename T>
-EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsCoroutine *coro)
+EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsExecutionContext *executionCtx)
 {
-    auto ptypes = PlatformTypes(coro);
+    auto ptypes = PlatformTypes(executionCtx);
     EtsClass *boxClass = nullptr;
 
     if constexpr (std::is_same<T, EtsBoolean>::value) {
@@ -59,9 +61,9 @@ EtsClass *EtsBoxPrimitive<T>::GetEtsBoxClass(EtsCoroutine *coro)
 }
 
 template <typename T>
-Class *EtsBoxPrimitive<T>::GetBoxClass(EtsCoroutine *coro)
+Class *EtsBoxPrimitive<T>::GetBoxClass(EtsExecutionContext *executionCtx)
 {
-    return GetEtsBoxClass(coro)->GetRuntimeClass();
+    return GetEtsBoxClass(executionCtx)->GetRuntimeClass();
 }
 
 }  // namespace ark::ets

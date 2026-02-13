@@ -82,7 +82,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsObjects)
     EtsClass *objectClass = PlatformTypes()->coreObject;
     ASSERT_NE(objectClass, nullptr);
 
-    EtsObject *obj = EtsObject::Create(coro_, objectClass);
+    EtsObject *obj = EtsObject::Create(EtsExecutionContext::FromMT(coro_), objectClass);
     ASSERT_NE(obj, nullptr);
 
     // Object should be a valid WeakMap key
@@ -93,7 +93,8 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsObjects)
 // Test that boxed Boolean is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsBooleanBox)
 {
-    EtsObject *boxedBool = EtsBoxPrimitive<EtsBoolean>::Create(coro_, static_cast<EtsBoolean>(1));
+    EtsObject *boxedBool =
+        EtsBoxPrimitive<EtsBoolean>::Create(EtsExecutionContext::FromMT(coro_), static_cast<EtsBoolean>(1));
     ASSERT_NE(boxedBool, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedBool);
@@ -104,7 +105,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBooleanBox)
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsIntBox)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedInt = EtsBoxPrimitive<EtsInt>::Create(coro_, 42);
+    EtsObject *boxedInt = EtsBoxPrimitive<EtsInt>::Create(EtsExecutionContext::FromMT(coro_), 42);
     ASSERT_NE(boxedInt, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedInt);
@@ -115,7 +116,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsIntBox)
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsLongBox)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedLong = EtsBoxPrimitive<EtsLong>::Create(coro_, 100L);
+    EtsObject *boxedLong = EtsBoxPrimitive<EtsLong>::Create(EtsExecutionContext::FromMT(coro_), 100L);
     ASSERT_NE(boxedLong, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedLong);
@@ -126,7 +127,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsLongBox)
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsDoubleBox)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedDouble = EtsBoxPrimitive<EtsDouble>::Create(coro_, 3.14);
+    EtsObject *boxedDouble = EtsBoxPrimitive<EtsDouble>::Create(EtsExecutionContext::FromMT(coro_), 3.14);
     ASSERT_NE(boxedDouble, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedDouble);
@@ -137,7 +138,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsDoubleBox)
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsFloatBox)
 {
     // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedFloat = EtsBoxPrimitive<EtsFloat>::Create(coro_, 2.5F);
+    EtsObject *boxedFloat = EtsBoxPrimitive<EtsFloat>::Create(EtsExecutionContext::FromMT(coro_), 2.5F);
     ASSERT_NE(boxedFloat, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedFloat);
@@ -147,8 +148,9 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsFloatBox)
 // Test that boxed Byte is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsByteBox)
 {
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedByte = EtsBoxPrimitive<EtsByte>::Create(coro_, static_cast<EtsByte>(10));
+    EtsObject *boxedByte =
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        EtsBoxPrimitive<EtsByte>::Create(EtsExecutionContext::FromMT(coro_), static_cast<EtsByte>(10));
     ASSERT_NE(boxedByte, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedByte);
@@ -158,8 +160,9 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsByteBox)
 // Test that boxed Short is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsShortBox)
 {
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    EtsObject *boxedShort = EtsBoxPrimitive<EtsShort>::Create(coro_, static_cast<EtsShort>(1000));
+    EtsObject *boxedShort =
+        // NOLINTNEXTLINE(readability-magic-numbers)
+        EtsBoxPrimitive<EtsShort>::Create(EtsExecutionContext::FromMT(coro_), static_cast<EtsShort>(1000));
     ASSERT_NE(boxedShort, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedShort);
@@ -169,7 +172,8 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsShortBox)
 // Test that boxed Char is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsCharBox)
 {
-    EtsObject *boxedChar = EtsBoxPrimitive<EtsChar>::Create(coro_, static_cast<EtsChar>('A'));
+    EtsObject *boxedChar =
+        EtsBoxPrimitive<EtsChar>::Create(EtsExecutionContext::FromMT(coro_), static_cast<EtsChar>('A'));
     ASSERT_NE(boxedChar, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(boxedChar);
@@ -195,7 +199,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBigInt)
 
     // Create a simple BigInt object (we can't easily construct a proper BigInt from C++,
     // but we can test that the class detection works by creating an object of BigInt class)
-    EtsObject *bigInt = EtsObject::Create(coro_, bigIntClass);
+    EtsObject *bigInt = EtsObject::Create(EtsExecutionContext::FromMT(coro_), bigIntClass);
     ASSERT_NE(bigInt, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(bigInt);
@@ -208,7 +212,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsNullValue)
     EtsClass *nullValueClass = PlatformTypes()->coreNull;
     ASSERT_NE(nullValueClass, nullptr);
 
-    EtsObject *nullValue = EtsObject::Create(coro_, nullValueClass);
+    EtsObject *nullValue = EtsObject::Create(EtsExecutionContext::FromMT(coro_), nullValueClass);
     ASSERT_NE(nullValue, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(nullValue);
@@ -233,7 +237,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsMultipleReferenceTypes)
     EtsClass *errorClass = PlatformTypes()->escompatError;
     ASSERT_NE(errorClass, nullptr);
 
-    EtsObject *error = EtsObject::Create(coro_, errorClass);
+    EtsObject *error = EtsObject::Create(EtsExecutionContext::FromMT(coro_), errorClass);
     ASSERT_NE(error, nullptr);
 
     EtsBoolean result = intrinsics::EtsWeakMapValidateKey(error);

@@ -227,7 +227,7 @@ ani_env *GetAniEnv()
             /* CC-OFFNXT(G.PRE.05) function gen */              \
             return nullptr;                                     \
         }                                                       \
-        auto *c = EtsCoroutine::GetCurrent();                   \
+        auto *c = EtsExecutionContext::GetCurrent();            \
         if (c == nullptr) {                                     \
             STValueThrowJSError(env, "Thread is not attached"); \
             /* CC-OFFNXT(G.PRE.05) function gen */              \
@@ -240,7 +240,7 @@ ani_env *GetAniEnv()
             return nullptr;                                     \
         }                                                       \
     } while (0);                                                \
-    INTEROP_CODE_SCOPE_JS_TO_ETS(EtsCoroutine::GetCurrent())
+    INTEROP_CODE_SCOPE_JS_TO_ETS(EtsExecutionContext::GetCurrent())
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ANI_CHECK_ERROR_RETURN(env, status)                     \

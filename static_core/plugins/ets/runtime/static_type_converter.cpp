@@ -14,13 +14,13 @@
  */
 
 #include "plugins/ets/runtime/static_type_converter.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_type.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "common_interfaces/objects/base_type.h"
 
@@ -36,31 +36,31 @@ static bool EtsToBoolean(EtsBoolean value)
 common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
 {
     EtsObject *etsObject = nullptr;
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
-    auto ptypes = PlatformTypes(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto ptypes = PlatformTypes(executionCtx);
     std::visit(
         [&](auto &&arg) -> void {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, std::monostate> || std::is_same_v<T, common_vm::BaseUndefined>) {
                 etsObject = nullptr;
             } else if constexpr (std::is_same_v<T, bool>) {
-                etsObject = EtsBoxPrimitive<EtsBoolean>::Create(coro, arg);
+                etsObject = EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, arg);
             } else if constexpr (std::is_same_v<T, EtsLong>) {
-                etsObject = EtsBoxPrimitive<EtsLong>::Create(coro, static_cast<EtsLong>(arg));
+                etsObject = EtsBoxPrimitive<EtsLong>::Create(executionCtx, static_cast<EtsLong>(arg));
             } else if constexpr (std::is_same_v<T, EtsInt>) {
-                etsObject = EtsBoxPrimitive<EtsInt>::Create(coro, static_cast<EtsInt>(arg));
+                etsObject = EtsBoxPrimitive<EtsInt>::Create(executionCtx, static_cast<EtsInt>(arg));
             } else if constexpr (std::is_same_v<T, EtsShort>) {
-                etsObject = EtsBoxPrimitive<EtsShort>::Create(coro, static_cast<EtsShort>(arg));
+                etsObject = EtsBoxPrimitive<EtsShort>::Create(executionCtx, static_cast<EtsShort>(arg));
             } else if constexpr (std::is_same_v<T, EtsChar>) {
-                etsObject = EtsBoxPrimitive<EtsChar>::Create(coro, static_cast<EtsChar>(arg));
+                etsObject = EtsBoxPrimitive<EtsChar>::Create(executionCtx, static_cast<EtsChar>(arg));
             } else if constexpr (std::is_same_v<T, EtsFloat>) {
-                etsObject = EtsBoxPrimitive<EtsFloat>::Create(coro, static_cast<EtsFloat>(arg));
+                etsObject = EtsBoxPrimitive<EtsFloat>::Create(executionCtx, static_cast<EtsFloat>(arg));
             } else if constexpr (std::is_same_v<T, EtsDouble>) {
-                etsObject = EtsBoxPrimitive<EtsDouble>::Create(coro, static_cast<EtsDouble>(arg));
+                etsObject = EtsBoxPrimitive<EtsDouble>::Create(executionCtx, static_cast<EtsDouble>(arg));
             } else if constexpr (std::is_same_v<T, common_vm::BaseNull>) {
-                etsObject = EtsObject::FromCoreType(coro->GetNullValue());
+                etsObject = EtsObject::FromCoreType(executionCtx->GetNullValue());
             } else if constexpr (std::is_same_v<T, common_vm::BaseBigInt>) {
                 uint32_t len = arg.length;
                 bool sign = arg.sign;
@@ -69,7 +69,7 @@ common_vm::BoxedValue StaticTypeConverter::WrapBoxed(common_vm::BaseType value)
                     etsIntArray->Set(i, static_cast<int32_t>(arg.data[i]));
                 }
                 ASSERT(ptypes->coreBigInt != nullptr);
-                VMHandle<EtsIntArray> arrHandle(coro, etsIntArray->GetCoreType());
+                VMHandle<EtsIntArray> arrHandle(executionCtx->GetMT(), etsIntArray->GetCoreType());
                 auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(ptypes->coreBigInt));
                 bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(arrHandle.GetPtr()));
                 bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), arg.data.empty() ? 0 : sign == 0 ? 1 : -1);
@@ -92,10 +92,10 @@ common_vm::BaseType StaticTypeConverter::UnwrapBoxed(common_vm::BoxedValue value
     }
 
     auto *etsObj = reinterpret_cast<EtsObject *>(value);
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
     auto *cls = etsObj->GetClass();
-    auto ptypes = PlatformTypes(coro);
+    auto ptypes = PlatformTypes(executionCtx);
     if (cls == ptypes->coreBoolean) {
         auto etsType = EtsBoxPrimitive<EtsBoolean>::Unbox(etsObj);
         return EtsToBoolean(etsType);
@@ -124,7 +124,7 @@ common_vm::BaseType StaticTypeConverter::UnwrapBoxed(common_vm::BoxedValue value
             baseBigInt.data.emplace_back(static_cast<uint32_t>(etsValue->Get(i)));
         }
         return baseBigInt;
-    } else if (etsObj->GetCoreType() == coro->GetNullValue()) {
+    } else if (etsObj->GetCoreType() == executionCtx->GetNullValue()) {
         return common_vm::BaseNull {};
     }
     return reinterpret_cast<common_vm::BoxedValue>(etsObj);

@@ -15,6 +15,10 @@
 
 #include <unistd.h>
 #include <string_view>
+#include "ets_coroutine.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_launch.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
@@ -151,7 +155,7 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
 {
     auto timerFunc = [](void *param) {
         auto *timerHandle = static_cast<uv_timer_t *>(param);
-        auto *env = ark::ets::EtsCoroutine::GetCurrent()->GetPandaAniEnv();
+        auto *env = ark::ets::EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
         auto timerId = reinterpret_cast<uint64_t>(timerHandle->data);
         auto [info, exists] = FindTimerInfo(env, timerId);
         if (!exists) {
@@ -169,25 +173,34 @@ void TimerModule::TimerCallback(uv_timer_t *timer)
             RepeatTimer(timerHandle, timerId);
         }
     };
+    // NOLINTNEXTLINE(google-build-using-namespace)
+    using namespace ark;
+
     auto timerId = reinterpret_cast<uint64_t>(timer->data);
-    auto coroName = "Timer callback: " + ark::ToPandaString(timerId);
+    auto jobName = "Timer callback: " + ToPandaString(timerId);
     {
-        auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-        ASSERT(coro != nullptr);
-        ark::ScopedManagedCodeThread managedScope(coro);
-        coro->GetCoroutineManager()->LaunchNative(timerFunc, timer, std::move(coroName),
-                                                  ark::CoroutineWorkerGroup::GenerateExactWorkerId(
-                                                      ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
-                                                  ark::ets::EtsCoroutine::TIMER_CALLBACK, false, true);
+        auto *executionCtx = JobExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+        auto *jobMan = executionCtx->GetManager();
+        ScopedManagedCodeThread managedScope(executionCtx);
+        auto epInfo = Job::NativeEntrypointInfo {timerFunc, timer};
+        // NOLINTNEXTLINE(performance-move-const-arg)
+        auto *job =
+            jobMan->CreateJob(std::move(jobName), epInfo, ets::EtsCoroutine::TIMER_CALLBACK, Job::Type::MUTATOR, true);
+        auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
+        auto lResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
+        if (UNLIKELY(lResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+            jobMan->DestroyJob(job);
+        }
     }
     uv_timer_stop(timer);
 }
 
 void TimerModule::RepeatTimer(uv_timer_t *timer, uint64_t timerId)
 {
-    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *env = coro->GetPandaAniEnv();
+    auto *executionCtx = ark::ets::EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *env = executionCtx->GetPandaAniEnv();
     auto [_, exists] = FindTimerInfo(env, timerId);
     if (exists) {
         uv_timer_again(timer);
@@ -266,18 +279,18 @@ void TimerModule::TimerInfo::InvokeCallback(ani_env *env)
     ark::ets::ani::ScopedManagedCodeFix s(env);
     auto invokeObject = s.ToInternalType(callback);
 
-    auto resolvedMethod = PlatformTypes(s.GetCoroutine())->coreFunctionUnsafeCall;
+    auto resolvedMethod = PlatformTypes(s.GetExecutionContext())->coreFunctionUnsafeCall;
     ASSERT(invokeObject->GetClass()->IsFunction());
     ark::ets::EtsMethod *call = invokeObject->GetClass()->ResolveVirtualMethod(resolvedMethod);
 
-    auto argArray = ark::ets::EtsObjectArray::Create(ark::ets::PlatformTypes(s.GetCoroutine())->coreObject, 0U);
+    auto argArray = ark::ets::EtsObjectArray::Create(ark::ets::PlatformTypes(s.GetExecutionContext())->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
-        ASSERT(s.GetCoroutine()->HasPendingException());
+        ASSERT(s.GetExecutionContext()->GetMT()->HasPendingException());
         return;
     }
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ark::Value arg[2] = {ark::Value(invokeObject->GetCoreType()), ark::Value(argArray->GetCoreType())};
 
-    call->GetPandaMethod()->Invoke(s.GetCoroutine(), arg);
+    call->GetPandaMethod()->Invoke(s.GetExecutionContext()->GetMT(), arg);
 }

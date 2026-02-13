@@ -23,7 +23,7 @@ namespace ark::ets::intrinsics {
 
 EtsObject *EtsMutexCreate()
 {
-    return EtsMutex::Create(EtsCoroutine::GetCurrent());
+    return EtsMutex::Create(EtsExecutionContext::GetCurrent());
 }
 
 void EtsMutexLock(EtsObject *mutex)
@@ -36,7 +36,7 @@ void EtsMutexUnlock(EtsObject *mutex)
 {
     ASSERT(mutex->GetClass() == PlatformTypes()->coreMutex);
     if (!EtsMutex::FromEtsObject(mutex)->IsHeld()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
                           "Unable to unlock Mutex: state is already unlocked");
         return;
     }
@@ -45,7 +45,7 @@ void EtsMutexUnlock(EtsObject *mutex)
 
 EtsObject *EtsEventCreate()
 {
-    return EtsEvent::Create(EtsCoroutine::GetCurrent());
+    return EtsEvent::Create(EtsExecutionContext::GetCurrent());
 }
 
 void EtsEventWait(EtsObject *event)
@@ -62,16 +62,16 @@ void EtsEventFire(EtsObject *event)
 
 EtsObject *EtsCondVarCreate()
 {
-    return EtsCondVar::Create(EtsCoroutine::GetCurrent());
+    return EtsCondVar::Create(EtsExecutionContext::GetCurrent());
 }
 
 void EtsCondVarWait(EtsObject *condVar, EtsObject *mutex)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(condVar->GetClass() == PlatformTypes(coro)->coreCondVar);
-    ASSERT(mutex->GetClass() == PlatformTypes(coro)->coreMutex);
-    EtsHandleScope scope(coro);
-    EtsHandle<EtsMutex> hMutex(coro, EtsMutex::FromEtsObject(mutex));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(condVar->GetClass() == PlatformTypes(executionCtx)->coreCondVar);
+    ASSERT(mutex->GetClass() == PlatformTypes(executionCtx)->coreMutex);
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsMutex> hMutex(executionCtx, EtsMutex::FromEtsObject(mutex));
     EtsCondVar::FromEtsObject(condVar)->Wait(hMutex);
 }
 
@@ -91,18 +91,18 @@ void EtsCondVarNotifyAll(EtsObject *condVar, EtsObject *mutex)
 
 EtsObject *EtsQueueSpinlockCreate()
 {
-    return EtsQueueSpinlock::Create(EtsCoroutine::GetCurrent());
+    return EtsQueueSpinlock::Create(EtsExecutionContext::GetCurrent());
 }
 
 void EtsQueueSpinlockGuard(EtsObject *spinlock, EtsObject *callback)
 {
     ASSERT(spinlock->GetClass() == PlatformTypes()->coreQueueSpinlock);
-    auto *coro = EtsCoroutine::GetCurrent();
-    EtsHandleScope scope(coro);
-    EtsHandle<EtsQueueSpinlock> hSpinlock(coro, EtsQueueSpinlock::FromEtsObject(spinlock));
-    EtsHandle<EtsObject> hCallback(coro, callback);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsQueueSpinlock> hSpinlock(executionCtx, EtsQueueSpinlock::FromEtsObject(spinlock));
+    EtsHandle<EtsObject> hCallback(executionCtx, callback);
     EtsQueueSpinlock::Guard guard(hSpinlock);
-    LambdaUtils::InvokeVoid(coro, hCallback.GetPtr());
+    LambdaUtils::InvokeVoid(executionCtx->GetMT(), hCallback.GetPtr());
 }
 
 void EtsReadLock(EtsObject *rwLock)
@@ -116,7 +116,7 @@ void EtsReadUnlock(EtsObject *rwLock)
     ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
     auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
     if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasWriteLock(state)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
                           "Unable to unlock ReadLock: state is already unlocked or write-locked");
         return;
     }
@@ -134,7 +134,7 @@ void EtsWriteUnlock(EtsObject *rwLock)
     ASSERT(rwLock->GetClass() == PlatformTypes()->coreRWLock);
     auto state = EtsRWLock::FromEtsObject(rwLock)->GetState();
     if (EtsRWLock::State::IsUnlocked(state) || EtsRWLock::State::HasReadLock(state)) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreIllegalLockStateError,
                           "Unable to unlock WriteLock: state is already unlocked or read-locked");
         return;
     }

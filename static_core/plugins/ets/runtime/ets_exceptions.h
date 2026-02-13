@@ -17,27 +17,30 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_
 
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include <string_view>
+#include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "runtime/include/managed_thread.h"
+#include "runtime/include/mem/panda_string.h"
 
 namespace ark::ets {
 
-class EtsCoroutine;
-class EtsClass;
-class EtsObject;
+PANDA_PUBLIC_API EtsObject *SetupEtsException(EtsExecutionContext *executionCtx, EtsClass *exceptionClass,
+                                              const char *msg);
 
-PANDA_PUBLIC_API EtsObject *SetupEtsException(EtsCoroutine *coroutine, EtsClass *exceptionClass, const char *msg);
+PANDA_PUBLIC_API void ThrowEtsException(EtsExecutionContext *executionCtx, const char *classDescriptor,
+                                        const char *msg);
 
-PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
-
-inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDescriptor, std::string_view msg)
+inline void ThrowEtsException(EtsExecutionContext *executionCtx, std::string_view classDescriptor, std::string_view msg)
 {
-    ThrowEtsException(coroutine, classDescriptor.data(), msg.data());
+    ThrowEtsException(executionCtx, classDescriptor.data(), msg.data());
 }
 
-void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *cls, const char *msg);
+void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, const char *msg);
 
-inline void ThrowEtsException(EtsCoroutine *coroutine, EtsClass *exceptionClass, std::string_view msg)
+inline void ThrowEtsException(EtsExecutionContext *executionCtx, EtsClass *exceptionClass, std::string_view msg)
 {
-    ThrowEtsException(coroutine, exceptionClass, msg.data());
+    ThrowEtsException(executionCtx, exceptionClass, msg.data());
 }
 
 }  // namespace ark::ets

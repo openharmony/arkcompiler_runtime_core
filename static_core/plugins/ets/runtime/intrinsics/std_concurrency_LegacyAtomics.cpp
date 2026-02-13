@@ -27,7 +27,9 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer-inl.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_legacy_atomics.h"
 
 namespace ark::ets::intrinsics {
 
@@ -219,4 +221,36 @@ FOR_UNSIGNED_TYPES(XOR_UNSIGNED)
 #undef FOR_SIGNED_TYPES
 #undef FOR_UNSIGNED_TYPES
 
+extern "C" {
+EtsString *AtomicsWaitImplInt32(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsInt value, EtsInt timeout)
+{
+    return LegacyAtomics::WaitInt32(buffer, index, value, timeout);
+}
+
+EtsString *AtomicsWaitImplInt64(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsLong value, EtsInt timeout)
+{
+    return LegacyAtomics::WaitInt64(buffer, index, value, timeout);
+}
+
+EtsPromise *AtomicsAsyncWaitImplInt32(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsInt value, int32_t timeout)
+{
+    return LegacyAtomics::AsyncWaitInt32(buffer, index, value, timeout);
+}
+
+EtsPromise *AtomicsAsyncWaitImplInt64(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsLong value, int32_t timeout)
+{
+    return LegacyAtomics::AsyncWaitInt64(buffer, index, value, timeout);
+}
+
+EtsInt AtomicsNotifyImplInt32(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsInt count)
+{
+    return LegacyAtomics::Notify(buffer, index, count);
+}
+
+EtsInt AtomicsNotifyImplInt64(EtsStdCoreArrayBuffer *buffer, EtsInt index, EtsInt count)
+{
+    return LegacyAtomics::Notify(buffer, index, count);
+}
+
+}  // extern "C"
 }  // namespace ark::ets::intrinsics

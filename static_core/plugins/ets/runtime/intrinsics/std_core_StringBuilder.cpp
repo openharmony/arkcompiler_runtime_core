@@ -77,7 +77,7 @@ EtsString *StdCoreToStringLong(EtsLong i)
     if (UNLIKELY(cache == nullptr)) {
         return LongToStringCache::GetNoCache(i);
     }
-    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), i);
+    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), i);
 }
 
 ObjectHeader *StdCoreStringBuilderAppendString(ObjectHeader *sb, EtsString *str)

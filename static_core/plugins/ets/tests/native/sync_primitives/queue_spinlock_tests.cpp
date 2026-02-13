@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,7 @@ private:
     static ani_object SpinlockCreate(ani_env *env)
     {
         ani::ScopedManagedCodeFix s(env);
-        auto *coreSpinlock = EtsQueueSpinlock::Create(EtsCoroutine::GetCurrent());
+        auto *coreSpinlock = EtsQueueSpinlock::Create(EtsExecutionContext::GetCurrent());
         ani_object spinlock {};
         s.AddLocalRef(coreSpinlock, reinterpret_cast<ani_ref *>(&spinlock));
         return spinlock;
@@ -96,9 +96,9 @@ private:
         ani::ScopedManagedCodeFix s(env);
         auto *coro = EtsCoroutine::GetCurrent();
         auto coreSpinlock = EtsQueueSpinlock::FromEtsObject(s.ToInternalType(spinlock));
-        EtsHandleScope scope(coro);
-        EtsHandle<EtsQueueSpinlock> hSpinlock(coro, coreSpinlock);
-        EtsHandle<EtsObject> hCallback(coro, s.ToInternalType(callback));
+        EtsHandleScope hs(EtsExecutionContext::FromMT(coro));
+        EtsHandle<EtsQueueSpinlock> hSpinlock(EtsExecutionContext::FromMT(coro), coreSpinlock);
+        EtsHandle<EtsObject> hCallback(EtsExecutionContext::FromMT(coro), s.ToInternalType(callback));
         EtsQueueSpinlock::Guard guard(hSpinlock);
         LambdaUtils::InvokeVoid(coro, hCallback.GetPtr());
     }

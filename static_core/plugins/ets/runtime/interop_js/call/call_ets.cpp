@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,9 @@ namespace ark::ets::interop::js {
 
 class CallETSHandler {
 public:
-    ALWAYS_INLINE CallETSHandler(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                                 EtsObject *thisObj)
-        : coro_(coro),
+    ALWAYS_INLINE CallETSHandler(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method,
+                                 Span<napi_value> jsargv, EtsObject *thisObj)
+        : executionCtx_(executionCtx),
           ctx_(ctx),
           protoReader_(method, ctx_->GetClassLinker(), ctx_->LinkerCtx()),
           thisObj_(thisObj),
@@ -33,10 +33,10 @@ public:
     }
 
     template <bool IS_STATIC>
-    static ALWAYS_INLINE napi_value HandleImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method,
+    static ALWAYS_INLINE napi_value HandleImpl(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method,
                                                Span<napi_value> jsargv, EtsObject *thisObj)
     {
-        CallETSHandler st(coro, ctx, method, jsargv, thisObj);
+        CallETSHandler st(executionCtx, ctx, method, jsargv, thisObj);
         return st.HandleImpl<IS_STATIC>();
     }
 
@@ -52,10 +52,10 @@ private:
     template <bool IS_STATIC>
     napi_value HandleImpl();
 
-    static napi_value __attribute__((noinline)) ForwardException(InteropCtx *ctx, EtsCoroutine *coro)
+    static napi_value __attribute__((noinline)) ForwardException(InteropCtx *ctx, EtsExecutionContext *executionCtx)
     {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -64,7 +64,7 @@ private:
     NO_COPY_SEMANTIC(CallETSHandler);
     NO_MOVE_SEMANTIC(CallETSHandler);
 
-    EtsCoroutine *const coro_;
+    EtsExecutionContext *const executionCtx_;
     InteropCtx *const ctx_;
 
     ProtoReader protoReader_;
@@ -78,9 +78,9 @@ template <bool IS_STATIC>
 ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 {
     INTEROP_TRACE();
-    HandleScope<ObjectHeader *> etsHandleScope(coro_);
-    auto const createRoot = [coro = coro_](ObjectHeader *val) {
-        return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(coro, val).GetAddress());
+    HandleScope<ObjectHeader *> etsHandleScope(executionCtx_->GetMT());
+    auto const createRoot = [executionCtx = executionCtx_](ObjectHeader *val) {
+        return reinterpret_cast<ObjectHeader **>(VMHandle<ObjectHeader>(executionCtx->GetMT(), val).GetAddress());
     };
 
     [[maybe_unused]] ObjectHeader **thisObjRoot = nullptr;
@@ -145,7 +145,7 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
 ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
 {
     ASSERT(protoReader_.GetType().IsReference());
-    return PackRestParameters(coro_, ctx_, protoReader_, restArgs);
+    return PackRestParameters(executionCtx_, ctx_, protoReader_, restArgs);
 }
 
 bool CallETSHandler::CheckNumArgs(size_t numArgs) const
@@ -187,38 +187,38 @@ napi_value CallETSHandler::HandleImpl()
 
     auto const numArgs = method->GetNumArgs() - (IS_STATIC ? 0 : 1);
     if (UNLIKELY(!CheckNumArgs(numArgs))) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
 
     auto etsArgs = ctx_->GetTempArgs<Value>(method->GetNumArgs());
     if (UNLIKELY(!ConvertArgs<IS_STATIC>(*etsArgs))) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
 
-    Value etsRes = method->Invoke(coro_, etsArgs->data());
-    if (UNLIKELY(coro_->HasPendingException())) {
-        return ForwardException(ctx_, coro_);
+    Value etsRes = method->Invoke(executionCtx_->GetMT(), etsArgs->data());
+    if (UNLIKELY(executionCtx_->GetMT()->HasPendingException())) {
+        return ForwardException(ctx_, executionCtx_);
     }
 
     protoReader_.Reset();
     napi_value jsRes;
     auto readVal = [&etsRes](auto typeTag) { return etsRes.GetAs<typename decltype(typeTag)::type>(); };
     // scope is required to ConvertRefArgToJS
-    HandleScope<ObjectHeader *> scope(coro_);
+    HandleScope<ObjectHeader *> scope(executionCtx_->GetMT());
     if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsRes, readVal))) {
-        return ForwardException(ctx_, coro_);
+        return ForwardException(ctx_, executionCtx_);
     }
     return jsRes;
 }
 
-napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
+napi_value CallETSInstance(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
                            EtsObject *thisObj)
 {
-    return CallETSHandler::HandleImpl<false>(coro, ctx, method, jsargv, thisObj);
+    return CallETSHandler::HandleImpl<false>(executionCtx, ctx, method, jsargv, thisObj);
 }
-napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv)
+napi_value CallETSStatic(EtsExecutionContext *executionCtx, InteropCtx *ctx, Method *method, Span<napi_value> jsargv)
 {
-    return CallETSHandler::HandleImpl<true>(coro, ctx, method, jsargv, nullptr);
+    return CallETSHandler::HandleImpl<true>(executionCtx, ctx, method, jsargv, nullptr);
 }
 
 Expected<Method *, PandaString> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint)

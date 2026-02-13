@@ -15,7 +15,10 @@
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
 
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_launch.h"
 #include "include/coretypes/string.h"
+#include "runtime/include/managed_thread.h"
 #include "include/object_header.h"
 #include "libarkfile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -32,10 +35,11 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "runtime/arch/helpers.h"
-#include "runtime/coroutines/coroutine_worker_group.h"
+#include "runtime/execution/job_worker_group.h"
 #include "runtime/interpreter/vregister_iterator.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/include/class_linker-inl.h"
 
 namespace ark::ets {
@@ -52,21 +56,22 @@ using TypeId = panda_file::Type::TypeId;
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHandle<EtsPromise> &promiseHandle,
+static inline bool Launch(EtsExecutionContext *executionCtx, Method *method, const EtsHandle<EtsPromise> &promiseHandle,
                           PandaVector<Value> &&args)
 {
-    ASSERT(currentCoro != nullptr);
-    PandaEtsVM *etsVm = currentCoro->GetPandaVM();
-    auto *coroManager = currentCoro->GetCoroutineManager();
-    auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-    // create the coro and put it to the ready queue
-    LaunchResult launchResult = currentCoro->GetCoroutineManager()->Launch(
-        evt, method, std::move(args), CoroutineWorkerGroup::AnyId(), EtsCoroutine::LAUNCH, false);
+    ASSERT(executionCtx != nullptr);
+    PandaEtsVM *etsVm = executionCtx->GetPandaVM();
+    auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto *promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
+    auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
+    // create the job and put it to the ready queue
+    auto epInfo = Job::ManagedEntrypointInfo {evt, method, std::move(args)};
+    auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::LAUNCH);
+    auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority()});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         // OOM
-        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
+            Job::Destroy(job);
         }
         etsVm->GetGlobalObjectStorage()->Remove(promiseRef);
     }
@@ -93,18 +98,18 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     }
     ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
-    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> promiseHandle(executionCtx, promise);
     // NOTE(panferovi): should be fixed in #19443
-    ASSERT(promiseHandle->GetMutex(currentCoro) == nullptr);
-    ASSERT(promiseHandle->GetEvent(currentCoro) == nullptr);
+    ASSERT(promiseHandle->GetMutex(executionCtx) == nullptr);
+    ASSERT(promiseHandle->GetEvent(executionCtx) == nullptr);
     // NOTE(panferovi): issue with raw args and thisObj??
-    auto *mutex = EtsMutex::Create(currentCoro);
-    promiseHandle->SetMutex(currentCoro, mutex);
-    auto *event = EtsEvent::Create(currentCoro);
-    promiseHandle->SetEvent(currentCoro, event);
-    bool successfulLaunch = Launch(currentCoro, method, promiseHandle, std::move(values));
+    auto *mutex = EtsMutex::Create(executionCtx);
+    promiseHandle->SetMutex(executionCtx, mutex);
+    auto *event = EtsEvent::Create(executionCtx);
+    promiseHandle->SetEvent(executionCtx, event);
+    bool successfulLaunch = Launch(executionCtx, method, promiseHandle, std::move(values));
     if (UNLIKELY(!successfulLaunch)) {
         HandlePendingException();
         UNREACHABLE();
@@ -138,10 +143,10 @@ ObjectHeader *LaunchFromInterpreterImpl(Method *method, Frame *frame, const uint
         args[i] = Value::FromVReg(frameHandler.GetVReg(vregIter.GetVRegIdx(i)));
     }
 
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
-    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    bool successfulLaunch = Launch(currentCoro, method, promiseHandle, std::move(args));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> promiseHandle(executionCtx, promise);
+    bool successfulLaunch = Launch(executionCtx, method, promiseHandle, std::move(args));
     if (UNLIKELY(!successfulLaunch)) {
         return nullptr;
     }
@@ -261,8 +266,8 @@ extern "C" Method *LookupMethodByNameEntrypoint(InterpreterCache::Entry *entry, 
                                                 Method *caller, const uint8_t *pc)
 {
     auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     Method *metaMethod = classLinker->GetMethod(*caller, caller->GetClass()->ResolveMethodIndex(id));
     if (UNLIKELY(metaMethod == nullptr)) {
@@ -270,7 +275,7 @@ extern "C" Method *LookupMethodByNameEntrypoint(InterpreterCache::Entry *entry, 
         return nullptr;
     }
     ETSStubCacheInfo cacheInfo {entry, caller, pc};
-    return GetMethodByName(currentCoro, cacheInfo, metaMethod, current);
+    return GetMethodByName(executionCtx, cacheInfo, metaMethod, current);
 }
 
 extern "C" void ThrowEtsExceptionNoSuchMethodEntrypoint(ObjectHeader *obj, uint32_t id, Method *caller)
@@ -343,24 +348,21 @@ extern "C" bool IsClassValueTypedEntrypoint(Class *cls)
 
 extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHeader *obj1, ObjectHeader *obj2)
 {
-    auto coro = EtsCoroutine::CastFromThread(thread);
     auto eobj1 = EtsObject::FromCoreType(obj1);
     auto eobj2 = EtsObject::FromCoreType(obj2);
-    return EtsValueTypedEquals(coro, eobj1, eobj2);
+    return EtsValueTypedEquals(EtsExecutionContext::FromMT(thread), eobj1, eobj2);
 }
 
 extern "C" EtsString *EtsGetTypeofEntrypoint(ManagedThread *thread, ObjectHeader *obj)
 {
-    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
     EtsObject *eobj = EtsObject::FromCoreType(obj);
-    return EtsGetTypeof(coro, eobj);
+    return EtsGetTypeof(EtsExecutionContext::FromMT(thread), eobj);
 }
 
 extern "C" bool EtsIstrueEntrypoint(ManagedThread *thread, ObjectHeader *obj)
 {
-    EtsCoroutine *coro = EtsCoroutine::CastFromThread(thread);
     EtsObject *eobj = EtsObject::FromCoreType(obj);
-    return EtsIstrue(coro, eobj);
+    return EtsIstrue(EtsExecutionContext::FromMT(thread), eobj);
 }
 
 extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
@@ -374,7 +376,7 @@ extern "C" ObjectHeader *LongToStringDecimalEntrypoint(ObjectHeader *cache, int6
     if (UNLIKELY(cache == nullptr)) {
         return LongToStringDecimalNoCacheEntrypoint(number);
     }
-    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), number)->GetCoreType();
+    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number)->GetCoreType();
 }
 
 extern "C" ObjectHeader *LongToStringDecimalStoreEntrypoint(ObjectHeader *elem, int64_t number)
@@ -384,7 +386,7 @@ extern "C" ObjectHeader *LongToStringDecimalStoreEntrypoint(ObjectHeader *elem, 
         return LongToStringDecimalNoCacheEntrypoint(number);
     }
     return LongToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), number, elem)
+        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), number, elem)
         ->GetCoreType();
 }
 
@@ -399,7 +401,7 @@ extern "C" ObjectHeader *FloatToStringDecimalEntrypoint(ObjectHeader *cache, uin
         return FloatToStringDecimalNoCacheEntrypoint(number);
     }
     return FloatToStringCache::FromCoreType(cache)
-        ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<float>(number))
+        ->GetOrCache(EtsExecutionContext::GetCurrent(), bit_cast<float>(number))
         ->GetCoreType();
 }
 
@@ -410,7 +412,7 @@ extern "C" ObjectHeader *FloatToStringDecimalStoreEntrypoint(ObjectHeader *elem,
         return FloatToStringDecimalNoCacheEntrypoint(number);
     }
     return FloatToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<float>(number), elem)
+        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), bit_cast<float>(number), elem)
         ->GetCoreType();
 }
 
@@ -425,7 +427,7 @@ extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, ui
         return DoubleToStringDecimalNoCacheEntrypoint(number);
     }
     return DoubleToStringCache::FromCoreType(cache)
-        ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number))
+        ->GetOrCache(EtsExecutionContext::GetCurrent(), bit_cast<double>(number))
         ->GetCoreType();
 }
 
@@ -436,7 +438,7 @@ extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem
         return DoubleToStringDecimalNoCacheEntrypoint(number);
     }
     return DoubleToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem)
+        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), bit_cast<double>(number), elem)
         ->GetCoreType();
 }
 
@@ -447,36 +449,42 @@ extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
 
 extern "C" void BeginGeneralNativeMethod()
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *executionCtx = EtsExecutionContext::FromMT(mThread);
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
         LOG(FATAL, RUNTIME) << "eTS NAPI push local frame failed";
     }
 
-    coroutine->NativeCodeBegin();
+    mThread->NativeCodeBegin();
 }
 
 extern "C" void EndGeneralNativeMethodPrim()
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *executionCtx = EtsExecutionContext::FromMT(mThread);
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
-    coroutine->NativeCodeEnd();
+    mThread->NativeCodeEnd();
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
 extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
-    coroutine->NativeCodeEnd();
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *executionCtx = EtsExecutionContext::FromMT(mThread);
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
+    mThread->NativeCodeEnd();
     ObjectHeader *ret = nullptr;
-    if (LIKELY(!coroutine->HasPendingException())) {
+    if (LIKELY(!mThread->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
@@ -486,9 +494,9 @@ extern "C" ObjectHeader *EndGeneralNativeMethodObj(ark::ets::EtsReference *etsRe
 
 extern "C" void BeginQuickNativeMethod()
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     constexpr uint32_t MAX_LOCAL_REF = 4096;
     if (UNLIKELY(!storage->PushLocalEtsFrame(MAX_LOCAL_REF))) {
@@ -498,20 +506,22 @@ extern "C" void BeginQuickNativeMethod()
 
 extern "C" void EndQuickNativeMethodPrim()
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
 
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
 extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::ets::EtsReference *etsRef)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    auto *storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto *mThread = ManagedThread::GetCurrent();
+    ASSERT(mThread != nullptr);
+    auto *executionCtx = EtsExecutionContext::FromMT(mThread);
+    ASSERT(executionCtx != nullptr);
+    auto *storage = executionCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
     ObjectHeader *ret = nullptr;
-    if (LIKELY(!coroutine->HasPendingException())) {
+    if (LIKELY(!mThread->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef)->GetCoreType();
     }
 
@@ -522,13 +532,13 @@ extern "C" ObjectHeader *EndQuickNativeMethodObj(ark::ets::EtsReference *etsRef)
 extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Method *caller, ObjectHeader *obj,
                                                                      size_t calleeId)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto rawMethod = classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (LIKELY(rawMethod != nullptr)) {
-        auto *resolved = ResolveCompatibleVMethod(currentCoro, klass, rawMethod);
+        auto *resolved = ResolveCompatibleVMethod(executionCtx, klass, rawMethod);
         ASSERT(resolved != nullptr);
         return reinterpret_cast<uintptr_t>(resolved);
     }
@@ -577,7 +587,7 @@ extern "C" int32_t GetStringSizeInBytes(ObjectHeader *str)
 
 extern "C" bool SameValueZeroEntrypoint(ObjectHeader *o1, ObjectHeader *o2)
 {
-    return ark::ets::intrinsics::helpers::SameValueZero(EtsCoroutine::GetCurrent(), EtsObject::FromCoreType(o1),
+    return ark::ets::intrinsics::helpers::SameValueZero(EtsExecutionContext::GetCurrent(), EtsObject::FromCoreType(o1),
                                                         EtsObject::FromCoreType(o2));
 }
 

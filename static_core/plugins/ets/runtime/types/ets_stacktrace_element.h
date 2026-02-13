@@ -73,10 +73,10 @@ public:
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsStackTraceElement, lineNumber_), lineNumber);
     }
 
-    inline static EtsStackTraceElement *Create(EtsCoroutine *etsCoroutine)
+    inline static EtsStackTraceElement *Create(EtsExecutionContext *executionCtx)
     {
-        EtsClass *klass = PlatformTypes(etsCoroutine)->coreStackTraceElement;
-        EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
+        EtsClass *klass = PlatformTypes(executionCtx)->coreStackTraceElement;
+        EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
         return reinterpret_cast<EtsStackTraceElement *>(etsObject);
     }
 

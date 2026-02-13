@@ -241,16 +241,16 @@ napi_value STValueNewSTArrayImpl(napi_env env, napi_callback_info info)
         InteropCtx::ThrowJSError(env, "NewSTArray: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(execCtx);
 
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(execCtx);
+    ScopedManagedCodeThread managedScope(execCtx->GetMT());
 
     EtsClass *arrayClass = PlatformTypes()->escompatArray;
     EtsObject *arrayInstance = arrayClass->CreateInstance();
     if (UNLIKELY(arrayInstance == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(execCtx->GetMT()->HasPendingException());
         InteropCtx::ThrowJSError(env, "Failed to create st.Array");
         return nullptr;
     }
@@ -268,9 +268,9 @@ EtsObject *CreateInstanceWithInt(napi_env env, EtsClass *etsClass, int32_t value
         return nullptr;
     }
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    if (UNLIKELY(!etsClass->IsInitialized() && !linker->InitializeClass(coro, etsClass))) {
+    EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
+    EtsClassLinker *linker = execCtx->GetPandaVM()->GetClassLinker();
+    if (UNLIKELY(!etsClass->IsInitialized() && !linker->InitializeClass(execCtx, etsClass))) {
         return nullptr;
     }
     EtsObject *obj = EtsObject::Create(etsClass);
@@ -278,12 +278,12 @@ EtsObject *CreateInstanceWithInt(napi_env env, EtsClass *etsClass, int32_t value
         return nullptr;
     }
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> objHandle(coro, obj);
+    [[maybe_unused]] EtsHandleScope scope(execCtx);
+    EtsHandle<EtsObject> objHandle(execCtx, obj);
     const size_t ctorArgCount = 2;
     std::array<Value, ctorArgCount> args {Value(obj->GetCoreType()), Value(value)};
-    ctor->GetPandaMethod()->Invoke(coro, args.data());
-    if (UNLIKELY(coro->HasPendingException())) {
+    ctor->GetPandaMethod()->Invoke(execCtx->GetMT(), args.data());
+    if (UNLIKELY(execCtx->GetMT()->HasPendingException())) {
         return nullptr;
     }
     return objHandle.GetPtr();
@@ -300,16 +300,16 @@ napi_value STValueNewSTSetImpl(napi_env env, napi_callback_info info)
         InteropCtx::ThrowJSError(env, "NewSTSet: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(execCtx);
 
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(execCtx);
+    ScopedManagedCodeThread managedScope(execCtx->GetMT());
 
     EtsClass *setClass = PlatformTypes()->coreSet;
     EtsObject *setInstance = CreateInstanceWithInt(env, setClass, 8);
     if (UNLIKELY(setInstance == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(execCtx->GetMT()->HasPendingException());
         InteropCtx::ThrowJSError(env, "Failed to create st.Set");
         return nullptr;
     }
@@ -330,16 +330,16 @@ napi_value STValueNewSTMapImpl(napi_env env, napi_callback_info info)
         InteropCtx::ThrowJSError(env, "NewSTMap: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
+    EtsExecutionContext *execCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(execCtx);
 
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(execCtx);
+    ScopedManagedCodeThread managedScope(execCtx->GetMT());
 
     EtsClass *mapClass = PlatformTypes()->coreMap;
     EtsObject *mapInstance = CreateInstanceWithInt(env, mapClass, 8);
     if (UNLIKELY(mapInstance == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(execCtx->GetMT()->HasPendingException());
         InteropCtx::ThrowJSError(env, "Failed to create st.Map");
         return nullptr;
     }

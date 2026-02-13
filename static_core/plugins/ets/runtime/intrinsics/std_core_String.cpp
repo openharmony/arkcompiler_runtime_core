@@ -70,9 +70,9 @@ static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, EtsInt begin, Ets
         return nullptr;
     }
     EtsInt length = s->GetLength();
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<EtsString> sHandle(coroutine, reinterpret_cast<ObjectHeader *>(s));
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsString> sHandle(executionCtx, s);
     EtsInt n = end - begin;
     void *array = nullptr;
     if (isUtf16) {
@@ -205,9 +205,9 @@ uint8_t StdCoreStringEquals(EtsString *owner, EtsObject *s)
 
 EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> strHandle(coroutine, reinterpret_cast<ObjectHeader *>(str));
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> strHandle(executionCtx->GetMT(), reinterpret_cast<ObjectHeader *>(str));
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     auto flatStringInfo = coretypes::FlatStringInfo::FlattenAllString(strHandle, ctx);
     icu::UnicodeString utf16Str;
@@ -224,7 +224,7 @@ EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Got error in process of normalization: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(coroutine, PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(executionCtx, PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
 
@@ -238,7 +238,7 @@ EtsString *StdCoreStringNormalizeNFC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -250,7 +250,7 @@ EtsString *StdCoreStringNormalizeNFD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -262,7 +262,7 @@ EtsString *StdCoreStringNormalizeNFKC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -274,7 +274,7 @@ EtsString *StdCoreStringNormalizeNFKD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -366,9 +366,9 @@ EtsInt StdCoreStringLastIndexOf(EtsString *s, uint16_t ch, EtsInt fromIndex)
         fromIndex = length - 1;
     }
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto thread = ark::ManagedThread::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-    VMHandle<coretypes::String> stringHandle(thread, string);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> stringHandle(executionCtx->GetMT(), string);
     ark::coretypes::FlatStringInfo flatStr = ark::coretypes::FlatStringInfo::FlattenAllString(stringHandle, ctx);
     namespace impl = ark::intrinsics::impl;
     if (flatStr.IsUtf16()) {
@@ -427,9 +427,9 @@ static coretypes::String *StringConcat3(coretypes::String *str1, coretypes::Stri
 {
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> str3Handle(coroutine, str3);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> str3Handle(executionCtx->GetMT(), str3);
     auto str = coretypes::String::Concat(str1, str2, ctx, vm);
     if (UNLIKELY(str == nullptr)) {
         HandlePendingException();
@@ -444,10 +444,10 @@ static coretypes::String *StringConcat4(coretypes::String *str1, coretypes::Stri
 {
     auto *vm = Runtime::GetCurrent()->GetPandaVM();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    VMHandle<coretypes::String> str3Handle(coroutine, str3);
-    VMHandle<coretypes::String> str4Handle(coroutine, str4);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<coretypes::String> str3Handle(executionCtx->GetMT(), str3);
+    VMHandle<coretypes::String> str4Handle(executionCtx->GetMT(), str4);
     auto str = coretypes::String::Concat(str1, str2, ctx, vm);
     if (UNLIKELY(str == nullptr)) {
         HandlePendingException();
@@ -548,26 +548,25 @@ extern "C" EtsString *AllocateStringObject(size_t length, bool compressed)
 EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
 {
     auto length = str->GetLength();
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
     if (UNLIKELY(count < 0)) {
         PandaString message = "repeat: count is negative";
-        ThrowEtsException(coroutine, PlatformTypes()->coreRangeError, message);
+        ThrowEtsException(executionCtx, PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
 
     if (length == 0 || count == 0) {
         return EtsString::CreateNewEmptyString();
     }
-    VMHandle<EtsString> sHandle(coroutine, reinterpret_cast<ObjectHeader *>(str));
+    EtsHandle<EtsString> sHandle(executionCtx, str);
 
     int size = length * count;
     auto compressed = str->IsMUtf8();
     auto result = AllocateStringObject(size, compressed);
     if (UNLIKELY(result == nullptr)) {
         PandaString message = "repeat: memory allocation failed";
-        auto coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreOutOfMemoryError, message);
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreOutOfMemoryError, message);
         return nullptr;
     }
 
@@ -580,8 +579,8 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
 EtsString *StdCoreStringGet(EtsString *str, EtsInt index)
 {
     auto strData = static_cast<uint16_t>(StdCoreStringCharAt(str, index));
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (coro->HasPendingException()) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (executionCtx->GetMT()->HasPendingException()) {
         return nullptr;
     }
     if (strData < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(strData)) {

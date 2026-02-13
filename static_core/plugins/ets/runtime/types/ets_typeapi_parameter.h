@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H_
 #define PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H_
 
+#include "include/managed_thread.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -29,8 +30,6 @@ namespace test {
 class EtsTypeAPITest;
 }  // namespace test
 
-class EtsCoroutine;
-
 class EtsTypeAPIParameter : public ObjectHeader {
 public:
     EtsTypeAPIParameter() = delete;
@@ -39,7 +38,7 @@ public:
     NO_COPY_SEMANTIC(EtsTypeAPIParameter);
     NO_MOVE_SEMANTIC(EtsTypeAPIParameter);
 
-    static EtsTypeAPIParameter *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
+    static EtsTypeAPIParameter *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
     EtsObject *AsObject()
     {

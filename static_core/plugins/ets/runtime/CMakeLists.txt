@@ -118,6 +118,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/ani/ani_helpers.cpp
     ${ETS_EXT_SOURCES}/ets_coroutine.cpp
+    ${ETS_EXT_SOURCES}/ets_execution_context.cpp
+    ${ETS_EXT_SOURCES}/ets_execution_context_wrapper.cpp
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
     ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
@@ -142,6 +144,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_map.cpp
     ${ETS_EXT_SOURCES}/types/ets_finreg_node.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalization_registry.cpp
+    ${ETS_EXT_SOURCES}/types/ets_legacy_atomics.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${ETS_EXT_SOURCES}/ets_object_state_info.cpp

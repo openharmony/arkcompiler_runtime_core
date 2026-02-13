@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_call_stack.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
@@ -29,6 +30,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
+#include "runtime/execution/job_execution_context.h"
 
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
 #include "plugins/ets/runtime/interop_js/timer_module.h"
@@ -132,14 +134,14 @@ static bool RegisterTimerModule()
     return TimerModule::Init(aniEnv);
 }
 
-static void RegisterEventLoopModule(EtsCoroutine *coro)
+static void RegisterEventLoopModule(EtsExecutionContext *executionCtx)
 {
-    ASSERT(coro != nullptr);
-    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
-    coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
-    coro->GetPandaVM()->SetRunEventLoopFunction(
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx->GetMT() == executionCtx->GetPandaVM()->GetJobManager()->GetMainThread());
+    executionCtx->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
+    executionCtx->GetPandaVM()->SetRunEventLoopFunction(
         [](EventLoopRunMode mode) { return EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
-    coro->GetPandaVM()->SetWalkEventLoopFunction(
+    executionCtx->GetPandaVM()->SetWalkEventLoopFunction(
         [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }
 
@@ -147,11 +149,11 @@ static void RegisterEventLoopModule(EtsCoroutine *coro)
 static PandaUniquePtr<SingleEventPoster> CreateExtSchedulingPoster()
 {
     auto schedulingFunc = [] {
-        auto *coro = Coroutine::GetCurrent();
-        coro->GetManager()->Schedule();
+        auto *executionCtx = JobExecutionContext::GetCurrent();
+        executionCtx->GetManager()->ExecuteJobs();
 #ifndef PANDA_BUILD_IN_OHOS_TREE
-        auto *w = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
-        w->TriggerSchedulerExternally(coro);
+        auto *w = executionCtx->GetWorker();
+        w->PostSchedulingTask();
 #endif
     };
     return MakePandaUnique<SingleEventPoster>(std::move(schedulingFunc));
@@ -356,7 +358,7 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
 
     // the event loop framework is per-EtsVM. Further on, it uses local InteropCtx instances
     // to access the JSVM-specific data
-    RegisterEventLoopModule(EtsCoroutine::GetCurrent());
+    RegisterEventLoopModule(EtsExecutionContext::GetCurrent());
 }
 
 InteropCtx::SharedEtsVmState::~SharedEtsVmState()
@@ -407,27 +409,26 @@ void InteropCtx::InitExternalInterfaces()
     });
 
 #endif
-    interfaceTable_.SetCreateInteropCtxFunction([](Coroutine *coro, ExternalIfaceTable::JSEnv jsEnv) {
+    interfaceTable_.SetCreateInteropCtxFunction([](EtsExecutionContext *executionCtx, ExternalIfaceTable::JSEnv jsEnv) {
         auto env = static_cast<napi_env>(jsEnv);
-        auto *etsCoro = static_cast<EtsCoroutine *>(coro);
         {
-            ScopedManagedCodeThread managedScope(etsCoro);
-            InteropCtx::Init(etsCoro, env);
+            ScopedManagedCodeThread managedScope(executionCtx->GetMT());
+            InteropCtx::Init(executionCtx, env);
         }
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
-        INTEROP_CODE_SCOPE_ETS_TO_JS(etsCoro);
+        INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
         // Here need to init interop in the given JSVM instance.
         TryInitInteropInJsEnv(jsEnv);
 #endif
     });
 }
 
-InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
-    : sharedEtsVmState_(SharedEtsVmState::GetInstance(coro->GetPandaVM())),
+InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env)
+    : sharedEtsVmState_(SharedEtsVmState::GetInstance(executionCtx->GetPandaVM())),
       jsEnv_(env),
       constStringStorage_(this),
       commonJSObjectCache_(this),
-      stackInfoManager_(this, coro)
+      stackInfoManager_(this, executionCtx)
 {
     stackInfoManager_.InitStackInfoIfNeeded();
     ecmaVMIterfaceAdaptor_ = MakePandaUnique<XGCVmAdaptor>(env, nullptr);
@@ -435,7 +436,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     RegisterBuiltinJSRefConvertors(this);
 
     InitExternalInterfaces();
-    InitJsValueFinalizationRegistry(coro);
+    InitJsValueFinalizationRegistry(executionCtx);
 }
 
 InteropCtx::~InteropCtx()
@@ -443,19 +444,20 @@ InteropCtx::~InteropCtx()
     Refstor()->Remove(jsvalueFregistryRef_);
 }
 
-void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
+void InteropCtx::InitJsValueFinalizationRegistry(EtsExecutionContext *executionCtx)
 {
-    auto *method = PlatformTypes(coro)->interopJSRuntime->GetStaticMethod("createFinalizationRegistry",
-                                                                          ":Lstd/core/FinalizationRegistry;");
+    auto *method =
+        PlatformTypes(executionCtx)
+            ->interopJSRuntime->GetStaticMethod("createFinalizationRegistry", ":Lstd/core/FinalizationRegistry;");
     ASSERT(method != nullptr);
     Value res;
-    if (coro->IsManagedCode()) {
-        res = method->GetPandaMethod()->Invoke(coro, nullptr);
+    if (executionCtx->GetMT()->IsManagedCode()) {
+        res = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), nullptr);
     } else {
-        ScopedManagedCodeThread threadScope {coro};
-        res = method->GetPandaMethod()->Invoke(coro, nullptr);
+        ScopedManagedCodeThread threadScope {executionCtx->GetMT()};
+        res = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), nullptr);
     }
-    ASSERT(!coro->HasPendingException());
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
     auto queue = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     ASSERT(queue != nullptr);
     jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
@@ -465,61 +467,63 @@ void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
     ASSERT(jsvalueFregistryRegister_ != nullptr);
 }
 
-bool InteropCtx::PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
+bool InteropCtx::PushOntoFinalizationRegistry(EtsExecutionContext *executionCtx, EtsObject *obj, EtsObject *cbarg)
 {
     auto queue = Refstor()->Get(jsvalueFregistryRef_);
     std::array<Value, 4U> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
                                   Value(static_cast<ObjectHeader *>(nullptr))};
-    jsvalueFregistryRegister_->Invoke(coro, args.data());
-    return !coro->HasPendingException();
+    jsvalueFregistryRegister_->Invoke(executionCtx->GetMT(), args.data());
+    return !executionCtx->GetMT()->HasPendingException();
 }
 
-EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsObject)
+EtsObject *InteropCtx::CreateETSCoreESError(EtsExecutionContext *executionCtx, EtsObject *etsObject)
 {
     ASSERT_MANAGED_CODE();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coro);
-    VMHandle<ObjectHeader> etsObjectHandle(coro, etsObject->GetCoreType());
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
+    VMHandle<ObjectHeader> etsObjectHandle(executionCtx->GetMT(), etsObject->GetCoreType());
 
-    Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
-                                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {
-                            coro->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY)->GetDescriptor()});
+    Method::Proto proto(
+        Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
+                                     panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
+        Method::Proto::RefTypeVector {
+            executionCtx->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY)->GetDescriptor()});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
-    auto ctor = PlatformTypes(coro)->interopESError->GetRuntimeClass()->GetDirectMethod(ctorName, proto);
+    auto ctor = PlatformTypes(executionCtx)->interopESError->GetRuntimeClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);
 
-    auto excObj = ObjectHeader::Create(coro, PlatformTypes(coro)->interopESError->GetRuntimeClass());
+    auto excObj =
+        ObjectHeader::Create(executionCtx->GetMT(), PlatformTypes(executionCtx)->interopESError->GetRuntimeClass());
     if (UNLIKELY(excObj == nullptr)) {
         return nullptr;
     }
-    VMHandle<ObjectHeader> excHandle(coro, excObj);
+    VMHandle<ObjectHeader> excHandle(executionCtx->GetMT(), excObj);
 
     std::array<Value, 2U> args {Value(excHandle.GetPtr()), Value(etsObjectHandle.GetPtr())};
-    ctor->InvokeVoid(coro, args.data());
+    ctor->InvokeVoid(executionCtx->GetMT(), args.data());
     auto res = EtsObject::FromCoreType(excHandle.GetPtr());
-    if (UNLIKELY(coro->HasPendingException())) {
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         return nullptr;
     }
     return res;
 }
 
-void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
+void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, napi_value val)
 {
-    auto ctx = Current(coro);
+    auto ctx = Current(executionCtx);
 
     ASSERT_MANAGED_CODE();
-    if (coro->IsUsePreAllocObj()) {
-        coro->SetUsePreAllocObj(false);
-        coro->SetException(coro->GetVM()->GetOOMErrorObject());
+    if (executionCtx->GetMT()->IsUsePreAllocObj()) {
+        executionCtx->GetMT()->SetUsePreAllocObj(false);
+        executionCtx->GetMT()->SetException(executionCtx->GetPandaVM()->GetOOMErrorObject());
         return;
     }
-    ASSERT(!coro->HasPendingException());
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
 
     auto env = ctx->GetJSEnv();
     if (IsUndefined<true>(env, val)) {
-        auto etsObj = JSValue::CreateUndefined(coro, ctx)->AsObject();
-        EtsObject *esObj = ctx->CreateETSCoreESError(coro, etsObj);
-        coro->SetException(esObj->GetCoreType());
+        auto etsObj = JSValue::CreateUndefined(executionCtx, ctx)->AsObject();
+        EtsObject *esObj = ctx->CreateETSCoreESError(executionCtx, etsObj);
+        executionCtx->GetMT()->SetException(esObj->GetCoreType());
         return;
     }
 
@@ -530,10 +534,11 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
-    auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? PlatformTypes(coro)->escompatError->GetRuntimeClass()
-                                                            : PlatformTypes(coro)->interopESError->GetRuntimeClass());
+    auto objRefconv =
+        JSRefConvertResolve(ctx, isInstanceof ? PlatformTypes(executionCtx)->escompatError->GetRuntimeClass()
+                                              : PlatformTypes(executionCtx)->interopESError->GetRuntimeClass());
     ASSERT(objRefconv != nullptr);
-    LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
+    LocalObjectHandle<EtsObject> etsObj(executionCtx->GetMT(), objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
         INTEROP_LOG(INFO) << "Something went wrong while unwrapping pending js exception";
         ASSERT(ctx->SanityETSExceptionPending());
@@ -541,8 +546,8 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
 
     auto klass = etsObj->GetClass()->GetRuntimeClass();
-    if (LIKELY(PlatformTypes(coro)->escompatError->GetRuntimeClass()->IsAssignableFrom(klass))) {
-        coro->SetException(etsObj->GetCoreType());
+    if (LIKELY(PlatformTypes(executionCtx)->escompatError->GetRuntimeClass()->IsAssignableFrom(klass))) {
+        executionCtx->GetMT()->SetException(etsObj->GetCoreType());
         return;
     }
 
@@ -550,15 +555,15 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     auto exc = JSConvertESError::Unwrap(ctx, ctx->GetJSEnv(), val);
     if (LIKELY(exc.has_value())) {
         ASSERT(exc != nullptr);
-        coro->SetException(exc.value()->GetCoreType());
+        executionCtx->GetMT()->SetException(exc.value()->GetCoreType());
     }  // otherwise exception is already set
 }
 
-void InteropCtx::ThrowETSError(EtsCoroutine *coro, const char *msg)
+void InteropCtx::ThrowETSError(EtsExecutionContext *executionCtx, const char *msg)
 {
     ASSERT_MANAGED_CODE();
-    ASSERT(!coro->HasPendingException());
-    ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError, msg);
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
+    ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, msg);
 }
 
 void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
@@ -635,14 +640,14 @@ EtsRuntimeLinker *InteropCtx::GetDefaultInteropLinker()
     return EtsRuntimeLinker::FromCoreType(header);
 }
 
-void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
+void InteropCtx::ForwardEtsException(EtsExecutionContext *executionCtx)
 {
     auto env = GetJSEnv();
-    ASSERT(coro != nullptr);
-    ASSERT(coro->HasPendingException());
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx->GetMT()->HasPendingException());
     ASSERT_MANAGED_CODE();
-    LocalObjectHandle<ObjectHeader> exc(coro, coro->GetException());
-    coro->ClearException();
+    LocalObjectHandle<ObjectHeader> exc(executionCtx->GetMT(), executionCtx->GetMT()->GetException());
+    executionCtx->GetMT()->ClearException();
 
     auto klass = exc->ClassAddr<Class>();
     ASSERT(PlatformTypes()->escompatError->GetRuntimeClass()->IsAssignableFrom(klass));
@@ -658,20 +663,20 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     ThrowJSValue(env, res);
 }
 
-void InteropCtx::ForwardJSException(EtsCoroutine *coro)
+void InteropCtx::ForwardJSException(EtsExecutionContext *executionCtx)
 {
     auto env = GetJSEnv();
     const napi_extended_error_info *info = nullptr;
     NAPI_CHECK_FATAL(napi_get_last_error_info(env, &info));
     if (info->error_code != napi_ok && info->error_code != napi_pending_exception) {
         INTEROP_LOG(INFO) << "Napi last error: " << info->error_message;
-        ThrowETSError(coro, info->error_message);
+        ThrowETSError(executionCtx, info->error_message);
         return;
     }
     napi_value excval;
     ASSERT(NapiIsExceptionPending(env));
     NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &excval));
-    ThrowETSError(coro, excval);
+    ThrowETSError(executionCtx, excval);
 }
 
 void JSConvertTypeCheckFailed(const char *typeName)
@@ -751,8 +756,8 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
 {
     INTEROP_LOG(ERROR) << "InteropCtx::Fatal: " << msg;
 
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
 
     INTEROP_LOG(ERROR) << "======================== ETS stack ============================";
     auto istk = ctx->GetOrCreateCallStack().GetRecords();
@@ -765,7 +770,7 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
         }
     };
 
-    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+    for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
         printIstkFrames(istkIt->frame);
         Method *method = stack.GetMethod();
         ASSERT(method != nullptr);
@@ -778,8 +783,8 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto env = ctx->GetJSEnv();
     INTEROP_LOG(ERROR) << (env != nullptr ? "<ets-entrypoint>" : "current js env is nullptr!");
 
-    if (coro->HasPendingException()) {
-        auto exc = EtsObject::FromCoreType(coro->GetException());
+    if (executionCtx->GetMT()->HasPendingException()) {
+        auto exc = EtsObject::FromCoreType(executionCtx->GetMT()->GetException());
         INTEROP_LOG(ERROR) << "With pending exception: " << exc->GetClass()->GetDescriptor();
     }
 
@@ -798,13 +803,13 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     std::abort();
 }
 
-void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
+void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env)
 {
-    auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(coro, env);
+    auto *ctx = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(executionCtx, env);
     ASSERT(ctx != nullptr);
-    auto *worker = coro->GetWorker();
-    worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
-    worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
+    auto *worker = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker();
+    worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
+    worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, ctx);
     XGC::GetInstance()->OnAttach(ctx);
@@ -830,11 +835,11 @@ void InteropCtx::Destroy(void *ptr)
     SharedEtsVmState::TryReleaseInstance();
 }
 
-static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsCoroutine *mainCoro)
+static bool CheckRuntimeOptions([[maybe_unused]] const ark::ets::EtsExecutionContext *executionCtx)
 {
 #if defined(PANDA_JS_ETS_HYBRID_MODE) && !defined(ARK_USE_COMMON_RUNTIME)
-    ASSERT(mainCoro != nullptr);
-    auto gcType = mainCoro->GetVM()->GetGC()->GetType();
+    ASSERT(executionCtx != nullptr);
+    auto gcType = executionCtx->GetPandaVM()->GetGC()->GetType();
     if ((Runtime::GetOptions().GetXgcTriggerType() != "never") &&
         (gcType != mem::GCType::G1_GC || Runtime::GetOptions().IsNoAsyncJit())) {
         // XGC is not implemented for other GC types
@@ -889,10 +894,11 @@ bool TryInitInteropInJsEnv(void *napiEnv)
 }
 
 // The external interface for ANI
-bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
+bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void *napiEnv)
 {
-    ASSERT(mainCoro->GetCoroutineManager()->GetMainThread() == mainCoro);
-    if (!CheckRuntimeOptions(mainCoro)) {
+    auto *mThread = executionCtx->GetMT();
+    ASSERT(JobExecutionContext::CastFromMutator(mThread)->GetManager()->GetMainThread() == mThread);
+    if (!CheckRuntimeOptions(executionCtx)) {
         return false;
     }
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
@@ -901,8 +907,8 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 #endif
     AppStateManager::Create();
     {
-        ScopedManagedCodeThread sm(mainCoro);
-        InteropCtx::Init(mainCoro, static_cast<napi_env>(napiEnv));
+        ScopedManagedCodeThread sm(mThread);
+        InteropCtx::Init(executionCtx, static_cast<napi_env>(napiEnv));
     }
 
     // NOTE(konstanting): support instantiation in the TimerModule and move this code to the InteropCtx constructor.
@@ -933,11 +939,11 @@ bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv)
 /* static */
 InteropCallStack &InteropCtx::GetOrCreateCallStack()
 {
-    auto &coroStorage = EtsCoroutine::GetCurrent()->GetLocalStorage();
-    auto *callStk = coroStorage.Get<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR, InteropCallStack *>();
+    auto &storage = EtsExecutionContext::FromMT(ManagedThread::GetCurrent())->GetLocalStorage();
+    auto *callStk = storage.Get<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR, InteropCallStack *>();
     if (callStk == nullptr) {
         callStk = Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCallStack>();
-        coroStorage.Set<EtsCoroutine::DataIdx::INTEROP_CALL_STACK_PTR>(
+        storage.Set<EtsExecutionContext::DataIdx::INTEROP_CALL_STACK_PTR>(
             callStk, [](void *param) { Runtime::GetCurrent()->GetInternalAllocator()->Delete(param); });
     }
     return *callStk;

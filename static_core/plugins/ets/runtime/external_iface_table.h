@@ -21,11 +21,9 @@
 #include "runtime/interpreter/frame.h"
 #include "plugins/ets/runtime/job_queue.h"
 
-namespace ark {
-class Coroutine;
-}  // namespace ark
-
 namespace ark::ets {
+
+class EtsExecutionContext;
 
 class ExternalIfaceTable {
 public:
@@ -34,7 +32,7 @@ public:
     using CreateJSRuntimeFunction = std::function<JSEnv()>;
     using CleanUpJSEnvFunction = std::function<void(JSEnv)>;
     using GetJSEnvFunction = std::function<JSEnv()>;
-    using CreateInteropCtxFunction = std::function<void(Coroutine *, JSEnv)>;
+    using CreateInteropCtxFunction = std::function<void(EtsExecutionContext *, JSEnv)>;
 
     NO_COPY_SEMANTIC(ExternalIfaceTable);
     NO_MOVE_SEMANTIC(ExternalIfaceTable);
@@ -116,10 +114,10 @@ public:
         createInteropCtx_ = std::move(cb);
     }
 
-    void CreateInteropCtx(Coroutine *coro, JSEnv jsEnv)
+    void CreateInteropCtx(EtsExecutionContext *executionCtx, JSEnv jsEnv)
     {
         if (createInteropCtx_) {
-            createInteropCtx_(coro, jsEnv);
+            createInteropCtx_(executionCtx, jsEnv);
         }
     }
 

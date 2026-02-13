@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_STDLIB_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_STDLIB_H
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "js_convert_base.h"
 
 namespace ark::ets::interop::js {
@@ -26,16 +27,16 @@ JSCONVERT_WRAP(StdlibBoolean)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsBoolean> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_get_boolean(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibBoolean)
 {
     bool val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_BOOLEAN, &result)) {
@@ -48,7 +49,7 @@ JSCONVERT_UNWRAP(StdlibBoolean)
         }
         NAPI_CHECK_FATAL(napi_get_value_bool(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsBoolean>::Create(coro, static_cast<EtsBoolean>(val));
+    return EtsBoxPrimitive<EtsBoolean>::Create(executionCtx, static_cast<EtsBoolean>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibByte, EtsObject *);
@@ -57,16 +58,16 @@ JSCONVERT_WRAP(StdlibByte)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsByte> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_int32(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibByte)
 {
     int32_t val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -79,12 +80,12 @@ JSCONVERT_UNWRAP(StdlibByte)
         }
         NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsByte>::Create(coro, val);
+    return EtsBoxPrimitive<EtsByte>::Create(executionCtx, val);
 }
 
 static bool GetValueFromNumber(napi_env env, napi_value &jsVal, EtsChar &val)
 {
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     napi_valuetype valueType = GetValueType(env, jsVal);
     napi_value result = jsVal;
     if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -105,7 +106,7 @@ static bool GetValueFromNumber(napi_env env, napi_value &jsVal, EtsChar &val)
 
 static bool GetValueFromString(napi_env env, napi_value &jsVal, EtsChar &val)
 {
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     napi_valuetype valueType = GetValueType(env, jsVal);
     napi_value result = jsVal;
     if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_STRING, &result)) {
@@ -133,7 +134,7 @@ JSCONVERT_WRAP(StdlibChar)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsChar> *>(etsVal);
     napi_value jsVal;
     std::array<char16_t, 2U> str = {static_cast<char16_t>(val->GetValue()), 0};
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_string_utf16(env, str.data(), 1, &jsVal));
     return jsVal;
 }
@@ -141,7 +142,7 @@ JSCONVERT_UNWRAP(StdlibChar)
 {
     EtsChar val = 0;
     if (GetValueFromNumber(env, jsVal, val) || GetValueFromString(env, jsVal, val)) {
-        return EtsBoxPrimitive<EtsChar>::Create(EtsCoroutine::GetCurrent(), static_cast<EtsChar>(val));
+        return EtsBoxPrimitive<EtsChar>::Create(EtsExecutionContext::GetCurrent(), static_cast<EtsChar>(val));
     }
     TypeCheckFailed();
     return {};
@@ -153,16 +154,16 @@ JSCONVERT_WRAP(StdlibShort)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsShort> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_int32(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibShort)
 {
     int32_t val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -175,7 +176,7 @@ JSCONVERT_UNWRAP(StdlibShort)
         }
         NAPI_CHECK_FATAL(napi_get_value_int32(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsShort>::Create(coro, static_cast<EtsShort>(val));
+    return EtsBoxPrimitive<EtsShort>::Create(executionCtx, static_cast<EtsShort>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibInt, EtsObject *);
@@ -184,16 +185,16 @@ JSCONVERT_WRAP(StdlibInt)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsInt> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_int32(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibInt)
 {
     EtsLong val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -206,7 +207,7 @@ JSCONVERT_UNWRAP(StdlibInt)
         }
         NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsInt>::Create(coro, static_cast<EtsInt>(val));
+    return EtsBoxPrimitive<EtsInt>::Create(executionCtx, static_cast<EtsInt>(val));
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibLong, EtsObject *);
@@ -215,16 +216,16 @@ JSCONVERT_WRAP(StdlibLong)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsLong> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_int64(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibLong)
 {
     EtsLong val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -237,7 +238,7 @@ JSCONVERT_UNWRAP(StdlibLong)
         }
         NAPI_CHECK_FATAL(napi_get_value_int64(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsLong>::Create(coro, val);
+    return EtsBoxPrimitive<EtsLong>::Create(executionCtx, val);
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibFloat, EtsObject *);
@@ -246,16 +247,16 @@ JSCONVERT_WRAP(StdlibFloat)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsFloat> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_double(env, static_cast<double>(valValue), &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibFloat)
 {
     double val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -269,7 +270,7 @@ JSCONVERT_UNWRAP(StdlibFloat)
         NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
     }
     auto fval = static_cast<EtsFloat>(val);
-    return EtsBoxPrimitive<EtsFloat>::Create(coro, fval);
+    return EtsBoxPrimitive<EtsFloat>::Create(executionCtx, fval);
 }
 
 JSCONVERT_DEFINE_TYPE(StdlibDouble, EtsObject *);
@@ -278,16 +279,16 @@ JSCONVERT_WRAP(StdlibDouble)
     auto *val = reinterpret_cast<EtsBoxPrimitive<EtsDouble> *>(etsVal);
     napi_value jsVal;
     auto valValue = val->GetValue();
-    ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+    ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
     NAPI_CHECK_FATAL(napi_create_double(env, valValue, &jsVal));
     return jsVal;
 }
 JSCONVERT_UNWRAP(StdlibDouble)
 {
     EtsDouble val;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         napi_value result = jsVal;
         napi_valuetype valueType = GetValueType(env, jsVal);
         if (valueType == napi_object && !GetValueByValueOf(env, jsVal, CONSTRUCTOR_NAME_NUMBER, &result)) {
@@ -300,7 +301,7 @@ JSCONVERT_UNWRAP(StdlibDouble)
         }
         NAPI_CHECK_FATAL(napi_get_value_double(env, result, &val));
     }
-    return EtsBoxPrimitive<EtsDouble>::Create(coro, val);
+    return EtsBoxPrimitive<EtsDouble>::Create(executionCtx, val);
 }
 
 }  // namespace ark::ets::interop::js

@@ -17,7 +17,6 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_FINALREG_FINALIZATION_REGISTRY_H
 
 #include "runtime/mem/gc/gc.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/mem/root_provider.h"
 #include "plugins/ets/runtime/types/ets_finalization_registry.h"
@@ -54,9 +53,9 @@ class PandaEtsVM;
  *    | FinReg | -> | FinRegNode | -> | FinRegNode |
  *    +--------+    +------------+    +------------+
  * finalizationList_ is not a GC root but GC updates its references and sweeps dead instancies.
- * After GC finished in a managed thread it asks FinalizationRegistryManager to start a clenup coroutine.
+ * After GC finished in a managed thread it asks FinalizationRegistryManager to launch a cleanup job.
  * The manager finds the corresponding FinalizationRegistry list (there are may be several lists) and combine
- * all finalization queues into a single list. This list is passed as an argument to the clenaup coroutine.
+ * all finalization queues into a single list. This list is passed as an argument to the cleanup job.
  */
 class FinalizationRegistryManager final {
 public:
@@ -66,34 +65,34 @@ public:
     ~FinalizationRegistryManager() = default;
 
     /**
-     * @brief Checks the number of called coroutines with cleanup and calls the next one
-     * if the number does not exceed MAX_FINREG_CLEANUP_COROS.
-     * @param coro Pointer to current coroutine
+     * @brief Checks the number of launched jobs with cleanup and calls the next one
+     * if the number does not exceed MAX_FINREG_CLEANUP_JOBS.
+     * @param executionCtx Pointer to the current execution context
      */
-    void StartCleanupCoroIfNeeded(EtsCoroutine *coro);
+    void LaunchCleanupJobIfNeeded(EtsExecutionContext *executionCtx);
 
-    /// @brief Decreases the counter of called cleanup coroutines
-    void CleanupCoroFinished();
+    /// @brief Decreases the counter of launched cleanup jobs
+    void CleanupJobFinished();
 
-    static CoroutineWorkerDomain GetCoroDomain(EtsCoroutine *coro);
+    static JobWorkerThreadDomain GetExecCtxDomain(EtsExecutionContext *executionCtx);
 
     void Enqueue(EtsFinalizationRegistry *finReg);
 
     void UpdateAndSweep(const ReferenceUpdater &updater);
 
-    static bool CanCleanup(CoroutineWorker::Id currentId, CoroutineWorkerDomain currentDomain, CoroutineWorker::Id id,
-                           CoroutineWorkerDomain domain);
+    static bool CanCleanup(JobWorkerThread::Id currentId, JobWorkerThreadDomain currentDomain, JobWorkerThread::Id id,
+                           JobWorkerThreadDomain domain);
 
 private:
     /// @brief Increase number of cleanup coroutines and check if not exceeds limit
-    bool UpdateFinRegCoroCountAndCheckIfCleanupNeeded();
+    bool UpdateFinRegJobsCountAndCheckIfCleanupNeeded();
     EtsFinalizationRegistry *UpdateAndSweepFinRegChain(EtsFinalizationRegistry *cur, const ReferenceUpdater &updater);
 
     // Limit of cleanup coroutines count
-    static constexpr uint32_t MAX_FINREG_CLEANUP_COROS = 3;
+    static constexpr uint32_t MAX_FINREG_CLEANUP_JOBS = 3;
 
     PandaEtsVM *vm_ {nullptr};
-    std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
+    std::atomic<uint32_t> finRegCleanupJobsCount_ {0};
     os::memory::Mutex cleanupMutex_;
     PandaList<EtsFinalizationRegistry *> finalizationList_ GUARDED_BY(cleanupMutex_);
 };

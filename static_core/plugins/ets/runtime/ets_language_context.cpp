@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_itable_builder.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_vtable_builder.h"
@@ -29,8 +30,8 @@ namespace ark::ets {
 
 void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const
 {
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    ThrowEtsException(coroutine, utf::Mutf8AsCString(mutf8Name), utf::Mutf8AsCString(mutf8Msg));
+    ThrowEtsException(EtsExecutionContext::FromMT(thread), utf::Mutf8AsCString(mutf8Name),
+                      utf::Mutf8AsCString(mutf8Msg));
 }
 
 PandaUniquePtr<ITableBuilder> EtsLanguageContext::CreateITableBuilder(ClassLinkerErrorHandler *errHandler) const
@@ -65,45 +66,45 @@ mem::GC *EtsLanguageContext::CreateGC(mem::GCType gcType, mem::ObjectAllocatorBa
 void EtsLanguageContext::ThrowStackOverflowException(ManagedThread *thread) const
 {
     ASSERT(thread != nullptr);
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    EtsClassLinker *classLinker = coroutine->GetPandaVM()->GetClassLinker();
+    EtsExecutionContext *executionCtx = EtsExecutionContext::FromMT(thread);
+    EtsClassLinker *classLinker = executionCtx->GetPandaVM()->GetClassLinker();
     const char *classDescriptor = utf::Mutf8AsCString(GetStackOverflowErrorClassDescriptor());
     EtsClass *cls = classLinker->GetClass(classDescriptor, true);
     ASSERT(cls != nullptr);
 
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> exc(coroutine, EtsObject::Create(cls));
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> exc(executionCtx, EtsObject::Create(cls));
 
     auto *error = EtsError::FromEtsObject(exc.GetPtr());
     if (UNLIKELY(error == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    EtsHandle<EtsError> errHandle(coroutine, error);
+    EtsHandle<EtsError> errHandle(executionCtx, error);
 
     auto *name = cls->GetName();
     if (UNLIKELY(name == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    errHandle->SetName(coroutine, name);
+    errHandle->SetName(executionCtx, name);
 
     auto *message = EtsString::CreateNewEmptyString();
     if (UNLIKELY(message == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    errHandle->SetMessage(coroutine, message);
+    errHandle->SetMessage(executionCtx, message);
 
-    auto *stackLines =
-        EtsTypedObjectArray<EtsStackTraceElement>::Create(PlatformTypes(coroutine)->coreStackTraceElement, 0U);
+    auto *stackLines = EtsTypedObjectArray<EtsStackTraceElement>::Create(
+        PlatformTypes(executionCtx->GetMT())->coreStackTraceElement, 0U);
     if (UNLIKELY(stackLines == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    errHandle->SetStackLines(coroutine, stackLines);
+    errHandle->SetStackLines(executionCtx, stackLines);
 
-    coroutine->SetException(exc.GetPtr()->GetCoreType());
+    executionCtx->GetMT()->SetException(exc.GetPtr()->GetCoreType());
 }
 
 VerificationInitAPI EtsLanguageContext::GetVerificationInitAPI() const

@@ -15,7 +15,7 @@
 
 #include <atomic>
 #include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
-#include "runtime/coroutines/coroutine.h"
+#include "runtime/execution/coroutines/coroutine.h"
 #include "runtime/include/runtime.h"
 
 namespace ark::ets::test {

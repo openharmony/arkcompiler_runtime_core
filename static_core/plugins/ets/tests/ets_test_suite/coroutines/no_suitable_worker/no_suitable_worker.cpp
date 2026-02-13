@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_vm.h"
-#include "runtime/coroutines/stackful_coroutine_manager.h"
+#include "runtime/execution/job_launch.h"
+#include "runtime/execution/job_execution_context.h"
 
 namespace ark::ets::test {
 
@@ -27,18 +27,17 @@ class EtsNoSuitableWorkerTest : public ani::testing::AniTest {};
 
 TEST_F(EtsNoSuitableWorkerTest, NoSuitableWorkerForNativeCoro)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] ScopedManagedCodeThread sj(coro);
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto etsVm = coro->GetPandaVM();
-    auto *coroManager = static_cast<StackfulCoroutineManager *>(etsVm->GetCoroutineManager());
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] ScopedManagedCodeThread sj(executionCtx->GetMT());
+    [[maybe_unused]] EtsHandleScope hs(executionCtx);
+    auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
     // NOLINTNEXTLINE(readability-magic-numbers)
-    auto groupId = CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::EXACT_ID, {99});
+    auto groupId = JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::EXACT_ID, {99});
     auto cb = []([[maybe_unused]] void *data) {};
-    auto launchRes = coroManager->LaunchNative(cb, reinterpret_cast<void *>(1U), "NoSuitableWorkerForNativeCoro",
-                                               groupId, CoroutinePriority::DEFAULT_PRIORITY, false, false);
+    auto *job = jobMan->CreateJob("NoSuitableWorkerForNativeCoro", Job::NativeEntrypointInfo {cb, nullptr});
+    auto launchRes = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
     ASSERT_EQ(launchRes, LaunchResult::NO_SUITABLE_WORKER);
-    ASSERT_TRUE(coro->HasPendingException());
+    ASSERT_TRUE(executionCtx->GetMT()->HasPendingException());
 }
 
 }  // namespace ark::ets::test

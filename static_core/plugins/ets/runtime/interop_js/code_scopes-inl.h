@@ -17,19 +17,17 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_INL_H
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "runtime/coroutines/coroutine_worker.h"
-#include "runtime/include/stack_walker.h"
 
 namespace ark::ets::interop::js {
 
 template <bool ETS_TO_JS>
-inline bool OpenInteropCodeScope(EtsCoroutine *coro, char const *descr)
+inline bool OpenInteropCodeScope(EtsExecutionContext *executionCtx, char const *descr)
 {
-    if (UNLIKELY(coro == nullptr || coro != ManagedThread::GetCurrent())) {
+    if (UNLIKELY(executionCtx == nullptr || executionCtx->GetMT() != ManagedThread::GetCurrent())) {
         return false;
     }
 
-    auto *ctx = InteropCtx::Current(coro);
+    auto *ctx = InteropCtx::Current(executionCtx);
     void *topFrame {};
     if constexpr (ETS_TO_JS) {
         ctx->UpdateInteropStackInfoIfNeeded();
@@ -40,18 +38,17 @@ inline bool OpenInteropCodeScope(EtsCoroutine *coro, char const *descr)
         topFrame = ctx->GetOrCreateCallStack().GetDynamicTopFrameSP();
     }
     ctx->GetOrCreateCallStack().AllocRecord(topFrame, ETS_TO_JS, descr);
-
     return true;
 }
 
 template <bool ETS_TO_JS>
-inline bool CloseInteropCodeScope(EtsCoroutine *coro)
+inline bool CloseInteropCodeScope(EtsExecutionContext *executionCtx)
 {
-    if (UNLIKELY(coro == nullptr || coro != ManagedThread::GetCurrent())) {
+    if (UNLIKELY(executionCtx == nullptr || executionCtx->GetMT() != ManagedThread::GetCurrent())) {
         return false;
     }
 
-    auto *ctx = InteropCtx::Current(coro);
+    auto *ctx = InteropCtx::Current(executionCtx);
     if constexpr (ETS_TO_JS) {
         ctx->UpdateInteropStackInfoIfNeeded();
     }

@@ -18,7 +18,6 @@
 #include "runtime/runtime_helpers.h"
 #include "types/ets_method.h"
 #include "types/ets_stacktrace_element.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
@@ -31,18 +30,18 @@ namespace ark::ets::intrinsics {
 
 EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     EtsMethod *method = EtsMethod::FromRuntimeMethod(stack->GetMethod());
-    auto className = EtsHandle<EtsString>(coroutine, method->GetClass()->GetName());
+    auto className = EtsHandle<EtsString>(executionCtx, method->GetClass()->GetName());
     if (UNLIKELY(className.GetPtr() == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    auto methodName = EtsHandle<EtsString>(coroutine, method->GetNameString());
+    auto methodName = EtsHandle<EtsString>(executionCtx, method->GetNameString());
     if (UNLIKELY(methodName.GetPtr() == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -51,18 +50,18 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
     if (sourceFile == nullptr) {
         sourceFile = "<unknown>";
     }
-    auto *stackTraceElement = EtsStackTraceElement::Create(coroutine);
+    auto *stackTraceElement = EtsStackTraceElement::Create(executionCtx);
     if (UNLIKELY(stackTraceElement == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    auto element = EtsHandle<EtsStackTraceElement>(coroutine, stackTraceElement);
+    auto element = EtsHandle<EtsStackTraceElement>(executionCtx, stackTraceElement);
     element->SetClassName(className.GetPtr());
     element->SetMethodName(methodName.GetPtr());
 
     EtsString *sourceFileName = EtsString::CreateFromMUtf8(sourceFile);
     if (UNLIKELY(sourceFileName == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     element->SetSourceFileName(sourceFileName);
@@ -72,18 +71,18 @@ EtsStackTraceElement *CreateStackTraceElement(StackWalker *stack)
 
 extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto stackTraceElementClass = PlatformTypes(coroutine)->coreStackTraceElement;
+    auto stackTraceElementClass = PlatformTypes(executionCtx)->coreStackTraceElement;
 
-    auto walker = StackWalker::Create(coroutine);
+    auto walker = StackWalker::Create(executionCtx->GetMT());
 
     PandaVector<EtsHandle<EtsStackTraceElement>> stackTraceElements;
-    for (auto stack = StackWalker::Create(coroutine); stack.HasFrame(); stack.NextFrame()) {
-        auto element = EtsHandle<EtsStackTraceElement>(coroutine, CreateStackTraceElement(&stack));
+    for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
+        auto element = EtsHandle<EtsStackTraceElement>(executionCtx, CreateStackTraceElement(&stack));
         if (UNLIKELY(element.GetPtr() == nullptr)) {
-            ASSERT(coroutine->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
         stackTraceElements.push_back(element);
@@ -93,10 +92,10 @@ extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
 
     auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize);
     if (UNLIKELY(resultArray == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    EtsHandle<EtsObjectArray> resultArrayHandle(coroutine, resultArray);
+    EtsHandle<EtsObjectArray> resultArrayHandle(executionCtx, resultArray);
     for (uint32_t i = 0; i < linesSize; i++) {
         resultArrayHandle.GetPtr()->Set(i, stackTraceElements[i]->AsObject());
     }

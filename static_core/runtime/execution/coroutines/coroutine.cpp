@@ -1,0 +1,282 @@
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/execution/coroutines/coroutine.h"
+#include "runtime/execution/job_events.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/coroutines/coroutine_context.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/thread_scopes.h"
+
+#include "runtime/trace.h"
+
+namespace ark {
+#if defined(ARK_USE_COMMON_RUNTIME)
+extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
+{
+    reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
+}
+#endif  // ARK_USE_COMMON_RUNTIME
+
+Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, Job *job, CoroutineContext *context)
+{
+    mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
+    auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
+                                         ark::panda_file::SourceLang::PANDA_ASSEMBLY, job, context);
+    ASSERT(co != nullptr);
+    co->Initialize();
+    return co;
+}
+
+Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
+                     ark::panda_file::SourceLang threadLang, Job *job, CoroutineContext *context)
+    : JobExecutionContext(id, allocator, vm, ManagedThread::ThreadType::THREAD_TYPE_COROUTINE, threadLang, job),
+      context_(context)
+{
+    ASSERT(vm != nullptr);
+    ASSERT(job != nullptr);
+    ASSERT(context != nullptr);
+    ASSERT(GetManager() != nullptr);
+    startSuspended_ = GetJob()->HasEntrypoint();
+    internalId_ = GetJob()->GetId();
+}
+
+void Coroutine::ReInitialize(Job *job, CoroutineContext *context)
+{
+    ASSERT(context != nullptr);
+    SetJob(job);
+    startSuspended_ = GetJob()->HasEntrypoint();
+    context_ = context;
+    context_->AttachToCoroutine(this);
+}
+
+void Coroutine::CleanUp()
+{
+    ManagedThread::CleanUp();
+    GetManager()->DestroyJob(GetJob());
+    SetJob(nullptr);
+    startSuspended_ = false;
+    immediateLauncher_ = nullptr;
+    JobExecutionContext::SetWorker(nullptr);
+    context_->CleanUp();
+}
+
+void Coroutine::ReplaceEntrypoint(EntrypointInfo &&epInfo)
+{
+    GetJob()->ReplaceEntrypoint(std::move(epInfo));
+}
+
+CoroutineWorker *Coroutine::GetWorker() const
+{
+    return static_cast<CoroutineWorker *>(JobExecutionContext::GetWorker());
+}
+
+CoroutineManager *Coroutine::GetCoroutineManager() const
+{
+    return static_cast<CoroutineManager *>(JobExecutionContext::GetManager());
+}
+
+Coroutine::Status Coroutine::GetCoroutineStatus() const
+{
+    return context_->GetStatus();
+}
+
+void Coroutine::SetCoroutineStatus(Coroutine::Status newStatus)
+{
+    context_->SetStatus(newStatus);
+}
+
+void Coroutine::OnStatusChanged(Status oldStatus, Status newStatus)
+{
+    // issue required status change events to the CoroutineManager
+    bool hasWorker = (GetWorker() != nullptr);
+    bool wasActive = hasWorker && (oldStatus == Coroutine::Status::RUNNABLE || oldStatus == Coroutine::Status::RUNNING);
+    bool isActive = hasWorker && (newStatus == Coroutine::Status::RUNNABLE || newStatus == Coroutine::Status::RUNNING);
+    IssueTracingEvents(oldStatus, newStatus);
+    if (UNLIKELY(wasActive != isActive)) {
+        if (wasActive && !isActive) {
+            GetCoroutineManager()->OnCoroBecameNonActive(this);
+        } else if (!wasActive && isActive) {
+            GetCoroutineManager()->OnCoroBecameActive(this);
+        }
+    }
+}
+
+void Coroutine::OnContextSwitchedTo() {}
+
+void Coroutine::ExecuteJob(Job *job)
+{
+    ASSERT(Coroutine::GetCurrent() == this);
+    job->SetExecutionContext(this);
+    job->SetStatus(Job::Status::RUNNING);
+    if (job->HasManagedEntrypoint()) {
+        auto &args = job->GetManagedEntrypointArguments();
+        if (IsInNativeCode()) {
+            ScopedManagedCodeThread s(this);
+            Value result = job->GetManagedEntrypoint()->Invoke(this, args.data());
+            RequestCompletion(result);
+        } else {
+            Value result = job->GetManagedEntrypoint()->Invoke(this, args.data());
+            RequestCompletion(result);
+        }
+    } else if (job->HasNativeEntrypoint()) {
+        job->GetNativeEntrypoint()(job->GetNativeEntrypointParam());
+    }
+    ASSERT(job->GetStatus() != Job::Status::BLOCKED);
+    job->SetExecutionContext(nullptr);
+    if (HasPendingException() && GetJob()->HasAbortFlag()) {
+        HandleUncaughtException();
+    }
+}
+
+void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
+{
+    bool isMutator = this->GetType() == Coroutine::Type::MUTATOR;
+    if (isMutator && newStatus == Coroutine::Status::RUNNING && oldStatus != Coroutine::Status::RUNNING) {
+        Tracer::StartAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId(), this->GetName().c_str());
+    }
+    if (isMutator && newStatus != Coroutine::Status::RUNNING && oldStatus == Coroutine::Status::RUNNING) {
+        Tracer::FinishAsync(Tracer::COROUTINE_EXECUTION, this->GetCoroutineId());
+    }
+}
+
+void Coroutine::Destroy()
+{
+    context_->Destroy();
+}
+
+void Coroutine::Initialize()
+{
+    context_->AttachToCoroutine(this);
+    // NOTE(cao ying, #26951): we need to remove this after refactoring the ark_aot initialization sequence,
+    // which should not include the unnecessary parts
+    // NOTE(cao ying, #26507): long command line causes SEGV under OHOS during the stack overflow
+    // checker initialization. Currently long command lines are not required for ark, but are required
+    // for ark_aot. So let's disable the stack overflow checker for ark_aot as a hotfix.
+    if (Runtime::GetCurrent()->GetOptions().IsArkAot()) {
+        return;
+    }
+    InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
+                              ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
+}
+
+bool Coroutine::RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize)
+{
+    if (GetJob()->HasManagedEntrypoint() || GetJob()->HasNativeEntrypoint()) {
+        // has EP and separate native context for its execution
+        return context_->RetrieveStackInfo(stackAddr, stackSize, guardSize);
+    }
+    // does not have EP, executes on OS-provided context and stack
+    return ManagedThread::RetrieveStackInfo(stackAddr, stackSize, guardSize);
+}
+
+void Coroutine::RequestSuspend(bool getsBlocked)
+{
+    context_->RequestSuspend(getsBlocked);
+}
+
+void Coroutine::RequestResume()
+{
+    context_->RequestResume();
+}
+
+void Coroutine::RequestUnblock()
+{
+    context_->RequestUnblock();
+}
+
+void Coroutine::RequestCompletion([[maybe_unused]] Value returnValue)
+{
+    auto *e = GetJob()->GetCompletionEvent();
+    e->Happen();
+}
+
+bool Coroutine::IsActive()
+{
+    bool workerAssigned = (GetWorker() != nullptr);
+    auto status = GetCoroutineStatus();
+    bool isRunnableOrRunning = (status == Status::RUNNABLE) || (status == Status::RUNNING);
+    return (workerAssigned && isRunnableOrRunning);
+}
+
+void Coroutine::SetWorker(JobWorkerThread *w)
+{
+    auto *oldWorker = GetWorker();
+    JobExecutionContext::SetWorker(w);
+    if (w != oldWorker) {
+        OnHostWorkerChanged();
+    }
+    // being ACTIVE requires an assigned worker!
+    if ((oldWorker == nullptr) && (w != nullptr)) {
+        GetCoroutineManager()->OnCoroBecameActive(this);
+    } else if ((oldWorker != nullptr) && (w == nullptr)) {
+        GetCoroutineManager()->OnCoroBecameNonActive(this);
+    }
+}
+
+void Coroutine::PrintCallStack() const
+{
+    for (auto stack = StackWalker::Create(this); stack.HasFrame(); stack.NextFrame()) {
+        Method *method = stack.GetMethod();
+        ASSERT(method != nullptr);
+        LOG(ERROR, COROUTINES) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
+                               << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
+    }
+}
+
+std::ostream &operator<<(std::ostream &os, Coroutine::Status status)
+{
+    switch (status) {
+        case Coroutine::Status::CREATED:
+            os << "CREATED";
+            break;
+        case Coroutine::Status::RUNNABLE:
+            os << "RUNNABLE";
+            break;
+        case Coroutine::Status::RUNNING:
+            os << "RUNNING";
+            break;
+        case Coroutine::Status::BLOCKED:
+            os << "BLOCKED";
+            break;
+        case Coroutine::Status::TERMINATING:
+            os << "TERMINATING";
+            break;
+        default:
+            break;
+    }
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, Coroutine::Type type)
+{
+    switch (type) {
+        case Coroutine::Type::FINALIZER:
+            os << "FINALIZER";
+            break;
+        case Coroutine::Type::MUTATOR:
+            os << "MUTATOR";
+            break;
+        case Coroutine::Type::SCHEDULER:
+            os << "SCHEDULER";
+            break;
+        default:
+            break;
+    }
+    return os;
+}
+
+}  // namespace ark

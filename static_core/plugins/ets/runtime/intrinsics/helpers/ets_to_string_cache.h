@@ -49,9 +49,9 @@ public:
     NO_COPY_SEMANTIC(EtsToStringCacheElement);
     NO_MOVE_SEMANTIC(EtsToStringCacheElement);
 
-    static EtsClass *GetClass(EtsCoroutine *coro);
-    static EtsToStringCacheElement<T> *Create(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle, T number,
-                                              EtsClass *klass);
+    static EtsClass *GetClass(EtsExecutionContext *executionCtx);
+    static EtsToStringCacheElement<T> *Create(EtsExecutionContext *executionCtx, EtsHandle<EtsString> &stringHandle,
+                                              T number, EtsClass *klass);
 
     static EtsToStringCacheElement<T> *FromCoreType(ObjectHeader *obj)
     {
@@ -78,11 +78,11 @@ public:
         return MEMBER_OFFSET(EtsToStringCacheElement<T>, number_);
     }
 
-    ToStringResult TryStore(EtsCoroutine *coro, EtsString *string, T number);
+    ToStringResult TryStore(EtsExecutionContext *executionCtx, EtsString *string, T number);
 
-    EtsString *GetString(EtsCoroutine *coro)
+    EtsString *GetString(EtsExecutionContext *executionCtx)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, GetStringOffset());
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, GetStringOffset());
         return EtsString::FromEtsObject(EtsObject::FromCoreType(obj));
     }
 
@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    void SetString(EtsCoroutine *coro, EtsString *string);
+    void SetString(EtsExecutionContext *executionCtx, EtsString *string);
     void SetNumber(T number);
 
 private:
@@ -108,7 +108,7 @@ class EtsToStringCache;
 template <typename T, typename Derived, typename Hash = SimpleHash<T>>
 class EtsToStringCache : public EtsTypedObjectArray<EtsToStringCacheElement<T>> {
 public:
-    static Derived *Create(EtsCoroutine *coro);
+    static Derived *Create(EtsExecutionContext *executionCtx);
     static Derived *FromCoreType(ObjectHeader *objectHeader)
     {
         return reinterpret_cast<Derived *>(objectHeader);
@@ -116,20 +116,20 @@ public:
 
     /**
      * @brief Compute representation of number and store to cache if possible
-     * @param coro         Pointer to current coroutine
+     * @param executionCtx      Pointer to current managed thread
      * @param number       Number (double, float or int64) to get representation for
      * @param elem         Pointer to `EtsToStringCacheElement` loaded from cache
      */
-    EtsString *CacheAndGetNoCheck(EtsCoroutine *coro, T number, ObjectHeader *elem);
+    EtsString *CacheAndGetNoCheck(EtsExecutionContext *executionCtx, T number, ObjectHeader *elem);
 
     /**
      * @brief Load string representation of number from cache, or compute it and store to cache if possible
-     * @param coro         Pointer to current coroutine
+     * @param executionCtx      Pointer to current managed thread
      * @param number       Number (double, float or int64) to get representation for
      */
-    EtsString *GetOrCache(EtsCoroutine *coro, T number)
+    EtsString *GetOrCache(EtsExecutionContext *executionCtx, T number)
     {
-        return GetOrCacheImpl(coro, number).first;
+        return GetOrCacheImpl(executionCtx, number).first;
     }
 
     /**
@@ -146,9 +146,10 @@ private:
     using Base = EtsTypedObjectArray<Elem>;
 
     static uint32_t GetIndex(T number);
-    void StoreToCache(EtsCoroutine *coro, EtsHandle<EtsString> &stringHandle, T number, uint32_t index);
-    std::pair<EtsString *, ToStringResult> FinishUpdate(EtsCoroutine *coro, T number, EtsToStringCacheElement<T> *elem);
-    std::pair<EtsString *, ToStringResult> GetOrCacheImpl(EtsCoroutine *coro, T number);
+    void StoreToCache(EtsExecutionContext *executionCtx, EtsHandle<EtsString> &stringHandle, T number, uint32_t index);
+    std::pair<EtsString *, ToStringResult> FinishUpdate(EtsExecutionContext *executionCtx, T number,
+                                                        EtsToStringCacheElement<T> *elem);
+    std::pair<EtsString *, ToStringResult> GetOrCacheImpl(EtsExecutionContext *executionCtx, T number);
 
     friend class ark::ets::test::EtsToStringCacheTest;
 };

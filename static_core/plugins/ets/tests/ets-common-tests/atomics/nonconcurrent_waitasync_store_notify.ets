@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ async function testMain() {
     buf = new ArrayBuffer(4);
     arr = new Int32Array(buf, 0, 1);
 
-    let promise: Promise<string> = Atomics.waitAsync(arr, 0, new BigInt(0));
+    let promise: Promise<string> = Atomics.waitAsync(arr, 0, 0);
     Atomics.store(arr, 0, 5);
     let count = Atomics.notify(arr, 0);
     let res: string = await promise;

@@ -43,9 +43,9 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
     napi_value proxyObj;
     NAPI_CHECK_FATAL(napi_new_instance(env, proxy, args.size(), args.data(), &proxyObj));
 
-    auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(coro);
-    EtsHandle<EtsObject> objHandle(coro, obj);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> objHandle(executionCtx, obj);
     storage->CreateETSObjectRef(ctx, objHandle, proxyObj);
 
     return proxyObj;
@@ -53,9 +53,9 @@ napi_value JSRefConvertRecord::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 
 napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info cbinfo)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
@@ -87,7 +87,7 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
         }
     }
 
-    ScopedManagedCodeThread managedScope(coro);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
     ASSERT(storage != nullptr);
@@ -97,18 +97,18 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    EtsMethod *getMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreRecordGet);
+    EtsMethod *getMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreRecordGet);
 
     Span sp(&jsArgs[1], 1);
-    return CallETSInstance(coro, ctx, getMethod->GetPandaMethod(), sp, etsThis);
+    return CallETSInstance(executionCtx, ctx, getMethod->GetPandaMethod(), sp, etsThis);
 }
 
 napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info cbinfo)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, nullptr, nullptr));
@@ -123,7 +123,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
     auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
 
-    EtsMethod *setMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreRecordSet);
+    EtsMethod *setMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreRecordSet);
 
     if (argc < 3U) {
         INTEROP_LOG(ERROR) << "Invalid number of arguments for $_set";
@@ -132,7 +132,7 @@ napi_value JSRefConvertRecord::RecordSetHandler(napi_env env, napi_callback_info
 
     Span sp(&jsArgs[1], 2U);
 
-    CallETSInstance(coro, ctx, setMethod->GetPandaMethod(), sp, etsThis);
+    CallETSInstance(executionCtx, ctx, setMethod->GetPandaMethod(), sp, etsThis);
 
     napi_value trueValue = GetBooleanValue(env, true);
     return trueValue;

@@ -24,60 +24,62 @@
 namespace ark::ets {
 
 /*static*/
-EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::Create(EtsCoroutine *coro, size_t length)
+EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::Create(EtsExecutionContext *executionCtx, size_t length)
 {
     ASSERT_MANAGED_CODE();
-    ASSERT(!coro->HasPendingException());
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *cls = PlatformTypes(coro)->coreArrayBuffer;
-    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto *cls = PlatformTypes(executionCtx)->coreArrayBuffer;
+    EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
     if (UNLIKELY(handle.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     auto *buf = AllocateArray(length);
     if (UNLIKELY(buf == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    handle->Initialize(coro, length, buf);
+    handle->Initialize(executionCtx, length, buf);
     return handle.GetPtr();
 }
 
 /*static*/
-EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData)
+EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::CreateNonMovable(EtsExecutionContext *executionCtx, size_t length,
+                                                               void **resultData)
 {
     ASSERT_MANAGED_CODE();
-    ASSERT(!coro->HasPendingException());
+    ASSERT(!executionCtx->GetMT()->HasPendingException());
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *cls = PlatformTypes(coro)->coreArrayBuffer;
-    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto *cls = PlatformTypes(executionCtx)->coreArrayBuffer;
+    EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, EtsStdCoreArrayBuffer::FromEtsObject(EtsObject::Create(cls)));
     if (UNLIKELY(handle.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     auto *buf = AllocateNonMovableArray(length);
     if (UNLIKELY(buf == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
-    handle->Initialize(coro, length, buf);
+    handle->Initialize(executionCtx, length, buf);
     *resultData = handle->GetData();
     return handle.GetPtr();
 }
 
 /*static*/
-bool EtsStdCoreArrayBuffer::IsNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self)
+bool EtsStdCoreArrayBuffer::IsNonMovableArray(EtsExecutionContext *executionCtx, EtsStdCoreArrayBuffer *self)
 {
     ASSERT(self != nullptr);
-    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, self);
+    EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, self);
     if (LIKELY(IsNativeArray(handle.GetPtr()))) {
         return true;
     }
     auto objArray = handle->GetManagedDataImpl();
-    return objArray != nullptr && coro->GetVM()->GetHeapManager()->IsNonMovable(objArray->AsObject()->GetCoreType());
+    return objArray != nullptr &&
+           executionCtx->GetPandaVM()->GetHeapManager()->IsNonMovable(objArray->AsObject()->GetCoreType());
 }
 
 /*static*/
@@ -88,10 +90,11 @@ bool EtsStdCoreArrayBuffer::IsNativeArray(EtsStdCoreArrayBuffer *self)
 }
 
 /*static*/
-void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self, EtsInt bytesLen)
+void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsExecutionContext *executionCtx, EtsStdCoreArrayBuffer *self,
+                                                      EtsInt bytesLen)
 {
     ASSERT(self != nullptr);
-    EtsHandle<EtsStdCoreArrayBuffer> handle(coro, self);
+    EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, self);
     if (UNLIKELY(bytesLen <= 0 || handle.GetPtr() == nullptr)) {
         return;
     }
@@ -99,7 +102,7 @@ void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsStd
 
     auto *nonMovArray = AllocateNonMovableArray(bytesLen);
     if (UNLIKELY(nonMovArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
     auto srcLen = bytesLen > handle->GetByteLength() ? handle->GetByteLength() : bytesLen;
@@ -117,13 +120,14 @@ void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsCoroutine *coro, EtsStd
         [[maybe_unused]] auto err = memcpy_s(dst, bytesLen, src, srcLen);
         ASSERT(err == EOK);
     }
-    ObjectAccessor::SetObject(coro, handle.GetPtr(), GetManagedDataOffset(), nonMovArray->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), handle.GetPtr(), GetManagedDataOffset(),
+                              nonMovArray->GetCoreType());
 
     // Without full memory barrier it is possible that architectures with weak memory order can try fetching
     // managed data before it's set
     arch::FullMemoryBarrier();
 
-    ASSERT(IsNonMovableArray(coro, handle.GetPtr()));
+    ASSERT(IsNonMovableArray(executionCtx, handle.GetPtr()));
 }
 
 EtsInt EtsStdCoreArrayBuffer::GetByteLength() const
@@ -149,10 +153,10 @@ void EtsStdCoreArrayBuffer::Set(EtsInt pos, EtsByte val)
     reinterpret_cast<int8_t *>(GetData())[pos] = val;
 }
 
-void EtsStdCoreArrayBuffer::Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array)
+void EtsStdCoreArrayBuffer::Initialize(EtsExecutionContext *executionCtx, size_t length, EtsByteArray *array)
 {
     ASSERT(array != nullptr);
-    ObjectAccessor::SetObject(coro, this, GetManagedDataOffset(), array->GetCoreType());
+    ObjectAccessor::SetObject(executionCtx->GetMT(), this, GetManagedDataOffset(), array->GetCoreType());
     ObjectAccessor::SetPrimitive(this, GetByteLengthOffset(), static_cast<decltype(byteLength_)>(length));
     ObjectAccessor::SetPrimitive(this, GetNativeDataOffset(), 0);  // not needed in managed code
     ObjectAccessor::SetPrimitive(this, GetIsResizableOffset(), ToEtsBoolean(false));
@@ -184,7 +188,8 @@ bool EtsStdCoreArrayBuffer::DoBoundaryCheck(EtsInt pos) const
     if (pos < 0 || pos >= GetByteLength()) {
         PandaString message = "ArrayBuffer position ";
         message.append(ToPandaString(pos)).append(" is out of bounds");
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreIndexOutOfBoundsError, message.c_str());
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreIndexOutOfBoundsError,
+                          message.c_str());
         return false;
     }
     return true;

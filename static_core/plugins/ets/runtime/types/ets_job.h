@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_JOB_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_JOB_H_
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/include/object_header.h"
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -23,9 +24,11 @@
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace ark::ets {
+namespace ark {
+class ManagedThread;
+}  // namespace ark
 
-class EtsCoroutine;
+namespace ark::ets {
 
 namespace test {
 class EtsJobTest;
@@ -44,7 +47,7 @@ public:
     NO_COPY_SEMANTIC(EtsJob);
     NO_MOVE_SEMANTIC(EtsJob);
 
-    PANDA_PUBLIC_API static EtsJob *Create(EtsCoroutine *etsCoroutine = EtsCoroutine::GetCurrent());
+    PANDA_PUBLIC_API static EtsJob *Create(EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent());
 
     static void EtsJobFinish(EtsJob *job, EtsObject *value);
 
@@ -75,46 +78,47 @@ public:
         return reinterpret_cast<EtsJob *>(job);
     }
 
-    EtsMutex *GetMutex(EtsCoroutine *coro)
+    EtsMutex *GetMutex(EtsExecutionContext *executionCtx)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsJob, mutex_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, mutex_));
         return EtsMutex::FromCoreType(obj);
     }
 
-    void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
+    void SetMutex(EtsExecutionContext *executionCtx, EtsMutex *mutex)
     {
         ASSERT(mutex != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, mutex_), mutex->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, mutex_), mutex->GetCoreType());
     }
 
-    EtsEvent *GetEvent(EtsCoroutine *coro)
+    EtsEvent *GetEvent(EtsExecutionContext *executionCtx)
     {
-        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsJob, event_));
+        auto *obj = ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, event_));
         return EtsEvent::FromCoreType(obj);
     }
 
-    void SetEvent(EtsCoroutine *coro, EtsEvent *event)
+    void SetEvent(EtsExecutionContext *executionCtx, EtsEvent *event)
     {
         ASSERT(event != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, event_), event->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, event_), event->GetCoreType());
     }
 
-    EtsObject *GetValue(EtsCoroutine *coro)
+    EtsObject *GetValue(EtsExecutionContext *executionCtx)
     {
-        return EtsObject::FromCoreType(ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsJob, value_)));
+        return EtsObject::FromCoreType(
+            ObjectAccessor::GetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, value_)));
     }
 
     /// Allows to get exclusive access to the job state
     void Lock()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         mutex->Lock();
     }
 
     void Unlock()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         ASSERT(mutex->IsHeld());
         mutex->Unlock();
@@ -122,15 +126,15 @@ public:
 
     bool IsLocked()
     {
-        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        auto *mutex = GetMutex(EtsExecutionContext::GetCurrent());
         ASSERT(mutex != nullptr);
         return mutex->IsHeld();
     }
 
-    /// Blocks current coroutine until job is resolved/rejected
+    /// Blocks current executionCtxutine until job is resolved/rejected
     void Wait()
     {
-        auto *event = GetEvent(EtsCoroutine::GetCurrent());
+        auto *event = GetEvent(EtsExecutionContext::GetCurrent());
         ASSERT(event != nullptr);
         event->Wait();
     }
@@ -150,30 +154,30 @@ public:
         return state_ == STATE_FAILED;
     }
 
-    void Finish(EtsCoroutine *coro, EtsObject *value)
+    void Finish(EtsExecutionContext *executionCtx, EtsObject *value)
     {
         ASSERT(state_ == STATE_RUNNING);
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, value_), coreValue);
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, value_), coreValue);
         state_ = STATE_FINISHED;
-        // Unblock awaitee coros
-        GetEvent(coro)->Fire();
+        // Unblock awaitee executionCtxs
+        GetEvent(executionCtx)->Fire();
     }
 
-    void Fail(EtsCoroutine *coro, EtsObject *error)
+    void Fail(EtsExecutionContext *executionCtx, EtsObject *error)
     {
         ASSERT(error != nullptr);
         ASSERT(state_ == STATE_RUNNING);
         ASSERT(error != nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsJob, value_), error->GetCoreType());
         state_ = STATE_FAILED;
 
         if (Runtime::GetOptions().IsListUnhandledOnExitJobs(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))) {
-            coro->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
+            executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddFailedJob(this);
         }
 
-        // Unblock awaitee coros
-        GetEvent(coro)->Fire();
+        // Unblock awaitee executionCtxs
+        GetEvent(executionCtx)->Fire();
     }
 
 private:

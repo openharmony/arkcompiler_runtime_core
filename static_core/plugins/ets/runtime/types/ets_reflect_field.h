@@ -20,13 +20,15 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
+namespace ark {
+class ManagedThread;
+}  // namespace ark
+
 namespace ark::ets {
 
 namespace test {
 class EtsReflectTest;
 }  // namespace test
-
-class EtsCoroutine;
 
 class EtsReflectField : public ObjectHeader {
 public:
@@ -36,9 +38,9 @@ public:
     NO_COPY_SEMANTIC(EtsReflectField);
     NO_MOVE_SEMANTIC(EtsReflectField);
 
-    static EtsReflectField *Create(EtsCoroutine *etsCoroutine, bool isStatic = false);
+    static EtsReflectField *Create(EtsExecutionContext *executionCtx, bool isStatic = false);
 
-    static EtsReflectField *CreateFromEtsField(EtsCoroutine *coro, EtsField *field);
+    static EtsReflectField *CreateFromEtsField(EtsExecutionContext *executionCtx, EtsField *field);
 
     EtsObject *AsObject()
     {

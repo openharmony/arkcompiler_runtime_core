@@ -8888,7 +8888,7 @@ intrinsics:
       ret: void
       args: [ Y ]
     impl: ark::ets::intrinsics::EtsAtomicReferenceStoreValue
- 
+
   - name: AtomicsRefExchangeObject
     space: ets
     class_name: std.concurrency.AtomicReference
@@ -8913,12 +8913,12 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicReference
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicReferenceIsLockFreeCheck
-  
+
 ################################
 # std.concurrency.AtomicInt #
 ################################
@@ -8936,7 +8936,7 @@ intrinsics:
   - name: AtomicIntLoad
     space: ets
     class_name: std.concurrency.AtomicInt
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: i32
@@ -9017,9 +9017,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicInt
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicIntIsLockFreeCheck
 
@@ -9040,7 +9040,7 @@ intrinsics:
   - name: AtomicLongLoad
     space: ets
     class_name: std.concurrency.AtomicLong
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: i64
@@ -9121,9 +9121,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicLong
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicLongIsLockFreeCheck
 
@@ -9144,7 +9144,7 @@ intrinsics:
   - name: AtomicShortLoad
     space: ets
     class_name: std.concurrency.AtomicShort
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: i16
@@ -9225,9 +9225,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicShort
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicShortIsLockFreeCheck
 
@@ -9248,7 +9248,7 @@ intrinsics:
   - name: AtomicByteLoad
     space: ets
     class_name: std.concurrency.AtomicByte
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: i8
@@ -9329,9 +9329,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicByte
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicByteIsLockFreeCheck
 
@@ -9352,7 +9352,7 @@ intrinsics:
   - name: AtomicFloatLoad
     space: ets
     class_name: std.concurrency.AtomicFloat
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: f32
@@ -9383,9 +9383,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicFloat
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicFloatIsLockFreeCheck
 
@@ -9406,7 +9406,7 @@ intrinsics:
   - name: AtomicDoubleLoad
     space: ets
     class_name: std.concurrency.AtomicDouble
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: f64
@@ -9437,9 +9437,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicDouble
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicDoubleIsLockFreeCheck
 
@@ -9460,7 +9460,7 @@ intrinsics:
   - name: AtomicBooleanLoad
     space: ets
     class_name: std.concurrency.AtomicBoolean
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: u1
@@ -9491,9 +9491,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicBoolean
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicBooleanIsLockFreeCheck
 
@@ -9514,7 +9514,7 @@ intrinsics:
   - name: AtomicCharLoad
     space: ets
     class_name: std.concurrency.AtomicChar
-    method_name: load 
+    method_name: load
     static: false
     signature:
       ret: u16
@@ -9545,9 +9545,9 @@ intrinsics:
     space: ets
     class_name: std.concurrency.AtomicChar
     method_name: isLockFree
-    static: true 
+    static: true
     signature:
-      ret: u1  
+      ret: u1
       args: []
     impl: ark::ets::intrinsics::EtsAtomicCharIsLockFreeCheck
 
@@ -9974,6 +9974,70 @@ intrinsics:
         - i32
         - std.core.Array
     impl: ark::ets::intrinsics::WorkerGroupGenerateGroupIdImpl
+
+######################################
+# std.concurrency.Atomics            #
+######################################
+
+  - name: StdConcurrencyAtomicsWaitImplInt32
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: waitImplInt32
+    static: true
+    signature:
+      ret: std.core.String
+      args: [std.core.ArrayBuffer, i32, i32, i32]
+    impl: ark::ets::intrinsics::AtomicsWaitImplInt32
+
+  - name: StdConcurrencyAtomicsWaitImplInt64
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: waitImplInt64
+    static: true
+    signature:
+      ret: std.core.String
+      args: [std.core.ArrayBuffer, i32, i64, i32]
+    impl: ark::ets::intrinsics::AtomicsWaitImplInt64
+
+  - name: StdConcurrencyAtomicsAsyncWaitImplInt32
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: asyncWaitImplInt32
+    static: true
+    signature:
+      ret: std.core.Promise
+      args: [std.core.ArrayBuffer, i32, i32, i32]
+    impl: ark::ets::intrinsics::AtomicsAsyncWaitImplInt32
+
+  - name: StdConcurrencyAtomicsAsyncWaitImplInt64
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: asyncWaitImplInt64
+    static: true
+    signature:
+      ret: std.core.Promise
+      args: [std.core.ArrayBuffer, i32, i64, i32]
+    impl: ark::ets::intrinsics::AtomicsAsyncWaitImplInt64
+
+  - name: StdConcurrencyAtomicsNotifyImplInt32
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: notifyImplInt32
+    static: true
+    signature:
+      ret: i32
+      args: [std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::AtomicsNotifyImplInt32
+
+  - name: StdConcurrencyAtomicsNotifyImplInt64
+    space: ets
+    class_name: std.concurrency.Atomics
+    method_name: notifyImplInt64
+    static: true
+    signature:
+      ret: i32
+      args: [std.core.ArrayBuffer, i32, i32]
+    impl: ark::ets::intrinsics::AtomicsNotifyImplInt64
 
 ###############################
 # std.core.ConcurrencyHelpers #

@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ARRAYBUFFER_INL_H
 
 #include "runtime/include/thread_scopes.h"
+#include "runtime/execution/job_execution_context.h"
 #include "plugins/ets/runtime/types/ets_arraybuffer.h"
 
 namespace ark::ets {
@@ -74,8 +75,8 @@ namespace ark::ets {
 template <typename T>
 T EtsStdCoreArrayBuffer::GetElement(uint32_t index, uint32_t byteOffset)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index, byteOffset);
     return val;
@@ -84,16 +85,16 @@ T EtsStdCoreArrayBuffer::GetElement(uint32_t index, uint32_t byteOffset)
 template <typename T>
 void EtsStdCoreArrayBuffer::SetElement(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, byteOffset, element);
 }
 
 template <typename T>
 T EtsStdCoreArrayBuffer::GetVolatileElement(uint32_t index, uint32_t byteOffset)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetVolatile, T, obj, index, byteOffset);
     return val;
@@ -102,8 +103,8 @@ T EtsStdCoreArrayBuffer::GetVolatileElement(uint32_t index, uint32_t byteOffset)
 template <typename T>
 void EtsStdCoreArrayBuffer::SetVolatileElement(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     EXECUTE_VOID_METHOD_DEPENDS_ON_TYPE(SetVolatile, T, obj, index, byteOffset, element);
 }
 
@@ -111,8 +112,8 @@ template <typename T>
 std::pair<bool, T> EtsStdCoreArrayBuffer::CompareAndExchangeElement(uint32_t index, uint32_t byteOffset, T oldElement,
                                                                     T newElement, bool strong)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     std::pair<bool, T> val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, CompareAndExchange, T, obj, index, byteOffset, oldElement, newElement, strong);
     return val;
@@ -120,8 +121,8 @@ std::pair<bool, T> EtsStdCoreArrayBuffer::CompareAndExchangeElement(uint32_t ind
 template <typename T>
 T EtsStdCoreArrayBuffer::ExchangeElement(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, Exchange, T, obj, index, byteOffset, element);
     return val;
@@ -130,8 +131,8 @@ T EtsStdCoreArrayBuffer::ExchangeElement(uint32_t index, uint32_t byteOffset, T 
 template <typename T>
 T EtsStdCoreArrayBuffer::GetAndAdd(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndAdd, T, obj, index, byteOffset, element);
     return val;
@@ -140,8 +141,8 @@ T EtsStdCoreArrayBuffer::GetAndAdd(uint32_t index, uint32_t byteOffset, T elemen
 template <typename T>
 T EtsStdCoreArrayBuffer::GetAndSub(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndSub, T, obj, index, byteOffset, element);
     return val;
@@ -150,8 +151,8 @@ T EtsStdCoreArrayBuffer::GetAndSub(uint32_t index, uint32_t byteOffset, T elemen
 template <typename T>
 T EtsStdCoreArrayBuffer::GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseOr, T, obj, index, byteOffset, element);
     return val;
@@ -160,8 +161,8 @@ T EtsStdCoreArrayBuffer::GetAndBitwiseOr(uint32_t index, uint32_t byteOffset, T 
 template <typename T>
 T EtsStdCoreArrayBuffer::GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseAnd, T, obj, index, byteOffset, element);
     return val;
@@ -170,8 +171,8 @@ T EtsStdCoreArrayBuffer::GetAndBitwiseAnd(uint32_t index, uint32_t byteOffset, T
 template <typename T>
 T EtsStdCoreArrayBuffer::GetAndBitwiseXor(uint32_t index, uint32_t byteOffset, T element)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(executionCtx, this, MEMBER_OFFSET(EtsStdCoreArrayBuffer, managedData_));
     T val;  // CC-OFF(G.EXP.09-CPP) variable is used in code gen macro
     EXECUTE_METHOD_DEPENDS_ON_TYPE(val, GetAndBitwiseXor, T, obj, index, byteOffset, element);
     return val;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,12 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_FINREG_NODE_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_FINREG_NODE_H
 
-#include "runtime/coroutines/coroutine_worker.h"
-#include "runtime/coroutines/coroutine_worker_domain.h"
+#include "runtime/execution/job_worker_thread.h"
+#include "runtime/execution/job_worker_domain.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 
 namespace ark::ets {
 
-class EtsCoroutine;
 class EtsFinalizationRegistry;
 namespace test {
 class EtsFinalizationRegistryLayoutTest;
@@ -66,8 +65,8 @@ public:
     }
 
     EtsFinalizationRegistry *GetFinalizationRegistry() const;
-    CoroutineWorkerDomain GetWorkerDomain() const;
-    CoroutineWorker::Id GetWorkerId() const;
+    JobWorkerThreadDomain GetWorkerDomain() const;
+    JobWorkerThread::Id GetWorkerId() const;
 
 private:
     static constexpr size_t GetTokenOffset()

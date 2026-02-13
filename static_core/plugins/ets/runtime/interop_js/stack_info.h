@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 struct NapiStackInfo;
 
 namespace ark::ets {
-class EtsCoroutine;
+class EtsExecutionContext;
 }  // namespace ark::ets
 
 namespace ark::ets::interop::js {
@@ -31,11 +31,11 @@ class InteropCtx;
 
 class StackInfoManagerBase {
 public:
-    StackInfoManagerBase([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] EtsCoroutine *coro)
-        : ctx_(ctx), mainCoro_(coro)
+    StackInfoManagerBase([[maybe_unused]] InteropCtx *ctx, [[maybe_unused]] EtsExecutionContext *executionCtx)
+        : ctx_(ctx), mainExecCtx_(executionCtx)
     {
         UNUSED_VAR(ctx_);
-        UNUSED_VAR(mainCoro_);
+        UNUSED_VAR(mainExecCtx_);
     }
     // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
     PANDA_PUBLIC_API void InitStackInfoIfNeeded() {};
@@ -47,13 +47,13 @@ public:
     NO_COPY_SEMANTIC(StackInfoManagerBase);
 
 protected:
-    InteropCtx *ctx_;         // NOLINT(misc-non-private-member-variables-in-classes)
-    EtsCoroutine *mainCoro_;  // NOLINT(misc-non-private-member-variables-in-classes)
+    InteropCtx *ctx_;                   // NOLINT(misc-non-private-member-variables-in-classes)
+    EtsExecutionContext *mainExecCtx_;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 class StackInfoManagerOhos : public StackInfoManagerBase {
 public:
-    StackInfoManagerOhos(InteropCtx *ctx, EtsCoroutine *coro);
+    StackInfoManagerOhos(InteropCtx *ctx, EtsExecutionContext *executionCtx);
     // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
     PANDA_PUBLIC_API void InitStackInfoIfNeeded();
     // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed

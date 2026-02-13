@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vresolver.h"
-#include "plugins/ets/runtime/ets_ani_env.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"

@@ -30,13 +30,13 @@
 namespace ark::ets::interop::js::ets_proxy {
 
 template <bool IS_STATIC>
-static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCoroutine *coro, InteropCtx *ctx,
-                                         napi_value jsThis)
+static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsExecutionContext *executionCtx,
+                                         InteropCtx *ctx, napi_value jsThis)
 {
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = fieldWrapper->GetOwner()->GetEtsClass();
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
-            ctx->ForwardEtsException(coro);
+        if (UNLIKELY(!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, etsClass))) {
+            ctx->ForwardEtsException(executionCtx);
             return nullptr;
         }
         return etsClass->AsObject();
@@ -44,8 +44,8 @@ static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsCorou
 
     EtsObject *etsThis = fieldWrapper->GetOwner()->UnwrapEtsProxy(ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -66,12 +66,12 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     }
 
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
-    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, jsThis);
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, executionCtx, ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -79,8 +79,8 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
 
     napi_value res = FieldAccessor::Getter(ctx, env, etsThis, etsFieldWrapper);
     if (UNLIKELY(res == nullptr)) {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
     }
     ASSERT(res != nullptr || ctx->SanityJSExceptionPending());
@@ -101,23 +101,23 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     }
 
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
-    ScopedManagedCodeThread managedScope(coro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx *ctx = InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
-    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, jsThis);
+    EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, executionCtx, ctx, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
     }
 
-    LocalObjectHandle<EtsObject> etsThisHandle(coro, etsThis);
+    LocalObjectHandle<EtsObject> etsThisHandle(executionCtx->GetMT(), etsThis);
     auto res = FieldAccessor::Setter(ctx, env, EtsHandle<EtsObject>(VMHandle<EtsObject>(etsThisHandle)),
                                      etsFieldWrapper, jsValue);
     if (UNLIKELY(!res)) {
-        if (coro->HasPendingException()) {
-            ctx->ForwardEtsException(coro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
         ASSERT(ctx->SanityJSExceptionPending());
     }

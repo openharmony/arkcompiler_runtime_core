@@ -22,6 +22,7 @@
 #include <regex>
 
 #include "ani.h"
+#include "include/object_header.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/utils.h"
@@ -41,7 +42,7 @@
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "runtime/coroutines/coroutine_scopes.h"
+#include "runtime/execution/coroutines/coroutine_scopes.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -94,9 +95,9 @@ static void CheckFunctionReturnType(ani_function fn, EtsType type)
     }
 }
 
-static ClassLinkerContext *GetClassLinkerContext(EtsCoroutine *coroutine)
+static ClassLinkerContext *GetClassLinkerContext(EtsExecutionContext *executionCtx)
 {
-    auto stack = StackWalker::Create(coroutine);
+    auto stack = StackWalker::Create(executionCtx->GetMT());
     if (!stack.HasFrame()) {
         return nullptr;
     }
@@ -116,12 +117,12 @@ static ani_status InitializeClass(ScopedManagedCodeFix &s, EtsClass *klass)
     }
 
     // Initialize class
-    EtsCoroutine *corutine = s.GetCoroutine();
-    EtsClassLinker *classLinker = corutine->GetPandaVM()->GetClassLinker();
-    bool isInitialized = classLinker->InitializeClass(corutine, klass);
+    auto *executionCtx = s.GetExecutionContext();
+    EtsClassLinker *classLinker = executionCtx->GetPandaVM()->GetClassLinker();
+    bool isInitialized = classLinker->InitializeClass(executionCtx, klass);
     if (!isInitialized) {
         LOG(ERROR, ANI) << "Cannot initialize class: " << klass->GetDescriptor();
-        if (corutine->HasPendingException()) {
+        if (executionCtx->GetMT()->HasPendingException()) {
             return ANI_PENDING_ERROR;
         }
         return ANI_ERROR;
@@ -237,7 +238,8 @@ static ani_status DoGeneralMethodCall(ScopedManagedCodeFix &s, ani_object obj, M
 {
     ASSERT(result != nullptr);
     // Trigger coroutine manager native call events
-    ScopedCoroutineNativeCall c(s.GetCoroutine());
+    // NOTE(panferovi, 33937): fix me
+    ScopedCoroutineNativeCall c(EtsCoroutine::CastFromThread(s.GetExecutionContext()->GetMT()));
 
     EtsMethod *m = nullptr;
     if constexpr (std::is_same_v<MethodType, ani_method>) {
@@ -432,10 +434,10 @@ static ani_status DoFind(PandaAniEnv *pandaEnv, const char *descriptor, ScopedMa
     ASSERT(descriptor != nullptr);
     ASSERT(result != nullptr);
     EtsClassLinker *classLinker = pandaEnv->GetEtsVM()->GetClassLinker();
-    EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetCoroutine()));
+    EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetExecutionContext()));
     if (UNLIKELY(pandaEnv->HasPendingException())) {
         EtsThrowable *currentException = pandaEnv->GetThrowable();
-        if (currentException->GetClass() == PlatformTypes(s.GetCoroutine())->coreLinkerClassNotFoundError) {
+        if (currentException->GetClass() == PlatformTypes(s.GetExecutionContext())->coreLinkerClassNotFoundError) {
             pandaEnv->ClearException();
             return ANI_NOT_FOUND;
         }
@@ -613,7 +615,7 @@ static ani_status AllocObject(ScopedManagedCodeFix &s, ani_class cls, ani_object
     ANI_CHECK_RETURN_IF_EQ(klass->IsStringClass(), true, ANI_INVALID_TYPE);
     ANI_CHECK_RETURN_IF_EQ(klass->IsArrayClass(), true, ANI_INVALID_TYPE);
 
-    EtsObject *obj = EtsObject::Create(s.GetCoroutine(), klass);
+    EtsObject *obj = EtsObject::Create(s.GetExecutionContext(), klass);
     ANI_CHECK_RETURN_IF_EQ(obj, nullptr, ANI_OUT_OF_MEMORY);
     return s.AddLocalRef(obj, reinterpret_cast<ani_ref *>(result));
 }
@@ -916,7 +918,7 @@ NO_UB_SANITIZE static ani_status Array_GetLength(ani_env *env, ani_array array, 
     ScopedManagedCodeFix s(env);
     auto *objArray = s.ToInternalType(array);
     EtsInt actualLength = 0;
-    ANI_CHECK_RETURN_IF_EQ(objArray->GetLength(s.GetCoroutine(), &actualLength), false, ANI_PENDING_ERROR);
+    ANI_CHECK_RETURN_IF_EQ(objArray->GetLength(s.GetExecutionContext(), &actualLength), false, ANI_PENDING_ERROR);
     *result = static_cast<ani_size>(actualLength);
 
     return ANI_OK;
@@ -934,8 +936,8 @@ NO_UB_SANITIZE static ani_status Array_New(ani_env *env, ani_size length, ani_re
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *coroutine = s.GetCoroutine();
-    auto *internalArray = EtsEscompatArray::Create(coroutine, length);
+    auto *executionCtx = s.GetExecutionContext();
+    auto *internalArray = EtsEscompatArray::Create(executionCtx, length);
     ANI_CHECK_RETURN_IF_EQ(internalArray, nullptr, ANI_OUT_OF_MEMORY);
     if (length != 0 && !IsUndefined(initialElement)) {
         EtsObject *obj = s.ToInternalType(initialElement);
@@ -957,7 +959,7 @@ NO_UB_SANITIZE static ani_status Array_Set(ani_env *env, ani_array array, ani_si
     ScopedManagedCodeFix s(env);
     EtsEscompatArray *escompatArray = s.ToInternalType(array);
     EtsObject *obj = s.ToInternalType(ref);
-    bool succeeded = escompatArray->SetRef(s.GetCoroutine(), index, obj);
+    bool succeeded = escompatArray->SetRef(s.GetExecutionContext(), index, obj);
     return succeeded ? ANI_OK : ANI_PENDING_ERROR;
 }
 
@@ -971,7 +973,7 @@ NO_UB_SANITIZE static ani_status Array_Get(ani_env *env, ani_array array, ani_si
 
     ScopedManagedCodeFix s(env);
     EtsEscompatArray *escompatArray = s.ToInternalType(array);
-    auto optObject = escompatArray->GetRef(s.GetCoroutine(), index);
+    auto optObject = escompatArray->GetRef(s.GetExecutionContext(), index);
     ANI_CHECK_RETURN_IF_EQ(optObject.has_value(), false, ANI_PENDING_ERROR);
     return s.AddLocalRef(*optObject, result);
 }
@@ -1001,7 +1003,7 @@ NO_UB_SANITIZE static ani_status Array_Pop(ani_env *env, ani_array array, ani_re
 
     ScopedManagedCodeFix s(env);
     EtsEscompatArray *escompatArray = s.ToInternalType(array);
-    EtsObject *obj = escompatArray->Pop(s.GetCoroutine());
+    EtsObject *obj = escompatArray->Pop(s.GetExecutionContext());
     if (s.HasPendingException()) {
         return ANI_PENDING_ERROR;
     }
@@ -1551,9 +1553,9 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *coro = s.GetCoroutine();
-    EtsHandleScope h(coro);
-    EtsHandle etsFn(coro, s.ToInternalType(fn));
+    auto *executionCtx = s.GetExecutionContext();
+    EtsHandleScope h(executionCtx);
+    EtsHandle etsFn(executionCtx, s.ToInternalType(fn));
 
     EtsClass *etsCls = etsFn->GetClass();
     ANI_CHECK_RETURN_IF_EQ(etsCls->IsFunction(), false, ANI_INVALID_TYPE);
@@ -1561,7 +1563,7 @@ NO_UB_SANITIZE static ani_status FunctionalObject_Call(ani_env *env, ani_fn_obje
     // `unsafeCall` must always present for classes marked with `IS_FUNCTION` flag
     ASSERT(method != nullptr);
 
-    EtsObjectArray *callArgs = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, argc);
+    EtsObjectArray *callArgs = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, argc);
     ANI_CHECK_RETURN_IF_EQ(callArgs, nullptr, ANI_OUT_OF_MEMORY);
     for (ani_size i = 0; i < argc; ++i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -2645,9 +2647,9 @@ static ani_status DoGetFieldByName(ani_env *env, ani_object object, const char *
     using Res = std::conditional_t<IS_REF, EtsObject *, R>;
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, s.ToInternalType(object));
     ASSERT(etsObject.GetPtr() != nullptr);
     EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
@@ -2736,9 +2738,9 @@ NO_UB_SANITIZE ani_status ObjectSetFieldByNamePrimitive(ani_env *env, ani_object
     CHECK_PTR_ARG(name);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, s.ToInternalType(object));
     ASSERT(etsObject.GetPtr() != nullptr);
     EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
@@ -2827,9 +2829,9 @@ NO_UB_SANITIZE static ani_status Object_SetFieldByName_Ref(ani_env *env, ani_obj
     CHECK_PTR_ARG(value);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, s.ToInternalType(object));
     ASSERT(etsObject.GetPtr() != nullptr);
     EtsField *etsField = etsObject->GetClass()->GetFieldIDByName(name, nullptr);
     EtsObject *etsValue = s.ToInternalType(value);
@@ -2851,11 +2853,11 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
     ASSERT(result != nullptr);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
     Res etsRes {};
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
-    EtsHandle<EtsClass> klass(coroutine, etsObject->GetClass());
+    EtsHandle<EtsObject> etsObject(executionCtx, s.ToInternalType(object));
+    EtsHandle<EtsClass> klass(executionCtx, etsObject->GetClass());
     EtsField *field = klass->GetFieldIDByName(name, nullptr);
     if (field != nullptr) {
         // Property as field
@@ -2875,8 +2877,8 @@ static ani_status DoGetPropertyByName(ani_env *env, ani_object object, const cha
         ANI_CHECK_RETURN_IF_NE(method->GetReturnValueType(), AniTypeInfo<R>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
         std::array args = {Value {etsObject->GetCoreType()}};
-        Value res = method->GetPandaMethod()->Invoke(coroutine, args.data());
-        ANI_CHECK_RETURN_IF_EQ(coroutine->HasPendingException(), true, ANI_PENDING_ERROR);
+        Value res = method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+        ANI_CHECK_RETURN_IF_EQ(executionCtx->GetMT()->HasPendingException(), true, ANI_PENDING_ERROR);
 
         if constexpr (IS_REF) {
             etsRes = EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
@@ -3017,10 +3019,10 @@ static ani_status DoSetPropertyByName(ani_env *env, ani_object object, const cha
     ASSERT(name != nullptr);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> etsObject(coroutine, s.ToInternalType(object));
-    EtsHandle<EtsClass> klass(coroutine, etsObject->GetClass());
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, s.ToInternalType(object));
+    EtsHandle<EtsClass> klass(executionCtx, etsObject->GetClass());
     EtsField *field = klass->GetFieldIDByName(name, nullptr);
     if (field != nullptr) {
         // Property as field
@@ -3050,8 +3052,8 @@ static ani_status DoSetPropertyByName(ani_env *env, ani_object object, const cha
             args.at(1U) = Value {value};
         }
 
-        method->GetPandaMethod()->Invoke(coroutine, args.data());
-        ANI_CHECK_RETURN_IF_EQ(coroutine->HasPendingException(), true, ANI_PENDING_ERROR);
+        method->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
+        ANI_CHECK_RETURN_IF_EQ(executionCtx->GetMT()->HasPendingException(), true, ANI_PENDING_ERROR);
     }
     return ANI_OK;
 }
@@ -3449,7 +3451,7 @@ NO_UB_SANITIZE static ani_status Reference_Equals(ani_env *env, ani_ref ref0, an
     }
     // Slow path
     ScopedManagedCodeFix s(env);
-    bool isEquals = EtsReferenceEquals<false>(s.GetCoroutine(), s.ToInternalType(ref0), s.ToInternalType(ref1));
+    bool isEquals = EtsReferenceEquals<false>(s.GetExecutionContext(), s.ToInternalType(ref0), s.ToInternalType(ref1));
     *result = isEquals ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
 }
@@ -3470,7 +3472,8 @@ NO_UB_SANITIZE static ani_status Reference_StrictEquals(ani_env *env, ani_ref re
     }
     // Slow path
     ScopedManagedCodeFix s(env);
-    bool isStrictEquals = EtsReferenceEquals<true>(s.GetCoroutine(), s.ToInternalType(ref0), s.ToInternalType(ref1));
+    bool isStrictEquals =
+        EtsReferenceEquals<true>(s.GetExecutionContext(), s.ToInternalType(ref0), s.ToInternalType(ref1));
     *result = isStrictEquals ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
 }
@@ -4903,9 +4906,9 @@ NO_UB_SANITIZE static ani_status Object_CallMethodByName_Void(ani_env *env, ani_
     return status;
 }
 
-static ani_size DoGetTupleLength(EtsCoroutine *coroutine, EtsHandle<EtsObject> internalTuple)
+static ani_size DoGetTupleLength(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> internalTuple)
 {
-    if (UNLIKELY(PlatformTypes(coroutine)->coreTupleN->IsAssignableFrom(internalTuple->GetClass()))) {
+    if (UNLIKELY(PlatformTypes(executionCtx)->coreTupleN->IsAssignableFrom(internalTuple->GetClass()))) {
         EtsClass *klass = internalTuple->GetClass();
         EtsField *field = klass->GetFieldIDByName("$tupleValues", nullptr);
         ASSERT(field != nullptr);
@@ -4929,21 +4932,21 @@ NO_UB_SANITIZE static ani_status TupleValue_GetNumberOfItems(ani_env *env, ani_t
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
+    auto *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(tupleValue));
 
-    *result = DoGetTupleLength(coroutine, internalTuple);
+    *result = DoGetTupleLength(executionCtx, internalTuple);
 
     return ANI_OK;
 }
 
 template <typename ValueType>
-static bool IsCorrectBoxType(EtsCoroutine *coro, EtsObject *element)
+static bool IsCorrectBoxType(EtsExecutionContext *executionCtx, EtsObject *element)
 {
     ASSERT(element != nullptr);
     ASSERT(element->GetClass() != nullptr);
-    auto *boxPrimitiveClass = EtsBoxPrimitive<ValueType>::GetBoxClass(coro);
+    auto *boxPrimitiveClass = EtsBoxPrimitive<ValueType>::GetBoxClass(executionCtx);
     return element->GetClass()->GetRuntimeClass() == boxPrimitiveClass;
 }
 
@@ -4955,10 +4958,10 @@ static ani_status TupleValueGetItem(ani_env *env, ani_object tupleValue, ani_siz
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
-    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+    auto executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(executionCtx, internalTuple), ANI_OUT_OF_RANGE);
 
     EtsClass *klass = internalTuple->GetClass();
     // NOTE (#24962): Extend implementation to TupleN, when FE supports it
@@ -4966,7 +4969,7 @@ static ani_status TupleValueGetItem(ani_env *env, ani_object tupleValue, ani_siz
     ASSERT(field != nullptr);
 
     auto *resultField = internalTuple->GetFieldObject(field);
-    ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<ValueType>(coroutine, resultField), false, ANI_INVALID_TYPE);
+    ANI_CHECK_RETURN_IF_EQ(IsCorrectBoxType<ValueType>(executionCtx, resultField), false, ANI_INVALID_TYPE);
 
     EtsBoxPrimitive<ValueType> *boxedVal = EtsBoxPrimitive<ValueType>::FromCoreType(resultField);
     auto primitiveValue = boxedVal->GetValue();
@@ -5049,11 +5052,11 @@ NO_UB_SANITIZE static ani_status TupleValue_GetItem_Ref(ani_env *env, ani_tuple_
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
+    auto executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
-    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+    EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(executionCtx, internalTuple), ANI_OUT_OF_RANGE);
 
     EtsClass *klass = internalTuple->GetClass();
     // NOTE (#24962): Extend implementation to TupleN, when FE supports it
@@ -5071,16 +5074,16 @@ static ani_status TupleValueSetItem(ani_env *env, ani_tuple_value tupleValue, an
     CHECK_PTR_ARG(tupleValue);
 
     ScopedManagedCodeFix s(env);
-    auto coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
+    auto executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
-    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+    EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(executionCtx, internalTuple), ANI_OUT_OF_RANGE);
 
-    EtsHandle<EtsObject> boxed(coroutine, EtsBoxPrimitive<ValueType>::Create(coroutine, value));
+    EtsHandle<EtsObject> boxed(executionCtx, EtsBoxPrimitive<ValueType>::Create(executionCtx, value));
     ANI_CHECK_RETURN_IF_EQ(boxed.GetPtr(), nullptr, ANI_OUT_OF_MEMORY);
 
-    EtsHandle<EtsClass> klass(coroutine, internalTuple->GetClass());
+    EtsHandle<EtsClass> klass(executionCtx, internalTuple->GetClass());
     // NOTE (#24962): Extend implementation to TupleN, when FE supports it
     EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
     ASSERT(field != nullptr);
@@ -5164,13 +5167,13 @@ NO_UB_SANITIZE static ani_status TupleValue_SetItem_Ref(ani_env *env, ani_tuple_
     CHECK_PTR_ARG(value);
 
     ScopedManagedCodeFix s(env);
-    auto coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
+    auto executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsObject> internalTuple(coroutine, s.ToInternalType(tupleValue));
-    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(coroutine, internalTuple), ANI_OUT_OF_RANGE);
+    EtsHandle<EtsObject> internalTuple(executionCtx, s.ToInternalType(tupleValue));
+    ANI_CHECK_RETURN_IF_GE(index, DoGetTupleLength(executionCtx, internalTuple), ANI_OUT_OF_RANGE);
 
-    EtsHandle<EtsClass> klass(coroutine, internalTuple->GetClass());
+    EtsHandle<EtsClass> klass(executionCtx, internalTuple->GetClass());
     // NOTE (#24962): Extend implementation to TupleN, when FE supports it
     EtsField *field = klass->GetFieldIDByName(("$" + std::to_string(index)).c_str(), nullptr);
     ASSERT(field != nullptr);
@@ -5627,12 +5630,13 @@ static ani_status DoCreateArrayBuffer(ani_env *env, size_t length, void **result
     ANI_CHECK_RETURN_IF_GT(length, static_cast<size_t>(std::numeric_limits<ani_int>::max()), ANI_INVALID_ARGS);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coro = s.GetCoroutine();
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
 
     // ArrayBuffer should be allocated with non-movable internal data.
-    EtsStdCoreArrayBuffer *internalArrayBuffer = EtsStdCoreArrayBuffer::CreateNonMovable(coro, length, resultData);
+    EtsStdCoreArrayBuffer *internalArrayBuffer =
+        EtsStdCoreArrayBuffer::CreateNonMovable(executionCtx, length, resultData);
 
-    ASSERT(coro->HasPendingException() == false);
+    ASSERT(executionCtx->GetMT()->HasPendingException() == false);
     ANI_CHECK_RETURN_IF_EQ(internalArrayBuffer, nullptr, ANI_OUT_OF_MEMORY);
 
     ani_ref arrayObject = nullptr;
@@ -5666,14 +5670,14 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(ani_env *env, ani_arraybuff
     CHECK_PTR_ARG(lengthResult);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsStdCoreArrayBuffer> internalArrayBuffer(coroutine, s.ToInternalType(arraybuffer));
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsStdCoreArrayBuffer> internalArrayBuffer(executionCtx, s.ToInternalType(arraybuffer));
 
     *lengthResult = internalArrayBuffer->GetByteLength();
-    bool isMovableData = !EtsStdCoreArrayBuffer::IsNonMovableArray(coroutine, internalArrayBuffer.GetPtr());
+    bool isMovableData = !EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, internalArrayBuffer.GetPtr());
     if (isMovableData) {  // Should still return a valid pointer
-        EtsStdCoreArrayBuffer::ReallocateNonMovableArray(coroutine, internalArrayBuffer.GetPtr(), *lengthResult);
+        EtsStdCoreArrayBuffer::ReallocateNonMovableArray(executionCtx, internalArrayBuffer.GetPtr(), *lengthResult);
     }
     *dataResult = internalArrayBuffer->GetData();
     return ANI_OK;
@@ -5860,10 +5864,10 @@ NO_UB_SANITIZE static ani_status EnumItem_GetValue_Int(ani_env *env, ani_enum_it
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
-    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enum_item));
+    EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
     EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
@@ -5880,10 +5884,10 @@ static ani_status GetStringArrayFromEnumItem(ani_env *env, ani_enum_item enumIte
                                              ani_string *result)
 {
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enumItem));
-    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enumItem));
+    EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
     EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
@@ -5923,10 +5927,10 @@ NO_UB_SANITIZE static ani_status EnumItem_GetIndex(ani_env *env, ani_enum_item e
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    EtsHandleScope scope(coroutine);
-    EtsHandle<EtsObject> internalEnumItem(coroutine, s.ToInternalType(enum_item));
-    EtsHandle<EtsClass> enumClass(coroutine, internalEnumItem->GetClass());
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> internalEnumItem(executionCtx, s.ToInternalType(enum_item));
+    EtsHandle<EtsClass> enumClass(executionCtx, internalEnumItem->GetClass());
     EtsField *etsField = enumClass->GetFieldIDByName("#ordinal", nullptr);
     auto ordinal = internalEnumItem->GetFieldPrimitive<int32_t>(etsField);
 
@@ -5943,7 +5947,7 @@ NO_UB_SANITIZE static ani_status Promise_New(ani_env *env, ani_resolver *resultR
     CHECK_PTR_ARG(resultPromise);
 
     ScopedManagedCodeFix s(env);
-    EtsPromise *promise = EtsPromise::Create(s.GetCoroutine());
+    EtsPromise *promise = EtsPromise::Create(s.GetExecutionContext());
     ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_OUT_OF_MEMORY);
     ani_status status = s.AddLocalRef(promise->AsObject(), reinterpret_cast<ani_ref *>(resultPromise));
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -5964,7 +5968,7 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(ani_env *env, ani_resol
     ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     EtsObject *value = s.ToInternalType(resolution);
-    promise->Resolve(s.GetCoroutine(), value);
+    promise->Resolve(s.GetExecutionContext(), value);
     return ANI_OK;
 }
 
@@ -5982,7 +5986,7 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(ani_env *env, ani_resolv
     ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     EtsObject *error = s.ToInternalType(rejection);
-    promise->Reject(s.GetCoroutine(), error);
+    promise->Reject(s.GetExecutionContext(), error);
     return ANI_OK;
 }
 
@@ -5996,11 +6000,11 @@ NO_UB_SANITIZE static ani_status Any_InstanceOf(ani_env *env, ani_ref ref, ani_r
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coro = s.GetCoroutine();
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
     EtsObject *lhsObj = s.ToInternalType(ref);
     EtsObject *rhsObj = s.ToInternalType(type);
 
-    bool isInstance = EtsIsinstance(coro, lhsObj, rhsObj);
+    bool isInstance = EtsIsinstance(executionCtx->GetMT(), lhsObj, rhsObj);
     *result = isInstance ? ANI_TRUE : ANI_FALSE;
     return ANI_OK;
 }
@@ -6009,21 +6013,21 @@ template <typename T>
 static ani_status DoGetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref *result)
 {
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coro = s.GetCoroutine();
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
     EtsObject *thisObj = s.ToInternalType(ref);
     EtsObject *retObj = nullptr;
 
     if constexpr (std::is_same_v<T, const char *>) {
         panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(key))),
                                                  utf::CStringAsMutf8(key)};
-        retObj = EtsLdbyname(coro, thisObj, propName);
+        retObj = EtsLdbyname(executionCtx->GetMT(), thisObj, propName);
     } else if constexpr (std::is_same_v<T, ani_size>) {
-        retObj = EtsLdbyidx(coro, thisObj, key);
+        retObj = EtsLdbyidx(executionCtx->GetMT(), thisObj, key);
     } else {
         static_assert(std::is_same_v<T, ani_ref>);
         ASSERT(key != nullptr);
         EtsObject *keyObj = s.ToInternalType(key);
-        retObj = EtsLdbyval(coro, thisObj, keyObj);
+        retObj = EtsLdbyval(executionCtx->GetMT(), thisObj, keyObj);
     }
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     return s.AddLocalRef(retObj, result);
@@ -6033,7 +6037,7 @@ template <typename T>
 static ani_status DoSetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref value)
 {
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coro = s.GetCoroutine();
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
     EtsObject *thisObj = s.ToInternalType(ref);
     EtsObject *valObj = s.ToInternalType(value);
 
@@ -6041,15 +6045,15 @@ static ani_status DoSetAnyProperty(ani_env *env, ani_ref ref, T key, ani_ref val
     if constexpr (std::is_same_v<T, const char *>) {
         panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(key))),
                                                  utf::CStringAsMutf8(key)};
-        EtsStbyname(coro, thisObj, propName, valObj);
+        EtsStbyname(executionCtx->GetMT(), thisObj, propName, valObj);
         ok = true;
     } else if constexpr (std::is_same_v<T, ani_size>) {
-        ok = EtsStbyidx(coro, thisObj, key, valObj);
+        ok = EtsStbyidx(executionCtx->GetMT(), thisObj, key, valObj);
     } else {
         static_assert(std::is_same_v<T, ani_ref>);
         CHECK_PTR_ARG(key);
         EtsObject *keyObj = s.ToInternalType(key);
-        ok = EtsStbyval(coro, thisObj, keyObj, valObj);
+        ok = EtsStbyval(executionCtx->GetMT(), thisObj, keyObj, valObj);
     }
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     return ok ? ANI_OK : ANI_ERROR;
@@ -6137,8 +6141,8 @@ NO_UB_SANITIZE static ani_status Any_Call(ani_env *env, ani_ref func, ani_size a
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
     EtsObject *funcObj = s.ToInternalType(func);
 
     PandaVector<VMHandle<ObjectHeader>> argsVec;
@@ -6147,11 +6151,11 @@ NO_UB_SANITIZE static ani_status Any_Call(ani_env *env, ani_ref func, ani_size a
         for (ani_size i = 0; i < argc; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             EtsObject *argObj = s.ToInternalType(argv[i]);
-            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+            argsVec.emplace_back(VMHandle<ObjectHeader>(executionCtx->GetMT(), argObj->GetCoreType()));
         }
     }
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
-    EtsObject *res = EtsCall(coroutine, funcObj, internalArgs);
+    EtsObject *res = EtsCall(executionCtx->GetMT(), funcObj, internalArgs);
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
 
     return s.AddLocalRef(res, result);
@@ -6171,8 +6175,8 @@ NO_UB_SANITIZE static ani_status Any_CallMethod(ani_env *env, ani_ref self, cons
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
     EtsObject *thisObj = s.ToInternalType(self);
 
     PandaVector<VMHandle<ObjectHeader>> argsVec;
@@ -6181,13 +6185,13 @@ NO_UB_SANITIZE static ani_status Any_CallMethod(ani_env *env, ani_ref self, cons
         for (ani_size i = 0; i < argc; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             EtsObject *argObj = s.ToInternalType(argv[i]);
-            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+            argsVec.emplace_back(VMHandle<ObjectHeader>(executionCtx->GetMT(), argObj->GetCoreType()));
         }
     }
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
     panda_file::File::StringData propName = {static_cast<uint32_t>(utf::MUtf8ToUtf16Size(utf::CStringAsMutf8(name))),
                                              utf::CStringAsMutf8(name)};
-    EtsObject *res = EtsCallThis(coroutine, thisObj, propName, internalArgs);
+    EtsObject *res = EtsCallThis(executionCtx->GetMT(), thisObj, propName, internalArgs);
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     return s.AddLocalRef(res, result);
 }
@@ -6202,8 +6206,8 @@ NO_UB_SANITIZE static ani_status Any_New(ani_env *env, ani_ref ctor, ani_size ar
     }
     CHECK_PTR_ARG(result);
     ScopedManagedCodeFix s(env);
-    EtsCoroutine *coroutine = s.GetCoroutine();
-    HandleScope<ObjectHeader *> scope(coroutine);
+    EtsExecutionContext *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
     EtsObject *ctorObj = s.ToInternalType(ctor);
 
     std::vector<VMHandle<ObjectHeader>> argsVec;
@@ -6212,13 +6216,13 @@ NO_UB_SANITIZE static ani_status Any_New(ani_env *env, ani_ref ctor, ani_size ar
         for (ani_size i = 0; i < argc; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             EtsObject *argObj = s.ToInternalType(argv[i]);
-            argsVec.emplace_back(VMHandle<ObjectHeader>(coroutine, argObj->GetCoreType()));
+            argsVec.emplace_back(VMHandle<ObjectHeader>(executionCtx->GetMT(), argObj->GetCoreType()));
         }
     }
 
     Span<VMHandle<ObjectHeader>> internalArgs = Span<VMHandle<ObjectHeader>>(argsVec.data(), argc);
 
-    EtsObject *newObj = EtsCallNew(coroutine, ctorObj, internalArgs);
+    EtsObject *newObj = EtsCallNew(executionCtx->GetMT(), ctorObj, internalArgs);
     ANI_CHECK_RETURN_IF_EQ(s.HasPendingException(), true, ANI_PENDING_ERROR);
     if (newObj == nullptr) {
         return ANI_ERROR;
@@ -6233,8 +6237,8 @@ static ani_status DoBoxPrimitive(ani_env *env, T value, ani_object *result)
     CHECK_PTR_ARG(result);
 
     ScopedManagedCodeFix s(env);
-    auto *coroutine = s.GetCoroutine();
-    auto internalObject = EtsBoxPrimitive<T>::Create(coroutine, value);
+    auto *exeCtx = s.GetExecutionContext();
+    auto internalObject = EtsBoxPrimitive<T>::Create(exeCtx, value);
     if (UNLIKELY(internalObject == nullptr)) {
         return ANI_OUT_OF_MEMORY;
     }

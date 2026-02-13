@@ -62,7 +62,7 @@ static const __ani_interaction_api *GetInteractionAPI(VEnv *venv)
 
 static EtsMethod *GetEtsMethodIfPointerValid(impl::VMethod *vmethod)
 {
-    ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
+    ani_env *env = EtsExecutionContext::GetCurrent()->GetPandaAniEnv();
     EnvANIVerifier *envANIVerifier = PandaAniEnv::FromAniEnv(env)->GetEnvANIVerifier();
     if (!envANIVerifier->IsValidMethod(vmethod)) {
         return nullptr;

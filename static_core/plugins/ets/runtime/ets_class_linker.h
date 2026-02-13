@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ namespace ark::ets {
 
 class EtsClass;
 class EtsClassLinkerExtension;
-class EtsCoroutine;
+class EtsExecutionContext;
 
 class PANDA_PUBLIC_API EtsClassLinker {
 public:
@@ -41,7 +41,9 @@ public:
 
     bool Initialize();
 
-    bool InitializeClass(EtsCoroutine *coroutine, EtsClass *klass);
+    bool InitializeClass(ManagedThread *mThread, EtsClass *klass);
+    bool InitializeClass(EtsExecutionContext *executionCtx, EtsClass *klass);
+
     EtsClass *GetClassRoot(EtsClassRoot root) const;
     EtsClass *GetClass(const char *name, bool needCopyDescriptor = false,
                        ClassLinkerContext *classLinkerContext = nullptr,
@@ -51,7 +53,7 @@ public:
                        ClassLinkerErrorHandler *errorHandler = nullptr);
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id, ClassLinkerContext *classLinkerContext,
                       ClassLinkerErrorHandler *errorHandler = nullptr);
-    Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
+    Method *GetAsyncImplMethod(Method *method, EtsExecutionContext *executionCtx);
 
     EtsClassLinkerExtension *GetEtsClassLinkerExtension()
     {

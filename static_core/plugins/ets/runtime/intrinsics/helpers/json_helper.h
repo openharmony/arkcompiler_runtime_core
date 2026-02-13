@@ -49,9 +49,9 @@ private:
     bool AppendJSONString(EtsHandle<EtsObject> &value, bool hasContent);
     void AppendJSONPrimitive(const PandaString &value, bool hasContent);
 
-    bool SerializeFields(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent);
-    bool SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> &obj, bool &hasContent);
-    bool SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent);
+    bool SerializeFields(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent);
+    bool SerializeGetters(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, bool &hasContent);
+    bool SerializeInterfaceList(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &value, bool &hasContent);
 
     // handling of types
     bool SerializeJSONObject(EtsHandle<EtsObject> &value);
@@ -83,7 +83,7 @@ private:
     PandaString ResolveDisplayName(const EtsField *field);
 
     bool SerializeObject(EtsHandle<EtsObject> &value);
-    bool HandleField(EtsCoroutine *coro, EtsHandle<EtsObject> &obj, EtsField *field, bool &hasContent,
+    bool HandleField(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &obj, EtsField *field, bool &hasContent,
                      PandaUnorderedSet<PandaString> &keys);
     bool HandleRecordKey(EtsHandle<EtsObject> &key);
     template <typename T>

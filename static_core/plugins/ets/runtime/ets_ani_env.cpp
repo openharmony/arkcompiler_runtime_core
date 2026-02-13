@@ -18,21 +18,23 @@
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::ets {
 
 /* static */
-Expected<PandaAniEnv *, const char *> PandaAniEnv::Create(EtsCoroutine *coroutine, mem::InternalAllocatorPtr allocator)
+Expected<PandaAniEnv *, const char *> PandaAniEnv::Create(EtsExecutionContext *executionCtx,
+                                                          mem::InternalAllocatorPtr allocator)
 {
-    auto *etsVm = coroutine->GetVM();
+    auto *etsVm = executionCtx->GetPandaVM();
     auto referenceStorage = MakePandaUnique<EtsReferenceStorage>(etsVm->GetGlobalObjectStorage(), allocator, false);
     if (!referenceStorage || !referenceStorage->GetAsReferenceStorage()->Init()) {
         return Unexpected("Cannot allocate EtsReferenceStorage");
     }
 
-    auto *aniEnv = allocator->New<PandaAniEnv>(coroutine, std::move(referenceStorage));
+    auto *aniEnv = allocator->New<PandaAniEnv>(executionCtx, std::move(referenceStorage));
     if (aniEnv == nullptr) {
         return Unexpected("Cannot allocate PandaAniEnv");
     }
@@ -50,10 +52,10 @@ PandaAniEnv *PandaAniEnv::FromAniEnv(ani_env *env)
     return static_cast<PandaAniEnv *>(env);
 }
 
-PandaAniEnv::PandaAniEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
-    : ani_env {ani::GetInteractionAPI()}, coroutine_(coroutine), referenceStorage_(std::move(referenceStorage))
+PandaAniEnv::PandaAniEnv(EtsExecutionContext *executionCtx, PandaUniquePtr<EtsReferenceStorage> referenceStorage)
+    : ani_env {ani::GetInteractionAPI()}, executionCtx_(executionCtx), referenceStorage_(std::move(referenceStorage))
 {
-    auto *vm = coroutine->GetPandaVM();
+    auto *vm = executionCtx->GetPandaVM();
     if (vm->IsVerifyANI()) {
         ani::verify::ANIVerifier *verifier = vm->GetANIVerifier();
         envANIVerifier_ = MakePandaUnique<ani::verify::EnvANIVerifier>(this, verifier, c_api);
@@ -62,7 +64,7 @@ PandaAniEnv::PandaAniEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceSto
 
 PandaEtsVM *PandaAniEnv::GetEtsVM() const
 {
-    return coroutine_->GetPandaVM();
+    return executionCtx_->GetPandaVM();
 }
 
 void PandaAniEnv::FreeInternalMemory()
@@ -83,24 +85,24 @@ void PandaAniEnv::ReInitialize()
 void PandaAniEnv::SetException(EtsThrowable *thr)
 {
     ASSERT_MANAGED_CODE();
-    coroutine_->SetException(thr->GetCoreType());
+    executionCtx_->GetMT()->SetException(thr->GetCoreType());
 }
 
 EtsThrowable *PandaAniEnv::GetThrowable() const
 {
     ASSERT_MANAGED_CODE();
-    return reinterpret_cast<EtsThrowable *>(coroutine_->GetException());
+    return reinterpret_cast<EtsThrowable *>(executionCtx_->GetMT()->GetException());
 }
 
 bool PandaAniEnv::HasPendingException() const
 {
-    return coroutine_->HasPendingException();
+    return executionCtx_->GetMT()->HasPendingException();
 }
 
 void PandaAniEnv::ClearException()
 {
     ASSERT_MANAGED_CODE();
-    coroutine_->ClearException();
+    executionCtx_->GetMT()->ClearException();
 }
 
 }  // namespace ark::ets

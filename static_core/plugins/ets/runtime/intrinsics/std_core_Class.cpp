@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_field.h"
@@ -84,12 +84,12 @@ EtsClass *StdCoreClassOf(EtsObject *obj)
 
 EtsClass *StdCoreClassCurrent()
 {
-    return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 0);
+    return GetMethodOwnerClassInFrames(EtsExecutionContext::GetCurrent(), 0);
 }
 
 EtsClass *StdCoreClassOfCaller()
 {
-    return GetMethodOwnerClassInFrames(EtsCoroutine::GetCurrent(), 1);
+    return GetMethodOwnerClassInFrames(EtsExecutionContext::GetCurrent(), 1);
 }
 
 void StdCoreClassInitialize(EtsClass *cls)
@@ -97,10 +97,10 @@ void StdCoreClassInitialize(EtsClass *cls)
     ASSERT(cls != nullptr);
 
     if (UNLIKELY(!cls->IsInitialized())) {
-        auto coro = EtsCoroutine::GetCurrent();
-        ASSERT(coro != nullptr);
-        EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-        linker->InitializeClass(coro, cls);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        ASSERT(executionCtx != nullptr);
+        EtsClassLinker *linker = executionCtx->GetPandaVM()->GetClassLinker();
+        linker->InitializeClass(executionCtx, cls);
     }
 }
 
@@ -112,11 +112,11 @@ EtsString *StdCoreClassGetDescriptor(EtsClass *cls)
 
 ObjectHeader *StdCoreClassGetInterfaces(EtsClass *cls)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     const auto interfaces = cls->GetRuntimeClass()->GetInterfaces();
-    auto *result = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, interfaces.size());
+    auto *result = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreClass, interfaces.size());
     if (UNLIKELY(result == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     for (size_t i = 0; i < interfaces.size(); i++) {
@@ -150,9 +150,9 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
 
 void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *ext = coro->GetPandaVM()->GetEtsClassLinkerExtension();
-    if (UNLIKELY(runtimeLinker->IsInstanceOf(PlatformTypes(coro)->coreBootRuntimeLinker))) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *ext = executionCtx->GetPandaVM()->GetEtsClassLinkerExtension();
+    if (UNLIKELY(runtimeLinker->IsInstanceOf(PlatformTypes(executionCtx)->coreBootRuntimeLinker))) {
         // BootRuntimeLinker is a singletone, initialize it once
         runtimeLinker->SetClassLinkerContext(ext->GetBootContext());
         return;
@@ -175,7 +175,7 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto runtimeName = clsName->GetMutf8();
 
     PandaString descriptor;
@@ -183,7 +183,7 @@ EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsS
     if (UNLIKELY(classDescriptor == nullptr)) {
         PandaString msg = "Cannot find class ";
         msg.append(runtimeName);
-        ThrowEtsException(coro, PlatformTypes(coro)->coreLinkerClassNotFoundError, msg);
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreLinkerClassNotFoundError, msg);
         return nullptr;
     }
 
@@ -198,8 +198,8 @@ EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsS
     }
 
     if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
-        if (UNLIKELY(!linker->InitializeClass(coro, klass))) {
-            ASSERT(coro->HasPendingException());
+        if (UNLIKELY(!linker->InitializeClass(executionCtx->GetMT(), klass))) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
     }
@@ -208,8 +208,8 @@ EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsS
 
 EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+    auto *mThread = ManagedThread::GetCurrent();
+    for (auto stack = StackWalker::Create(mThread); stack.HasFrame(); stack.NextFrame()) {
         auto *method = stack.GetMethod();
         if (LIKELY(method != nullptr)) {
             auto *cls = method->GetClass();
@@ -225,24 +225,25 @@ EtsRuntimeLinker *EtsGetNearestNonBootRuntimeLinker()
 }
 
 template <bool IS_STATIC = false, bool IS_CONSTRUCTOR = false>
-static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const PandaVector<EtsMethod *> &methods)
+static ObjectHeader *CreateEtsReflectMethodArray(EtsExecutionContext *executionCtx,
+                                                 const PandaVector<EtsMethod *> &methods)
 {
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsClass *klass = IS_CONSTRUCTOR ? PlatformTypes(coro)->coreReflectConstructor
-                                     : (IS_STATIC ? PlatformTypes(coro)->coreReflectStaticMethod
-                                                  : PlatformTypes(coro)->coreReflectInstanceMethod);
+    EtsClass *klass = IS_CONSTRUCTOR ? PlatformTypes(executionCtx)->coreReflectConstructor
+                                     : (IS_STATIC ? PlatformTypes(executionCtx)->coreReflectStaticMethod
+                                                  : PlatformTypes(executionCtx)->coreReflectInstanceMethod);
     ASSERT(klass != nullptr);
 
-    EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(klass, methods.size()));
+    EtsHandle<EtsObjectArray> arrayH(executionCtx, EtsObjectArray::Create(klass, methods.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     ASSERT(arrayH.GetPtr() != nullptr);
 
     for (size_t idx = 0; idx < methods.size(); ++idx) {
-        auto *reflectMethod = EtsReflectMethod::CreateFromEtsMethod(coro, methods[idx]);
+        auto *reflectMethod = EtsReflectMethod::CreateFromEtsMethod(executionCtx, methods[idx]);
         arrayH->Set(idx, reflectMethod->AsObject());
     }
 
@@ -251,12 +252,12 @@ static ObjectHeader *CreateEtsReflectMethodArray(EtsCoroutine *coro, const Panda
 
 ObjectHeader *StdCoreClassGetInstanceMethodsInternal(EtsClass *cls, EtsBoolean publicOnly)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     PandaVector<EtsMethod *> instanceMethods;
     for (auto iter = helpers::InstanceMethodsIterator(cls, FromEtsBoolean(publicOnly)); !iter.IsEmpty(); iter.Next()) {
         instanceMethods.emplace_back(iter.Value());
     }
-    return CreateEtsReflectMethodArray(coro, instanceMethods);
+    return CreateEtsReflectMethodArray(executionCtx, instanceMethods);
 }
 
 // Match method by comparing each param type to the caller's Class array (same runtime class).
@@ -337,8 +338,8 @@ static EtsMethod *GetInstanceMethodByParamClasses(EtsClass *cls, const char *nam
 EtsReflectMethod *StdCoreClassGetInstanceMethodInternal(EtsClass *cls, EtsString *name, ObjectHeader *signature,
                                                         EtsBoolean publicOnly)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     bool publicOnlyBool = FromEtsBoolean(publicOnly);
 
@@ -359,7 +360,7 @@ EtsReflectMethod *StdCoreClassGetInstanceMethodInternal(EtsClass *cls, EtsString
             // Multiple overloads found
             PandaOStringStream msg;
             msg << "Found two methods with the same name '" << nameCStr << "'. Please specify signature.";
-            ThrowEtsException(coro, PlatformTypes()->escompatError, msg.str().c_str());
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, msg.str().c_str());
             return nullptr;  // unreachable after throw, but makes control flow clear
         }
         method = *resolved;  // nullptr if not found, non-null if single method found
@@ -369,7 +370,7 @@ EtsReflectMethod *StdCoreClassGetInstanceMethodInternal(EtsClass *cls, EtsString
         return nullptr;
     }
 
-    return EtsReflectMethod::CreateFromEtsMethod(coro, method);
+    return EtsReflectMethod::CreateFromEtsMethod(executionCtx, method);
 }
 
 EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
@@ -377,8 +378,8 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
     ASSERT(cls != nullptr);
     ASSERT(name != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     PandaVector<uint8_t> tree8Buf;
     Field *field = cls->GetRuntimeClass()->GetDeclaredInstanceFieldByName(name->ConvertToStringView(&tree8Buf));
@@ -386,7 +387,7 @@ EtsReflectField *StdCoreClassGetInstanceFieldByNameInternal(EtsClass *cls, EtsSt
         return nullptr;
     }
 
-    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
+    return EtsReflectField::CreateFromEtsField(executionCtx, EtsField::FromRuntimeField(field));
 }
 
 EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsString *name, EtsBoolean publicOnly)
@@ -394,8 +395,8 @@ EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsStri
     ASSERT(cls != nullptr);
     ASSERT(name != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     PandaVector<uint8_t> tree8Buf;
     Field *field = cls->GetRuntimeClass()->GetDeclaredStaticFieldByName(name->ConvertToStringView(&tree8Buf));
@@ -403,7 +404,7 @@ EtsReflectField *StdCoreClassGetStaticFieldByNameInternal(EtsClass *cls, EtsStri
         return nullptr;
     }
 
-    return EtsReflectField::CreateFromEtsField(coro, EtsField::FromRuntimeField(field));
+    return EtsReflectField::CreateFromEtsField(executionCtx, EtsField::FromRuntimeField(field));
 }
 
 static PandaVector<EtsMethod *> GetConstructors(EtsClass *cls, bool onlyPublic)
@@ -426,20 +427,20 @@ ObjectHeader *StdCoreClassGetConstructorsInternal(EtsClass *cls, EtsBoolean publ
 {
     ASSERT(cls != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     auto constructors = GetConstructors(cls, FromEtsBoolean(publicOnly));
 
-    return CreateEtsReflectMethodArray<false, true>(coro, constructors);
+    return CreateEtsReflectMethodArray<false, true>(executionCtx, constructors);
 }
 
 ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean publicOnly)
 {
     ASSERT(cls != nullptr);
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     bool collectPublic = FromEtsBoolean(publicOnly);
     PandaVector<EtsMethod *> staticMethods;
@@ -452,28 +453,29 @@ ObjectHeader *StdCoreClassGetStaticMethodsInternal(EtsClass *cls, EtsBoolean pub
         }
     }
 
-    return CreateEtsReflectMethodArray<true, false>(coro, staticMethods);
+    return CreateEtsReflectMethodArray<true, false>(executionCtx, staticMethods);
 }
 
 template <bool IS_STATIC = false>
-static ObjectHeader *CreateEtsReflectFieldArray(EtsCoroutine *coro, const PandaVector<EtsField *> &fields)
+static ObjectHeader *CreateEtsReflectFieldArray(EtsExecutionContext *executionCtx,
+                                                const PandaVector<EtsField *> &fields)
 {
-    EtsClass *klass =
-        IS_STATIC ? PlatformTypes(coro)->coreReflectStaticField : PlatformTypes(coro)->coreReflectInstanceField;
+    EtsClass *klass = IS_STATIC ? PlatformTypes(executionCtx)->coreReflectStaticField
+                                : PlatformTypes(executionCtx)->coreReflectInstanceField;
     ASSERT(klass != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    EtsHandle<EtsObjectArray> arrayH(coro, EtsObjectArray::Create(klass, fields.size()));
+    EtsHandle<EtsObjectArray> arrayH(executionCtx, EtsObjectArray::Create(klass, fields.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
     for (size_t idx = 0; idx < fields.size(); ++idx) {
-        auto *reflectField = EtsReflectField::CreateFromEtsField(coro, fields[idx]);
+        auto *reflectField = EtsReflectField::CreateFromEtsField(executionCtx, fields[idx]);
         if (UNLIKELY(reflectField == nullptr)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
         arrayH->Set(idx, reflectField->AsObject());
@@ -487,8 +489,8 @@ ObjectHeader *StdCoreClassGetInstanceFieldsInternal(EtsClass *cls, EtsBoolean pu
     ASSERT(cls != nullptr);
     ASSERT(!(cls->IsInterface()));
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     bool collectPublic = FromEtsBoolean(publicOnly);
 
@@ -501,7 +503,7 @@ ObjectHeader *StdCoreClassGetInstanceFieldsInternal(EtsClass *cls, EtsBoolean pu
         }
     }
 
-    return CreateEtsReflectFieldArray(coro, instanceFields);
+    return CreateEtsReflectFieldArray(executionCtx, instanceFields);
 }
 
 ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publicOnly)
@@ -509,8 +511,8 @@ ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publ
     ASSERT(cls != nullptr);
     ASSERT(!(cls->IsInterface()));
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     bool collectPublic = FromEtsBoolean(publicOnly);
 
@@ -523,7 +525,7 @@ ObjectHeader *StdCoreClassGetStaticFieldsInternal(EtsClass *cls, EtsBoolean publ
         }
     }
 
-    return CreateEtsReflectFieldArray<true>(coro, staticFields);
+    return CreateEtsReflectFieldArray<true>(executionCtx, staticFields);
 }
 
 EtsBoolean StdCoreClassIsEnum(EtsClass *cls)
@@ -572,13 +574,13 @@ ObjectHeader *StdCoreClassGetUnionConstituentTypesInternal(EtsClass *cls)
     ASSERT(cls != nullptr);
     ASSERT(cls->IsUnionClass());
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     auto constituentTypes = cls->GetRuntimeClass()->GetConstituentTypes();
-    auto *typesArray = EtsObjectArray::Create(PlatformTypes(coro)->coreClass, constituentTypes.size());
+    auto *typesArray = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreClass, constituentTypes.size());
     if (UNLIKELY(typesArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
     ASSERT(typesArray != nullptr);

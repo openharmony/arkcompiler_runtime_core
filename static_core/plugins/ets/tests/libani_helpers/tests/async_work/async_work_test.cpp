@@ -16,7 +16,7 @@
 #include "ani_gtest.h"
 #include "libani_helpers/concurrency_helpers.h"
 #include "include/thread_scopes.h"
-#include "coroutines/coroutine_manager.h"
+#include "runtime/execution/coroutines/coroutine_manager.h"
 
 namespace ark::ets::ani_helpers::testing {
 
@@ -42,12 +42,12 @@ class MainWorkerAsyncWorkTest : public ark::ets::ani::testing::AniTest {
 
 class AsyncWorkEvent {
 public:
-    AsyncWorkEvent() : event_(Coroutine::GetCurrent()->GetManager()) {}
+    AsyncWorkEvent() : event_(JobExecutionContext::GetCurrent()->GetManager()) {}
 
     void Wait()
     {
         event_.Lock();
-        Coroutine::GetCurrent()->GetManager()->Await(&event_);
+        JobExecutionContext::GetCurrent()->GetManager()->Await(&event_);
     }
 
     void Fire()

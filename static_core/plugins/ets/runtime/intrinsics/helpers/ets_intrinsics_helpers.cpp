@@ -17,6 +17,8 @@
 #include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
 #include "ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "ets_panda_file_items.h"
 #include "ets_stubs.h"
 #include "ets_stubs-inl.h"
 #include "ets_exceptions.h"
@@ -129,11 +131,12 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
         radix = DECIMAL;
     }
     if (radix < MIN_RADIX || radix > MAX_RADIX) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError, "Invalid radix");
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError,
+                          "Invalid radix");
         return 0;
     }
     if (ToDigit(str[startIndex]) >= radix) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -144,7 +147,7 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
             break;
         }
         if (result < (std::numeric_limits<T>::min() + digit) / radix) {
-            ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+            ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
                               "Value exceeds integer limits");
             return 0;
         }
@@ -159,7 +162,7 @@ T StringToInt(EtsString *str, uint8_t radix)
     auto ps = str->TrimLeft()->GetMutf8();
     PandaString::size_type index = 0;
     if (index >= ps.size()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -168,7 +171,7 @@ T StringToInt(EtsString *str, uint8_t radix)
         ++index;
     }
     if (index >= ps.size()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
                           "String does not contain a valid number");
         return 0;
     }
@@ -180,7 +183,7 @@ T StringToInt(EtsString *str, uint8_t radix)
         return result;
     }
     if (result < -std::numeric_limits<T>::max()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+        ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatFormatError,
                           "Value exceeds integer limits");
         return 0;
     }
@@ -790,20 +793,20 @@ bool SameValueZeroFloatingPoint(EtsObject *a, EtsObject *b)
 }
 }  // namespace
 
-bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
+bool SameValueZero(EtsExecutionContext *executionCtx, EtsObject *a, EtsObject *b)
 {
     if (UNLIKELY(a == b)) {
         return true;
     }
 
-    if (EtsReferenceNullish(coro, a) || EtsReferenceNullish(coro, b)) {
+    if (EtsReferenceNullish(executionCtx, a) || EtsReferenceNullish(executionCtx, b)) {
         // a == b is already handled
         return false;
     }
 
     EtsClass *aKlass = a->GetClass();
     EtsClass *bKlass = b->GetClass();
-    auto ptypes = PlatformTypes(coro);
+    auto ptypes = PlatformTypes(executionCtx);
     if (aKlass == ptypes->coreDouble && bKlass == ptypes->coreDouble) {
         return SameValueZeroFloatingPoint<EtsDouble>(a, b);
     }
@@ -811,7 +814,7 @@ bool SameValueZero(EtsCoroutine *coro, EtsObject *a, EtsObject *b)
         return SameValueZeroFloatingPoint<EtsFloat>(a, b);
     }
 
-    return EtsReferenceEquals(coro, a, b);
+    return EtsReferenceEquals(executionCtx, a, b);
 }
 
 }  // namespace ark::ets::intrinsics::helpers

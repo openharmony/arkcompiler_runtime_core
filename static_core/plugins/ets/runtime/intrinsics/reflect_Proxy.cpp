@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "intrinsics.h"
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -38,9 +39,8 @@ static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *
                 PandaOStringStream msg;
                 msg << "All given to Proxy classes must be an interface. But given class '"
                     << proxyInterfaces[idx]->GetName() << " is not an interface";
-                ark::ets::ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatTypeError,
+                ark::ets::ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->escompatTypeError,
                                             msg.str().c_str());
-
                 allocator->Free(proxyInterfaces.Data());
                 return std::nullopt;
             }
@@ -58,27 +58,30 @@ extern "C" EtsClass *ReflectProxyGenerateProxy(EtsRuntimeLinker *linker, EtsStri
     }
     ASSERT(name != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
 
     auto *linkerCtx = linker->GetClassLinkerContext();
     ASSERT(linkerCtx != nullptr);
 
-    auto *classLinkerExt = coroutine->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+    auto *pandaVM = executionCtx->GetPandaVM();
+    ASSERT(pandaVM != nullptr);
+
+    auto *classLinkerExt = pandaVM->GetClassLinker()->GetEtsClassLinkerExtension();
     ASSERT(classLinkerExt != nullptr);
 
     Class *baseProxyClass = classLinkerExt->GetPlatformTypes()->coreReflectProxy->GetRuntimeClass();
     ASSERT(baseProxyClass != nullptr);
 
-    [[maybe_unused]] EtsHandleScope scope(coroutine);
-    EtsHandle<EtsString> nameH(coroutine, name);
-    EtsHandle<EtsObjectArray> interfacesH(coroutine, EtsObjectArray::FromCoreType(interfaces));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsString> nameH(executionCtx, name);
+    EtsHandle<EtsObjectArray> interfacesH(executionCtx, EtsObjectArray::FromCoreType(interfaces));
 
     PandaString descriptor;
     ClassHelper::GetDescriptor(utf::CStringAsMutf8(nameH->GetMutf8().data()), &descriptor);
     const uint8_t *descriptorMutf8 = utf::CStringAsMutf8(descriptor.c_str());
 
-    auto internalAllocator = coroutine->GetPandaVM()->GetHeapManager()->GetInternalAllocator();
+    auto internalAllocator = pandaVM->GetHeapManager()->GetInternalAllocator();
     auto proxyInterfaces = CheckAndTransformInterfaces(interfacesH.GetPtr(), internalAllocator);
     if (UNLIKELY(!proxyInterfaces)) {
         return nullptr;
@@ -90,7 +93,7 @@ extern "C" EtsClass *ReflectProxyGenerateProxy(EtsRuntimeLinker *linker, EtsStri
         descriptorMutf8, true, PROXY_CLASS_ACCESS_FLAGS, Span<Field>(), baseProxyClass, *proxyInterfaces, linkerCtx,
         classLinkerExt->GetErrorHandler());
     if (UNLIKELY(proxyClass == nullptr)) {
-        ASSERT(coroutine->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         LOG(INFO, ETS) << "Can't build proxy class " << nameH->GetMutf8();
         internalAllocator->Free(proxyInterfaces->data());
         return nullptr;

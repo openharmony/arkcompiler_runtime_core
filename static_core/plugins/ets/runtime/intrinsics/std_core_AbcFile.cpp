@@ -22,7 +22,6 @@
 #include "libziparchive/extractortool/extractor.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -35,10 +34,11 @@
 
 namespace ark::ets::intrinsics {
 
-static EtsAbcFile *CreateAbcFile(EtsCoroutine *coro, ClassLinkerContext *ctx,
+static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerContext *ctx,
                                  std::unique_ptr<const panda_file::File> &&pf)
 {
-    auto *abcFile = EtsAbcFile::FromEtsObject(EtsObject::Create(coro, PlatformTypes(coro)->coreAbcFile));
+    auto *abcFile =
+        EtsAbcFile::FromEtsObject(EtsObject::Create(executionCtx, PlatformTypes(executionCtx)->coreAbcFile));
     abcFile->SetPandaFile(pf.get());
 
     Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);
@@ -51,11 +51,12 @@ static bool IsHspPath(const std::string &path)
     return std::equal(suffix.rbegin(), suffix.rend(), path.rbegin());
 }
 
-static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &extractor, EtsCoroutine *coro,
-                           const std::string &path)
+static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &extractor,
+                           EtsExecutionContext *executionCtx, const std::string &path)
 {
     if (!extractor || !extractor->Init()) {
-        ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError, "Open failed, file: " + path);
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
+                               "Open failed, file: " + path);
         return false;
     }
     return true;
@@ -69,14 +70,14 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     auto *ctx = runtimeLinker->GetClassLinkerContext();
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
 
     const auto path = filePath->GetMutf8();
     std::unique_ptr<const panda_file::File> pf {nullptr};
     {
         // Loading panda-file might be time-consuming, which would affect GC
         // unless being executed in native scope
-        ScopedNativeCodeThread etsNativeScope(coro);
+        ScopedNativeCodeThread etsNativeScope(executionCtx->GetMT());
         pf = panda_file::OpenPandaFileOrZip(path);
     }
 
@@ -85,7 +86,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         // get hsp path
         std::string hspPath = pathStr;
         std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hspPath);
-        if (!CheckExtractor(extractor, coro, pathStr)) {
+        if (!CheckExtractor(extractor, executionCtx, pathStr)) {
             return nullptr;
         }
         std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
@@ -101,7 +102,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         // get hap path
         size_t pos = pathStr.rfind("/ets/");
         if (pos == std::string::npos) {
-            ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError,
+            ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
                                    PandaString("Open failed, file: ") + path);
             return nullptr;
         }
@@ -109,7 +110,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         hapPath += ".hap";
 
         std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(hapPath);
-        if (!CheckExtractor(extractor, coro, pathStr)) {
+        if (!CheckExtractor(extractor, executionCtx, pathStr)) {
             return nullptr;
         }
         auto safeData = extractor->GetSafeData(pathStr);
@@ -121,11 +122,11 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     if (pf == nullptr) {
-        ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError,
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreAbcFileNotFoundError,
                                PandaString("Abc file not found: ") + path);
         return nullptr;
     }
-    return CreateAbcFile(coro, ctx, std::move(pf));
+    return CreateAbcFile(executionCtx, ctx, std::move(pf));
 }
 
 EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHeader *rawFileArray)
@@ -134,22 +135,25 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
         ThrowNullPointerException();
         return nullptr;
     }
+    ASSERT(rawFileArray != nullptr);
+    ASSERT(runtimeLinker != nullptr);
 
     auto *ctx = runtimeLinker->GetClassLinkerContext();
-    auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope hs(coro);
-    EtsHandle<EtsByteArray> arrayHandle(coro, EtsByteArray::FromEtsObject(EtsObject::FromCoreType(rawFileArray)));
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope hs(executionCtx);
+    EtsHandle<EtsByteArray> arrayHandle(executionCtx,
+                                        EtsByteArray::FromEtsObject(EtsObject::FromCoreType(rawFileArray)));
 
     auto length = arrayHandle->GetLength();
     size_t sizeToMmap = AlignUp(length, ark::os::mem::GetPageSize());
     void *mmapedMem = nullptr;
     {
         // mmap might be time-consuming, which would affect GC unless being executed in native scope
-        [[maybe_unused]] ScopedNativeCodeThread ns(coro);
+        [[maybe_unused]] ScopedNativeCodeThread ns(executionCtx->GetMT());
         mmapedMem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     }
     if (UNLIKELY(mmapedMem == nullptr)) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatError,
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
                           PandaString("Failed to allocate in-memory AbcFile"));
         return nullptr;
     }
@@ -160,11 +164,12 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
 
     auto pf = panda_file::File::OpenFromMemory(std::move(ptr));
     if (pf == nullptr) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatError, PandaString("Failed to load abc file from memory"));
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
+                          PandaString("Failed to load abc file from memory"));
         return nullptr;
     }
 
-    return CreateAbcFile(coro, ctx, std::move(pf));
+    return CreateAbcFile(executionCtx, ctx, std::move(pf));
 }
 
 EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLinker, EtsString *clsName, EtsBoolean init)
@@ -193,19 +198,19 @@ EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLink
         return nullptr;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto *ctx = runtimeLinker->GetClassLinkerContext();
     auto *linkerErrorHandler = PandaEtsVM::GetCurrent()->GetEtsClassLinkerExtension()->GetErrorHandler();
     auto *klass = classLinker->LoadClass(*pf, classId, ctx, linkerErrorHandler, true);
     if (UNLIKELY(klass == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
     if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
-        if (UNLIKELY(!classLinker->InitializeClass(coro, klass))) {
-            ASSERT(coro->HasPendingException());
+        if (UNLIKELY(!classLinker->InitializeClass(executionCtx->GetMT(), klass))) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return nullptr;
         }
     }

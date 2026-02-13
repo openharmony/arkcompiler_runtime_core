@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/mem/internal_allocator.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -34,6 +33,7 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_stubs.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/include/class_linker-inl.h"
 
@@ -307,7 +307,7 @@ public:
         InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
         ETSStubCacheInfo cacheInfo {cache->GetEntry(this->GetInst().GetAddress()), caller,
                                     this->GetInst().GetAddress()};
-        ark::Method *method = GetMethodByName(GetCoro(), cacheInfo, rawMethod, klass);
+        ark::Method *method = GetMethodByName(GetExecutionContext(), cacheInfo, rawMethod, klass);
         if (UNLIKELY(method == nullptr)) {
             LookUpException(klass, rawMethod);
             this->MoveToExceptionHandler();
@@ -358,7 +358,7 @@ public:
     {
         LOG_INST() << "ets.ldnullvalue";
 
-        this->GetAccAsVReg().SetReference(GetCoro()->GetNullValue());
+        this->GetAccAsVReg().SetReference(GetExecutionContext()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 
@@ -368,7 +368,7 @@ public:
         uint16_t vd = this->GetInst().template GetVReg<FORMAT>();
         LOG_INST() << "ets.movnullvalue v" << vd;
 
-        this->GetFrameHandler().GetVReg(vd).SetReference(GetCoro()->GetNullValue());
+        this->GetFrameHandler().GetVReg(vd).SetReference(GetExecutionContext()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 
@@ -378,7 +378,7 @@ public:
         LOG_INST() << "ets.isnullvalue";
 
         ObjectHeader *obj = this->GetAcc().GetReference();
-        this->GetAccAsVReg().SetPrimitive(obj == GetCoro()->GetNullValue());
+        this->GetAccAsVReg().SetPrimitive(obj == GetExecutionContext()->GetNullValue());
         this->template MoveToNextInst<FORMAT, true>();
     }
 
@@ -393,7 +393,8 @@ public:
         ObjectHeader *obj1 = this->GetFrame()->GetVReg(v1).GetReference();
         ObjectHeader *obj2 = this->GetFrame()->GetVReg(v2).GetReference();
 
-        bool res = EtsReferenceEquals(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
+        bool res =
+            EtsReferenceEquals(GetExecutionContext(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
         this->GetAccAsVReg().SetPrimitive(res);
         this->template MoveToNextInst<FORMAT, true>();
     }
@@ -409,7 +410,8 @@ public:
         ObjectHeader *obj1 = this->GetFrame()->GetVReg(v1).GetReference();
         ObjectHeader *obj2 = this->GetFrame()->GetVReg(v2).GetReference();
 
-        bool res = EtsReferenceEquals<true>(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
+        bool res = EtsReferenceEquals<true>(GetExecutionContext(), EtsObject::FromCoreType(obj1),
+                                            EtsObject::FromCoreType(obj2));
         this->GetAccAsVReg().SetPrimitive(res);
         this->template MoveToNextInst<FORMAT, true>();
     }
@@ -423,7 +425,7 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(v1).GetReference();
 
-        EtsString *res = EtsReferenceTypeof(GetCoro(), EtsObject::FromCoreType(obj));
+        EtsString *res = EtsReferenceTypeof(GetExecutionContext(), EtsObject::FromCoreType(obj));
         this->GetAccAsVReg().SetReference(res->AsObjectHeader());
         this->template MoveToNextInst<FORMAT, true>();
     }
@@ -437,7 +439,7 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(v).GetReference();
 
-        bool res = EtsIstrue(GetCoro(), EtsObject::FromCoreType(obj));
+        bool res = EtsIstrue(GetExecutionContext(), EtsObject::FromCoreType(obj));
         this->GetAccAsVReg().SetPrimitive(res);
         this->template MoveToNextInst<FORMAT, true>();
     }
@@ -462,7 +464,7 @@ public:
 
         uint16_t v = this->GetInst().template GetVReg<FORMAT>();
 
-        auto *coro = this->GetCoro();
+        auto *executionCtx = this->GetExecutionContext();
         auto *frame = this->GetFrame();
         auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
 
@@ -470,16 +472,16 @@ public:
         auto *prev = frame->GetPrevFrame();
 
         // return to the caller frame
-        frame->GetAcc().Set(asyncCtx->GetReturnValue(coro));
+        frame->GetAcc().Set(asyncCtx->GetReturnValue(executionCtx));
 
-        Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(coro, frame->GetMethod());
+        Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(executionCtx->GetMT(), frame->GetMethod());
 
         this->GetInstructionHandlerState()->UpdateInstructionHandlerState(
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             prev->GetInstruction() + prev->GetBytecodeOffset(), prev);
 
         this->SetDispatchTable(this->GetThread()->template GetCurrentDispatchTable<IS_DEBUG>());
-        RuntimeIfaceT::SetCurrentFrame(coro, prev);
+        RuntimeIfaceT::SetCurrentFrame(executionCtx->GetMT(), prev);
 
         this->GetAcc() = frame->GetAcc();
         this->SetInst(prev->GetNextInstruction());
@@ -510,8 +512,8 @@ public:
 
         // save vregs to context
         auto frameHandler = GetFrameHandler(frame);
-        auto *coro = this->GetCoro();
-        auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
+        auto *executionCtx = this->GetExecutionContext();
+        auto *frameOffsets = asyncCtx->GetFrameOffsets(executionCtx);
         auto *method = frame->GetMethod();
         ASSERT(method != nullptr);
         uint32_t frameSize = method->GetNumVregs() + method->GetNumArgs();
@@ -521,7 +523,7 @@ public:
             auto vreg = frameHandler.GetVReg(frameIdx);
             if (vreg.HasObject()) {
                 frameOffsets->Set(idx, frameIdx);
-                asyncCtx->AddReference(coro, idx, EtsObject::FromCoreType(vreg.GetReference()));
+                asyncCtx->AddReference(executionCtx, idx, EtsObject::FromCoreType(vreg.GetReference()));
                 idx++;
             }
         }
@@ -531,7 +533,7 @@ public:
             auto vreg = frameHandler.GetVReg(frameIdx);
             if (!vreg.HasObject()) {
                 frameOffsets->Set(refCount + idx, frameIdx);
-                asyncCtx->AddPrimitive(coro, idx, vreg.GetValue());
+                asyncCtx->AddPrimitive(executionCtx, idx, vreg.GetValue());
                 idx++;
             }
         }
@@ -548,7 +550,7 @@ public:
 
         LOG_INST() << "ets.async.dispatch v" << v;
 
-        auto *coro = this->GetCoro();
+        auto *executionCtx = this->GetExecutionContext();
         auto *frame = this->GetFrame();
         auto *asyncCtx = EtsAsyncContext::FromCoreType(frame->GetVReg(v).GetReference());
 
@@ -563,9 +565,9 @@ public:
         // load vregs from context
         auto frameHandler = GetFrameHandler(frame);
 
-        auto *refValues = asyncCtx->GetRefValues(coro);
-        auto *primValues = asyncCtx->GetPrimValues(coro);
-        auto *frameOffsets = asyncCtx->GetFrameOffsets(coro);
+        auto *refValues = asyncCtx->GetRefValues(executionCtx);
+        auto *primValues = asyncCtx->GetPrimValues(executionCtx);
+        auto *frameOffsets = asyncCtx->GetFrameOffsets(executionCtx);
         uint32_t refCount = asyncCtx->GetRefCount();
         uint32_t primCount = asyncCtx->GetPrimCount();
 
@@ -593,9 +595,9 @@ public:
         asyncCtx->SetRefCount(0);
         asyncCtx->SetPrimCount(0);
 
-        auto *awaiteePromise = asyncCtx->GetAwaitee(coro);
+        auto *awaiteePromise = asyncCtx->GetAwaitee(executionCtx);
         ASSERT(!awaiteePromise->IsPending());
-        this->GetAccAsVReg().SetReference(EtsObject::ToCoreType(awaiteePromise->GetValue(coro)));
+        this->GetAccAsVReg().SetReference(EtsObject::ToCoreType(awaiteePromise->GetValue(executionCtx)));
 
         // load resume point id
         auto resumePointId = reinterpret_cast<const uint8_t *>(asyncCtx->GetAwaitId());
@@ -610,7 +612,7 @@ private:
 
     ALWAYS_INLINE bool IsUndefined(ObjectHeader *obj)
     {
-        return obj == GetCoro()->GetUndefinedObject();
+        return obj == GetExecutionContext()->GetUndefinedObject();
     }
 
     ALWAYS_INLINE bool IsNullish(ObjectHeader *obj)
@@ -618,9 +620,14 @@ private:
         return IsNull(obj) || IsUndefined(obj);
     }
 
-    ALWAYS_INLINE EtsCoroutine *GetCoro() const
+    ALWAYS_INLINE ManagedThread *GetManagedThread() const
     {
-        return EtsCoroutine::CastFromThread(this->GetThread());
+        return this->GetThread();
+    }
+
+    ALWAYS_INLINE EtsExecutionContext *GetExecutionContext() const
+    {
+        return EtsExecutionContext::FromMT(GetManagedThread());
     }
 
     template <BytecodeInstruction::Format FORMAT>

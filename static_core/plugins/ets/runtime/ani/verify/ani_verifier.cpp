@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/ani_verifier.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/ani/ani_type_check.h"
@@ -142,14 +142,14 @@ void ANIVerifier::Abort(const std::string_view message)
     PandaStringStream ss;
     ss << message << "\n";
 
-    EtsCoroutine *coro = nullptr;
     Mutator *mutator = Mutator::GetCurrent();
+    EtsExecutionContext *executionCtx = nullptr;
     if (mutator != nullptr) {
-        coro = EtsCoroutine::GetCurrent();
+        executionCtx = EtsExecutionContext::GetCurrent();
     }
-    if (coro != nullptr) {
+    if (executionCtx != nullptr) {
         ss << "  Called from:";
-        StackWalker stack = StackWalker::Create(coro);
+        StackWalker stack = StackWalker::Create(executionCtx->GetMT());
         for (; stack.HasFrame(); stack.NextFrame()) {
             Method *method = stack.GetMethod();
             ss << "\n    " << method->GetClass()->GetName() << "." << method->GetName().data << " at "

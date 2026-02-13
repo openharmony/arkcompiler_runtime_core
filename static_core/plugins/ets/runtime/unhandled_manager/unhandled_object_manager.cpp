@@ -14,6 +14,8 @@
  */
 
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
+#include "runtime/execution/job_launch.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -87,7 +89,7 @@ void UnhandledObjectManager::VisitObjects(const GCRootVisitor &visitor)
 }
 
 static PandaUnorderedSet<EtsObject *> FlattenMapOfSets(
-    PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> &mapOfSets)
+    PandaUnorderedMap<JobWorkerThread::Id, PandaUnorderedSet<EtsObject *>> &mapOfSets)
 {
     PandaUnorderedSet<EtsObject *> result;
     size_t count = 0;
@@ -112,38 +114,38 @@ static void RemoveObjectImpl(PandaUnorderedSet<EtsObject *> &objects, EtsObject 
     objects.erase(object);
 }
 
-static PandaVector<EtsHandle<EtsObject>> TransformToVectorOfHandles(EtsCoroutine *coro,
+static PandaVector<EtsHandle<EtsObject>> TransformToVectorOfHandles(EtsExecutionContext *executionCtx,
                                                                     const PandaUnorderedSet<EtsObject *> &objects)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     PandaVector<EtsHandle<EtsObject>> handleVec;
     handleVec.reserve(objects.size());
     for (auto *obj : objects) {
         ASSERT(!obj->GetCoreType()->IsForwarded());
-        handleVec.emplace_back(coro, obj);
+        handleVec.emplace_back(executionCtx, obj);
     }
     return handleVec;
 }
 
 template <typename T>
-static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsCoroutine *coro,
+static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsExecutionContext *executionCtx,
                                                                    const PandaVector<EtsHandle<EtsObject>> &handles)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
-    ASSERT(coro != nullptr);
-    EtsHandle<EtsEscompatArray> arrayH(coro, EtsEscompatArray::Create(coro, handles.size()));
+    ASSERT(executionCtx != nullptr);
+    EtsHandle<EtsEscompatArray> arrayH(executionCtx, EtsEscompatArray::Create(executionCtx, handles.size()));
     if (UNLIKELY(arrayH.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
-        return EtsHandle<EtsEscompatArray>(coro, nullptr);
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return EtsHandle<EtsEscompatArray>(executionCtx, nullptr);
     }
     size_t i = 0;
     for (auto hobj : handles) {
-        auto *objAndReason = EtsEscompatArray::Create(coro, 2U);
+        auto *objAndReason = EtsEscompatArray::Create(executionCtx, 2U);
         if (UNLIKELY(objAndReason == nullptr)) {
-            ASSERT(coro->HasPendingException());
-            return EtsHandle<EtsEscompatArray>(coro, nullptr);
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return EtsHandle<EtsEscompatArray>(executionCtx, nullptr);
         }
-        objAndReason->EscompatArraySetUnsafe(0, T::FromEtsObject(hobj.GetPtr())->GetValue(coro));
+        objAndReason->EscompatArraySetUnsafe(0, T::FromEtsObject(hobj.GetPtr())->GetValue(executionCtx));
         objAndReason->EscompatArraySetUnsafe(1, hobj.GetPtr());
 
         arrayH->EscompatArraySetUnsafe(i, objAndReason);
@@ -153,7 +155,7 @@ static EtsHandle<EtsEscompatArray> CreateEtsObjectArrayFromHandles(EtsCoroutine 
 }
 
 template <typename T>
-static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine *coro,
+static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
                                     EtsHandle<EtsEscompatArray> &hobjects)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
@@ -167,38 +169,39 @@ static void ListObjectsFromEtsArray(EtsClassLinker *etsClassLinker, EtsCoroutine
         LOG(DEBUG, COROUTINES) << "List unhandled rejected promises";
     }
     ASSERT(method != nullptr);
-    auto *coroManager = coro->GetCoroutineManager();
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
+    auto *jobExecCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
+    auto *jobMan = jobExecCtx->GetManager();
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, jobMan);
     PandaVector<Value> args = {Value(hobjects->GetCoreType())};
-    LaunchResult launchRes = coroManager->LaunchImmediately(
-        evt, method, std::move(args), ark::CoroutineWorkerGroup::GenerateExactWorkerId(coro->GetWorker()->GetId()),
-        EtsCoroutine::ASYNC_CALL, true);
-
+    auto epInfo = Job::ManagedEntrypointInfo {evt, method, std::move(args)};
+    auto *job =
+        jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::ASYNC_CALL, Job::Type::MUTATOR, true);
+    LaunchResult launchRes = jobMan->Launch(job, LaunchParams {true});
     if UNLIKELY (launchRes != LaunchResult::OK) {
         LOG(DEBUG, COROUTINES) << "Failed to list unhandled rejections";
-        ASSERT(launchRes == LaunchResult::COROUTINES_LIMIT_EXCEED);
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        ASSERT(launchRes == LaunchResult::RESOURCE_LIMIT_EXCEED);
+        jobMan->DestroyJob(job);
         return;
     }
     LOG(DEBUG, COROUTINES) << "List unhandled rejections end";
 }
 
 template <typename T>
-static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro,
+static void ListUnhandledObjectsImpl(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
                                      const PandaUnorderedSet<EtsObject *> &objects)
 {
     static_assert(std::is_same_v<T, EtsJob> || std::is_same_v<T, EtsPromise>);
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     ASSERT(etsClassLinker != nullptr);
-    [[maybe_unused]] EtsHandleScope scope(coro);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    auto handles = TransformToVectorOfHandles(coro, objects);
-    auto hEtsArray = CreateEtsObjectArrayFromHandles<T>(coro, handles);
+    auto handles = TransformToVectorOfHandles(executionCtx, objects);
+    auto hEtsArray = CreateEtsObjectArrayFromHandles<T>(executionCtx, handles);
     if (UNLIKELY(hEtsArray.GetPtr() == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
-    ListObjectsFromEtsArray<T>(etsClassLinker, coro, hEtsArray);
+    ListObjectsFromEtsArray<T>(etsClassLinker, executionCtx, hEtsArray);
 }
 
 void UnhandledObjectManager::AddFailedJob(EtsJob *job)
@@ -213,10 +216,10 @@ void UnhandledObjectManager::RemoveFailedJob(EtsJob *job)
     RemoveObjectImpl(failedJobs_, job->AsObject());
 }
 
-void UnhandledObjectManager::ListFailedJobs(EtsCoroutine *coro)
+void UnhandledObjectManager::ListFailedJobs(EtsExecutionContext *executionCtx)
 {
     ASSERT_MANAGED_CODE();
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     PandaUnorderedSet<EtsObject *> unhandledObjects {};
     {
         os::memory::LockHolder lh(mutex_);
@@ -225,20 +228,20 @@ void UnhandledObjectManager::ListFailedJobs(EtsCoroutine *coro)
         }
         unhandledObjects.swap(failedJobs_);
     }
-    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), coro, unhandledObjects);
+    ListUnhandledObjectsImpl<EtsJob>(vm_->GetClassLinker(), executionCtx, unhandledObjects);
 }
 
-void UnhandledObjectManager::AddRejectedPromise(EtsPromise *promise, EtsCoroutine *adderCoro)
+void UnhandledObjectManager::AddRejectedPromise(EtsPromise *promise, EtsExecutionContext *adderExecutionCtx)
 {
     os::memory::LockHolder lh(mutex_);
-    auto workerId = adderCoro->GetWorker()->GetId();
+    auto workerId = JobExecutionContext::CastFromMutator(adderExecutionCtx->GetMT())->GetWorker()->GetId();
     AddObjectImpl(rejectedPromises_[workerId], promise->AsObject());
 }
 
-void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise, EtsCoroutine *removerCoro)
+void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise, EtsExecutionContext *removerExecutionCtx)
 {
     os::memory::LockHolder lh(mutex_);
-    auto workerId = removerCoro->GetWorker()->GetId();
+    auto workerId = JobExecutionContext::CastFromMutator(removerExecutionCtx->GetMT())->GetWorker()->GetId();
     auto it = rejectedPromises_.find(workerId);
     if (it != rejectedPromises_.end()) {
         it->second.erase(promise->AsObject());
@@ -248,13 +251,13 @@ void UnhandledObjectManager::RemoveRejectedPromise(EtsPromise *promise, EtsCorou
     }
 }
 
-void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro, bool listAllObjects)
+void UnhandledObjectManager::ListRejectedPromises(EtsExecutionContext *executionCtx, bool listAllObjects)
 {
     ASSERT_MANAGED_CODE();
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     PandaUnorderedSet<EtsObject *> unhandledObjects {};
     if (listAllObjects) {
-        PandaUnorderedMap<CoroutineWorker::Id, PandaUnorderedSet<EtsObject *>> rejectedPromisesLocal {};
+        PandaUnorderedMap<JobWorkerThread::Id, PandaUnorderedSet<EtsObject *>> rejectedPromisesLocal {};
         {
             os::memory::LockHolder lh(mutex_);
             if (rejectedPromises_.empty()) {
@@ -264,7 +267,7 @@ void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro, bool listA
         }
         unhandledObjects = FlattenMapOfSets(rejectedPromisesLocal);
     } else {
-        auto workerId = coro->GetWorker()->GetId();
+        auto workerId = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker()->GetId();
         {
             os::memory::LockHolder lh(mutex_);
             auto it = rejectedPromises_.find(workerId);
@@ -276,7 +279,7 @@ void UnhandledObjectManager::ListRejectedPromises(EtsCoroutine *coro, bool listA
         }
     }
 
-    ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), coro, unhandledObjects);
+    ListUnhandledObjectsImpl<EtsPromise>(vm_->GetClassLinker(), executionCtx, unhandledObjects);
 }
 
 bool UnhandledObjectManager::HasFailedJobObjects() const
@@ -285,13 +288,13 @@ bool UnhandledObjectManager::HasFailedJobObjects() const
     return !(failedJobs_.empty());
 }
 
-bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool listAllObjects) const
+bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsExecutionContext *executionCtx, bool listAllObjects) const
 {
     os::memory::LockHolder lh(mutex_);
     if (listAllObjects) {
         return !(rejectedPromises_.empty());
     }
-    auto workerId = coro->GetWorker()->GetId();
+    auto workerId = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker()->GetId();
     auto it = rejectedPromises_.find(workerId);
     if (it != rejectedPromises_.end()) {
         return !it->second.empty();
@@ -299,9 +302,10 @@ bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool 
     return false;
 }
 
-static void InvokeErrorHandlerImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro, EtsHandle<EtsObject> &exception)
+static void InvokeErrorHandlerImpl(EtsClassLinker *etsClassLinker, EtsExecutionContext *executionCtx,
+                                   EtsHandle<EtsObject> &exception)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     auto *exceptionClass = exception->GetClass();
     auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
     if (exceptionClass == platformTypes->coreOutOfMemoryError ||
@@ -310,20 +314,20 @@ static void InvokeErrorHandlerImpl(EtsClassLinker *etsClassLinker, EtsCoroutine 
         PROCESS_EXIT(1);
         UNREACHABLE();
     }
-    coro->ClearException();
+    executionCtx->GetMT()->ClearException();
     auto *method = platformTypes->coreStdProcessHandleUncaughtError->GetPandaMethod();
     ASSERT(method != nullptr);
     std::array args = {Value(exception->GetCoreType())};
     LOG(DEBUG, COROUTINES) << "Invoking error handler";
-    method->InvokeVoid(coro, args.data());
+    method->InvokeVoid(executionCtx->GetMT(), args.data());
 }
 
-void UnhandledObjectManager::InvokeErrorHandler(EtsCoroutine *coro, EtsHandle<EtsObject> exception)
+void UnhandledObjectManager::InvokeErrorHandler(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> exception)
 {
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
     ASSERT_MANAGED_CODE();
 
-    InvokeErrorHandlerImpl(vm_->GetClassLinker(), coro, exception);
+    InvokeErrorHandlerImpl(vm_->GetClassLinker(), executionCtx, exception);
 }
 
 }  // namespace ark::ets

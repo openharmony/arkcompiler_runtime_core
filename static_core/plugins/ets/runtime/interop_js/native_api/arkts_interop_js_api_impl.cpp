@@ -15,6 +15,7 @@
 
 #include "arkts_interop_js_api_impl.h"
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "ets_object_state_info.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
@@ -66,12 +67,12 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
         return false;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
+    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetExecutionContext() != executionCtx)) {
         return false;
     }
-    auto ctx = InteropCtx::Current(coro);
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         return false;
     }
@@ -96,7 +97,7 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esvalue, void **res
     ani::ScopedManagedCodeFix s(env);
     auto *jsValueObject = JSValue::FromEtsObject(s.ToInternalType(jsValue));
 
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto jsenv = ctx->GetJSEnv();
     NapiScope jsHandleScope(jsenv);
 
@@ -115,12 +116,12 @@ PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result)
         return false;
     }
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() != coro)) {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    if (UNLIKELY(PandaAniEnv::FromAniEnv(env)->GetExecutionContext() != executionCtx)) {
         return false;
     }
 
-    auto ctx = InteropCtx::Current(coro);
+    auto ctx = InteropCtx::Current(executionCtx);
     if (ctx == nullptr) {
         return false;
     }
@@ -129,24 +130,24 @@ PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result)
     return true;
 }
 
-PANDA_PUBLIC_API bool OpenJSToETSScope(EtsCoroutine *coro, char const *descr)
+PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr)
 {
-    return OpenInteropCodeScope<false>(coro, descr);
+    return OpenInteropCodeScope<false>(executionCtx, descr);
 }
 
-PANDA_PUBLIC_API bool CloseJSToETSScope(EtsCoroutine *coro)
+PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx)
 {
-    return CloseInteropCodeScope<true>(coro);
+    return CloseInteropCodeScope<true>(executionCtx);
 }
 
-PANDA_PUBLIC_API bool OpenETSToJSScope(EtsCoroutine *coro, char const *descr)
+PANDA_PUBLIC_API bool OpenETSToJSScope(EtsExecutionContext *executionCtx, char const *descr)
 {
-    return OpenInteropCodeScope<true>(coro, descr);
+    return OpenInteropCodeScope<true>(executionCtx, descr);
 }
 
-PANDA_PUBLIC_API bool CloseETSToJSScope(EtsCoroutine *coro)
+PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx)
 {
-    return CloseInteropCodeScope<false>(coro);
+    return CloseInteropCodeScope<false>(executionCtx);
 }
 
 static bool CreateAnyRef(ani::ScopedManagedCodeFix &s, JSValue *anyRef, ani_ref *result)
@@ -155,12 +156,13 @@ static bool CreateAnyRef(ani::ScopedManagedCodeFix &s, JSValue *anyRef, ani_ref 
     return s.AddLocalRef(etsObj, result) == ANI_OK;
 }
 
-static bool ConvertNativeReferences(EtsCoroutine *coro, InteropCtx *ctx, Span<napi_value> values, Span<ani_ref> results)
+static bool ConvertNativeReferences(EtsExecutionContext *executionCtx, InteropCtx *ctx, Span<napi_value> values,
+                                    Span<ani_ref> results)
 {
     ASSERT(values.size() == results.size());
 
-    ani::ScopedManagedCodeFix s(coro->GetPandaAniEnv());
-    INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
+    ani::ScopedManagedCodeFix s(executionCtx->GetPandaAniEnv());
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -168,7 +170,7 @@ static bool ConvertNativeReferences(EtsCoroutine *coro, InteropCtx *ctx, Span<na
     for (size_t i = 0, end = values.size(); i < end; ++i) {
         auto optAnyRef = JSConvertJSValue::UnwrapWithNullCheck(ctx, env, values[i]);
         if (UNLIKELY(!optAnyRef || optAnyRef.value() == nullptr)) {
-            ctx->ForwardJSException(coro);
+            ctx->ForwardJSException(executionCtx);
             return false;
         }
         if (UNLIKELY(!CreateAnyRef(s, optAnyRef.value(), &localResults[i]))) {
@@ -183,18 +185,18 @@ static bool CloseJsScopeImpl(napi_env env, Span<napi_value> values, Span<ani_ref
 {
     ASSERT(values.size() == results.size());
 
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *ctx = InteropCtx::Current(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *ctx = InteropCtx::Current(executionCtx);
     if (UNLIKELY(ctx == nullptr || ctx->GetJSEnv() != env)) {
         return false;
     }
 
     if (!values.empty()) {
-        if (UNLIKELY(!ConvertNativeReferences(coro, ctx, values, results))) {
+        if (UNLIKELY(!ConvertNativeReferences(executionCtx, ctx, values, results))) {
             return false;
         }
     }
-    return CloseETSToJSScope(coro);
+    return CloseETSToJSScope(executionCtx);
 }
 
 PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value *values, ani_ref *result)

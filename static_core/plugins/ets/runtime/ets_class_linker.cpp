@@ -16,7 +16,6 @@
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_class.h"
@@ -40,10 +39,16 @@ bool EtsClassLinker::Initialize()
     return true;
 }
 
-bool EtsClassLinker::InitializeClass(EtsCoroutine *coroutine, EtsClass *klass)
+bool EtsClassLinker::InitializeClass(EtsExecutionContext *executionCtx, EtsClass *klass)
 {
     ASSERT(klass != nullptr);
-    return classLinker_->InitializeClass(coroutine, klass->GetRuntimeClass());
+    return classLinker_->InitializeClass(executionCtx->GetMT(), klass->GetRuntimeClass());
+}
+
+bool EtsClassLinker::InitializeClass(ManagedThread *mThread, EtsClass *klass)
+{
+    ASSERT(klass != nullptr);
+    return classLinker_->InitializeClass(mThread, klass->GetRuntimeClass());
 }
 
 EtsClass *EtsClassLinker::GetClassRoot(EtsClassRoot root) const
@@ -72,7 +77,7 @@ Method *EtsClassLinker::GetMethod(const panda_file::File &pf, panda_file::File::
     return classLinker_->GetMethod(pf, id, classLinkerContext, errorHandler);
 }
 
-Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine)
+Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsExecutionContext *executionCtx)
 {
     ASSERT(method != nullptr);
     panda_file::File::EntityId asyncAnnId = EtsAnnotation::FindAsyncAnnotation(method);
@@ -86,7 +91,7 @@ Method *EtsClassLinker::GetAsyncImplMethod(Method *method, EtsCoroutine *corouti
         panda_file::MethodDataAccessor mda(pf, implMethodId);
         PandaStringStream out;
         out << "Cannot resolve async method " << mda.GetFullName();
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreLinkerUnresolvedMethodError, out.str());
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreLinkerUnresolvedMethodError, out.str());
     }
     return result;
 }

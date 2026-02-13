@@ -15,10 +15,11 @@
 
 #include "plugins/ets/runtime/ani/ani_helpers.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
+#include "runtime/execution/job_launch.h"
 #include "libarkfile/shorty_iterator.h"
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -151,11 +152,12 @@ extern "C" uint32_t AniCalcStackArgsSpaceSize(Method *method, bool isCritical)
     return counter.GetStackSpaceSize();
 }
 
-static void ThrowUnresolvedMethodException(Method *method, EtsCoroutine *coroutine)
+static void ThrowUnresolvedMethodException(Method *method, ManagedThread *thread)
 {
     PandaStringStream ss;
     ss << "No implementation found for " << method->GetFullName();
-    ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreLinkerUnresolvedMethodError, ss.str());
+    ThrowEtsException(EtsExecutionContext::FromMT(thread), PlatformTypes(thread)->coreLinkerUnresolvedMethodError,
+                      ss.str());
 }
 
 // Disable warning because the function uses ARCH_COPY_METHOD_ARGS macro.
@@ -200,7 +202,7 @@ extern "C" void AniBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_t *i
     argReader.Read<Method *>();  // Skip method
 
     if (UNLIKELY(method->GetNativePointer() == nullptr)) {
-        ThrowUnresolvedMethodException(method, EtsCoroutine::CastFromThread(thread));
+        ThrowUnresolvedMethodException(method, thread);
     }
 
     ARCH_COPY_METHOD_ARGS(method, argReader, argWriter);
@@ -322,8 +324,7 @@ extern "C" uint8_t *AniBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inSta
     ASSERT(!method->IsSynchronized());
     ASSERT(thread == ManagedThread::GetCurrent());
 
-    auto *coroutine = EtsCoroutine::CastFromThread(thread);
-    auto *pandaEnv = coroutine->GetPandaAniEnv();
+    PandaAniEnv *pandaEnv = EtsExecutionContext::FromMT(thread)->GetPandaAniEnv();
     ani_env *argEnv = pandaEnv->IsVerifyANI() ? static_cast<ani_env *>(pandaEnv->GetEnvANIVerifier()->GetEnv())
                                               : static_cast<ani_env *>(pandaEnv);
     uint8_t *outRegsArgs = PrepareArgsOnStack(method, inRegsArgs, inStackArgs, outStackArgs, argEnv);
@@ -334,7 +335,7 @@ extern "C" uint8_t *AniBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inSta
     // (e.g. stop at a safepoint and walk the stack args of NAPI frame)
 
     if (UNLIKELY(method->GetNativePointer() == nullptr)) {
-        ThrowUnresolvedMethodException(method, coroutine);
+        ThrowUnresolvedMethodException(method, thread);
     }
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodEntryEvent(thread, method);
@@ -356,8 +357,8 @@ extern "C" uint8_t *AniBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inSta
 extern "C" uint8_t *AniBeginVerify(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
                                    ManagedThread *thread)
 {
-    auto *coroutine = EtsCoroutine::CastFromThread(thread);
-    auto *pandaEnv = coroutine->GetPandaAniEnv();
+    auto *executionCtx = EtsExecutionContext::FromMT(thread);
+    auto *pandaEnv = executionCtx->GetPandaAniEnv();
     auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
     envANIVerifier->PushNativeFrame(pandaEnv);
     return AniBegin(method, inRegsArgs, inStackArgs, outStackArgs, thread);
@@ -381,17 +382,16 @@ extern "C" void AniEnd(Method *method, ManagedThread *thread, bool isFastNative)
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
-    auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto storage = EtsExecutionContext::FromMT(thread)->GetPandaAniEnv()->GetEtsReferenceStorage();
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
 extern "C" void AniEndVerify(Method *method, ManagedThread *thread, bool isFastNative)
 {
-    auto coroutine = EtsCoroutine::CastFromThread(thread);
+    auto executionCtx = EtsExecutionContext::FromMT(thread);
 
     // Pop native frame verification before ending the native method
-    auto envANIVerifier = coroutine->GetPandaAniEnv()->GetEnvANIVerifier();
+    auto envANIVerifier = executionCtx->GetPandaAniEnv()->GetEnvANIVerifier();
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
@@ -413,10 +413,9 @@ extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThr
 
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
-    auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
+    auto storage = EtsExecutionContext::FromMT(thread)->GetPandaAniEnv()->GetEtsReferenceStorage();
     EtsObject *ret = nullptr;
-    if (LIKELY(!coroutine->HasPendingException())) {
+    if (LIKELY(!thread->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef);
     }
 
@@ -427,13 +426,13 @@ extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThr
 
 extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef vref, ManagedThread *thread, bool isFastNative)
 {
-    auto coroutine = EtsCoroutine::CastFromThread(thread);
+    auto *executionCtx = EtsExecutionContext::FromMT(thread);
     ani_ref ref = vref.GetRef();
     auto etsRef = reinterpret_cast<EtsReference *>(ref);
 
     EtsObject *obj = AniObjEnd(method, etsRef, thread, isFastNative);
     // Pop native frame verification before ending the native method
-    auto envANIVerifier = coroutine->GetPandaAniEnv()->GetEnvANIVerifier();
+    auto envANIVerifier = executionCtx->GetPandaAniEnv()->GetEnvANIVerifier();
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
@@ -459,17 +458,18 @@ extern "C" bool IsEtsMethodFastNative(Method *method)
 extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentCoro, uint8_t *regArgs,
                                           uint8_t *stackArgs)
 {
-    PandaEtsVM *vm = currentCoro->GetPandaVM();
-    auto *coroManager = currentCoro->GetCoroutineManager();
-    Method *impl = vm->GetClassLinker()->GetAsyncImplMethod(method, currentCoro);
+    EtsExecutionContext *executionCtx = EtsExecutionContext::FromMT(currentCoro);
+    PandaEtsVM *vm = executionCtx->GetPandaVM();
+    auto *jobMan = vm->GetJobManager();
+    Method *impl = vm->GetClassLinker()->GetAsyncImplMethod(method, executionCtx);
     if (impl == nullptr) {
         ASSERT(currentCoro->HasPendingException());
         // Exception is thrown by GetAsyncImplMethod
         return 0;
     }
     ASSERT(!currentCoro->HasPendingException());
-    if (coroManager->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(currentCoro, PlatformTypes(currentCoro)->coreInvalidCoroutineOperationError,
+    if (jobMan->IsJobSwitchDisabled()) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot call async in the current context!");
         return 0;
     }
@@ -492,13 +492,13 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     // Create object after arg fix ^^^.
     // Arg fix is needed for StackWalker. So if GC gets triggered in EtsPromise::Create
     // it StackWalker correctly finds all vregs.
-    EtsPromise *promise = EtsPromise::Create(currentCoro);
+    EtsPromise *promise = EtsPromise::Create(executionCtx);
     if (UNLIKELY(promise == nullptr)) {
         ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
         return 0;
     }
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
 
     // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
     if (!method->IsStatic()) {
@@ -509,17 +509,17 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     arch::ValueWriter writer(&args);
     ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
-    EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
-    LaunchResult launchResult = coroManager->LaunchImmediately(
-        evt, impl, std::move(args),
-        ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),
-        EtsCoroutine::ASYNC_CALL, false);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> promiseHandle(executionCtx, promise);
+
+    auto epInfo = Job::ManagedEntrypointInfo {evt, impl, std::move(args)};
+    auto *job = jobMan->CreateJob(impl->GetFullName(), std::move(epInfo), EtsCoroutine::ASYNC_CALL);
+    LaunchResult launchResult = jobMan->Launch(job, LaunchParams {true});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
-        if (launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED) {
-            Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
+        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
+            jobMan->DestroyJob(job);
         }
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
         return 0;

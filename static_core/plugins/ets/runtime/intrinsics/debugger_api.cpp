@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "include/tooling/debug_interface.h"
+#include "include/tooling/vreg_value.h"
+#include "intrinsics.h"
 #include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -25,11 +29,11 @@
 
 namespace ark::ets::intrinsics {
 
-static void SetRuntimeException(EtsLong regNumber, EtsCoroutine *coroutine, std::string_view typeName)
+static void SetRuntimeException(EtsLong regNumber, EtsExecutionContext *executionCtx, std::string_view typeName)
 {
     auto errorMsg =
         "Failed to access variable at vreg #" + std::to_string(regNumber) + " and type " + std::string(typeName);
-    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, errorMsg);
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, errorMsg);
 }
 
 template <typename T>
@@ -37,24 +41,24 @@ static T DebuggerAPIGetLocal(EtsLong regNumber)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    auto *runtime = coroutine->GetPandaVM()->GetRuntime();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "Debugger is not enabled");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
         return static_cast<T>(0);
     }
     if (UNLIKELY(regNumber < 0)) {
-        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
         return static_cast<T>(0);
     }
 
     ark::tooling::VRegValue vregValue;
     auto &debugger = runtime->StartDebugSession()->GetDebugger();
-    auto err = debugger.GetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
-                                    &vregValue);
+    auto err = debugger.GetVariable(ark::ets::tooling::CoroutineToPtThread(executionCtx->GetMT()), PREVIOUS_FRAME_DEPTH,
+                                    regNumber, &vregValue);
     if (err) {
         LOG(ERROR, DEBUGGER) << "Failed to get local variable: " << err.value().GetMessage();
-        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
         return static_cast<T>(0);
     }
     return ark::ets::tooling::VRegValueToEtsValue<T>(vregValue);
@@ -110,24 +114,24 @@ static void DebuggerAPISetLocal(EtsLong regNumber, T value)
 {
     static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    auto *runtime = coroutine->GetPandaVM()->GetRuntime();
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *runtime = executionCtx->GetPandaVM()->GetRuntime();
     if (UNLIKELY(!runtime->IsDebugMode())) {
-        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "Debugger is not enabled");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
         return;
     }
     if (UNLIKELY(regNumber < 0)) {
-        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
         return;
     }
 
     auto vregValue = ark::ets::tooling::EtsValueToVRegValue<T>(value);
     auto &debugger = runtime->StartDebugSession()->GetDebugger();
-    auto err = debugger.SetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
-                                    vregValue);
+    auto err = debugger.SetVariable(ark::ets::tooling::CoroutineToPtThread(executionCtx->GetMT()), PREVIOUS_FRAME_DEPTH,
+                                    regNumber, vregValue);
     if (err) {
         LOG(ERROR, DEBUGGER) << "Failed to set local variable: " << err.value().GetMessage();
-        SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
     }
 }
 

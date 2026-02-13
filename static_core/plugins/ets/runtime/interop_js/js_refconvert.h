@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_H_
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -163,10 +164,10 @@ inline bool CheckClassInitialized(Class *klass)
     ASSERT(klass != nullptr);
     if constexpr (ALLOW_INIT) {
         if (UNLIKELY(!klass->IsInitialized())) {
-            auto coro = EtsCoroutine::GetCurrent();
-            ASSERT(coro != nullptr);
-            auto classLinker = coro->GetPandaVM()->GetClassLinker();
-            if (!classLinker->InitializeClass(coro, EtsClass::FromRuntimeClass(klass))) {
+            auto executionCtx = EtsExecutionContext::GetCurrent();
+            ASSERT(executionCtx != nullptr);
+            auto classLinker = executionCtx->GetPandaVM()->GetClassLinker();
+            if (!classLinker->InitializeClass(executionCtx, EtsClass::FromRuntimeClass(klass))) {
                 INTEROP_LOG(ERROR) << "Class " << klass->GetDescriptor() << " cannot be initialized";
                 return false;
             }

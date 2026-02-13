@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 
 namespace ark::ets {
 
-class EtsCoroutine;
+class EtsExecutionContext;
 
 namespace interop::js {
 
@@ -33,7 +33,7 @@ namespace interop::js {
  * @param mainCoro The main coroutine instance
  * @param napiEnv The napi_env for the main JSVM instance
  */
-PANDA_PUBLIC_API bool CreateMainInteropContext(ark::ets::EtsCoroutine *mainCoro, void *napiEnv);
+PANDA_PUBLIC_API bool CreateMainInteropContext(ark::ets::EtsExecutionContext *mainCoro, void *napiEnv);
 
 }  // namespace interop::js
 

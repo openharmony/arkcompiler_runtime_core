@@ -48,8 +48,8 @@ static void *GetNativeData(T *array)
 {
     auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*array->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "ArrayBuffer was detached");
+        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "ArrayBuffer was detached");
         return nullptr;
     }
     return arrayBuffer->GetData();
@@ -71,8 +71,8 @@ static void EtsCoreTypedArraySet(T *thisArray, EtsInt pos, typename T::ElementTy
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "invalid index");
+        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "invalid index");
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -97,8 +97,8 @@ typename T::ElementType EtsCoreTypedArrayGet(T *thisArray, EtsInt pos)
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "invalid index");
+        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "invalid index");
         return 0;
     }
     /**
@@ -205,8 +205,8 @@ static void EtsCoreTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt pos
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
+        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -266,7 +266,7 @@ class ArrayElement<T, std::enable_if_t<std::is_integral_v<typename T::ElementTyp
 public:
     using Type = typename T::ElementType;
 
-    ArrayElement() : coreIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreInt) {}
+    ArrayElement() : coreIntClass_(PlatformTypes(EtsExecutionContext::GetCurrent())->coreInt) {}
 
     std::optional<Type> GetTyped(EtsObject *object) const
     {
@@ -297,7 +297,7 @@ class ArrayElement<T, std::enable_if_t<std::is_floating_point_v<typename T::Elem
 public:
     using Type = typename T::ElementType;
 
-    ArrayElement() : coreDoubleClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreDouble) {}
+    ArrayElement() : coreDoubleClass_(PlatformTypes(EtsExecutionContext::GetCurrent())->coreDouble) {}
 
     std::optional<Type> GetTyped(EtsObject *object) const
     {
@@ -355,7 +355,7 @@ class BigInt64ArrayElement {
 public:
     using Type = typename ArrayType::ElementType;
 
-    BigInt64ArrayElement() : stdCoreBigIntClass_(PlatformTypes(EtsCoroutine::GetCurrent())->coreBigInt) {}
+    BigInt64ArrayElement() : stdCoreBigIntClass_(PlatformTypes(EtsExecutionContext::GetCurrent())->coreBigInt) {}
 
     std::optional<Type> GetTyped(EtsObject *object) const
     {
@@ -417,8 +417,8 @@ static void EtsCoreTypedArraySetValuesFromFixedArray(T *thisArray, void *dstData
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(actualLength > static_cast<uint32_t>(thisArray->GetLengthInt()))) {
-        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
+        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
         return;
     }
 
@@ -439,48 +439,48 @@ static void EtsCoreTypedArraySetValuesFromFixedArray(T *thisArray, void *dstData
 /// Slow path, because methods of `srcArray` might be overriden
 template <typename T>
 static void EtsCoreTypedArraySetValuesFromArraySlowPath(T *thisArray, void *dstData, EtsEscompatArray *srcArray,
-                                                        EtsCoroutine *coro)
+                                                        EtsExecutionContext *executionCtx)
 {
     using ElementType = typename T::ElementType;
 
     ASSERT(thisArray != nullptr);
     ASSERT(srcArray != nullptr);
-    ASSERT(coro != nullptr);
+    ASSERT(executionCtx != nullptr);
 
     EtsInt thisArrayLengthInt = thisArray->GetLengthInt();
     EtsInt offset = thisArray->GetByteOffset();
 
-    EtsHandleScope scope(coro);
-    EtsHandle<EtsEscompatArray> srcArrayHandle(coro, srcArray);
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsEscompatArray> srcArrayHandle(executionCtx, srcArray);
 
     EtsInt actualLength = 0;
-    if (UNLIKELY(!srcArrayHandle->GetLength(coro, &actualLength))) {
-        ASSERT(coro->HasPendingException());
+    if (UNLIKELY(!srcArrayHandle->GetLength(executionCtx, &actualLength))) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(actualLength < 0 || actualLength > thisArrayLengthInt)) {
-        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
         return;
     }
 
     const auto arrayElement = unbox::ArrayElement<T>();
     for (size_t i = 0; i < static_cast<size_t>(actualLength); ++i) {
-        auto optElement = srcArrayHandle->GetRef(coro, i);
+        auto optElement = srcArrayHandle->GetRef(executionCtx, i);
         if (UNLIKELY(!optElement)) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             return;
         }
         if (UNLIKELY(*optElement == nullptr)) {
             PandaStringStream ss;
             ss << "element at index " << i << " is undefined";
-            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError, ss.str());
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError, ss.str());
             return;
         }
         const auto val = arrayElement.GetTyped(*optElement);
         if (!val.has_value()) {
-            ASSERT(coro->HasPendingException());
+            ASSERT(executionCtx->GetMT()->HasPendingException());
             break;
         }
         ObjectAccessor::SetPrimitive(dstData, offset, *val);
@@ -499,13 +499,13 @@ static void EtsCoreTypedArraySetValuesFromArrayImpl(T *thisArray, EtsEscompatArr
         return;
     }
 
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    if (LIKELY(srcArray->IsExactlyEscompatArray(coro))) {
+    EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
+    if (LIKELY(srcArray->IsExactlyEscompatArray(executionCtx))) {
         // Fast path in case of `srcArray` being exactly `std.core.Array`
         EtsCoreTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromEscompatArray(),
                                                  srcArray->GetActualLengthFromEscompatArray());
     } else {
-        EtsCoreTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, coro);
+        EtsCoreTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, executionCtx);
     }
 }
 
@@ -1210,10 +1210,10 @@ T *EtsCoreTypedArraySortWrapper(T *thisArray, bool withNaN = false)
 
     auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*thisArray->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope scope(coro);
-        EtsHandle<EtsObject> handle(coro, thisArray);
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "ArrayBuffer was detached");
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        EtsHandle<EtsObject> handle(executionCtx, thisArray);
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError, "ArrayBuffer was detached");
         return static_cast<T *>(handle.GetPtr());
     }
     void *dataPtr = arrayBuffer->GetData();

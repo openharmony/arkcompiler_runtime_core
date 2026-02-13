@@ -21,15 +21,14 @@ add_custom_target(ets_test_suite_coroutines)
 #                         [SKIP_ARM32_COMPILER]
 #                         [LIST_UNHANDLED]
 #                         [OPTIONS "--gc-type=epsilon"]
-#                         IMPL "THREADED" "STACKFUL"
-#                         OPTION_SETS_THREADED "DEFAULT"
+#                         IMPL "STACKFUL"
 #                         OPTION_SETS_STACKFUL "DEFAULT" "POOL" "MIGRATE_AWAKENED" "MIGRATION"
 #                         WORKERS "AUTO" "ONE" "THREE"
 #                         MODE "INT" "JIT" "AOT" "LLVMAOT" "JITOSR"
 # )
-# This funciont will create a number of tests as a cartesian product of IMPL, OPTION_SETS_${IMPL}, WORKERS, and MODES, e.g.
-#                         THREADED DEFAULT AUTO INT
-#                         THREADED DEFAULT AUTO JIT
+# This funcion will create a number of tests as a cartesian product of IMPL, OPTION_SETS_${IMPL}, WORKERS, and MODES, e.g.
+#                         STACKFUL DEFAULT AUTO INT
+#                         STACKFUL DEFAULT AUTO JIT
 #                         ...
 #                         STACKFUL ONE JITOSR
 #
@@ -38,7 +37,6 @@ function(add_ets_coroutines_test)
     set(prefix ARG)
     set(noValues SKIP_ARM32_COMPILER LIST_UNHANDLED)
     set(singleValues FILE)
-    set(multiValues OPTIONS IMPL OPTION_SETS_THREADED OPTION_SETS_STACKFUL WORKERS MODE)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     # NOTE(26403) Profilesaver is turned off beause of integer overflow
@@ -169,18 +167,9 @@ add_ets_coroutines_test(FILE launch_instruction.ets
 
 add_ets_coroutines_test(FILE launch_instruction.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
-                        MODE "INT" "JIT"
-)
-
-add_ets_coroutines_test(FILE await.ets
-                        SKIP_ARM32_COMPILER
-                        IMPL "THREADED"
-                        OPTION_SETS_THREADED "DEFAULT"
-                        WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
 )
 
@@ -211,8 +200,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE launch_exception.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
+                            IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
@@ -220,8 +208,6 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE launch_instr_array.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "STACKFUL" "THREADED"
-                            OPTION_SETS_THREADED "DEFAULT"
                             OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
@@ -237,8 +223,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE class_load_race.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
+                            IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT" "POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
@@ -313,8 +298,7 @@ if (NOT PANDA_TARGET_ARM32)
     # Depends on issue 12886
     add_ets_coroutines_test(FILE multiple_launch.ets
                             SKIP_ARM32_COMPILER
-                            IMPL "THREADED" "STACKFUL"
-                            OPTION_SETS_THREADED "DEFAULT"
+                            IMPL "STACKFUL"
                             OPTION_SETS_STACKFUL "DEFAULT" "NO_POOL"
                             WORKERS "AUTO" "ONE"
                             MODE "INT" "JIT"
@@ -338,8 +322,7 @@ if (NOT PANDA_TARGET_ARM32)
 
     add_ets_coroutines_test(FILE concurrent_await.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL"
                         WORKERS "AUTO" "ONE"
                         MODE "INT" "JIT"
     )
@@ -366,7 +349,6 @@ add_ets_coroutines_test(FILE eworker_id.ets
 add_ets_coroutines_test(FILE launch_return.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL" # Issue 24058
-                        OPTION_SETS_THREADED "DEFAULT"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT"
@@ -374,8 +356,7 @@ add_ets_coroutines_test(FILE launch_return.ets
 
 add_ets_coroutines_test(FILE launch_yield.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_THREADED "DEFAULT"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "ONE"
                         MODE "INT" "JIT" "AOT"
@@ -399,7 +380,7 @@ add_ets_coroutines_test(FILE affinity.ets
 
 add_ets_coroutines_test(FILE wake_for_another_event.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
@@ -407,7 +388,7 @@ add_ets_coroutines_test(FILE wake_for_another_event.ets
 
 add_ets_coroutines_test(FILE await_standalone_promise.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
@@ -447,7 +428,7 @@ add_ets_coroutines_test(FILE eworker_interop_exception.ets
 
 add_ets_coroutines_test(FILE launch.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
@@ -512,7 +493,7 @@ add_ets_coroutines_test(FILE eworker_parameter.ets
 
 add_ets_coroutines_test(FILE await_async_return_reject_promise.ets
                         SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
+                        IMPL "STACKFUL"
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
@@ -540,6 +521,14 @@ add_ets_coroutines_test(FILE sync_primitives.ets
                         OPTION_SETS_STACKFUL "DEFAULT"
                         WORKERS "AUTO"
                         MODE "INT"
+)
+
+add_ets_coroutines_test(FILE legacy_atomics_wait_notify.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "THREE"
+                        MODE "INT" "JIT" "AOT"
 )
 
 add_subdirectory(dfx)

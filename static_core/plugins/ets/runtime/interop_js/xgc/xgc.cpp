@@ -169,10 +169,10 @@ bool XGC::Destroy()
     if (instance_ == nullptr) {
         return false;
     }
-    auto *mainCoro = EtsCoroutine::GetCurrent();
-    ASSERT(mainCoro != nullptr);
-    ASSERT(mainCoro == mainCoro->GetCoroutineManager()->GetMainThread());
-    mainCoro->GetPandaVM()->GetGC()->RemoveListener(instance_);
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    ASSERT(executionCtx == executionCtx->GetManager()->GetMainThread());
+    EtsExecutionContext::FromMT(executionCtx)->GetPandaVM()->GetGC()->RemoveListener(instance_);
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     allocator->Delete(instance_);
     instance_ = nullptr;
@@ -389,8 +389,8 @@ bool XGC::Trigger([[maybe_unused]] mem::GC *gc, [[maybe_unused]] PandaUniquePtr<
     ASSERT_MANAGED_CODE();
     LOG(DEBUG, GC_TRIGGER) << "Trigger XGC. Current storage size = " << storage_->Size();
     // NOTE(ipetrov, #20146): Iterate over all contexts
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *ctx = InteropCtx::Current(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    auto *ctx = InteropCtx::Current(executionCtx);
     ASSERT(ctx != nullptr);
     // NOTE(audovichenko): Handle the situation when the function create several equal tasks
     // NOTE(audovichenko): Handle the situation when GC is triggered in one VM but cannot be triggered in another VM.

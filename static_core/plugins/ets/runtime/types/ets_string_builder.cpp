@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "include/coretypes/string.h"
 #include "libarkbase/utils/utils.h"
 #include "libarkbase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
 #include "runtime/include/runtime.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -88,9 +88,9 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
 
     // Check the case of the buf overflow
     if (index >= buf->GetLength()) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        EtsHandle<EtsCharArray> arrHandle(coroutine, arr);
-        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        EtsHandle<EtsCharArray> arrHandle(executionCtx, arr);
+        EtsHandle<EtsObjectArray> bufHandle(executionCtx, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
         if (buf == nullptr) {
@@ -245,10 +245,10 @@ VMHandle<EtsObject> &StringBuilderAppendNullString(VMHandle<EtsObject> &sbHandle
 
 ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
     VMHandle<EtsObject> sbAppendNullStringHandle = StringBuilderAppendNullString(sbHandle);
     ASSERT(sbAppendNullStringHandle.GetPtr() != nullptr);
 
@@ -286,8 +286,8 @@ VMHandle<EtsObject> &StringBuilderAppendString(VMHandle<EtsObject> &sbHandle, Et
     auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
     // Check buf overflow
     if (index >= buf->GetLength()) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(executionCtx, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
         if (buf == nullptr) {
@@ -317,11 +317,11 @@ VMHandle<EtsObject> &StringBuilderAppendString(VMHandle<EtsObject> &sbHandle, Et
 
 ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
-    EtsHandle<EtsString> strHandle(coroutine, str);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
+    EtsHandle<EtsString> strHandle(executionCtx, str);
 
     return StringBuilderAppendString(sbHandle, strHandle)->GetCoreType();
 }
@@ -340,8 +340,8 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 1U >= buf->GetLength()) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(executionCtx, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 2U));
         if (buf == nullptr) {
@@ -405,12 +405,12 @@ VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, E
 
 ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
-    EtsHandle<EtsString> str0Handle(coroutine, str0);
-    EtsHandle<EtsString> str1Handle(coroutine, str1);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
+    EtsHandle<EtsString> str0Handle(executionCtx, str0);
+    EtsHandle<EtsString> str1Handle(executionCtx, str1);
 
     return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle)->GetCoreType();
 }
@@ -431,8 +431,8 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     // Check buf overflow
     ASSERT(buf != nullptr);
     if (index + 2U >= buf->GetLength()) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(executionCtx, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 3U));
         if (buf == nullptr) {
@@ -509,13 +509,13 @@ VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, E
 
 ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
-    EtsHandle<EtsString> str0Handle(coroutine, str0);
-    EtsHandle<EtsString> str1Handle(coroutine, str1);
-    EtsHandle<EtsString> str2Handle(coroutine, str2);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
+    EtsHandle<EtsString> str0Handle(executionCtx, str0);
+    EtsHandle<EtsString> str1Handle(executionCtx, str1);
+    EtsHandle<EtsString> str2Handle(executionCtx, str2);
 
     return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle)->GetCoreType();
 }
@@ -538,8 +538,8 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     ASSERT(buf != nullptr);
     // Check buf overflow
     if (index + 3U >= buf->GetLength()) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(executionCtx, buf);
         // May trigger GC
         buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 4U));
         if (buf == nullptr) {
@@ -633,14 +633,14 @@ VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, E
 ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2,
                                          EtsString *str3)
 {
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
-    EtsHandle<EtsString> str0Handle(coroutine, str0);
-    EtsHandle<EtsString> str1Handle(coroutine, str1);
-    EtsHandle<EtsString> str2Handle(coroutine, str2);
-    EtsHandle<EtsString> str3Handle(coroutine, str3);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
+    EtsHandle<EtsString> str0Handle(executionCtx, str0);
+    EtsHandle<EtsString> str1Handle(executionCtx, str1);
+    EtsHandle<EtsString> str2Handle(executionCtx, str2);
+    EtsHandle<EtsString> str3Handle(executionCtx, str3);
 
     return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle, str3Handle)->GetCoreType();
 }
@@ -649,9 +649,9 @@ ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
 {
     ASSERT(sb != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
 
     // May trigger GC
     auto *arr = CharToCharArray(v);
@@ -662,9 +662,9 @@ ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v)
 {
     ASSERT(sb != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
 
     // May trigger GC
     auto *arr = BoolToCharArray(v);
@@ -675,9 +675,9 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 {
     ASSERT(sb != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
 
     // May trigger GC
     auto *cache = ManagedThread::GetCurrent()->GetLongToStringCache();
@@ -685,7 +685,7 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
         auto *str = LongToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = LongToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
@@ -707,16 +707,16 @@ ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
 {
     ASSERT(sb != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
 
     auto *cache = ManagedThread::GetCurrent()->GetFloatToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         auto *str = FloatToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
@@ -724,16 +724,16 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
 {
     ASSERT(sb != nullptr);
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
 
     auto *cache = ManagedThread::GetCurrent()->GetDoubleToStringCache();
     if (UNLIKELY(cache == nullptr)) {
         auto *str = DoubleToStringCache::GetNoCache(v);
         return StringBuilderAppendString(sbHandle->GetCoreType(), str);
     }
-    auto *str = DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    auto *str = DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), v);
     return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
@@ -746,15 +746,15 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
         return EtsString::CreateNewEmptyString();
     }
 
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    VMHandle<EtsObject> sbHandle(executionCtx->GetMT(), sb);
     ASSERT(sbHandle.GetPtr() != nullptr);
 
     auto index = sbHandle->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto compress = sbHandle->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);
     EtsString *s = EtsString::AllocateNonInitializedString(length, compress);
-    if (UNLIKELY(coroutine->HasPendingException())) {
+    if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
         ASSERT(s == nullptr);
         return nullptr;
     }

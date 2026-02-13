@@ -17,6 +17,7 @@
 
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 
 namespace ark::ets::ani::verify {
 
@@ -32,11 +33,11 @@ VEnv *VEnv::GetCurrent()
     if (Mutator::GetCurrent() == nullptr) {
         return nullptr;
     }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    if (coro == nullptr) {
+    auto *execCtx = EtsExecutionContext::GetCurrent();
+    if (execCtx == nullptr) {
         return nullptr;
     }
-    auto venv = coro->GetPandaAniEnv()->GetEnvANIVerifier()->GetEnv();
+    auto venv = execCtx->GetPandaAniEnv()->GetEnvANIVerifier()->GetEnv();
     return venv;
 }
 

@@ -151,7 +151,7 @@ WorkStatus DeleteAsyncWork(ani_env *env, AsyncWork *work)
 
 /**
  * @brief ANI helper to execute job on specific worker
- * @param[in] env current coro env
+ * @param[in] env current execution context env
  * @param[in] worker target worker id
  * @param[in] event function to call
  * @param[in] data pointer to additional data to use in event

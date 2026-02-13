@@ -19,7 +19,6 @@
 #include "include/object_accessor.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 
 #include <cstdint>
 
@@ -75,13 +74,14 @@ public:
     }
 
     /// Creates ArrayBuffer with managed buffer.
-    static EtsStdCoreArrayBuffer *Create(EtsCoroutine *coro, size_t length);
-    static EtsStdCoreArrayBuffer *CreateNonMovable(EtsCoroutine *coro, size_t length, void **resultData);
+    static EtsStdCoreArrayBuffer *Create(EtsExecutionContext *executionCtx, size_t length);
+    static EtsStdCoreArrayBuffer *CreateNonMovable(EtsExecutionContext *executionCtx, size_t length, void **resultData);
 
-    static bool IsNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self);
+    static bool IsNonMovableArray(EtsExecutionContext *executionCtx, EtsStdCoreArrayBuffer *self);
     static bool IsNativeArray(EtsStdCoreArrayBuffer *self);
 
-    static void ReallocateNonMovableArray(EtsCoroutine *coro, EtsStdCoreArrayBuffer *self, EtsInt bytesLen);
+    static void ReallocateNonMovableArray(EtsExecutionContext *executionCtx, EtsStdCoreArrayBuffer *self,
+                                          EtsInt bytesLen);
 
     EtsObject *AsObject()
     {
@@ -146,7 +146,7 @@ public:
     }
 
     /// Initializes ArrayBuffer with its own non-movable array
-    void Initialize(EtsCoroutine *coro, size_t length, EtsByteArray *array);
+    void Initialize(EtsExecutionContext *executionCtx, size_t length, EtsByteArray *array);
 
     template <typename T>
     T GetElement(uint32_t index, uint32_t offset);

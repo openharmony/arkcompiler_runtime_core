@@ -18,29 +18,31 @@ import { launch } from 'std/concurrency'
 let s = new ArrayBuffer(4);
 let arr = new Int32Array(s, 0, 1);
 
-function testMain() {
-    let consumerJob = launch(consumer)
+async function testMain() {
+    let consumerWorker = new EAWorker();
+    let producerWorker = new EAWorker();
+    consumerWorker.start();
+    producerWorker.start();
+    let consumerJob = consumerWorker.run<Int>(consumer)
     heavyComputation()
-    let producerJob = launch(producer)
+    let producerJob = producerWorker.run<Int>(producer)
 
     producerJob.Await();
     consumerJob.Await();
+    consumerWorker.join();
+    producerWorker.join();
 }
 
 function producer(): Int {
     for (let i = 1; i < 10; i++) {
-        console.log('sending ' + i)
         send(i)
-        console.log("sent " + i)
     }
     return 1
 }
 
 function consumer(): Int {
     for (let i = 1; i < 10; i++) {
-        console.log('receiving')
         let x = read()
-        console.log('received ' + x)
         arktest.assertEQ(x, i)
     }
     return 1
@@ -66,10 +68,9 @@ function read(): int {
     try {
         while (true) {
             let value = Atomics.exchange(arr, 0, 0)
-            // console.println("read value " + value)
             if (value != 0) {
                 Atomics.notify(arr, 0)
-                return value
+                return value.toInt();
             }
             Atomics.wait(arr, 0, 0)
         }
@@ -90,6 +91,6 @@ function heavyComputation(): Int {
 
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics skipped_rendezvous_channel tests')
-    suite.addTest('Function testMain', testMain)
+    suite.addAsyncTest('Function testMain', testMain)
     return suite.run()
 }

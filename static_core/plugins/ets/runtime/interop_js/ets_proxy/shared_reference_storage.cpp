@@ -127,7 +127,7 @@ template <bool NEED_ADD_NATIVE_SCOPE>
 SharedReference *SharedReferenceStorage::GetReference(napi_env env, napi_value jsObject) const
 {
     if constexpr (NEED_ADD_NATIVE_SCOPE) {
-        ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
+        ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
         return GetReferenceImpl(env, jsObject);
     } else {
         ASSERT_SCOPED_NATIVE_CODE();
@@ -183,7 +183,7 @@ napi_value SharedReferenceStorage::GetJsObject(EtsObject *etsObject, napi_env en
         if (currentRef->ctx_->GetXGCVmAdaptor()->HasSameEnv(env)) {
             auto ref = currentRef->jsRef_;
             storageLock_.Unlock();
-            ScopedNativeCodeThreadIfNeeded s(EtsCoroutine::GetCurrent());
+            ScopedNativeCodeThreadIfNeeded s(ManagedThread::GetCurrent());
             napi_value jsValue;
             NAPI_CHECK_FATAL(napi_get_reference_value(env, ref, &jsValue));
             return jsValue;
@@ -213,9 +213,10 @@ bool SharedReferenceStorage::HasReferenceWithCtx(SharedReference *ref, InteropCt
 #if defined(PANDA_JS_ETS_HYBRID_MODE) || defined(PANDA_TARGET_OHOS)
 static napi_value WrapEtsObject(InteropCtx *ctx, ets_proxy::SharedReference *ref)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    EtsHandleScope scope(coro);
-    EtsHandle<EtsObject> etsObject(coro, ref->GetEtsObject());
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> etsObject(executionCtx, ref->GetEtsObject());
     auto klass = etsObject->GetClass()->GetRuntimeClass();
     JSRefConvert *refConv = JSRefConvertResolve<true>(ctx, klass);
     napi_value res = refConv->Wrap(ctx, etsObject.GetPtr());
@@ -224,16 +225,16 @@ static napi_value WrapEtsObject(InteropCtx *ctx, ets_proxy::SharedReference *ref
 
 static napi_value ProxObjectAttachCb([[maybe_unused]] napi_env env, void *data)
 {
-    auto *coro = Coroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    auto *ctx = InteropCtx::Current(coro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *ctx = InteropCtx::Current(executionCtx);
     ASSERT(ctx != nullptr);
     auto *ref = AtomicLoad(static_cast<ets_proxy::SharedReference **>(data), std::memory_order_acquire);
-    if (coro->IsManagedCode()) {
+    if (executionCtx->GetMT()->IsManagedCode()) {
         // TaskPool and EWorker call napi_deserialize_hybrid through intrinsics functions
         return WrapEtsObject(ctx, ref);
     }
-    ScopedManagedCodeThread v(coro);
+    ScopedManagedCodeThread v(executionCtx->GetMT());
     return WrapEtsObject(ctx, ref);
 }
 #endif
@@ -254,8 +255,8 @@ static void TriggerXGCIfNeeded([[maybe_unused]] InteropCtx *ctx)
 static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_ref *result,
                                     const SharedReferenceStorage::PreInitJSObjectCallback &preInitCallback = nullptr)
 {
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    ScopedNativeCodeThreadIfNeeded scope(currentCoro);
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ScopedNativeCodeThreadIfNeeded scope(executionCtx->GetMT());
     napi_env env = ctx->GetJSEnv();
     // Deleter can be called after Runtime::Destroy, so InternalAllocator can not be used
     auto **refRef = new SharedReference *(nullptr);
@@ -273,8 +274,8 @@ static SharedReference **CreateXRef(InteropCtx *ctx, napi_value jsObject, napi_r
 #endif
     if (UNLIKELY(status != napi_ok)) {
         DeleteSharedReferenceRefCallback(env, refRef, nullptr);
-        if (currentCoro->HasPendingException()) {
-            ctx->ForwardEtsException(currentCoro);
+        if (executionCtx->GetMT()->HasPendingException()) {
+            ctx->ForwardEtsException(executionCtx);
         }
         ASSERT(ctx->SanityJSExceptionPending());
         return nullptr;
@@ -351,17 +352,17 @@ SharedReference *SharedReferenceStorage::CreateJSObjectRef(InteropCtx *ctx, EtsH
                                                            napi_value jsObject)
 {
     napi_ref jsRef;
-    auto coro = EtsCoroutine::GetCurrent();
+    auto executionCtx = EtsExecutionContext::GetCurrent();
     auto env = ctx->GetJSEnv();
     {
-        ScopedNativeCodeThread nativeScope(coro);
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
 #if defined(PANDA_JS_ETS_HYBRID_MODE)
         auto status = napi_create_xref(env, jsObject, 1, &jsRef);
 #else
         auto status = napi_create_reference(env, jsObject, 1, &jsRef);
 #endif
         if (status != napi_ok) {
-            ctx->ForwardJSException(coro);
+            ctx->ForwardJSException(executionCtx);
             return nullptr;
         }
     }

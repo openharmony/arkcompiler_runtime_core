@@ -34,9 +34,11 @@ function testMain() {
     arr_2 = new BigInt64Array(buf_2, 0, 1)
     bytearr_i8 = new Int8Array(buf_1, 0, 4)
     bytearr_i64 = new BigInt64Array(buf_2, 0, 1)
+    let w = new EAWorker();
+    w.start();
 
     for (let i = 0; i < N; i++) {
-        launch(task1)
+        w.run<Int>(task1);
     }
     let cur: byte = Atomics.load(bytearr_i8, 0).toByte()
     while (cur != N) {
@@ -46,7 +48,7 @@ function testMain() {
     }
 
     for (let i = 0; i < N; i++) {
-        launch(task2)
+        w.run<Int>(task2);
     }
     let cur_64: long = Atomics.load(bytearr_i64, 0).getLong()
     while (cur_64 != N) {
@@ -55,6 +57,7 @@ function testMain() {
         cur_64 = Atomics.load(bytearr_i64, 0).getLong()
     }
     L.log('all tasks have finished')
+    w.join();
 }
 
 function task1(): Int {

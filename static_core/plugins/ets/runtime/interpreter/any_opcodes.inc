@@ -20,83 +20,72 @@
 
 namespace ark::intrinsics {
 
-ObjectHeader *ETSAnyLdbyname(ManagedThread *thread, ObjectHeader *thisObj, panda_file::File::StringData name)
+ObjectHeader *ETSAnyLdbyname(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name)
 {
-    auto ldObj =
-        ets::EtsLdbyname(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), name)
-            ->GetCoreType();
+    auto ldObj = ets::EtsLdbyname(mThread, ets::EtsObject::FromCoreType(thisObj), name)->GetCoreType();
     return ldObj;
 }
 
-void ETSAnyStbyname(ManagedThread *thread, ObjectHeader *thisObj, panda_file::File::StringData name, ObjectHeader *val)
+void ETSAnyStbyname(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name, ObjectHeader *val)
 {
-    ets::EtsStbyname(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), name,
-                     ets::EtsObject::FromCoreType(val));
+    ets::EtsStbyname(mThread, ets::EtsObject::FromCoreType(thisObj), name, ets::EtsObject::FromCoreType(val));
 }
 
 // NOTE(nsizov): remove maybe_unused when implementations delivered
-ObjectHeader *ETSAnyLdbyidx(ManagedThread *thread, ObjectHeader *thisObj, double key)
+ObjectHeader *ETSAnyLdbyidx(ManagedThread *mThread, ObjectHeader *thisObj, double key)
 {
     auto idx = static_cast<uint32_t>(key);
-    auto ldObj = ets::EtsLdbyidx(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), idx)
-                     ->GetCoreType();
+    auto ldObj = ets::EtsLdbyidx(mThread, ets::EtsObject::FromCoreType(thisObj), idx)->GetCoreType();
     return ldObj;
 }
 
 // NOTE(nsizov): remove maybe_unused when implementations delivered
-void ETSAnyStbyidx(ManagedThread *thread, ObjectHeader *thisObj, double key, ObjectHeader *val)
+void ETSAnyStbyidx(ManagedThread *mThread, ObjectHeader *thisObj, double key, ObjectHeader *val)
 {
     auto idx = static_cast<uint32_t>(key);
-    ets::EtsStbyidx(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), idx,
-                    ets::EtsObject::FromCoreType(val));
+    ets::EtsStbyidx(mThread, ets::EtsObject::FromCoreType(thisObj), idx, ets::EtsObject::FromCoreType(val));
 }
 
-ObjectHeader *ETSAnyLdbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key)
+ObjectHeader *ETSAnyLdbyval(ManagedThread *mThread, ObjectHeader *thisObj, ObjectHeader *key)
 {
-    auto ldObj = ets::EtsLdbyval(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj),
-                                 ets::EtsObject::FromCoreType(key))
+    auto ldObj = ets::EtsLdbyval(mThread, ets::EtsObject::FromCoreType(thisObj), ets::EtsObject::FromCoreType(key))
                      ->GetCoreType();
     return ldObj;
 }
 
-void ETSAnyStbyval(ManagedThread *thread, ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
+void ETSAnyStbyval(ManagedThread *mThread, ObjectHeader *thisObj, ObjectHeader *key, ObjectHeader *val)
 {
     if (key == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
         return;
     }
-    ets::EtsStbyval(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj),
-                    ets::EtsObject::FromCoreType(key), ets::EtsObject::FromCoreType(val));
+    ets::EtsStbyval(mThread, ets::EtsObject::FromCoreType(thisObj), ets::EtsObject::FromCoreType(key),
+                    ets::EtsObject::FromCoreType(val));
 }
 
-bool ETSAnyIsinstance(ManagedThread *thread, ObjectHeader *lhs, ObjectHeader *rhs)
+bool ETSAnyIsinstance(ManagedThread *mThread, ObjectHeader *lhs, ObjectHeader *rhs)
 {
     if (rhs == nullptr) {
         interpreter::RuntimeInterface::ThrowNullPointerException();
         return false;
     }
-    return ets::EtsIsinstance(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(lhs),
-                              ets::EtsObject::FromCoreType(rhs));
+    return ets::EtsIsinstance(mThread, ets::EtsObject::FromCoreType(lhs), ets::EtsObject::FromCoreType(rhs));
 }
 
-ObjectHeader *ETSAnyCall(ManagedThread *thread, ObjectHeader *func, Span<VMHandle<ObjectHeader>> args)
+ObjectHeader *ETSAnyCall(ManagedThread *mThread, ObjectHeader *func, Span<VMHandle<ObjectHeader>> args)
 {
-    return ets::EtsCall(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(func), args)
-        ->GetCoreType();
+    return ets::EtsCall(mThread, ets::EtsObject::FromCoreType(func), args)->GetCoreType();
 }
 
-ObjectHeader *ETSAnyCallThis(ManagedThread *thread, ObjectHeader *thisObj, panda_file::File::StringData name,
+ObjectHeader *ETSAnyCallThis(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name,
                              Span<VMHandle<ObjectHeader>> args)
 {
-    return ets::EtsCallThis(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(thisObj), name,
-                            args)
-        ->GetCoreType();
+    return ets::EtsCallThis(mThread, ets::EtsObject::FromCoreType(thisObj), name, args)->GetCoreType();
 }
 
-ObjectHeader *ETSAnyCallNew(ManagedThread *thread, ObjectHeader *ctor, Span<VMHandle<ObjectHeader>> args)
+ObjectHeader *ETSAnyCallNew(ManagedThread *mThread, ObjectHeader *ctor, Span<VMHandle<ObjectHeader>> args)
 {
-    return ets::EtsCallNew(ets::EtsCoroutine::CastFromThread(thread), ets::EtsObject::FromCoreType(ctor), args)
-        ->GetCoreType();
+    return ets::EtsCallNew(mThread, ets::EtsObject::FromCoreType(ctor), args)->GetCoreType();
 }
 
 }  // namespace ark::intrinsics

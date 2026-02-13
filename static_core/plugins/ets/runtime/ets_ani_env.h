@@ -16,26 +16,28 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ANI_ENV_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_ANI_ENV_H
 
+#include "runtime/include/managed_thread.h"
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 
 namespace ark::ets {
 
-class EtsCoroutine;
+class EtsExecutionContext;
 class PandaEtsVM;
 using EtsThrowable = EtsObject;
 
 class PandaAniEnv : public ani_env {
 public:
-    static Expected<PandaAniEnv *, const char *> Create(EtsCoroutine *coroutine, mem::InternalAllocatorPtr allocator);
+    static Expected<PandaAniEnv *, const char *> Create(EtsExecutionContext *executionCtx,
+                                                        mem::InternalAllocatorPtr allocator);
 
-    PandaAniEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
+    PandaAniEnv(EtsExecutionContext *executionCtx, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
     ~PandaAniEnv() = default;
 
-    EtsCoroutine *GetEtsCoroutine() const
+    EtsExecutionContext *GetExecutionContext() const
     {
-        return coroutine_;
+        return executionCtx_;
     }
 
     PandaEtsVM *GetEtsVM() const;
@@ -70,7 +72,7 @@ public:
     NO_MOVE_SEMANTIC(PandaAniEnv);
 
 private:
-    EtsCoroutine *coroutine_;
+    EtsExecutionContext *executionCtx_;
     PandaUniquePtr<EtsReferenceStorage> referenceStorage_;
     PandaUniquePtr<ani::verify::EnvANIVerifier> envANIVerifier_;
 };

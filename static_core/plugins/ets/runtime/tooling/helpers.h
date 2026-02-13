@@ -112,9 +112,9 @@ constexpr ark::tooling::VRegValue EtsValueToVRegValue(EtsObject *value)
     return ark::tooling::VRegValue(reinterpret_cast<int64_t>(value->GetCoreType()));
 }
 
-inline ark::tooling::PtThread CoroutineToPtThread(EtsCoroutine *coroutine)
+inline ark::tooling::PtThread CoroutineToPtThread(ManagedThread *mThread)
 {
-    return ark::tooling::PtThread(coroutine);
+    return ark::tooling::PtThread(mThread);
 }
 
 }  // namespace ark::ets::tooling

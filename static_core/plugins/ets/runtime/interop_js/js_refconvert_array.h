@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,17 +58,17 @@ private:
 public:
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
         auto env = ctx->GetJSEnv();
-        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(coro);
+        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(executionCtx->GetMT());
 
-        VMHandle<coretypes::Array> etsArr(coro, coretypes::Array::Cast(obj->GetCoreType()));
+        VMHandle<coretypes::Array> etsArr(executionCtx->GetMT(), coretypes::Array::Cast(obj->GetCoreType()));
         auto len = etsArr->GetLength();
 
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
         {
-            ScopedNativeCodeThread nativeScope(coro);
+            ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
             NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
         }
 
@@ -80,7 +80,7 @@ public:
             }
             {
                 // NOTE(audovichenko): try to do not change thread state in each iteration.
-                ScopedNativeCodeThread s(coro);
+                ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
                 napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
                 if (UNLIKELY(NapiThrownGeneric(rc))) {
                     return nullptr;
@@ -93,7 +93,7 @@ public:
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsArr)
     {
-        auto coro = EtsCoroutine::GetCurrent();
+        auto executionCtx = EtsExecutionContext::GetCurrent();
         auto env = ctx->GetJSEnv();
         {
             bool isArray;
@@ -111,7 +111,7 @@ public:
         }
 
         // NOTE(vpukhov): elide handles for primitive arrays
-        LocalObjectHandle<coretypes::Array> etsArr(coro, coretypes::Array::Create(klass_, len));
+        LocalObjectHandle<coretypes::Array> etsArr(executionCtx->GetMT(), coretypes::Array::Create(klass_, len));
         NapiScope jsHandleScope(env);
 
         for (size_t idx = 0; idx < len; ++idx) {
@@ -148,18 +148,18 @@ public:
 
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj)
     {
-        auto coro = EtsCoroutine::GetCurrent();
+        auto executionCtx = EtsExecutionContext::GetCurrent();
         auto env = ctx->GetJSEnv();
-        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(coro);
+        [[maybe_unused]] HandleScope<ObjectHeader *> hscope(executionCtx->GetMT());
 
-        VMHandle<coretypes::Array> etsArr(coro, obj->GetCoreType());
+        VMHandle<coretypes::Array> etsArr(executionCtx->GetMT(), obj->GetCoreType());
         ASSERT(etsArr.GetPtr() != nullptr);
         auto len = etsArr->GetLength();
 
         NapiEscapableScope jsHandleScope(env);
         napi_value jsArr;
         {
-            ScopedNativeCodeThread nativeScope(coro);
+            ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
             NAPI_CHECK_FATAL(napi_create_array_with_length(env, len, &jsArr));
         }
 
@@ -182,7 +182,7 @@ public:
                 jsElem = GetUndefined(env);
             }
             {
-                ScopedNativeCodeThread s(coro);
+                ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
                 napi_status rc = napi_set_element(env, jsArr, idx, jsElem);
                 if (UNLIKELY(NapiThrownGeneric(rc))) {
                     return nullptr;
@@ -210,7 +210,7 @@ public:
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsArr)
     {
-        auto coro = EtsCoroutine::GetCurrent();
+        auto executionCtx = EtsExecutionContext::GetCurrent();
         auto env = ctx->GetJSEnv();
         {
             bool isArray;
@@ -227,7 +227,7 @@ public:
             return nullptr;
         }
 
-        LocalObjectHandle<coretypes::Array> etsArr(coro, coretypes::Array::Create(klass_, len));
+        LocalObjectHandle<coretypes::Array> etsArr(executionCtx->GetMT(), coretypes::Array::Create(klass_, len));
         NapiScope jsHandleScope(env);
 
         for (size_t idx = 0; idx < len; ++idx) {

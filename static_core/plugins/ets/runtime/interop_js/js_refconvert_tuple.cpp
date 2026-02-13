@@ -33,9 +33,9 @@ template <JsProxyMethodCallBack CALL_BACK>
 static napi_value JsProxyMethodCallBackWrapper(napi_env env, napi_callback_info info)
 {
     ASSERT_SCOPED_NATIVE_CODE();
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = ark::ets::interop::js::InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = ark::ets::interop::js::InteropCtx::Current(executionCtx);
+    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
 
     size_t argc;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
@@ -47,8 +47,8 @@ static napi_value JsProxyMethodCallBackWrapper(napi_env env, napi_callback_info 
 
 static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
 
     EtsObject *etsObject;
     if (IsUndefined<true>(env, jsValue)) {
@@ -56,7 +56,7 @@ static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
     } else if (IsNull<true>(env, jsValue)) {
         etsObject = ctx->GetNullValue();
     } else {
-        auto refconv = JSRefConvertResolve(ctx, PlatformTypes(coro)->coreObject->GetRuntimeClass());
+        auto refconv = JSRefConvertResolve(ctx, PlatformTypes(executionCtx)->coreObject->GetRuntimeClass());
         ASSERT(refconv != nullptr);
         etsObject = refconv->Unwrap(ctx, jsValue);
     }
@@ -67,8 +67,8 @@ static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
 template <bool IS_TUPLEN>
 static napi_value TupleGetCallBackHandler(napi_env env, size_t argc, napi_value *argv)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
 
     Span<napi_value> argsSpan {argv, argc};
     napi_value jsThis = argsSpan[0];
@@ -84,7 +84,7 @@ static napi_value TupleGetCallBackHandler(napi_env env, size_t argc, napi_value 
 
     if constexpr (!IS_TUPLEN) {
         // handle Tuple0, Tuple1, ..., Tuple16
-        ScopedManagedCodeThread managedCode(coro);
+        ScopedManagedCodeThread managedCode(executionCtx->GetMT());
 
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         auto etsThis = storage->GetReference(env, jsThis)->GetEtsObject();
@@ -109,8 +109,8 @@ static napi_value TupleGetCallBackHandler(napi_env env, size_t argc, napi_value 
 template <bool IS_TUPLEN>
 static napi_value TupleSetCallBackHandler(napi_env env, size_t argc, napi_value *argv)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    auto ctx = InteropCtx::Current(executionCtx);
 
     Span<napi_value> argsSpan {argv, argc};
     napi_value jsThis = argsSpan[0];
@@ -125,7 +125,7 @@ static napi_value TupleSetCallBackHandler(napi_env env, size_t argc, napi_value 
 
     if constexpr (!IS_TUPLEN) {
         // handle Tuple0, Tuple1, ..., Tuple16
-        ScopedManagedCodeThread managedCode(coro);
+        ScopedManagedCodeThread managedCode(executionCtx->GetMT());
 
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         auto etsThis = storage->GetReference(env, jsThis)->GetEtsObject();
@@ -200,9 +200,9 @@ napi_value JSRefConvertTuple<IS_TUPLEN>::WrapImpl(InteropCtx *ctx, EtsObject *et
         napi_value jsProxyCtor = ctx->GetCommonJSObjectCache()->GetProxy();
         NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtor, args.size(), args.data(), &proxyObject));
 
-        auto coro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] EtsHandleScope s(coro);
-        EtsHandle<EtsObject> objHandle(coro, etsObject);
+        auto executionCtx = EtsExecutionContext::GetCurrent();
+        [[maybe_unused]] EtsHandleScope s(executionCtx);
+        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
         storage->CreateETSObjectRef(ctx, objHandle, proxyObject);
 
         return proxyObject;
@@ -217,8 +217,8 @@ EtsObject *JSRefConvertTuple<IS_TUPLEN>::UnwrapImpl([[maybe_unused]] InteropCtx 
                                                     [[maybe_unused]] napi_value jsObject)
 {
     // just throw exception
-    auto coro = EtsCoroutine::GetCurrent();
-    InteropCtx::ThrowETSError(coro, "Assigning a dynamic object to a static tuple object is not supported.");
+    auto executionCtx = EtsExecutionContext::GetCurrent();
+    InteropCtx::ThrowETSError(executionCtx, "Assigning a dynamic object to a static tuple object is not supported.");
     return nullptr;
 }
 

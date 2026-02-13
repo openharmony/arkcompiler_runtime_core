@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "runtime/coroutines/coroutine_manager.h"
-#include "runtime/coroutines/coroutine_events.h"
+#include "runtime/execution/job_execution_context.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "runtime/execution/job_events.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
@@ -26,75 +27,79 @@
 namespace ark::ets {
 
 /*static*/
-EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
+EtsPromise *EtsPromise::Create(EtsExecutionContext *executionCtx)
 {
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto *klass = PlatformTypes(coro)->corePromise;
-    auto hPromise = EtsHandle<EtsPromise>(coro, EtsPromise::FromEtsObject(EtsObject::Create(coro, klass)));
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto *klass = PlatformTypes(executionCtx)->corePromise;
+    auto hPromise =
+        EtsHandle<EtsPromise>(executionCtx, EtsPromise::FromEtsObject(EtsObject::Create(executionCtx, klass)));
     ASSERT(hPromise.GetPtr() != nullptr);
-    auto *mutex = EtsMutex::Create(coro);
-    hPromise->SetMutex(coro, mutex);
-    auto *event = EtsEvent::Create(coro);
-    hPromise->SetEvent(coro, event);
+    auto *mutex = EtsMutex::Create(executionCtx);
+    hPromise->SetMutex(executionCtx, mutex);
+    auto *event = EtsEvent::Create(executionCtx);
+    hPromise->SetEvent(executionCtx, event);
     return hPromise.GetPtr();
 }
 
-void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
+void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx)
 {
-    auto *cbQueue = GetCallbackQueue(coro);
-    auto *workerDomainQueue = GetWorkerDomainQueue(coro);
+    auto *cbQueue = GetCallbackQueue(executionCtx);
+    auto *workerDomainQueue = GetWorkerDomainQueue(executionCtx);
     auto queueSize = GetQueueSize();
     ASSERT(queueSize == 0 || cbQueue != nullptr);
     ASSERT(queueSize == 0 || workerDomainQueue != nullptr);
 
     if (Runtime::GetOptions().IsListUnhandledOnExitPromises(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)) &&
         state_ == STATE_REJECTED && queueSize == 0) {
-        coro->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, coro);
+        executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(this, executionCtx);
     }
 
     // Unblock awaitee coros
-    GetEvent(coro)->Fire();
+    GetEvent(executionCtx)->Fire();
 
     for (int idx = 0; idx < queueSize; ++idx) {
         auto *thenCallback = cbQueue->Get(idx);
-        auto workerDomain = static_cast<CoroutineWorkerDomain>(workerDomainQueue->Get(idx));
-        ASSERT(workerDomain == CoroutineWorkerDomain::MAIN || workerDomain == CoroutineWorkerDomain::GENERAL);
-        auto groupId = workerDomain == CoroutineWorkerDomain::MAIN
-                           ? CoroutineWorkerGroup::FromDomain(coro->GetCoroutineManager(), CoroutineWorkerDomain::MAIN)
-                           : CoroutineWorkerGroup::AnyId();
-        EtsPromise::LaunchCallback(coro, thenCallback, groupId);
+        auto workerDomain = static_cast<JobWorkerThreadDomain>(workerDomainQueue->Get(idx));
+        auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+        ASSERT(workerDomain == JobWorkerThreadDomain::MAIN || workerDomain == JobWorkerThreadDomain::GENERAL);
+        auto groupId = workerDomain == JobWorkerThreadDomain::MAIN
+                           ? JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::MAIN)
+                           : JobWorkerThreadGroup::AnyId();
+        EtsPromise::LaunchCallback(executionCtx, thenCallback, groupId);
     }
-    ClearQueues(coro);
+    ClearQueues(executionCtx);
 }
 
 /* static */
-void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const CoroutineWorkerGroup::Id &groupId)
+void EtsPromise::LaunchCallback(EtsExecutionContext *executionCtx, EtsObject *callback,
+                                const JobWorkerThreadGroup::Id &groupId)
 {
     // Launch callback in its own coroutine
-    auto *coroManager = coro->GetCoroutineManager();
-    auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
-
-    [[maybe_unused]] EtsHandleScope scope(coro);
-    auto handledCb = EtsHandle<EtsObject>(coro, callback);
+    [[maybe_unused]] EtsHandleScope scope(executionCtx);
+    auto handledCb = EtsHandle<EtsObject>(executionCtx, callback);
 
     if (!handledCb->GetClass()->IsFunction()) {
-        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Method have to be instance of function");
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatTypeError,
+                          "Method have to be instance of function");
     }
 
-    EtsMethod *etsmethod = PlatformTypes(coro)->coreFunctionUnsafeCall;
+    EtsMethod *etsmethod = PlatformTypes(executionCtx)->coreFunctionUnsafeCall;
     auto *method = EtsMethod::ToRuntimeMethod(handledCb->GetClass()->ResolveVirtualMethod(etsmethod));
 
-    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    auto argArray = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
-        ASSERT(coro->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return;
     }
 
+    auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
+    auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, jobMan);
     auto args = PandaVector<Value> {Value(handledCb->GetCoreType()), Value(argArray->GetCoreType())};
-    auto launchResult =
-        coroManager->Launch(event, method, std::move(args), groupId, EtsCoroutine::PROMISE_CALLBACK, false);
-    if (UNLIKELY(launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED)) {
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(event);
+    auto epInfo = Job::ManagedEntrypointInfo {event, method, std::move(args)};
+    auto job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::PROMISE_CALLBACK);
+    auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
+    if (UNLIKELY(launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+        jobMan->DestroyJob(job);
     }
 }
 

@@ -29,7 +29,7 @@ ManagedThread *EtsPlugin::CreateManagedThread() const
     auto vm = rt->GetPandaVM();
     auto coroman = static_cast<CoroutineManager *>(vm->GetThreadManager());
     auto coro = coroman->CreateEntrypointlessCoroutine(rt, vm, true, "_coro_", Coroutine::Type::MUTATOR,
-                                                       CoroutinePriority::DEFAULT_PRIORITY);
+                                                       JobPriority::DEFAULT_PRIORITY);
     ASSERT(coro != nullptr);
     return coro;
 }

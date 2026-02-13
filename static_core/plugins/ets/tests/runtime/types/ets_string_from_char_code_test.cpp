@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ets_coroutine.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "intrinsics.h"
 #include "entrypoints_gen.h"
 #include "types/ets_box_primitive.h"
@@ -69,12 +70,12 @@ public:
     EtsObjectArray *CreateCharCodeArray(IntIter first, IntIter last)
     {
         using CharCode = EtsBoxPrimitive<EtsInt>;
-        EtsClass *klass = CharCode::GetEtsBoxClass(coroutine_);
+        EtsClass *klass = CharCode::GetEtsBoxClass(EtsExecutionContext::FromMT(coroutine_));
         ASSERT(klass != nullptr);
         auto length = std::distance(first, last);
         EtsObjectArray *charCodeArray = EtsObjectArray::Create(klass, length);
         std::for_each(first, last, [&charCodeArray, this, idx = 0U](int d) mutable {
-            auto *boxedValue = CharCode::Create(coroutine_, d);
+            auto *boxedValue = CharCode::Create(EtsExecutionContext::FromMT(coroutine_), d);
             charCodeArray->Set(idx++, boxedValue);
         });
         return charCodeArray;
@@ -85,7 +86,7 @@ public:
         // Allocate and create the buffer
         auto *buffer = CreateCharCodeArray(codes.begin(), codes.end());
         // Allocate the array object
-        auto *array = EtsEscompatArray::Create(coroutine_, codes.size());
+        auto *array = EtsEscompatArray::Create(EtsExecutionContext::FromMT(coroutine_), codes.size());
         // Fill the array with the pre-created buffer
         ObjectAccessor::SetObject(coroutine_, array, EtsEscompatArray::GetBufferOffset(), buffer->GetCoreType());
         return array;
