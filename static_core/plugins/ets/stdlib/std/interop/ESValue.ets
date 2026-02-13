@@ -17,31 +17,12 @@ package std.interop;
 
 import {IterableIterator, IteratorResult} from "std/core";
 
-// NOTE(from InteropTransferHelper.ets): #IC8LO3 remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export type StaticOrESValue = ESValue | Object | null | undefined
-export type ESValueCallbackData = object
-export type ESValueCallback = (argThis: ESValue, argNewTgt: ESValue, args: FixedArray<ESValue>, data?: ESValueCallbackData) => ESValue
-export class ESValuePropertyDescriptor {
-    key: string | ESValue = ''
-    call?: ESValueCallback
-    getter?: ESValueCallback
-    setter?: ESValueCallback
-    value?: ESValue
-    data?: ESValueCallbackData
-}
 
 export final class ESValue {
     // #IC51G4: this.ev should be able to storage anything
     private ev: Any
     private isStatic: boolean
-
-    private static OBJECT_CLASS: Class = Class.of(new Object());
-    private static NUMBER_CLASS: Class = Class.of(new Number());
-    private static BOOLEAN_CLASS: Class = Class.of(new Boolean());
-    private static STRING_CLASS: Class = Class.of(new String());
-    private static BIGINT_CLASS: Class = Class.of(new BigInt());
 
     constructor(ev: Any) {
         this.ev = ev
@@ -484,16 +465,6 @@ export final class ESValue {
                 reject(error);
             });
         });
-    }
-
-    static defineClass(
-        name: String,
-        ctor: ESValueCallback,
-        data?: ESValueCallbackData,
-        properties?: FixedArray<ESValuePropertyDescriptor>,
-        superC?: ESValue
-    ): ESValue {
-        throw Error("not implemented yet");
     }
 
     public $_iterator(): IterableIterator<ESValue> {

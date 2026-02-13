@@ -299,6 +299,29 @@ let doubleValue = doubleWrap.toDouble(); // 3.14159265358
 ```
 
 ---
+### wrap
+`public static wrap(o: Any): ESValue`  
+Wrap the original value type into an ESValue object.
+
+Parameters:
+
+| Parameter Name |  Type  | Required |          Description          |
+| :----: | :----: | :--: | :------------------: |
+|    o   | Any |  Yes  | The type of the primitive value to be wrapped. |
+
+Return Value:
+
+|    Type     |           Description           |
+| :---------: | :----------------------: |
+|   ESValue   | The ESValue object storing the dynamic double value |
+
+Example:
+```typescript
+let objVal = ESValue.wrap(dynamicObject);
+let raw = objVal.isObject(); // true
+```
+
+---
 ### unwrap
 `public unwrap(): Any`  
 Unwrap ESValue into the original value type.
@@ -616,9 +639,9 @@ Return Value:
 Example:
 
 ```typescript
-let objVal = ESValue.instantiateEmptyObject();
-let obj = objVal.toStaticObject();
-obj.property = 'value';
+class A {};
+let objA = ESValue.wrap(new A());
+let obj = objA.toStaticObject();
 ```
 
 ---
@@ -725,14 +748,14 @@ let res = val1.isStrictlyEqualTo(val2); // true
 
 ---
 ### instantiate
-`public instantiate(...args: FixedArray<ESValue>): ESValue`  
+`public instantiate(...args: FixedArray<StaticOrESValue>): ESValue`  
 Instantiate a class and return it wrapped as an ESValue object. The parameters are the parameters required by the constructor.
 
 Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :--------------------: | :----------------------------: | :------: | :---------------------: |
-| ...args (dynamic) | FixedArray<ESValue> | No | The parameter list of the constructor |
+| ...args (dynamic) | FixedArray<StaticOrESValue> | No | The parameter list of the constructor |
 
 Return Value:
 
@@ -791,8 +814,8 @@ Example:
 
 ```typescript
 let arr = ESValue.instantiateEmptyArray();
-arr.push(ESValue.wrapNumber(1));
-arr.push(ESValue.wrapNumber(2));
+arr.invokeMethod('push', ESValue.wrapNumber(1));
+arr.invokeMethod('push', ESValue.wrapNumber(2));
 ```
 
 ---
@@ -882,7 +905,7 @@ let val = jsArray.getProperty(ESValue.wrapNumber(2));
 
 ---
 ### setProperty (string version)
-`public setProperty(name: string, value: ESValue): void`  
+`public setProperty(name: string, value: StaticOrESValue): void`  
 Use the `name` value as the property name, and the dynamic object stored in `value` as the property value. Set the property value of the dynamic object stored in `this`.
 
 Parameters:
@@ -890,7 +913,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :-------: | :------: | :-----------------: |
 | name | string | Yes | The property name |
-| value | ESValue | Yes | The property value |
+| value | StaticOrESValue | Yes | The property value |
 
 Example:
 
@@ -902,13 +925,13 @@ export let A = {
 // file2.ets
 let module = ESValue.load('file1');
 let value = ESValue.wrapNumber(5);
-let property = ESValue.wrapString('property1');
+let property = 'property1';
 jsObjectA.setProperty(property, value);
 ```
 
 ---
 ### setProperty (number version)
-`public setProperty(index: number, value: ESValue): void`  
+`public setProperty(index: number, value: StaticOrESValue): void`  
 Use the `index` value as the property name, and the dynamic object stored in `value` as the property value. Set the property value of the dynamic object stored in `this`.
 
 Parameters:
@@ -916,7 +939,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :-------: | :------: | :-----------------: |
 | index | number | Yes | The array index |
-| value | ESValue | Yes | The element value |
+| value | StaticOrESValue | Yes | The element value |
 
 Example:
 
@@ -932,7 +955,7 @@ jsArray1.setProperty(2, value);
 
 ---
 ### setProperty (ESValue version)
-`public setProperty(property: ESValue, value: ESValue): void`  
+`public setProperty(property: ESValue, value: StaticOrESValue): void`  
 Use the dynamic object stored in `property` as the property name, and the dynamic object stored in `value` as the property value, to set the property of the dynamic object stored in `this`.
 
 Parameters:
@@ -940,7 +963,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :--------------: | :-------: | :------: | :-----------------: |
 | property | ESValue | Yes | The property identifier object |
-| value | ESValue | Yes | The property value |
+| value | StaticOrESValue | Yes | The property value |
 
 Example:
 
@@ -1086,14 +1109,14 @@ let hasIdx = obj.hasOwnProperty('idx');
 
 ---
 ### invoke
-`public invoke(...args: FixedArray<ESValue>): ESValue`  
+`public invoke(...args: FixedArray<StaticOrESValue>): ESValue`  
 Execute the function or method of the dynamic object stored in `this`, with `args` being wrapped ESValue objects.
 
 Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :----------------: | :--------------: | :------: | :-----------------: |
-| ...args | FixedArray<ESValue> | No | The function parameter list |
+| ...args | FixedArray<StaticOrESValue> | No | The function parameter list |
 
 Return Value:
 
@@ -1113,7 +1136,7 @@ let result = jsFunc.invoke();
 ```
 ---
 ### invokeWithRecv
-`public invokeWithRecv(recv: ESValue, ...args: FixedArray<ESValue>): ESValue`  
+`public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue`  
 Use `recv` as this and `args` as parameters to execute the method stored in ESValue. `args` is a wrapped ESValue object.
 
 Parameters:
@@ -1121,7 +1144,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :---------------: | :------: | :-----------------: |
 | recv | ESValue | Yes | The this value |
-| ...args | FixedArray<ESValue> | No | The function parameter list |
+| ...args | FixedArray<StaticOrESValue> | No | The function parameter list |
 
 Return Value:
 
@@ -1140,7 +1163,7 @@ let iterator = symbolIteratorMethod.invokeWithRecv(iterableObj);
 ```
 ---
 ### invokeMethod
-`public invokeMethod(method: string, ...args: FixedArray<ESValue>): ESValue`  
+`public invokeMethod(method: string, ...args: FixedArray<StaticOrESValue>): ESValue`  
 Use the method name `mothod` and `args` as parameters to get the method saved in `this` dynamic object and execute it. `args` are wrapped ESValue objects.
 
 Parameters:
@@ -1148,7 +1171,7 @@ Parameters:
 | Parameter Name | Type | Required | Description |
 | :------------: | :---------------: | :------: | :-----------------: |
 | method | string | Yes | The method name |
-| ...args | FixedArray<ESValue> | No | The method parameter list |
+| ...args | FixedArray<StaticOrESValue> | No | The method parameter list |
 
 Return Value:
 
@@ -1249,14 +1272,14 @@ for (const entry of jsIterableObject.entries()) {
 
 ---
 ### instanceOf
-`public instanceOf(type: ESValue): boolean`  
+`public instanceOf(type: ESValue | Type): boolean`  
 Check whether the dynamic object stored in `this` object is an instance of the dynamic type stored in the `type` object.
 
 Parameters:
 
 | Parameter Name | Type | Required | Description |
 | :------------: | :-----------: | :------: | :-----------------: |
-| type | ESValue | Yes | Dynamic type |
+| type | ESValue/Type | Yes | Dynamic type |
 
 Return Value:
 
@@ -1360,6 +1383,31 @@ export async function sleepRetNumber(ms: number): Promise<number> {
 let module = ESValue.load('file1');
 let sleepRetNumber = module.getProperty('sleepRetNumber');
 let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).isPromise();
+```
+
+---
+### toPromise
+`public toPromise(): Promise<ESValue>`  
+Determine whether the object stored in the ESValue is of Promise type. If so, return it as a Promise<ESValue>; otherwise, throw an exception.
+
+Return Value:
+
+|   Type    |            Description             |
+| :-------: | :-------------------------: |
+|  Promise\<ESValue\> | An asynchronous result that will be completed in the future and return an ESValue. |
+
+Example:
+```typescript
+// file1.ts
+export async function sleepRetNumber(ms: number): Promise<number> {
+    await sleep(ms);
+    return 0xcafe;
+}
+// file2.ets
+let module = ESValue.load('file1');
+let sleepRetNumber = module.getProperty('sleepRetNumber');
+let res = sleepRetNumber.invoke(ESValue.wrapNumber(5000)).toPromise();
+await res;
 ```
 
 ---
