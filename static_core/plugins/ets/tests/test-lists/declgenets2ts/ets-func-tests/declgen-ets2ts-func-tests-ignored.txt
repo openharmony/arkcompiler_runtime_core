@@ -15,6 +15,7 @@ regression/22981/22981.ets
 #FailKind.TSC_FAIL - 147 tests:
 regression/13734_0.ets
 regression/15869_0.ets
+regression/31724.ets
 regression/default_interface_method.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_01.ets
 spec/09.classes/Accessor_Declarations/issue-15142_6.ets
