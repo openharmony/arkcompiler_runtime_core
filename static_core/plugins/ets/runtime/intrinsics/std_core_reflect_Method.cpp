@@ -75,7 +75,7 @@ extern "C" EtsInt ReflectMethodGetParametersNumImpl(EtsLong etsFunctionPtr)
     return function->GetParametersNum();
 }
 
-extern "C" ObjectHeader *ReflectMethodGetParametersTypesImpl(EtsLong etsFunctionPtr)
+extern "C" ObjectHeader *ReflectMethodGetParameterTypesImpl(EtsLong etsFunctionPtr)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);

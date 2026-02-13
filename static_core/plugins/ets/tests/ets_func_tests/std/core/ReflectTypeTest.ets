@@ -242,7 +242,7 @@ function testGetStaticMethod() {
     arktest.assertNE(methodA3, undefined)
     let methodA4 = infoA.getStaticMethod("stfoo3", [ Class.PRIMITIVE_INT, Class.PRIMITIVE_LONG ]);
     arktest.assertNE(methodA4, undefined)
-    let paramsMethodA4 = methodA4!.getParametersTypes()
+    let paramsMethodA4 = methodA4!.getParameterTypes()
     let methodA5 = infoA.getStaticMethod("stfoo3", paramsMethodA4);
     arktest.assertNE(methodA5, undefined)
     let methodA6 = infoA.getStaticMethod("stboo1")

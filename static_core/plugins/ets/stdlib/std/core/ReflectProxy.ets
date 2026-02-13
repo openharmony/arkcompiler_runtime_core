@@ -221,7 +221,7 @@ export class Proxy {
         let numCtors = constructors.length
         for (let idx = 0; idx < numCtors; ++idx) {
             if (constructors[idx].getParametersNum() == numParams) {
-                if (Proxy.compareTypesUnchecked(params, constructors[idx].getParametersTypes())) {
+                if (Proxy.compareTypesUnchecked(params, constructors[idx].getParameterTypes())) {
                     return constructors[idx]
                 }
             }

@@ -122,8 +122,8 @@ class Method {
      * @returns { FixedArray<Class> } Returns a FixedArray containing all parameter types.
      *
      */
-    public getParametersTypes(): FixedArray<Class> {
-        return Method.getParametersTypesImpl(this.methodPtr)
+    public getParameterTypes(): FixedArray<Class> {
+        return Method.getParameterTypesImpl(this.methodPtr)
     }
 
     /**
@@ -164,7 +164,7 @@ class Method {
 
     private static native getNameInternal(methodPtr: long): string
     private static native getReturnTypeImpl(methodPtr: long): Class | undefined
-    private static native getParametersTypesImpl(methodPtr: long): FixedArray<Class>
+    private static native getParameterTypesImpl(methodPtr: long): FixedArray<Class>
     private static native getParameterTypeByIdxImpl(methodPtr: long, idx: int): Class | undefined
     private static native getParametersNumImpl(methodPtr: long): int
     private native invokeInternal(thisObj: Object | undefined, args?: FixedArray<Any>): Any

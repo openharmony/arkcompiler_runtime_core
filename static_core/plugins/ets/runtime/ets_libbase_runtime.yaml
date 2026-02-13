@@ -7064,15 +7064,15 @@ intrinsics:
       args: [ i64, i32 ]
     impl: ark::ets::intrinsics::ReflectMethodGetParameterTypeByIdxImpl
 
-  - name: StdCoreReflectMethodGetParametersTypesImpl
+  - name: StdCoreReflectMethodGetParameterTypesImpl
     space: ets
     class_name: std.core.reflect.Method
-    method_name: getParametersTypesImpl
+    method_name: getParameterTypesImpl
     static: true
     signature:
       ret: std.core.Class[]
       args: [ i64 ]
-    impl: ark::ets::intrinsics::ReflectMethodGetParametersTypesImpl
+    impl: ark::ets::intrinsics::ReflectMethodGetParameterTypesImpl
 
   - name: StdCoreReflectMethodGetParametersNumImpl
     space: ets
