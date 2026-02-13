@@ -16,10 +16,6 @@ import("$ark_root/plugins/plugins.gni")
 import("$ark_root/verification/verification.gni")
 
 
-declare_args() {
-  ark_ets_pcre2_newline_patch = true
-}
-
 if (ark_standalone_build) {
   import("$build_root/ark.gni")
 } else {
@@ -477,39 +473,6 @@ if (ark_ets_interop_js) {
 _libarkruntime_calculated_defines = []
 _libarkruntime_calculated_include_dirs = []
 
-if (ark_ets_pcre2_newline_patch) {
-  action("pcre2_patch_newline") {
-    script = "$ark_root/runtime/templates/gen_pcre2_newline.rb"
-
-    inputs = [
-      "//third_party/pcre2/pcre2/src/pcre2_newline.c",
-      "$ark_root/plugins/ets/runtime/patches/pcre2_newline.patch",
-    ]
-
-    outputs = [ "$target_gen_dir/pcre2/pcre2_newline_patched.stamp" ]
-
-    args = [
-      "--source",
-      rebase_path("//third_party/pcre2/pcre2/src/pcre2_newline.c"),
-      "--patch",
-      rebase_path("$ark_root/plugins/ets/runtime/patches/pcre2_newline.patch"),
-      "--output",
-      rebase_path("$target_gen_dir/pcre2/pcre2_newline_patched.stamp"),
-    ]
-  }
-
-  if (!(ark_standalone_build || ark_static_standalone_build)) {
-    ohos_shared_headers("arkruntime_pcre2") {
-      include_dirs = [ ]
-      deps = [ ":pcre2_patch_newline" ]
-
-      part_name = "runtime_core"
-      subsystem_name = "arkcompiler"
-    }
-  }
-
-}
-
 if (!(ark_standalone_build || ark_static_standalone_build)) {
   _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static" ]
   _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static_16" ]
@@ -611,10 +574,6 @@ ohos_source_set("libarkruntime_set_static") {
   public_configs = _libarkruntime_calculated_configs
   public_configs += [ "$ark_root:ark_config" ]
 
-  if (ark_ets_pcre2_newline_patch) {
-    deps += [ ":pcre2_patch_newline" ]
-    defines += [ "ARK_PCRE2_NEWLINE_PATCH" ]
-  }
   deps += _libarkruntime_calculated_deps
 
   if (enable_irtoc) {
@@ -643,11 +602,6 @@ ohos_source_set("libarkruntime_set_static_host") {
   public_configs = _libarkruntime_calculated_configs
   public_configs += [ "$ark_root:ark_host_config" ]
 
-  if (ark_ets_pcre2_newline_patch) {
-    deps += [ ":pcre2_patch_newline" ]
-    defines += [ "ARK_PCRE2_NEWLINE_PATCH" ]
-  }
-
   deps += _libarkruntime_calculated_deps
   deps += [
     ":arkruntime_interpreter_impl_host",
@@ -664,10 +618,6 @@ ohos_source_set("libarkruntime_set_static_host") {
 
 ohos_static_library("libarkruntime_static") {
   deps = []
-  if (ark_ets_pcre2_newline_patch) {
-    deps += [ ":pcre2_patch_newline" ]
-    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
-  }
   deps += [ ":libarkruntime_set_static" ]
   output_extension = "a"
   part_name = ark_part_name
@@ -697,10 +647,6 @@ ohos_shared_library("libarkruntime") {
   }
 
   deps = []
-  if (ark_ets_pcre2_newline_patch) {
-    deps += [ ":pcre2_patch_newline" ]
-    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
-  }
   deps += [ ":libarkruntime_set_static" ]
 
   external_deps = []
@@ -753,10 +699,6 @@ ohos_shared_library("libarkruntime_host") {
   ldflags += [ "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a" ]
 
   deps = []
-  if (ark_ets_pcre2_newline_patch) {
-    deps += [ ":pcre2_patch_newline" ]
-    defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
-  }
 
   external_deps = []
   if (current_toolchain == host_toolchain) {
@@ -1199,6 +1141,7 @@ generated_file("get_profiling_any_type_h") {
 # Used only in ark_static_standalone_build. For ohos build, use external_deps.
 if (ark_static_standalone_build) {
   pcre2_lib_dir = "//third_party/pcre2/pcre2"
+  pcre2_arkts_dir = "//third_party/pcre2/pcre2_ArkTS"
   copy("pcre2_copy_config_h") {
     sources = [ "$pcre2_lib_dir/src/config.h.generic" ]
     outputs = [ "$target_gen_dir/pcre2/internal/config.h" ]
@@ -1209,19 +1152,22 @@ if (ark_static_standalone_build) {
     outputs = [ "$target_gen_dir/pcre2/common/pcre2.h" ]
   }
 
+  copy("pcre2_copy_chartables_c") {
+    sources = [ "$pcre2_lib_dir/src/pcre2_chartables.c.dist" ]
+    outputs = [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
+  }
+
   ohos_static_library("libpcre2_16") {
     output_name = "libpcre2_16"
     deps = [
       ":pcre2_copy_config_h",
       ":pcre2_copy_pcre2_h",
+      ":pcre2_copy_chartables_c",
     ]
-    if (ark_ets_pcre2_newline_patch) {
-      deps += [ ":pcre2_patch_newline" ]
-      defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
-    }
     sources = [
       "$pcre2_lib_dir/src/pcre2_auto_possess.c",
       "$pcre2_lib_dir/src/pcre2_compile.c",
+      "$pcre2_lib_dir/src/pcre2_compile_class.c",
       "$pcre2_lib_dir/src/pcre2_config.c",
       "$pcre2_lib_dir/src/pcre2_context.c",
       "$pcre2_lib_dir/src/pcre2_convert.c",
@@ -1233,7 +1179,7 @@ if (ark_static_standalone_build) {
       "$pcre2_lib_dir/src/pcre2_maketables.c",
       "$pcre2_lib_dir/src/pcre2_match.c",
       "$pcre2_lib_dir/src/pcre2_match_data.c",
-      "$pcre2_lib_dir/src/pcre2_newline.c",
+      "$pcre2_arkts_dir/pcre2_newline_static.c",
       "$pcre2_lib_dir/src/pcre2_ord2utf.c",
       "$pcre2_lib_dir/src/pcre2_pattern_info.c",
       "$pcre2_lib_dir/src/pcre2_script_run.c",
@@ -1248,10 +1194,11 @@ if (ark_static_standalone_build) {
       "$pcre2_lib_dir/src/pcre2_xclass.c",
     ]
     include_dirs = [
+      "$pcre2_lib_dir/src",
       "$target_gen_dir/pcre2/common",
       "$target_gen_dir/pcre2/internal",
     ]
-    sources += [ "$pcre2_lib_dir/src/pcre2_chartables.c" ]
+    sources += [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
     cflags = [
       "-D_GNU_SOURCE",
       "-DHAVE_CONFIG_H",
@@ -1269,15 +1216,13 @@ if (ark_static_standalone_build) {
     deps = [
       ":pcre2_copy_config_h",
       ":pcre2_copy_pcre2_h",
+      ":pcre2_copy_chartables_c",
     ]
-    if (ark_ets_pcre2_newline_patch) {
-      deps += [ ":pcre2_patch_newline" ]
-      defines = [ "ARK_PCRE2_NEWLINE_PATCH" ]
-    }
     sources = [
       "$pcre2_lib_dir/src/pcre2_auto_possess.c",
       "$pcre2_lib_dir/src/pcre2_chkdint.c",
       "$pcre2_lib_dir/src/pcre2_compile.c",
+      "$pcre2_lib_dir/src/pcre2_compile_class.c",
       "$pcre2_lib_dir/src/pcre2_config.c",
       "$pcre2_lib_dir/src/pcre2_context.c",
       "$pcre2_lib_dir/src/pcre2_convert.c",
@@ -1289,7 +1234,7 @@ if (ark_static_standalone_build) {
       "$pcre2_lib_dir/src/pcre2_maketables.c",
       "$pcre2_lib_dir/src/pcre2_match.c",
       "$pcre2_lib_dir/src/pcre2_match_data.c",
-      "$pcre2_lib_dir/src/pcre2_newline.c",
+      "$pcre2_arkts_dir/pcre2_newline_static.c",
       "$pcre2_lib_dir/src/pcre2_ord2utf.c",
       "$pcre2_lib_dir/src/pcre2_pattern_info.c",
       "$pcre2_lib_dir/src/pcre2_script_run.c",
@@ -1304,10 +1249,11 @@ if (ark_static_standalone_build) {
       "$pcre2_lib_dir/src/pcre2_xclass.c",
     ]
     include_dirs = [
+      "$pcre2_lib_dir/src",
       "$target_gen_dir/pcre2/common",
       "$target_gen_dir/pcre2/internal",
     ]
-    sources += [ "$pcre2_lib_dir/src/pcre2_chartables.c" ]
+    sources += [ "$target_gen_dir/pcre2/internal/pcre2_chartables.c" ]
     cflags = [
       "-D_GNU_SOURCE",
       "-DHAVE_CONFIG_H",

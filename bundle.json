@@ -366,9 +366,6 @@
                 },
                 {
                     "name": "//arkcompiler/runtime_core/static_core/platforms/target_defaults:arktarget_options"
-                },
-                {
-                    "name": "//arkcompiler/runtime_core/static_core/runtime:arkruntime_pcre2"
                 }
             ],
             "test": [
