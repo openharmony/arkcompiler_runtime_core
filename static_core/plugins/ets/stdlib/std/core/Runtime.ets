@@ -65,19 +65,6 @@ export final class Runtime {
      */
     public native static isLittleEndianPlatform(): boolean;
 
-    /**
-     * Check if two references point to the same object/value.
-     *
-     * @param { Any } o1 The first object for comparison
-     * @param { Any } o2 The second object for comparison
-     * @returns { boolean } true if Objects are equal
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public static native isSameReference(o1: Any, o2: Any): boolean;
-
     // Deprecated.
     /**
      * Get type information of the specified object. This method is deprecated.
