@@ -85,8 +85,9 @@ class RunnerASTChecker(RunnerJS):
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestASTChecker:
         with open(test_file, 'r', encoding='utf-8') as file:
-            test_cases = self.util.parse_tests(file)
+            test_cases, is_a_test = self.util.parse_tests(file)
 
         test = TestASTChecker(self.test_env, test_file, flags, get_test_id(test_file, self.test_root), test_cases)
         test.ignored = is_ignored
+        test.is_a_test = is_a_test
         return test

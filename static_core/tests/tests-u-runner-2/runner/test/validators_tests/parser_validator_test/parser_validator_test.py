@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,7 +42,7 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertTrue(actual)
+        self.assertTrue(actual.passed)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_absent_expected(self, mock_test: MagicMock) -> None:
@@ -121,7 +121,7 @@ class ParserValidatorTest(TestCase):
             actual_output=actual_output,
             _2=actual_error,
             return_code=actual_return_code)
-        self.assertTrue(actual)
+        self.assertTrue(actual.passed)
 
     @patch('runner.suites.test_standard_flow.TestStandardFlow', spec=TestStandardFlow)
     def test_passed_with_output_rt2(self, mock_test: MagicMock) -> None:

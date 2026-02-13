@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# -- coding: utf-8 --
-#
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,22 +22,22 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import ClassVar
 
-from runner.common_exceptions import RunnerException
+from typing_extensions import assert_never
+
+from runner.common_exceptions import ValidatorException
 from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
-AstCheckerError = tuple[str, str]
-AstCheckerErrorsSet = set[AstCheckerError]
-LocationType = tuple[int, int]
+
+_error_msg_pattern = re.compile(r"[\w\s]*error:.*", re.IGNORECASE)
 
 
 class UtilASTChecker:
-    skip_options: ClassVar[dict[str, bool]] = {'SkipErrors': False, 'SkipWarnings': False}
-
-    class AstCheckerException(RunnerException):
-        pass
+    def __init__(self) -> None:
+        self.skip_options = {'SkipErrors': False, 'SkipWarnings': False}
+        self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/[ ]*', re.DOTALL)
+        self.reset_skips()
 
     class _TestType(Enum):
         NODE = 'Node'
@@ -97,10 +97,6 @@ class UtilASTChecker:
             self.skip_errors = False
             self.skip_warnings = False
 
-    def __init__(self) -> None:
-        self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/', re.DOTALL)
-        self.reset_skips()
-
     @staticmethod
     def create_test_case(name: str | None, pattern: UtilASTChecker._Pattern) -> UtilASTChecker._TestCase:
         pattern_parsed = {'error': pattern.pattern}
@@ -108,12 +104,13 @@ class UtilASTChecker:
             try:
                 pattern_parsed = json.loads(pattern.pattern)
             except json.JSONDecodeError as ex:
-                raise UtilASTChecker.AstCheckerException(
-                    f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern.pattern}') from ex
+                message = f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern.pattern}'
+                _LOGGER.error(message)
+                raise ValidatorException(message) from ex
         return UtilASTChecker._TestCase(name, pattern, pattern_parsed)
 
     @staticmethod
-    def get_match_location(match: re.Match, start: bool = False) -> LocationType:
+    def get_match_location(match: re.Match, start: bool = False) -> tuple[int, int]:
         """
         Returns match location in file: line and column (counting from 1)
         """
@@ -134,21 +131,21 @@ class UtilASTChecker:
         return True
 
     @staticmethod
-    def run_error_test(test_file: Path, test: _TestCase, actual_errors: AstCheckerErrorsSet) -> bool:
-        file_name: str = test_file.name if test.error_file == '' else test.error_file
-        expected_error: AstCheckerError = f'{test.checks["error"]}', f'[{file_name}:{test.line}:{test.col}]'
+    def run_message_test(test_file: Path, test: _TestCase, actual_errors: set) -> bool:
+        file_name = test_file.name if test.error_file == '' else test.error_file
+        expected_error = f'{test.checks["error"]}', f'[{file_name}:{test.line}:{test.col}]'
         if expected_error in actual_errors:
             actual_errors.remove(expected_error)
             return True
-        _LOGGER.all(f'No Expected error {expected_error}')
+        _LOGGER.all(f'Found Unexpected error: {expected_error}')
         return False
 
     @staticmethod
-    def get_actual_errors(error: str) -> set:
+    def get_actual_errors(error: str) -> set[tuple[str, str]]:
         actual_errors = set()
         for error_str in error.splitlines():
             if error_str.strip():
-                error_text, error_loc = error_str.rsplit(' ', 1)
+                error_loc, error_text = error_str.split(' ', 1)
                 actual_errors.add((error_text.strip(), error_loc))
         return actual_errors
 
@@ -172,10 +169,11 @@ class UtilASTChecker:
         sep1 = match_str.find(' ')
         sep2 = match_str.find(' ', sep1 + 1)
         if sep1 == -1 or sep2 == -1:
-            raise UtilASTChecker.AstCheckerException(
-                'Wrong definition format: expected '
-                f'`/* @@@ <id> <pattern-type> <pattern> */`, got /* @@@ {match_str} */')
-        name = match_str[:sep1]
+            message = 'Wrong definition format: expected `/* @@@ <id> <pattern-type> <pattern> */`, ' + \
+                      f'got /* @@@ {match_str} */'
+            _LOGGER.error(message)
+            raise ValidatorException(message)
+
         pattern_type = UtilASTChecker._TestType(match_str[sep1 + 1:sep2])
         pattern = match_str[sep2 + 1:]
 
@@ -202,12 +200,15 @@ class UtilASTChecker:
             # parse `<id>`
             name = str_match
             if any(not char.isalnum() and char != '_' for char in name):
-                raise UtilASTChecker.AstCheckerException(
-                    f'Bad `<id>` value, expected value from `[a-zA-Z0-9_]+`, got {name}')
+                message = f'Bad `<id>` value, expected value from `[a-zA-Z0-9_]+`, got {name}'
+                _LOGGER.error(message)
+                raise ValidatorException(message)
 
             if name in link_sources_map:
                 line, col = self.get_match_location(match)
-                raise UtilASTChecker.AstCheckerException(f'Link {name} (at location {line}:{col}) is already defined')
+                message = f'Link {name} (at location {line}:{col}) is already defined'
+                _LOGGER.error(message)
+                raise ValidatorException(message)
 
             if name in link_defs_map:
                 result = []
@@ -235,8 +236,10 @@ class UtilASTChecker:
         for opt, val in matches:
             value = val.lower()
             if opt not in self.skip_options or value not in ['true', 'false']:
-                raise UtilASTChecker.AstCheckerException('Wrong match_at_location format: expected '
-                                                         f'`/* @@# <skip-option> */`, got /* @@? {match_str} */')
+                message = ('Wrong match_at_location format: expected '
+                           f'`/* @@# <skip-option> */`, got /* @@? {match_str} */')
+                _LOGGER.default(message)
+                raise ValidatorException(message)
             self.skip_options[opt] = value == 'true'
 
     def parse_match_at_loc_statement(self, match: re.Match[str]) -> UtilASTChecker._TestCase:
@@ -245,36 +248,29 @@ class UtilASTChecker:
         and  `? <file-name>:<line>:<col> <pattern-type> <pattern>`
         """
         match_str = re.sub(r'\s+', ' ', match.group('pattern'))[1:].strip()
-        sep1 = match_str.find(' ')
-        sep2 = match_str.find(' ', sep1 + 1)
-        if sep1 == -1 or sep2 == -1:
-            raise UtilASTChecker.AstCheckerException('Wrong match_at_location format: expected '
-                                                     '`/* @@? <line>:<col> <pattern-type> <pattern> */`, '
-                                                     f'got /* @@? {match_str} */')
-        location = match_str[:sep1]
-        loc_sep1 = location.find(':')
-        loc_sep2 = location.find(':', loc_sep1 + 1)
-        if loc_sep1 == -1:
-            raise UtilASTChecker.AstCheckerException('Wrong match_at_location format: expected '
-                                                     '`/* @@? <line>:<col> <pattern-type> <pattern> */`, '
-                                                     f'got /* @@? {match_str} */')
-        line_str = location[:loc_sep1] if loc_sep2 == -1 else location[loc_sep1 + 1:loc_sep2]
-        col_str = location[loc_sep1 + 1:] if loc_sep2 == -1 else location[loc_sep2 + 1:]
-        error_file = '' if loc_sep2 == -1 else location[:loc_sep1]
-        if loc_sep2 != -1:
-            pass
-        if not line_str.isdigit():
-            raise UtilASTChecker.AstCheckerException(f'Expected line number, got {line_str}')
-        if not col_str.isdigit():
-            raise UtilASTChecker.AstCheckerException(f'Expected column number, got {col_str}')
+        only_pos_pattern = re.compile(r'(?P<row>\d+):(?P<col>\d+)\s(?P<pattern_type>\S+)\s(?P<pattern>.*)')
+        file_pos_pattern = re.compile(
+            r'(?P<file_name>\S+):(?P<row>\d+):(?P<col>\d+)\s(?P<pattern_type>\S+)\s(?P<pattern>.*)')
+        only_pos_match = only_pos_pattern.match(match_str)
+        file_pos_match = file_pos_pattern.match(match_str)
+        loc_match = file_pos_match if file_pos_match else only_pos_match
 
-        line, col = int(line_str), int(col_str)
-        pattern_type = UtilASTChecker._TestType(match_str[sep1 + 1:sep2])
-        pattern = match_str[sep2 + 1:]
+        if loc_match is None:
+            message = ('Wrong match_at_location format: expected '
+                       '`/* @@? <line>:<col> <pattern-type> <pattern> */`, '
+                       f'got /* @@? {match_str} */')
+            _LOGGER.error(message)
+            raise ValidatorException(message)
+
+        error_file = file_pos_match.group("file_name") if file_pos_match else ""
+        row = int(loc_match.group("row"))
+        col = int(loc_match.group("col"))
+        pattern_type = UtilASTChecker._TestType(loc_match.group("pattern_type"))
+        pattern = loc_match.group("pattern")
 
         return self.create_test_case(
             name=None,
-            pattern=UtilASTChecker._Pattern(pattern_type, pattern, line, col, error_file)
+            pattern=UtilASTChecker._Pattern(pattern_type, pattern, row, col, error_file)
         )
 
     def parse_tests(self, test_text: str) -> UtilASTChecker.TestCasesList:
@@ -326,8 +322,6 @@ class UtilASTChecker:
         return nodes
 
     def run_node_test(self, test: _TestCase, ast: dict) -> bool:
-        if test.test_type != UtilASTChecker._TestType.NODE:
-            return True
         nodes_by_loc = self.find_nodes_by_start_location(ast, test.line, test.col)
         test_passed = False
         for node in nodes_by_loc:
@@ -341,30 +335,19 @@ class UtilASTChecker:
         Takes AST and runs tests on it, returns True if all tests passed
         """
         _LOGGER.all(f'Running {len(test_cases.tests_list)} tests...')
-        failed_tests = 0
-        actual_errors: AstCheckerErrorsSet = self.get_actual_errors(error)
+        actual_errors = self.get_actual_errors(error)
         tests_set = set(test_cases.tests_list)
-        node_test_passed = True
-        error_test_passed = True
-        warning_test_passed = True
 
-        for i, test in enumerate(tests_set):
-            if test.test_type == UtilASTChecker._TestType.NODE:
-                node_test_passed = self.run_node_test(test, ast)
-            elif test.test_type == UtilASTChecker._TestType.ERROR:
-                error_test_passed = True if test_cases.skip_errors \
-                    else self.run_error_test(test_file, test, actual_errors)
-            elif test.test_type == UtilASTChecker._TestType.WARNING:
-                warning_test_passed = True if test_cases.skip_warnings \
-                    else self.run_error_test(test_file, test, actual_errors)
-            test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
-            if bool(node_test_passed and error_test_passed and warning_test_passed):
-                _LOGGER.all(f'PASS: {test_name}')
-            else:
-                _LOGGER.all(f'FAIL: {test_name} in {test_file}')
+        failed_tests = self._dispatch_tests(test_file, test_cases, ast, actual_errors, tests_set)
+
+        for actual_error in actual_errors:
+            message = actual_error[0]
+            if not self.check_skip_warning() and message.startswith("Warning:"):
+                _LOGGER.all(f'Unexpected warning {actual_error}')
                 failed_tests += 1
-
-        failed_tests = self.check_remaining_errors(actual_errors, failed_tests)
+            if not self.check_skip_error() and _error_msg_pattern.match(message):
+                _LOGGER.all(f'Unexpected error {actual_error}')
+                failed_tests += 1
 
         if failed_tests == 0:
             _LOGGER.all('All tests passed')
@@ -373,14 +356,26 @@ class UtilASTChecker:
         _LOGGER.all(f'Failed {failed_tests} tests')
         return False
 
-    def check_remaining_errors(self, actual_errors: AstCheckerErrorsSet, failed_tests: int) -> int:
-        for actual_error in actual_errors:
-            if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():
-                _LOGGER.all(f'Unexpected warning {actual_error}')
+    def _dispatch_tests(self, test_file: Path, test_cases: TestCasesList, ast: dict,
+                        actual_errors: set[tuple[str, str]], tests_set: set[_TestCase]) -> int:
+        failed_tests = 0
+        for i, test in enumerate(tests_set):
+            if test.test_type == UtilASTChecker._TestType.NODE:
+                test_passed = self.run_node_test(test, ast)
+            elif test.test_type == UtilASTChecker._TestType.ERROR:
+                test_passed = self.run_message_test(test_file, test, actual_errors)
+                if test_cases.skip_errors:
+                    test_passed = True
+            elif test.test_type == UtilASTChecker._TestType.WARNING:
+                test_passed = self.run_message_test(test_file, test, actual_errors)
+                if test_cases.skip_warnings:
+                    test_passed = True
+            else:
+                assert_never(test.test_type)
+            test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
+            if test_passed:
+                _LOGGER.all(f'PASS: {test_name}')
+            else:
+                _LOGGER.all(f'FAIL: {test_name} in {test_file}')
                 failed_tests += 1
-            if (actual_error[0].split()[0] in ("TypeError:", "SyntaxError:", "Error:")
-                    and not self.check_skip_error()):
-                _LOGGER.all(f'Unexpected error {actual_error}')
-                failed_tests += 1
-
         return failed_tests

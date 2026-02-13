@@ -118,6 +118,10 @@ class TimeoutException(RunnerException):
     pass
 
 
+class ValidatorException(RunnerException):
+    pass
+
+
 class TestGenerationException(RunnerException):
     def __init__(self, args: tuple) -> None:
         if len(args) > 0:
