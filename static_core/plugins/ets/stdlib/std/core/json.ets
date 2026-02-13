@@ -17,6 +17,8 @@ package std.core
 
 const BigIntType: Class;
 
+export type JsonRecordType = boolean | bigint | String | undefined | null | Double | Long | Record<string, JsonRecordType> | Array<JsonRecordType>
+
 export interface JsonReplacer {
     jsonReplacer(): Record<String, Any>
 }
@@ -728,8 +730,13 @@ export class JSON {
     /**
       * Parses a JSON string and returns a JsonElement.
       * @param {string} text - The JSON string to parse
+      * @param {jsonx.ParseOptions} [options] - BigInt parsing options
       * @returns {JsonElement} The parsed JSON element
       * @throws {JsonParseError} If the JSON string is invalid
+      * @static
+      * @syscap SystemCapability.Utils.Lang
+      * @FaAndStageModel
+      * @since 24
       */
     public static parseJsonElement(text: string, options?: jsonx.ParseOptions): jsonx.JsonElement {
         return new UnifiedJsonParser(text, options).parse()
@@ -739,14 +746,35 @@ export class JSON {
       * Parses a JSON string with a reviver function and returns a JsonElement.
       * @param {string} text - The JSON string to parse
       * @param {(key: string, value: JsonElement) => JsonElement} reviver - Function to transform values
+      * @param {jsonx.ParseOptions} [options] - BigInt parsing options
       * @returns {JsonElement} The parsed JSON element
       * @throws {JsonParseError} If the JSON string is invalid
+      * @static
+      * @syscap SystemCapability.Utils.Lang
+      * @FaAndStageModel
+      * @since 24
       */
     public static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement,
         options?: jsonx.ParseOptions): jsonx.JsonElement {
 
         return new UnifiedJsonParser(text, reviver, options).parse()
     }
+
+    /**
+      * Parses a JSON object string and returns a Record.
+      * @param {string} text - The JSON string to parse
+      * @param {jsonx.ParseOptions} [options] - BigInt parsing options
+      * @returns {Record<string, JsonRecordType>} The parsed Record object
+      * @throws {JsonParseError} If the JSON string is invalid
+      * @static
+      * @syscap SystemCapability.Utils.Lang
+      * @FaAndStageModel
+      * @since 24
+      */
+    public static parseJsonRecord(text: string, options?: jsonx.ParseOptions): Record<string, JsonRecordType> {
+        return new UnifiedJsonParser(text, options).parseRecord()
+    }
+
 }
 
 interface ArrayHandle {
@@ -1993,6 +2021,186 @@ class UnifiedJsonParser {
         return result
     }
 
+    public parseRecord(): Record<string, JsonRecordType> {
+        this.skipWhitespace()
+        if (this.index >= this.length) {
+            throw new JsonParseError("Unexpected end of input", 0, 0)
+        }
+        let firstChar = this.ch
+        if (firstChar != c'{') {
+            throw new JsonParseError("JSON Record root must be an object (starting with '{')", 0, 0)
+        }
+        return this.parseObjectRaw()
+    }
+
+    private parseObjectRaw(): Record<string, JsonRecordType> {
+        this.advance()
+        this.skipWhitespace()
+        let result: Record<string, JsonRecordType> = new Record<string, JsonRecordType>()
+
+        if (this.ch == c'}') {
+            this.advance()
+            return result
+        }
+
+        while (true) {
+            this.skipWhitespace()
+            let key = this.parseStringRaw()
+
+            this.skipWhitespace()
+            if (this.ch != c':') {
+                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
+                    this.index, this.index)
+            }
+            this.advance()
+            this.skipWhitespace()
+
+            let value = this.parseValueRaw()
+            result.set(key, value)
+
+            this.skipWhitespace()
+            if (this.ch == c',') {
+                this.advance()
+            } else if (this.ch == c'}') {
+                this.advance()
+                return result
+            } else {
+                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
+                    this.index, this.index)
+            }
+        }
+    }
+
+    private parseValueRaw(): JsonRecordType {
+        let idx = this.index
+        let ch = this.ch
+        if ((ch == c'n' || ch == c't' || ch == c'f') && idx + 4 <= this.length) {
+            let sub = this.source.substring(idx, idx + 4)
+            if (sub === "null") {
+                this.advanceBy(4)
+                return null
+            }
+            if (sub === "true") {
+                this.advanceBy(4)
+                return true
+            }
+            if (sub === "fals" && idx + 5 <= this.length && this.source.charCodeAt(idx + 4) === c'e') {
+                this.advanceBy(5)
+                return false
+            }
+            throw new JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
+        }
+
+        switch (this.ch) {
+            case c'"':
+                return this.parseStringRaw()
+            case c'{':
+                return this.parseObjectRaw()
+            case c'[':
+                return this.parseArrayRaw()
+            case c'-':
+            case c'0': case c'1': case c'2': case c'3': case c'4':
+            case c'5': case c'6': case c'7': case c'8': case c'9':
+                return this.parseNumberRaw()
+            default:
+                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
+                    this.index, this.index)
+        }
+    }
+
+    private parseNumberRaw(): bigint | Long | Double {
+        let start = this.index
+        let hasFraction = false
+        let hasExponent = false
+
+        if (this.ch == c'-') {
+            this.advance()
+        }
+
+        if (this.ch == c'0') {
+            this.advance()
+        } else if (Char.isDecDigit(this.ch)) {
+            while (Char.isDecDigit(this.ch)) {
+                this.advance()
+            }
+        } else {
+            throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+        }
+
+        if (this.ch == c'.') {
+            hasFraction = true
+            this.advance()
+            if (!Char.isDecDigit(this.ch)) {
+                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+            }
+            while (Char.isDecDigit(this.ch)) {
+                this.advance()
+            }
+        }
+
+        if (this.ch == c'e' || this.ch == c'E') {
+            hasExponent = true
+            this.advance()
+            if (this.ch == c'+' || this.ch == c'-') {
+                this.advance()
+            }
+            if (!Char.isDecDigit(this.ch)) {
+                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+            }
+            while (Char.isDecDigit(this.ch)) {
+                this.advance()
+            }
+        }
+
+        let numStr = this.source.substring(start, this.index)
+        let isFloat = hasFraction || hasExponent
+
+        if (isFloat) {
+            return Double.parseFloat(numStr)
+        }
+
+        if (this.bigIntOpt == 2) {
+            return BigInt(numStr)
+        }
+        if (this.bigIntOpt == 1) {
+            try {
+                return Long.parseInt(numStr, 10)
+            } catch (e) {
+                if (e instanceof FormatError) {
+                    return BigInt(numStr)
+                }
+                throw e
+            }
+        }
+        return Long.parseInt(numStr, 10)
+    }
+
+    private parseArrayRaw(): Array<JsonRecordType> {
+        this.advance()
+        this.skipWhitespace()
+
+        let array: Array<JsonRecordType> = new Array<JsonRecordType>()
+        let idx = 0
+
+        while (this.ch != c']') {
+            this.skipWhitespace()
+            let value = this.parseValueRaw()
+            array.push(value)
+            idx++
+
+            this.skipWhitespace()
+            if (this.ch == c',') {
+                this.advance()
+            } else if (this.ch != c']') {
+                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
+                    this.index, this.index)
+            }
+        }
+
+        this.advance()
+        return array
+    }
+
     private parseValue(): jsonx.JsonElement {
         let idx = this.index
         let ch = this.ch
@@ -2132,15 +2340,29 @@ class UnifiedJsonParser {
 
         let escChar = this.ch
         this.advance()
-        if (escChar == c'u') {
-            return this.parseUnicodeEscape()
+        switch (escChar) {
+            case c'"':
+                return "\""
+            case c'\\':
+                return "\\"
+            case c'/':
+                return "/"
+            case c'b':
+                return "\b"
+            case c'f':
+                return "\f"
+            case c'n':
+                return "\n"
+            case c'r':
+                return "\r"
+            case c't':
+                return "\t"
+            case c'u':
+                return this.parseUnicodeEscape()
+            default:
+                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${this.getPositionDesc()}`,
+                    this.index - 2, this.index)
         }
-        let escaped = UnifiedJsonParser.ESCAPE_MAP.get(escChar)
-        if (escaped != undefined) {
-            return escaped
-        }
-        throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${this.getPositionDesc()}`, 
-            this.index - 2, this.index)
     }
 
     private parseUnicodeEscape(): string {
