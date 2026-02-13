@@ -54,9 +54,21 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      * @throws errors happened on loading ABC file.
      */
     public addAbcFiles(paths: string[]): void {
-        const newFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(paths.length)
+        const loadedFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(paths.length)
+        let count = 0
         for (let i = 0; i < paths.length; i++) {
-            newFiles[i] = AbcFile.loadAbcFile(this, paths[i])
+            const file = AbcFile.loadAbcFile(this, paths[i])
+            if (file) {
+                loadedFiles[count] = file
+                count++
+            } else {
+                // NOTE: Skipping invalid path as a temporary workaround, should throw an exception instead
+                console.error("Failed to load ABC file: " + paths[i])
+            }
+        }
+        const newFiles : FixedArray<AbcFile | undefined> = new FixedArray<AbcFile | undefined>(count)
+        for (let i = 0; i < count; i++) {
+            newFiles[i] = loadedFiles[i]
         }
         this.addAbcFiles(newFiles)
     }

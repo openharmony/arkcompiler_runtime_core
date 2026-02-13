@@ -89,6 +89,10 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         }
         std::string abcPath = hspPath.substr(0, hspPath.length() - 4).append("/ets/modules_static.abc");
         auto safeData = extractor->GetSafeDataForHsp(abcPath);
+        if (safeData == nullptr) {
+            LOG(ERROR, RUNTIME) << "Failed to get safe data from HSP archive: " << abcPath;
+            return nullptr;
+        }
         pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
     }
 
@@ -109,6 +113,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         }
         auto safeData = extractor->GetSafeData(pathStr);
         if (safeData == nullptr) {
+            LOG(ERROR, RUNTIME) << "Failed to get safe data from HAP archive: " << pathStr;
             return nullptr;
         }
         pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), pathStr);
