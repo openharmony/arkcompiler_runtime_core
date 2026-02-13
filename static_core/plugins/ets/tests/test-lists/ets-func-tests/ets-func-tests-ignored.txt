@@ -17,9 +17,6 @@ regression/15278_1.ets
 regression/23659_0.ets
 regression/23659_1.ets
 
-#31724
-regression/31724.ets
-
 #19666  (Feature: Null safety tests)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
@@ -266,7 +263,7 @@ spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 #28321
 std/concurrency/eaworker_message_ignored.ets
 
-#30642
+#30642 
 std/containers/BlockingQueue/LinkedBlockingQueue_getEnd.ets
 
 ### Type Erasure
@@ -292,8 +289,6 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.ets
 #23989
 std/core/std_core_typedarrays_bignum__BigUint64Array.ets
 
-#32768
-std/core/std_core_typeduarrays_methods__BigUint64Array.ets
 ### Negative tests (Import-export)
 spec/import_export/05.export_directives/02.export_type_directives/to_export_negative.ets
 
@@ -309,9 +304,6 @@ spec/import_export/05.export_directives/03.re-export_directives/to_export.ets
 spec/import_export/05.export_directives/03.re-export_directives/to_export_2.ets
 spec/import_export/05.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 
-#10874
-std/math/std_math_clz64_long.ets
-
 #21382 - fixed array -> T[] casts
 escompat/ArrayTest1.ets
 escompat/ArrayTest2.ets
@@ -323,9 +315,6 @@ escompat/ArrayTest6.ets
 #21382 - instance method on primitive
 std/core/std_core_char_instance_Char_toUpperCase.ets
 
-#29995
-ets_func_tests/escompat/JsonAnnotationTest.ets
-
 ############
 # temporary place for the tests related to primitive types refactoring
 ############
@@ -336,7 +325,6 @@ ets_func_tests/escompat/JsonAnnotationTest.ets
 
 # 6.
 # verifier failures:
-std/core/JsonTest.ets
 spec/09.classes/Accessor_Declarations/issue-15142_9.ets
 
 # 7.

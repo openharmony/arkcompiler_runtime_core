@@ -1,2 +1,5 @@
+#33128
+ets_func_tests/std/core/ArrayFilterTest.ets
+
 #28746 
 std/core/EAWorker_out_of_coro_creation.ets
