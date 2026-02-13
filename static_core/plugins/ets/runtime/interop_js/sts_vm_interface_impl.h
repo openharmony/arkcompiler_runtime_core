@@ -24,6 +24,12 @@
 #include "libarkbase/macros.h"
 #include "libarkbase/os/mutex.h"
 
+namespace ark::ets {
+
+class PandaEtsVM;
+
+}  // namespace ark::ets
+
 namespace ark::ets::interop::js {
 
 namespace testing {
@@ -35,6 +41,8 @@ public:
     NO_COPY_SEMANTIC(STSVMInterfaceImpl);
     NO_MOVE_SEMANTIC(STSVMInterfaceImpl);
     PANDA_PUBLIC_API STSVMInterfaceImpl();
+    explicit STSVMInterfaceImpl(PandaEtsVM *vm);
+
     PANDA_PUBLIC_API ~STSVMInterfaceImpl() override = default;
 
     PANDA_PUBLIC_API void MarkFromObject(void *obj) override;
@@ -49,6 +57,11 @@ public:
     PANDA_PUBLIC_API void FinishXGCBarrier() override;
 
     PANDA_PUBLIC_API void NotifyWaiters();
+
+    PandaEtsVM *GetVM() const
+    {
+        return vm_;
+    }
 
 private:
     enum class XGCSyncState { NONE, CONCURRENT_PHASE, CONCURRENT_FINISHED, REMARK_PHASE };
@@ -93,6 +106,8 @@ private:
     VMBarrier xgcBarrier_;
     // xgcSyncState_ is used only for debug
     thread_local static XGCSyncState xgcSyncState_;
+
+    PandaEtsVM *vm_ {nullptr};
 
     // friend test class to access internal structures
     friend class testing::STSVMInterfaceImplTest;

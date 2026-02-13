@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -231,13 +231,11 @@ public:
     uint32_t GetHashCode();
 
     /**
-     * @brief Get interop index of object. It should be setted. You can check if it's setted by
-     * HasInteropIndexed method.
-     * This method is thread safe to GetHashCode, HasInteropIndexed methods. Also it's thread safe to itself.
-     * @see HasInteropIndexed, GetHashCode.
+     * @brief GetInteropIndex with explicit VM parameter (for use in non-coroutine contexts like GC)
+     * @param vm the PandaEtsVM instance
      * @return interop index of object.
      */
-    uint32_t GetInteropIndex() const;
+    uint32_t GetInteropIndex(PandaEtsVM *vm) const;
 
     /**
      * @brief This method sets interop index of the object. Object must not have it. You can check if it's setted by
@@ -251,17 +249,14 @@ public:
      * @brief This method drops interop index of the object. Object must have it. You can check if it's setted by
      * HasInteropIndexed method. If object is in USE_INFO state, it will no be changed until Deflate method is called.
      * This method is thread safe to GetHashCode, HasInteropIndexed methods. IT IN NOT THREAD SAFE TO ITSELF!
+     * @param vm the PandaEtsVM instance
      * @see HasInteropIndexed, GetHashCode, Deflate
      */
-    void DropInteropIndex();
+    void DropInteropIndex(PandaEtsVM *vm);
 
-    bool HasInteropIndex() const
-    {
-        bool hasInteropIndex = false;
-        while (!TryCheckIfHasInteropIndex(&hasInteropIndex)) {
-        }
-        return hasInteropIndex;
-    }
+    bool HasInteropIndex() const;
+
+    bool HasInteropIndex(PandaEtsVM *vm) const;
 
     bool IsHashed() const
     {
@@ -310,11 +305,11 @@ private:
     static inline uint32_t GenerateHashCode();
 
     [[nodiscard]] bool TryGetHashCode(uint32_t *hash);
-    [[nodiscard]] bool TryGetInteropIndex(uint32_t *index) const;
+    [[nodiscard]] bool TryGetInteropIndex(PandaEtsVM *vm, uint32_t *index) const;
     [[nodiscard]] bool TrySetInteropIndex(uint32_t index);
-    [[nodiscard]] bool TryDropInteropIndex();
+    [[nodiscard]] bool TryDropInteropIndex(PandaEtsVM *vm);
     [[nodiscard]] bool TryDeflate();
-    [[nodiscard]] PANDA_PUBLIC_API bool TryCheckIfHasInteropIndex(bool *hasInteropIndexed) const;
+    [[nodiscard]] PANDA_PUBLIC_API bool TryCheckIfHasInteropIndex(PandaEtsVM *vm, bool *hasInteropIndexed) const;
 
     NO_COPY_SEMANTIC(EtsObject);
     NO_MOVE_SEMANTIC(EtsObject);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,19 +50,20 @@ ALWAYS_INLINE static bool IsJsXrefObjectType([[maybe_unused]] const SharedRefere
     return result;
 }
 
-size_t SharedReferenceStorageVerifier::TraverseAllItems(const SharedReferenceStorage *const storage, XgcStatus status)
+size_t SharedReferenceStorageVerifier::TraverseAllItems(const SharedReferenceStorage *const storage, XgcStatus status,
+                                                        PandaEtsVM *vm)
 {
     size_t capacity = storage->Capacity();
     size_t failCount = 0;
     for (size_t index = 1U; index < capacity; ++index) {
-        failCount += VerifyOneItem(storage, index, status);
+        failCount += VerifyOneItem(storage, index, status, vm);
     }
     LOG_IF(failCount > 0, ERROR, ETS_INTEROP_JS) << "REF_VERIFIER: Shared reference verify total fails: " << failCount;
     return failCount;
 }
 
 size_t SharedReferenceStorageVerifier::VerifyOneItem(const SharedReferenceStorage *const storage, size_t index,
-                                                     XgcStatus status)
+                                                     XgcStatus status, PandaEtsVM *vm)
 {
     size_t failCount = 0;
     const SharedReference *item = storage->GetItemByIndex(index);
@@ -71,7 +72,7 @@ size_t SharedReferenceStorageVerifier::VerifyOneItem(const SharedReferenceStorag
         return failCount;
     }
     failCount = CheckObjectAlive(item, index);
-    failCount += CheckObjectReindex(storage, item, index);
+    failCount += CheckObjectReindex(storage, item, index, vm);
     failCount += CheckObjectAddressValid(item, index);
     failCount += CheckJsObjectType(item, index);
     if (status == XgcStatus::XGC_FINISHED) {
@@ -111,13 +112,13 @@ size_t SharedReferenceStorageVerifier::CheckJsObjectAlive(const SharedReference 
 }
 
 size_t SharedReferenceStorageVerifier::CheckObjectReindex(const SharedReferenceStorage *const storage,
-                                                          const SharedReference *item, size_t index)
+                                                          const SharedReference *item, size_t index, PandaEtsVM *vm)
 {
     size_t failCount = 0;
     if (!item->HasETSFlag() && item->HasJSFlag()) {
         failCount += CheckJsObjectReindex(storage, item, index);
     }
-    failCount += CheckEtsObjectReindex(item, index);
+    failCount += CheckEtsObjectReindex(item, index, vm);
     return failCount;
 }
 
@@ -137,10 +138,10 @@ size_t SharedReferenceStorageVerifier::CheckJsObjectReindex(const SharedReferenc
     return failCount;
 }
 
-size_t SharedReferenceStorageVerifier::CheckEtsObjectReindex(const SharedReference *item, size_t index)
+size_t SharedReferenceStorageVerifier::CheckEtsObjectReindex(const SharedReference *item, size_t index, PandaEtsVM *vm)
 {
     size_t failCount = 0;
-    int32_t idx = item->GetEtsObject()->GetInteropIndex();
+    int32_t idx = item->GetEtsObject()->GetInteropIndex(vm);
     if (const_cast<InteropCtx *>(item->GetCtx())->GetSharedRefStorage()->GetItemByIndex(idx) != item) {
         LOG_REF_VERIFIER << "Shared Reference corruption found! Ets object address cannot reindex at " << std::hex
                          << item << "," << index;
