@@ -145,12 +145,17 @@ void StackfulCoroutineContext::ThreadProcImpl()
     SetStatus(Coroutine::Status::RUNNING);
     if (co->HasManagedEntrypoint()) {
         ScopedManagedCodeThread s(co);
+        co->UpdateCachedObjects();
         PandaVector<Value> args = std::move(co->GetManagedEntrypointArguments());
         // profiling
         GetWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
         Value result = co->GetManagedEntrypoint()->Invoke(co, args.data());
         co->RequestCompletion(result);
     } else if (co->HasNativeEntrypoint()) {
+        {
+            ScopedManagedCodeThread s(co);
+            co->UpdateCachedObjects();
+        }
         // profiling: jump to the NATIVE EP, will end the SCH_ALL there
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());
     }

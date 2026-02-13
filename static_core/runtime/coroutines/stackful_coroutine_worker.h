@@ -191,6 +191,9 @@ public:
     bool ProcessAsyncWork() NO_THREAD_SAFETY_ANALYSIS override;
     void OnNewCoroutineStartup(Coroutine *co) override;
 
+    /// @brief Update worker local object in coroutines
+    void CacheLocalObjectsInCoroutines() override;
+
 private:
     /* schedule loop management */
     /// the EP for threaded schedule loops
@@ -264,9 +267,6 @@ private:
     void OnBeforeContextSwitch(StackfulCoroutineContext *from, StackfulCoroutineContext *to);
     /// called right after the coroutineContext is switched (in case if no migration happened)
     void OnAfterContextSwitch(StackfulCoroutineContext *to);
-
-    /// worker local storage
-    void CacheLocalObjectsInCoroutines() override;
 
     void ProcessTimerEvents();
 

@@ -937,6 +937,7 @@ void ManagedThread::CleanUp()
     objectHeaderHandleScopes_.clear();
 
     CleanUpMutatorStatus();
+    SetFlattenedStringCache(nullptr);
     // NOTE(molotkovnikhail, 13159) Add cleanup of signal_stack for windows target
 }
 

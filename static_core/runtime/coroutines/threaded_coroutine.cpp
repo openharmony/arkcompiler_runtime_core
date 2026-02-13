@@ -109,6 +109,7 @@ void ThreadedCoroutineContext::ThreadProc(ThreadedCoroutineContext *ctx)
         }
 
         ScopedManagedCodeThread s(co);
+        co->UpdateCachedObjects();
         PandaVector<Value> args = std::move(co->GetManagedEntrypointArguments());
         LOG(DEBUG, COROUTINES) << "ThreadProc: invoking the EP for coro " << co->GetName();
         Value res = co->GetManagedEntrypoint()->Invoke(co, args.data());

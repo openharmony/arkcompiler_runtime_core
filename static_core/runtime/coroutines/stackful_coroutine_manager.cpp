@@ -52,7 +52,7 @@ void StackfulCoroutineManager::CreateMainCoroAndWorkers(size_t howMany, Runtime 
     auto *mainCo = CreateMainCoroutine(runtime, vm);
     ASSERT(mainCo != nullptr);
     wMain->AddRunningCoroutine(mainCo);
-    OnWorkerStartupImpl(wMain);
+    OnWorkerStartup(wMain);
 
     CreateWorkersImpl(howMany, runtime, vm);
 }
@@ -184,6 +184,7 @@ void StackfulCoroutineManager::OnWorkerShutdown(StackfulCoroutineWorker *worker)
 
 void StackfulCoroutineManager::OnWorkerStartup(StackfulCoroutineWorker *worker)
 {
+    worker->OnBeforeWorkerStartup();
     os::memory::LockHolder lock(workersLock_);
     OnWorkerStartupImpl(worker);
 }
@@ -1065,14 +1066,21 @@ bool StackfulCoroutineManager::MigrateCoroutinesInward(StackfulCoroutineWorker *
     }
 
     auto affinityMask = CalcAffinityMask(CoroutineWorkerGroup::AnyId());
-    os::memory::LockHolder lkWorkers(workersLock_);
-    StackfulCoroutineWorker *from = ChooseWorkerImpl(WorkerSelectionPolicy::MOST_LOADED, affinityMask);
-    if (from == nullptr || from->IsIdle()) {
-        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MigrateCoroutinesInward : no suitable worker.";
-        return false;
+    bool res;
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        StackfulCoroutineWorker *from = ChooseWorkerImpl(WorkerSelectionPolicy::MOST_LOADED, affinityMask);
+        if (from == nullptr || from->IsIdle()) {
+            LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MigrateCoroutinesInward : no suitable worker.";
+            return false;
+        }
+        res = to->MigrateFrom(from);
     }
-
-    return to->MigrateFrom(from);
+    if (res) {
+        ScopedManagedCodeThread msc(Coroutine::GetCurrent());
+        to->CacheLocalObjectsInCoroutines();
+    }
+    return res;
 }
 
 StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelectionPolicy policy, AffinityMask mask)
@@ -1113,10 +1121,23 @@ StackfulCoroutineWorker *StackfulCoroutineManager::ChooseWorkerImpl(WorkerSelect
 
 void StackfulCoroutineManager::MigrateAwakenedCoro(Coroutine *co)
 {
-    os::memory::LockHolder lkWorkers(workersLock_);
-    auto *w = ChooseWorkerForCoroutine(co);
-    ASSERT(w != nullptr);
-    w->AddRunnableCoroutine(co);
+    // NOTE(alimovilya, #33501) remove after fix
+    LOG(FATAL, COROUTINES) << "--coroutine-enable-features:migrate-awakened IS NOT SUPPORTED";
+    {
+        os::memory::LockHolder lkWorkers(workersLock_);
+        auto *w = ChooseWorkerForCoroutine(co);
+        ASSERT(w != nullptr);
+        w->AddRunnableCoroutine(co);
+    }
+
+    // NOTE(alimovilya, #33501) `co` might be already destroyed
+    auto *currCoro = Coroutine::GetCurrent();
+    if (currCoro->IsInNativeCode()) {
+        ScopedManagedCodeThread msc(currCoro);
+        co->UpdateCachedObjects();
+    } else {
+        co->UpdateCachedObjects();
+    }
 }
 
 PandaUniquePtr<StackfulCoroutineStateInfoTable> StackfulCoroutineManager::GetAllWorkerFullStatus() const
@@ -1227,4 +1248,34 @@ void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLim
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): EWorkers limit is set to " << exclusiveWorkersLimit
                            << ", when suggested " << eWorkersLimit;
 }
+
+void StackfulCoroutineManager::InitializeManagedStructures()
+{
+    ASSERT_NATIVE_CODE();
+    auto *currCoro = Coroutine::GetCurrent();
+    ASSERT(currCoro == GetMainThread());
+
+    ScopedManagedCodeThread msc(currCoro);
+    PandaVector<PandaVector<CoroutineWorker::LocalObjectData>> eachWorkerLocalObjects {};
+
+    os::memory::LockHolder l {workersLock_};
+
+    auto numWorkers = workers_.size();
+    workersLock_.Unlock();
+
+    eachWorkerLocalObjects.reserve(numWorkers);
+    for (size_t i = 0; i < numWorkers; i++) {
+        eachWorkerLocalObjects.push_back(CoroutineWorker::CreateWorkerLocalObjects());
+    }
+    workersLock_.Lock();
+    ASSERT(numWorkers == workers_.size());
+
+    int i = 0;
+    for (auto *w : workers_) {
+        w->InitWorkerLocalObjects(std::move(eachWorkerLocalObjects[i++]));
+        w->CacheLocalObjectsInCoroutines();
+    }
+    currCoro->UpdateCachedObjects();
+}
+
 }  // namespace ark
