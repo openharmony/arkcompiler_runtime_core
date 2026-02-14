@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -781,12 +781,6 @@ static void SetAttachCallbackForClass(napi_env env, napi_value jsCtor, std::vect
     NAPI_CHECK_FATAL(napi_mark_attach_with_xref(env, jsCtor, static_cast<void *>(etsClass), AttachCBForClass));
 }
 
-static void SortMethodByName(PandaVector<Method *> &methods)
-{
-    std::sort(methods.begin(), methods.end(),
-              [](const Method *lhs, const Method *rhs) { return lhs->GetName() < rhs->GetName(); });
-}
-
 /*static*/
 std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsClass *etsClass, const char *jsBuiltinName,
                                                          const OverloadsMap *overloads)
@@ -817,7 +811,6 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     if (!etsClass->IsFinal()) {
         auto allEtsMethod = etsClass->GetMethods();
         auto ungroupedMethods = CollectAllPandaMethods(allEtsMethod.begin(), allEtsMethod.end());
-        SortMethodByName(ungroupedMethods);
 
         _this->jsproxyWrapper_ = ctx->GetJsProxyInstance(etsClass);
         if (_this->jsproxyWrapper_ == nullptr) {

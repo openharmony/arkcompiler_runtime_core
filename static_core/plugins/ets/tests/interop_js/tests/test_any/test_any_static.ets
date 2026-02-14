@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -21,6 +21,11 @@ import { TestNew0, TestNew1, TestNew2 } from "testDecl";
 import { Foobar } from "testDecl";
 import {arrNum, arrFill, big_val} from 'testDecl';
 import { UserAccount } from 'testDecl'
+import { testBooleanInstance } from 'testDecl';
+import { TestArrayOps, testArrayOpsInstance } from 'testDecl';
+import { testTypeChecksInstance } from 'testDecl';
+import { testChainedCallsInstance } from 'testDecl';
+import { testMultipleGettersInstance } from 'testDecl';
 
 function testIsInstance(): void {
     let res = fooInstance instanceof Foo;
@@ -145,6 +150,64 @@ function testSetter(): void {
     arktest.assertTrue(res);
 }
 
+function testGetter(): void {
+    const user = new UserAccount('alice', 30);
+    let username = user.username;
+    let age = user.age;
+    arktest.assertEQ(username, 'alice');
+    arktest.assertEQ(age, 30);
+}
+
+function testBooleanTypes(): void {
+    let boolTrue = testBooleanInstance.boolTrue;
+    let boolFalse = testBooleanInstance.boolFalse;
+    let boolNull = testBooleanInstance.boolNull;
+
+    arktest.assertEQ(boolTrue, true);
+    arktest.assertEQ(boolFalse, false);
+    arktest.assertEQ(boolNull, null);
+}
+
+function testArrayLength(): void {
+    let arr = testArrayOpsInstance.arr;
+    let len = arr.length;
+    arktest.assertEQ(len, 3);
+}
+
+function testArrayPush(): void {
+    let arr = testArrayOpsInstance.arr;
+    let newLen = arr.push(99);
+    arktest.assertEQ(newLen, 4);
+    arktest.assertEQ(arr[3], 99);
+}
+
+function testTypeOf(): void {
+    let numType = typeof testTypeChecksInstance.num;
+    let strType = typeof testTypeChecksInstance.str;
+    let boolType = typeof testTypeChecksInstance.bool;
+    let objType = typeof testTypeChecksInstance.obj;
+
+    arktest.assertEQ(numType, 'number');
+    arktest.assertEQ(strType, 'string');
+    arktest.assertEQ(boolType, 'boolean');
+    arktest.assertEQ(objType, 'object');
+}
+
+function testChainedMethodCalls(): void {
+    let result = testChainedCallsInstance.add(10).multiply(2).subtract(5).getResult();
+    arktest.assertEQ(result, 15);
+}
+
+function testMultipleGetters(): void {
+    let firstName = testMultipleGettersInstance.firstName;
+    let lastName = testMultipleGettersInstance.lastName;
+    let fullName = testMultipleGettersInstance.fullName;
+
+    arktest.assertEQ(firstName, 'John');
+    arktest.assertEQ(lastName, 'Doe');
+    arktest.assertEQ(fullName, 'John Doe');
+}
+
 function testAll(): void {
     testIsInstance();
     testLdByName();
@@ -165,4 +228,11 @@ function testAll(): void {
     testArrayFill();
     testBigInt();
     testSetter();
+    testGetter();
+    testBooleanTypes();
+    testArrayLength();
+    testArrayPush();
+    testTypeOf();
+    testChainedMethodCalls();
+    testMultipleGetters();
 }
