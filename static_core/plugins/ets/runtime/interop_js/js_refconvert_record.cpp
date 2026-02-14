@@ -62,11 +62,19 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), nullptr, nullptr));
 
-    std::string value = GetString(env, jsArgs[1]);
-    if (value == ets_proxy::SharedReferenceStorage::PROXY_NAPI_WRAPPER) {
-        napi_value result;
-        napi_get_property(env, jsArgs->data()[0], jsArgs->data()[1], &result);
-        return result;
+    if (argc < 2U) {
+        INTEROP_LOG(ERROR) << "Invalid number of arguments for $_get";
+        return nullptr;
+    }
+    napi_valuetype vtype;
+    NAPI_CHECK_FATAL(napi_typeof(env, jsArgs[1], &vtype));
+    if (vtype == napi_string) {
+        std::string value = GetString(env, jsArgs[1]);
+        if (value == ets_proxy::SharedReferenceStorage::PROXY_NAPI_WRAPPER) {
+            napi_value result;
+            napi_get_property(env, jsArgs->data()[0], jsArgs->data()[1], &result);
+            return result;
+        }
     }
 
     ScopedManagedCodeThread managedScope(coro);
@@ -80,11 +88,6 @@ napi_value JSRefConvertRecord::RecordGetHandler(napi_env env, napi_callback_info
     ASSERT(etsThis != nullptr);
 
     EtsMethod *getMethod = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreRecordGet);
-
-    if (argc < 2U) {
-        INTEROP_LOG(ERROR) << "Invalid number of arguments for $_get";
-        return nullptr;
-    }
 
     Span sp(&jsArgs[1], 1);
     return CallETSInstance(coro, ctx, getMethod->GetPandaMethod(), sp, etsThis);
