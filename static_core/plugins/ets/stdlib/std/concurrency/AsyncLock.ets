@@ -124,14 +124,18 @@ export class AsyncLock {
     }
 
     private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
-        return Promise.resolve<T>(callback()).finally(() => {
-             if (options.signal != null && options.signal!.aborted == true) {
-                this.fireCondEvent();
-                throw new Error('AsyncLock:: Operation aborted by signal');
-            }
+        try {
+            return  Promise.resolve<T>(callback()).finally(() => {	 
+                if (options.signal != null && options.signal!.aborted == true) {	 
+                    this.fireCondEvent();	 
+                    throw new Error('AsyncLock:: Operation aborted by signal');	 
+                }	 
+                this.unlock(asyncLockInfo);	 
+            });
+        } catch(e) {
             this.unlock(asyncLockInfo);
-        });
-
+            throw e;
+        }
     }
 
     private static launchPromise<T>(f: Function, ...args: FixedArray<Any>): Promise<T> {
@@ -157,12 +161,7 @@ export class AsyncLock {
     private wrapper<T, U>(callback: AsyncLockCallback<T>, callerCID: int, mode: AsyncLockMode, options: AsyncLockOptions<U>, asyncLockInfo : AsyncLockInfo) : Promise<Awaited<T>> {
 
         this.lock<U>(callerCID, mode,  asyncLockInfo, options);
-        return Promise.resolve<T>(callback()).finally(() => {if (options.signal != null && options.signal!.aborted == true ) {
-            this.fireCondEvent();
-            throw new Error('AsyncLock:: Operation aborted by signal');
-        }
-            this.unlock(asyncLockInfo);
-        });
+        return this.syncwrapper<T, U>(callback, options,  asyncLockInfo);
     }
 
     private lock<U>(callerCID: int, mode: AsyncLockMode, asyncLockInfo: AsyncLockInfo, options: AsyncLockOptions<U>): void {
