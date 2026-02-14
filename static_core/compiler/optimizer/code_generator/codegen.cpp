@@ -24,7 +24,6 @@ Codegen Hi-Level implementation
 #include "optimizer/ir/inst.h"
 #include "relocations.h"
 #include "include/compiler_interface.h"
-#include "irtoc/backend/compiler/constants.h"
 #include "ir-dyn-base-types.h"
 #include "runtime/include/coretypes/string.h"
 #include "compiler/optimizer/ir/analysis.h"
@@ -355,46 +354,7 @@ void Codegen::EmitInterpreterReturnIntrinsic([[maybe_unused]] IntrinsicInst *ins
                                              [[maybe_unused]] SRCREGS src)
 {
     ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN);
-    auto enc = GetEncoder();
-    // Removes all call records
-    ssize_t offset = GetIrtocCFrameSizeBytesBelowFP(GetArch());
-    enc->EncodeAdd(SpReg(), FpReg(), Imm(-offset));
     GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), []() {});
-}
-
-void Codegen::EmitInitInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
-                                                     [[maybe_unused]] SRCREGS src)
-{
-    ASSERT(0);
-    GetEncoder()->SetFalseResult();
-}
-
-void Codegen::EmitPushInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
-                                                     [[maybe_unused]] SRCREGS src)
-{
-    ASSERT(0);
-    GetEncoder()->SetFalseResult();
-}
-
-void Codegen::EmitPopInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
-                                                    [[maybe_unused]] SRCREGS src)
-{
-    ASSERT(0);
-    GetEncoder()->SetFalseResult();
-}
-
-void Codegen::EmitPopMultipleInterpreterCallRecordsIntrinsic([[maybe_unused]] IntrinsicInst *inst,
-                                                             [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
-{
-    ASSERT(0);
-    GetEncoder()->SetFalseResult();
-}
-
-void Codegen::EmitUpdateInterpreterCallRecordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
-                                                       [[maybe_unused]] SRCREGS src)
-{
-    ASSERT(0);
-    GetEncoder()->SetFalseResult();
 }
 #endif  // IRTOC_INTRINSICS_ENABLED
 
@@ -1441,7 +1401,6 @@ void Codegen::CreateMultiArrayCall(CallInst *callInst)
     auto location = callInst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
 
-    ASSERT(!GetFrameInfo()->GetSpillsRelativeFp());
     GetEncoder()->EncodeMov(classOrig, ConvertRegister(location.GetValue(), DataType::REFERENCE));
     CallRuntime(callInst, EntrypointId::CREATE_MULTI_ARRAY, dstReg, RegMask::GetZeroMask(), classReg, TypedImm(numArgs),
                 SpReg());
@@ -2453,29 +2412,29 @@ bool Codegen::RegisterKeepCallArgument(CallInst *callInst, Reg reg)
 
 void Codegen::LoadMethod(Reg dst)
 {
-    ASSERT((CFrameMethod::GetOffsetFromFpInBytes(GetFrameLayout()) -
-            (GetFrameLayout().GetMethodOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::BYTES>())) ==
+    ASSERT((CFrameMethod::GetOffsetFromSpInBytes(GetFrameLayout()) -
+            (GetFrameLayout().GetMethodOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>())) ==
            0);
-    auto fpOffset = CFrameMethod::GetOffsetFromFpInBytes(GetFrameLayout());
-    auto mem = MemRef(FpReg(), -fpOffset);
+    auto spOffset = CFrameMethod::GetOffsetFromSpInBytes(GetFrameLayout());
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeLdr(dst, false, mem);
 }
 
 void Codegen::StoreFreeSlot(Reg src)
 {
     ASSERT(src.GetSize() <= (GetFrameLayout().GetSlotSize() << 3U));
-    auto fpOffset =
-        GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::BYTES>();
-    auto mem = MemRef(FpReg(), -fpOffset);
+    auto spOffset =
+        GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>();
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeStr(src, mem);
 }
 
 void Codegen::LoadFreeSlot(Reg dst)
 {
     ASSERT(dst.GetSize() <= (GetFrameLayout().GetSlotSize() << 3U));
-    auto fpOffset =
-        GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::FP, CFrameLayout::OffsetUnit::BYTES>();
-    auto mem = MemRef(FpReg(), -fpOffset);
+    auto spOffset =
+        GetFrameLayout().GetFreeSlotOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>();
+    auto mem = MemRef(SpReg(), spOffset);
     GetEncoder()->EncodeLdr(dst, false, mem);
 }
 

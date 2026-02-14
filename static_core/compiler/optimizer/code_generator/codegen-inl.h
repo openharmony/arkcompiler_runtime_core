@@ -225,6 +225,8 @@ void Codegen::CreateUnaryCheck(Inst *inst, RuntimeInterface::EntrypointId id, De
     GetEncoder()->EncodeJump(slowPath, src, cc);
 }
 
+// The function alignment up the value from alignment_reg using tmp_reg.
+
 inline ssize_t Codegen::GetStackOffset(Location location)
 {
     if (location.GetKind() == LocationType::STACK_ARGUMENT) {
@@ -242,26 +244,21 @@ inline ssize_t Codegen::GetStackOffset(Location location)
 
 inline ssize_t Codegen::GetBaseOffset(Location location)
 {
-    if (location.IsAnyRegister()) {
-        ASSERT(location.IsRegisterValid());
-        auto *frame = GetFrameInfo();
-        auto offset = location.IsFpRegister() ? frame->GetFpCalleesOffset() : frame->GetCalleesOffset();
-        offset += GetCalleeRegsMask(GetArch(), location.IsFpRegister()).GetDistanceFromTail(location.GetValue());
-        offset *= GetFrameLayout().GetSlotSize();
-        return offset;
-    }
-    ASSERT(location.GetKind() == LocationType::STACK);
-    return GetFrameLayout().GetSpillOffsetFromFpInBytes(location.GetValue());
+    ASSERT(location.IsRegisterValid());
+    auto *frame = GetFrameInfo();
+    auto regNum = location.GetValue();
+    bool isFp = location.IsFpRegister();
+
+    auto offset = isFp ? frame->GetFpCalleesOffset() : frame->GetCalleesOffset();
+    offset += GetCalleeRegsMask(GetArch(), isFp).GetDistanceFromTail(regNum);
+    offset *= GetFrameLayout().GetSlotSize();
+    return offset;
 }
 
-inline MemRef Codegen::GetMemRefForSlot(CFrameLayout::OffsetOrigin basedOn, Location location)
+inline MemRef Codegen::GetMemRefForSlot(Location location)
 {
-    // Stack arguments shall be always SP-based
-    if (location.GetKind() == LocationType::STACK_ARGUMENT || basedOn == CFrameLayout::OffsetOrigin::SP) {
-        return MemRef(SpReg(), GetStackOffset(location));
-    }
     ASSERT(location.IsAnyStack());
-    return MemRef(FpReg(), -GetBaseOffset(location));
+    return MemRef(SpReg(), GetStackOffset(location));
 }
 
 inline Reg Codegen::SpReg() const

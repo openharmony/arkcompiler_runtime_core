@@ -65,13 +65,6 @@
             ],
             "inner_kits": [
                 {
-                    "name": "//arkcompiler/runtime_core/static_core/runtime/tooling/backtrace:arkbacktrace",
-                    "header": {
-                        "header_files": [],
-                        "header_base": "//arkcompiler/runtime_core/static_core/runtime/tooling/backtrace"
-                    }
-                },
-                {
                     "name": "//arkcompiler/runtime_core/arkplatform:libarkplatform",
                     "header": {
                         "header_files": [],

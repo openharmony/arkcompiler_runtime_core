@@ -16,7 +16,6 @@
 #define COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H
 
 #include "optimizer/ir/inst.h"
-#include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_visitor.h"
 #include "libarkbase/utils/cframe_layout.h"
 
@@ -69,7 +68,6 @@ private:
     Encoder *encoder_;
     CFrameLayout fl_;
     Reg spReg_;
-    Reg fpReg_;
 };
 }  // namespace ark::compiler
 #endif  // COMPILER_OPTIMIZER_CODEGEN_SPILL_FILL_ENCODER_H

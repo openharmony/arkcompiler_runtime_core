@@ -334,7 +334,7 @@ public:
 
     ssize_t GetStackOffset(Location location);
     ssize_t GetBaseOffset(Location location);
-    MemRef GetMemRefForSlot(CFrameLayout::OffsetOrigin basedOn, Location location);
+    MemRef GetMemRefForSlot(Location location);
     Reg SpReg() const;
     Reg FpReg() const;
 

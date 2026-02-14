@@ -255,16 +255,12 @@ public:
     void EncodeNegOverflowAndZero(compiler::LabelHolder::LabelId id, Reg dst, Reg src) override;
 
     void EncodeLdr(Reg dst, bool dstSigned, MemRef mem) override;
-    void EncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset) override;
-    void EncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset) override;
     void EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem) override;
     void EncodeLdrAcquireInvalid(Reg dst, bool dstSigned, MemRef mem);
     void EncodeLdrAcquireScalar(Reg dst, bool dstSigned, MemRef mem);
 
     void EncodeMov(Reg dst, Imm src) override;
     void EncodeStr(Reg src, MemRef mem) override;
-    void EncodeStrPreIndex(Reg src, Reg dstBase, Imm offset) override;
-    void EncodeStrPostIndex(Reg src, Reg dstBase, Imm offset) override;
     void EncodeStrRelease(Reg src, MemRef mem) override;
 
     void EncodeLdrExclusive(Reg dst, Reg addr, bool acquire) override;
@@ -297,12 +293,8 @@ public:
     void EncodeSelectTestTransform(const ArgsSelectImmTransform &args) override;
 
     void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem) override;
-    void EncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset) override;
-    void EncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset) override;
 
     void EncodeStp(Reg src0, Reg src1, MemRef mem) override;
-    void EncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, Imm offset) override;
-    void EncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, Imm offset) override;
 
     void EncodeMAdd(Reg dst, Reg src0, Reg src1, Reg src2) override;
     void EncodeMSub(Reg dst, Reg src0, Reg src1, Reg src2) override;

@@ -194,12 +194,8 @@ public:
     virtual void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1);
     virtual void EncodeMov(Reg dst, Imm src);
     virtual void EncodeLdr(Reg dst, bool dstSigned, MemRef mem);
-    virtual void EncodeLdrPreIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset);
-    virtual void EncodeLdrPostIndex(Reg dst, bool dstSigned, Reg srcBase, Imm offset);
     virtual void EncodeLdrAcquire(Reg dst, bool dstSigned, MemRef mem);
     virtual void EncodeStr(Reg src, MemRef mem);
-    virtual void EncodeStrPreIndex(Reg src, Reg dstBase, Imm offset);
-    virtual void EncodeStrPostIndex(Reg src, Reg dstBase, Imm offset);
     virtual void EncodeStrRelease(Reg src, MemRef mem);
     virtual void EncodeLdrExclusive(Reg dst, Reg addr, bool acquire);
     virtual void EncodeStrExclusive(Reg dst, Reg src, Reg addr, bool release);
@@ -306,11 +302,7 @@ public:
 
     virtual void EncodeGetTypeSize(Reg size, Reg type);
     virtual void EncodeLdp(Reg dst0, Reg dst1, bool dstSigned, MemRef mem);
-    virtual void EncodeLdpPreIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset);
-    virtual void EncodeLdpPostIndex(Reg dst0, Reg dst1, bool dstSigned, Reg srcBase, Imm offset);
     virtual void EncodeStp(Reg src0, Reg src1, MemRef mem);
-    virtual void EncodeStpPreIndex(Reg src0, Reg src1, Reg dstBase, Imm offset);
-    virtual void EncodeStpPostIndex(Reg src0, Reg src1, Reg dstBase, Imm offset);
     virtual void EncodeMAdd(Reg dst, Reg src0, Reg src1, Reg src2);
     virtual void EncodeMSub(Reg dst, Reg src0, Reg src1, Reg src2);
     virtual void EncodeMNeg(Reg dst, Reg src0, Reg src1);

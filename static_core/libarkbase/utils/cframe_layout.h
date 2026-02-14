@@ -17,7 +17,6 @@
 #define PANDA_CFRAME_LAYOUT_H
 
 #include "arch.h"
-#include "bit_field.h"
 
 namespace ark {
 
@@ -57,16 +56,6 @@ public:
     static constexpr ssize_t GetOffsetFromSpInBytes(const CFrameLayoutT &fl)
     {
         return GetOffsetFromSpInSlots(fl) * static_cast<ssize_t>(fl.GetSlotSize());
-    }
-    template <class CFrameLayoutT>
-    static constexpr ssize_t GetOffsetFromFpInSlots()
-    {
-        return START;
-    }
-    template <class CFrameLayoutT>
-    static constexpr ssize_t GetOffsetFromFpInBytes(const CFrameLayoutT &fl)
-    {
-        return START * static_cast<ssize_t>(fl.GetSlotSize());
     }
 
 private:
@@ -206,12 +195,7 @@ public:
 
     constexpr ssize_t GetSpillOffsetFromSpInBytes(size_t spillSlot) const
     {
-        return GetSpillOffset<OffsetOrigin::SP, OffsetUnit::BYTES>(spillSlot);
-    }
-
-    constexpr size_t GetSpillOffsetFromFpInBytes(size_t spillSlot) const
-    {
-        return GetSpillOffset<OffsetOrigin::FP, OffsetUnit::BYTES>(spillSlot);
+        return GetSpillOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::BYTES>(spillSlot);
     }
 
     // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -342,7 +326,6 @@ enum class FrameKind { NONE, INTERPRETER, COMPILER };
 template <FrameKind KIND>
 struct BoundaryFrame;
 
-// Compiled to Interpreter
 template <>
 struct BoundaryFrame<FrameKind::INTERPRETER> {
     static constexpr ssize_t METHOD_OFFSET = 1;
@@ -351,16 +334,11 @@ struct BoundaryFrame<FrameKind::INTERPRETER> {
     static constexpr ssize_t CALLEES_OFFSET = -1;
 };
 
-// Interpreter to Compiled
-// Value at offset 0 is the FP of previous native frame, which is possibly different with that at FP_OFFSET below.
 template <>
 struct BoundaryFrame<FrameKind::COMPILER> {
     static constexpr ssize_t METHOD_OFFSET = -1;
-    // Stores FP of previous managed frame.
-    static constexpr ssize_t FP_OFFSET = -2;
+    static constexpr ssize_t FP_OFFSET = 0;
     static constexpr ssize_t RETURN_OFFSET = 1;
-    // NB: The actual offset value of callee-saved registers is -3.
-    // Set to -2 due to ARM64 alignment requirements.
     static constexpr ssize_t CALLEES_OFFSET = -2;
 };
 

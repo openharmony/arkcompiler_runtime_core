@@ -18,15 +18,20 @@
 
 #include <cstdint>
 #include <vector>
+#include "libarkfile/class_data_accessor.h"
+#include "libarkfile/code_data_accessor.h"
+#include "libarkfile/debug_helpers.h"
+#include "libarkfile/file.h"
+#include "libarkfile/method_data_accessor.h"
+#include "runtime/include/class.h"
+#include "runtime/include/class_helper.h"
+#include "runtime/include/stack_walker.h"
 
 namespace ark::tooling {
 
 constexpr uint16_t FUNCTIONNAME_MAX = 1024;
 constexpr uint16_t PACKAGENAME_MAX = 1024;
 constexpr uint16_t URL_MAX = 1024;
-constexpr uint32_t ARKFRAME_SIZE = 16;
-constexpr uint32_t ARKPC_OFFSET = 8;
-constexpr uint32_t FP_SIZE = sizeof(uintptr_t);
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 struct Function {
@@ -39,44 +44,28 @@ struct Function {
     uintptr_t codeSize;
 };
 
-enum class StepFrameType : uint8_t {
-    NATIVE_FRAME = 0,
-    FOREIGN_MANAGED_FRAME = 1,
-    ARK_MANAGED_FRAME = 2,
-};
-
-struct ArkStepParam {
-    uintptr_t *fp;
-    uintptr_t *sp;
-    uintptr_t *pc;
-    bool *isArkFrame;
-    StepFrameType *frameType;
-    uint64_t frameIndex;
+struct MethodInfo {
+    uintptr_t methodId;   // NOLINT(misc-non-private-member-variables-in-classes)
+    uintptr_t codeBegin;  // NOLINT(misc-non-private-member-variables-in-classes)
+    uint32_t codeSize;    // NOLINT(misc-non-private-member-variables-in-classes)
+    MethodInfo(uintptr_t id, uintptr_t begin, uint32_t size) : methodId(id), codeBegin(begin), codeSize(size) {}
+    friend bool operator<(const MethodInfo &lhs, const MethodInfo &rhs)
+    {
+        return lhs.codeBegin < rhs.codeBegin;
+    }
 };
 
 class Backtrace {
 public:
     using ReadMemFunc = bool (*)(void *, uintptr_t, uintptr_t *, bool);
-    using ReadMemFuncStatic = bool (*)(void *, uintptr_t, uintptr_t *);
     // CC-OFFNXT(readability-function-size_parameters)
-    static int StepArkByManagedFrame(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc,
-                                     uintptr_t *bcOffset);
+    static int StepArk(void *ctx, ReadMemFunc readMem, uintptr_t *fp, uintptr_t *sp, uintptr_t *pc,
+                       uintptr_t *bcOffset);
     // CC-OFFNXT(readability-function-size_parameters)
-    static bool StepArkByNativeFrame(void *ctx, ReadMemFuncStatic readMem, ArkStepParam *arkStepParam);
-    // CC-OFFNXT(readability-function-size_parameters)
-    static int SymbolizeByManagedFrame(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData,
-                                       uint64_t abcSize, Function *function);
-    // CC-OFFNXT(readability-function-size_parameters)
-    static bool SymbolizeByNativeFrame(uintptr_t pc, uintptr_t mapBase, uintptr_t loadOffset, uint8_t *abcData,
-                                       uintptr_t abcSize, Function *function, uintptr_t extractorptr);
-    static bool SymbolizeByNativeFrame(uintptr_t pc, uintptr_t mapBase, Function *function, uintptr_t extractorptr);
-    static uintptr_t CreateArkSymbolExtractor();
-    static bool DestroyArkSymbolExtractor(uintptr_t extractorptr);
-    static bool SetExtractorData(uint8_t *data, uintptr_t dataSize, uintptr_t loadOffset, uintptr_t extractorptr);
-    static uint8_t *GetExtractorFileData(uintptr_t extractorptr);
-    static uintptr_t GetExtractorFileDataSize(uintptr_t extractorptr);
-    static uintptr_t GetExtractorFileLoadOffset(uintptr_t extractorptr);
-    static bool HasExtractorFile(uintptr_t extractorptr);
+    static int Symbolize(uintptr_t pc, uintptr_t mapBase, uint32_t bcOffset, uint8_t *abcData, uint64_t abcSize,
+                         Function *function);
+    static std::vector<MethodInfo> ReadAllMethodInfos(const ark::panda_file::File *pandaFile);
+    static std::optional<MethodInfo> ReadMethodInfo(ark::panda_file::MethodDataAccessor &mda);
 };
 
 }  // namespace ark::tooling
