@@ -151,6 +151,14 @@ add_ets_coroutines_test(FILE async_call.ets
                         MODE "INT" "JIT" "AOT"
 )
 
+add_ets_coroutines_test(FILE global_timer_in_static_init.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "ONE"
+                        MODE "INT" "JIT" "AOT"
+)
+
 add_ets_coroutines_test(FILE launch_instruction.ets
                         SKIP_ARM32_COMPILER
                         IMPL "STACKFUL"
