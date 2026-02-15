@@ -32,10 +32,14 @@ cases:
            return new B()
        }
       use: |-
-          arktest.assertEQ(boo("not null")?.fldB?.fldA , "abc")
-          arktest.assertEQ(boo("not null")?.fldB?.metA("xyz") , "xyz")
-          arktest.assertEQ(boo("not null")?.metB("not null")?.fldA , "abc")
-          arktest.assertEQ(boo("not null")?.metB("not null")?.metA("xyz") , "xyz")
+        arktest.assertEQ(boo("not null")?.fldB?.fldA , "abc")
+        arktest.assertEQ(boo("not null")?.fldB?.metA("xyz") , "xyz")
+        arktest.assertEQ(boo("not null")?.metB("not null")?.fldA , "abc")
+        arktest.assertEQ(boo("not null")?.metB("not null")?.metA("xyz") , "xyz")
+        arktest.assertTrue(boo("not null")?.fldB?.fldA instanceof string)
+        arktest.assertTrue(boo("not null")?.fldB?.metA("xyz") instanceof string)
+        arktest.assertTrue(boo("not null")?.metB("not null")?.fldA instanceof string)
+        arktest.assertTrue(boo("not null")?.metB("not null")?.metA("xyz") instanceof string)
 
     - decl: |-
         let users: string[] = ["John", "Jane"];
@@ -56,6 +60,7 @@ cases:
       use: |-
         const bob = new Person("Bob");
         arktest.assertEQ(bob.getGreeting?.(), "Hello, Bob");
+        arktest.assertTrue(bob.getGreeting?.() instanceof string);
 
     - decl: |-
         class Person {
@@ -78,6 +83,7 @@ cases:
       use: |-
         let name: string = "Alice";
         arktest.assertEQ(greet(name?.toUpperCase()), "Hello, ALICE");
+        arktest.assertTrue(greet(name?.toUpperCase()) instanceof string);
 
     - decl: |-
         class A {
@@ -94,3 +100,23 @@ cases:
       use: |-
         const a1 = new A();
         arktest.assertEQ(a1?.b?.c?.value, "test");
+        arktest.assertTrue(a1?.b?.c?.value instanceof string);
+
+    - decl: |-
+        // example from specification
+        function foo(s1: string, s2: string | null) {
+            let a = s1?.[0] // 's' is of non-nullish type, type of 'a' is string
+            let b = s2?.[0] // type of 'b' is string | undefined
+            arktest.assertTrue(a instanceof string);
+            arktest.assertTrue(b instanceof string || b == undefined);
+        }
+      use: |-
+        foo("a", "b");
+        foo("a", null);
+
+    - decl: |-
+        // example from specification
+        class C { f = 1}
+      use: |-
+        let c = new C()
+        c?.f // warning: expression is always non-nullish

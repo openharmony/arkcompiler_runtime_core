@@ -20,6 +20,7 @@ desc: >-
     If the object to the left of ('?.') is undefined or null, then the evaluation of the entire
     surrounding expression is dropped, and undefined is used as the result of the expression.
     If an expression is not of a nullish type, then the chaining operator has no effect.
+expected_out: "warning: expression is always non-nullish"
 ---*/
 
 {{c.decl}}

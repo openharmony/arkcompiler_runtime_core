@@ -17,6 +17,7 @@
 desc: |-
     If an expression preceding a chaining operator is known at compile time to always evaluate to a nullish
     value (undefined or null) or a non-nullish value at runtime, then a compile-time warning is issued.
+expected_out: "warning: expression is always evaluated as undefined"
 ---*/
 
 class Example {
@@ -68,6 +69,8 @@ function test_null_lambda() {
     arktest.assertTrue(res3 == undefined, "expect undefined (n, method, lambda)")
 }
 
+class C { f = 1}
+
 function main(): void {
     // test field access
     let example: Example | undefined = undefined
@@ -104,4 +107,8 @@ function main(): void {
     test_null()
     test_undefined_lambda()
     test_null_lambda()
+
+    // example from specification
+    let d: C | undefined = undefined
+    d?.f // warning: expression is always evaluated as undefined
 }
