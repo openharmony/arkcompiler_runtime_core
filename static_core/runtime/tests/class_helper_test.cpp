@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,75 +13,28 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <cerrno>
 #include <cstdarg>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string_view>
+#include "libarkbase/utils/utf.h"
 
 #include "runtime/include/class_helper.h"
 
 namespace ark::test {
 
-std::string GetExpectedType(panda_file::Type::TypeId id)
+TEST(ClassHelpers, IsPrimitive)
 {
-    std::string expected;
-    switch (id) {
-        case panda_file::Type::TypeId::VOID:
-            expected = "void";
-            break;
-        case panda_file::Type::TypeId::U1:
-            expected = "bool";
-            break;
-        case panda_file::Type::TypeId::I8:
-            expected = "i8";
-            break;
-        case panda_file::Type::TypeId::U8:
-            expected = "u8";
-            break;
-        case panda_file::Type::TypeId::I16:
-            expected = "i16";
-            break;
-        case panda_file::Type::TypeId::U16:
-            expected = "u16";
-            break;
-        case panda_file::Type::TypeId::I32:
-            expected = "i32";
-            break;
-        case panda_file::Type::TypeId::U32:
-            expected = "u32";
-            break;
-        case panda_file::Type::TypeId::I64:
-            expected = "i64";
-            break;
-        case panda_file::Type::TypeId::U64:
-            expected = "u64";
-            break;
-        case panda_file::Type::TypeId::F32:
-            expected = "f32";
-            break;
-        case panda_file::Type::TypeId::F64:
-            expected = "f64";
-            break;
-        case panda_file::Type::TypeId::TAGGED:
-            expected = "any";
-            break;
-        default:
-            expected = "";
-            break;
-    }
-    return expected;
-}
+    const std::array<std::pair<const char *, std::string_view>, 15> PRIMITIVE_RUNTIME_NAMES = {
+        std::pair {"V", "void"}, std::pair {"Z", "u1"},  std::pair {"B", "i8"},  std::pair {"H", "u8"},
+        std::pair {"S", "i16"},  std::pair {"C", "u16"}, std::pair {"I", "i32"}, std::pair {"U", "u32"},
+        std::pair {"J", "i64"},  std::pair {"Q", "u64"}, std::pair {"F", "f32"}, std::pair {"D", "f64"},
+        std::pair {"A", "any"},  std::pair {"Y", "Y"},   std::pair {"N", "N"}};
 
-TEST(ClassHelpers, GetPrimitiveTypeStr)
-{
-    int start = static_cast<int>(panda_file::Type::TypeId::VOID);
-    int end = static_cast<int>(panda_file::Type::TypeId::TAGGED);
-    for (int i = start; i <= end; ++i) {
-        auto id = static_cast<panda_file::Type::TypeId>(i);
-        std::string expected = GetExpectedType(id);
-        const char *typeStr = ark::ClassHelper::GetPrimitiveTypeStr(id);
-        ASSERT_EQ(std::string_view(typeStr), std::string_view(expected));
+    for (const auto &p : PRIMITIVE_RUNTIME_NAMES) {
+        ASSERT_TRUE(ClassHelper::IsPrimitive(utf::CStringAsMutf8(p.first)));
     }
 }
 

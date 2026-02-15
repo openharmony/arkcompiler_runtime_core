@@ -115,10 +115,22 @@ if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_PRODUCT_BUILD)
     )
 endif()
 
+panda_ets_add_gtest(
+    NO_CORES
+    NAME ets_runtime_name_converters_test
+    SOURCES ets_runtime_name_converters_test.cpp
+    LIBRARIES arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB $<TARGET_PROPERTY:mock_stdlib,FILE>
+    DEPS_TARGETS mock_stdlib arkruntime
+)
+
 add_dependencies(ets_tests_runtime_gtests
     ets_vm_test_gtests
     static_object_accessor_test_gtests
-    static_type_converter_test_gtests)
+    static_type_converter_test_gtests
+    ets_runtime_name_converters_test_gtests)
 
 add_subdirectory(types)
 add_subdirectory(tooling)

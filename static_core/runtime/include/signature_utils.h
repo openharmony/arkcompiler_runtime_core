@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_SIGNATURE_UTILS_H
-#define PANDA_PLUGINS_ETS_RUNTIME_SIGNATURE_UTILS_H
+#ifndef PANDA_RUNTIME_SIGNATURE_UTILS_H
+#define PANDA_RUNTIME_SIGNATURE_UTILS_H
 
 #include <string_view>
 #include <optional>
 
 #include "libarkbase/macros.h"
 
-namespace ark::ets::signature {
+namespace ark::signature {
 
 template <typename StringT, char TARGET_SEPARATOR>
 std::optional<StringT> NormalizePackageSeparators(const std::string_view signature, size_t start, size_t end)
@@ -46,6 +46,6 @@ std::optional<StringT> NormalizePackageSeparators(const std::string_view signatu
     return result;
 }
 
-}  // namespace ark::ets::signature
+}  // namespace ark::signature
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_SIGNATURE_UTILS_H
+#endif  // PANDA_RUNTIME_SIGNATURE_UTILS_H

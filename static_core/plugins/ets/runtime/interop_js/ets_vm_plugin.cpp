@@ -33,7 +33,7 @@
 #include "libarkbase/os/thread.h"
 
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
-#include "plugins/ets/runtime/signature_utils.h"
+#include "runtime/include/signature_utils.h"
 
 namespace ark::ets::interop::js {
 

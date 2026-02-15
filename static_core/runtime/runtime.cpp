@@ -14,6 +14,7 @@
  */
 
 #include "runtime/include/runtime.h"
+#include "include/class_helper.h"
 
 #include "compiler_options.h"
 
@@ -1209,7 +1210,7 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
     }
 
     PandaString descriptor;
-    auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+    auto classNameBytes = ClassHelper::GetReferenceDescriptor(className.c_str(), &descriptor);
     auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
     Class *cls = nullptr;
@@ -1281,7 +1282,7 @@ Expected<LanguageContext, Runtime::Error> Runtime::ExtractLanguageContext(const 
     }
 
     PandaString descriptor;
-    auto classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+    auto classNameBytes = ClassHelper::GetReferenceDescriptor(className.c_str(), &descriptor);
     auto methodNameBytes = utf::CStringAsMutf8(methodName.c_str());
 
     auto classId = pf->GetClassId(classNameBytes);
