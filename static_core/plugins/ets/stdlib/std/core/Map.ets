@@ -24,11 +24,11 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
     get size(): int;
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param k the key to find in the Map/class
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key is present.
      */
     get(key: K): V | undefined;
 
@@ -170,7 +170,7 @@ function setClearFlag(this: BucketsArrType, state: boolean) {
     return this[Const.CLEAR_FLAG_IDX] = (state ? 1 : 0)
 }
 
-function getNumOfDeletedAt(this: BucketsArrType, at: At): int { // Call only when clear or rehash occured.
+function getNumOfDeletedAt(this: BucketsArrType, at: At): int { // Call only when clear or rehash occurred.
     if (this.getClearFlag()) {
         return at / pairs(1)
     }
@@ -720,11 +720,11 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     /**
-     * Returns a value assosiated with key if present
+     * Returns a value associated with key if present
      *
      * @param key the key to find in the Map
      *
-     * @returns value if assosiated with key presents.
+     * @returns value if associated with key is present.
      */
     override get(key: K): V | undefined {
         const bucketIdx = this.getBucketIndex(key)
@@ -741,7 +741,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     /**
-     * Returns a value assosiated with key if present, or a default value otherwise
+     * Returns a value associated with key if present, or a default value otherwise
      *
      * @param key the key to find in the Map
      *

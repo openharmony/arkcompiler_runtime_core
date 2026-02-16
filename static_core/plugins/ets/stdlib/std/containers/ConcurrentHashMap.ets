@@ -578,11 +578,11 @@ export namespace containers {
         }
 
         /**
-        * Returns a value assosiated with key if present
+        * Returns a value associated with key if present
         *
         * @param { K } key the key to find in the ConcurrentHashMap
         *
-        * @returns { V | undefined } value if assosiated with key presents.
+        * @returns { V | undefined } value if associated with key is present.
         */
         public override get(key: K): V | undefined {
             const buck = this.getBucket(key);

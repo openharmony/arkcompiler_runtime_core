@@ -3679,8 +3679,8 @@ export abstract class FunctionType extends Type {
 
     /**
      * Returns number of parameters
-     * For static methods reciever type counted as parameter
-     * For instance methods reciever type isn't counted as parameter
+     * For static methods receiver type counted as parameter
+     * For instance methods receiver type isn't counted as parameter
      *
      * @returns {long} number of parameters
      * @syscap SystemCapability.Utils.Lang

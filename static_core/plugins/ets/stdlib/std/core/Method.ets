@@ -93,7 +93,7 @@ export class Method extends Object {
         const isCtor = this.isConstructor()
         const isStatic = this.isStatic()
         if ((isStatic || isCtor) != (recv == null)) {
-            throw new Error("reciever may be null only for static/ctor methods")
+            throw new Error("receiver may be null only for static/ctor methods")
         }
         const thisType = this.getType()
         if (thisType.getParametersNum() != args.length) {

@@ -1,36 +1,7 @@
 {
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true
-  },
-  "skills": {
-    "directory": "SKILLS",
-    "structure": "folder-per-skill",
-    "naming": "match-folder"
-  },
-  "permissions": {
-    "allow": [
-      "Bash(cat:*)",
-      "Bash(cd:*)",
-      "Bash cp(*)",
-      "Bash diff(*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-      "Bash(head:*)",
-      "Bash ls(*)",
-      "Bash(mkdir:*)",
-      "Bash(mv:*)",
-      "Bash pwd(*)",
-      "Bash(rm:*)",
-      "Bash(sed:*)",
-      "Bash sort(*)",
-      "Bash(tail:*)",
-      "Bash(tee:*)",
-      "Bash(touch:*)",
-      "Bash(tr:*)",
-      "Bash uniq(*)",
-      "Bash wc(*)",
-      "Bash xargs(*)"
-    ],
-    "deny": []
+    "typescript-lsp@claude-plugins-official": true,
+    "example-skills@anthropic-agent-skills": true,
+    "claude-md-management@claude-plugins-official": true
   }
 }
