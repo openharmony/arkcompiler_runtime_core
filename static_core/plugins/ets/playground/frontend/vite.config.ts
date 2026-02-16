@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,25 @@
  * limitations under the License.
  */
 
-module.exports = {
-    module: {
-        rules: [
-            {
-                test: /\.scss$/i,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                    },
-                    {
-                        loader: 'sass-loader',
-                    },
-                ],
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+    plugins: [react()],
+    server: {
+        port: 3000,
+        proxy: {
+            '^/(compile|run|share|options|syntax|ast|versions)': {
+                target: 'http://localhost:8000',
             },
-        ],
+        },
     },
-};
+    build: {
+        outDir: 'build',
+    },
+    css: {
+        modules: {
+            localsConvention: 'camelCaseOnly',
+        },
+    },
+});

@@ -3,3 +3,7 @@ coverage/
 public/env.js
 yarn.lock
 package-lock.json
+build/
+test-results/
+playwright-report/
+reports/

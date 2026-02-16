@@ -144,7 +144,7 @@ const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
 
         containerRef.current.querySelectorAll('[data-index]').forEach((el): void => observer.observe(el));
 
-        return () => {
+        return (): void => {
             observer.disconnect();
         };
     }, [logs, dispatch, outLogs, errLogs]);
