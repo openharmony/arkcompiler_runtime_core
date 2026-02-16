@@ -2850,8 +2850,6 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_16.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_5.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_3.ets
-07.expressions/27.equality_expressions/type_neg_1.ets
-07.expressions/27.equality_expressions/type_neg_67.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/02.constant_declarations/const_decl_qmark_n1_12.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_0.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_11.ets
@@ -2862,8 +2860,6 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_12.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_5.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_6.ets
-07.expressions/27.equality_expressions/type_neg_23.ets
-07.expressions/27.equality_expressions/type_neg_66.ets
 07.expressions/35.constant_expression/check_enum/constant_num_chain_initializer_neg_0.ets
 07.expressions/35.constant_expression/check_enum/constant_num_chain_initializer_neg_1.ets
 07.expressions/35.constant_expression/check_enum/constant_number_conversion_neg.ets
@@ -2879,7 +2875,6 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_18.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_2.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_9.ets
-07.expressions/27.equality_expressions/type_neg_44.ets
 07.expressions/35.constant_expression/check_annotation/constant_bitwise_expression_neg_4.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_12.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_2.ets
@@ -2887,15 +2882,12 @@
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_14.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_16.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field_neg.ets
-07.expressions/27.equality_expressions/type_neg_45.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/02.constant_declarations/const_decl_qmark_n2_13.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_10.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_14.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-field-n_9.ets
 06.contexts_and_conversions/04.implicit_conversions/01.widening_numeric_conversions/decl_field/decl-st-field-n_7.ets
 06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/enum2double_neg_0.ets
-07.expressions/27.equality_expressions/type_neg_0.ets
-07.expressions/27.equality_expressions/type_neg_22.ets
 07.expressions/35.constant_expression/check_annotation/constant_bitwise_expression_neg_7.ets
 07.expressions/35.constant_expression/check_enum/constant_str_chain_initializer_neg.ets
 09.classes/06.field_declarations/04.field_initialization/class_static_fields_cte_11.ets

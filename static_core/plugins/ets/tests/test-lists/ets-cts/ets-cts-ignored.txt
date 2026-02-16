@@ -367,12 +367,6 @@
 #32703
 07.expressions/23.exponentiation_expression/inf_27.ets
 
-#31358 number and char equality ops should produce CTE
-07.expressions/27.equality_expressions/eq_neg_16.ets
-07.expressions/27.equality_expressions/eq_neg_17.ets
-07.expressions/27.equality_expressions/eq_neg_18.ets
-07.expressions/27.equality_expressions/eq_neg_19.ets
-
 #32743 bigint and numerical ==/=== should always return false (now return true - false positive)
 07.expressions/27.equality_expressions/01.numerical_equality_operators/bigint_equality_operators/eq_numeric_0.ets
 
@@ -413,6 +407,34 @@
 07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_17.ets
 07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_18.ets
 07.expressions/26.relational_expressions/01.character_relational_operators/char_relational_mixed_n_19.ets
+
+#33172 Expected warning message is not produced
+07.expressions/27.equality_expressions/eq_warn_false_0.ets
+07.expressions/27.equality_expressions/eq_warn_false_1.ets
+07.expressions/27.equality_expressions/eq_warn_false_10.ets
+07.expressions/27.equality_expressions/eq_warn_false_11.ets
+07.expressions/27.equality_expressions/eq_warn_false_12.ets
+07.expressions/27.equality_expressions/eq_warn_false_2.ets
+07.expressions/27.equality_expressions/eq_warn_false_3.ets
+07.expressions/27.equality_expressions/eq_warn_false_4.ets
+07.expressions/27.equality_expressions/eq_warn_false_5.ets
+07.expressions/27.equality_expressions/eq_warn_false_6.ets
+07.expressions/27.equality_expressions/eq_warn_false_7.ets
+07.expressions/27.equality_expressions/eq_warn_false_8.ets
+07.expressions/27.equality_expressions/eq_warn_false_9.ets
+07.expressions/27.equality_expressions/eq_warn_true_0.ets
+07.expressions/27.equality_expressions/eq_warn_true_1.ets
+07.expressions/27.equality_expressions/eq_warn_true_10.ets
+07.expressions/27.equality_expressions/eq_warn_true_11.ets
+07.expressions/27.equality_expressions/eq_warn_true_12.ets
+07.expressions/27.equality_expressions/eq_warn_true_2.ets
+07.expressions/27.equality_expressions/eq_warn_true_3.ets
+07.expressions/27.equality_expressions/eq_warn_true_4.ets
+07.expressions/27.equality_expressions/eq_warn_true_5.ets
+07.expressions/27.equality_expressions/eq_warn_true_6.ets
+07.expressions/27.equality_expressions/eq_warn_true_7.ets
+07.expressions/27.equality_expressions/eq_warn_true_8.ets
+07.expressions/27.equality_expressions/eq_warn_true_9.ets
 
 #30340 &&= ||= ??= still not supported in code
 07.expressions/31.assignment/02.compound_assignment_operators/ops_12.ets
