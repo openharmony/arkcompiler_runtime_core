@@ -836,6 +836,9 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
+#33238
+15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping.ets
+
 #25111
 15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_0.ets
 15.semantic_rules/02.subtyping/07.subtyping_for_fixed-size_array_types/positive_1.ets
@@ -1528,6 +1531,13 @@
 
 #31018 override protected method in superclass by protected one with the same public in superinterface
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_5.ets
+
+#33241
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
+
+#33242
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_public_in_sub_n.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_non_compatible_n.ets
 
 #28235 Constructor Names not yet work
 15.semantic_rules/09.overriding/constructor_no_override_1.ets
