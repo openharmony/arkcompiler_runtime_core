@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ export const loader = {
     init: jest.fn(() => Promise.resolve()),
 };
 
-const Editor = ({ defaultLanguage, defaultValue, theme, onChange, value, ...props }) => (
+const Editor = ({ defaultLanguage, defaultValue, theme, onChange, value, onMount, ...props }) => (
     <div data-testid="editor" {...props} data-language={defaultLanguage} data-theme={theme}>
         {defaultValue || value || 'Mocked Editor'}
         <textarea onChange={onChange} data-testid="editor-textarea" defaultValue={defaultValue} />

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ loader.config({ monaco });
 export const DISASM = 'arkasm';
 
 const DisasmEditor: React.FC = () => {
-    let backendSyntax = useSelector(selectSyntax);
+    const backendSyntax = useSelector(selectSyntax);
     const monaco = useMonaco();
     const {theme} = useTheme();
     const [code, setCode] = React.useState('');
