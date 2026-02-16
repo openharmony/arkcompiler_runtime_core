@@ -191,6 +191,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/const_folding.cpp
         optimizer/optimizations/deoptimize_elimination.cpp
         optimizer/optimizations/escape.cpp
+        optimizer/optimizations/fill_savestate_suspend_inputs.cpp
         optimizer/optimizations/cleanup.cpp
         optimizer/optimizations/if_conversion.cpp
         optimizer/optimizations/if_merging.cpp
@@ -366,6 +367,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/reg_alloc_interference_graph_test.cpp
     tests/reg_alloc_resolver_test.cpp
     tests/rpo_test.cpp
+    tests/fill_savestate_suspend_inputs_test.cpp
     tests/savestate_optimization_tests.cpp
     tests/savestate_suspend_checker_test.cpp
     tests/dispatch_checker_test.cpp

@@ -143,6 +143,9 @@ bool IsConditionEqual(const Inst *inst0, const Inst *inst1, bool inverted);
 CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
 
 void PrepareUsers(Inst *inst, ArenaVector<User *> *users);
+
+PANDA_PUBLIC_API bool OptimizeSaveStateConstantInputs(SaveStateInst *saveState);
+
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_ANALYSIS_H

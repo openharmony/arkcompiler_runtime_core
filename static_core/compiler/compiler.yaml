@@ -147,6 +147,7 @@ options:
     - graph-cloner
     - deoptimize-elim
     - cleanup
+    - fill-ss-suspend
     - if-merging
     - ifconversion
     - inlining

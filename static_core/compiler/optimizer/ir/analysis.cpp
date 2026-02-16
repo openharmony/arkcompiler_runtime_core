@@ -1031,4 +1031,41 @@ void PrepareUsers(Inst *inst, ArenaVector<User *> *users)
     auto newEnd = std::remove_if(users->begin(), users->end(), [](User *user) { return user->GetInst()->IsCheck(); });
     users->erase(newEnd, users->end());
 }
+
+bool OptimizeSaveStateConstantInputs(SaveStateInst *saveState)
+{
+    auto graph = saveState->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+
+    size_t idx = 0;
+    size_t inputsCount = saveState->GetInputsCount();
+    bool skipFloats = (graph->GetArch() == Arch::AARCH32);
+    bool modified = false;
+
+    while (idx < inputsCount) {
+        auto inputInst = saveState->GetInput(idx).GetInst();
+        // In Aarch32 float values are stored in different format than integer
+        if (inputInst->GetOpcode() == Opcode::NullPtr ||
+            (inputInst->IsConst() && (!skipFloats || inputInst->GetType() == DataType::INT64))) {
+            uint64_t rawValue =
+                inputInst->GetOpcode() == Opcode::NullPtr ? 0 : inputInst->CastToConstant()->GetRawValue();
+            auto vreg = saveState->GetVirtualRegister(idx);
+            auto type = inputInst->GetType();
+            // There are no INT64 in dynamic
+            if (type == DataType::INT64 && graph->IsDynamicMethod()) {
+                type = DataType::INT32;
+            }
+            saveState->AppendImmediate(rawValue, vreg.Value(), type, vreg.GetVRegType());
+            saveState->RemoveInput(idx);
+            inputsCount--;
+            modified = true;
+        } else {
+            idx++;
+        }
+    }
+    return modified;
+}
+
 }  // namespace ark::compiler

@@ -35,6 +35,8 @@
 #include "optimizer/optimizations/deoptimize_elimination.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/escape.h"
+#include "optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/optimizations/fill_savestate_suspend_inputs.h"
 #include "optimizer/optimizations/if_conversion.h"
 #include "optimizer/optimizations/inlining.h"
 #include "optimizer/optimizations/licm.h"
@@ -148,6 +150,8 @@ void Pipeline::RunRegAllocAndCodeGenPass(CompilerTaskRunner<RUNNER_MODE> taskRun
         return;
     }
     graph->template RunPass<Cleanup>();
+
+    graph->template RunPass<FillSaveStateSuspendInputs>();
 
     taskRunner.SetTaskOnSuccess([fatalOnErr](CompilerTaskRunner<RUNNER_MODE> nextRunner) {
         nextRunner.AddCallbackOnFail([fatalOnErr]([[maybe_unused]] CompilerContext<RUNNER_MODE> &compilerCtx) {

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1054,6 +1054,70 @@ float CalcSpillWeight(const LivenessAnalyzer &la, LifeIntervals *interval)
         }
     }
     return useWeight;
+}
+
+/**
+ * Get all live values at the specified instruction point.
+ *
+ * Note: This method should be called BEFORE register allocation splits intervals.
+ * After RegAlloc, the sibling chain must be traversed using FindSiblingAt.
+ *
+ * Performance considerations:
+ * - instLifeIntervals_ is populated during the liveness analysis pass in instruction order
+ *   (linear numbers). It is NOT necessarily sorted by interval start/end.
+ * - Each interval's LiveRanges are sorted by start (ascending) within that interval.
+ * - SplitCover(ln) performs a linear scan through the interval's ranges.
+ * - For large methods, consider using LifeIntervalsTree (interval tree data structure)
+ *   for O(log N + K) lookup instead of O(N). However, for typical method sizes (< 1000
+ *   instructions), the linear scan is fast enough due to cache-friendly iteration.
+ * - This method is called once per SaveStateSuspend instruction (typically 1-2 per method),
+ *   so even O(N) is acceptable.
+ */
+void LivenessAnalyzer::GetLiveValuesAtPoint(Inst *inst, ArenaVector<Inst *> &result) const
+{
+    ASSERT(inst != nullptr);
+    auto ln = GetInstLifeNumber(inst);
+    GetLiveValuesAtLifeNumber(ln, result);
+}
+
+void LivenessAnalyzer::GetLiveValuesAtLifeNumber(LifeNumber ln, ArenaVector<Inst *> &result) const
+{
+    result.clear();
+
+    for (const auto &interval : instLifeIntervals_) {
+        if (!interval->HasInst()) {
+            continue;
+        }
+
+        if (interval->SplitCover(ln)) {
+            result.push_back(interval->GetInst());
+        }
+    }
+}
+
+bool LivenessAnalyzer::IsLiveAtPoint(const Inst *valueInst, const Inst *atInst) const
+{
+    ASSERT(valueInst != nullptr);
+    ASSERT(atInst != nullptr);
+
+    auto ln = GetInstLifeNumber(atInst);
+    return IsLiveAtLifeNumber(valueInst, ln);
+}
+
+bool LivenessAnalyzer::IsLiveAtLifeNumber(const Inst *valueInst, LifeNumber ln) const
+{
+    ASSERT(valueInst != nullptr);
+
+    if (valueInst->GetLinearNumber() == INVALID_LINEAR_NUM) {
+        return false;
+    }
+
+    auto interval = GetInstLifeIntervals(valueInst);
+    if (interval == nullptr) {
+        return false;
+    }
+
+    return interval->SplitCover(ln);
 }
 
 }  // namespace ark::compiler

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,11 @@
 #include "gtest/gtest.h"
 #include "libarkbase/mem/arena_allocator.h"
 #include "libarkbase/mem/pool_manager.h"
+#include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <unordered_map>
+#include <vector>
 #include "compiler.h"
 #include "compiler_logger.h"
 #include "graph_comparator.h"
@@ -531,6 +534,39 @@ private:
 #define SRC_GRAPH(testName, ...) TEST_GRAPH(src_graph, testName, __VA_ARGS__)
 #define OUT_GRAPH(testName, ...) TEST_GRAPH(out_graph, testName, __VA_ARGS__)
 // NOLINTEND(cppcoreguidelines-macro-usage)
+
+inline bool IsValueInInputs(const Inst *inst, const Inst *value)
+{
+    if (inst == nullptr || value == nullptr) {
+        return false;
+    }
+    const auto inputs = inst->GetInputs();
+    return std::any_of(inputs.begin(), inputs.end(), [value](const Input &input) { return input.GetInst() == value; });
+}
+
+inline size_t CountValueInInputs(const Inst *inst, const Inst *value)
+{
+    if (inst == nullptr || value == nullptr) {
+        return 0U;
+    }
+    const auto inputs = inst->GetInputs();
+    return static_cast<size_t>(
+        std::count_if(inputs.begin(), inputs.end(), [value](const Input &input) { return input.GetInst() == value; }));
+}
+
+inline bool HasDuplicateInputs(const Inst *inst)
+{
+    if (inst == nullptr) {
+        return false;
+    }
+    const auto inputs = inst->GetInputs();
+    std::vector<const Inst *> inputInsts;
+    inputInsts.reserve(inputs.Size());
+    std::transform(inputs.begin(), inputs.end(), std::back_inserter(inputInsts),
+                   [](const Input &input) { return input.GetInst(); });
+    std::sort(inputInsts.begin(), inputInsts.end());
+    return std::adjacent_find(inputInsts.begin(), inputInsts.end()) != inputInsts.end();
+}
 
 }  // namespace ark::compiler
 
