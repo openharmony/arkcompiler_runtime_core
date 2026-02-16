@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -178,53 +178,6 @@ private:
                                       size_t &refIdx) const;
 
     pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
-
-    static std::string StringDataToString(panda_file::File::StringData sd)
-    {
-        std::string str = std::string(utf::Mutf8AsCString(sd.data));
-        size_t symPos = 0;
-        while (symPos = str.find_first_of("\a\b\f\n\r\t\v\'\?\\", symPos), symPos != std::string::npos) {
-            std::string sym;
-            switch (str[symPos]) {
-                case '\a':
-                    sym = R"(\a)";
-                    break;
-                case '\b':
-                    sym = R"(\b)";
-                    break;
-                case '\f':
-                    sym = R"(\f)";
-                    break;
-                case '\n':
-                    sym = R"(\n)";
-                    break;
-                case '\r':
-                    sym = R"(\r)";
-                    break;
-                case '\t':
-                    sym = R"(\t)";
-                    break;
-                case '\v':
-                    sym = R"(\v)";
-                    break;
-                case '\'':
-                    sym = R"(\')";
-                    break;
-                case '\?':
-                    sym = R"(\?)";
-                    break;
-                case '\\':
-                    sym = R"(\\)";
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-            str = str.replace(symPos, 1, sym);
-            ASSERT(sym.size() == 2U);
-            symPos += 2U;
-        }
-        return str;
-    }
 
     template <typename T>
     std::string LiteralIntegralValueToString(const pandasm::LiteralArray::Literal &lit) const

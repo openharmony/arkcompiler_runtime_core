@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,49 +38,51 @@ inline File::StringData File::GetStringData(EntityId id) const
 // CC-OFFNXT(G.FUD.06) switch-case
 inline std::string StringDataToString(File::StringData sd)
 {
-    std::string str = std::string(utf::Mutf8AsCString(sd.data));
-    size_t symPos = 0;
-    while (symPos = str.find_first_of("\a\b\f\n\r\t\v\'\?\\", symPos), symPos != std::string::npos) {
-        std::string sym;
-        switch (str[symPos]) {
+    const char *data = utf::Mutf8AsCString(sd.data);
+    std::string result;
+    // * 1.2 because of character replacement in the below loop
+    result.reserve(sd.utf16Length * 1.2);
+
+    for (const char *p = data; *p; ++p) {
+        char c = *p;
+        switch (c) {
             case '\a':
-                sym = R"(\a)";
+                result.append("\\a");
                 break;
             case '\b':
-                sym = R"(\b)";
+                result.append("\\b");
                 break;
             case '\f':
-                sym = R"(\f)";
+                result.append("\\f");
                 break;
             case '\n':
-                sym = R"(\n)";
+                result.append("\\n");
                 break;
             case '\r':
-                sym = R"(\r)";
+                result.append("\\r");
                 break;
             case '\t':
-                sym = R"(\t)";
+                result.append("\\t");
                 break;
             case '\v':
-                sym = R"(\v)";
+                result.append("\\v");
                 break;
             case '\'':
-                sym = R"(\')";
+                result.append("\\'");
                 break;
             case '\?':
-                sym = R"(\?)";
+                result.append("\\?");
                 break;
             case '\\':
-                sym = R"(\\)";
+                result.append("\\\\");
                 break;
             default:
-                UNREACHABLE();
+                result.push_back(c);
+                break;
         }
-        str = str.replace(symPos, 1, sym);
-        ASSERT(sym.size() == 2U);
-        symPos += 2U;
     }
-    return str;
+    result.shrink_to_fit();
+    return result;
 }
 
 }  // namespace ark::panda_file

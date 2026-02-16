@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -248,8 +248,7 @@ AnnotationList AbcFileProcessor::GetETSAnnotation(const panda_file::File::Entity
         annList.push_back({"ets.annotation.class", className});
 
         annList.push_back({"ets.annotation.id", "id_" + std::to_string(annotationId.GetOffset())});
-        annList.push_back(
-            {"ets.annotation.element.name", stringTable_->StringDataToString(file_->GetStringData(elemNameId))});
+        annList.push_back({"ets.annotation.element.name", StringDataToString(file_->GetStringData(elemNameId))});
         // type
         if (isArray) {
             elemType = "array";
