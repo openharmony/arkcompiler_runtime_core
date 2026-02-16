@@ -1,0 +1,41 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Remainder with mixed numeric types
+
+cases:
+    # float dividend, integral divisors
+    - { typex: float, x: 10.5f, typey: byte, y: 4, result: 2.5f, result_type: float }
+    - { typex: float, x: 10.5f, typey: short, y: 4, result: 2.5f, result_type: float }
+    - { typex: float, x: 10.5f, typey: int, y: 4, result: 2.5f, result_type: float }
+    - { typex: float, x: 10.5f, typey: long, y: 4, result: 2.5f, result_type: float }
+
+    # double dividend, integral divisors
+    - { typex: double, x: 10.5, typey: byte, y: 4, result: 2.5, result_type: double }
+    - { typex: double, x: 10.5, typey: short, y: 4, result: 2.5, result_type: double }
+    - { typex: double, x: 10.5, typey: int, y: 4, result: 2.5, result_type: double }
+    - { typex: double, x: 10.5, typey: long, y: 4, result: 2.5, result_type: double }
+
+    # integral dividend, float/double divisors
+    - { typex: int, x: 10, typey: float, y: 4.0f, result: 2.0f, result_type: float }
+    - { typex: int, x: 10, typey: double, y: 4.0, result: 2.0, result_type: double }
+    - { typex: long, x: 10, typey: float, y: 4.0f, result: 2.0f, result_type: float }
+    - { typex: long, x: 10, typey: double, y: 4.0, result: 2.0, result_type: double }
+
+    # float and double mixed
+    - { typex: float, x: 10.5f, typey: double, y: 4.0, result: 2.5, result_type: double }
+    - { typex: double, x: 10.5, typey: float, y: 4.0f, result: 2.5, result_type: double }
+
+    # negative dividend (sign of remainder follows dividend)
+    - { typex: float, x: -10.5f, typey: int, y: 4, result: -2.5f, result_type: float }
+    - { typex: double, x: -10.5, typey: int, y: 4, result: -2.5, result_type: double }
