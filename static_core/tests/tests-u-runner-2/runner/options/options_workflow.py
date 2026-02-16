@@ -20,12 +20,12 @@ from pathlib import Path
 from typing import Any, Optional, cast
 
 from runner import utils
-from runner.common_exceptions import FileNotFoundException
+from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.logger import Log
 from runner.options.macros import MacroNotExpanded, Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.options_test_suite import TestSuiteOptions
-from runner.options.step import Step, StepKind
+from runner.options.step import RawStepData, Step, StepKind
 from runner.utils import indent as utils_indent
 
 _LOGGER = Log.get_logger(__file__)
@@ -179,35 +179,20 @@ class WorkflowOptions(IOptions):
             if param_name not in self.__parameters:
                 self.__parameters[param_name] = param_value
 
-    def __load_steps(self, steps: dict[str, dict]) -> None:
+    def __load_steps(self, steps: dict[str, RawStepData]) -> None:
         for step_name, step_content in steps.items():
             if FROM in step_content:
                 self.__prepare_imported_configs(step_name, step_content)
             else:
                 self.__load_step(step_name, step_content)
 
-    def __load_step(self, step_name: str, step_content: dict[str, str | list | dict[str, list]]) -> None:
+    def __load_step(self, step_name: str, step_content: RawStepData) -> None:
         _LOGGER.all(f"Going to load step '{step_name}'")
         for (step_item, step_value) in step_content.items():
             if isinstance(step_value, str):
                 step_content[step_item] = Macros.correct_macro(step_value, self)
-        new_args = []
-        for arg in step_content['args']:
-            arg = Macros.correct_macro(arg, self) \
-                if not self.__test_suite.is_defined_in_collections(arg) else arg
-            if isinstance(arg, list):
-                new_args.extend(arg)
-            else:
-                new_args.append(arg)
-        step_content['args'] = new_args
-        new_env: dict[str, list] = {}
-        if 'env' in step_content:
-            new_env_var = []
-            for env, val in cast(dict, step_content['env']).items():
-                for env_line in val:
-                    new_env_var.append(Macros.correct_macro(env_line, self))
-                new_env[env] = new_env_var
-            step_content['env'] = new_env
+        self.__expand_macros_in_step_args(step_content)
+        self.__expand_macros_in_step_env(step_content)
         step = Step(step_name, step_content)
         if step.enabled:
             if not step.executable_path_exists() and step.step_kind != StepKind.GTEST_RUNNER:
@@ -220,6 +205,31 @@ class WorkflowOptions(IOptions):
             self.__steps.append(step)
         else:
             _LOGGER.all(f"Step '{step_name}' is disabled and won't be loaded")
+
+    def __expand_macros_in_step_args(self, step_content: RawStepData) -> None:
+        new_args = []
+        for arg in step_content['args']:
+            arg = Macros.correct_macro(arg, self) \
+                if not self.__test_suite.is_defined_in_collections(arg) else arg
+            if isinstance(arg, list):
+                new_args.extend(arg)
+            else:
+                new_args.append(arg)
+        step_content['args'] = new_args
+
+    def __expand_macros_in_step_env(self, step_content: RawStepData) -> None:
+        if 'env' not in step_content:
+            return
+        env = cast(RawStepData, step_content['env'])
+        for key, value in env.items():
+            if isinstance(value, str):
+                new_value: str | list[str] = cast(str, Macros.correct_macro(value, self))
+            elif isinstance(value, list):
+                new_value = [cast(str, Macros.correct_macro(env_line, self)) for env_line in value]
+            else:
+                raise InvalidConfiguration(f"Unsupported type for 'env' value: {type(value)}. "
+                                           "Expected str or list[str]")
+            env[key] = new_value
 
     def __expand_macro_for_str(self, value_in_workflow: str) -> str | list[str]:
         try:

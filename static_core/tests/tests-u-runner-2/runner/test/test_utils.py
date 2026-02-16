@@ -26,7 +26,7 @@ from runner import utils
 from runner.common_exceptions import InvalidConfiguration
 from runner.suites.test_lists import TestLists
 
-MethodType = Any    # type: ignore[explicit-any]
+MethodType = Any  # type: ignore[explicit-any]
 CLASSTYPE = TypeVar("CLASSTYPE", bound='object')
 
 
@@ -57,6 +57,14 @@ def compare_dicts(test_case: unittest.TestCase, actual_dict: dict[str, Any],  # 
                 f"actual value = {actual_value}. Expected to be equal")
 
 
+def compare_lists(test_case: unittest.TestCase, actual_list: list[str], expected_list: list[str]) -> None:
+    test_case.assertEqual(len(actual_list), len(expected_list), "Compared lists have different length")
+    for actual, expected in zip(sorted(actual_list), sorted(expected_list), strict=False):
+        test_case.assertEqual(actual, expected, f"actual value = '{actual}' from {actual_list},\n"
+                                                f"expected value = '{expected}' from {expected_list}.\n"
+                                                "Expected to be equal")
+
+
 def try_to_cast_one_type(value1: str, value2: Any) -> int | bool | str:  # type: ignore[explicit-any]
     if isinstance(value2, int):
         return int(value1)
@@ -79,7 +87,7 @@ def assert_not_raise(test_case: unittest.TestCase, cls: type[Exception], functio
         function(*params)
     except cls as ex:
         exception_occurs = True
-        exception_message = f"Unexpected exception has occured: {ex}"
+        exception_message = f"Unexpected exception has occurred: {ex}"
     finally:
         test_case.assertFalse(exception_occurs, exception_message)
 

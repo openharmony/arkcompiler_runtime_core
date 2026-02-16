@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,31 +18,22 @@ parameters:
     work-dir: ${parameters.work-dir}
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
 steps:
-    echo-compiler-ets:
+    echo-compiler:
         executable-path: /usr/bin/echo
         step-type: compiler
-        step-filter: "simple1.ets"
-        args:
-            - "--output=${parameters.output-file}"
-            - ${test-id}
-    echo-compiler-pa:
-        executable-path: /usr/bin/echo
-        step-type: compiler
-        step-filter: "simple?.pa"
-        args:
-            - "--output=${parameters.output-file}"
-            - ${test-id}
-    echo-compiler-skip:
-        executable-path: /usr/bin/echo
-        step-type: compiler
-        step-filter: "simple1"
         args:
             - "--output=${parameters.output-file}"
             - ${test-id}
     echo-runtime:
+        pre-reqs:
+            - req: FileExist
+              value: "${parameters.work-dir}/gen/simple_co.ets"
+            - req: FolderExist
+              value: "${parameters.work-dir}/gen"
+            - req: ParentExistCreate
+              value: "${parameters.output-file}"
         executable-path: /usr/bin/echo
         step-type: runtime
-        step-filter: "*simple1*"
         args:
             - "--output=${parameters.output-file}"
             - "--boot-panda-files=stdlib"

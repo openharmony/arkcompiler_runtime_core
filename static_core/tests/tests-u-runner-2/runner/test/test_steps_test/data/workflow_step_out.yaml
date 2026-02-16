@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,32 +18,21 @@ parameters:
     work-dir: ${parameters.work-dir}
     output-file: "${parameters.work-dir}/intermediate/${test-id}.abc"
 steps:
-    echo-compiler-ets:
+    echo-stdout:
+        pre-reqs:
+            - req: ParentExistCreate
+              value: "${parameters.work-dir}/intermediate/report/out.txt"
         executable-path: /usr/bin/echo
         step-type: compiler
-        step-filter: "simple1.ets"
         args:
             - "--output=${parameters.output-file}"
-            - ${test-id}
-    echo-compiler-pa:
-        executable-path: /usr/bin/echo
-        step-type: compiler
-        step-filter: "simple?.pa"
-        args:
-            - "--output=${parameters.output-file}"
-            - ${test-id}
-    echo-compiler-skip:
-        executable-path: /usr/bin/echo
-        step-type: compiler
-        step-filter: "simple1"
-        args:
-            - "--output=${parameters.output-file}"
-            - ${test-id}
-    echo-runtime:
-        executable-path: /usr/bin/echo
-        step-type: runtime
-        step-filter: "*simple1*"
-        args:
-            - "--output=${parameters.output-file}"
-            - "--boot-panda-files=stdlib"
-            - ${test-id}
+        stdout: "${parameters.work-dir}/intermediate/report/${test-id}-stdout.txt"
+        stderr: "${parameters.work-dir}/intermediate/report/${test-id}-stderr.txt"
+        post-reqs:
+            - req: FolderExist
+              value: "${parameters.work-dir}/intermediate/report"
+            - req: FileExist
+              value: "${parameters.work-dir}/intermediate/report/${test-id}-stdout.txt"
+            - req: FileExist
+              value: "${parameters.work-dir}/intermediate/report/${test-id}-stderr.txt"
+
