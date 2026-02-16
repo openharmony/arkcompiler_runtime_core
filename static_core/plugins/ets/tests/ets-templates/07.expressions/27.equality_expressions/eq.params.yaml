@@ -30,28 +30,14 @@ cases:
     - { a: '"A"', b: '"A"' }
     - { a: '["A"]', b: '["A"]' }
 
-    - decl: |-
-          enum Color { Red, Green, Blue }
-      a: Color.Red
-      b: Color.Green
-    - decl: |-
-          enum Color { Red, Green, Blue }
-      a: '[Color.Red]'
-      b: '[Color.Green]'
+    - { a: Color.Red, b: Color.Green }
+    - { a: '[Color.Red]', b: '[Color.Green]' }
 
     - { a: 'new Object()', b: 'new Object()' }
     - { a: 'new Object[1]', b: 'new Object[1]' }
 
-    - decl: |-
-          class A {}
-          class B {}
-      a: new A()
-      b: new B()
-    - decl: |-
-          class A {}
-          class B {}
-      a: '[new A()]'
-      b: '[new B()]'
+    - { a: new A(), b: new B() }
+    - { a: '[new A()]', b: '[new B()]' }
 
     - a: '(p: number): number => { return p * p }'
       b: '(p: number): number => { return p * p }'
