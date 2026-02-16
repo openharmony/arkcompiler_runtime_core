@@ -49,17 +49,59 @@ To start the application in development mode:
 
 ### Testing the Application
 
-To run tests for the application:
+#### Unit Tests
 
    ```bash
    npm test
    ```
 
-   or if you're using `yarn`:
+#### E2E Tests
+
+E2E tests use Playwright and require the backend running at `http://localhost:8000`. Make sure the backend is started before running E2E tests.
+
+Install browsers first:
 
    ```bash
-   yarn test
+   npx playwright install
    ```
+
+Run tests:
+
+   ```bash
+   npm run test:e2e
+   ```
+
+Other modes:
+
+   ```bash
+   npm run test:e2e:headed   # with browser visible
+   npm run test:e2e:ui       # Playwright UI mode
+   npm run test:e2e:debug    # debug mode
+   ```
+
+#### CI
+
+Unit tests with coverage:
+
+   ```bash
+   npm run test:unit:ci
+   ```
+
+E2E tests with JUnit and HTML reports:
+
+   ```bash
+   npm run test:e2e:ci
+   ```
+
+All tests (unit + E2E):
+
+   ```bash
+   npm run test:ci
+   ```
+
+Reports are saved to the `reports/` directory:
+- `unit-junit.xml` — unit test results
+- `e2e-junit.xml` — E2E test results
 
 ### Building the Application
 

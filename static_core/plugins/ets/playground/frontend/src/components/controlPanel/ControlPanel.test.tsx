@@ -52,22 +52,22 @@ describe('ControlPanel component', () => {
 
     it('renders the ControlPanel component with all buttons and elements', () => {
         renderWithProviders(<ControlPanel />);
-        expect(screen.getByTestId('compile-btn')).toBeInTheDocument();
-        expect(screen.getByTestId('run-btn')).toBeInTheDocument();
-        expect(screen.getByTestId('options')).toBeInTheDocument();
-    });
-
-    it('dispatches compile action on Compile button click', () => {
-        renderWithProviders(<ControlPanel />);
-        const compileButton = screen.getByTestId('run-btn');
-        fireEvent.click(compileButton);
-        expect(store.dispatch).toHaveBeenCalled();
+        expect(screen.getByLabelText('Compile')).toBeInTheDocument();
+        expect(screen.getByLabelText('Run')).toBeInTheDocument();
+        expect(screen.getByLabelText('Options')).toBeInTheDocument();
     });
 
     it('dispatches run action on Run button click', () => {
         renderWithProviders(<ControlPanel />);
-        const runButton = screen.getByTestId('compile-btn');
+        const runButton = screen.getByLabelText('Run');
         fireEvent.click(runButton);
+        expect(store.dispatch).toHaveBeenCalled();
+    });
+
+    it('dispatches compile action on Compile button click', () => {
+        renderWithProviders(<ControlPanel />);
+        const compileButton = screen.getByLabelText('Compile');
+        fireEvent.click(compileButton);
         expect(store.dispatch).toHaveBeenCalled();
     });
 
@@ -80,7 +80,7 @@ describe('ControlPanel component', () => {
 
     it('opens and closes the Compile Options popover on click', () => {
         renderWithProviders(<ControlPanel />);
-        const compileOptionsButton = screen.getByTestId('options');
+        const compileOptionsButton = screen.getByLabelText('Options');
         fireEvent.click(compileOptionsButton);
         expect(screen.getByTestId('compile-options-content')).toBeInTheDocument();
     });
@@ -93,7 +93,7 @@ describe('ControlPanel component', () => {
             code: { isCompileLoading: true, isRunLoading: false },
         });
         renderWithProviders(<ControlPanel />);
-        const compileButton = screen.getByTestId('compile-btn');
+        const compileButton = screen.getByLabelText('Compile');
         expect(compileButton).toBeDisabled();
     });
 
@@ -105,7 +105,7 @@ describe('ControlPanel component', () => {
             code: { isCompileLoading: false, isRunLoading: true },
         });
         renderWithProviders(<ControlPanel />);
-        const runButton = screen.getByTestId('run-btn');
+        const runButton = screen.getByLabelText('Run');
         expect(runButton).toBeDisabled();
     });
 });
