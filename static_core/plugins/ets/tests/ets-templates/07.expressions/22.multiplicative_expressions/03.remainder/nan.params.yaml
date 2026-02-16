@@ -34,3 +34,21 @@ nan_inf:
 
     - { x: Double.POSITIVE_INFINITY, y: 0.0 }
     - { x: Double.NEGATIVE_INFINITY, y: 0.0 }
+
+    # Float-specific NaN cases: float % 0.0f
+    - { x: 3.14f, y: 0.0f }
+    - { x: 0.0f, y: 0.0f }
+    - { x: Float.POSITIVE_INFINITY, y: 0.0f }
+    - { x: Float.NEGATIVE_INFINITY, y: 0.0f }
+    - { x: Float.MAX_VALUE, y: 0.0f }
+    - { x: Float.MIN_VALUE, y: 0.0f }
+
+    # Float NaN operand
+    - { x: Float.NaN, y: 1.0f }
+    - { x: 1.0f, y: Float.NaN }
+    - { x: Float.NaN, y: Float.NaN }
+
+    # Mixed float/double with zero divisor
+    - { x: 12.63, y: 0.0f }
+    - { x: Double.MIN_VALUE, y: 0.0f }
+    - { x: Double.MAX_VALUE, y: 0.0f }
