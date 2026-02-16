@@ -8,7 +8,7 @@ function main(): int {
     // Create a testsuite instance
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
     // Add a test to the testsuite
-    myTessuite.addTest("TestWithEqualityAndNonEquality", () => {
+    myTestsuite.addTest("TestWithEqualityAndNonEquality", () => {
         let one = 1;
         arktest.assertEQ(one, 1);
         arktest.assertNE(one, 2);
@@ -17,7 +17,7 @@ function main(): int {
         arktest.assertLE(one, 4);
     });
     // Add one more test to the testsuite
-    myTessuite.addTest("TestWithExceptions", () => {
+    myTestsuite.addTest("TestWithExceptions", () => {
         arktest.expectError(() => { throw new Error() }, new Error());
         let expectedException = new Exception("Expected message");
         arktest.expectException(() => { throw new Exception("Expected message") }, expectedException);
@@ -36,7 +36,7 @@ function main(): int {
 ```ts
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTessuite.addTest("TestWithEquality", () => {
+    myTestsuite.addTest("TestWithEquality", () => {
         let one = 1;
         arktest.assertEQ(one, 1);
     });
@@ -49,11 +49,11 @@ function main() {
 ```ts
 function main() {
     let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTessuite.addTest("TestWithEquality1", () => {
+    myTestsuite.addTest("TestWithEquality1", () => {
         let one = 1;
         arktest.assertEQ(one, 1);
     });
-    myTessuite.addTest("TestWithEquality2", () => {
+    myTestsuite.addTest("TestWithEquality2", () => {
         let two = 2;
         arktest.assertEQ(two, 1); // Here is bug
     });

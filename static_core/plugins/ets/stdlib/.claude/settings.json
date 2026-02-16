@@ -1,0 +1,10 @@
+{
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true
+  },
+  "skills": {
+    "directory": "SKILLS",
+    "structure": "folder-per-skill",
+    "naming": "match-folder"
+  }
+}

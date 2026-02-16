@@ -3,7 +3,7 @@ name: explore
 description: Explore the ArkTS Playground codebase to understand architecture, find components, or trace data flow
 ---
 
-Uses the Explore agent to investigate the playground codebase structure, components, and relationships.
+Uses Explore agent to investigate the playground codebase structure, components, and relationships.
 
 ## Usage
 
