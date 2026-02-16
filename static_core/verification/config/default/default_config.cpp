@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ const char VERIFIER_DEBUG_DEFAULT_CONFIG[] =
     "    verifier {\n"
     "      default {\n"
     "        check {\n"
-    "          cflow, resolve-id, typing, absint\n"
+    "          cflow, resolve-id, absint\n"
     "        }\n"
     "      }\n"
     "    }\n"

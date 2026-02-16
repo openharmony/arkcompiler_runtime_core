@@ -55,10 +55,9 @@ Defined in **`jobs/job.cpp`**; the order matters:
 
 1. **ResolveIdentifiers**: resolve referenced entities used by bytecode (types, methods, fields)
 2. **CheckCflow**: build **`CflowMethodInfo`** (jump targets, flags, exception handlers)
-3. **UpdateTypes**: populate type-system knowledge from cached entities and signatures
-4. **ABSINT**: create a **`VerificationContext`** and run **`VerifyMethod`** (abstract interpretation)
+3. **ABSINT**: create a **`VerificationContext`** and run **`VerifyMethod`** (abstract interpretation)
 
-Each step can be enabled/disabled per method via **`MethodOptions`** (`RESOLVE_ID`, `CFLOW`, `TYPING`, `ABSINT`).
+Each step can be enabled/disabled per method via **`MethodOptions`** (`RESOLVE_ID`, `CFLOW`, `ABSINT`).
 
 ---
 

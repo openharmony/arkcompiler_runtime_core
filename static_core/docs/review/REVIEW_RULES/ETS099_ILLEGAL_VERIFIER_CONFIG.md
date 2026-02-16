@@ -8,7 +8,7 @@ Error
 
 ## Detect
 
-A violation occurs when verifier config file contains section `check` but one of the option from the list is missed. List: `cflow`, `resolve-id`, `typing`, `absint`
+A violation occurs when verifier config file contains section `check` but one of the option from the list is missed. List: `cflow`, `resolve-id`, `absint`
 
 ## Example BAD code
 
@@ -19,7 +19,7 @@ debug {
     verifier {
       default {
         check {
-          cflow, resolve-id, typing
+          cflow, resolve-id
         }
       }
     }
@@ -36,7 +36,7 @@ debug {
     verifier {
       default {
         check {
-          cflow, resolve-id, typing, absint
+          cflow, resolve-id, absint
         }
       }
     }

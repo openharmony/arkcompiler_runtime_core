@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,8 +123,6 @@ MethodSignature const *TypeSystem::GetMethodSignature(Method const *method)
         return &it->second;
     }
 
-    methodOfId_[methodId] = method;
-
     auto const resolveType = [this, method](const uint8_t *descr) {
         return DescriptorToType(service_->GetClassLinker(), method->GetClass()->GetLoadContext(), descr);
     };
@@ -161,50 +159,4 @@ PandaUnorderedSet<Type> const *TypeSystem::SupertypesOfClass(Class const *klass)
     supertypesCache_[klass] = std::move(toCache);
     return &supertypesCache_[klass];
 }
-
-void TypeSystem::MentionClass(Class const *klass)
-{
-    knownClasses_.insert(klass);
-}
-
-void TypeSystem::DisplayTypeSystem(std::function<void(PandaString const &)> const &handler)
-{
-    handler("Classes:");
-    DisplayClasses([&handler](auto const &name) { handler(name); });
-    handler("Methods:");
-    DisplayMethods([&handler](auto const &name, auto const &sig) { handler(name + " : " + sig); });
-    handler("Subtyping (type <; supertype)");
-    DisplaySubtyping([&handler](auto const &type, auto const &supertype) { handler(type + " <: " + supertype); });
-}
-
-void TypeSystem::DisplayClasses(std::function<void(PandaString const &)> const &handler) const
-{
-    for (auto const *klass : knownClasses_) {
-        handler((Type {klass}).ToString(this));
-    }
-}
-
-void TypeSystem::DisplayMethods(std::function<void(PandaString const &, PandaString const &)> const &handler) const
-{
-    for (auto const &it : signatureOfMethod_) {
-        auto &id = it.first;
-        auto &sig = it.second;
-        auto const *method = methodOfId_.at(id);
-        handler(method->GetFullName(), sig.ToString(this));
-    }
-}
-
-void TypeSystem::DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler)
-{
-    for (auto const *klass : knownClasses_) {
-        if (klass->IsArrayClass()) {
-            continue;
-        }
-        auto klassStr = (Type {klass}).ToString(this);
-        for (auto const &supertype : *SupertypesOfClass(klass)) {
-            handler(klassStr, supertype.ToString(this));
-        }
-    }
-}
-
 }  // namespace ark::verifier

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class A { }
+export class A { }
 
 class DummyRuntimeLinker extends RuntimeLinker {
     private parent: RuntimeLinker | undefined = undefined;
@@ -43,6 +43,7 @@ class Test {
     static stdCoreObjectWrongName4 = "[D";
     static additionalClass1Name = "additional1.AdditionalClass1";
     static additionalClass2Name = "additional2.AdditionalClass2";
+    static additionalClass4Name = "additional4.AdditionalClass4";
 
     static testDummyLinker() {
         const placeholderClass = Class.of(new A());
@@ -169,7 +170,7 @@ class Test {
         arktest.assertEQ(cls2.getLinker(), linker);
         // Trigger class initialization, which will not find "AdditionalClass1"
         arktest.expectThrow(() => { linker.loadClass(Test.additionalClass2Name, true); },
-            (e) => e instanceof LinkerUnresolvedClassError
+            (e) => e instanceof LinkerVerificationError
         );
     }
 
@@ -311,6 +312,14 @@ class Test {
         arktest.expectThrow(() => { memoryLinker.loadClass(Test.stdCoreObjectWrongName4) }, errorCheck);
     }
 
+    static testLinkerUnresolvedClassError() {
+        const abcFiles = Test.getAdditionalFilesList();
+        const baseLinker = new AbcRuntimeLinker(undefined, abcFiles);
+        arktest.expectThrow(() => { baseLinker.loadClass(Test.additionalClass4Name, true) },
+            (e) => e instanceof LinkerUnresolvedClassError
+        );
+    }
+
     static test() {
         Test.testDummyLinker();
         Test.testEmptyAbcRuntimeLinker();
@@ -324,6 +333,7 @@ class Test {
         Test.testMemoryRuntimeLinkerAddAbcFiles();
         Test.testConcurrentAddAbcFiles();
         Test.testWrongClassName();
+        Test.testLinkerUnresolvedClassError();
     }
 }
 

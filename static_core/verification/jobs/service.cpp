@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,43 +30,42 @@ void VerifierService::Destroy()
     shutdown_ = true;
 
     for (auto &it : processors_) {
-        auto *langData = &it.second;
+        auto *loadContextData = &it.second;
         // Wait for ongoing verifications to finish
-        while (langData->totalProcessors < langData->queue.size()) {
+        while (loadContextData->totalProcessors < loadContextData->queue.size()) {
             condVar_.Wait(&lock_);
         }
-        for (auto *processor : langData->queue) {
+        for (auto *processor : loadContextData->queue) {
             allocator_->Delete<TaskProcessor>(processor);
         }
     }
 }
 
-TaskProcessor *VerifierService::GetProcessor(SourceLang lang)
+TaskProcessor *VerifierService::GetProcessor(ClassLinkerContext *ctx)
 {
     ark::os::memory::LockHolder lck {lock_};
     if (shutdown_) {
         return nullptr;
     }
-    if (processors_.count(lang) == 0) {
-        processors_.emplace(lang, lang);
+    if (processors_.count(ctx) == 0) {
+        processors_.emplace(ctx, ctx);
     }
-    LangData *langData = &processors_.at(lang);
-    if (langData->queue.empty()) {
-        langData->queue.push_back(allocator_->New<TaskProcessor>(this, lang));
-        langData->totalProcessors++;
+    LoadContextData *loadContextData = &processors_.at(ctx);
+    if (loadContextData->queue.empty()) {
+        loadContextData->queue.push_back(allocator_->New<TaskProcessor>(this, ctx));
+        loadContextData->totalProcessors++;
     }
     // NOTE(gogabr): should we use a queue or stack discipline?
-    auto res = langData->queue.front();
-    langData->queue.pop_front();
+    auto res = loadContextData->queue.front();
+    loadContextData->queue.pop_front();
     return res;
 }
 
 void VerifierService::ReleaseProcessor(TaskProcessor *processor)
 {
     ark::os::memory::LockHolder lck {lock_};
-    auto lang = processor->GetLang();
-    ASSERT(processors_.count(lang) > 0);
-    processors_.at(lang).queue.push_back(processor);
+    ASSERT(processors_.count(processor->GetLoadContext()) > 0);
+    processors_.at(processor->GetLoadContext()).queue.push_back(processor);
     condVar_.Signal();
 }
 
