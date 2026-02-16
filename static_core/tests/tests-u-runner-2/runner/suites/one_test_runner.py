@@ -167,23 +167,27 @@ class OneTestRunner:
             fail_kind: str | None = None
             try:
                 output, error = process.communicate(timeout=params.timeout)
+                if params.stdout:
+                    params.stdout.write_text(output, encoding="utf-8")
+                if params.stderr:
+                    params.stderr.write_text(error, encoding="utf-8")
                 return_code = return_code_interpreter(output, error, process.returncode)
                 validation_result = result_validator(output, error, return_code)
                 passed = validation_result.passed
                 self.__log_cmd(f"{name}: Actual output: {output.strip()}")
                 if not passed:
                     if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
-                                                    ValidatorFailKind.STDERR_NOT_EMPTY]:
+                                                  ValidatorFailKind.STDERR_NOT_EMPTY,
+                                                  ValidatorFailKind.POST_REQ_FAILED]:
                         kind = validation_result.kind.value
                         fail_kind = self.__failed_kind_special(name, kind)
-
+                        error += validation_result.description
                     else:
                         fail_kind = self._detect_fail_kind(name, return_code)
 
             except subprocess.TimeoutExpired:
                 self.__log_cmd(f"{name}: Failed by timeout after {params.timeout} sec")
                 fail_kind = self.__fail_kind_timeout(name)
-                error = fail_kind
                 return_code = process.returncode
                 output, error = self._terminate_timed_out_process(process, name)
         return passed, fail_kind, output, error, return_code

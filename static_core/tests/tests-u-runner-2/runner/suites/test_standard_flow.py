@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import copy
 import os
 import re
 from collections.abc import Sequence
@@ -39,7 +38,7 @@ from runner.options.step import Step, StepKind
 from runner.suites.one_test_runner import OneTestRunner
 from runner.suites.test_metadata import TestMetadata
 from runner.test_base import Test
-from runner.utils import get_class_by_name, to_bool
+from runner.utils import get_validator_class, to_bool
 
 if TYPE_CHECKING:
     pass
@@ -332,8 +331,7 @@ class TestStandardFlow(ITestFlow, Test):
         return self
 
     def prepare_compiler_step(self, step: Step) -> Step:
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
+        new_step = deepcopy(step)
         if self.__is_dependent:
             new_step.args = self.__change_output_arg(step.args, new_step.args)
             new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
@@ -343,8 +341,7 @@ class TestStandardFlow(ITestFlow, Test):
 
     def prepare_verifier_step(self, step: Step) -> Step:
         if self.dependent_tests and self.is_panda:
-            new_step = copy.copy(step)
-            new_step.args = step.args[:]
+            new_step = deepcopy(step)
             new_step.args = self.__add_boot_panda_files(new_step.args)
             return new_step
         return step
@@ -352,8 +349,7 @@ class TestStandardFlow(ITestFlow, Test):
     def prepare_aot_step(self, step: Step) -> Step:
         if not self.is_panda:
             return step
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
+        new_step = deepcopy(step)
         if self.dependent_tests:
             for abc_file in list(self.dependent_abc_files):
                 new_step.args.extend([f'--paoc-panda-files={abc_file}'])
@@ -363,8 +359,7 @@ class TestStandardFlow(ITestFlow, Test):
     def prepare_runtime_step(self, step: Step) -> Step:
         if not self.is_panda:
             return step
-        new_step = copy.copy(step)
-        new_step.args = step.args[:]
+        new_step = deepcopy(step)
         new_step.args.insert(-2, "--verification-mode=ahead-of-time")
 
         new_step.args.insert(-2, self.__add_panda_files())
@@ -402,10 +397,23 @@ class TestStandardFlow(ITestFlow, Test):
 
         return passed
 
-    def expand_last_call_macros(self, step: Step) -> list[str]:
+    def expand_last_call_macros(self, orig_step: Step) -> Step:
+        """
+        Checks all step fields that can contain macros and expand them
+        Returns a new step with corrected values. The original step is kept unchanged.
+        """
+        step = deepcopy(orig_step)
         flags = step.args[:]
         while utils.list_has_macros(flags):
             flags = self.__expand_last_call_in_args(flags)
+        if step.stdout:
+            step.stdout = self.__expand_last_call_in_path(step.stdout)
+        if step.stderr:
+            step.stderr = self.__expand_last_call_in_path(step.stderr)
+        step.pre_requirements = step.pre_requirements[:]
+        step.post_requirements = step.post_requirements[:]
+        for req in step.pre_requirements + step.post_requirements:
+            req.value = self.__expand_last_call_in_args([req.value])[0]
         if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
             if 'dynamic-ast' in self.metadata.es2panda_options:
                 index = flags.index("--dump-ast")
@@ -415,7 +423,8 @@ class TestStandardFlow(ITestFlow, Test):
         if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
             prepend_options = self.__add_options(self.metadata.ark_options)
             flags = utils.prepend_list(prepend_options, flags)
-        return flags
+        step.args = flags
+        return step
 
     def _continue_after_process_dependent_files(self) -> bool:
         """
@@ -502,8 +511,10 @@ class TestStandardFlow(ITestFlow, Test):
         assert step.executable_path is not None
         params = BinaryParams(
             executor=step.executable_path,
-            flags=self.expand_last_call_macros(step),
+            flags=step.args,
             env=cmd_env,
+            stdout=step.stdout,
+            stderr=step.stderr,
             timeout=step.timeout,
             use_qemu=not step.skip_qemu
         )
@@ -538,10 +549,16 @@ class TestStandardFlow(ITestFlow, Test):
                 break
         return new_args
 
-    def __run_step(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        cmd_env = self.flow_utils.get_step_env(step)
-
+    def __run_step(self, orig_step: Step) -> tuple[bool, TestReport, str | None]:
+        cmd_env = self.flow_utils.get_step_env(orig_step)
+        step = self.expand_last_call_macros(orig_step)
         params = self._make_params(step, cmd_env)
+
+        pre_reqs_succeed, pre_reqs_result = step.check_pre_requirements()
+        if not pre_reqs_succeed:
+            test_report = TestReport("", "\n".join(pre_reqs_result), -1)
+            self.reproduce += f"\nStep {step.name}: FAILED\n{test_report.error}\n"
+            return False, test_report, f"{step.name.upper()}_PRE_REQS_FAILED"
 
         test_runner = OneTestRunner(self.test_env)
         passed, report, fail_kind = test_runner.run_with_coverage(
@@ -554,26 +571,32 @@ class TestStandardFlow(ITestFlow, Test):
         )
         self.reproduce += test_runner.reproduce
         self.reproduce += self.expected_err_log
+
         result = "PASSED" if passed else f"FAILED with {fail_kind}"
         self.reproduce += f"Step '{step.name}' result: {result}\n"
         return passed, report, fail_kind
 
+    def __expand_last_call_in_path(self, arg: Path) -> Path:
+        line = arg.as_posix()
+        line = self.__expand_last_call_in_line(line)[0]
+        return Path(line)
+
+    def __expand_last_call_in_line(self, arg: str) -> list[str]:
+        line: str = Macros.process_special_macros(arg, self.test_id)
+        if utils.has_macro(line):
+            try:
+                line_expanded: str | list[str] = Macros.correct_macro(line, self.test_extra_params)
+            except ParameterNotFound:
+                line_expanded = Macros.correct_macro(line, self.test_env.config.workflow)
+            if isinstance(line_expanded, list):
+                return line_expanded
+            return line_expanded.split()
+        return [line]
+
     def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
         flags: list[str] = []
         for arg in self.__fix_entry_point(args):
-            flag = Macros.process_special_macros(str(arg), self.test_id)
-            if utils.has_macro(flag):
-                flag_expanded: str | list[str] = ""
-                try:
-                    flag_expanded = Macros.correct_macro(flag, self.test_extra_params)
-                except ParameterNotFound:
-                    flag_expanded = Macros.correct_macro(flag, self.test_env.config.workflow)
-                if isinstance(flag_expanded, list):
-                    flags.extend(flag_expanded)
-                elif isinstance(flag_expanded, str):
-                    flags.extend(flag_expanded.split())
-            else:
-                flags.extend(flag.split())
+            flags.extend(self.__expand_last_call_in_line(str(arg)))
         return flags
 
     def __add_panda_files(self) -> str:
@@ -605,15 +628,6 @@ class ValidatorUtils:
         self.validator: IValidator = self._init_validator()
         self._flow_type: TestStandardFlow = flow_type
 
-    @staticmethod
-    def __get_validator_class(clazz: str) -> type[IValidator]:
-        class_obj = get_class_by_name(clazz)
-        if not issubclass(class_obj, IValidator):
-            raise InvalidConfiguration(
-                f"Validator class '{clazz}' not found. "
-                f"Check value of 'validator' parameter")
-        return class_obj
-
     def add_additional_validator(self) -> None:
         runtime_steps = [step.step_kind.value for step in self._flow_type.runtime_steps]
         if self._flow_type.has_expected:
@@ -625,7 +639,9 @@ class ValidatorUtils:
 
     def step_validator(self, step: Step, output: str, error: str, return_code: int) -> ValidationResult:
         validator_name = step.name if step.name in self.validator.validators else step.step_kind.value
-        validator = self.validator.get_validator(validator_name)
+        validator = self.validator.get_validator(validator_name) \
+            if step.validator is None \
+            else step.validator.get_validator(validator_name)
         if validator is not None:
             for validator_func in validator:
                 step_validator_result = validator_func(self._flow_type, step.step_kind.value,
@@ -638,14 +654,21 @@ class ValidatorUtils:
                     # we have a comparison result for runtime step - no need in output comparison with expected for
                     # further steps
                     self._delete_runtime_validator(step.step_kind.value)
-            return ValidationResult(True, ValidatorFailKind.NONE, "")
+
+        post_reqs_succeed, post_reqs_result = step.check_post_requirements()
+        if not post_reqs_succeed:
+            post_failures_str = "\n".join(post_reqs_result)
+            return ValidationResult(passed=False,
+                                    kind=ValidatorFailKind.POST_REQ_FAILED,
+                                    description=f"{step.name.upper()}_POST_REQS_FAILED: {post_failures_str}")
+
         return ValidationResult(True, ValidatorFailKind.NONE, "")
 
     def _init_validator(self) -> IValidator:
         validator_class_name = self.test_env.config.test_suite.get_parameter("validator")
         if validator_class_name is None:
             return BaseValidator()
-        validator_class = self.__get_validator_class(validator_class_name)
+        validator_class = get_validator_class(validator_class_name)
         return validator_class()
 
     def _delete_runtime_validator(self, step_kind: str) -> None:
