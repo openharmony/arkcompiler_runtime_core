@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,6 +73,13 @@ class PlatformBase(CrossShell, ABC):
             'tools',
             self.required_tools,
             extra=args.extra_plugins)
+        unknown_tools = set(args.custom_opts) - set(tool_plugins)
+        if unknown_tools:
+            log.warning(
+                'Tools for these custom options had not been recognized: %s',
+                {k: args.custom_opts[k] for k in unknown_tools}
+            )
+            log.warning('Expected labels for tools are: %s', set(tool_plugins))
         for n, t in tool_plugins.items():
             tool: ToolBase = t.Tool(self.target,
                                     self.flags,
