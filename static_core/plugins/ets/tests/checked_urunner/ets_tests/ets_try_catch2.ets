@@ -15,7 +15,11 @@
 
 // These tests were disabled because of catch block no longer accepting specific error type
 //! DISABLED_CHECKER      Try Catch Resolving JIT Optimize with partial and default catches
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch2.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch2.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false \
+//!                        --compiler-regex=ets_try_catch2.MultipleCatch::__noinline__multipleCatch",
+//!              entry: "ets_try_catch2.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch2.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch2.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
@@ -52,10 +56,10 @@ class MultipleCatch {
         for (let i : int = 0; i < 16; i++) {
             try {
                 switch (i) {
-                case 0: case 1: case 2: case 3: case 4:
-                case 5: case 6: case 7: case 8: case 9:
+                  case 0: case 1: case 2: case 3: case 4:
+                  case 5: case 6: case 7: case 8: case 9:
                     throw new Error0();
-                case 10:
+                  case 10:
                     throw new Error1();
                 }
             } catch (e) {

@@ -51,7 +51,7 @@ class ArrayLikeImplTest<T> implements ArrayLike<T> {
 
     override $_get(index: int): T {
         if ((index  < 0) || (index >= this.actualLength)) {
-            throw new RangeError("Out of bounds");
+            throw new RangeError('Out of bounds');
         }
         return this.buffer[index] as T;
     }
@@ -105,7 +105,7 @@ class ArrayValueIteratorTest implements IterableIterator<Number> {
     }
 }
 
-function check_array<T>(arr: Array<T>, start: int, end: int, expected: T) {
+function checkArray<T>(arr: T[], start: int, end: int, expected: T) {
     for (let i = start; i < end; i++) {
         arktest.assertEQ(arr[i], expected);
     }
@@ -113,103 +113,103 @@ function check_array<T>(arr: Array<T>, start: int, end: int, expected: T) {
 
 //! CHECKER       std.core Array from primitive array
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, entry: "escompat_array_from.ETSGLOBAL::test_array_from"
-//! METHOD        "escompat_array_from.ETSGLOBAL::test_array_from"
+//! RUN           force_jit: true, entry: "escompat_array_from.ETSGLOBAL::testArrayFrom"
+//! METHOD        "escompat_array_from.ETSGLOBAL::testArrayFrom"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallStatic.*std.core.Array::from/
-function test_array_from() {
+function testArrayFrom() {
     {
         let array1 = Array.from(smallFromBigInt64Array);
-        check_array<BigInt>(array1, 0, shortSize, new BigInt(0));
+        checkArray<BigInt>(array1, 0, shortSize, new BigInt(0));
     }
     {
         let array1 = Array.from(bigFromBigInt64Array);
-        check_array<BigInt>(array1, 0, longSize, new BigInt(0));
+        checkArray<BigInt>(array1, 0, longSize, new BigInt(0));
     }
     {
         let array1 = Array.from(smallFromBigUint64Array);
-        check_array<BigInt>(array1, 0, shortSize, new BigInt(0));
+        checkArray<BigInt>(array1, 0, shortSize, new BigInt(0));
     }
     {
         let array1 = Array.from(bigFromBigUint64Array);
-        check_array<BigInt>(array1, 0, longSize, new BigInt(0));
+        checkArray<BigInt>(array1, 0, longSize, new BigInt(0));
     }
     {
         let array1 = Array.from(smallFromFloat32Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromFloat32Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromFloat64Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromFloat64Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromInt16Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromInt16Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromInt32Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromInt32Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromInt8Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromInt8Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(bigFromUint32Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
 
     {
         let array1 = Array.from(smallFromUint16Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromUint16Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromUint32Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromUint32Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromUint8Array);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromUint8Array);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     {
         let array1 = Array.from(smallFromUint8ClampedArray);
-        check_array<Double>(array1, 0, shortSize, 0);
+        checkArray<Double>(array1, 0, shortSize, 0);
     }
     {
         let array1 = Array.from(bigFromUint8ClampedArray);
-        check_array<Double>(array1, 0, longSize, 0);
+        checkArray<Double>(array1, 0, longSize, 0);
     }
     for (let i: int = 0; i < shortSize; i++) {
         smallFromSet.add(i);
@@ -236,7 +236,7 @@ function test_array_from() {
     for (let i: int = 0; i < 3; i++) {
         arktest.assertEQ(fromIter[i], i + 1);
     }
-    let arrCustom: Array<ArrayLike<number> | Iterable<number>> = new Array<ArrayLike<number> | Iterable<number>>(2);
+    let arrCustom: (ArrayLike<number> | Iterable<number>)[] = new Array<ArrayLike<number> | Iterable<number>>(2);
     let tmpArrLike: ArrayLikeImplTest<number> = new ArrayLikeImplTest<number>();
     tmpArrLike.push(1);
     arrCustom[0] = tmpArrLike;

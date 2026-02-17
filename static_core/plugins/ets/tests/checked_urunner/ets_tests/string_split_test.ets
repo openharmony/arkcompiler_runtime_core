@@ -26,20 +26,19 @@
 //! EVENT_NOT    /Deoptimization,string_split_test.ETSGLOBAL::main,BOUNDS_CHECK/
 //! METHOD       "string_split_test.ETSGLOBAL::main"
 
-function main(): void
-{
-    let str = "It can't be - there must be a gap in between!";
-    let arr: String[] = str.split(" ", -5);
-    arktest.assertEQ(arr.length, 11, "Length must be 11");
-    arktest.assertTrue(arr[0].equals("It"), "First substring must be `It`");
-    arktest.assertTrue(arr[1].equals("can't"), "Second substring must be `can't`");
-    arktest.assertTrue(arr[2].equals("be"), "Third substring must be `be`");
-    arktest.assertTrue(arr[3].equals("-"), "Third substring must be `-`");
-    arktest.assertTrue(arr[4].equals("there"), "Third substring must be `there`");
-    arktest.assertTrue(arr[5].equals("must"), "Third substring must be `must`");
-    arktest.assertTrue(arr[6].equals("be"), "Third substring must be `be`");
-    arktest.assertTrue(arr[7].equals("a"), "Third substring must be `a`");
-    arktest.assertTrue(arr[8].equals("gap"), "Third substring must be `gap`");
-    arr = str.split(" ", 3);
-    arktest.assertEQ(arr.length, 3, "Length must be 3");
+function main(): void {
+    let str = 'It can\'t be - there must be a gap in between!';
+    let arr: String[] = str.split(' ', -5);
+    arktest.assertEQ(arr.length, 11, 'Length must be 11');
+    arktest.assertTrue(arr[0].equals('It'), 'First substring must be `It`');
+    arktest.assertTrue(arr[1].equals('can\'t'), 'Second substring must be `can\'t`');
+    arktest.assertTrue(arr[2].equals('be'), 'Third substring must be `be`');
+    arktest.assertTrue(arr[3].equals('-'), 'Third substring must be `-`');
+    arktest.assertTrue(arr[4].equals('there'), 'Third substring must be `there`');
+    arktest.assertTrue(arr[5].equals('must'), 'Third substring must be `must`');
+    arktest.assertTrue(arr[6].equals('be'), 'Third substring must be `be`');
+    arktest.assertTrue(arr[7].equals('a'), 'Third substring must be `a`');
+    arktest.assertTrue(arr[8].equals('gap'), 'Third substring must be `gap`');
+    arr = str.split(' ', 3);
+    arktest.assertEQ(arr.length, 3, 'Length must be 3');
 }

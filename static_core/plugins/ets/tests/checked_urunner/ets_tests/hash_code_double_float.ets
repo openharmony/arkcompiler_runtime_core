@@ -27,7 +27,8 @@
 //! INST              "Intrinsic.StdRuntimeGetHashCodeByValue"
 
 //! CHECKER           JIT: Compare getting hash code values
-//! RUN               force_jit: true, options: "--compiler-regex='.*test.*'", entry: "hash_code_double_float.ETSGLOBAL::main"
+//! RUN               force_jit: true, options: "--compiler-regex='.*test.*'",
+//!                   entry: "hash_code_double_float.ETSGLOBAL::main"
 //!
 //! METHOD            "hash_code_double_float.ETSGLOBAL::testHashCodeByValueDouble"
 //! PASS_AFTER        "IrBuilder"
@@ -38,7 +39,8 @@
 //! INST              "Intrinsic.StdRuntimeGetHashCodeByValue"
 
 //! CHECKER           INTERP-CPP: Compare getting hash code values
-//! RUN               options: "--interpreter-type=cpp --compiler-enable-jit=false", entry: "hash_code_double_float.ETSGLOBAL::main"
+//! RUN               options: "--interpreter-type=cpp --compiler-enable-jit=false",
+//!                   entry: "hash_code_double_float.ETSGLOBAL::main"
 
 function testHashCodeByValueDouble(value: double) {
     return Runtime.getHashCodeByValue(value).toInt();

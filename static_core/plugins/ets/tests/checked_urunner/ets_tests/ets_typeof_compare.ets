@@ -14,12 +14,14 @@
  */
 
 //! CHECKER      Check for typeof + compare peephole
-//! RUN          force_jit: true, entry: "ets_typeof_compare.ETSGLOBAL::main",
-//!              options: "--compiler-regex='.*ETSGLOBAL::__noinline__process_typeof' \
-//!                 --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false"
+//! RUN          force_jit: true,
+//!              entry: "ets_typeof_compare.ETSGLOBAL::main",
+//!              options: "--compiler-regex='.*ETSGLOBAL::__noinline__processTypeof' \
+//!                        --compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false"
 //!
-//! EVENT        /Compilation,ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
-//! METHOD       "ets_typeof_compare.ETSGLOBAL::__noinline__process_typeof"
+//! EVENT        /Compilation,ets_typeof_compare.ETSGLOBAL::__noinline__processTypeof,.*,COMPILED/
+//! METHOD       "ets_typeof_compare.ETSGLOBAL::__noinline__processTypeof"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.CompilerEtsTypeof",1
 //! INST_NOT     "IsInstance"
@@ -27,11 +29,11 @@
 //! INST_COUNT   "Intrinsic.CompilerEtsTypeof",1
 //! INST_COUNT   "IsInstance",1
 
-function __noinline__process_typeof(u: string|number): int {
+function __noinline__processTypeof(u: string|number): int {
   let t = typeof (u)
-   if (t == "number") {
+   if (t == 'number') {
      return 2;
-   } else if (t == "string") {
+   } else if (t == 'string') {
      return 1;
    } else {
      return 0;
@@ -41,7 +43,7 @@ function __noinline__process_typeof(u: string|number): int {
 function main(): int {
   let res :int = 0;
   for (let i:int = 0; i < 25; ++i) {
-    res += __noinline__process_typeof(String(i));
+    res += __noinline__processTypeof(String(i));
   }
   console.log(res);
   return res - 25;

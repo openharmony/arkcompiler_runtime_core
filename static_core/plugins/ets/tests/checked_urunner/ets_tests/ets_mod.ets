@@ -28,7 +28,9 @@
 //! RUN           entry: "ets_mod.ETSGLOBAL::main"
 
 function main(): int {
-    if (mod(2.0, 1.0) != 0.) return 1;
+    if (mod(2.0, 1.0) != 0.0) {
+        return 1;
+    }
     
     return 0;
 }

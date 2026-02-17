@@ -22,8 +22,7 @@
 //! ASM          arm64: "b.ge #+0x14", x64: "jnl +0x14", arm: "bge 0x10000068"
 //! ASM          arm64: "b.eq #+0xc", x64: "jz +0x0C", arm: "beq 0x10000068"
 
-function __noinline__while(a: int): int
-{
+function __noinline__while(a: int): int {
     let i: int = 0;
     for(; i < 100; ++i) {
         if (i == a) {

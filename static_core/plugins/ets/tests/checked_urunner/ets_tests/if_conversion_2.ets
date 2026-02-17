@@ -107,30 +107,30 @@ function __noinline__foo6(x: int, y: int): int {
 }
 
 function main(): void {
-    arktest.assertEQ(__noinline__foo1(24, 8), "9,8");
-    arktest.assertEQ(__noinline__foo1(40, 8), "40,8");
-    arktest.assertEQ(__noinline__foo1(24, -36), "-35,25");
-    arktest.assertEQ(__noinline__foo1(96, -36), "96,97");
+    arktest.assertEQ(__noinline__foo1(24, 8), '9,8');
+    arktest.assertEQ(__noinline__foo1(40, 8), '40,8');
+    arktest.assertEQ(__noinline__foo1(24, -36), '-35,25');
+    arktest.assertEQ(__noinline__foo1(96, -36), '96,97');
 
-    arktest.assertEQ(__noinline__foo2(24, 8, 42), "-8,8");
-    arktest.assertEQ(__noinline__foo2(40, 8, 42), "40,8");
-    arktest.assertEQ(__noinline__foo2(24, -36, 42), "36,-24");
-    arktest.assertEQ(__noinline__foo2(96, -36, 42), "96,-96");
+    arktest.assertEQ(__noinline__foo2(24, 8, 42), '-8,8');
+    arktest.assertEQ(__noinline__foo2(40, 8, 42), '40,8');
+    arktest.assertEQ(__noinline__foo2(24, -36, 42), '36,-24');
+    arktest.assertEQ(__noinline__foo2(96, -36, 42), '96,-96');
 
-    arktest.assertEQ(__noinline__foo3(24, 8), "-9,8");
-    arktest.assertEQ(__noinline__foo3(40, 8), "40,8");
-    arktest.assertEQ(__noinline__foo3(24, -36), "35,-25");
-    arktest.assertEQ(__noinline__foo3(96, -36), "96,-97");
+    arktest.assertEQ(__noinline__foo3(24, 8), '-9,8');
+    arktest.assertEQ(__noinline__foo3(40, 8), '40,8');
+    arktest.assertEQ(__noinline__foo3(24, -36), '35,-25');
+    arktest.assertEQ(__noinline__foo3(96, -36), '96,-97');
 
-    arktest.assertEQ(__noinline__foo4(24, 8, 42), "33,-1");
-    arktest.assertEQ(__noinline__foo4(40, 8, 42), "50,-1");
-    arktest.assertEQ(__noinline__foo4(24, -36, 42), "33,-46");
-    arktest.assertEQ(__noinline__foo4(96, -36, 42), "106,-46");
+    arktest.assertEQ(__noinline__foo4(24, 8, 42), '33,-1');
+    arktest.assertEQ(__noinline__foo4(40, 8, 42), '50,-1');
+    arktest.assertEQ(__noinline__foo4(24, -36, 42), '33,-46');
+    arktest.assertEQ(__noinline__foo4(96, -36, 42), '106,-46');
 
-    arktest.assertEQ(__noinline__foo5(24, 8), "35,-3");
-    arktest.assertEQ(__noinline__foo5(40, 8), "50,-3");
-    arktest.assertEQ(__noinline__foo5(24, -36), "35,-46");
-    arktest.assertEQ(__noinline__foo5(96, -36), "106,-46");
+    arktest.assertEQ(__noinline__foo5(24, 8), '35,-3');
+    arktest.assertEQ(__noinline__foo5(40, 8), '50,-3');
+    arktest.assertEQ(__noinline__foo5(24, -36), '35,-46');
+    arktest.assertEQ(__noinline__foo5(96, -36), '106,-46');
 
     arktest.assertEQ(__noinline__foo6(70, 30), -70 & 127);
     arktest.assertEQ(__noinline__foo6(70, 50), -80 & 127);

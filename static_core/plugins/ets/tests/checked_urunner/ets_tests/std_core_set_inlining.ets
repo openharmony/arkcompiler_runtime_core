@@ -15,13 +15,13 @@
 
 //! CHECKER       AOT + external inlining: inline Map methods inside Set
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*test_set_.*' --compiler-inline-external-methods-aot=true", entry: "std_core_set_inlining.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex='.*testSet.*' --compiler-inline-external-methods-aot=true", entry: "std_core_set_inlining.ETSGLOBAL::main"
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetBool,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetBool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_bool"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetBool"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -31,11 +31,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetChar,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetChar,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_char"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetChar"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -45,11 +45,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetByte,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetByte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_byte"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetByte"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -59,11 +59,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetShort,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetShort,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_short"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetShort"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -73,11 +73,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetInt,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetInt,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_int"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetInt"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -90,13 +90,13 @@
 //! RUN           entry: "std_core_set_inlining.ETSGLOBAL::main"
 
 //! CHECKER       JIT: inline Map methods inside Set
-//! RUN           force_jit: true, options: "--compiler-regex='.*test_set_.*'", entry: "std_core_set_inlining.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*testSet.*'", entry: "std_core_set_inlining.ETSGLOBAL::main"
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_bool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetBool,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetBool,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_bool"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetBool"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -106,11 +106,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_char,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetChar,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetChar,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_char"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetChar"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -120,11 +120,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_byte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetByte,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetByte,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_byte"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetByte"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -134,11 +134,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_short,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetShort,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetShort,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_short"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetShort"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -148,11 +148,11 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 //!
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::has,.*,STATIC,SUCCESS/
-//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::test_set_int,std\.core\.Set::delete,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetInt,std\.core\.Set::has,.*,STATIC,SUCCESS/
+//! EVENT         /Inline,std_core_set_inlining\.ETSGLOBAL::testSetInt,std\.core\.Set::delete,.*,STATIC,SUCCESS/
 //! EVENT         /Inline,std\.core\.Set::has,std\.core\.Map::has,.*,(SUCCESS|DEVIRTUALIZED)/
 //! EVENT         /Inline,std\.core\.Set::delete,std\.core\.Map::delete,.*,(SUCCESS|DEVIRTUALIZED)/
-//! METHOD        "std_core_set_inlining.ETSGLOBAL::test_set_int"
+//! METHOD        "std_core_set_inlining.ETSGLOBAL::testSetInt"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /CallStatic.*std\.core\.Set::has/
 //! INST          /CallStatic.*std\.core\.Set::delete/
@@ -162,7 +162,7 @@
 //! INST          /Call.*std\.core\.Set::delete/
 //! INST          /Call.*std\.core\.Map::delete/
 
-function test_set_bool() {
+function testSetBool() {
     let set: Set<boolean> = new Set<boolean>
     set.add(false)
     arktest.assertTrue(set.has(false))
@@ -173,7 +173,7 @@ function test_set_bool() {
     arktest.assertFalse(set.delete(true))
 }
 
-function test_set_char() {
+function testSetChar() {
     let set: Set<char> = new Set<char>
     set.add(c'A')
     arktest.assertTrue(set.has(c'A'))
@@ -189,7 +189,7 @@ function test_set_char() {
     arktest.assertFalse(set.has(c'\u0001'))
 }
 
-function test_set_byte() {
+function testSetByte() {
     let set: Set<byte> = new Set<byte>
     set.add((1).toByte())
     arktest.assertTrue(set.has((1).toByte()))
@@ -200,7 +200,7 @@ function test_set_byte() {
     arktest.assertFalse(set.delete((2).toByte()))
 }
 
-function test_set_short() {
+function testSetShort() {
     let set: Set<short> = new Set<short>
     set.add((1).toShort())
     arktest.assertTrue(set.has((1).toShort()))
@@ -211,7 +211,7 @@ function test_set_short() {
     arktest.assertFalse(set.delete((2).toShort()))
 }
 
-function test_set_int(): void {
+function testSetInt(): void {
     let set: Set<int> = new Set<int>
     set.add(1)
     arktest.assertTrue(set.has(1))
@@ -223,9 +223,9 @@ function test_set_int(): void {
 }
 
 function main(): void {
-    test_set_bool()
-    test_set_char()
-    test_set_byte()
-    test_set_short()
-    test_set_int()
+    testSetBool()
+    testSetChar()
+    testSetByte()
+    testSetShort()
+    testSetInt()
 }

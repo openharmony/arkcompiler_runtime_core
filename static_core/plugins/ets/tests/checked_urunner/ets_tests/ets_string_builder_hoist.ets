@@ -14,7 +14,7 @@
  */
 
 //! DEFINE_FRONTEND_OPTIONS     DEFAULT ARGS
-//! RUN_FRONTEND        options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_FRONTEND options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER     AOT: Verify StringBuilder hoisting optimization for string concatenation in loop
 //! SKIP_IF     @architecture == "arm32"
@@ -30,8 +30,9 @@
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting optimization for string concatenation in loop
-//! RUN         force_jit: true, entry: "ets_string_builder_hoist.ETSGLOBAL::main",
-//!             options: "--compiler-regex='.*willHoist[0-9]+'"
+//! RUN         force_jit: true,
+//!             options: "--compiler-regex='.*willHoist[0-9]+'",
+//!             entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
@@ -42,7 +43,7 @@
 //! INST_NOT    /Intrinsic\.StdCoreSbAppendString/
 
 function willHoist1() {
-    let ret: string = "test:"
+    let ret: string = 'test:'
     for (let i = 0; i < 10; i++) {
         ret += String(i)
     }
@@ -66,8 +67,9 @@ function willHoist1() {
 
 
 //! CHECKER     JIT: Verify StringBuilder hoisting is not performed in some case
-//! RUN         force_jit: true, entry: "ets_string_builder_hoist.ETSGLOBAL::main",
-//!             options: "--compiler-regex='.*willNotHoist[0-9]+'"
+//! RUN         force_jit: true,
+//!             options: "--compiler-regex='.*willNotHoist[0-9]+'",
+//!             entry: "ets_string_builder_hoist.ETSGLOBAL::main"
 //!
 //! METHOD      "ets_string_builder_hoist.ETSGLOBAL::willNotHoist1"
 //! PASS_AFTER  "SimplifyStringBuilder"
@@ -80,8 +82,8 @@ function willHoist1() {
 //! INST_NOT    /LoadAndInitClass 'std\.core\.StringBuilder'/
 
 function willNotHoist1() {
-    let ret: string = ""
-    let acc: string = "test:"
+    let ret: string = ''
+    let acc: string = 'test:'
     for (let i = 0; i < 10; i++, acc += String(i)) {
         ret = acc
     }
@@ -89,8 +91,8 @@ function willNotHoist1() {
 }
 
 function willNotHoist2() {
-    let ret: string = ""
-    let acc: string = "test:"
+    let ret: string = ''
+    let acc: string = 'test:'
     for (let i = 0; i < 10; acc += String(i), i++) {
         ret = acc
     }
@@ -98,9 +100,9 @@ function willNotHoist2() {
 }
 
 function main() {
-    arktest.assertEQ(willHoist1(), "test:0123456789")
-    arktest.assertEQ(willNotHoist1(), "test:123456789")
-    arktest.assertEQ(willNotHoist2(), "test:012345678")
+    arktest.assertEQ(willHoist1(), 'test:0123456789')
+    arktest.assertEQ(willNotHoist1(), 'test:123456789')
+    arktest.assertEQ(willNotHoist2(), 'test:012345678')
 }
 
 //! CHECKER     BCO: Verify StringBuilder hoisting optimizations

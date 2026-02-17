@@ -89,13 +89,17 @@ function main(): int {
 //! RUN          entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Hoist loop invariant RefTypeCheck and replace by deopt, JIT with CPP interpreter
-//! RUN          force_jit: true, options: "--compiler-regex='.*test2.*' --interpreter-type=cpp", entry: "hoist_checkcast.ETSGLOBAL::main2"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*test2.*' --interpreter-type=cpp",
+//!              entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Check stacktrace for starr_obj with wrong type, CPP interpreter
-//! RUN          options: "--compiler-enable-jit=false --interpreter-type=cpp", entry: "hoist_checkcast.ETSGLOBAL::main2"
+//! RUN          options: "--compiler-enable-jit=false --interpreter-type=cpp",
+//!              entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 //! CHECKER      Check stacktrace for starr_obj with wrong type, irtoc interpreter
-//! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc", entry: "hoist_checkcast.ETSGLOBAL::main2"
+//! RUN          options: "--compiler-enable-jit=false --interpreter-type=irtoc",
+//!              entry: "hoist_checkcast.ETSGLOBAL::main2"
 
 function test2(arr: FixedArray<Object>, value: A | B) : int {
     let iters = 0;

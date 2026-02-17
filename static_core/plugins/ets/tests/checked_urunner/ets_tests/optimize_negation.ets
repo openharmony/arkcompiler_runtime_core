@@ -14,7 +14,8 @@
  */
 
 //! CHECKER         Test check optimize bool Negation
-//! RUN             force_jit: true, options: "--compiler-regex='.*func.*' --compiler-inlining=false", entry: "optimize_negation.ETSGLOBAL::main"
+//! RUN             force_jit: true, options: "--compiler-regex='.*func.*' --compiler-inlining=false",
+//!                 entry: "optimize_negation.ETSGLOBAL::main"
 //! EVENT           /Compilation,optimize_negation.ETSGLOBAL::func,.*,COMPILED/
 //! METHOD          "optimize_negation.ETSGLOBAL::func"
 //!
@@ -41,12 +42,12 @@
 //! INST_NOT        "Xor "
 //! INST_NOT        "Compare"
 
-function get_bool() : boolean {
+function getBool() : boolean {
     return false
 }
 
 function func() : boolean {
-    let a : boolean = get_bool()
+    let a : boolean = getBool()
     return !a
 }
 

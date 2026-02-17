@@ -27,7 +27,7 @@ function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int 
     __noinline__foo(arr.length, elem); // can throw error
     x = indexes[0]; // NullCheck can be not executed
   } catch (e) {
-    arktest.assertTrue(false, "error, " + e.toString());
+    arktest.assertTrue(false, 'error, ' + e.toString());
   }
 
   for (let i: int = 0; i < arr.length; ++i) {
@@ -41,7 +41,7 @@ function find(arr: FixedArray<byte>, indexes: FixedArray<byte>, elem: int): int 
 
 function __noinline__foo(length: int, elem: int) : void {
   if (elem >= length) {
-    throw new ArrayIndexOutOfBoundsError("find failed: out of range");
+    throw new ArrayIndexOutOfBoundsError('find failed: out of range');
   }
 }
 

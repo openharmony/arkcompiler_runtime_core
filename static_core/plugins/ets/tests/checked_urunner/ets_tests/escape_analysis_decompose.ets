@@ -144,7 +144,7 @@ function next5(t : Int8ArrayIteratorEntries2) : IteratorResult<[Number, Number]>
 function main(): void {
     for (let i = 0; i < 200; i++) {
         arktest.assertEQ(__noinline__next2('maybe', i < 100 ? 0 : 1), 'maybeok');
-        arktest.assertEQ(__noinline__next3("abcde"), "abcde", "Wrong at next3")
+        arktest.assertEQ(__noinline__next3('abcde'), 'abcde', 'Wrong at next3')
     }
 
     let arr = new Int8Array([1, 2, 3]);

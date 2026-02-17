@@ -18,14 +18,17 @@ let C:int = 0;
 let C1:int = 2;
 
 //! CHECKER      Verify check's users NO_HOIST if check's input is is hoistable.
-//! RUN          force_jit: true, options: "--compiler-regex=.*HoistableInput --compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
-//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::HoistableInput"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*hoistableInput --compiler-enable-events \
+//!                        --compiler-events-path=./events.csv",
+//!              entry: "checks_elimination_no_hoist.ETSGLOBAL::hoistableInput"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::hoistableInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::HoistableInput,licm,inst_id:#{div1Id}/
-//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::HoistableInput,licm,inst_id:#{div2Id}/
-function HoistableInput(): int {
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::hoistableInput,licm,instId:#{div1Id}/
+//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::hoistableInput,licm,instId:#{div2Id}/
+function hoistableInput(): int {
     let u:int = 0;
     let v:int = 2;
 
@@ -50,14 +53,16 @@ function HoistableInput(): int {
 }
 
 //! CHECKER      Verify check's users hoisted if there is a dominating check outside.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside"
-//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside"
+//! RUN          force_jit: true,
+//!              options: "--compiler-enable-events --compiler-events-path=./events.csv",
+//!              entry: "checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
 //! INST_NEXT    /Div/; div2Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside,licm,inst_id:#{div2Id}/
-//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::DomCheckOutside,licm,inst_id:#{div2Id}/
-function DomCheckOutside(): int {
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside,licm,instId:#{div2Id}/
+//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside,licm,instId:#{div2Id}/
+function domCheckOutside(): int {
     let u:int = 0;
     let v:int = 1;
 
@@ -82,12 +87,15 @@ function DomCheckOutside(): int {
 }
 
 //! CHECKER      Verify check's users NO_HOIST if check's input's bounds are invalid at the outermost preheader.
-//! RUN          force_jit: true, options: "--compiler-regex=.*InvalidBoundsOutside --compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
-//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*invalidBoundsOutside --compiler-enable-events \
+//!                        --compiler-events-path=./events.csv",
+//!              entry: "checks_elimination_no_hoist.ETSGLOBAL::invalidBoundsOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::invalidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::InvalidBoundsOutside,licm,inst_id:#{div1Id}/
-function InvalidBoundsOutside(): int {
+//! EVENT_NOT    /checks_elimination_no_hoist.ETSGLOBAL::invalidBoundsOutside,licm,instId:#{div1Id}/
+function invalidBoundsOutside(): int {
     let u:int = 0;
     let v:int = 1;
     let c:int = C;
@@ -109,13 +117,15 @@ function InvalidBoundsOutside(): int {
 }
 
 //! CHECKER      Verify check's users hoisted if check's input's bounds are valid at the outermost preheader.
-//! RUN          force_jit: true, options: "--compiler-enable-events --compiler-events-path=./events.csv", entry: "checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside"
-//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside"
+//! RUN          force_jit: true,
+//!              options: "--compiler-enable-events --compiler-events-path=./events.csv",
+//!              entry: "checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Div/; div1Id = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside,licm,inst_id:#{div1Id}/
-//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::ValidBoundsOutside,licm,inst_id:#{div1Id}/
-function ValidBoundsOutside(): int {
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside,licm,instId:#{div1Id}/
+//! EVENT_NEXT   /checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside,licm,instId:#{div1Id}/
+function validBoundsOutside(): int {
     let u:int = 0;
     let v:int = 1;
     let c:int = C;
@@ -134,9 +144,9 @@ function ValidBoundsOutside(): int {
     return u;
 }
 
-//! CHECKER      Check NO_HOIST flag for NullCheck.
-//! RUN          force_jit: true, entry: "checks_elimination_no_hoist.ETSGLOBAL::NullCheck"
-//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::NullCheck"
+//! CHECKER      Check NO_HOIST flag for nullCheck.
+//! RUN          force_jit: true, entry: "checks_elimination_no_hoist.ETSGLOBAL::nullCheck"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::nullCheck"
 //! PASS_AFTER   "Codegen"
 //! INST         "Intrinsic.StdCoreStringIndexOf"
 function __noinline__getnull(): string | null {
@@ -148,7 +158,7 @@ function __noinline__updateIdx(): int {
 
 let RES = -3;
 
-function NullCheck(): int {
+function nullCheck(): int {
     let nulref = __noinline__getnull();
     let x : char = c'\0';
     for (let i = 0; i < 3; i++) {
@@ -162,17 +172,18 @@ function NullCheck(): int {
 }
 
 // NOTE(compiler): Enable fast CharAt implementation #28221
-// CHECKER      Check NO_HOIST flag for BoundsCheck.
-// RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*BoundsCheck --compiler-enable-events --compiler-events-path=./events.csv"
-// METHOD       "checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck"
+// CHECKER      Check NO_HOIST flag for boundsCheck.
+// RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*boundsCheck --compiler-enable-events \
+//!                       --compiler-events-path=./events.csv"
+// METHOD       "checks_elimination_no_hoist.ETSGLOBAL::boundsCheck"
 // PASS_AFTER   "IrBuilder"
 // INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-// EVENT        /checks_elimination_no_hoist.ETSGLOBAL::BoundsCheck,licm,inst_id:#{lcscId}/
+// EVENT        /checks_elimination_no_hoist.ETSGLOBAL::boundsCheck,licm,instId:#{lcscId}/
 function __noinline__getstr(): string {
     return "x";
 }
 
-function BoundsCheck(): int {
+function boundsCheck(): int {
     let str1char = __noinline__getstr();
     for (let i = 0; i < 3; i++) {
         if (str1char.length <= 100000) {

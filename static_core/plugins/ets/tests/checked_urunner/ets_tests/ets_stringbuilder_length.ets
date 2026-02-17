@@ -14,11 +14,14 @@
  */
 
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_FRONTEND            options: "--ets-strings-concat=false \
+//!                                   --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true \
+//!                       --compiler-inlining=false --compiler-check-final=false \
+//!                       --compiler-simplify-string-builder=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -32,7 +35,8 @@
 
 //! CHECKER     StringBuilder length field access AOT optimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false"
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true \
+//!                       --compiler-inlining=false --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
 //! PASS_AFTER  "OptimizeStringConcat"
@@ -57,7 +61,8 @@
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true \
+//!                       --bco-compiler --compiler-optimize-string-concat=true"
 
 //! CHECKER     BCO, StringBuilder length field access BCO optimized
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
@@ -88,12 +93,18 @@
 //! CHECKER       INTERP-IRTOC, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
+//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
+//!                         --interpreter-type=irtoc --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv",
+//!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! CHECKER       INTERP-CPP, StringBuilder length field access BCO optimized
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv", entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
+//! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
+//!                         --interpreter-type=cpp --compiler-enable-events \
+//!                         --compiler-events-path=./events.csv",
+//!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 function generateFakeRandomInteger(): Int32Array {
   let resource: Int32Array = new Int32Array([12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]);
@@ -108,7 +119,8 @@ function stringCalculation00() {
 
   let resources: Int32Array = generateFakeRandomInteger();
   for (let i: int = 0; i < N; i++) {
-    if (resources[i % res.length.toInt() % 15].toInt() > resources[(i + resources[i % 15].toInt()) % res.length.toInt() % 15].toInt()) {
+    if (resources[i % res.length.toInt() % 15].toInt() >
+        resources[(i + resources[i % 15].toInt()) % res.length.toInt() % 15].toInt()) {
       res += str1 + i;
     } else {
       res += str1;

@@ -21,6 +21,6 @@ export function add(x: int, y: int): int {
     return x + y;
 }
 
-export function get_sum_element(arr: int[], idx: int): int {
+export function getSumElement(arr: int[], idx: int): int {
     return add(arr[idx], arr[idx]);
 }

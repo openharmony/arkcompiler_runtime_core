@@ -14,7 +14,7 @@
  */
 
 class MyMap<K, V> extends Map<K, V> {
-    public arr: Array<[K, V]> | undefined
+    public arr: [K, V][] | undefined
 
     public set(key: K, value: V): this {
         if (this.arr == undefined) {
@@ -63,12 +63,12 @@ class MySet<K> extends Set<K> {
 
 //! CHECKER       AOT: MySet<boolean> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*(test_set|SetHas|SetDelete).*'",
+//! RUN_PAOC      options: "--compiler-regex='.*(testSet|setHas|setDelete).*'",
 //!               entry: "std_core_set_inlining_inheritance.ETSGLOBAL::testSetBoolOverrided"
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetHasBool"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setHasBool"
 //! PASS_AFTER    "Inline"
 //! INST          /CallVirtual.*std\.core\.Set::has/
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetDeleteBool"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setDeleteBool"
 //! PASS_AFTER    "Inline"
 //! INST          /CallVirtual.*std\.core\.Set::delete/
 //!
@@ -77,12 +77,12 @@ class MySet<K> extends Set<K> {
 //! CHECKER       AOT PGO: MySet<boolean> overrided intrinsics
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PGO_PROF  entry: "std_core_set_inlining_inheritance.ETSGLOBAL::testSetBoolOverrided"
-//! RUN_PGO_PAOC  options: "--compiler-regex='.*(test_set|SetHas|SetDelete).*'"
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetHasBool"
+//! RUN_PGO_PAOC  options: "--compiler-regex='.*(testSet|setHas|setDelete).*'"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setHasBool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Call.*std\.core\.Map::has/
 //! INST          /Call.*std_core_set_inlining_inheritance\.MySet::has/
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetDeleteBool"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setDeleteBool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Call.*std\.core\.Map::delete/
 //! INST          /Call.*std_core_set_inlining_inheritance\.MySet::delete/
@@ -90,25 +90,25 @@ class MySet<K> extends Set<K> {
 //! RUN           entry: "std_core_set_inlining_inheritance.ETSGLOBAL::testSetBoolOverrided"
 
 //! CHECKER       JIT: MySet<boolean> overrided intrinsics
-//! RUN           force_jit: true, options: "--compiler-regex='.*(test_set|SetHas|SetDelete).*'",
+//! RUN           force_jit: true, options: "--compiler-regex='.*(testSet|setHas|setDelete).*'",
 //!               entry: "std_core_set_inlining_inheritance.ETSGLOBAL::testSetBoolOverrided"
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetHasBool"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setHasBool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Call.*std\.core\.Map::has/
-//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__SetDeleteBool"
+//! METHOD        "std_core_set_inlining_inheritance.ETSGLOBAL::__noinline__setDeleteBool"
 //! PASS_AFTER    "Inline"
 //! INST_NOT      /Call.*std\.core\.Map::delete/
 
 function testSetBoolOverrided() {
     let set: Set<boolean> = new MySet<boolean>()
     set.add(false)
-    arktest.assertTrue(__noinline__SetHasBool(set))
-    arktest.assertTrue(__noinline__SetDeleteBool(set))
+    arktest.assertTrue(__noinline__setHasBool(set))
+    arktest.assertTrue(__noinline__setDeleteBool(set))
 }
 
-function __noinline__SetHasBool(set: Set<boolean>): boolean {
+function __noinline__setHasBool(set: Set<boolean>): boolean {
     return set.has(true);
 }
-function __noinline__SetDeleteBool(set: Set<boolean>): boolean {
+function __noinline__setDeleteBool(set: Set<boolean>): boolean {
     return set.delete(true);
 }

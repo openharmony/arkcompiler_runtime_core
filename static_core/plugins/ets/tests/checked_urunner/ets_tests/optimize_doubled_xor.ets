@@ -25,7 +25,7 @@ ninja optimize_doubled_xor.checked
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*test.*' ", entry: "optimize_doubled_xor.ETSGLOBAL::main"
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const1"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst1"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -35,7 +35,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const2"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst2"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -45,7 +45,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const3"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst3"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -55,7 +55,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_byte"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainByte"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -65,7 +65,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_short"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainShort"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -75,7 +75,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_int"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainInt"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -85,7 +85,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_long"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainLong"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -95,7 +95,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_no_optimization_diff_const"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainNoOptimizationDiffConst"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -107,7 +107,7 @@ ninja optimize_doubled_xor.checked
 //! INST_NEXT     /Xor/
 //! INST_COUNT    /Xor/,2
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_no_optimization_multi_users"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainNoOptimizationMultiUsers"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -124,7 +124,7 @@ ninja optimize_doubled_xor.checked
 //! CHECKER       JIT: Checking xor->xor optimization
 //! RUN           force_jit: true, options: "--compiler-regex='.*test.*' ", entry: "optimize_doubled_xor.ETSGLOBAL::main"
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const1"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst1"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -134,7 +134,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const2"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst2"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -144,7 +144,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_optimization_const3"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainOptimizationConst3"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -154,7 +154,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_byte"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainByte"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -164,7 +164,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_short"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainShort"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -174,7 +174,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_int"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainInt"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -184,7 +184,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_long"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainLong"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -194,7 +194,7 @@ ninja optimize_doubled_xor.checked
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    /Xor/,0
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_no_optimization_diff_const"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainNoOptimizationDiffConst"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -206,7 +206,7 @@ ninja optimize_doubled_xor.checked
 //! INST_NEXT     /Xor/
 //! INST_COUNT    /Xor/,2
 //!
-//! METHOD        "optimize_doubled_xor.ETSGLOBAL::test_xor_chain_no_optimization_multi_users"
+//! METHOD        "optimize_doubled_xor.ETSGLOBAL::testXorChainNoOptimizationMultiUsers"
 //! PASS_BEFORE   "Peepholes"
 //! INST          /Xor/
 //! INST_NEXT     /Xor/
@@ -223,7 +223,7 @@ function __noinline__dummyReturn(): Int {
     return 1;
 }
 
-function test_xor_chain_optimization_const1(param: int): int {
+function testXorChainOptimizationConst1(param: int): int {
     const XOR_CONST: int = 1;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -235,7 +235,7 @@ function test_xor_chain_optimization_const1(param: int): int {
     return result;
 }
 
-function test_xor_chain_optimization_const2(param: int): int {
+function testXorChainOptimizationConst2(param: int): int {
     const XOR_CONST: int = 0x12345678;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -247,7 +247,7 @@ function test_xor_chain_optimization_const2(param: int): int {
     return result;
 }
 
-function test_xor_chain_optimization_const3(param: int): int {
+function testXorChainOptimizationConst3(param: int): int {
     const XOR_CONST: int = -1;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -259,7 +259,7 @@ function test_xor_chain_optimization_const3(param: int): int {
     return result;
 }
 
-function test_xor_chain_no_optimization_diff_const(param: int): int {
+function testXorChainNoOptimizationDiffConst(param: int): int {
     const XOR_CONST1: int = 0x1234567;
     const XOR_CONST2: int = 0x7654321;
     // Should NOT be optimized - different constants
@@ -272,7 +272,7 @@ function test_xor_chain_no_optimization_diff_const(param: int): int {
     return result;
 }
 
-function test_xor_chain_no_optimization_multi_users(param: int): int {
+function testXorChainNoOptimizationMultiUsers(param: int): int {
     const XOR_CONST: int = 0x12345678;
     let temp = param ^ XOR_CONST;
     // Should NOT be optimized - temp has multiple users
@@ -286,7 +286,7 @@ function test_xor_chain_no_optimization_multi_users(param: int): int {
     return result1 + result2;
 }
 
-function test_xor_chain_byte(param: byte): byte {
+function testXorChainByte(param: byte): byte {
     const XOR_CONST: byte = 0x12 as byte;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -298,7 +298,7 @@ function test_xor_chain_byte(param: byte): byte {
     return result.toByte();
 }
 
-function test_xor_chain_short(param: short): short {
+function testXorChainShort(param: short): short {
     const XOR_CONST: short = 0x1234 as short;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -310,7 +310,7 @@ function test_xor_chain_short(param: short): short {
     return result.toShort();
 }
 
-function test_xor_chain_int(param: int): int {
+function testXorChainInt(param: int): int {
     const XOR_CONST: int = 0x12345678;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -322,7 +322,7 @@ function test_xor_chain_int(param: int): int {
     return result;
 }
 
-function test_xor_chain_long(param: long): long {
+function testXorChainLong(param: long): long {
     const XOR_CONST: long = 0x123456789ABCDEF0 as long;
     // should be optimized to just 'param' since (param ^ XOR_CONST) ^ XOR_CONST == param
     let result = (param ^ XOR_CONST) ^ XOR_CONST;
@@ -336,19 +336,20 @@ function test_xor_chain_long(param: long): long {
  
 function main() {
     let param: int = 42;
-    arktest.assertEQ(test_xor_chain_optimization_const1(param), param);
-    arktest.assertEQ(test_xor_chain_optimization_const2(param), param);
-    arktest.assertEQ(test_xor_chain_optimization_const3(param), param);
-    arktest.assertEQ(test_xor_chain_no_optimization_diff_const(param), param ^ 0x1234567 ^ 0x7654321);
-    arktest.assertEQ(test_xor_chain_no_optimization_multi_users(param), (param ^ 0x12345678 ^ 0x12345678) + ((param ^ 0x12345678) + 1));
+    arktest.assertEQ(testXorChainOptimizationConst1(param), param);
+    arktest.assertEQ(testXorChainOptimizationConst2(param), param);
+    arktest.assertEQ(testXorChainOptimizationConst3(param), param);
+    arktest.assertEQ(testXorChainNoOptimizationDiffConst(param), param ^ 0x1234567 ^ 0x7654321);
+    arktest.assertEQ(testXorChainNoOptimizationMultiUsers(param),
+                     (param ^ 0x12345678 ^ 0x12345678) + ((param ^ 0x12345678) + 1));
     let byteParam: byte = 42 as byte;
-    arktest.assertEQ(test_xor_chain_byte(byteParam), byteParam);
+    arktest.assertEQ(testXorChainByte(byteParam), byteParam);
     let shortParam: short = 4242 as short;
-    arktest.assertEQ(test_xor_chain_short(shortParam), shortParam);
+    arktest.assertEQ(testXorChainShort(shortParam), shortParam);
     let intParam: int = 424242 as int;
-    arktest.assertEQ(test_xor_chain_int(intParam), intParam);
+    arktest.assertEQ(testXorChainInt(intParam), intParam);
     let longParam: long = 424242424242 as long;
-    arktest.assertEQ(test_xor_chain_long(longParam), longParam);
+    arktest.assertEQ(testXorChainLong(longParam), longParam);
 
     return 0;
 }

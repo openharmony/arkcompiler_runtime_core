@@ -23,7 +23,7 @@
 //! INST_NOT     "InitString FromString"
 
 function main(): void {
-    let str1: String = new String();
+    let str1: String = {};
     arktest.assertEQ(str1.getLength(), 0, "String is not empty");
     arktest.assertTrue(str1.isEmpty(), "String is not empty");
 

@@ -25,15 +25,17 @@
 
 import { A } from './ext_funcs_3.ets';
 import { risky } from './ext_funcs_3.ets';
-import { maybe_throw } from './ext_funcs_3.ets';
-import { sum_array } from './ext_funcs_3.ets';
+import { maybeThrow } from './ext_funcs_3.ets';
+import { sumArray } from './ext_funcs_3.ets';
 
 //! CHECKER    Check deep external inlining
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main0" # CC-OFF(G.FMT.02) special comment for testin
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main0"
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::B,ext_funcs_3.ETSGLOBAL::C,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::A,ext_funcs_3.ETSGLOBAL::B,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main0,ext_funcs_3.ETSGLOBAL::A,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main0" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main0"
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main0"
 //! PASS_BEFORE "Inline"
 //! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::A.*\[file=\d+\]/
@@ -47,10 +49,12 @@ function main0(): int {
 }
 
 //! CHECKER    Check inline external method and inline internal method inside (no exception)
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main1"
+//! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybeThrow,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main1,ext_funcs_3.ETSGLOBAL::risky,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main1" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main1"
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main1"
 //! PASS_BEFORE "Inline"
 //! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::risky.*\[file=\d+\]/
@@ -65,11 +69,13 @@ function main1(): int {
 }
 
 //! CHECKER    Check inline external method and inline internal method inside (exception)
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main2"
+//! EVENT      /Inline,ext_funcs_3.ETSGLOBAL::risky,ext_funcs_3.ETSGLOBAL::maybeThrow,.*,STATIC,SUCCESS/
 //! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main2,ext_funcs_3.ETSGLOBAL::risky,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main2" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
+//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main2"
+//! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybeThrow,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main2,.*,IFRAME/
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main2"
 //! PASS_BEFORE "Inline"
@@ -86,20 +92,22 @@ function main2(): int {
 }
 
 //! CHECKER    Check exception inside of external inlined method
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main3,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main3" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybe_throw,.*,THROW/
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main3"
+//! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main3,ext_funcs_3.ETSGLOBAL::maybeThrow,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main3"
+//! EVENT      /Exception,ext_funcs_3.ETSGLOBAL::maybeThrow,.*,THROW/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main3,.*,IFRAME/
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main3"
 //! PASS_BEFORE "Inline"
-//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::maybe_throw.*\[file=\d+\]/
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::maybeThrow.*\[file=\d+\]/
 
 function main3(): int {
     let total = 0;
     for (let i = 2; i >= 0; i--) {
         try {
-            total += maybe_throw(i);
+            total += maybeThrow(i);
         } catch (e) {
             total += -1;
         }
@@ -112,21 +120,23 @@ function main3(): int {
 }
 
 //! CHECKER    Check deoptimization inside of external inlined method
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main4,ext_funcs_3.ETSGLOBAL::sum_array,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc", entry: "ext_inlining_4.ETSGLOBAL::main4" # CC-OFF(G.FMT.02) special comment for testin
-//! EVENT      /DeoptimizationReason,ext_funcs_3.ETSGLOBAL::sum_array,BOUNDS_CHECK_WITH_DEOPT/
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main4"
+//! EVENT      /Inline,ext_inlining_4.ETSGLOBAL::main4,ext_funcs_3.ETSGLOBAL::sumArray,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../ext_inlining_4_ext_funcs_3.ets.abc",
+//!            entry: "ext_inlining_4.ETSGLOBAL::main4"
+//! EVENT      /DeoptimizationReason,ext_funcs_3.ETSGLOBAL::sumArray,BOUNDS_CHECK_WITH_DEOPT/
 //! EVENT      /Deoptimization,ext_inlining_4.ETSGLOBAL::main4,.*,IFRAME/
 //! METHOD     "ext_inlining_4.ETSGLOBAL::main4"
 //! PASS_BEFORE "Inline"
-//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::sum_array.*\[file=\d+\]/
+//! INST       /CallStatic.*ext_funcs_3\.ETSGLOBAL::sumArray.*\[file=\d+\]/
 
 function main4(): int {
     let arr: int[] = [1, 2, 3];
     let total = 0;
 
     try {
-        total = sum_array(arr);
+        total = sumArray(arr);
     } catch (e) {
         total = -1;
     }

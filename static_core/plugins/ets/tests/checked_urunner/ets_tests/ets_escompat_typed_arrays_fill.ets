@@ -14,7 +14,8 @@
  */
 
 //! CHECKER       Array fill intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=.*testFill.*", entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testMain"
+//! RUN           force_jit: true,
+//!               options:"--compiler-regex=.*testFill.*", entry: "ets_escompat_typed_arrays_fill.ETSGLOBAL::testMain"
 //! METHOD        "ets_escompat_typed_arrays_fill.ETSGLOBAL::testFillInt8Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.Int8ArrayFillInternal "
@@ -76,22 +77,36 @@ function testFillFloat64Array() {
 }
 
 function testMain() : int {
-	if (!testFillInt8Array()) return 1;
-	if (!testFillInt16Array()) return 1;
-	if (!testFillInt32Array()) return 1;
-	if (!testFillFloat32Array()) return 1;
-	if (!testFillFloat64Array()) return 1;
+	if (!testFillInt8Array()) {
+	    return 1;
+	}
+	if (!testFillInt16Array()) {
+	    return 1;
+	}
+	if (!testFillInt32Array()) {
+	    return 1;
+	}
+	if (!testFillFloat32Array()) {
+	    return 1;
+	}
+	if (!testFillFloat64Array()) {
+	    return 1;
+	}
 	return 0;
 }
 
 function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
-    if (arr.length != expected.length) return false;
+    if (arr.length != expected.length) {
+        return false;
+    }
 
     for (let i = 0; i < expected.length; i++) {
         if (isNaN(arr[i]) && isNaN(expected[i])) {
             continue
         }
-        if (arr[i] != expected[i]) return false;
+        if (arr[i] != expected[i]) {
+            return false;
+        }
     }
     return true;
 }

@@ -14,8 +14,8 @@
  */
 
 class A {
-    a: int;
-    b: int;
+    public a: int;
+    public b: int;
 };
 
 let arr: FixedArray<int> = new FixedArray<int>(4)
@@ -25,7 +25,8 @@ function foo(obj: A, cnt: int): int  {
 }
 
 //! CHECKER       Escape isn't applied
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "escape_deoptimization.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'",
+//!               entry: "escape_deoptimization.ETSGLOBAL::main"
 //! METHOD        "escape_deoptimization.ETSGLOBAL::main"
 //! PASS_BEFORE   "ChecksElimination"
 //! INST_NOT      "DeoptimizeIf"
@@ -61,7 +62,11 @@ function __noinline__abort() {
 }
 
 // remove dependence from assert in stdlib
-function cassert(v: boolean, s?: string) { if (!v) { throw new AssertionError(s) } }
+function cassert(v: boolean, s?: string) {
+    if (!v) {
+        throw new AssertionError(s) 
+    } 
+}
 
 function main() {
     let cnt: int = 0
@@ -71,7 +76,7 @@ function main() {
        obj.a = 1;
        a = [foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++), foo(obj, cnt++)];
     } catch (e) {
-        cassert(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
+        cassert(e instanceof ArrayIndexOutOfBoundsError, 'Throwed not ArrayIndexOutOfBoundsError');
         cassert(a.length == 1);
         cassert(a[0] == 42);
         return

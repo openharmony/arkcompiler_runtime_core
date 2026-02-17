@@ -15,91 +15,94 @@
 
 //! CHECKER       JIT: indexOf() and lastIndexOf()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true,  options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_index_of_part2.ETSGLOBAL::main"
-//! METHOD        "test_uint8array_index_of"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex=.*::test.*array.*",
+//!               entry: "ets_escompat_typed_arrays_index_of_part2.ETSGLOBAL::main"
+//! METHOD        "testUint8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8Array::indexOf/
-//! METHOD        "test_uint8clampedarray_index_of"
+//! METHOD        "testUint8clampedarrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8ClampedArray::indexOf/
-//! METHOD        "test_uint16array_index_of"
+//! METHOD        "testUint16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint16Array::indexOf/
-//! METHOD        "test_uint32array_index_of"
+//! METHOD        "testUint32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint32Array::indexOf/
-//! METHOD        "test_biguint64array_index_of"
+//! METHOD        "testBiguint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigUint64Array::indexOf/
 
 
 //! CHECKER       AOT: indexOf() and lastIndexOf()
-//! RUN_PAOC      options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_index_of_part2.ETSGLOBAL::main"
-//! METHOD        "test_uint8array_index_of"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
+//!               entry: "ets_escompat_typed_arrays_index_of_part2.ETSGLOBAL::main"
+//! METHOD        "testUint8arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8Array::indexOf/
-//! METHOD        "test_uint8clampedarray_index_of"
+//! METHOD        "testUint8clampedarrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8ClampedArray::indexOf/
-//! METHOD        "test_uint16array_index_of"
+//! METHOD        "testUint16arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint16Array::indexOf/
-//! METHOD        "test_uint32array_index_of"
+//! METHOD        "testUint32arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint32Array::indexOf/
-//! METHOD        "test_biguint64array_index_of"
+//! METHOD        "testBiguint64arrayIndexOf"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigUint64Array::indexOf/
 
-function test_uint8array_index_of() {
+function testUint8arrayIndexOf() {
     let array = new Uint8Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
-    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
-function test_uint8clampedarray_index_of() {
+function testUint8clampedarrayIndexOf() {
     let array = new Uint8ClampedArray([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
-    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
-function test_uint16array_index_of() {
+function testUint16arrayIndexOf() {
     let array = new Uint16Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3 ,  0),  2.);
-    arktest.assertEQ(array.indexOf(3 ,  6), -1.);
-    arktest.assertEQ(array.indexOf(3.,  8), -1.);
-    arktest.assertEQ(array.indexOf(3., -1), -1.);
-    arktest.assertEQ(array.indexOf(3., -7),  2.);
+    arktest.assertEQ(array.indexOf(3 ,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3 ,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3.0,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3.0, -7),  2.0);
 }
 
-function test_uint32array_index_of() {
+function testUint32arrayIndexOf() {
     let array = new Uint32Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(3.,  0),  2.);
-    arktest.assertEQ(array.indexOf(3.,  6), -1.);
-    arktest.assertEQ(array.indexOf(3 ,  8), -1.);
-    arktest.assertEQ(array.indexOf(3 , -1), -1.);
-    arktest.assertEQ(array.indexOf(3 , -7),  2.);
+    arktest.assertEQ(array.indexOf(3.0,  0),  2.0);
+    arktest.assertEQ(array.indexOf(3.0,  6), -1.0);
+    arktest.assertEQ(array.indexOf(3 ,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -1), -1.0);
+    arktest.assertEQ(array.indexOf(3 , -7),  2.0);
 }
 
-function test_biguint64array_index_of() {
+function testBiguint64arrayIndexOf() {
     let array = new BigUint64Array([1, 2, 3, 3, 3, 4, 5])
-    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.);
-    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.);
-    arktest.assertEQ(array.indexOf(3,  8), -1.);
-    arktest.assertEQ(array.indexOf(3, -1), -1.);
-    arktest.assertEQ(array.indexOf(3, -7),  2.);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  0),  2.0);
+    arktest.assertEQ(array.indexOf(new BigInt(3),  6), -1.0);
+    arktest.assertEQ(array.indexOf(3,  8), -1.0);
+    arktest.assertEQ(array.indexOf(3, -1), -1.0);
+    arktest.assertEQ(array.indexOf(3, -7),  2.0);
 }
 
 function main(): void {
-    test_uint8array_index_of()
-    test_uint8clampedarray_index_of()
-    test_uint16array_index_of()
-    test_uint32array_index_of()
-    test_biguint64array_index_of()
+    testUint8arrayIndexOf()
+    testUint8clampedarrayIndexOf()
+    testUint16arrayIndexOf()
+    testUint32arrayIndexOf()
+    testBiguint64arrayIndexOf()
 }

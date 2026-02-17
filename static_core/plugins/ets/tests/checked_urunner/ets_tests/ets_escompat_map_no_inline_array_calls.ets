@@ -47,7 +47,7 @@ class MyArray<T> extends Array<T> {
 }
 
 class MyMap<K, V> extends Map<K, V> {
-    arr: Array<K>
+    arr: K[]
 
     public constructor(size: number) {
         super()

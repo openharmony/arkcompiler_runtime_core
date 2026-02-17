@@ -126,13 +126,13 @@ class MyArray<T> extends Array<T> {
 	}
 }
 
-function arraySet(arr: Array<int>): void {
+function arraySet(arr: int[]): void {
     arr[1] = 2;
     arr[3] = 5;
     arr[8] = 13;
 }
 
-function arrayGet(arr: Array<int>): int {
+function arrayGet(arr: int[]): int {
     return arr[1] + arr[3] + arr[8];
 }
 
@@ -141,7 +141,7 @@ const DERIVED_ARRAY_BRANCH = 1;
 const NUM_ARRAY_BRANCHES = 2;
 
 function __noinline__testWithRandomBranch(branch: int): void {
-    let arr: Array<int>;
+    let arr: int[];
     if (branch == BASE_ARRAY_BRANCH) {
         arr = new Array<int>(16);
     } else {

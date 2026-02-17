@@ -14,7 +14,9 @@
  */
 
 //! CHECKER       Array fill intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=.*testFill.*", entry: "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testMain"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex=.*testFill.*",
+//!               entry: "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testMain"
 //! METHOD        "ets_escompat_typed_arrays_fill_part2.ETSGLOBAL::testFillBigInt64Array"
 //! PASS_AFTER    "Inline"
 //! INST          "Intrinsic.BigInt64ArrayFillInternal "
@@ -83,42 +85,66 @@ function testFillBigUint64Array() {
 }
 
 function testMain() : int {
-	if (!testFillBigInt64Array()) return 1;
-	if (!testFillUint8Array()) return 1;
-	if (!testFillUint8ClampedArray()) return 1;
-	if (!testFillUint16Array()) return 1;
-	if (!testFillUint32Array()) return 1;
-	if (!testFillBigUint64Array()) return 1;
+	if (!testFillBigInt64Array()) {
+	    return 1;
+	}
+	if (!testFillUint8Array()) {
+	    return 1;
+	}
+	if (!testFillUint8ClampedArray()) {
+	    return 1;
+	}
+	if (!testFillUint16Array()) {
+	    return 1;
+	}
+	if (!testFillUint32Array()) {
+	    return 1;
+	}
+	if (!testFillBigUint64Array()) {
+	    return 1;
+	}
 
 	return 0;
 }
 
 function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
-    if (arr.length != expected.length) return false;
+    if (arr.length != expected.length) {
+        return false;
+    }
 
     for (let i = 0; i < expected.length; i++) {
         if (isNaN(arr[i]) && isNaN(expected[i])) {
             continue
         }
-        if (arr[i] != expected[i]) return false;
+        if (arr[i] != expected[i]) {
+            return false;
+        }
     }
     return true;
 }
 
 function checkArray(arr: BigInt64Array, expected: BigInt64Array) {
-    if (arr.length != expected.length) return false;
+    if (arr.length != expected.length) {
+        return false;
+    }
 
     for (let i = 0; i < expected.length; i++) {
-        if (arr[i] != expected[i]) return false;
+        if (arr[i] != expected[i]) {
+            return false;
+        }
     }
     return true;
 }
 
 function checkArray(arr: BigUint64Array, expected: BigUint64Array) {
-    if (arr.length != expected.length) return false;
+    if (arr.length != expected.length) {
+        return false;
+    }
 
     for (let i = 0; i < expected.length; i++) {
-        if (arr[i] != expected[i]) return false;
+        if (arr[i] != expected[i]) {
+            return false;
+        }
     }
     return true;
 }

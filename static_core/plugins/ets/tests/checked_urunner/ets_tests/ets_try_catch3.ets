@@ -14,7 +14,11 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Optimize with default catch on the same level
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch3.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch3.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false \
+//!                        --compiler-regex=ets_try_catch3.MultipleCatch::__noinline__multipleCatch",
+//!              entry: "ets_try_catch3.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch3.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch3.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"

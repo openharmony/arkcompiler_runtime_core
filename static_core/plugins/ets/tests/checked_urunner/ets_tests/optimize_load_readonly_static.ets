@@ -14,8 +14,8 @@
  */
 
 class Base {
-    static readonly x: int
-    static readonly y: int
+    public static readonly x: int
+    public static readonly y: int
 
     static {
         Base.x = 2
@@ -30,7 +30,7 @@ class Base {
 }
 
 class NotReadonly {
-    static x: int
+    public static x: int
 
     static {
         NotReadonly.x = 2
@@ -62,7 +62,9 @@ function getNotReadonlyX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
 
 //! CHECKER      LoadStatic for readonly field, GVN not applied, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getBaseX|Base::<cctor>)'", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getBaseX|Base::<cctor>)'",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
 //! EVENT        "Compilation,optimize_load_readonly_static.ETSGLOBAL::getBaseX"
 //! EVENT_NEXT   "Compilation,Base::<cctor>"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::getBaseX"
@@ -91,7 +93,8 @@ function getNotReadonlyX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
 
 //! CHECKER      Replace LoadStatic for readonly field with constant in JIT when class is initialized
-//! RUN          options: "--compiler-regex='ETSGLOBAL::getBaseX' --no-async-jit=true --compiler-hotness-threshold=3", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
+//! RUN          options: "--compiler-regex='ETSGLOBAL::getBaseX' --no-async-jit=true --compiler-hotness-threshold=3",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetBaseX"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::getBaseX"
 //! PASS_AFTER   "IrBuilder"
 //! INST         "LoadStatic"
@@ -106,10 +109,14 @@ function checkGetBaseX(): int {
 }
 
 //! CHECKER      LoadStatic for NOT readonly field, GVN not applied, compare with interpreter
-//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          options: "--compiler-enable-jit=false",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
 
 //! CHECKER      LoadStatic for NOT readonly field, GVN not applied, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX|NotReadonly::<cctor>)'", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          force_jit: true,
+//!              options:
+//!              "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX|NotReadonly::<cctor>)'",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
 //! EVENT        "Compilation,optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX"
 //! EVENT_NEXT   "Compilation,NotReadonly::<cctor>"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX"
@@ -124,7 +131,8 @@ function checkGetBaseX(): int {
 //! INST_COUNT   "LoadStatic", 3
 
 //! CHECKER      LoadStatic for NOT readonly field, GVN not applied, AOT
-//! RUN_PAOC     options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX|NotReadonly::<cctor>)'"
+//! RUN_PAOC     options:
+//!              "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX|NotReadonly::<cctor>)'"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX"
 //! PASS_AFTER   "Codegen"
 //! INST         /LoadStatic.*NotReadonly.x/
@@ -135,10 +143,13 @@ function checkGetBaseX(): int {
 //! INST_COUNT   "LoadStatic", 3
 //! PASS_AFTER   "Codegen"
 //! INST_COUNT   "LoadStatic", 3
-//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          options:
+//!              "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
 
 //! CHECKER      Do NOT replace LoadStatic for NOT readonly field with constant in JIT when class is initialized
-//! RUN          options: "--compiler-regex='ETSGLOBAL::getNotReadonlyX' --no-async-jit=true --compiler-hotness-threshold=3", entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
+//! RUN          options:
+//!              "--compiler-regex='ETSGLOBAL::getNotReadonlyX' --no-async-jit=true --compiler-hotness-threshold=3",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkGetNotReadonlyX"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::getNotReadonlyX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "LoadStatic", 1
@@ -157,7 +168,9 @@ function checkGetNotReadonlyX(): int {
 //! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
 
 //! CHECKER      LoadStatic for readonly field, GVN applied, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkBaseX|Base::<cctor>)'", entry: "optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkBaseX|Base::<cctor>)'",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
 //! EVENT        "Compilation,optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
 //! EVENT_NEXT   "Compilation,Base::<cctor>"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::checkBaseX"
@@ -196,10 +209,14 @@ function checkBaseX(): int {
 }
 
 //! CHECKER      GVN not applied for LoadStatic because field is not readonly, compare with interpreter
-//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
+//! RUN          options: "--compiler-enable-jit=false",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 
 //! CHECKER      GVN not applied for LoadStatic because field is not readonly, JIT
-//! RUN          force_jit: true, options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX|NotReadonly::<cctor>)'", entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
+//! RUN          force_jit: true,
+//!              options:
+//!              "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX|NotReadonly::<cctor>)'",
+//!              entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 //! EVENT        "Compilation,optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 //! EVENT_NEXT   "Compilation,NotReadonly::<cctor>"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
@@ -209,13 +226,15 @@ function checkBaseX(): int {
 //! INST_COUNT   /LoadStatic.*NotReadonly.x/, 2
 
 //! CHECKER      GVN not applied for LoadStatic because field is not readonly, AOT
-//! RUN_PAOC     options: "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX|NotReadonly::<cctor>)'"
+//! RUN_PAOC     options:
+//!              "--compiler-regex='(optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX|NotReadonly::<cctor>)'"
 //! METHOD       "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /LoadStatic.*NotReadonly.x/, 2
 //! PASS_AFTER   "Codegen"
 //! INST_COUNT   /LoadStatic.*NotReadonly.x/, 2
-//! RUN          options: "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
+//! RUN          options:
+//!              "--compiler-enable-jit=false", entry: "optimize_load_readonly_static.ETSGLOBAL::checkNotReadonlyX"
 
 function checkNotReadonlyX(): int {
     arktest.assertEQ(NotReadonly.x, 4)

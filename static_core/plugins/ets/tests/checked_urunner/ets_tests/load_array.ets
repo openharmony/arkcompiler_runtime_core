@@ -14,7 +14,9 @@
  */
 
 //! CHECKER         Load with negative index is correct with 32 bit offset
-//! RUN             force_jit: true, options: "--compiler-regex='.*func.*'", entry: "load_array.ETSGLOBAL::main", return: 0
+//! RUN             force_jit: true,
+//!                 options: "--compiler-regex='.*func.*'",
+//!                 entry: "load_array.ETSGLOBAL::main", return: 0
 //! METHOD          "load_array.ETSGLOBAL::func"
 //! PASS_BEFORE     "AdjustRefs"
 //! INST            "LoadArrayI"
