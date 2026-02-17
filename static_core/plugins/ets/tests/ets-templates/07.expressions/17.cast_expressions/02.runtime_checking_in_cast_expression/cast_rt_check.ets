@@ -26,14 +26,16 @@ interface J {}
 interface K {}
 class A implements I {}
 class B extends A implements J {}
+class C extends B implements K {}
 
 function main(): void  {
     {{t.init}};
     try {
         {{t.expr}};
-        arktest.assertFalse(!x)
+        {% if t.fail %}throw new Error("Expected ClassCastError but cast succeeded"){% else %}arktest.assertTrue(x instanceof {{t.target}}){% endif %}
     } catch (e) {
-      arktest.assertTrue(e instanceof ClassCastError)
+        if (!(e instanceof ClassCastError)) { throw e; }
+        {% if not t.fail %}throw new Error("Unexpected ClassCastError on successful cast"){% endif %}
     }
 }
 {% endfor %}
