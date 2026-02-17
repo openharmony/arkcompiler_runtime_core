@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 
 #ifndef PANDA_RUNTIME_COROUTINES_COROUTINE_WORKER_DOMAIN_H
 #define PANDA_RUNTIME_COROUTINES_COROUTINE_WORKER_DOMAIN_H
+
+#include <ostream>
+#include <sstream>
 
 namespace ark {
 
@@ -35,6 +38,29 @@ enum class CoroutineWorkerDomain {
      */
     EA,
 };
+
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
+inline std::ostream &operator<<(std::ostream &os, CoroutineWorkerDomain domain)
+{
+    switch (domain) {
+        case CoroutineWorkerDomain::GENERAL:
+            os << "GENERAL";
+            break;
+        case CoroutineWorkerDomain::EXACT_ID:
+            os << "EXACT_ID";
+            break;
+        case CoroutineWorkerDomain::MAIN:
+            os << "MAIN";
+            break;
+        case CoroutineWorkerDomain::EA:
+            os << "EA";
+            break;
+        default:
+            UNREACHABLE();
+            break;
+    }
+    return os;
+}
 
 }  // namespace ark
 

@@ -25,6 +25,11 @@ void FinalizationRegistryManager::CleanupCoroFinished()
 {
     // Atomic with acq_rel order reason: other threads should see correct value
     [[maybe_unused]] uint32_t oldCnt = finRegCleanupCoroCount_.fetch_sub(1, std::memory_order_acq_rel);
+    [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
+    LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
+                        << "] FinReg cleanup coroutine finished | Worker domain: " << GetCoroDomain(coro)
+                        << " | Worker id: " << coro->GetWorker()->GetId();
+
     ASSERT(oldCnt > 0);
 }
 
@@ -55,6 +60,9 @@ void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
     };
     auto it = std::find_if(finalizationList_.begin(), finalizationList_.end(), pred);
     if (it == finalizationList_.end()) {
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] Adding new FinReg (" << finReg
+                            << ") to finalization list | Worker domain: " << finReg->GetWorkerDomain()
+                            << " | Worker id: " << finReg->GetWorkerId();
         finalizationList_.push_back(finReg);
     } else {
         EtsFinalizationRegistry *head = *it;
@@ -69,6 +77,9 @@ void FinalizationRegistryManager::UpdateAndSweep(const ReferenceUpdater &updater
     while (it != finalizationList_.end()) {
         EtsFinalizationRegistry *head = UpdateAndSweepFinRegChain(*it, updater);
         if (head == nullptr) {
+            LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] Remove FinReg (" << *it
+                                << ") from finalization list | Worker domain: " << (*it)->GetWorkerDomain()
+                                << " | Worker id: " << (*it)->GetWorkerId();
             finalizationList_.erase(it++);
         } else {
             *it = head;
@@ -123,6 +134,10 @@ bool FinalizationRegistryManager::UpdateFinRegCoroCountAndCheckIfCleanupNeeded()
                                                  cnt, cnt + 1U, std::memory_order_acq_rel, std::memory_order_acquire)) {
         oldCnt = cnt;
     }
+    LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
+                        << "] Check if we can to launch FinReg "
+                           "cleanup. Max cleanup coroutines : "
+                        << MAX_FINREG_CLEANUP_COROS << " | Current count of coroutines running cleanup: " << oldCnt;
     return oldCnt < MAX_FINREG_CLEANUP_COROS;
 }
 
@@ -160,23 +175,31 @@ static std::pair<EtsFinRegNode *, EtsFinRegNode *> CombineLists(EtsFinalizationR
     return std::make_pair(head, tail);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUD.05) solid logic
 void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
 {
     ASSERT(coro != nullptr);
     auto *coroManager = coro->GetCoroutineManager();
     auto currentWorkerId = coro->GetWorker()->GetId();
     auto currentWorkerDomain = GetCoroDomain(coro);
+    LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
+                        << "] GC finished, check if FinReg cleanup coroutine needed | Worker domain: "
+                        << currentWorkerDomain << " | Worker id: " << currentWorkerId
+                        << " | Coroutine id: " << coro->GetId();
     // Check are there node that can be finalized by the current worker
     auto pred = [currentWorkerId, currentWorkerDomain](const EtsFinalizationRegistry *finReg) {
         return CanCleanup(currentWorkerId, currentWorkerDomain, finReg->GetWorkerId(), finReg->GetWorkerDomain());
     };
     auto it = std::find_if(finalizationList_.begin(), finalizationList_.end(), pred);
     if (it == finalizationList_.end()) {
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] Nothing to clean up";
         return;
     }
     auto [head, tail] = CombineLists(*it);
     auto toDelete = it;
     ++it;
+    LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] FinReg deleted from finalization list: ("
+                        << *toDelete << ")";
     finalizationList_.erase(toDelete);
     it = std::find_if(
         it, finalizationList_.end(), [currentWorkerId, currentWorkerDomain](const EtsFinalizationRegistry *finReg) {
@@ -184,6 +207,8 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         });
     if (it != finalizationList_.end()) {
         auto [head2, tail2] = CombineLists(*it);
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__ << "] FinReg deleted from finalization list: (" << *it
+                            << ")";
         finalizationList_.erase(it);
         tail->SetNext(head2);
         tail = tail2;
@@ -197,6 +222,13 @@ void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
         auto workerDomain = GetCoroDomain(coro);
         auto groupId = GetGroupId(coroManager, workerDomain, workerId);
         auto args = PandaVector<Value> {Value(EtsObject::ToCoreType(head))};
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
+                            << "] Launch FinReg cleanup coroutine | Worker domain: " << workerDomain
+                            << " | Worker id: " << workerId << " | Coroutine id: " << coro->GetId();
+        LOG(DEBUG, RUNTIME) << "[FinRegManager::" << __FUNCTION__
+                            << "] FinReg cleanup in progress, count: "
+                            // Atomic with relaxed order reason: no sync depends
+                            << finRegCleanupCoroCount_.load(std::memory_order_relaxed);
         auto launchResult =
             coroManager->Launch(event, cleanup, std::move(args), groupId, CoroutinePriority::DEFAULT_PRIORITY, false);
         if (UNLIKELY(launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED)) {
