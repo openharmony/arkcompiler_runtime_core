@@ -54,6 +54,11 @@ from runner.logger import Log
 
 _LOGGER = Log.get_logger(__file__)
 
+ALLOWED_TEST_EXTS = (
+    (".d", ".ets"),
+    (".ets",),
+)
+
 
 class FontColor(BaseEnum):
     RED_BOLD = "\033[31;1m"
@@ -548,6 +553,18 @@ def is_executable_file(path_to_file: Path) -> bool:
         return False
     mode = path_to_file.stat().st_mode
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+
+
+def strip_test_name(test_name: Path) -> tuple[str, str]:
+    name = test_name.name
+
+    for ext_parts in ALLOWED_TEST_EXTS:
+        ext_str = "".join(ext_parts)
+        if name.endswith(ext_str):
+            base = name[:-len(ext_str)]
+            return base, ext_str
+
+    raise ValueError(f"Unsupported test extension for: {name!r}")
 
 
 def unlines(lines: Iterable[str]) -> str:

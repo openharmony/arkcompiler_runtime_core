@@ -39,7 +39,7 @@ class EtsTemplatesGenerator(IGenerator):
         self.extension = f".{self._config.test_suite.extension()}"
         self.filter: str = str(self._config.test_suite.get_parameter("filter"))
         self.test_file = self._config.test_suite.get_parameter("test-file")
-        self._already_generated: set[Path] = set()
+        self._generated_deps: set[Path] = set()
 
     @staticmethod
     def get_expected_files_for_test(test_path: Path) -> list[Path]:
@@ -71,7 +71,7 @@ class EtsTemplatesGenerator(IGenerator):
         test_source = self._source
         if self.test_file and fnmatch.fnmatchcase(self.test_file, self.filter):
             test_source = self._source / self.test_file
-        self.__dfs(test_source, self._already_generated)
+        self.__dfs(test_source, set())
 
         _LOGGER.default(f"Generation finished! Generated {len(self.generated_tests)} test files")
         return self.generated_tests
@@ -91,50 +91,83 @@ class EtsTemplatesGenerator(IGenerator):
         return matched
 
     def _copy_expected_file(self, path: Path) -> None:
-        test_full_name = path.relative_to(self._source)
-        output = self._target / test_full_name
-        shutil.copy(path, output.parent)
+        test_expected_files = EtsTemplatesGenerator.get_expected_files_for_test(path)
+        if test_expected_files:
+            for expected_file in test_expected_files:
+                test_full_name = expected_file.relative_to(self._source)
+                output = self._target / test_full_name
+                shutil.copy(expected_file, output.parent)
 
     def _strip_test_template_suffix(self, path: Path) -> Path | None:
         if path.exists():
             return path
-
-        if not self.test_file:
-            return None
 
         # test_file might have postfix from template, should find parent file
         base, _, _ = path.name.rpartition("_")
         parent_test = path.parent / f"{base}{self.extension}"
         return parent_test if parent_test.exists() else None
 
-    def __generate_test(self, path: Path) -> None:
-        dep_tests_to_generate: set[Path] = set()
+    def _collect_d_ets(self, test_full_name: str, seen_d_ets: set[Path]) -> tuple[set[Path], set[Path]]:
+        new_d_ets_files = set()
+        test_parent_dir = self._source / Path(test_full_name).parent
+        for file_name in test_parent_dir.iterdir():
+            if self._is_d_ets_file(file_name) and file_name not in seen_d_ets:
+                new_d_ets_files.add(Path(file_name.name))
+                seen_d_ets.add(file_name)
+
+        return new_d_ets_files, seen_d_ets
+
+    def _is_d_ets_file(self, file_path: Path) -> bool:
+        return file_path.is_file() and file_path.suffixes[-2:] == [".d", ".ets"]
+
+    def _should_generate_dependency(self, dep_test: Path) -> bool:
+        if dep_test in self._generated_deps or dep_test in self.generated_tests:
+            return False
+
+        # Check if test was already generated
+        dep_relative = dep_test.relative_to(self._source)
+        generated_relative = [
+            Path(gen_test).relative_to(self._target)
+            for gen_test in self.generated_tests
+        ]
+
+        return dep_relative not in generated_relative
+
+    def _collect_dependency_tests(self, path: Path, generated_tests: list,
+                                  d_ets_files: set[Path]) -> set[Path]:
+        dep_tests = set(d_ets_files)
+
+        dep_files = EtsTemplatesGenerator._get_test_dep_files(path, generated_tests)
+        for test_path in dep_files:
+            strip_test_path = self._strip_test_template_suffix(test_path)
+            if strip_test_path is not None:
+                dep_tests.add(Path(strip_test_path))
+
+        return {(path.parent / dep_test).resolve() for dep_test in dep_tests}
+
+    def __generate_test(self, path: Path, seen_d_ets: set) -> None:
+        if path in self._generated_deps:
+            return
         test_full_name = os.path.relpath(path, self._source)
         output = self._target / test_full_name
+
         bench = Benchmark(path, output, test_full_name, self._source, self.extension)
         generated_tests = bench.generate()
+        if len(generated_tests) > 1:
+            self._generated_deps.add(path)
         self.generated_tests.extend(generated_tests)
 
+        self._copy_expected_file(path)
+
         if self.test_file is not None or self.filter != DEFAULT_FILTER:
-            dep_files = EtsTemplatesGenerator._get_test_dep_files(path, generated_tests)
+            d_ets_files, seen_d_ets = self._collect_d_ets(test_full_name, seen_d_ets)
 
-            test_parent_dir = self._source / Path(test_full_name).parent
-            for file_name in test_parent_dir.iterdir():
-                if file_name.is_file() and file_name.suffixes[-2:] == [".d", ".ets"]:
-                    dep_tests_to_generate.add(Path(file_name.name))
+            dep_tests = self._collect_dependency_tests(path, generated_tests, d_ets_files)
 
-            for test_path in dep_files:
-                test_path_parent = self._strip_test_template_suffix(test_path)
-                if test_path_parent is not None:
-                    dep_tests_to_generate.add(Path(test_path_parent))
-
-            dep_tests_to_generate = {(path.parent / Path(dep_test)).resolve() for dep_test in dep_tests_to_generate}
-            if dep_tests_to_generate:
-                for dep_test in dep_tests_to_generate:
-                    dep_test_output = self._target / dep_test.relative_to(self._source)
-                    if not dep_test_output.exists():
-                        self.__generate_test(dep_test)
-                        self._already_generated.add(dep_test)
+            for dep_test in dep_tests:
+                if self._should_generate_dependency(dep_test):
+                    self.__generate_test(dep_test, seen_d_ets)
+                    self._generated_deps.add(dep_test)
 
     def __dfs(self, test_path: Path, seen: set[Path]) -> None:
         path = self._strip_test_template_suffix(test_path)
@@ -151,12 +184,7 @@ class EtsTemplatesGenerator(IGenerator):
         if path not in self._matched:
             return
 
-        if path.suffix == self.extension:
-            self.__generate_test(path)
-
-            test_expected_files = EtsTemplatesGenerator.get_expected_files_for_test(path)
-            if test_expected_files:
-                for expected_file in test_expected_files:
-                    self._copy_expected_file(expected_file)
+        if str(path).endswith(self.extension):
+            self.__generate_test(path, set())
 
             return
