@@ -367,13 +367,23 @@ end
 end
 
 macro(:load_class) do |obj|
+  unless Options.atomic_aligned_data_access?
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # Volatile was previosly used to guarantee atomic access.
+  # Current supported platforms guarantee it for aligned memory access.
+  # Memory order is not required since memory barrier after class initialization
+  # in class linker guarantees initialized class visibility
+  # See class_linker.cpp:AvoidLoadedClassPointerLeak
   if defines.ARK_HYBRID && defines.PANDA_TARGET_64
-    klass_with_flags = LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.u64
+    klass_with_flags := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
     # Mask for class pointer
     Bitcast(And(klass_with_flags, 0x0000ffffffffffff).u64).ref
   else
-    # Load with memory barrier, see related store in store_class
-    LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.ref
+    LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
   end
 end
 
@@ -387,11 +397,21 @@ macro(:load_base_class) do |klass|
 end
 
 macro(:store_class) do |obj, klass|
+  unless Options.atomic_aligned_data_access?
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # Volatile was previosly used to guarantee atomic access.
+  # Current supported platforms guarantee it for aligned memory access.
+  # Memory order is not required since memory barrier after class initialization
+  # in class linker guarantees initialized class visibility
+  # See class_linker.cpp:AvoidLoadedClassPointerLeak
   if defines.ARK_HYBRID && defines.PANDA_TARGET_64
-    StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.u64
+    StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
   else
-    # Store with memory barrier, because changes should be visible in GC thread
-    StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile.ref
+    StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
   end
 end
 

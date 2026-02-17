@@ -98,12 +98,11 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
 
     # There is no check of the argument against NullPointer as
     # it's done in the InstBuilder (see AddArgNullcheckIfNeeded)
-    klass := load_class(str)
     length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
     hashcode := LoadI(str).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     data_size := unpack_length(Cast(length).u64, string_compression_enabled, Constants::STRING_LENGTH_SHIFT)
 
-    new_str := allocate_string_tlab(klass, Cast(data_size).word, :FastPath)
+    new_str := allocate_string_tlab(load_core_string_class(), Cast(data_size).word, :FastPath)
     StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
     StoreI(new_str, hashcode).Imm(Constants::STRING_HASHCODE_OFFSET).u32
 

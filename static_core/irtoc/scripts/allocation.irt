@@ -78,6 +78,7 @@ function(:AllocateObjectTlab,
     store_class(start, klass)
     addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
     StoreI(addr, new_start).Imm(0).ptr
+    # Memory barrier is encoded in codegen, see VisitNewObject
     Return(start).ptr
   }
 }
@@ -137,6 +138,7 @@ def AllocateArrayTlab(element_size)
       StoreI(start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
       addr := Add(tlab_ptr, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
       StoreI(addr, new_start).Imm(0).ptr
+      # Memory barrier is encoded in codegen, see VisitNewArray
       Return(start).ptr
     }
   }
