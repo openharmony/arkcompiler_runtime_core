@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ public:
                             PandaList<Method *>::const_iterator profiledMethodsFinal);
     void SaveProfile(const PandaString &saveFilePath, const PandaString &classCtxStr,
                      PandaList<Method *> &profiledMethods, PandaList<Method *>::const_iterator profiledMethodsFinal,
-                     PandaUnorderedSet<std::string_view> &profiledPandaFiles);
+                     PandaUnorderedSet<std::string> &profiledPandaFiles);
 };
 }  // namespace ark
 #endif  // PROFILING_SAVE_H

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,12 +253,12 @@ void AotManager::ParseClassContextToFile(std::string_view context)
     while ((end = context.find(AotClassContextCollector::DELIMETER, start)) != std::string_view::npos) {
         pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
         ASSERT(pathEnd != std::string_view::npos);
-        profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
+        profiledPandaFiles_.insert(std::string(context.substr(start, pathEnd - start)));
         start = end + 1;
     }
     pathEnd = context.find(AotClassContextCollector::HASH_DELIMETER, start);
     ASSERT(pathEnd != std::string_view::npos);
-    profiledPandaFiles_.insert(context.substr(start, pathEnd - start));
+    profiledPandaFiles_.insert(std::string(context.substr(start, pathEnd - start)));
 }
 
 bool AotClassContextCollector::operator()(const panda_file::File &pf)
