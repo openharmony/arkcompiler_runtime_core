@@ -125,6 +125,9 @@
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined3u.ets
 05.generics/02.generic_instantiations/01.type_arguments/type_arguments_of_parameterized_declarations/fixed_array_predefined4.ets
 
+#33178
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/cannot_infer_type_arg_n.ets
+
 #20213 Generic instantiation depends on arguments order
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/func_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/meth_8.ets
