@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -147,19 +147,139 @@ TEST_F(ClassGetStaticFieldByNameFloatTest, combination_test4)
     CheckFieldValue("class_get_static_field_by_name_float_test.FloatStaticFinal", "float_value");
 }
 
-TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization)
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.GetFloatStatic", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Parent", &cls), ANI_OK);
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
     ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "parentStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
 
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "agex", &floatValue), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Parent", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "age", &floatValue), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.GetFloatStatic"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "childStaticField", &floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "grandchildStaticField", &floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "parentStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "childStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "grandchildStaticField", &floatValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "parentStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "childStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+}
+
+TEST_F(ClassGetStaticFieldByNameFloatTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_get_static_field_by_name_float_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
+    ani_float floatValue {};
+    ASSERT_EQ(env_->Class_GetStaticFieldByName_Float(cls, "grandchildStaticField", &floatValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_get_static_field_by_name_float_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing

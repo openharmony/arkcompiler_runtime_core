@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,4 +23,14 @@ class TestSetDoubleA extends TestSetDouble {
 
 final class TestSetDoubleFinal extends TestSetDouble {
     static double_value: double = 18.0;
+}
+
+class Parent {
+    static parentStaticField: double = 24.0;
+}
+class Child extends Parent {
+    static childStaticField: double = 18.0;
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: double = 10.0;
 }
