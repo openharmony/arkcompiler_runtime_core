@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,13 @@ final class TestIntFinal extends TestInt {
 }
 
 class Parent {
-    static parentField: int = 1;
-    static overridedField: int = 2;
+    static parentStaticField: int = 1;
+    static overridedStaticField: int = 2;
 }
 class Child extends Parent {
-    static overridedField: int = 4;
-    static childField: int = 3;
+    static overridedStaticField: int = 4;
+    static childStaticField: int = 3;
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: int = 5;
 }

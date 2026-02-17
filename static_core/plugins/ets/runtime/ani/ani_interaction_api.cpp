@@ -338,8 +338,13 @@ static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_fi
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
-    *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
-    return ANI_OK;
+    if constexpr (std::is_same_v<T, ani_ref>) {
+        auto *etsRes = etsClass->GetStaticFieldObject(etsField);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
+        return ANI_OK;
+    }
 }
 
 template <typename T>
@@ -357,7 +362,12 @@ static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_fi
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
-    etsClass->SetStaticFieldPrimitive(etsField, value);
+    if constexpr (std::is_same_v<T, ani_ref>) {
+        EtsObject *etsValue = s.ToInternalType(value);
+        etsClass->SetStaticFieldObject(etsField, etsValue);
+    } else {
+        etsClass->SetStaticFieldPrimitive(etsField, value);
+    }
     return ANI_OK;
 }
 
@@ -376,11 +386,17 @@ static ani_status ClassGetStaticFieldByName(ani_env *env, ani_class cls, const c
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
+    etsClass = etsField->GetDeclaringClass();
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
-    *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
-    return ANI_OK;
+    if constexpr (std::is_same_v<T, ani_ref>) {
+        EtsObject *etsRes = etsClass->GetStaticFieldObject(etsField);
+        return s.AddLocalRef(etsRes, result);
+    } else {
+        *result = etsClass->GetStaticFieldPrimitive<T>(etsField);
+        return ANI_OK;
+    }
 }
 
 template <typename T>
@@ -389,6 +405,9 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     CHECK_ENV(env);
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(name);
+    if constexpr (std::is_same_v<T, ani_ref>) {
+        CHECK_PTR_ARG(value);
+    }
 
     ScopedManagedCodeFix s(env);
     EtsClass *etsClass = s.ToInternalType(cls);
@@ -397,10 +416,16 @@ static ani_status ClassSetStaticFieldByName(ani_env *env, ani_class cls, const c
     ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
 
+    etsClass = etsField->GetDeclaringClass();
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
 
-    etsClass->SetStaticFieldPrimitive(etsField, value);
+    if constexpr (std::is_same_v<T, ani_ref>) {
+        EtsObject *etsValue = s.ToInternalType(value);
+        etsClass->SetStaticFieldObject(etsField, etsValue);
+    } else {
+        etsClass->SetStaticFieldPrimitive(etsField, value);
+    }
     return ANI_OK;
 }
 
@@ -1754,7 +1779,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Boolean(ani_env *env, ani_
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_boolean>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1763,7 +1788,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Char(ani_env *env, ani_cla
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_char>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1772,7 +1797,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Byte(ani_env *env, ani_cla
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_byte>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1781,7 +1806,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Short(ani_env *env, ani_cl
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_short>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1790,7 +1815,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Int(ani_env *env, ani_clas
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_int>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1799,7 +1824,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Long(ani_env *env, ani_cla
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_long>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1808,7 +1833,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Float(ani_env *env, ani_cl
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_float>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1817,7 +1842,7 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Double(ani_env *env, ani_c
 {
     ANI_DEBUG_TRACE(env);
 
-    return ClassGetStaticField<ani_double>(env, cls, field, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1825,21 +1850,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticField_Ref(ani_env *env, ani_clas
                                                           ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(field);
-    CHECK_PTR_ARG(result);
 
-    EtsField *etsField = ToInternalField(field);
-    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
-    EtsClass *etsClass = s.ToInternalType(cls);
-    ani_status status = InitializeClass(s, etsClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    auto *etsRes = etsClass->GetStaticFieldObject(etsField);
-    return s.AddLocalRef(etsRes, result);
+    return ClassGetStaticField(env, cls, field, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -1919,22 +1931,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticField_Ref(ani_env *env, ani_clas
                                                           ani_ref value)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(field);
-    CHECK_PTR_ARG(value);
 
-    EtsField *etsField = ToInternalField(field);
-    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
-    EtsClass *etsClass = s.ToInternalType(cls);
-    ani_status status = InitializeClass(s, etsClass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    EtsObject *etsValue = s.ToInternalType(value);
-    etsClass->SetStaticFieldObject(etsField, etsValue);
-    return ANI_OK;
+    return ClassSetStaticField(env, cls, field, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2014,23 +2012,8 @@ NO_UB_SANITIZE static ani_status Class_GetStaticFieldByName_Ref(ani_env *env, an
                                                                 ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(name);
-    CHECK_PTR_ARG(result);
 
-    ScopedManagedCodeFix s(env);
-    EtsClass *klass = s.ToInternalType(cls);
-
-    EtsField *etsField = klass->GetStaticFieldIDByName(name);
-    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
-    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ani_status status = InitializeClass(s, klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    EtsObject *etsRes = klass->GetStaticFieldObject(etsField);
-    return s.AddLocalRef(etsRes, result);
+    return ClassGetStaticFieldByName(env, cls, name, result);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
@@ -2108,24 +2091,8 @@ NO_UB_SANITIZE static ani_status Class_SetStaticFieldByName_Ref(ani_env *env, an
                                                                 ani_ref value)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
-    CHECK_PTR_ARG(cls);
-    CHECK_PTR_ARG(name);
-    CHECK_PTR_ARG(value);
 
-    ScopedManagedCodeFix s(env);
-    EtsClass *klass = s.ToInternalType(cls);
-
-    EtsField *etsField = klass->GetStaticFieldIDByName(name);
-    ANI_CHECK_RETURN_IF_EQ(etsField, nullptr, ANI_NOT_FOUND);
-    ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ani_status status = InitializeClass(s, klass);
-    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-
-    EtsObject *etsValue = s.ToInternalType(value);
-    klass->SetStaticFieldObject(etsField, etsValue);
-    return ANI_OK;
+    return ClassSetStaticFieldByName(env, cls, name, value);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)

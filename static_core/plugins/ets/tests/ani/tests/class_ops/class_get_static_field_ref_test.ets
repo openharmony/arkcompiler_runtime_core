@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,4 +25,14 @@ class TestRefA extends TestRef {
 final class TestRefFinal extends TestRef {
     static int_value: int = 0;
     static string_value: String = "testString";
+}
+
+class Parent {
+    static parentStaticField: String = "parent";
+}
+class Child extends Parent {
+    static childStaticField: String = "child";
+}
+final class Grandchild extends Child {
+    static grandchildStaticField: String = "grandchild";
 }

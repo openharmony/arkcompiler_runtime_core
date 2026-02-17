@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,21 +175,148 @@ TEST_F(ClassSetStaticFieldByNameRefTest, invalid_argument1)
     ASSERT_EQ(env_->c_api->Class_SetStaticFieldByName_Ref(nullptr, cls, "string_value", string), ANI_INVALID_ARGS);
 }
 
-TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization)
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization0)
 {
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.BoxStaticFinal", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Parent", &cls), ANI_OK);
 
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
     ani_string stringValue {};
     ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "parentStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
 
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization1)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Parent", &cls), ANI_OK);
 
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_valuex", stringValue), ANI_NOT_FOUND);
-    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "childStaticField", stringValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
 
-    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "string_value", stringValue), ANI_OK);
-    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.BoxStaticFinal"));
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization2)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Parent", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "grandchildStaticField", stringValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization3)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "parentStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization4)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "childStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization5)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Child", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "grandchildStaticField", stringValue), ANI_NOT_FOUND);
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization6)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "parentStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization7)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "childStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+}
+
+TEST_F(ClassSetStaticFieldByNameRefTest, check_initialization8)
+{
+    ani_class cls {};
+    ASSERT_EQ(env_->FindClass("class_set_static_field_by_name_ref_test.Grandchild", &cls), ANI_OK);
+
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_FALSE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
+    ani_string stringValue {};
+    ASSERT_EQ(env_->String_NewUTF8("test", 4U, &stringValue), ANI_OK);
+    ASSERT_EQ(env_->Class_SetStaticFieldByName_Ref(cls, "grandchildStaticField", stringValue), ANI_OK);
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Parent"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Child"));
+    ASSERT_TRUE(IsRuntimeClassInitialized("class_set_static_field_by_name_ref_test.Grandchild"));
 }
 
 }  // namespace ark::ets::ani::testing
