@@ -341,7 +341,7 @@ void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
     // It guarantees that the flag is already set for the current coro and we need to propagate it
     // or GC will see the new coro in EnumerateAllThreads.
 #if !defined(ARK_USE_COMMON_RUNTIME)
-    if (Thread::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
+    if (Mutator::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
         Coroutine::GetCurrent()->IsSuspended() && !co->IsSuspended()) {
         co->SuspendImpl(true);
     }
@@ -361,7 +361,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::TerminateCoroutine() started";
     co->NativeCodeEnd();
-    co->UpdateStatus(ThreadStatus::TERMINATING);
+    co->UpdateStatus(MutatorStatus::TERMINATING);
 
     {
         os::memory::LockHolder lList(coroListLock_);
@@ -386,7 +386,7 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         } else {
             co->DestroyInternalResources();
         }
-        co->UpdateStatus(ThreadStatus::FINISHED);
+        co->UpdateStatus(MutatorStatus::FINISHED);
     }
     Runtime::GetCurrent()->GetNotificationManager()->ThreadEndEvent(co);
 
@@ -980,7 +980,7 @@ bool StackfulCoroutineManager::IsNoActiveMutatorsExceptCurrent()
 
 Coroutine *StackfulCoroutineManager::CreateExclusiveWorkerForThread(Runtime *runtime, PandaVM *vm)
 {
-    ASSERT(Thread::GetCurrent() == nullptr);
+    ASSERT(Mutator::GetCurrent() == nullptr);
 
     // actually we need this lock due to worker limit
     os::memory::LockHolder eWorkerLock(eWorkerCreationLock_);

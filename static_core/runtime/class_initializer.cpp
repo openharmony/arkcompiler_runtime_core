@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,7 +228,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread 
 
         if (klass->IsInitializing()) {
             if constexpr (MODE == MT_MODE_TASK) {
-                if (klass->GetInitTid() == Coroutine::CastFromThread(thread)->GetCoroutineId()) {
+                if (klass->GetInitTid() == Coroutine::CastFromMutator(thread)->GetCoroutineId()) {
                     return true;
                 }
             } else {
@@ -245,7 +245,7 @@ bool ClassInitializer<MODE>::Initialize(ClassLinker *classLinker, ManagedThread 
         }
 
         if constexpr (MODE == MT_MODE_TASK) {
-            klass->SetInitTid(Coroutine::CastFromThread(thread)->GetCoroutineId());
+            klass->SetInitTid(Coroutine::CastFromMutator(thread)->GetCoroutineId());
         } else {
             klass->SetInitTid(thread->GetId());
         }

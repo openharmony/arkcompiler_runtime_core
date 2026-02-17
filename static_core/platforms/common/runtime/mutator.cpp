@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include "runtime/include/thread.h"
+#include "runtime/include/mutator.h"
 
 namespace ark {
 
-static thread_local Thread *g_sCurrentThread = nullptr;
+static thread_local Mutator *g_sCurrentMutator = nullptr;
 
 /* static */
-void Thread::SetCurrent(Thread *thread)
+void Mutator::SetCurrent(Mutator *mutator)
 {
-    g_sCurrentThread = thread;
+    g_sCurrentMutator = mutator;
 }
 
 /* static */
-Thread *Thread::GetCurrent()
+Mutator *Mutator::GetCurrent()
 {
-    return g_sCurrentThread;
+    return g_sCurrentMutator;
 }
 
 }  // namespace ark

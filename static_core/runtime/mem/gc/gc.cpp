@@ -821,13 +821,13 @@ bool GC::WaitForGC(GCTask task)
 
 bool GC::WaitForGCInManaged(const GCTask &task)
 {
-    Thread *baseThread = Thread::GetCurrent();
-    if (ManagedThread::ThreadIsManagedThread(baseThread)) {
-        ManagedThread *thread = ManagedThread::CastFromThread(baseThread);
+    auto *mutator = Mutator::GetCurrent();
+    if (ManagedThread::MutatorIsManagedThread(mutator)) {
+        ManagedThread *thread = ManagedThread::CastFromMutator(mutator);
         ASSERT(thread->GetMutatorLock()->HasLock());
-        [[maybe_unused]] bool isDaemon = MTManagedThread::ThreadIsMTManagedThread(baseThread) &&
-                                         MTManagedThread::CastFromThread(baseThread)->IsDaemon();
-        ASSERT(!isDaemon || thread->GetStatus() == ThreadStatus::RUNNING);
+        [[maybe_unused]] bool isDaemon =
+            MTManagedThread::MutatorIsMTManagedThread(mutator) && MTManagedThread::CastFromMutator(mutator)->IsDaemon();
+        ASSERT(!isDaemon || thread->GetStatus() == MutatorStatus::RUNNING);
         SAFEPOINT_TIME_CHECKER(SafepointTimerTable::ResetTimers(thread->GetInternalId(), true));
         vm_->GetMutatorLock()->Unlock();
         thread->PrintSuspensionStackIfNeeded();

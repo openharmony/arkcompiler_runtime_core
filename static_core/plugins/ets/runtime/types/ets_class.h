@@ -25,7 +25,6 @@
 #include "libarkbase/mem/object_pointer.h"
 #include "runtime/class_linker_context.h"
 #include "runtime/include/class-inl.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/class_linker.h"
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_type.h"

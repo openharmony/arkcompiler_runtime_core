@@ -86,7 +86,7 @@ void StackfulCoroutineContext::SetStatus(Coroutine::Status newStatus)
 {
     ASSERT(GetCoroutine() != nullptr);
 #ifndef NDEBUG
-    PandaString setter = (Thread::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
+    PandaString setter = (Mutator::GetCurrent() == nullptr) ? "null" : Coroutine::GetCurrent()->GetName();
     LOG(DEBUG, COROUTINES) << GetCoroutine()->GetName() << ": " << status_ << " -> " << newStatus << " by " << setter;
 #endif
     Coroutine::Status oldStatus = status_;
@@ -102,9 +102,9 @@ void StackfulCoroutineContext::Destroy()
         UNREACHABLE();
     }
     ASSERT(co == Coroutine::GetCurrent());
-    ASSERT(co->GetStatus() != ThreadStatus::FINISHED);
+    ASSERT(co->GetStatus() != MutatorStatus::FINISHED);
 
-    co->UpdateStatus(ThreadStatus::TERMINATING);
+    co->UpdateStatus(MutatorStatus::TERMINATING);
     SetStatus(Coroutine::Status::TERMINATING);
 
     if (co->GetManager()->TerminateCoroutine(co)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "runtime/include/panda_vm.h"
-
 #include "runtime/lock_order_graph.h"
 
 namespace ark {
@@ -47,10 +46,10 @@ bool LockOrderGraph::CheckForTerminationLoops(const PandaList<MTManagedThread *>
 
         auto threadId = thread->GetId();
         auto status = thread->GetStatus();
-        if (status == ThreadStatus::NATIVE) {
+        if (status == MutatorStatus::NATIVE) {
             nodes[threadId] = true;
         } else {
-            if (status != ThreadStatus::IS_BLOCKED) {
+            if (status != MutatorStatus::IS_BLOCKED) {
                 LOG(DEBUG, RUNTIME) << "Thread " << threadId << " has changed its status during graph construction";
                 return false;
             }

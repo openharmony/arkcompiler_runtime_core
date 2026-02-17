@@ -111,6 +111,7 @@ set(SOURCES
     monitor.cpp
     monitor_object_lock.cpp
     monitor_pool.cpp
+    mutator.cpp
     global_object_lock.cpp
     class_lock.cpp
     object_header.cpp
@@ -122,7 +123,6 @@ set(SOURCES
     runtime_controller.cpp
     string_table.cpp
     thread.cpp
-    thread_proxy.cpp
     mt_thread_manager.cpp
     lock_order_graph.cpp
     time_utils.cpp
@@ -251,9 +251,9 @@ if (ENABLE_PERF_COUNTERS)
 endif()
 
 if (PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS)
-    list(APPEND SOURCES ${PANDA_ROOT}/platforms/mobile/runtime/thread.cpp)
+    list(APPEND SOURCES ${PANDA_ROOT}/platforms/mobile/runtime/mutator.cpp)
 else()
-    list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/thread.cpp)
+    list(APPEND SOURCES ${PANDA_ROOT}/platforms/common/runtime/mutator.cpp)
 endif()
 
 if (PANDA_TARGET_MOBILE)
@@ -574,7 +574,6 @@ if (NOT PANDA_USE_PREBUILT_TARGETS)
     add_dependencies(arkruntime arkruntime_static)
 endif ()
 
-add_subdirectory(scheduler)
 add_subdirectory(asm_defines)
 
 add_dependencies(arkruntime_obj

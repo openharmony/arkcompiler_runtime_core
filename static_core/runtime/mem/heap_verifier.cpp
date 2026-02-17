@@ -165,7 +165,7 @@ static PandaString GetClassName(const ObjectHeader *obj)
 template <class LanguageConfig>
 size_t HeapVerifier<LanguageConfig>::VerifyAllPaused() const
 {
-    Rendezvous *rendezvous = Thread::GetCurrent()->GetVM()->GetRendezvous();
+    Rendezvous *rendezvous = Mutator::GetCurrent()->GetVM()->GetRendezvous();
     rendezvous->SafepointBegin();
     size_t failCount = VerifyAll();
     rendezvous->SafepointEnd();
@@ -337,7 +337,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     // A string object may exist but there are no live references to it (no bit set in the live bitmap).
     // But later code may reuse it by calling StringTable::GetOrInternString so this string
     // get alive. That is why we mark all strings as alive by visiting the string table.
-    Thread::GetCurrent()->GetVM()->VisitStrings(collectObjects);
+    Mutator::GetCurrent()->GetVM()->VisitStrings(collectObjects);
     heap_->IterateOverObjects(collectObjects);
     failsCount += this->CheckHeap(heapObjects, referentObjects);
     // Stack verifier

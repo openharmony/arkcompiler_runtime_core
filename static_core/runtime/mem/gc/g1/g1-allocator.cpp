@@ -425,7 +425,7 @@ void ObjectAllocatorG1<MT_MODE>::ResetYoungAllocator()
         thread->ClearTLAB();
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
+    Mutator::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
     objectAllocator_->ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
 }
 

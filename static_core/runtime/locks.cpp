@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "runtime/include/locks.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/logger.h"
-#include "include/thread.h"
+#include "runtime/include/locks.h"
+#include "runtime/include/mutator.h"
 
 #include <memory>
 #if defined(USE_ADDRESS_SANITIZER)
@@ -61,7 +61,7 @@ void MutatorLock::ReadLock()
 #endif
     LockT::ReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::ReadLock";
-    Thread::GetCurrent()->SetLockState(RDLOCK);
+    Mutator::GetCurrent()->SetLockState(RDLOCK);
 }
 
 void MutatorLock::WriteLock()
@@ -71,7 +71,7 @@ void MutatorLock::WriteLock()
 #endif
     LockT::WriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::WriteLock";
-    Thread::GetCurrent()->SetLockState(WRLOCK);
+    Mutator::GetCurrent()->SetLockState(WRLOCK);
 }
 
 bool MutatorLock::TryReadLock()
@@ -79,7 +79,7 @@ bool MutatorLock::TryReadLock()
     bool ret = LockT::TryReadLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryReadLock";
     if (ret) {
-        Thread::GetCurrent()->SetLockState(RDLOCK);
+        Mutator::GetCurrent()->SetLockState(RDLOCK);
     }
     return ret;
 }
@@ -89,7 +89,7 @@ bool MutatorLock::TryWriteLock()
     bool ret = LockT::TryWriteLock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::TryWriteLock";
     if (ret) {
-        Thread::GetCurrent()->SetLockState(WRLOCK);
+        Mutator::GetCurrent()->SetLockState(WRLOCK);
     }
     return ret;
 }
@@ -101,17 +101,17 @@ void MutatorLock::Unlock()
 #endif
     LockT::Unlock();
     LOG(DEBUG, RUNTIME) << "MutatorLock::Unlock";
-    Thread::GetCurrent()->SetLockState(UNLOCKED);
+    Mutator::GetCurrent()->SetLockState(UNLOCKED);
 }
 
 MutatorLock::MutatorLockState MutatorLock::GetState() const
 {
-    return Thread::GetCurrent()->GetLockState();
+    return Mutator::GetCurrent()->GetLockState();
 }
 
 bool MutatorLock::HasLock() const
 {
-    auto state = Thread::GetCurrent()->GetLockState();
+    auto state = Mutator::GetCurrent()->GetLockState();
     return state == RDLOCK || state == WRLOCK;
 }
 #endif  // !NDEBUG

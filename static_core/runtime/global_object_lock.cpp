@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,20 +23,20 @@ static os::memory::ConditionVariable g_cv;  // NOLINT(fuchsia-statically-constru
 
 GlobalObjectLock::GlobalObjectLock([[maybe_unused]] const ObjectHeader *obj)
 {
-    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_BLOCKED);
+    ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_BLOCKED);
     g_mtx.Lock();
 }
 
 bool GlobalObjectLock::Wait([[maybe_unused]] bool ignoreInterruption) const
 {
-    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_WAITING);
+    ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_WAITING);
     g_cv.Wait(&g_mtx);
     return true;
 }
 
 bool GlobalObjectLock::TimedWait(uint64_t timeout) const
 {
-    ScopedChangeThreadStatus s(ManagedThread::GetCurrent(), ThreadStatus::IS_TIMED_WAITING);
+    ScopedChangeMutatorStatus s(ManagedThread::GetCurrent(), MutatorStatus::IS_TIMED_WAITING);
     g_cv.TimedWait(&g_mtx, timeout);
     return true;
 }

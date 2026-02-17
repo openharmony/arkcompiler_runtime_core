@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "libarkbase/mem/mem_pool.h"
 #include "libarkbase/mem/mem_config.h"
 #include "libarkbase/mem/mem.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/object_header.h"
@@ -91,7 +92,7 @@ void ObjectAllocatorBase::IterateOverObjectsSafe([[maybe_unused]] const ObjectVi
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
-    ScopedChangeThreadStatus ets(thread, ThreadStatus::RUNNING);
+    ScopedChangeMutatorStatus ets(thread, MutatorStatus::RUNNING);
     ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
     IterateOverObjects(objectVisitor);
 }
@@ -619,7 +620,7 @@ void ObjectAllocatorGen<MT_MODE>::ResetYoungAllocator()
         thread->ClearTLAB();
         return true;
     };
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(threadCallback);
+    Mutator::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(threadCallback);
     youngGenAllocator_->Reset();
 }
 

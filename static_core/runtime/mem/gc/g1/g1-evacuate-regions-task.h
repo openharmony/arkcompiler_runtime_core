@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,25 +18,6 @@
 #include "runtime/mem/gc/workers/gc_workers_tasks.h"
 
 namespace ark::mem {
-
-class GcThreadScope {
-public:
-    explicit GcThreadScope(Thread *gcThread) : previous_(Thread::GetCurrent())
-    {
-        Thread::SetCurrent(gcThread);
-    }
-
-    ~GcThreadScope()
-    {
-        Thread::SetCurrent(previous_);
-    }
-
-    DEFAULT_COPY_SEMANTIC(GcThreadScope);
-    DEFAULT_MOVE_SEMANTIC(GcThreadScope);
-
-private:
-    Thread *previous_;
-};
 
 template <typename Ref>
 class GCEvacuateRegionsTaskStack;

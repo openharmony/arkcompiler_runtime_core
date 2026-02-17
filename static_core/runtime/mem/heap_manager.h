@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,14 @@
 
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/macros.h"
+#include "libarkbase/mem/code_allocator.h"
+#include "libarkbase/mem/mem.h"
+#include "libarkbase/trace/trace.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/object_header.h"
-#include "runtime/include/thread.h"
+#include "runtime/mem/alloc_config.h"
 #include "runtime/mem/frame_allocator-inl.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map_singleton.h"
 #include "runtime/mem/heap_verifier.h"

@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
@@ -253,7 +252,7 @@ extern "C" EtsDoubleArray *StdGCAllocatePinnedDoubleArray(EtsLong length)
 extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
 {
     ASSERT(obj != nullptr);
-    auto *vm = Thread::GetCurrent()->GetVM();
+    auto *vm = ManagedThread::GetCurrent()->GetVM();
     SpaceType objSpaceType =
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
     ASSERT_PRINT(IsHeapSpace(objSpaceType), SpaceTypeToString(objSpaceType));
@@ -287,7 +286,7 @@ extern "C" void StdGCPinObject(EtsObject *obj)
 extern "C" void StdGCUnpinObject(EtsObject *obj)
 {
     ASSERT(obj != nullptr);
-    auto *vm = Thread::GetCurrent()->GetVM();
+    auto *vm = ManagedThread::GetCurrent()->GetVM();
     vm->GetHeapManager()->UnpinObject(obj->GetCoreType());
 }
 

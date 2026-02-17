@@ -21,8 +21,8 @@
 
 static ark::Expected<ark::ets::EtsCoroutine *, std::string_view> GetCurrentCoroutine()
 {
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         return ark::Unexpected(std::string_view("Thread is unattached"));
     }
     // After verifying that the current thread is attached to VM, it is valid to get current EtsCoroutine

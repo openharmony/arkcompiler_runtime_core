@@ -28,7 +28,6 @@
 #include "runtime/include/thread_scopes.h"
 
 #include "runtime/include/stack_walker.h"
-#include "runtime/include/thread.h"
 #include "runtime/interpreter/runtime_interface.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"

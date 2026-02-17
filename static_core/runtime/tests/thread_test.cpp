@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,47 +174,47 @@ DEATH_TEST_F(ThreadTest, TestAllConversions)
     AssertNative();
 }
 
-std::string GetThreadStatus(ThreadStatus status)
+static std::string GetMutatorStatus(MutatorStatus status)
 {
     std::string expected;
     switch (status) {
-        case ThreadStatus::CREATED:
+        case MutatorStatus::CREATED:
             expected = "New";
             break;
-        case ThreadStatus::RUNNING:
+        case MutatorStatus::RUNNING:
             expected = "Runnable";
             break;
-        case ThreadStatus::IS_BLOCKED:
+        case MutatorStatus::IS_BLOCKED:
             expected = "Blocked";
             break;
-        case ThreadStatus::IS_WAITING:
+        case MutatorStatus::IS_WAITING:
             expected = "Waiting";
             break;
-        case ThreadStatus::IS_TIMED_WAITING:
+        case MutatorStatus::IS_TIMED_WAITING:
             expected = "Timed_waiting";
             break;
-        case ThreadStatus::IS_SUSPENDED:
+        case MutatorStatus::IS_SUSPENDED:
             expected = "Suspended";
             break;
-        case ThreadStatus::IS_COMPILER_WAITING:
+        case MutatorStatus::IS_COMPILER_WAITING:
             expected = "Compiler_waiting";
             break;
-        case ThreadStatus::IS_WAITING_INFLATION:
+        case MutatorStatus::IS_WAITING_INFLATION:
             expected = "Waiting_inflation";
             break;
-        case ThreadStatus::IS_SLEEPING:
+        case MutatorStatus::IS_SLEEPING:
             expected = "Sleeping";
             break;
-        case ThreadStatus::IS_TERMINATED_LOOP:
+        case MutatorStatus::IS_TERMINATED_LOOP:
             expected = "Terminated_loop";
             break;
-        case ThreadStatus::TERMINATING:
+        case MutatorStatus::TERMINATING:
             expected = "Terminating";
             break;
-        case ThreadStatus::NATIVE:
+        case MutatorStatus::NATIVE:
             expected = "Native";
             break;
-        case ThreadStatus::FINISHED:
+        case MutatorStatus::FINISHED:
             expected = "Terminated";
             break;
         default:
@@ -224,13 +224,13 @@ std::string GetThreadStatus(ThreadStatus status)
     return expected;
 }
 
-TEST_F(ThreadTest, ThreadStatusAsStringTest)
+TEST_F(ThreadTest, MutatorStatusAsStringTest)
 {
-    int start = static_cast<int>(ThreadStatus::CREATED);
-    int end = static_cast<int>(ThreadStatus::FINISHED);
+    int start = static_cast<int>(MutatorStatus::CREATED);
+    int end = static_cast<int>(MutatorStatus::FINISHED);
     for (int i = start; i <= end; ++i) {
-        auto status = static_cast<ThreadStatus>(i);
-        std::string expected = GetThreadStatus(status);
+        auto status = static_cast<MutatorStatus>(i);
+        std::string expected = GetMutatorStatus(status);
         EXPECT_EQ(std::string_view(ManagedThread::ThreadStatusAsString(status)), std::string_view(expected));
     }
 }

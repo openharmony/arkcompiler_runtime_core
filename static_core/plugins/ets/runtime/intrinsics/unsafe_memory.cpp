@@ -21,7 +21,6 @@
 #include "libarkbase/utils/arch.h"
 #include "runtime/handle_scope.h"
 #include "runtime/handle_scope-inl.h"
-#include "runtime/include/thread.h"
 
 namespace ark::ets::intrinsics {
 

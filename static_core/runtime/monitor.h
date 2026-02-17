@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/utils/list.h"
 #include "libarkbase/utils/logger.h"
-#include "runtime/include/thread_status.h"
+#include "runtime/include/mutator_status.h"
 
 namespace ark {
 
@@ -113,7 +113,7 @@ public:
      * @param  ignore_interruption  ignore interruption event or not
      * @return true if it was interrupted; false otherwise
      */
-    PANDA_PUBLIC_API static State Wait(ObjectHeader *obj, ThreadStatus status, uint64_t timeout, uint64_t nanos,
+    PANDA_PUBLIC_API static State Wait(ObjectHeader *obj, MutatorStatus status, uint64_t timeout, uint64_t nanos,
                                        bool ignoreInterruption = false);
 
     static State Notify(ObjectHeader *obj);
@@ -235,7 +235,7 @@ private:
                               MonitorPool *monitorPool);
 
     static State WaitWithHeavyLockedState(MTManagedThread *thread, VMHandle<ObjectHeader> &objHandle, MarkWord &mark,
-                                          ThreadStatus status, uint64_t timeout, uint64_t nanos,
+                                          MutatorStatus status, uint64_t timeout, uint64_t nanos,
                                           bool ignoreInterruption);
 
     friend class MonitorPool;

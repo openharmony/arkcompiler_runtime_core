@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,7 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
-#include "runtime/include/thread_status.h"
+#include "runtime/include/mutator_status.h"
 #include "runtime/interpreter/frame.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "libarkbase/utils/math_helpers.h"
@@ -372,19 +371,19 @@ void ObjectMonitorExit(ObjectHeader *header)
 
 void ObjectWait(ObjectHeader *header)
 {
-    Monitor::State state = Monitor::Wait(header, ThreadStatus::IS_WAITING, 0, 0);
+    Monitor::State state = Monitor::Wait(header, MutatorStatus::IS_WAITING, 0, 0);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
 }
 
 void ObjectTimedWait(ObjectHeader *header, uint64_t timeout)
 {
-    Monitor::State state = Monitor::Wait(header, ThreadStatus::IS_TIMED_WAITING, timeout, 0);
+    Monitor::State state = Monitor::Wait(header, MutatorStatus::IS_TIMED_WAITING, timeout, 0);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
 }
 
 void ObjectTimedWaitNanos(ObjectHeader *header, uint64_t timeout, uint64_t nanos)
 {
-    Monitor::State state = Monitor::Wait(header, ThreadStatus::IS_TIMED_WAITING, timeout, nanos);
+    Monitor::State state = Monitor::Wait(header, MutatorStatus::IS_TIMED_WAITING, timeout, nanos);
     LOG_IF(state == Monitor::State::ILLEGAL, FATAL, RUNTIME) << "Monitor::Wait() failed";
 }
 

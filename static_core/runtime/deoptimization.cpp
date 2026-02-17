@@ -22,6 +22,7 @@
 #include "libarkfile/file_items.h"
 #include "libarkbase/macros.h"
 #include "runtime/include/locks.h"
+#include "runtime/include/mutator.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/profiling/profiling-inl.h"
@@ -106,7 +107,7 @@ static bool InvalidateCompiledMethod(ManagedThread *thread, Method *method, bool
 // NO_THREAD_SAFETY_ANALYSIS because it doesn't know about mutator_lock status in this scope
 void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha) NO_THREAD_SAFETY_ANALYSIS
 {
-    PandaVM *vm = Thread::GetCurrent()->GetVM();
+    PandaVM *vm = Mutator::GetCurrent()->GetVM();
     ScopedSuspendAllThreadsRunning ssat(vm->GetRendezvous());
     // NOTE(msherstennikov): remove this loop and check `methods` contains frame's method in stack traversing
     for (const auto &method : methods) {
@@ -124,7 +125,7 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
         }
         // NOTE (Trubenkov)  clean up compiled code(See issue 1706)
         method->SetInterpreterEntryPoint();
-        Thread::GetCurrent()->GetVM()->GetCompiler()->RemoveOsrCode(method);
+        Mutator::GetCurrent()->GetVM()->GetCompiler()->RemoveOsrCode(method);
         // If deoptimization ocure during OSR compilation, we reset status after finish the compilation
         if (method->GetCompilationStatus() != Method::COMPILATION) {
             method->SetCompilationStatus(Method::NOT_COMPILED);

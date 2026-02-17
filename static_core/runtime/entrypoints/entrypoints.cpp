@@ -555,7 +555,7 @@ static Class *GetClass(const Method *caller, FileEntityId fileEntityId, ClassLin
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto [pf, entityId] = GetPandaFileByIndex(fileEntityId);
 
-    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()) ||
+    ASSERT(!MTManagedThread::MutatorIsMTManagedThread(Mutator::GetCurrent()) ||
            !PandaVM::GetCurrent()->GetGC()->IsGCRunning() || PandaVM::GetCurrent()->GetMutatorLock()->HasLock());
 
     Class *klass = pf->GetPandaCache()->GetClassFromCache(entityId);
@@ -676,7 +676,7 @@ extern "C" Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *met
         extSz = Runtime::GetCurrent()->GetLanguageContext(*method).GetFrameExtSize();
     }
     size_t allocSz = Frame::GetAllocSize(size, extSz);
-    Frame *frame = Thread::GetCurrent()->GetVM()->GetHeapManager()->AllocateExtFrame(allocSz, extSz);
+    Frame *frame = Mutator::GetCurrent()->GetVM()->GetHeapManager()->AllocateExtFrame(allocSz, extSz);
     if (UNLIKELY(frame == nullptr)) {
         return nullptr;
     }

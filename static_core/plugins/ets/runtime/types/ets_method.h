@@ -22,7 +22,6 @@
 #include "libarkfile/file_items.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/method.h"
-#include "runtime/include/thread.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"

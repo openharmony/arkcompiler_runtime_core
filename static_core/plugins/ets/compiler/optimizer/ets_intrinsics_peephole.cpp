@@ -764,7 +764,7 @@ bool Peepholes::PeepholeDoubleToString([[maybe_unused]] GraphVisitor *v, Intrins
         cache =
             graph->CreateInstLoadImmediate(DataType::REFERENCE, pc, cachePtr, LoadImmediateInst::ObjectType::OBJECT);
     } else {
-        auto vm = graph->CreateInstLoadImmediate(DataType::POINTER, pc, Thread::GetVmOffset(),
+        auto vm = graph->CreateInstLoadImmediate(DataType::POINTER, pc, Mutator::GetVmOffset(),
                                                  LoadImmediateInst::ObjectType::TLS_OFFSET);
         intrinsic->InsertBefore(vm);
         cache = graph->CreateInstLoad(

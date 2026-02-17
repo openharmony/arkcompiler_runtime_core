@@ -17,7 +17,6 @@
 #include "runtime/compiler.h"
 #include "runtime/core/core_vm.h"
 #include "runtime/handle_scope-inl.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/gc/reference-processor/empty_reference_processor.h"
@@ -70,7 +69,8 @@ Expected<PandaCoreVM *, PandaString> PandaCoreVM::Create(Runtime *runtime, const
     // Create Main Thread
     coreVm->mainThread_ = MTManagedThread::Create(runtime, coreVm);
     coreVm->mainThread_->InitBuffers();
-    ASSERT(coreVm->mainThread_ == ManagedThread::GetCurrent());
+    ASSERT_PRINT(coreVm->mainThread_ == ManagedThread::GetCurrent(),
+                 coreVm->mainThread_ << " " << ManagedThread::GetCurrent());
     coreVm->mainThread_->InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
                                                    ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
 
@@ -306,8 +306,8 @@ void PandaCoreVM::VisitVmRoots(const GCRootVisitor &visitor)
     PandaVM::VisitVmRoots(visitor);
     // Visit PT roots
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
-        ASSERT(MTManagedThread::ThreadIsMTManagedThread(thread));
-        auto mtThread = MTManagedThread::CastFromThread(thread);
+        ASSERT(MTManagedThread::MutatorIsMTManagedThread(thread));
+        auto mtThread = MTManagedThread::CastFromMutator(thread);
         auto ptStorage = mtThread->GetPtReferenceStorage();
         ptStorage->VisitObjects(visitor, mem::RootType::ROOT_PT_LOCAL);
         return true;

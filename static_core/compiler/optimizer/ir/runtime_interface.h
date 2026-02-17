@@ -22,16 +22,13 @@
 #include "ir-dyn-base-types.h"
 #include "libarkbase/mem/gc_barrier.h"
 #include "runtime/include/coretypes/tagged_value.h"
+#include "runtime/include/object_header.h"
 #include "runtime/profiling/profiling.h"
 #include "source_languages.h"
 #include "libarkbase/utils/arch.h"
 #include "libarkbase/utils/span.h"
 #include "libarkbase/utils/arena_containers.h"
 #include "libarkbase/mem/mem.h"
-
-namespace ark {
-class Thread;
-}  // namespace ark
 
 namespace ark::compiler {
 enum class ClassType {

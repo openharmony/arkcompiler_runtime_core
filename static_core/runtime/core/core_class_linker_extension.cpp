@@ -442,7 +442,7 @@ Class *CoreClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t v
 {
     ASSERT(IsInitialized());
 
-    auto vm = Thread::GetCurrent()->GetVM();
+    auto vm = Mutator::GetCurrent()->GetVM();
     auto *heapManager = vm->GetHeapManager();
 
     auto *classRoot = GetClassRoot(ClassRoot::CLASS);

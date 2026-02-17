@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,7 +86,7 @@ void GCTriggerHeap::RestoreMinTargetFootprint()
 
 void GCTriggerHeap::ComputeNewTargetFootprint(const GCTask &task, size_t heapSizeBeforeGc, size_t heapSize)
 {
-    GC *gc = Thread::GetCurrent()->GetVM()->GetGC();
+    GC *gc = Mutator::GetCurrent()->GetVM()->GetGC();
     if (gc->IsGenerational() && task.reason == GCTaskCause::YOUNG_GC_CAUSE &&
         task.collectionType != GCCollectionType::MIXED) {
         // we don't want to update heap-trigger on young-gc
@@ -417,7 +417,7 @@ void PauseTimeGoalTrigger::GCFinished(const GCTask &task, size_t heapSizeBeforeG
         }
     }
 
-    auto *gc = Thread::GetCurrent()->GetVM()->GetGC();
+    auto *gc = Mutator::GetCurrent()->GetVM()->GetGC();
     gc->ComputeNewSize();
 
     if (task.collectionType == GCCollectionType::MIXED) {

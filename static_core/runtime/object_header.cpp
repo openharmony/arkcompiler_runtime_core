@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/hclass.h"
 #include "runtime/include/runtime.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/free_object.h"
 #include "runtime/mem/vm_handle.h"

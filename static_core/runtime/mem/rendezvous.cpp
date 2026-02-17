@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ void Rendezvous::SafepointBegin()
     ASSERT(!mutatorLock_->HasLock());
     LOG(DEBUG, GC) << "Rendezvous: SafepointBegin";
     // Suspend all threads
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->SuspendAllThreads();
+    Mutator::GetCurrent()->GetVM()->GetThreadManager()->SuspendAllThreads();
     // Acquire write MutatorLock
     mutatorLock_->WriteLock();
 }
@@ -39,7 +39,7 @@ void Rendezvous::SafepointEnd()
     // Release write MutatorLock
     mutatorLock_->Unlock();
     // Resume all threads
-    Thread::GetCurrent()->GetVM()->GetThreadManager()->ResumeAllThreads();
+    Mutator::GetCurrent()->GetVM()->GetThreadManager()->ResumeAllThreads();
     LOG(DEBUG, GC) << "Rendezvous: SafepointEnd exit";
 }
 

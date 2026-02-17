@@ -16,11 +16,6 @@
 #define PANDA_RUNTIME_THREAD_H_
 
 #include <cstdint>
-#include <memory>
-#include <chrono>
-#include <limits>
-#include <thread>
-#include <atomic>
 #include <csignal>
 
 #include "libarkbase/mem/gc_barrier.h"
@@ -32,19 +27,13 @@
 #include "libarkbase/utils/list.h"
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/tsan_interface.h"
-#include "runtime/include/mem/panda_containers.h"
-#include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/object_header-inl.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/include/language_context.h"
-#include "runtime/include/thread_proxy.h"
-#include "runtime/include/locks.h"
-#include "runtime/include/thread_status.h"
 #include "runtime/interpreter/cache.h"
 #include "runtime/mem/frame_allocator-inl.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/internal_allocator.h"
-#include "runtime/mem/tlab.h"
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "runtime/entrypoints/entrypoints.h"
 #include "libarkbase/events/events.h"
@@ -63,234 +52,22 @@ enum Priority {
 
 namespace ark {
 
-template <class TYPE>
-class HandleStorage;
-template <class TYPE>
-class GlobalHandleStorage;
-template <class TYPE>
-class HandleScope;
-
-namespace test {
-class ThreadTest;
-}  // namespace test
-
 class ThreadManager;
 class Runtime;
 class PandaVM;
 class MonitorPool;
 
-namespace mem {
-class GCBarrierSet;
-}  // namespace mem
-
-namespace tooling {
-class PtThreadInfo;
-}  // namespace tooling
-
-struct CustomTLSData {
-    CustomTLSData() = default;
-    virtual ~CustomTLSData() = default;
-
-    NO_COPY_SEMANTIC(CustomTLSData);
-    NO_MOVE_SEMANTIC(CustomTLSData);
-};
-
-class LockedObjectInfo {
-public:
-    LockedObjectInfo(ObjectHeader *obj, void *fp) : object_(obj), stack_(fp) {}
-    inline ObjectHeader *GetObject() const
-    {
-        return object_;
-    }
-
-    inline void SetObject(ObjectHeader *objNew)
-    {
-        object_ = objNew;
-    }
-
-    ALWAYS_INLINE void UpdateObject(const ReferenceUpdater &updater)
-    {
-        [[maybe_unused]] ObjectStatus status = updater(&object_);
-        ASSERT(status == ObjectStatus::ALIVE_OBJECT);
-    }
-
-    inline void *GetStack() const
-    {
-        return stack_;
-    }
-
-    inline void SetStack(void *stackNew)
-    {
-        stack_ = stackNew;
-    }
-
-    static constexpr uint32_t GetMonitorOffset()
-    {
-        return MEMBER_OFFSET(LockedObjectInfo, object_);
-    }
-
-    static constexpr uint32_t GetStackOffset()
-    {
-        return MEMBER_OFFSET(LockedObjectInfo, stack_);
-    }
-
-private:
-    ObjectHeader *object_;
-    void *stack_;
-};
-
-template <typename Adapter = mem::AllocatorAdapter<LockedObjectInfo>>
-class LockedObjectList {
-    static constexpr uint32_t DEFAULT_CAPACITY = 16;
-
-public:
-    LockedObjectList() : capacity_(DEFAULT_CAPACITY), allocator_(Adapter())
-    {
-        storage_ = allocator_.allocate(DEFAULT_CAPACITY);
-    }
-
-    ~LockedObjectList()
-    {
-        allocator_.deallocate(storage_, capacity_);
-    }
-
-    NO_COPY_SEMANTIC(LockedObjectList);
-    NO_MOVE_SEMANTIC(LockedObjectList);
-
-    void PushBack(LockedObjectInfo data)
-    {
-        ExtendIfNeeded();
-        storage_[size_++] = data;
-    }
-
-    template <typename... Args>
-    LockedObjectInfo &EmplaceBack(Args &&...args)
-    {
-        ExtendIfNeeded();
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto *rawMem = &storage_[size_];
-        auto *datum = new (rawMem) LockedObjectInfo(std::forward<Args>(args)...);
-        size_++;
-        return *datum;
-    }
-
-    LockedObjectInfo &Back()
-    {
-        ASSERT(size_ > 0);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return storage_[size_ - 1];
-    }
-
-    bool Empty() const
-    {
-        return size_ == 0;
-    }
-
-    void PopBack()
-    {
-        ASSERT(size_ > 0);
-        --size_;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        (&storage_[size_])->~LockedObjectInfo();
-    }
-
-    Span<LockedObjectInfo> Data()
-    {
-        return Span<LockedObjectInfo>(storage_, size_);
-    }
-
-    static constexpr uint32_t GetCapacityOffset()
-    {
-        return MEMBER_OFFSET(LockedObjectList, capacity_);
-    }
-
-    static constexpr uint32_t GetSizeOffset()
-    {
-        return MEMBER_OFFSET(LockedObjectList, size_);
-    }
-
-    static constexpr uint32_t GetDataOffset()
-    {
-        return MEMBER_OFFSET(LockedObjectList, storage_);
-    }
-
-private:
-    void ExtendIfNeeded()
-    {
-        ASSERT(size_ <= capacity_);
-        if (size_ < capacity_) {
-            return;
-        }
-        uint32_t newCapacity = capacity_ * 3U / 2U;  // expand by 1.5
-        LockedObjectInfo *newStorage = allocator_.allocate(newCapacity);
-        ASSERT(newStorage != nullptr);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::copy(storage_, storage_ + size_, newStorage);
-        allocator_.deallocate(storage_, capacity_);
-        storage_ = newStorage;
-        capacity_ = newCapacity;
-    }
-
-    template <typename T, size_t ALIGNMENT = sizeof(T)>
-    using Aligned __attribute__((aligned(ALIGNMENT))) = T;
-    // Use uint32_t instead of size_t to guarantee the same size
-    // on all platforms and simplify compiler stubs accessing this fields.
-    // uint32_t is large enough to fit locked objects list's size.
-    Aligned<uint32_t> capacity_;
-    Aligned<uint32_t> size_ {0};
-    Aligned<LockedObjectInfo *> storage_;
-    Adapter allocator_;
-};
-
-/**
- *  Hierarchy of thread classes
- *
- *         +--------+
- *         | Thread |
- *         +--------+
- *             |
- *      +---------------+
- *      | ManagedThread |
- *      +---------------+
- *             |
- *     +-----------------+
- *     | MTManagedThread |
- *     +-----------------+
- *
- *
- *  Thread - is the most low-level entity. This class contains pointers to VM which this thread associated.
- *  ManagedThread - stores runtime context to run managed code in single-threaded environment
- *  MTManagedThread - extends ManagedThread to be able to run code in multi-threaded environment
- */
-
 /// @brief Class represents arbitrary runtime thread
-// NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
-class Thread : public ThreadProxy {
+class Thread {
 public:
     using ThreadId = uint32_t;
-    enum class ThreadType {
-        THREAD_TYPE_NONE,
-        THREAD_TYPE_GC,
-        THREAD_TYPE_COMPILER,
-        THREAD_TYPE_MANAGED,
-        THREAD_TYPE_MT_MANAGED,
-        THREAD_TYPE_TASK,
-        THREAD_TYPE_WORKER_THREAD,
-    };
 
-    Thread(PandaVM *vm, ThreadType threadType);
+    explicit Thread(PandaVM *vm);
     virtual ~Thread();
     NO_COPY_SEMANTIC(Thread);
     NO_MOVE_SEMANTIC(Thread);
 
-    PANDA_PUBLIC_API static Thread *GetCurrent();
-    PANDA_PUBLIC_API static void SetCurrent(Thread *thread);
-
-    virtual void FreeInternalMemory();
-
-    void FreeAllocatedMemory();
-
-    PandaVM *GetVM() const
+    PandaVM *GetPandaVM() const
     {
         return vm_;
     }
@@ -300,71 +77,11 @@ public:
         vm_ = vm;
     }
 
-    void *GetPreWrbEntrypoint() const
-    {
-        // Atomic with relaxed order reason: only atomicity and modification order consistency needed
-        return preWrbEntrypoint_.load(std::memory_order_relaxed);
-    }
-
-    void SetPreWrbEntrypoint(void *entry)
-    {
-        preWrbEntrypoint_ = entry;
-    }
-
-    ThreadType GetThreadType() const
-    {
-        return threadType_;
-    }
-
-    static constexpr size_t GetVmOffset()
-    {
-        return MEMBER_OFFSET(Thread, vm_);
-    }
-
-    uint64_t *GetThreadRandomState()
-    {
-        return &threadRandomState_;
-    }
-
-protected:
-    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    std::atomic<void *> preWrbEntrypoint_ {nullptr};  // if NOT nullptr, stores pointer to PreWrbFunc and indicates we
-                                                      // are currently in concurrent marking phase
-    uint64_t threadRandomState_ {0};
-    // NOLINTEND(misc-non-private-member-variables-in-classes)
-
 private:
-    void InitThreadRandomState();
-
     PandaVM *vm_ {nullptr};
-    ThreadType threadType_ {ThreadType::THREAD_TYPE_NONE};
-#ifndef PANDA_TARGET_WINDOWS
-    stack_t signalStack_ {};
-#endif
-};
-
-template <typename ThreadT>
-class ScopedCurrentThread {
-public:
-    explicit ScopedCurrentThread(ThreadT *thread) : thread_(thread)
-    {
-        ASSERT(Thread::GetCurrent() == nullptr);
-
-        // Set current thread
-        Thread::SetCurrent(thread_);
-    }
-
-    ~ScopedCurrentThread()
-    {
-        // Reset current thread
-        Thread::SetCurrent(nullptr);
-    }
-
-    NO_COPY_SEMANTIC(ScopedCurrentThread);
-    NO_MOVE_SEMANTIC(ScopedCurrentThread);
-
-private:
-    ThreadT *thread_;
+#if defined(PANDA_USE_CUSTOM_SIGNAL_STACK)
+    FIELD_UNUSED stack_t signalStack_ {};
+#endif  // PANDA_USE_CUSTOM_SIGNAL_STACK
 };
 
 class QosHelper {
@@ -381,9 +98,5 @@ public:
 };
 
 }  // namespace ark
-
-#ifdef PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
-#include "platforms/mobile/runtime/thread-inl.cpp"
-#endif  // PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
 
 #endif  // PANDA_RUNTIME_THREAD_H_

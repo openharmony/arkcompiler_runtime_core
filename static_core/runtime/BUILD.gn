@@ -282,6 +282,7 @@ _libarkruntime_calculated_sources = [
   "monitor_object_lock.cpp",
   "monitor_pool.cpp",
   "mt_thread_manager.cpp",
+  "mutator.cpp",
   "object_accessor.cpp",
   "object_header.cpp",
   "osr.cpp",
@@ -299,7 +300,6 @@ _libarkruntime_calculated_sources = [
   "stack_walker.cpp",
   "string_table.cpp",
   "thread.cpp",
-  "thread_proxy.cpp",
   "time_utils.cpp",
   "timing.cpp",
   "tooling/backtrace/backtrace.cpp",
@@ -401,12 +401,12 @@ if (defined(enable_perf_counters)) {
 
 if (is_mob) {
   _libarkruntime_calculated_sources += [
-    "$ark_root/platforms/mobile/runtime/thread.cpp",
+    "$ark_root/platforms/mobile/runtime/mutator.cpp",
     "$ark_root/platforms/mobile/runtime/verify_app_install.cpp",
   ]
 } else {
   _libarkruntime_calculated_sources += [
-    "$ark_root/platforms/common/runtime/thread.cpp",
+    "$ark_root/platforms/common/runtime/mutator.cpp",
     "$ark_root/platforms/common/runtime/verify_app_install.cpp",
   ]
 }

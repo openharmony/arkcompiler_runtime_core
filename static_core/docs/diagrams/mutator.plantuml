@@ -1,0 +1,44 @@
+@startuml
+
+class Thread {
+(os thread)
+==
+}
+
+class Mutator {
+    + GetMutatorLock()
+    + GetBarrierSet()
+    + GetVM()
+    + Suspend()
+    + Resume()
+    - vm_
+    - barrierSet_
+}
+class GC
+
+class MutatorManager {
+    + EnumerateMutators(CallbackFunc callback)
+    + RegisterMutator(Mutator *m)
+    + UnregisterMutator(Mutator *m)
+}
+
+class ManagedThread {
+    - frame_
+    - exception_
+    - interpreterCache_
+}
+
+class MTManagedThread
+class JobExecutionContext
+class CoroutineWorker
+
+GC -up-> MutatorManager
+MutatorManager o-right- "0..*" Mutator
+ManagedThread -up-|> Mutator
+MTManagedThread -up-|> ManagedThread
+JobExecutionContext -up-|> ManagedThread
+CoroutineWorker -up-|> Thread
+MTManagedThread *-right- "1" Thread
+
+
+@enduml

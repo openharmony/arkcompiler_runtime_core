@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ public:
         auto event = Event();
         std::thread worker([this, &event, routineName, routineSignature,
                             args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-            ASSERT(Thread::GetCurrent() == nullptr);
+            ASSERT(Mutator::GetCurrent() == nullptr);
             [[maybe_unused]] ani_env *workerEnv = nullptr;
             ani_options aniArgs {0, nullptr};
             [[maybe_unused]] auto status = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv);
@@ -164,7 +164,7 @@ public:
 private:
     void WaitUntilReachLimit(Event &event, std::atomic_size_t &count)
     {
-        ASSERT(Thread::GetCurrent() == nullptr);
+        ASSERT(Mutator::GetCurrent() == nullptr);
         [[maybe_unused]] ani_env *workerEnv = nullptr;
         ani_options aniArgs {0, nullptr};
         [[maybe_unused]] auto status = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv);
@@ -181,7 +181,7 @@ private:
     template <typename... Args>
     void WorkerRoutine(Event &event, std::string_view routineName, std::string_view routineSignature, Args &&...args)
     {
-        ASSERT(Thread::GetCurrent() == nullptr);
+        ASSERT(Mutator::GetCurrent() == nullptr);
         [[maybe_unused]] ani_env *workerEnv = nullptr;
         ani_options aniArgs {0, nullptr};
         [[maybe_unused]] auto status = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &workerEnv);

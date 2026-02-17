@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,16 +106,16 @@ private:
     NO_MOVE_SEMANTIC(ScopedManagedCodeThread);
 };
 
-class PANDA_PUBLIC_API ScopedChangeThreadStatus {
+class PANDA_PUBLIC_API ScopedChangeMutatorStatus {
 public:
-    explicit ScopedChangeThreadStatus(ManagedThread *thread, ThreadStatus newStatus) : thread_(thread)
+    explicit ScopedChangeMutatorStatus(ManagedThread *thread, MutatorStatus newStatus) : thread_(thread)
     {
         ASSERT(thread_ != nullptr);
         oldStatus_ = thread_->GetStatus();
         thread_->UpdateStatus(newStatus);
     }
 
-    ~ScopedChangeThreadStatus()
+    ~ScopedChangeMutatorStatus()
     {
         ASSERT(thread_ != nullptr);
         thread_->UpdateStatus(oldStatus_);
@@ -123,10 +123,10 @@ public:
 
 private:
     ManagedThread *thread_;
-    ThreadStatus oldStatus_;
+    MutatorStatus oldStatus_;
 
-    NO_COPY_SEMANTIC(ScopedChangeThreadStatus);
-    NO_MOVE_SEMANTIC(ScopedChangeThreadStatus);
+    NO_COPY_SEMANTIC(ScopedChangeMutatorStatus);
+    NO_MOVE_SEMANTIC(ScopedChangeMutatorStatus);
 };
 
 }  // namespace ark

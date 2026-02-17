@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,8 @@
 #include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/mem/gc/gc_types.h"
+
 namespace ark {
-class Thread;
 class Trace;
 class Runtime;
 class RuntimeOptions;

@@ -29,7 +29,7 @@ PandaUniquePtr<VEnv> VEnv::Create(PandaAniEnv *ownerEnv)
 /* static */
 VEnv *VEnv::GetCurrent()
 {
-    if (Thread::GetCurrent() == nullptr) {
+    if (Mutator::GetCurrent() == nullptr) {
         return nullptr;
     }
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();

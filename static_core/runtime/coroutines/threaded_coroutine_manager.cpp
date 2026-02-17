@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +125,7 @@ void ThreadedCoroutineManager::RegisterCoroutine(Coroutine *co)
     // We need to propagate SUSPEND_REQUEST under the coroListLock_.
     // It guarantees that the flag is already set for the current coro and we need to propagate it
     // or GC will see the new coro in EnumerateAllThreads.
-    if (Thread::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
+    if (Mutator::GetCurrent() != nullptr && Coroutine::GetCurrent() != nullptr &&
         Coroutine::GetCurrent()->IsSuspended() && !co->IsSuspended()) {
         co->SuspendImpl(true);
     }
@@ -135,7 +135,7 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
 {
     LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::TerminateCoroutine() started";
     co->NativeCodeEnd();
-    co->UpdateStatus(ThreadStatus::TERMINATING);
+    co->UpdateStatus(MutatorStatus::TERMINATING);
 
     ProcessTimerEvents();
 
@@ -166,7 +166,7 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
         // coro (because it is already removed) must be impossible.
         co->DestroyInternalResources();
     }
-    co->UpdateStatus(ThreadStatus::FINISHED);
+    co->UpdateStatus(MutatorStatus::FINISHED);
     Runtime::GetCurrent()->GetNotificationManager()->ThreadEndEvent(co);
 
     if (!co->HasManagedEntrypoint()) {

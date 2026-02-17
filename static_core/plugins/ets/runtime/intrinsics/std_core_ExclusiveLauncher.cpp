@@ -16,7 +16,6 @@
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/exceptions.h"
-#include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"

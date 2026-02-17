@@ -61,7 +61,7 @@ public:
         allocator->Delete(aniEnv_);
     }
 
-    static EtsCoroutine *CastFromThread(Thread *thread)
+    static EtsCoroutine *CastFromThread(ManagedThread *thread)
     {
         ASSERT(thread != nullptr);
         return static_cast<EtsCoroutine *>(thread);

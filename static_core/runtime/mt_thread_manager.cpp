@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,7 +91,7 @@ bool MTThreadManager::DeregisterSuspendedThreads()
             i = threads_.erase(i);
             continue;
         }
-        if (status == ThreadStatus::NATIVE || status == ThreadStatus::IS_BLOCKED) {
+        if (status == MutatorStatus::NATIVE || status == MutatorStatus::IS_BLOCKED) {
             // We have a blocked thread - there is a potential termination loop
             isPotentiallyBlockedThreadPresent = true;
         } else {
@@ -230,7 +230,7 @@ bool MTThreadManager::IsRunningThreadExist()
     bool isExists = false;
     EnumerateThreadsWithLockheld([curThread, &isExists](ManagedThread *thread) {
         if (thread != curThread) {
-            if (thread->GetStatus() == ThreadStatus::RUNNING) {
+            if (thread->GetStatus() == MutatorStatus::RUNNING) {
                 isExists = true;
                 return false;
             };
@@ -290,7 +290,7 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
         thread->DestroyInternalResources();
 
         LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
-        thread->UpdateStatus(ThreadStatus::FINISHED);
+        thread->UpdateStatus(MutatorStatus::FINISHED);
         // Do not delete main thread, Runtime::GetMainThread is expected to always return valid object
         if (thread == GetMainThread()) {
             return false;
@@ -337,7 +337,7 @@ MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_
     MTManagedThread *current = MTManagedThread::GetCurrent();
     MTManagedThread *suspended = nullptr;
     ASSERT(current != nullptr);
-    ASSERT(current->GetStatus() != ThreadStatus::RUNNING);
+    ASSERT(current->GetStatus() != MutatorStatus::RUNNING);
 
     // Extract target thread
     while (true) {
@@ -365,7 +365,7 @@ MTManagedThread *MTThreadManager::SuspendAndWaitThreadByInternalThreadId(uint32_
 
     // Now wait until target thread is really suspended
     for (uint32_t loopIter = 0;; loopIter++) {
-        if (suspended->GetStatus() != ThreadStatus::RUNNING) {
+        if (suspended->GetStatus() != MutatorStatus::RUNNING) {
             // Thread is suspended now
             return suspended;
         }

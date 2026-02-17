@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,8 @@ extern "C" arkvm_status ARKVM_RegisterExternalScheduler(arkvm_external_scheduler
         return ARKVM_INVALID_ARGS;
     }
 
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
     auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();
@@ -46,8 +46,8 @@ extern "C" arkvm_status ARKVM_RunScheduler(arkvm_schedule_mode mode)
         return ARKVM_INVALID_ARGS;
     }
 
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         return ARKVM_INVALID_CONTEXT;
     }
     auto *coroutine = ark::ets::EtsCoroutine::GetCurrent();

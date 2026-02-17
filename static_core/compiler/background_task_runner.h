@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,12 +25,12 @@
 #include "compiler/optimizer/pipeline.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "runtime/include/compiler_interface.h"
-#include "runtime/include/thread.h"
+#include "runtime/include/mutator.h"
 
 namespace ark {
 
 class CompilerTask;
-class Thread;
+class Mutator;
 class Method;
 class PandaVM;
 
@@ -43,7 +43,7 @@ class Graph;
 class BackgroundCompilerContext {
 public:
     using CompilerTask = std::unique_ptr<ark::CompilerTask, std::function<void(ark::CompilerTask *)>>;
-    using CompilerThread = std::unique_ptr<ark::Thread, std::function<void(ark::Thread *)>>;
+    using CompilerThread = std::unique_ptr<ark::Mutator, std::function<void(ark::Mutator *)>>;
 
     void SetCompilerTask(CompilerTask compilerTask)
     {
@@ -193,7 +193,7 @@ FakeCopyable<T> MakeFakeCopyable(T &&t)
 
 class BackgroundCompilerTaskRunner : public ark::TaskRunner<BackgroundCompilerTaskRunner, BackgroundCompilerContext> {
 public:
-    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Thread *compilerThread,
+    BackgroundCompilerTaskRunner(taskmanager::TaskQueueInterface *compilerQueue, Mutator *compilerThread,
                                  RuntimeInterface *runtimeIface)
         : compilerQueue_(compilerQueue), compilerThread_(compilerThread), runtimeIface_(runtimeIface)
     {
@@ -223,7 +223,7 @@ public:
 
 private:
     taskmanager::TaskQueueInterface *compilerQueue_ {nullptr};
-    Thread *compilerThread_ {nullptr};
+    Mutator *compilerThread_ {nullptr};
     RuntimeInterface *runtimeIface_;
     BackgroundCompilerContext taskCtx_;
 };

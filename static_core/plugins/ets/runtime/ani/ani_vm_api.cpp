@@ -82,8 +82,8 @@ extern "C" ani_status ANI_GetCreatedVMs(ani_vm **vmsBuffer, ani_size vmsBufferLe
     ANI_CHECK_RETURN_IF_EQ(vmsBuffer, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
 
-    auto *thread = ark::Thread::GetCurrent();
-    if (thread == nullptr) {
+    auto *mutator = ark::Mutator::GetCurrent();
+    if (mutator == nullptr) {
         *result = 0;
         return ANI_OK;
     }
@@ -136,8 +136,8 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
         return ANI_INVALID_VERSION;
     }
 
-    Thread *thread = Thread::GetCurrent();
-    if (thread == nullptr) {
+    Mutator *mutator = Mutator::GetCurrent();
+    if (mutator == nullptr) {
         LOG(ERROR, ANI) << "Cannot get environment, thread is not attached to VM";
         return ANI_ERROR;
     }
@@ -171,7 +171,7 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
     ANI_CHECK_RETURN_IF_EQ(result, nullptr, ANI_INVALID_ARGS);
     ANI_CHECK_RETURN_IF_EQ(IsVersionSupported(version), false, ANI_INVALID_VERSION);
 
-    if (Thread::GetCurrent() != nullptr) {
+    if (Mutator::GetCurrent() != nullptr) {
         LOG(ERROR, ANI) << "Cannot attach current thread, thread has already been attached";
         return ANI_ERROR;
     }
@@ -231,7 +231,7 @@ static ani_status DetachCurrentThread(ani_vm *vm)
 {
     ANI_DEBUG_TRACE(vm);
     ANI_CHECK_RETURN_IF_EQ(vm, nullptr, ANI_INVALID_ARGS);
-    if (Thread::GetCurrent() == nullptr) {
+    if (Mutator::GetCurrent() == nullptr) {
         LOG(ERROR, ANI) << "Cannot detach current thread, thread is not attached";
         return ANI_ERROR;
     }
@@ -249,7 +249,7 @@ static ani_status DetachCurrentThread(ani_vm *vm)
         LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached";
         return ANI_ERROR;
     }
-    ASSERT(Thread::GetCurrent() == nullptr);
+    ASSERT(Mutator::GetCurrent() == nullptr);
 
 #ifdef PANDA_USE_FFRT
     ffrt_this_task_set_legacy_mode(false);
