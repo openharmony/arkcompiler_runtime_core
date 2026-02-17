@@ -332,13 +332,12 @@ private:
     virtual void BuildNewObject(const BytecodeInstruction *bcInst);
     virtual void BuildLoadConstArray(const BytecodeInstruction *bcInst);
     void BuildLoadConstStringArray(const BytecodeInstruction *bcInst);
-    template <typename T>
+    template <typename T = uint32_t>
     void BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                    const pandasm::LiteralArray &litArray);
     template <typename T>
     void BuildUnfoldLoadConstPrimitiveArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                             const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
-    template <typename T>
     void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                          const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
     void BuildInitString(const BytecodeInstruction *bcInst);

@@ -348,7 +348,7 @@ instructions:
   - opcode: LoadObjectDynamic
     base: LoadObjectDynamicInst
     signature: [d-any, ref-any, any, any]
-    flags: [load, no_hoist, no_cse, acc_write]
+    flags: [load, no_hoist, no_cse, acc_write, barrier]
     description: Load value from dynamic object's field.
 
   - opcode: Load
@@ -419,13 +419,13 @@ instructions:
   - opcode: StoreObjectDynamic
     base: StoreObjectDynamicInst
     signature: [d-any, ref-any, any, any, any]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, barrier]
     description: Store value in dynamic object's field.
 
   - opcode: StoreResolvedObjectField
     base: StoreResolvedObjectFieldInst
     signature: [ref-nc, real, u32]
-    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, acc_read, require_tmp, write_barrier, barrier]
     description: Store value in resolved object's field.
     fields:
       - field_id: TypeId
@@ -475,7 +475,7 @@ instructions:
   - opcode: StoreResolvedObjectFieldStatic
     base: StoreResolvedObjectFieldStaticInst
     signature: [ref, real]
-    flags: [store, no_dce, no_hoist, no_cse, write_barrier]
+    flags: [store, no_dce, no_hoist, no_cse, write_barrier, barrier]
     modes: [jit_aot]
     description: Store value into resolved static field.
     fields:

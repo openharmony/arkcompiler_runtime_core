@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -183,13 +183,6 @@ public:
         CHECK_OR_RETURN(StoreStatic, GetVolatile)
         CHECK_OR_RETURN(LoadObject, GetVolatile)
         CHECK_OR_RETURN(StoreObject, GetVolatile)
-        CHECK_OR_RETURN(NewObject, GetNeedBarrier)
-        CHECK_OR_RETURN(NewArray, GetNeedBarrier)
-        CHECK_OR_RETURN(CheckCast, GetNeedBarrier)
-        CHECK_OR_RETURN(IsInstance, GetNeedBarrier)
-        CHECK_OR_RETURN(LoadString, GetNeedBarrier)
-        CHECK_OR_RETURN(LoadConstArray, GetNeedBarrier)
-        CHECK_OR_RETURN(LoadType, GetNeedBarrier)
 
         CHECK_OR_RETURN(CallStatic, IsInlined)
         CHECK_OR_RETURN(CallVirtual, IsInlined)
