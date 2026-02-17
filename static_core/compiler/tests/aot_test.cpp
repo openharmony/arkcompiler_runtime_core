@@ -1096,12 +1096,7 @@ private:
     std::string pandaStdLib_;
 };
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33043)
-TEST_F(AotCompilerTest, DISABLED_NoMemoryFilesInAnFile)
-#else
 TEST_F(AotCompilerTest, NoMemoryFilesInAnFile)
-#endif
 {
     if (RUNTIME_ARCH != Arch::X86_64) {
         GTEST_SKIP();

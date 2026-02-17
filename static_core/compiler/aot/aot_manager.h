@@ -160,7 +160,7 @@ public:
         return profiledMethods_;
     }
 
-    PandaUnorderedSet<std::string_view> &GetProfiledPandaFiles()
+    PandaUnorderedSet<std::string> &GetProfiledPandaFiles()
     {
         return profiledPandaFiles_;
     }
@@ -179,7 +179,7 @@ private:
 
     mutable os::memory::Mutex profiledMethodsLock_;
     PandaList<Method *> profiledMethods_ GUARDED_BY(profiledMethodsLock_);
-    PandaUnorderedSet<std::string_view> profiledPandaFiles_;
+    PandaUnorderedSet<std::string> profiledPandaFiles_;
 
     os::memory::RecursiveMutex aotStringRootsLock_;
     PandaVector<ObjectHeader **> aotStringGcRoots_;
