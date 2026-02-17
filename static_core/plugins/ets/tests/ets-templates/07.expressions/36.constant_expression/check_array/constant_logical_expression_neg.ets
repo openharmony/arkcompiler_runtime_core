@@ -18,6 +18,7 @@
 desc:
     Constant expression with logical calculations as array size.
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 const value1: {{c.type}} = {{c.value}}

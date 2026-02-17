@@ -15,9 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression chain initializer, declared in the same compilation unit.
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 const num: {{c.type}} = {{c.value}}

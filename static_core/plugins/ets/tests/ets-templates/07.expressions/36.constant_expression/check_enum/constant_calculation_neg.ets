@@ -15,9 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with mathematical calculations as enum initializer.
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 const value1: {{c.type}} = {{c.value}}

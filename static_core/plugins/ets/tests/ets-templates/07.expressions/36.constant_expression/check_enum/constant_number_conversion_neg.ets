@@ -15,9 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with number conversion as enum initializer.
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 const testValue: {{c.type}} = {{c.value}}

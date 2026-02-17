@@ -15,11 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression numeric chain initializer.
-tags:
-- compile-only
-- negative
+tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 const const1: {{c.type1}} = 101

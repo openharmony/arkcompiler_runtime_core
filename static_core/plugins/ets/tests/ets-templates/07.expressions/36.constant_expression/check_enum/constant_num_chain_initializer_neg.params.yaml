@@ -12,5 +12,15 @@
 # limitations under the License.
 ---
 cases:
-  - { type1: byte,  type2: char  }
-  - { type1: char,  type2: char  }
+  - type1: |-
+      byte
+    type2: |-
+      char
+    expect: |-
+      Semantic error ESE0318: Type 'Byte' cannot be assigned to type 'Char'
+  - type1: |-
+      char
+    type2: |-
+      char
+    expect: |-
+      Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Char'

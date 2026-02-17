@@ -1,0 +1,43 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+  # < operator
+  - { type: int,    left: 5,    right: 10,   op: '<',  expected: 'true'  }
+  - { type: int,    left: 10,   right: 5,    op: '<',  expected: 'false' }
+  - { type: long,   left: 100,  right: 200,  op: '<',  expected: 'true'  }
+  - { type: float,  left: 1.0f, right: 2.0f, op: '<',  expected: 'true'  }
+  - { type: number, left: 1.0,  right: 2.0,  op: '<',  expected: 'true'  }
+
+  # <= operator
+  - { type: int,    left: 5,    right: 5,    op: '<=', expected: 'true'  }
+  - { type: int,    left: 10,   right: 5,    op: '<=', expected: 'false' }
+
+  # > operator
+  - { type: int,    left: 10,   right: 5,    op: '>',  expected: 'true'  }
+  - { type: int,    left: 5,    right: 10,   op: '>',  expected: 'false' }
+  - { type: number, left: 3.14, right: 2.71, op: '>',  expected: 'true'  }
+
+  # >= operator
+  - { type: int,    left: 5,    right: 5,    op: '>=', expected: 'true'  }
+  - { type: long,   left: 100,  right: 200,  op: '>=', expected: 'false' }
+
+  # == operator
+  - { type: int,    left: 10,   right: 10,   op: '==', expected: 'true'  }
+  - { type: int,    left: 10,   right: 20,   op: '==', expected: 'false' }
+  - { type: float,  left: 1.5f, right: 1.5f, op: '==', expected: 'true'  }
+
+  # != operator
+  - { type: int,    left: 10,   right: 20,   op: '!=', expected: 'true'  }
+  - { type: int,    left: 10,   right: 10,   op: '!=', expected: 'false' }
+  - { type: number, left: 2.5,  right: 3.5,  op: '!=', expected: 'true'  }

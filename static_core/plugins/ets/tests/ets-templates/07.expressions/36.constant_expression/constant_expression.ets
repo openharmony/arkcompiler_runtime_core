@@ -15,16 +15,13 @@
 
 {%- for c in cases %}
 /*---
-desc: 
+desc: >-
     Constant expressions are expressions with values that can be evaluated at compile time.
 ---*/
 
-
-{{c.defs}}
-
-{% if "Num1 = num1" in c.use %}
+{% if c.decl is defined %}
 {{ c.decl }}
 {% endif %}
 
-{{c.use|indent}}
+{{ c.use }}
 {%- endfor %}
