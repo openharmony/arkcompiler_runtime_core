@@ -61,3 +61,7 @@ cases:
 
     - nullish_value: "undefined"
       mix_without_parentheses: true || a_nullish ?? true
+
+context:
+  - main
+  - foo

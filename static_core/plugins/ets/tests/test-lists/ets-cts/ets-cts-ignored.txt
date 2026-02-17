@@ -383,6 +383,9 @@
 #32103
 07.expressions/16.instanceof_expression/instantiated_generic_type_2.ets
 
+#33285
+07.expressions/20.nullish-coalescing_expression/compile_time_evaluated.ets
+
 #30583
 07.expressions/20.nullish-coalescing_expression/resulting_type_crash.ets
 
