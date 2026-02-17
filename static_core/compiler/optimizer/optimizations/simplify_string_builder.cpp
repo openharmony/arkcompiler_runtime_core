@@ -53,7 +53,6 @@ bool HasTryCatchBlocks(Graph *graph)
     return false;
 }
 
-// CC-OFFNXT(huge_method[C++]) solid logic
 bool SimplifyStringBuilder::RunImpl()
 {
     isApplied_ = false;
@@ -83,37 +82,49 @@ bool SimplifyStringBuilder::RunImpl()
     // Loops with try-catch block and OSR mode are not supported in current implementation
     if (!HasTryCatchBlocks(GetGraph()) && !GetGraph()->IsOsrMode()) {
         for (auto loop : GetGraph()->GetRootLoop()->GetInnerLoops()) {
-            OptimizeStringConcatenation(loop);
+            isApplied_ |= OptimizeStringConcatenation(loop);
         }
     }
 
-    // Cleanup should be done before block optimizations, to erase instruction marked as dead
-    GetGraph()->RunPass<compiler::Cleanup>();
+    if (isApplied_) {
+        // Cleanup should be done before block optimizations, to erase instruction marked as dead
+        GetGraph()->RunPass<compiler::Cleanup>();
+    }
 
-    OptimizeStringBuilderChain();
+    if (OptimizeStringBuilderChain()) {
+        // Cleanup should be done before block optimizations, to erase instruction marked as dead
+        GetGraph()->RunPass<compiler::Cleanup>();
+    }
 
-    // Cleanup should be done before block optimizations, to erase instruction marked as dead
-    GetGraph()->RunPass<compiler::Cleanup>();
-
+    bool isAppliedLocal = false;
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->IsEmpty()) {
             continue;
         }
-        OptimizeStringBuilderToString(block);
-        OptimizeStringConcatenation(block);
-        OptimizeStringBuilderAppendChain(block);
-        OptimizeStringBuilderStringLength(block);
+        isAppliedLocal |= OptimizeStringBuilderToString(block);
+        isAppliedLocal |= OptimizeStringConcatenation(block);
+        isAppliedLocal |= OptimizeStringBuilderAppendChain(block);
+        isAppliedLocal |= OptimizeStringBuilderStringLength(block);
     }
 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
 
-    if (GetGraph()->IsBytecodeOptimizer()) {
-        // Cleanup should be done inside pass, to satisfy GraphChecker
-        GetGraph()->RunPass<compiler::Cleanup>();
-        return isApplied_;
+    if (!GetGraph()->IsBytecodeOptimizer()) {
+        /// NOTE: (mivanov) The function below will be removed after #30940 is implemented
+        isAppliedLocal |= CleanupSaveStateInstructions();
     }
 
-    /// NOTE: (mivanov) The loop below will be removed after #30940 is implemented
+    if (isAppliedLocal) {
+        // Cleanup should be done inside pass, to satisfy GraphChecker
+        GetGraph()->RunPass<compiler::Cleanup>();
+    }
+
+    return isApplied_;
+}
+
+bool SimplifyStringBuilder::CleanupSaveStateInstructions()
+{
+    bool isAppliedLocal = false;
     // Remove save state inserted in loop post exit block at IR builder
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto inst : block->Insts()) {
@@ -121,13 +132,10 @@ bool SimplifyStringBuilder::RunImpl()
                 continue;
             }
             inst->ClearFlag(inst_flags::NO_DCE);
+            isAppliedLocal = true;
         }
     }
-
-    // Cleanup should be done inside pass, to satisfy GraphChecker
-    GetGraph()->RunPass<compiler::Cleanup>();
-
-    return isApplied_;
+    return isAppliedLocal;
 }
 
 void SimplifyStringBuilder::InvalidateAnalyses()
@@ -171,13 +179,14 @@ static bool CanRemoveFromSaveStates(Inst *inst)
     return true;
 }
 
-void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
+bool SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
 {
     // Removes unnecessary String Builder instances
 
     ASSERT(block != nullptr);
     ASSERT(block->GetGraph() == GetGraph());
 
+    bool isAppliedLocal = false;
     // Walk through a basic block, find every StringBuilder instance and constructor call,
     // and check it we can remove/replace them
     InstIter inst = block->Insts().begin();
@@ -222,6 +231,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
                 COMPILER_LOG(DEBUG, SIMPLIFY_SB)
                     << "Remove StringBuilder toString()-call (id=" << (*inst)->GetId() << ")";
                 isApplied_ = true;
+                isAppliedLocal = true;
             } else {
                 removeInstance = false;
                 break;
@@ -233,11 +243,13 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
             !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
             RemoveStringBuilderInstance(instance);
             isApplied_ = true;
+            isAppliedLocal = true;
         }
 
         // Proceed to the next StringBuilder constructor
         inst = nextInst != block->Insts().end() ? nextInst : inst;
     }
+    return isAppliedLocal;
 }
 
 InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end)
@@ -438,7 +450,7 @@ void SimplifyStringBuilder::Cleanup(const ConcatenationMatch &match)
     RemoveStringBuilderInstance(match.instance);
 }
 
-void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
+bool SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
 {
     // Replace String Builder usage with string concatenation whenever optimal
 
@@ -483,10 +495,11 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
 
             instance->SetMarker(visited);
 
-            isAppliedLocal = true;
             isApplied_ = true;
+            isAppliedLocal = true;
         }
     } while (isAppliedLocal);
+    return isAppliedLocal;
 }
 
 void SimplifyStringBuilder::ConcatenationLoopMatch::TemporaryInstructions::Clear()
@@ -1996,9 +2009,10 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
     return matches_;
 }
 
-void SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
+bool SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
 {
     // Optimize String Builder concatenation loops
+    bool isAppliedLocal = false;
 
     // Process inner loops first
     for (auto innerLoop : loop->GetInnerLoops()) {
@@ -2008,19 +2022,19 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
     // Check if basic block for instructions to hoist exist
     // Alternative way maybe to create one
     if (loop->GetPreHeader() == nullptr) {
-        return;
+        return isAppliedLocal;
     }
 
     auto preHeaderSaveState = FindPreHeaderSaveState(loop);
     if (preHeaderSaveState == nullptr) {
-        return;
+        return isAppliedLocal;
     }
 
     // Check if basic block for instructions to hoist exist
     // Alternative way maybe to create one
     auto postExit = GetLoopPostExit(loop);
     if (postExit == nullptr) {
-        return;
+        return isAppliedLocal;
     }
 
     auto postExitSaveState = FindFirstSaveState(postExit);
@@ -2033,8 +2047,10 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
         Cleanup(match);
 
         isApplied_ = true;
+        isAppliedLocal = true;
     }
     Cleanup(loop);
+    return isAppliedLocal;
 }
 
 IntrinsicInst *SimplifyStringBuilder::CreateIntrinsicStringBuilderAppendStrings(const ConcatenationMatch &match,
@@ -2188,16 +2204,17 @@ void SimplifyStringBuilder::ReplaceWithAppendIntrinsic(Inst *instance, const Ins
     }
 }
 
-void SimplifyStringBuilder::OptimizeStringBuilderAppendChain(BasicBlock *block)
+bool SimplifyStringBuilder::OptimizeStringBuilderAppendChain(BasicBlock *block)
 {
     // StringBuilder::append(s0, s1, ...) implemented with Irtoc functions with number of arguments more than 4, and
     // requires pre/post-write barriers to be supported. AARCH32 does not support neither barriers, nor so much
     // arguments in Irtoc functions.
     if (!GetGraph()->SupportsIrtocBarriers()) {
-        return;
+        return false;
     }
 
-    isApplied_ |= BreakStringBuilderAppendChains(block);
+    bool isAppliedLocal = BreakStringBuilderAppendChains(block);
+    isApplied_ |= isAppliedLocal;
 
     for (auto &[instance, calls] : CollectStringBuilderCalls(block)) {
         for (size_t from = 0; from < calls.size();) {
@@ -2213,6 +2230,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderAppendChain(BasicBlock *block)
             from = to;
         }
     }
+    return isAppliedLocal;
 }
 
 // CC-OFFNXT(huge_depth) false positive
@@ -2516,7 +2534,7 @@ SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::CollectStri
     return stringBuilderCalls_;
 }
 
-void SimplifyStringBuilder::OptimizeStringBuilderChain()
+bool SimplifyStringBuilder::OptimizeStringBuilderChain()
 {
     /*
         Merges consecutive String Builders into one String Builder if possible
@@ -2553,6 +2571,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderChain()
             3) 'inputInstance' must not be used after instance.append(inputInstance.toString()) call.
         Those limitations fully match SB patterns of string concatenation.
     */
+    bool isAppliedLocal = false;
 
     for (auto &instanceCalls : CollectStringBuilderChainCalls()) {
         auto inputInstance = instanceCalls.first;
@@ -2568,10 +2587,12 @@ void SimplifyStringBuilder::OptimizeStringBuilderChain()
         FixBrokenSaveStatesForStringBuilderCalls(inputInstance);
 
         isApplied_ = true;
+        isAppliedLocal = true;
     }
+    return isAppliedLocal;
 }
 
-void SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
+bool SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
 {
     /*
         Removes extra calls for get-stringLength
@@ -2593,6 +2614,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
             let len1 = sb.stringLength;
     */
 
+    bool isAppliedLocal = false;
     sbStringLengthCalls_.clear();
 
     for (Inst *curInst : block->Insts()) {
@@ -2606,6 +2628,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
                 currStringLength->ClearFlag(inst_flags::NO_DCE);
 
                 isApplied_ = true;
+                isAppliedLocal = true;
 
                 COMPILER_LOG(DEBUG, SIMPLIFY_SB)
                     << "Remove StringBuilder stringLength()-call (id=" << curInst->GetId() << ")";
@@ -2632,6 +2655,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
             }
         }
     }
+    return isAppliedLocal;
 }
 
 }  // namespace ark::compiler
