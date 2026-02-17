@@ -57,8 +57,26 @@ function testStore() {
     }
 }
 
+function testUnsignedStoreOverflow() {
+    const U8VAL: long = 150;
+    let storedVal = Atomics.store(uint8array, 0, U8VAL);
+    arktest.assertEQ(storedVal, U8VAL);
+    arktest.assertEQ(uint8array[0], U8VAL);
+
+    const U16VAL: long = 32918;
+    storedVal = Atomics.store(uint16array, 0, U16VAL);
+    arktest.assertEQ(storedVal, U16VAL);
+    arktest.assertEQ(uint16array[0], U16VAL);
+
+    const U32VAL: long = 2147483798;
+    storedVal = Atomics.store(uint32array, 0, U32VAL);
+    arktest.assertEQ(storedVal, U32VAL);
+    arktest.assertEQ(uint32array[0], U32VAL);
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics base_operation_store tests')
     suite.addTest('Function testStore', testStore)
+    suite.addTest('Function testUnsignedStoreOverflow', testUnsignedStoreOverflow)
     return suite.run()
 }

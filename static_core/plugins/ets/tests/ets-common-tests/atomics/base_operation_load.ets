@@ -56,8 +56,29 @@ function testLoad() {
     }
 }
 
+function testUnsignedLoadOverflow() {
+    const U8VAL: long = 150;
+    uint8array[0] = U8VAL;
+    let storedVal = Atomics.load(uint8array, 0);
+    arktest.assertEQ(storedVal, U8VAL);
+    arktest.assertEQ(uint8array[0], U8VAL);
+
+    const U16VAL: long = 32918;
+    uint16array[0] = U16VAL;
+    storedVal = Atomics.load(uint16array, 0);
+    arktest.assertEQ(storedVal, U16VAL);
+    arktest.assertEQ(uint16array[0], U16VAL);
+
+    const U32VAL: long = 2147483798;
+    uint32array[0] = U32VAL;
+    storedVal = Atomics.load(uint32array, 0);
+    arktest.assertEQ(storedVal, U32VAL);
+    arktest.assertEQ(uint32array[0], U32VAL);
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics base_operation_load tests')
     suite.addTest('Function testLoad', testLoad)
+    suite.addTest('Function testUnsignedLoadOverflow', testUnsignedLoadOverflow)
     return suite.run()
 }
