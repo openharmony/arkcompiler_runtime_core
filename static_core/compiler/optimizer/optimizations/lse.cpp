@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1066,7 +1066,10 @@ void Lse::DeleteInstructions(const BasicBlockHeap &eliminated)
         GetGraph()->GetEventWriter().EventLse(inst->GetId(), inst->GetPc(), origin->GetId(), origin->GetPc(),
                                               GetEliminationCode(inst, origin));
         // Try to update savestates
-        if (!GetGraph()->IsBytecodeOptimizer() && value->IsMovableObject()) {
+        if (!value->IsDominate(inst)) {
+            // This is a shadowed store. No need to bridge value
+            ASSERT(origin->IsStore());
+        } else if (!GetGraph()->IsBytecodeOptimizer() && value->IsMovableObject()) {
             if (!value->IsPhi() && origin->IsMovableObject() && origin->IsLoad() && origin->IsDominate(inst)) {
                 // this branch is not required, but can be faster if origin is closer to inst than value
                 ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), origin, inst);

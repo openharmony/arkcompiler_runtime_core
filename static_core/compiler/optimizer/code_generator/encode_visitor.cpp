@@ -939,9 +939,6 @@ void EncodeVisitor::VisitResolveObjectField(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto graph = enc->cg_->GetGraph();
     auto resolver = inst->CastToResolveObjectField();
-    if (resolver->GetNeedBarrier()) {
-        // Inserts barriers for GC
-    }
     auto type = inst->GetType();
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
     auto typeId = resolver->GetTypeId();
@@ -1512,9 +1509,6 @@ void EncodeVisitor::VisitUnresolvedLoadType(GraphVisitor *visitor, Inst *inst)
     auto encoder = enc->GetEncoder();
     auto codegen = enc->GetCodegen();
     auto loadType = inst->CastToUnresolvedLoadType();
-    if (loadType->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
     auto typeId = loadType->GetTypeId();
@@ -1547,9 +1541,6 @@ void EncodeVisitor::VisitLoadType(GraphVisitor *visitor, Inst *inst)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto loadType = inst->CastToLoadType();
-    if (loadType->GetNeedBarrier()) {
-        // Consider inserting barriers for GC
-    }
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto graph = enc->cg_->GetGraph();
     auto typeId = loadType->GetTypeId();

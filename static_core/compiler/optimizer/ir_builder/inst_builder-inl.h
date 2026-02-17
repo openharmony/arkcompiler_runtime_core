@@ -19,6 +19,7 @@
 #include "inst_builder.h"
 #include "libarkbase/macros.h"
 #include "optimizer/code_generator/encode.h"
+#include "optimizer/ir/datatype.h"
 #include "runtime/include/coretypes/string.h"
 
 namespace ark::compiler {
@@ -760,7 +761,7 @@ Inst *InstBuilder::BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataT
         // 2. Create an instruction to store a value to the resolved field
         auto storeField = graph_->CreateInstStoreResolvedObjectField(type, pc, nullptr, nullptr, nullptr,
                                                                      TypeIdMixin {fieldId, GetGraph()->GetMethod()},
-                                                                     false, type == DataType::REFERENCE);
+                                                                     type == DataType::REFERENCE);
         *resolveInst = resolveField;
         return storeField;
     }
@@ -1023,7 +1024,7 @@ void InstBuilder::BuildUnfoldLoadConstPrimitiveArray(const BytecodeInstruction *
     }
 }
 
-template <typename T>
+// NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                                   const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst)
 {
@@ -1032,7 +1033,7 @@ void InstBuilder::BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcI
     for (size_t i = 0; i < arraySize; i++) {
         auto indexInst = graph_->FindOrCreateConstant(i);
         auto save = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
-        auto typeId = static_cast<uint32_t>(std::get<T>(litArray.literals[i].value));
+        auto typeId = static_cast<uint32_t>(std::get<uint32_t>(litArray.literals[i].value));
         auto loadStringInst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bcInst->GetAddress()), save,
                                                                TypeIdMixin {typeId, method});
         AddInstruction(save);
@@ -1068,7 +1069,8 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     UpdateDefinition(bcInst->GetVReg(0), arrayInst);
 
     if (arraySize > g_options.GetCompilerUnfoldConstArrayMaxSize()) {
-        // Create LoadConstArray instruction
+        // Create FillConstArray instruction, only primitive arrays are supported
+        ASSERT(DataType::IsTypeNumeric(type));
         auto ss = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
         auto inst = GetGraph()->CreateInstFillConstArray(type, GetPc(bcInst->GetAddress()), arrayInst, ss,
                                                          TypeIdMixin {bcInst->GetId(0).AsFileId().GetOffset(), method},
@@ -1088,7 +1090,7 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     [[maybe_unused]] auto arrayClass = GetRuntime()->ResolveType(method, typeId);
     ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetLineStringClass(method, nullptr)));
     // Special case for string array
-    BuildUnfoldLoadConstStringArray<T>(bcInst, type, litArray, arrayInst);
+    BuildUnfoldLoadConstStringArray(bcInst, type, litArray, arrayInst);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -1099,7 +1101,7 @@ void InstBuilder::BuildLoadConstStringArray(const BytecodeInstruction *bcInst)
     auto arraySize = litArray.literals.size();
     ASSERT(arraySize > 0);
     if (arraySize > g_options.GetCompilerUnfoldConstArrayMaxSize()) {
-        // Create LoadConstArray instruction for String array, because we calls runtime for the case.
+        // Create LoadConstArray instruction for String array, because we call runtime for this case.
         auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
         auto method = GetGraph()->GetMethod();
         auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bcInst->GetAddress()), saveState,
@@ -1108,7 +1110,7 @@ void InstBuilder::BuildLoadConstStringArray(const BytecodeInstruction *bcInst)
         AddInstruction(inst);
         UpdateDefinition(bcInst->GetVReg(0), inst);
     } else {
-        BuildUnfoldLoadConstArray<uint32_t>(bcInst, DataType::REFERENCE, litArray);
+        BuildUnfoldLoadConstArray(bcInst, DataType::REFERENCE, litArray);
     }
 }
 
