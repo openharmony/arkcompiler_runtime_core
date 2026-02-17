@@ -42,15 +42,16 @@ export class ArraySort {
   public prepareArray(): void {
     this.ints = new FixedArray<int>(this.size);
     this.intsInitial = new FixedArray<int>(this.size);
+    let size = this.size
     switch (this.distribution) {
       case "sorted":
-        for (let i = 0; i < this.size; i++) {
+        for (let i = 0; i < size; i++) {
           this.intsInitial[i] = i;
         }
         break;
       case "sorted_reversed":
-        for (let i = 0; i < this.size; i++) {
-          this.intsInitial[i] = this.size - i;
+        for (let i = 0; i < size; i++) {
+          this.intsInitial[i] = size - i;
         }
         break;
       default:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -128,9 +128,9 @@ class VmbRunner:
             if not (self.dry_run or self.skip_cleanup):
                 self.platform.cleanup(bu)
             timer_unit.finish()
-            elapsed = timer_unit.elapsed().total_seconds()
+            elapsed = timer_unit.elapsed.total_seconds()
             bu.result.full_time = elapsed
-            log.debug('%s total time: %f', bu.name, elapsed)
+            log.debug('%s total time: %d nano seconds', bu.name, timer_unit.elapsed_ns)
 
     def run_suite_batch(self, bench_units: List[BenchUnit]) -> List[BenchUnit]:
         tests_per_batch = self.tests_per_batch if self.tests_per_batch > 0 else 5
@@ -193,11 +193,10 @@ class VmbRunner:
             else self.run_suite_serial(bench_units)
         self.hooks.run_after_suite(self.platform)
         timer_suite.finish()
-        elapsed = timer_suite.elapsed()
         if self.dry_run:
-            log.passed('Dry run finished in %s', elapsed)
+            log.passed('Dry run finished in %s seconds', timer_suite.elapsed)
         else:
-            log.passed('Run took %s', elapsed)
+            log.passed('Run took %s seconds', timer_suite.elapsed)
         return bus, self.platform.ext_info, timer_suite
 
 

@@ -25,7 +25,7 @@ import shutil
 from pathlib import Path
 from string import Template
 from typing import Union, Dict, Any, Callable, List, Iterable, Optional
-from time import time
+from time import perf_counter_ns
 from enum import Enum
 from datetime import datetime, timezone, timedelta
 from importlib.util import spec_from_file_location, module_from_spec
@@ -33,6 +33,7 @@ from importlib.util import spec_from_file_location, module_from_spec
 PASS_LOG_LEVEL = logging.ERROR + 1
 TRACE_LOG_LEVEL = logging.DEBUG - 1
 log = logging.getLogger('vmb')
+TS_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
 
 
 def ensure_env_var(var: str) -> str:
@@ -84,15 +85,21 @@ def norm_list(it: Optional[Iterable[str]]) -> List[str]:
     return sorted([t.lower() for t in set(it)]) if it else []
 
 
+def td_from_nanodiff(t1: int, t2: int) -> timedelta:
+    return timedelta(microseconds=(t2 - t1) // 1000) + timedelta(microseconds=((t2 - t1) % 1000) / 1000)
+
+
 def log_time(f: Callable[..., Any]) -> Callable[..., Any]:
     """Annotation for debug performance."""
     def f1(*args: Any, **kwargs: Any) -> Any:
         log.trace('%s started', f.__name__)
-        start = time()
+        start = perf_counter_ns()
         ret = f(*args, **kwargs)
-        log.trace('%s finished in %s',
-                  f.__name__,
-                  str(timedelta(seconds=time() - start)))
+        end = perf_counter_ns()
+        log.trace(
+            '%s finished in %s (%d nano seconds)',
+            f.__name__, str(td_from_nanodiff(t1=start, t2=end)), end-start
+        )
         return ret
     return f1
 
@@ -159,27 +166,40 @@ class Timer:
     """Simple struct for begin-end."""
 
     tz = datetime.now(timezone.utc).astimezone().tzinfo
-    tm_format = "%Y-%m-%dT%H:%M:%S.00000%z"
+    ns2ts = 1e9
 
     def __init__(self) -> None:
-        self.begin = datetime.now(timezone.utc)
-        self.end = self.begin
+        self._begin = perf_counter_ns()
+        self._end = self._begin
 
     @staticmethod
-    def format(t) -> str:
+    def format(t: datetime) -> str:
         if not isinstance(t, datetime):
             return 'unknown'
-        return t.astimezone(Timer.tz).strftime(Timer.tm_format)
+        return t.astimezone(Timer.tz).strftime(TS_FORMAT)
+
+    @property
+    def begin(self) -> str:
+        return self.format(datetime.fromtimestamp(self._begin / Timer.ns2ts))
+
+    @property
+    def end(self) -> str:
+        return self.format(datetime.fromtimestamp(self._end / Timer.ns2ts))
 
     def start(self) -> None:
-        self.begin = datetime.now(timezone.utc)
-        self.end = self.begin
+        self._begin = perf_counter_ns()
+        self._end = self._begin
 
     def finish(self) -> None:
-        self.end = datetime.now(timezone.utc)
+        self._end = perf_counter_ns()
 
+    @property
+    def elapsed_ns(self) -> int:
+        return int(self._end - self._begin)
+
+    @property
     def elapsed(self) -> timedelta:
-        return self.end - self.begin
+        return td_from_nanodiff(t1=self._begin, t2=self._end)
 
 
 class Singleton(type):
@@ -269,7 +289,7 @@ class ColorFormatter(logging.Formatter):
     def format(self, record):
         """Format."""
         log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(ColorFormatter.ts + log_fmt, '%Y-%m-%dT%H:%M:%S')
+        formatter = logging.Formatter(ColorFormatter.ts + log_fmt)
         record.nanos = str(int(record.created * 1e9))
         return formatter.format(record)
 
