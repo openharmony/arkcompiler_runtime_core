@@ -37,8 +37,8 @@ cases:
       let ternary1 = cond ? a : b
       let ternary3 = !cond ? a : b
       // assignment with explicit type
-      let ternary2: A = cond ? a : b
-      let ternary4: B = !cond ? a : b
+      let ternary2: A|B = cond ? a : b
+      let ternary4: A|B = !cond ? a : b
     use: |-
       arktest.assertTrue(ternary1 instanceof A, "expect instance of A")
       arktest.assertFalse(ternary1 instanceof B, "expect not instance of B")

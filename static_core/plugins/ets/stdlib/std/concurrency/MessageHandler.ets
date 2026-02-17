@@ -40,6 +40,7 @@ export namespace concurrency {
         private worker: EAWorker;
         private messageMutex: Mutex;
         private messages: Map<Message, MessageStatus>;
+        private readonly defaultMessagewhat : int = -1000000;
         /**
          * Create a MessageHandler instance
          * @param { Handler } handler The message handler function
@@ -81,7 +82,7 @@ export namespace concurrency {
             if (this.workerIsMain()) {
                 return false;
             }
-            if (what == Message.defaultMessagewhat) {
+            if (what == this.defaultMessagewhat) {
                 return false;
             }
             return this.hasMessage((value: MessageStatus, key: Message) => {
@@ -99,7 +100,7 @@ export namespace concurrency {
             if (this.workerIsMain()) {
                 return false;
             }
-            if (what == Message.defaultMessagewhat) {
+            if (what == this.defaultMessagewhat) {
                 return false;
             }
             return this.hasMessage((value: MessageStatus, key: Message) => {
@@ -144,7 +145,7 @@ export namespace concurrency {
             if (this.workerIsMain()) {
                 return false;
             }
-            if (what == Message.defaultMessagewhat) {
+            if (what == this.defaultMessagewhat) {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {
@@ -162,7 +163,7 @@ export namespace concurrency {
             if (this.workerIsMain()) {
                 return false;
             }
-            if (what == Message.defaultMessagewhat) {
+            if (what == this.defaultMessagewhat) {
                 return false;
             }
             return this.removeMessages((value: MessageStatus, key: Message) => {

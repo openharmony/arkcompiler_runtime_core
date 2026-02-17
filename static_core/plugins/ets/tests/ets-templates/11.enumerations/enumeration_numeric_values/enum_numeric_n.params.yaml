@@ -82,4 +82,3 @@ cases:
           enum Enum1: short { a = 254.3 } // Cannot assign
       use: |-
           arktest.assertEQ( Enum2.a.valueOf(), 254.3 )
-    

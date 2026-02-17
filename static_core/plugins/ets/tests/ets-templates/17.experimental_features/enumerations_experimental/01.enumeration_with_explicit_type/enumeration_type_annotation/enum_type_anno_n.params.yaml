@@ -78,8 +78,7 @@ cases:
           arktest.assertEQ( Enum.first.valueOf() instanceof byte, true )
 
     - decl: |-
-          const c: long = 2147483648;
-          enum Enum: int { first, second, third = c}
+          enum Enum: int { first, second, third = 2147483648}
       use: |-
           arktest.assertTrue(Enum.first.valueOf() instanceof int)
           arktest.assertTrue(Enum.second.valueOf() instanceof int)

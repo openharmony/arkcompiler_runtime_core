@@ -126,11 +126,9 @@ cases:
           arktest.assertTrue( res![0] === "A" )
           arktest.assertTrue( res![1] === null )
 
-    - decl: |-
-          const index: int = 1
-      use: |-
+    - use: |-
           let e: [string, boolean] = ["A", true]
-          arktest.assertTrue( e[index] == true ) // const indices allowed
+          arktest.assertTrue( e[1] == true ) // const indices allowed
 
     - decl: |-
           function foo(p: string[]) {

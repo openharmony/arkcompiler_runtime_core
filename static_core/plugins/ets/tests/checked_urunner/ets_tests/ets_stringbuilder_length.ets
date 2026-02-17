@@ -80,7 +80,7 @@
 //! INST_COUNT  /StringBuilder::toString/,1
 //! INST_COUNT  /std.core.String::%%get-length/,2
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,1
-//! IN_BLOCK    /loop 1, depth 1, bc: 0x000000a3/
+//! IN_BLOCK    /loop 1, depth 1, bc: 0x000000a4/
 //! INST_NOT    /StringBuilder::<ctor>/
 //! INST_COUNT  /StringBuilder::append/,2
 //! INST_NOT    /StringBuilder::toString/

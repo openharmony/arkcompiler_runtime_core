@@ -70,8 +70,9 @@ class DeepCloner {
 	private maxDepth: int
 	private currentDepth: int = 0
 
-	private static readonly OBJ_ENTRY_FIELD: int = 0
-	private static readonly OBJ_ENTRY_VALUE: int = 1
+    // TODO #33602: replace with const enum
+	//private static readonly OBJ_ENTRY_FIELD: int = 0
+	//private static readonly OBJ_ENTRY_VALUE: int = 1
 
 	private copies = new Map<Object, Object>()
 
@@ -221,8 +222,9 @@ class DeepCloner {
 
 		const objEntries = this.getObjectEntries(obj)
 		for (const objEntry of objEntries) {
-			const field = objEntry![DeepCloner.OBJ_ENTRY_FIELD]
-			const fieldValCopy = this.clone<Object>(objEntry![DeepCloner.OBJ_ENTRY_VALUE] as (Object | undefined))
+		    // TODO #33602: replace with const enum
+			const field = objEntry![/*DeepCloner.OBJ_ENTRY_FIELD*/0]
+			const fieldValCopy = this.clone<Object>(objEntry![/*DeepCloner.OBJ_ENTRY_VALUE*/1] as (Object | undefined))
 			const fieldValCopyType = Class.ofAny(fieldValCopy)
 
 			if (fieldValCopyType !== undefined && reflect.internals.Types.isAssignableFrom(field.getType(), fieldValCopyType)) {

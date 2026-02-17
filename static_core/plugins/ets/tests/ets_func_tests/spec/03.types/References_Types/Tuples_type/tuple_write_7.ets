@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +21,13 @@
 
 
 
-const indexx: long = 1;
 
 function main(): void {
     let tuple: [number, number] = [0, 0];
 
-    tuple[indexx] = 24;
+    tuple[1] = 24;
 
     arktest.assertEQ( tuple[0], 0)
-    arktest.assertEQ( tuple[indexx], 24)
+    arktest.assertEQ( tuple[1], 24)
 
 }

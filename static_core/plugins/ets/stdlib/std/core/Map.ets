@@ -294,8 +294,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private static readonly MIN_CAPACITY = 4
     private static readonly MIN_SHRINK_CAPACITY = 16
-    private static readonly ENTRY_KEY = 0
-    private static readonly ENTRY_VAL = 1
+    // TODO #33602: replace with const enum
+    //private static readonly ENTRY_KEY = 0
+    //private static readonly ENTRY_VAL = 1
 
     private static adjustCapacity(numEntries: int): int {
         if (numEntries <= Map.MIN_CAPACITY)
@@ -422,7 +423,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             if (pair == null) {
                 continue
             }
-            this.set(pair[Map.ENTRY_KEY] as K, pair[Map.ENTRY_VAL] as V)
+            // TODO #33602: replace with const enum
+            this.set(pair[/*Map.ENTRY_KEY*/0] as K, pair[/*Map.ENTRY_VAL*/1] as V)
         }
     }
 
@@ -439,7 +441,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         this.initialCapacity = capacity
 
         entries.forEach((entry: [K, V]) => {
-            this.set(entry[Map.ENTRY_KEY] as K, entry[Map.ENTRY_VAL] as V)
+            // TODO #33602: replace with const enum
+            this.set(entry[/*Map.ENTRY_KEY*/0] as K, entry[/*Map.ENTRY_VAL*/1] as V)
         })
     }
 
@@ -483,7 +486,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
                 if (pair == undefined || pair == null) {
                     continue
                 }
-                this.set(pair[Map.ENTRY_KEY] as K, pair[Map.ENTRY_VAL] as V)
+                // TODO #33602: replace with const enum
+                this.set(pair[/*Map.ENTRY_KEY*/0] as K, pair[/*Map.ENTRY_VAL*/1] as V)
             }
         } else {
             const entriesIter = (entries as Iterable<[K, V]>).$_iterator()
@@ -501,7 +505,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             this.cap = capacity
 
             entriesBuf.forEach((e: [K, V]) => {
-                this.set(e[Map.ENTRY_KEY] as K, e[Map.ENTRY_VAL] as V)
+                // TODO #33602: replace with const enum
+                this.set(e[/*Map.ENTRY_KEY*/0] as K, e[/*Map.ENTRY_VAL*/1] as V)
             })
         }
         this.initialCapacity = this.cap

@@ -402,13 +402,11 @@ cases:
       - {check_type: "byte", check_value: "127"}
     decl_variants:
       - |-
-        const a: [check_type] = [check_value]
-        enum Enum: [check_type] { first = a, second = a - 1,
-          third = a - 2 }
+        enum Enum: [check_type] { first = [check_value], second = [check_value] - 1,
+          third = [check_value] - 2 }
       - |-
-        const a: [check_type] = [check_value]
-        const enum Enum: [check_type] { first = a, second = a - 1,
-          third = a - 2 }
+        const enum Enum: [check_type] { first = [check_value], second = [check_value] - 1,
+          third = [check_value] - 2 }
     sub_cases_logic:
       - |-
         const v1: [check_type] = [check_value]

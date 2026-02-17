@@ -214,15 +214,15 @@ cases:
       - decl_data: |-
           const c: int = 5
           const check_val: int = c
-          enum IntEnum { A = c }
+          enum IntEnum { A = 5 }
       - decl_data: |-
           const c: short = 5
           const check_val: int = c
-          enum IntEnum { A = c }
+          enum IntEnum { A = 5 }
       - decl_data: |-
           const c: byte = 5
           const check_val: int = c
-          enum IntEnum { A = c }
+          enum IntEnum { A = 5 }
     decl: |-
       [decl_data]
     logic: |-

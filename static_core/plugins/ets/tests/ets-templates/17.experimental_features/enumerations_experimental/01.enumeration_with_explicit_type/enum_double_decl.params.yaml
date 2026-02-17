@@ -78,11 +78,11 @@ cases:
       - |-
         const a: double = 1.23
         const b: double = 1.234
-        enum Enum: double { first = a, second = b, third = b - 1.1 }
+        enum Enum: double { first = 1.23, second = 1.234, third = 1.234 - 1.1 }
       - |-
         const a: double = 1.23
         const b: double = 1.234
-        const enum Enum: double { first = a, second = b, third = b - 1.1 }
+        const enum Enum: double { first = 1.23, second = 1.234, third = 1.234 - 1.1 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)

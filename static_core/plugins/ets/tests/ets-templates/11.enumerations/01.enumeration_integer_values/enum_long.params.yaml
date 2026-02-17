@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -139,12 +139,12 @@ cases:
         const a: long = 0
         const b: long = 1
         const c: long = 3
-        enum Enum { first = a, second = b, third = c }
+        enum Enum { first = 0, second = 1, third = 3 }
       - |-
         const a: long = 0
         const b: long = 1
         const c: long = 3
-        const enum Enum { first = a, second = b, third = c }
+        const enum Enum { first = 0, second = 1, third = 3 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -152,9 +152,6 @@ cases:
         arktest.assertTrue(Enum.third instanceof Enum)
         arktest.assertTrue(a instanceof long)
         arktest.assertTrue(b instanceof long)
-        arktest.assertTrue(Enum.first.valueOf() instanceof long)
-        arktest.assertTrue(Enum.second.valueOf() instanceof long)
-        arktest.assertTrue(Enum.third.valueOf() instanceof long)
         arktest.assertEQ(Enum.first.valueOf(), a)
         arktest.assertEQ(Enum.second.valueOf(), b)
         arktest.assertEQ(Enum.third.valueOf(), c)
@@ -166,11 +163,9 @@ cases:
         to set the value explicitly.
     decl_variants:
       - |-
-        const a: long = 0x7fffffff - 1
-        enum Enum { first = a, second, third }
+        enum Enum { first = 0x7fffffff - 1, second, third }
       - |-
-        const a: long = 0x7fffffff - 1
-        const enum Enum { first = a, second, third }
+        const enum Enum { first = 0x7fffffff - 1, second, third }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -193,12 +188,12 @@ cases:
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        enum Enum { first = a, second = b, third = first + second }
+        enum Enum { first = 0x7fffffff - 10, second = 1010, third = first + second }
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        const enum Enum { first = a, second = b, third = first + second }
+        const enum Enum { first = 0x7fffffff - 10, second = 1010, third = first + second }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -221,12 +216,12 @@ cases:
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        enum Enum { first = a, second = b, third = a + b }
+        enum Enum { first = 0x7fffffff - 10, second = 1010, third = a + b }
       - |-
         const a: long = 0x7fffffff - 10
         const b: long = 1010
         const v: long = a + b
-        const enum Enum { first = a, second = b, third = a + b }
+        const enum Enum { first = 0x7fffffff - 10, second = 1010, third = a + b }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
@@ -246,15 +241,12 @@ cases:
         to set the value explicitly.
     decl_variants:
       - |-
-        const a: long = 5
-        enum Enum { A = a << 32 }
+        enum Enum { A = 5 << 32 }
       - |-
-        const a: long = 5
-        const enum Enum { A = a << 32 }
+        const enum Enum { A = 5 << 32 }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.A instanceof Enum)
-        arktest.assertTrue(Enum.A.valueOf() instanceof long)
         arktest.assertEQ(Enum.A, 0x5_0000_0000)
 
   - desc: |-
@@ -263,19 +255,14 @@ cases:
         to set the value explicitly.
     decl_variants:
       - |-
-        const x: long = 5
-        enum Enum { first = x, second, third }
+        enum Enum { first = 5, second, third }
       - |-
-        const x: long = 5
-        const enum Enum { first = x, second, third }
+        const enum Enum { first = 5, second, third }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
         arktest.assertTrue(Enum.second instanceof Enum)
         arktest.assertTrue(Enum.third instanceof Enum)
-        arktest.assertTrue(Enum.first.valueOf() instanceof long)
-        arktest.assertTrue(Enum.second.valueOf() instanceof long)
-        arktest.assertTrue(Enum.third.valueOf() instanceof long)
         arktest.assertEQ(Enum.first.valueOf(), 5)
         arktest.assertEQ(Enum.second.valueOf(), 6)
         arktest.assertEQ(Enum.third.valueOf(), 7)
