@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -188,6 +188,7 @@ function ohos_arm64() {
         -DPANDA_ETS_INTEROP_JS=ON \
         -DPANDA_LLVM_BACKEND=${PANDA_LLVM_BACKEND} \
         -DPANDA_WITH_SAFEPOINT_CHECKER=${PANDA_WITH_SAFEPOINT_CHECKER} \
+        -DPANDA_USE_64_BIT_POINTER=${PANDA_USE_64_BIT_POINTER} \
         -DPANDA_TRACK_INTERNAL_ALLOCATIONS=${PANDA_TRACK_INTERNAL_ALLOCATIONS} \
         ${extra_llvm_opts} \
         -DPANDA_BUILD_LLVM_BINARIES=${PANDA_BUILD_LLVM_BINARIES} \
@@ -341,6 +342,8 @@ function print_help() {
 
     --panda_track_internal_allocations
                             Enable internal memory profiling statistics for ohos (aarch64)
+
+    --ptr_64bit Enable 64 bit pointer
     "
 
     echo "$HELP_MESSAGE"
@@ -500,6 +503,10 @@ function parse_options() {
             ;;
         --panda_track_internal_allocations)
             PANDA_TRACK_INTERNAL_ALLOCATIONS=1
+            shift
+            ;;
+        --ptr_64bit)
+            PANDA_USE_64_BIT_POINTER="true"
             shift
             ;;
         *)
