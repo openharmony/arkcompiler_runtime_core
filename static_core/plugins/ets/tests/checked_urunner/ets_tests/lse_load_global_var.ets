@@ -14,7 +14,7 @@
  */
 
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_FRONTEND       options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER            Check that LSE and AA work correctly with global variables
 //! SKIP_IF            @architecture == "arm32"

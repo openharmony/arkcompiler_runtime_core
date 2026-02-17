@@ -24,19 +24,21 @@
 //! RUN_FRONTEND            options: "--opt-level=2 --ets-strings-concat=false"
 
 
-import { get_element } from './ext_funcs_1.ets';
+import { getElement } from './ext_funcs_1.ets';
 
 //! CHECKER    Check external inlining with depth 1 and two panda files
-//! RUN_PAOC   options: "--panda-files=../ext_inlining_2_ext_funcs.ets.abc:../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
-//! EVENT      /Inline,ext_funcs_1.ETSGLOBAL::get_element,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
-//! EVENT_NEXT /Inline,ext_inlining_2.ETSGLOBAL::main,ext_funcs_1.ETSGLOBAL::get_element,.*,STATIC,SUCCESS/
-//! RUN        options: "--panda-files=../ext_inlining_2_ext_funcs.ets.abc:../ext_inlining_2_ext_funcs_1.ets.abc", entry: "ext_inlining_2.ETSGLOBAL::main" # CC-OFF(G.FMT.02) special comment for testing
+//! RUN_PAOC   options: "--panda-files=../ext_inlining_2_ext_funcs.ets.abc:../ext_inlining_2_ext_funcs_1.ets.abc",
+//!            entry: "ext_inlining_2.ETSGLOBAL::main"
+//! EVENT      /Inline,ext_funcs_1.ETSGLOBAL::getElement,ext_funcs.ETSGLOBAL::add,.*,STATIC,SUCCESS/
+//! EVENT_NEXT /Inline,ext_inlining_2.ETSGLOBAL::main,ext_funcs_1.ETSGLOBAL::getElement,.*,STATIC,SUCCESS/
+//! RUN        options: "--panda-files=../ext_inlining_2_ext_funcs.ets.abc:../ext_inlining_2_ext_funcs_1.ets.abc",
+//!            entry: "ext_inlining_2.ETSGLOBAL::main"
 //! METHOD     "ext_inlining_2.ETSGLOBAL::main"
 //! PASS_BEFORE "Inline"
-//! INST       /CallStatic.*ext_funcs_1\.ETSGLOBAL::get_element.*\[file=\d+\]/
+//! INST       /CallStatic.*ext_funcs_1\.ETSGLOBAL::getElement.*\[file=\d+\]/
 
 function main(): int {
     let arr: int[] = [1, 2, 3, 4];
-    let val: int = get_element(arr, 2);
+    let val: int = getElement(arr, 2);
     return val === 6 ? 0 : 1;
 }

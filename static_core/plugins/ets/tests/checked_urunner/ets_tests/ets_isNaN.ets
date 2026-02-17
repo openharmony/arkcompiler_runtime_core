@@ -14,39 +14,43 @@
  */
 
 //! CHECKER      IR Builder inlining double
-//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f64.*'", entry: "ets_isNaN.ETSGLOBAL::check_isnan_f64"
-//! METHOD       "ets_isNaN.ETSGLOBAL::check_isnan_f64"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*checkIsnanF64.*'",
+//!              entry: "ets_isNaN.ETSGLOBAL::checkIsnanF64"
+//! METHOD       "ets_isNaN.ETSGLOBAL::checkIsnanF64"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Compare/
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining double 
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*check_isnan_f64.*'"
-//! METHOD        "ets_isNaN.ETSGLOBAL::check_isnan_f64"
+//! RUN_AOT       options: "--compiler-regex='.*checkIsnanF64.*'"
+//! METHOD        "ets_isNaN.ETSGLOBAL::checkIsnanF64"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Compare/
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_isNaN.ETSGLOBAL::check_isnan_f64"
+//! RUN           entry: "ets_isNaN.ETSGLOBAL::checkIsnanF64"
 
 //! CHECKER      IR Builder inlining float
-//! RUN          force_jit: true, options: "--compiler-regex='.*check_isnan_f32.*'", entry: "ets_isNaN.ETSGLOBAL::check_isnan_f32"
-//! METHOD       "ets_isNaN.ETSGLOBAL::check_isnan_f32"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*checkIsnanF32.*'",
+//!              entry: "ets_isNaN.ETSGLOBAL::checkIsnanF32"
+//! METHOD       "ets_isNaN.ETSGLOBAL::checkIsnanF32"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Compare/
 //! INST_NEXT_NOT /Intrinsic/
 
 //! CHECKER       AOT IR Builder inlining float
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_AOT       options: "--compiler-regex='.*check_isnan_f32.*'"
-//! METHOD        "ets_isNaN.ETSGLOBAL::check_isnan_f32"
+//! RUN_AOT       options: "--compiler-regex='.*checkIsnanF32.*'"
+//! METHOD        "ets_isNaN.ETSGLOBAL::checkIsnanF32"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Compare/
 //! INST_NEXT_NOT /Intrinsic/
-//! RUN           entry: "ets_isNaN.ETSGLOBAL::check_isnan_f32"
+//! RUN           entry: "ets_isNaN.ETSGLOBAL::checkIsnanF32"
 
 
-function check_isnan_f64() : int {
+function checkIsnanF64() : int {
     if (!Double.isNaN(Double.NaN)) return 11;
     if (Double.isNaN(Double.POSITIVE_INFINITY)) return 12;
     if (Double.isNaN(Double.NEGATIVE_INFINITY)) return 13;
@@ -57,7 +61,7 @@ function check_isnan_f64() : int {
     return 0;
 }
 
-function check_isnan_f32() : int {
+function checkIsnanF32() : int {
     if (!Float.isNaN(Float.NaN)) return 1;
     if (Float.isNaN(Float.POSITIVE_INFINITY)) return 2;
     if (Float.isNaN(Float.NEGATIVE_INFINITY)) return 3;

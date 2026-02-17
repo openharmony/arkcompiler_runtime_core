@@ -23,21 +23,21 @@ export function add(x: int, y: int): int {
 }
 
 // functions with unpredictable side effects
-export function add_with_log(x: int, y: int): int {
+export function addWithLog(x: int, y: int): int {
     console.log('Adding..');
     return x + y;
 }
 
-export function rand_plus(x: int): double {
+export function randPlus(x: int): double {
     let r = Math.floor(Math.random() * 10);  // [0, 9]
     return x + r;
 }
 
-export function get_arr_element(arr: int[], idx: int): int {
+export function getArrElement(arr: int[], idx: int): int {
     return arr[idx];
 }
 
-export function make_array(n: int): int[] {
+export function makeArray(n: int): int[] {
     let arr = new int[n];
     return arr;
 }
@@ -46,6 +46,6 @@ export function stringify(x: Object): string {
     return x.toString();
 }
 
-export function safe_div(x: int, y: int): int {
+export function safeDiv(x: int, y: int): int {
     return x / y;
 }

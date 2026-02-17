@@ -15,7 +15,7 @@
 
 function check(arr1: Object, arr2: Object): int {
     if (arr1.toString() != arr2.toString()) {
-        console.print("Expected " + arr2.toString() + " but got " + arr1.toString());
+        console.print('Expected ' + arr2.toString() + ' but got ' + arr1.toString());
         return 1;
     }
     return 0;
@@ -23,7 +23,13 @@ function check(arr1: Object, arr2: Object): int {
 
 class TestBailout {
     //! CHECKER       TestBailout1
-    //! RUN           force_jit: true, options: "--compiler-regex='.*memmove_bailout.TestBailout::.*' --compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias.*,memmove_bailout.TestBailout::patternMissmatch_offsets1,memmove_bailout.TestBailout::patternMissmatch_offsets2,memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'", entry: "memmove_bailout.TestBailout::main"
+    //! RUN           force_jit: true,
+    //!               options: "--compiler-regex='.*memmove_bailout.TestBailout::.*' " +
+    //!                        "--compiler-inlining-blacklist='memmove_bailout.TestBailout::mayAlias.*," +
+    //!                        "memmove_bailout.TestBailout::patternMissmatch_offsets1," +
+    //!                        "memmove_bailout.TestBailout::patternMissmatch_offsets2," +
+    //!                        "memmove_bailout.TestBailout::refArray,memmove_bailout.TestBailout::differentTypes'",
+    //!               entry: "memmove_bailout.TestBailout::main"
     //!
     //! METHOD        "memmove_bailout.TestBailout::__noinline__mayAlias"
     //! PASS_AFTER    "LoopIdioms"
@@ -70,9 +76,9 @@ class TestBailout {
     }
 
     static mayAlias_ref(): int {
-        let src: FixedArray<string> = ["6", "7", "8"];
+        let src: FixedArray<string> = ['6', '7', '8'];
         let dst: FixedArray<object> = new FixedArray<object>(3);
-        return check(TestBailout.__noinline__mayAlias_ref(src, dst), ["6", "7", "8"]);
+        return check(TestBailout.__noinline__mayAlias_ref(src, dst), ['6', '7', '8']);
     }
 
     static __noinline__mayAlias_ref(src: FixedArray<string>, dst: FixedArray<object>): FixedArray<object> {
@@ -103,8 +109,8 @@ class TestBailout {
     }
 
     static refArray(): int {
-        let src = new Array<int>(6, 7, 8);
-        let dst = new Array<int>(1, 2, 3, 4, 5);
+        let src: int[] = [6, 7, 8];
+        let dst: int[] = [1, 2, 3, 4, 5];
         let offs = dst.length - src.length;
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];

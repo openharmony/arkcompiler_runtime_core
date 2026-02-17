@@ -14,7 +14,7 @@
  */
 
 class A {
-    valA_: int;
+    public valA_: int;
 
     constructor() {
         this.valA_ = 0
@@ -26,7 +26,7 @@ class A {
 }
 
 class B extends A {
-    valB_: int;
+    public valB_: int;
 
     constructor(valA: int, valB: int) {
         super(valA);
@@ -49,7 +49,7 @@ function __noinline__getLength(flag: boolean): int {
 //! CHECKER       AOT Escape eliminate phi with objects
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-inline-external-methods-aot=true --compiler-regex='.*test.*'"
-//! METHOD        "ETSGLOBAL::test_simple_phi1"
+//! METHOD        "ETSGLOBAL::testSimplePhi1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -59,7 +59,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_NOT      /StoreObject/
 //! INST_NOT      /LoadObject/
 //!
-//! METHOD        "ETSGLOBAL::test_simple_phi2"
+//! METHOD        "ETSGLOBAL::testSimplePhi2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -69,7 +69,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 1
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_with_slowpath"
+//! METHOD        "ETSGLOBAL::testWithSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -79,7 +79,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 1
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_different_classes"
+//! METHOD        "ETSGLOBAL::testDifferentClasses"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 3
@@ -89,7 +89,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 3
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_loop"
+//! METHOD        "ETSGLOBAL::testLoop"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 7
 //! INST_COUNT    /StoreObject/, 7
@@ -103,7 +103,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 0
 //! INST_COUNT    /i32.*Phi/, 3
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects"
+//! METHOD        "ETSGLOBAL::testDominateObjects"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -117,7 +117,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_materialize"
+//! METHOD        "ETSGLOBAL::testDominateObjectsMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -131,7 +131,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_materialize_in_slowpath"
+//! METHOD        "ETSGLOBAL::testDominateObjectsMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -145,7 +145,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_separate_obj_usage"
+//! METHOD        "ETSGLOBAL::testDominateObjectsSeparateObjUsage"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -159,7 +159,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays"
+//! METHOD        "ETSGLOBAL::testTempArrays"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -173,7 +173,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length1"
+//! METHOD        "ETSGLOBAL::testTempArraysDiffLength1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 14
@@ -185,7 +185,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 11
 //! INST_COUNT    /ref.*Phi/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length2"
+//! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 2
 //! INST_COUNT    /StoreArray/, 20
@@ -197,7 +197,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 5
 //!
-//! METHOD        "ETSGLOBAL::test_arrays_materialize"
+//! METHOD        "ETSGLOBAL::testArraysMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -209,7 +209,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_arrays_materialize_in_slowpath"
+//! METHOD        "ETSGLOBAL::testArraysMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -223,7 +223,7 @@ function __noinline__getLength(flag: boolean): int {
 
 //! CHECKER       JIT Escape eliminate phi with objects
 //! RUN           force_jit: true, options: "--compiler-regex='.*test.*'", entry: "escape_phi.ETSGLOBAL::main"
-//! METHOD        "ETSGLOBAL::test_simple_phi1"
+//! METHOD        "ETSGLOBAL::testSimplePhi1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -233,7 +233,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_NOT      /StoreObject/
 //! INST_NOT      /LoadObject/
 //!
-//! METHOD        "ETSGLOBAL::test_simple_phi2"
+//! METHOD        "ETSGLOBAL::testSimplePhi2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -243,7 +243,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 1
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_with_slowpath"
+//! METHOD        "ETSGLOBAL::testWithSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -253,7 +253,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 1
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_different_classes"
+//! METHOD        "ETSGLOBAL::testDifferentClasses"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 3
@@ -263,7 +263,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /StoreObject/, 3
 //! INST_COUNT    /LoadObject/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_loop"
+//! METHOD        "ETSGLOBAL::testLoop"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 7
 //! INST_COUNT    /StoreObject/, 7
@@ -277,7 +277,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 0
 //! INST_COUNT    /i32.*Phi/, 3
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects"
+//! METHOD        "ETSGLOBAL::testDominateObjects"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -291,7 +291,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_materialize"
+//! METHOD        "ETSGLOBAL::testDominateObjectsMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -305,7 +305,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_materialize_in_slowpath"
+//! METHOD        "ETSGLOBAL::testDominateObjectsMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -319,7 +319,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_dominate_objects_separate_obj_usage"
+//! METHOD        "ETSGLOBAL::testDominateObjectsSeparateObjUsage"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewObject/, 2
 //! INST_COUNT    /StoreObject/, 2
@@ -333,7 +333,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_NOT      /i32.*Phi/
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays"
+//! METHOD        "ETSGLOBAL::testTempArrays"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -347,7 +347,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /ref.*Phi/, 1
 //! INST_COUNT    /i32.*Phi/, 0
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length1"
+//! METHOD        "ETSGLOBAL::testTempArraysDiffLength1"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 14
@@ -359,7 +359,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 11
 //! INST_COUNT    /ref.*Phi/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_temp_arrays_diff_length2"
+//! METHOD        "ETSGLOBAL::testTempArraysDiffLength2"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 2
 //! INST_COUNT    /StoreArray/, 24
@@ -371,7 +371,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 4
 //! INST_COUNT    /ref.*Phi/, 5
 //!
-//! METHOD        "ETSGLOBAL::test_arrays_materialize"
+//! METHOD        "ETSGLOBAL::testArraysMaterialize"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -383,7 +383,7 @@ function __noinline__getLength(flag: boolean): int {
 //! INST_COUNT    /LoadArray/, 9
 //! INST_COUNT    /ref.*Phi/, 1
 //!
-//! METHOD        "ETSGLOBAL::test_arrays_materialize_in_slowpath"
+//! METHOD        "ETSGLOBAL::testArraysMaterializeInSlowpath"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    /NewArray/, 4
 //! INST_COUNT    /StoreArray/, 12
@@ -397,7 +397,7 @@ function __noinline__getLength(flag: boolean): int {
 
 
 // apply, objects are temporary
-function test_simple_phi1(a: int, b: int): int {
+function testSimplePhi1(a: int, b: int): int {
     let obj: A;
     if (a > b) {
         obj = new A(a);
@@ -408,7 +408,7 @@ function test_simple_phi1(a: int, b: int): int {
 }
 
 // no apply, object escapes
-function test_simple_phi2(a: int, b: int): int {
+function testSimplePhi2(a: int, b: int): int {
     let obj: A;
     if (a > b) {
         obj = new A(a);
@@ -420,7 +420,7 @@ function test_simple_phi2(a: int, b: int): int {
 }
 
 // apply, materialize into slowpath
-function test_with_slowpath(a: int, b: int, flag: boolean): int {
+function testWithSlowpath(a: int, b: int, flag: boolean): int {
     let obj: A;
     if (a > b) {
         obj = new A(a);
@@ -435,7 +435,7 @@ function test_with_slowpath(a: int, b: int, flag: boolean): int {
 }
 
 // no apply, different classes
-function test_different_classes(a: int, b: int): int {
+function testDifferentClasses(a: int, b: int): int {
     let obj: A;
     if (a > b) {
         obj = new A(a);
@@ -446,16 +446,16 @@ function test_different_classes(a: int, b: int): int {
 }
 
 // apply, objects are temporary
-function test_loop(N: int) : int {
+function testLoop(n: int) : int {
     let a = new A(0);
-    while (a.valA_ != N) {
+    while (a.valA_ != n) {
         a = new A(a.valA_ + 1);
     }
     return a.valA_;
 }
 
 // no apply
-function test_dominate_objects(flag: boolean): int {
+function testDominateObjects(flag: boolean): int {
     let a1 = new A(0);
     let a2 = new A(1);
     let a: A;
@@ -468,7 +468,7 @@ function test_dominate_objects(flag: boolean): int {
 }
 
 // no apply, objects are temporary, 
-function test_dominate_objects_separate_obj_usage(flag: boolean): int {
+function testDominateObjectsSeparateObjUsage(flag: boolean): int {
     let a1 = new A(0);
     let a2 = new A(1);
     let a: A;
@@ -482,7 +482,7 @@ function test_dominate_objects_separate_obj_usage(flag: boolean): int {
 }
 
 // no apply
-function test_dominate_objects_materialize(flag: boolean): int {
+function testDominateObjectsMaterialize(flag: boolean): int {
     let a1 = new A(0);
     let a2 = new A(1);
     let a: A;
@@ -496,7 +496,7 @@ function test_dominate_objects_materialize(flag: boolean): int {
 }
 
 // no apply
-function test_dominate_objects_materialize_in_slowpath(flag: boolean, slowpath: boolean): int {
+function testDominateObjectsMaterializeInSlowpath(flag: boolean, slowpath: boolean): int {
     let a1 = new A(0);
     let a2 = new A(1);
     let a: A;
@@ -513,7 +513,7 @@ function test_dominate_objects_materialize_in_slowpath(flag: boolean, slowpath: 
 }
 
 // apply
-function test_temp_arrays(flag: boolean): int {
+function testTempArrays(flag: boolean): int {
     let arr: int[];
     if (flag) {
         arr = [0, 1, 2];
@@ -524,7 +524,7 @@ function test_temp_arrays(flag: boolean): int {
 }
 
 // no apply, different length
-function test_temp_arrays_diff_length1(flag: boolean): int {
+function testTempArraysDiffLength1(flag: boolean): int {
     let arr: int[];
     if (flag) {
         arr = [0, 1, 2, 4];
@@ -535,7 +535,7 @@ function test_temp_arrays_diff_length1(flag: boolean): int {
 }
 
 // no apply, different length
-function test_temp_arrays_diff_length2(flag: boolean): int {
+function testTempArraysDiffLength2(flag: boolean): int {
     let length = __noinline__getLength(flag);
     let arr: int[];
     if (flag) {
@@ -553,7 +553,7 @@ function test_temp_arrays_diff_length2(flag: boolean): int {
 }
 
 // no apply
-function test_arrays_materialize(flag: boolean): int {
+function testArraysMaterialize(flag: boolean): int {
     let arr: int[];
     if (flag) {
         arr = [0, 1, 2];
@@ -565,7 +565,7 @@ function test_arrays_materialize(flag: boolean): int {
 }
 
 // apply
-function test_arrays_materialize_in_slowpath(flag1: boolean, flag2: boolean): int {
+function testArraysMaterializeInSlowpath(flag1: boolean, flag2: boolean): int {
     let arr: int[];
     if (flag1) {
         arr = [0, 1, 2];
@@ -580,43 +580,103 @@ function test_arrays_materialize_in_slowpath(flag1: boolean, flag2: boolean): in
 }
 
 function main(): int {
-    if (test_simple_phi1(1, 2) != 2) return 1;
-    if (test_simple_phi1(2, 1) != 2) return 2;
-    if (test_simple_phi2(1, 2) != 100500) return 3;
-    if (test_simple_phi2(2, 1) != 100500) return 4;
-    if (test_with_slowpath(1, 2, false) != 2) return 5;
-    if (test_with_slowpath(2, 1, false) != 2) return 6;
-    if (test_with_slowpath(2, 1, true) != 100500) return 7;
-    if (test_different_classes(1, 2) != 2) return 8;
-    if (test_different_classes(2, 1) != 2) return 9;
-    if (test_loop(10) != 10) return 10;
-    if (test_dominate_objects(true) != 0) return 11;
-    if (test_dominate_objects(false) != 1) return 12;
-    if (test_dominate_objects_materialize(true) != 100500) return 13;
-    if (test_dominate_objects_materialize(false) != 100500) return 14;
-    if (test_dominate_objects_materialize_in_slowpath(false, false) != 1) return 15;
-    if (test_dominate_objects_materialize_in_slowpath(true, false) != 0) return 16;
-    if (test_dominate_objects_materialize_in_slowpath(false, true) != 100500) return 17;
-    if (test_dominate_objects_materialize_in_slowpath(true, true) != 100500) return 18;
-    if (test_temp_arrays(true) != 3) return 19;
-    if (test_temp_arrays(false) != 12) return 20;
-    if (test_temp_arrays_diff_length1(true) != 7) return 21;
+    if (testSimplePhi1(1, 2) != 2) {
+        return 1;
+    }
+    if (testSimplePhi1(2, 1) != 2) {
+        return 2;
+    }
+    if (testSimplePhi2(1, 2) != 100500) {
+        return 3;
+    }
+    if (testSimplePhi2(2, 1) != 100500) {
+        return 4;
+    }
+    if (testWithSlowpath(1, 2, false) != 2) {
+        return 5;
+    }
+    if (testWithSlowpath(2, 1, false) != 2) {
+        return 6;
+    }
+    if (testWithSlowpath(2, 1, true) != 100500) {
+        return 7;
+    }
+    if (testDifferentClasses(1, 2) != 2) {
+        return 8;
+    }
+    if (testDifferentClasses(2, 1) != 2) {
+        return 9;
+    }
+    if (testLoop(10) != 10) {
+        return 10;
+    }
+    if (testDominateObjects(true) != 0) {
+        return 11;
+    }
+    if (testDominateObjects(false) != 1) {
+        return 12;
+    }
+    if (testDominateObjectsMaterialize(true) != 100500) {
+        return 13;
+    }
+    if (testDominateObjectsMaterialize(false) != 100500) {
+        return 14;
+    }
+    if (testDominateObjectsMaterializeInSlowpath(false, false) != 1) {
+        return 15;
+    }
+    if (testDominateObjectsMaterializeInSlowpath(true, false) != 0) {
+        return 16;
+    }
+    if (testDominateObjectsMaterializeInSlowpath(false, true) != 100500) {
+        return 17;
+    }
+    if (testDominateObjectsMaterializeInSlowpath(true, true) != 100500) {
+        return 18;
+    }
+    if (testTempArrays(true) != 3) {
+        return 19;
+    }
+    if (testTempArrays(false) != 12) {
+        return 20;
+    }
+    if (testTempArraysDiffLength1(true) != 7) {
+        return 21;
+    }
     try {
-        test_temp_arrays_diff_length1(false);
+        testTempArraysDiffLength1(false);
         return 22;
     } catch (e) {}
-    if (test_temp_arrays_diff_length2(true) != 10) return 23;
+    if (testTempArraysDiffLength2(true) != 10) {
+        return 23;
+    }
     try {
-        test_temp_arrays_diff_length2(false);
+        testTempArraysDiffLength2(false);
         return 24;
     } catch (e) {}
-    if (test_arrays_materialize(true) != 100503) return 25;
-    if (test_arrays_materialize(false) != 100509) return 26;
-    if (test_arrays_materialize_in_slowpath(false, false) != 12) return 27;
-    if (test_arrays_materialize_in_slowpath(true, false) != 3) return 28;
-    if (test_arrays_materialize_in_slowpath(false, true) != 100509) return 29;
-    if (test_arrays_materialize_in_slowpath(true, true) != 100503) return 30;
-    if (test_dominate_objects_separate_obj_usage(true) != 0) return 31;
-    if (test_dominate_objects_separate_obj_usage(false) != 3) return 32;
+    if (testArraysMaterialize(true) != 100503) {
+        return 25;
+    }
+    if (testArraysMaterialize(false) != 100509) {
+        return 26;
+    }
+    if (testArraysMaterializeInSlowpath(false, false) != 12) {
+        return 27;
+    }
+    if (testArraysMaterializeInSlowpath(true, false) != 3) {
+        return 28;
+    }
+    if (testArraysMaterializeInSlowpath(false, true) != 100509) {
+        return 29;
+    }
+    if (testArraysMaterializeInSlowpath(true, true) != 100503) {
+        return 30;
+    }
+    if (testDominateObjectsSeparateObjUsage(true) != 0) {
+        return 31;
+    }
+    if (testDominateObjectsSeparateObjUsage(false) != 3) {
+        return 32;
+    }
     return 0;
 }

@@ -19,29 +19,33 @@
 //!                 --compiler-hotness-threshold=22 --log-level=debug --log-components=compiler \
 //!                 --compiler-log=inlining --no-async-jit"
 //!
-//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
 
 //! CHECKER      Check inlining sequence with profiling
 //! RUN          entry: "inlining_order_1.ETSGLOBAL::main", options: "--compiler-regex='.*ETSGLOBAL::.*' \
 //!                 --compiler-profiling-threshold=0 --compiler-hotness-threshold=30 --log-level=debug \
 //!                 --log-components=compiler --compiler-log=inlining --no-async-jit"
 //!
-//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
 
 //! CHECKER      Check inlining sequence in AOT
 //! SKIP_IF      @architecture == "arm32"
 //! RUN_PAOC     options: ""
-//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
-//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::test_loops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
+//! EVENT        /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::hot,.*,STATIC,SUCCESS/
+//! EVENT_NEXT   /Inline,inlining_order_1.ETSGLOBAL::testLoops,inlining_order_1.ETSGLOBAL::cold,.*,STATIC,SUCCESS/
 //! RUN          entry: "inlining_order_1.ETSGLOBAL::main",
 //!              options: "--log-level=debug --log-components=compiler --compiler-log=inlining"
 
-function cold(): int { return 30; }
-function hot(i:int):int { return -i; }
+function cold(): int {
+ return 30; 
+}
+function hot(i:int):int {
+ return -i; 
+}
 
-function test_loops(): void {
+function testLoops(): void {
     let N = cold();
     let arr: FixedArray<int> = new FixedArray<int>(N);
 
@@ -52,7 +56,7 @@ function test_loops(): void {
 
 function main(): int {
     for (let i = 0; i < 3; i++) {
-        test_loops();
+        testLoops();
     }
     return 0;
 }

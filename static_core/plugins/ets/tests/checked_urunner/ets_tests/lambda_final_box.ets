@@ -38,34 +38,34 @@
 //! INST            /CallStatic.*std.core.DoubleBox/
 
 function main(): int {
-    let c_boolean: boolean = true;
-    let c_byte: byte = 1 as byte;
-    let c_char: char = c'a';
-    let c_short: short = 123;
-    let c_int: int = 123000;
-    let c_long: long = 123000000000;
-    let c_float: float = 1.0f;
-    let c_double: double = 1.0;
-    let c_object = "abc";
-    c_boolean = false;
-    c_byte = 2;
-    c_char = c'b';
-    c_short++;
-    c_int++;
-    c_long++;
-    c_float++;
-    c_double++;
-    c_object = "def";
+    let cBoolean: boolean = true;
+    let cByte: byte = 1 as byte;
+    let cChar: char = c'a';
+    let cShort: short = 123;
+    let cInt: int = 123000;
+    let cLong: long = 123000000000;
+    let cFloat: float = 1.0f;
+    let cDouble: double = 1.0;
+    let cObject = "abc";
+    cBoolean = false;
+    cByte = 2;
+    cChar = c'b';
+    cShort++;
+    cInt++;
+    cLong++;
+    cFloat++;
+    cDouble++;
+    cObject = "def";
     (() => {
-        c_boolean = false;
-        c_byte = 2;
-        c_char = c'b';
-        c_short++;
-        c_int++;
-        c_long++;
-        c_float++;
-        c_double++;
-        c_object = "def";
+        cBoolean = false;
+        cByte = 2;
+        cChar = c'b';
+        cShort++;
+        cInt++;
+        cLong++;
+        cFloat++;
+        cDouble++;
+        cObject = "def";
     })();
     return 0;
 }

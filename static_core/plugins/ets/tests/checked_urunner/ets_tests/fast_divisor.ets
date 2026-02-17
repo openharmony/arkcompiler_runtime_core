@@ -17,39 +17,39 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-regex='.*(Div|Mod).*'", entry: "fast_divisor.ETSGLOBAL::main"
 //! EVENT_NOT     /Compilation,fast_divisor.ETSGLOBAL::main,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModByMin,.*,COMPILED/
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivBy7"
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModByMin,.*,COMPILED/
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivBy7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivByM7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -59,31 +59,31 @@
 //! INST_NEXT     "Add"
 //! INST_NEXT     "AShrI"
 //! INST_NEXT     "Neg"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModBy7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModByM7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -92,29 +92,29 @@
 //! INST_NEXT     "SelectImm"
 //! INST_NEXT     "AndI"
 //! INST_NEXT     "Sub"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivBy7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivByM7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -124,31 +124,31 @@
 //! INST_NEXT     "Add"
 //! INST_NEXT     "AShrI"
 //! INST_NEXT     "Neg"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModBy7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModByM7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -157,46 +157,46 @@
 //! INST_NEXT     "SelectImm"
 //! INST_NEXT     /And|AndI/
 //! INST_NEXT     "Sub"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 
 //! CHECKER       Div/Mod by const optimization, AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*(Div|Mod).*'"
 //! EVENT_NOT     /Compilation,fast_divisor.ETSGLOBAL::main,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModBy7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModByM7,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntDivByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::IntModByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongDivByMin,.*,COMPILED/
-//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::LongModByMin,.*,COMPILED/
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivBy7"
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModBy7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModByM7,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intDivByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::intModByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longDivByMin,.*,COMPILED/
+//! EVENT         /Compilation,fast_divisor.ETSGLOBAL::longModByMin,.*,COMPILED/
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivBy7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivByM7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntDivByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::intDivByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -206,31 +206,31 @@
 //! INST_NEXT     "Add"
 //! INST_NEXT     "AShrI"
 //! INST_NEXT     "Neg"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntDivByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intDivByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModBy7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModByM7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smull"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::IntModByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::intModByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -239,29 +239,29 @@
 //! INST_NEXT     "SelectImm"
 //! INST_NEXT     "AndI"
 //! INST_NEXT     "Sub"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::IntModByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::intModByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivBy7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "DivI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivByM7"
 //! ASM_INST      "DivI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongDivByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::longDivByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Div",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -271,31 +271,31 @@
 //! INST_NEXT     "Add"
 //! INST_NEXT     "AShrI"
 //! INST_NEXT     "Neg"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongDivByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longDivByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModBy7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModBy7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModBy7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModBy7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModByM7"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModByM7"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT    "ModI",1
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModByM7"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModByM7"
 //! ASM_INST      "ModI"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! ASM           x64: "imul", arm64: "smulh"
 //! ASM           x64: "sar", arm64: "asr"
 //! ASM           x64: "sub", arm64: "msub"
-//! METHOD        "fast_divisor.ETSGLOBAL::LongModByMin"
+//! METHOD        "fast_divisor.ETSGLOBAL::longModByMin"
 //! PASS_BEFORE   "Lowering"
 //! INST_COUNT    "Mod",1
 //! PASS_AFTER_NEXT "Cleanup"
@@ -304,88 +304,88 @@
 //! INST_NEXT     "SelectImm"
 //! INST_NEXT     /And|AndI/
 //! INST_NEXT     "Sub"
-//! ASM_METHOD    "fast_divisor.ETSGLOBAL::LongModByMin"
+//! ASM_METHOD    "fast_divisor.ETSGLOBAL::longModByMin"
 //! ASM_NOT       x64: "idiv", arm64: "sdiv"
 //! RUN           entry: "fast_divisor.ETSGLOBAL::main"
 
 // Int Div/Mod by 7
-function IntDivBy7(num: int): int {
+function intDivBy7(num: int): int {
     return num / 7;
 }
 
-function IntModBy7(num: int): int {
+function intModBy7(num: int): int {
     return num % 7;
 }
 
 // Long Div/Mod by 7
-function LongDivBy7(num: long): long {
+function longDivBy7(num: long): long {
     return num / 7;
 }
 
-function LongModBy7(num: long): long {
+function longModBy7(num: long): long {
     return num % 7;
 }
 
 // Int Div/Mod by (-7)
-function IntDivByM7(num: int): int {
+function intDivByM7(num: int): int {
     return num / (-7);
 }
 
-function IntModByM7(num: int): int {
+function intModByM7(num: int): int {
     return num % (-7);
 }
 
 // Long Div/Mod by (-7)
-function LongDivByM7(num: long): long {
+function longDivByM7(num: long): long {
     return num / (-7);
 }
 
-function LongModByM7(num: long): long {
+function longModByM7(num: long): long {
     return num % (-7);
 }
 
 // Int Div/Mod by Int.MIN_VALUE
-function IntDivByMin(num: int): int {
+function intDivByMin(num: int): int {
     arktest.assertEQ(Int.MIN_VALUE, -2147483648)
     return num / (-2147483648 as int);
 }
 
-function IntModByMin(num: int): int {
+function intModByMin(num: int): int {
     arktest.assertEQ(Int.MIN_VALUE, -2147483648)
     return num % (-2147483648 as int);
 }
 
 // Long Div/Mod by Long.MIN_VALUE
-function LongDivByMin(num: long): long {
+function longDivByMin(num: long): long {
     arktest.assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num / (-9223372036854775808 as long);
 }
 
-function LongModByMin(num: long): long {
+function longModByMin(num: long): long {
     arktest.assertEQ(Long.MIN_VALUE, -9223372036854775808)
     return num % (-9223372036854775808 as long);
 }
 
 function main(): int {
-    arktest.assertEQ(IntDivBy7(1405), 200)
-    arktest.assertEQ(IntModBy7(1405), 5)
-    arktest.assertEQ(LongDivBy7(1405), 200)
-    arktest.assertEQ(LongModBy7(1405), 5)
+    arktest.assertEQ(intDivBy7(1405), 200)
+    arktest.assertEQ(intModBy7(1405), 5)
+    arktest.assertEQ(longDivBy7(1405), 200)
+    arktest.assertEQ(longModBy7(1405), 5)
 
-    arktest.assertEQ(IntDivByM7(1405), -200)
-    arktest.assertEQ(IntModByM7(1405), 5)
-    arktest.assertEQ(LongDivByM7(1405), -200)
-    arktest.assertEQ(LongModByM7(1405), 5)
+    arktest.assertEQ(intDivByM7(1405), -200)
+    arktest.assertEQ(intModByM7(1405), 5)
+    arktest.assertEQ(longDivByM7(1405), -200)
+    arktest.assertEQ(longModByM7(1405), 5)
 
-    arktest.assertEQ(IntDivByMin(1405), 0)
-    arktest.assertEQ(IntModByMin(1405), 1405)
-    arktest.assertEQ(LongDivByMin(1405), 0)
-    arktest.assertEQ(LongModByMin(1405), 1405)
+    arktest.assertEQ(intDivByMin(1405), 0)
+    arktest.assertEQ(intModByMin(1405), 1405)
+    arktest.assertEQ(longDivByMin(1405), 0)
+    arktest.assertEQ(longModByMin(1405), 1405)
 
-    arktest.assertEQ(IntDivByMin(Int.MIN_VALUE), 1)
-    arktest.assertEQ(IntModByMin(Int.MIN_VALUE), 0)
-    arktest.assertEQ(LongDivByMin(Long.MIN_VALUE), 1)
-    arktest.assertEQ(LongModByMin(Long.MIN_VALUE), 0)
+    arktest.assertEQ(intDivByMin(Int.MIN_VALUE), 1)
+    arktest.assertEQ(intModByMin(Int.MIN_VALUE), 0)
+    arktest.assertEQ(longDivByMin(Long.MIN_VALUE), 1)
+    arktest.assertEQ(longModByMin(Long.MIN_VALUE), 0)
 
     return 0;
 }

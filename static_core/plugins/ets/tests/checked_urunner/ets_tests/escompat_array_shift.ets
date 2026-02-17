@@ -33,7 +33,7 @@
 //! INST       /Intrinsic.EscompatObjectFastCopyToUncheckedWithBarriers/
 //! INST       /CallStatic.Inlined.*std.core.Array::popImpl/
 
-function checkArray(arr: Array<int>, expected: Array<int>) {
+function checkArray(arr: int[], expected: int[]) {
     let len = arr.length;
     arktest.assertEQ(len, expected.length);
     for (let i = 0; i < len; i++) {

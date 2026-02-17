@@ -16,69 +16,79 @@
 type SomeRef = Object | null | undefined;
 
 // Prevents comparison elimination by frontend type inferrence
-function getfalse(): boolean { return false }
-function getnull(): SomeRef { return null }
-function getundef(): SomeRef { return undefined }
-function id(x: SomeRef) { return x }
-function getobj(): SomeRef { return new Object(); }
+function getfalse(): boolean {
+ return false 
+}
+function getnull(): SomeRef {
+ return null 
+}
+function getundef(): SomeRef {
+ return undefined 
+}
+function id(x: SomeRef) {
+ return x 
+}
+function getobj(): SomeRef {
+ return {}; 
+}
 
 //! CHECKER      AOT ets.strictequals peepholes
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*(equals_).*'"
+//! RUN_PAOC     options: "--compiler-regex='.*(equals).*'"
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_dce"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsDce"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_cse"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsCse"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   /Intrinsic.CompilerEtsStrictEquals/, 2
 //! PASS_AFTER   "ChecksElimination"
 //! INST_COUNT   /Intrinsic.CompilerEtsStrictEquals/, 1
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_same_inputs"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsSameInputs"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_null"
-//! PASS_AFTER   "IrBuilder"
-//! INST         /Intrinsic.CompilerEtsStrictEquals/
-//! PASS_AFTER   "ChecksElimination"
-//! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
-//! INST         /Compare/
-//!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_undefined"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsNull"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST         /Compare/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_null_undefined"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsUndefined"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /Intrinsic.CompilerEtsStrictEquals/
+//! PASS_AFTER   "ChecksElimination"
+//! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
+//! INST         /Compare/
+//!
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsNullUndefined"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_reftyped_input"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsReftypedInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST_NOT     /Intrinsic.CompilerEtsStrictEquals/
 //! INST_NOT     /Compare/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_union_input"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsUnionInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //!
-//! METHOD       "ets_strict_equals.ETSGLOBAL::strict_equals_object_input"
+//! METHOD       "ets_strict_equals.ETSGLOBAL::strictEqualsObjectInput"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Intrinsic.CompilerEtsStrictEquals/
 //! PASS_AFTER   "ChecksElimination"
@@ -86,31 +96,31 @@ function getobj(): SomeRef { return new Object(); }
 //!
 //! RUN          entry: "ets_strict_equals.ETSGLOBAL::main"
 
-function strict_equals_dce(x: SomeRef, y: SomeRef) {
+function strictEqualsDce(x: SomeRef, y: SomeRef) {
     return getfalse() && x === y;
 }
-function strict_equals_cse(x: SomeRef, y: SomeRef) {
+function strictEqualsCse(x: SomeRef, y: SomeRef) {
     return id(x) === id(y) && id(y) === id(x); // commutative
 }
-function strict_equals_same_inputs(x: SomeRef) {
+function strictEqualsSameInputs(x: SomeRef) {
     return id(x) === id(x);
 }
-function strict_equals_null(x: SomeRef) {
+function strictEqualsNull(x: SomeRef) {
     return getnull() === x;
 }
-function strict_equals_undefined(x: SomeRef) {
+function strictEqualsUndefined(x: SomeRef) {
     return x === getundef();
 }
-function strict_equals_null_undefined() {
+function strictEqualsNullUndefined() {
     return getnull() === getundef();
 }
-function strict_equals_reftyped_input() {
+function strictEqualsReftypedInput() {
     return getobj() === getobj();
 }
-function strict_equals_union_input(x: double | string) {
+function strictEqualsUnionInput(x: double | string) {
     return x === x;
 }
-function strict_equals_object_input(x: SomeRef) {
+function strictEqualsObjectInput(x: SomeRef) {
     return x === x;
 }
 
@@ -118,15 +128,15 @@ function main() {
     let a = new Int(123);
     let b = new Int(123);
 
-    arktest.assertTrue(!strict_equals_dce(a, b));
-    arktest.assertTrue(strict_equals_cse(a, b));
-    arktest.assertTrue(strict_equals_same_inputs(a));
-    arktest.assertTrue(strict_equals_null(null) && !strict_equals_null(undefined) && !strict_equals_null(a));
-    arktest.assertTrue(strict_equals_undefined(undefined) && !strict_equals_undefined(null) && !strict_equals_undefined(a));
-    arktest.assertTrue(!strict_equals_null_undefined());
-    arktest.assertTrue(!strict_equals_reftyped_input());
-    arktest.assertTrue(!strict_equals_union_input(NaN));
+    arktest.assertTrue(!strictEqualsDce(a, b));
+    arktest.assertTrue(strictEqualsCse(a, b));
+    arktest.assertTrue(strictEqualsSameInputs(a));
+    arktest.assertTrue(strictEqualsNull(null) && !strictEqualsNull(undefined) && !strictEqualsNull(a));
+    arktest.assertTrue(strictEqualsUndefined(undefined) && !strictEqualsUndefined(null) && !strictEqualsUndefined(a));
+    arktest.assertTrue(!strictEqualsNullUndefined());
+    arktest.assertTrue(!strictEqualsReftypedInput());
+    arktest.assertTrue(!strictEqualsUnionInput(NaN));
 
     let objNaN: object = NaN;
-    arktest.assertTrue(!strict_equals_object_input(objNaN));
+    arktest.assertTrue(!strictEqualsObjectInput(objNaN));
 }

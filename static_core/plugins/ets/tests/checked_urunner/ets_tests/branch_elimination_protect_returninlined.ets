@@ -15,26 +15,26 @@
 
 //! CHECKER          Block with ReturnInlined inst with an infinite loop is preserved
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*inlined_inf_loop"
-//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::inlined_inf_loop"
+//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*test1InfLoop"
+//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test1InfLoop"
 //! PASS_AFTER       "Inline"
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_BEFORE_NTH  "BranchElimination", 3
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER_NTH   "BranchElimination", 3
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER       "Codegen"
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 
-function inf_loop(): int {
+function infLoop(): int {
     for (let i = 0; i < 5; i = i + 1) {
         break
     }
@@ -56,33 +56,33 @@ function inf_loop(): int {
 
 // Check that a function with an infinite loop gets inlined
 // and the ReturnInlined block is not removed by BranchElimination.
-function inlined_inf_loop(): void {
-    inf_loop()
+function test1InfLoop(): void {
+    infLoop()
 }
 
 //! CHECKER          Block with ReturnInlined inst with some processing after infinite loop
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-regex=.*complex_processing_after_inf_call"
-//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::complex_processing_after_inf_call"
+//! RUN_PAOC         options: "--compiler-regex=.*test2ProcessingAfterInfCall"
+//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test2ProcessingAfterInfCall"
 //! PASS_AFTER       "Inline"
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_BEFORE_NTH  "BranchElimination", 3
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER_NTH   "BranchElimination", 3
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER       "Codegen"
-//! INST             /Call.*Inlined.*inf_loop/
+//! INST             /Call.*Inlined.*infLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 
-function complex_processing_after_inf_call(): int {
-    inf_loop()
+function test2ProcessingAfterInfCall(): int {
+    infLoop()
     let x = 0;
     while (true) {
         x = x + 1;
@@ -95,26 +95,26 @@ function complex_processing_after_inf_call(): int {
 
 //! CHECKER          Block with ReturnInlined inst with an complex infinite loop is preserved
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-regex=.*complex_inlined_inf_loop"
-//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::complex_inlined_inf_loop"
+//! RUN_PAOC         options: "--compiler-regex=.*test3InfLoop"
+//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test3InfLoop"
 //! PASS_AFTER       "Inline"
-//! INST             /Call.*Inlined.*complex_inf_loop/
+//! INST             /Call.*Inlined.*complexInfLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_BEFORE_NTH  "BranchElimination", 3
-//! INST             /Call.*Inlined.*complex_inf_loop/
+//! INST             /Call.*Inlined.*complexInfLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER_NTH   "BranchElimination", 3
-//! INST             /Call.*Inlined.*complex_inf_loop/
+//! INST             /Call.*Inlined.*complexInfLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 //! PASS_AFTER       "Codegen"
-//! INST             /Call.*Inlined.*complex_inf_loop/
+//! INST             /Call.*Inlined.*complexInfLoop/
 //! INST             "ReturnInlined"
 //! INST_COUNT       "ReturnInlined", 1
 
-function complex_inf_loop(): int {
+function complexInfLoop(): int {
     for (let i = 0; i < 5; i = i + 1) {
         break
     }
@@ -141,8 +141,8 @@ function complex_inf_loop(): int {
     return x
 }
 
-function complex_inlined_inf_loop(): int {
-    let result = complex_inf_loop()
+function test3InfLoop(): int {
+    let result = complexInfLoop()
     if (result > 0) {
         for (let k = result; k > 0; k = k - 1) {
             if (k % 10 == 0) {
@@ -163,38 +163,38 @@ function complex_inlined_inf_loop(): int {
 
 //! CHECKER          Check proper elimination of block with Throw and ReturnInlined instructions
 //! SKIP_IF          @architecture == "arm32"
-//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*test_eliminate_throw"
-//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test_eliminate_throw"
+//! RUN_PAOC         options: "--compiler-inline-external-methods-aot=true --compiler-regex=.*test4EliminateThrow"
+//! METHOD           "branch_elimination_protect_returninlined.ETSGLOBAL::test4EliminateThrow"
 //! PASS_AFTER       "Inline"
-//! INST             /Call.*Inlined.*eliminate_throw/
+//! INST             /Call.*Inlined.*eliminateThrow/
 //! INST_COUNT       "CallStatic.Inlined", 6
 //! INST_COUNT       "ReturnInlined", 9
-//! INST_COUNT       "Throw", 2
+//! INST_COUNT       "Throw", 3
 //! PASS_BEFORE_NTH  "BranchElimination", 2
-//! INST             /Call.*Inlined.*eliminate_throw/
+//! INST             /Call.*Inlined.*eliminateThrow/
 //! INST             /LoadClass.*escompat.Error/
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
 //! INST_NEXT        "Intrinsic.StdCoreRuntimeFailedTypeCastExclUndefinedStub"
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "Throw"
-//! INST_COUNT       "Throw", 2
+//! INST_COUNT       "Throw", 3
 //! INST_COUNT       "ReturnInlined", 9
 //! PASS_AFTER_NTH   "BranchElimination", 2
-//! INST             /Call.*Inlined.*eliminate_throw/
+//! INST             /Call.*Inlined.*eliminateThrow/
 //! INST_NEXT        "ReturnInlined"
 //! INST_NEXT        "ReturnVoid"
-//! INST_COUNT       "Throw", 0
+//! INST_COUNT       "Throw", 1
 //! INST_COUNT       "ReturnInlined", 1
 
-function always_false(): boolean {
+function alwaysFalse(): boolean {
     return false;
 }
 
-function eliminate_throw(): int {
+function eliminateThrow(): int {
     // A condition that the compiler can definitively evaluate.
     // Statically known to be false.
-    if (always_false()) {
+    if (alwaysFalse()) {
         // This block SHOULD be removed by BE:
         const error = (): Error => {
             // Throw.
@@ -208,6 +208,6 @@ function eliminate_throw(): int {
 
 // Checking that the unreachable block with ReturnInlined and Throw instructions
 // (as determined by BranchElimination) is properly eliminated.
-function test_eliminate_throw(): void {
-    eliminate_throw()
+function test4EliminateThrow(): void {
+    eliminateThrow()
 }

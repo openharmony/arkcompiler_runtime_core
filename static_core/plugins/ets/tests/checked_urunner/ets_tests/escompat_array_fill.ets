@@ -17,16 +17,16 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, entry: "escompat_array_fill.ETSGLOBAL::main",
 //!                options: "--heap-size-limit=#{is_managed_ptr_64_bit_config? ? 20000000 : 12345678} \
-//!                  --compiler-hotness-threshold=0 --compiler-regex='.*ETSGLOBAL::test_array.*'"
+//!                  --compiler-hotness-threshold=0 --compiler-regex='.*ETSGLOBAL::testArray.*'"
 //!
-//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_fill"
+//! METHOD        "escompat_array_fill.ETSGLOBAL::testArrayFill"
 //! PASS_AFTER    "Codegen"
 //! INST          /CallVirtual.*std.core.Array::fill/
 //! INST_COUNT    /CallVirtual.*std.core.Array::fill/, 8
 //! INST          /CallStatic.*std.core.Array::fill/
 //! INST_COUNT    /CallStatic.*std.core.Array::fill/, 5
 //!
-//! METHOD        "escompat_array_fill.ETSGLOBAL::test_array_call_virtual_fill"
+//! METHOD        "escompat_array_fill.ETSGLOBAL::testArrayCallVirtualFill"
 //! PASS_AFTER    "Codegen"
 //! INST          /escompat_array_fill.MyArray::fill/
 //! INST_COUNT    /escompat_array_fill.MyArray::fill/, 8
@@ -41,38 +41,38 @@ class TestClass {
     }
 }
 
-let array_size: int = 10;
-let array1: Array<int> = new Array<int>(array_size);
+let arraySize: int = 10;
+let array1: int[] = new Array<int>(arraySize);
 
-function check_array(arr: Array<int>, start: int, end: int, expected: int) {
+function checkArray(arr: int[], start: int, end: int, expected: int) {
     for (let i = start; i < end; i++) {
         arktest.assertEQ(arr[i], expected);
     }
 }
 
-function fill_big_array() {
+function fillBigArray() {
     // if have memory leak, will cause oom, then test failed
-    let array2: Array<number> = new Array<number>(1024 * 768);
+    let array2: number[] = new Array<number>(1024 * 768);
     array2.fill(1);
 }
 
-function test_array_fill() {
-    array1.fill(99, 0, array_size);
-    check_array(array1, 0, array_size, 99);
+function testArrayFill() {
+    array1.fill(99, 0, arraySize);
+    checkArray(array1, 0, arraySize, 99);
 
-    array1.fill(11, array_size / 2 - array_size, array_size);
-    check_array(array1, 0, array_size / 2, 99);
-    check_array(array1, array_size / 2, array_size, 11);
+    array1.fill(11, arraySize / 2 - arraySize, arraySize);
+    checkArray(array1, 0, arraySize / 2, 99);
+    checkArray(array1, arraySize / 2, arraySize, 11);
 
-    array1.fill(12, -(array_size + 2), array_size);
-    check_array(array1, 0, array_size, 12);
+    array1.fill(12, -(arraySize + 2), arraySize);
+    checkArray(array1, 0, arraySize, 12);
 
-    array1.fill(13, array_size / 2 - array_size, array_size + 3);
-    check_array(array1, 0, array_size / 2, 12);
-    check_array(array1, array_size / 2, array_size, 13);
+    array1.fill(13, arraySize / 2 - arraySize, arraySize + 3);
+    checkArray(array1, 0, arraySize / 2, 12);
+    checkArray(array1, arraySize / 2, arraySize, 13);
 
-    array1.fill(14, 0, array_size + 2);
-    check_array(array1, 0, array_size, 14);
+    array1.fill(14, 0, arraySize + 2);
+    checkArray(array1, 0, arraySize, 14);
 
     arktest.assertEQ(array1.fill(15, 0, 1)[0], 15);
     arktest.assertEQ(array1.fill(15, 0, 1)[1], 14);
@@ -107,7 +107,7 @@ function test_array_fill() {
     }
 
     for (let i = 0; i < 20; i++) {
-        fill_big_array();
+        fillBigArray();
     }
 }
 
@@ -129,28 +129,28 @@ class MyArray<T> extends Array<T> {
     }
 }
 
-function test_array_call_virtual_fill() {
-    let array2: MyArray<int> = new MyArray<int>(array_size);
-    array2.fill(99, 0, array_size);
-    check_array(array2, 0, array_size, 99);
+function testArrayCallVirtualFill() {
+    let array2: MyArray<int> = new MyArray<int>(arraySize);
+    array2.fill(99, 0, arraySize);
+    checkArray(array2, 0, arraySize, 99);
     arktest.assertEQ(array2.getCounter(), 1);
 
-    array2.fill(11, array_size / 2 - array_size, array_size);
-    check_array(array2, 0, array_size / 2, 99);
-    check_array(array2, array_size / 2, array_size, 11);
+    array2.fill(11, arraySize / 2 - arraySize, arraySize);
+    checkArray(array2, 0, arraySize / 2, 99);
+    checkArray(array2, arraySize / 2, arraySize, 11);
     arktest.assertEQ(array2.getCounter(), 2);
 
-    array2.fill(12, -(array_size + 2), array_size);
-    check_array(array2, 0, array_size, 12);
+    array2.fill(12, -(arraySize + 2), arraySize);
+    checkArray(array2, 0, arraySize, 12);
     arktest.assertEQ(array2.getCounter(), 3);
 
-    array2.fill(13, array_size / 2 - array_size, array_size + 3);
-    check_array(array2, 0, array_size / 2, 12);
-    check_array(array2, array_size / 2, array_size, 13);
+    array2.fill(13, arraySize / 2 - arraySize, arraySize + 3);
+    checkArray(array2, 0, arraySize / 2, 12);
+    checkArray(array2, arraySize / 2, arraySize, 13);
     arktest.assertEQ(array2.getCounter(), 4);
 
-    array2.fill(14, 0, array_size + 2);
-    check_array(array2, 0, array_size, 14);
+    array2.fill(14, 0, arraySize + 2);
+    checkArray(array2, 0, arraySize, 14);
     arktest.assertEQ(array2.getCounter(), 5);
 
     arktest.assertEQ(array2.fill(15, 0, 1)[0], 15);
@@ -162,6 +162,6 @@ function test_array_call_virtual_fill() {
 }
 
 function main() {
-    test_array_fill();
-    test_array_call_virtual_fill();
+    testArrayFill();
+    testArrayCallVirtualFill();
 }

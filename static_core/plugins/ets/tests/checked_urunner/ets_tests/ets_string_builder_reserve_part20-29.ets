@@ -18,63 +18,63 @@
 
 //! CHECKER       AOT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
+//! RUN_PAOC      options: "--compiler-regex='.*Reserve[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_reserve20"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringReserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve21"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringIfReserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve22"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringIfReserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_loop_reserve23"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringLoopReserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=19)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::types_reserve24"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::typesReserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve25"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve26"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve27"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve28"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partially_uncountable_reserve29"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partiallyUncountableReserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=6)"
 //! INST_NOT      "NewArray (size=9)"
@@ -84,63 +84,63 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_reserve_part20-29.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*Reserve[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_reserve_part20-29.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_reserve20"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringReserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve21"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringIfReserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_if_reserve22"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringIfReserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multi_toString_loop_reserve23"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::multiToStringLoopReserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=19)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::types_reserve24"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::typesReserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve25"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve26"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_COUNT    "NewArray (size=3)",2
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve27"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArray_reserve28"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::lenArrayReserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partially_uncountable_reserve29"
+//! METHOD        "ets_string_builder_reserve_part20-29.ETSGLOBAL::partiallyUncountableReserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=6)"
 //! INST_NOT      "NewArray (size=9)"
@@ -148,7 +148,7 @@
 //! INST          "NewArray (size=6)"
 //! INST_NOT      "NewArray (size=9)"
 
-function multi_toString_reserve20() : string {
+function multiToStringReserve20() : string {
     let sb = new StringBuilder()            // applied
     sb.append(0)
     sb.append(sb.toString())
@@ -156,7 +156,7 @@ function multi_toString_reserve20() : string {
     return sb.toString()
 }
 
-function multi_toString_if_reserve21() : string {
+function multiToStringIfReserve21() : string {
     let sb = new StringBuilder()            // applied
     sb.append(0)
     if (sb.toString().getLength() > 0)
@@ -165,7 +165,7 @@ function multi_toString_if_reserve21() : string {
     return sb.toString()
 }
 
-function multi_toString_if_reserve22() : string {
+function multiToStringIfReserve22() : string {
     let sb = new StringBuilder()            // applied
     sb.append(sb.toString())
     if (sb.toString().getLength() > 0)
@@ -174,7 +174,7 @@ function multi_toString_if_reserve22() : string {
     return sb.toString()
 }
 
-function multi_toString_loop_reserve23() : string {
+function multiToStringLoopReserve23() : string {
     let sb = new StringBuilder()            // applied
     sb.append(sb.toString())
     for (let i = 0; i < 3; ++i) {
@@ -193,7 +193,7 @@ function multi_toString_loop_reserve23() : string {
     return sb.toString()
 }
 
-function types_reserve24() : string {
+function typesReserve24() : string {
     let sb = new StringBuilder()            // applied
     sb.append(false as boolean)
     sb.append(c'1' as char)
@@ -204,11 +204,11 @@ function types_reserve24() : string {
     sb.append(6 as float)
     sb.append(7 as double)
     sb.append("8" as string)
-    sb.append(new Object)
+    sb.append({} as Object)
     return sb.toString()
 }
 
-function lenArray_reserve25() : string {
+function lenArrayReserve25() : string {
     let strings: FixedArray<string> = ["0", "1", "2"]
     let sb = new StringBuilder()            // applied, due loop is countable
     for (let i = 0; i < strings.length; ++i)
@@ -216,7 +216,7 @@ function lenArray_reserve25() : string {
     return sb.toString()
 }
 
-function lenArray_reserve26() : string {
+function lenArrayReserve26() : string {
     let strings: FixedArray<string> = ["0", "1", "2"]
     let sb = new StringBuilder()            // applied, due loop is countable
     for (let s : string of strings)
@@ -224,43 +224,43 @@ function lenArray_reserve26() : string {
     return sb.toString()
 }
 
-function lenArray_reserve27(strings: FixedArray<string>) : string {
+function lenArrayReserve27(strings: FixedArray<string>) : string {
     let sb = new StringBuilder()            // not applied, due loop is uncountable
     for (let i = 0; i < strings.length; ++i)
         sb.append(strings[i])
     return sb.toString()
 }
 
-function lenArray_reserve28(strings: FixedArray<string>) : string {
+function lenArrayReserve28(strings: FixedArray<string>) : string {
     let sb = new StringBuilder()            // not applied, due loop is uncountable
     for (let s : string of strings)
         sb.append(s)
     return sb.toString()
 }
 
-function partially_uncountable_reserve29() : string {
-    let sb_countable = new StringBuilder()  // applied, due loop is countable
+function partiallyUncountableReserve29() : string {
+    let sbCountable = new StringBuilder()  // applied, due loop is countable
     for (let i : int = 2; i < 8; ++i)
-        sb_countable.append(i)
+        sbCountable.append(i)
 
-    let sb_uncountable = new StringBuilder()    // not applied, due loop is uncountable
+    let sbUncountable = new StringBuilder()    // not applied, due loop is uncountable
     for (let i : number = 2; i < 11; ++i)
-        sb_uncountable.append(i)
+        sbUncountable.append(i)
 
-    return sb_countable.toString() + sb_uncountable.toString()
+    return sbCountable.toString() + sbUncountable.toString()
 }
 
 function main() : int {
-    arktest.assertEQ(multi_toString_reserve20(), "001", "Wrong result at multi_toString_reserve20")
-    arktest.assertEQ(multi_toString_if_reserve21(), "001", "Wrong result at multi_toString_if_reserve21")
-    arktest.assertEQ(multi_toString_if_reserve22(), "", "Wrong result at multi_toString_if_reserve22")
-    arktest.assertEQ(multi_toString_loop_reserve23(), "", "Wrong result at multi_toString_loop_reserve23")
-    arktest.assertEQ(types_reserve24(), "false12345678[object Object]", "Wrong result at types_reserve24")
-    arktest.assertEQ(lenArray_reserve25(), "012", "Wrong result at lenArray_reserve25")
-    arktest.assertEQ(lenArray_reserve26(), "012", "Wrong result at lenArray_reserve26")
-    arktest.assertEQ(lenArray_reserve27(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve27")
-    arktest.assertEQ(lenArray_reserve28(["0", "1", "2"]), "012", "Wrong result at lenArray_reserve28")
-    arktest.assertEQ(partially_uncountable_reserve29(), "2345672345678910", "Wrong result at partially_uncountable_reserve29")
+    arktest.assertEQ(multiToStringReserve20(), "001", "Wrong result at multiToStringReserve20")
+    arktest.assertEQ(multiToStringIfReserve21(), "001", "Wrong result at multiToStringIfReserve21")
+    arktest.assertEQ(multiToStringIfReserve22(), "", "Wrong result at multiToStringIfReserve22")
+    arktest.assertEQ(multiToStringLoopReserve23(), "", "Wrong result at multiToStringLoopReserve23")
+    arktest.assertEQ(typesReserve24(), "false12345678[object Object]", "Wrong result at typesReserve24")
+    arktest.assertEQ(lenArrayReserve25(), "012", "Wrong result at lenArrayReserve25")
+    arktest.assertEQ(lenArrayReserve26(), "012", "Wrong result at lenArrayReserve26")
+    arktest.assertEQ(lenArrayReserve27(["0", "1", "2"]), "012", "Wrong result at lenArrayReserve27")
+    arktest.assertEQ(lenArrayReserve28(["0", "1", "2"]), "012", "Wrong result at lenArrayReserve28")
+    arktest.assertEQ(partiallyUncountableReserve29(), "2345672345678910", "Wrong result at partiallyUncountableReserve29")
 
     return 0
 }

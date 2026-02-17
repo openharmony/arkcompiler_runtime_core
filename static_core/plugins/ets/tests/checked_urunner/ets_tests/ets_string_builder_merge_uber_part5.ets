@@ -19,23 +19,37 @@
 
 // Source file must be last in the compile list
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false", inputs: "ets_string_builder_merge_uber_export.ets", output: "ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc"
-//! RUN_FRONTEND            options: "--ets-strings-concat=false"
+//! RUN_FRONTEND  options: "--ets-strings-concat=false",
+//!               inputs: "ets_string_builder_merge_uber_export.ets",
+//!               output: "ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc"
+//! RUN_FRONTEND  options: "--ets-strings-concat=false"
 
 //! CHECKER       JIT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--panda-files=../ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc --compiler-regex='.*chain_concat[0-9]+.*' --compiler-inlining=false", entry: "ets_string_builder_merge_uber_part5.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options:
+//!               "--panda-files=../ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc \
+//!                --compiler-regex='.*ChainConcat[0-9]+.*' --compiler-inlining=false",
+//!               entry: "ets_string_builder_merge_uber_part5.ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String Builders merging (w/o optimizations)
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--panda-files=../ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc --compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ets_string_builder_merge_uber_part5.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options:
+//!               "--panda-files=../ets_string_builder_merge_uber_part5_ets_string_builder_merge_uber_export.ets.abc \
+//!                --compiler-inlining=false --compiler-simplify-string-builder=false",
+//!               entry: "ets_string_builder_merge_uber_part5.ETSGLOBAL::main"
 
-import { uber_chain_concat4 } from "./ets_string_builder_merge_uber_export.ets"
+import { uberChainConcat4 } from './ets_string_builder_merge_uber_export.ets'
 
-const uber_golden_TFFF = "_aaaa_bdbdbd_aaaa_cacaca_bbbbb_aaaa_cacaca_dbdbdb_ccccc_bb_dbdbdb_aaaa_cacaca_dbdbdb_ccccc_cc_";
-const uber_golden_TFFT = "_aaaa_badbadbad_aaaa_cbacbacba_bbbbb_aaaa_cbacbacba_dcbdcbdcb_ccccc_bb_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_ccccc_cc_";
+const uberGoldenTFFF = 
+'_aaaa_bdbdbd_aaaa_cacaca_bbbbb_aaaa_cacaca_dbdbdb_ccccc_bb_dbdbdb_aaaa_cacaca_dbdbdb_ccccc_cc_';
+const uberGoldenTFFT =
+'_aaaa_badbadbad_aaaa_cbacbacba_bbbbb_aaaa_cbacbacba_dcbdcbdcb_ccccc_bb_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_ccccc_cc_';
 
 function main() {
-    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, false, false, false) , uber_golden_TFFF, "Wrong result at uber_golden_TFFF");
-    arktest.assertEQ(uber_chain_concat4(false, "a", 4, "b", 3, "c", 5, "d", 2, true, false, false, true)  , uber_golden_TFFT, "Wrong result at uber_golden_TFFT");
+    arktest.assertEQ(uberChainConcat4(false, 'a', 4, 'b', 3, 'c', 5, 'd', 2, true, false, false, false),
+                     uberGoldenTFFF, 'Wrong result at uberGoldenTFFF');
+    arktest.assertEQ(uberChainConcat4(false, 'a', 4, 'b', 3, 'c', 5, 'd', 2, true, false, false, true),
+                     uberGoldenTFFT, 'Wrong result at uberGoldenTFFT');
 }

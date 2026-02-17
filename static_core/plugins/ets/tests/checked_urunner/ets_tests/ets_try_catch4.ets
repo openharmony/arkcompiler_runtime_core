@@ -52,11 +52,11 @@ class Error1 extends Error {}
 
 function throwErrors(i: int): void {
  switch (i) {
- case 0:
+   case 0:
       throw new Error0();
- case 1:
+   case 1:
      throw new Error1();
- default:
+   default:
      break;
  }
 }

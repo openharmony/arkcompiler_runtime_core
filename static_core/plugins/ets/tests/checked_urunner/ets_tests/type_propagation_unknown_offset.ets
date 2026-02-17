@@ -14,8 +14,9 @@
  */
 
 //! CHECKER         Check type of read at unknown index
-//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__read_after_write.*'", entry: "type_propagation_unknown_offset.ETSGLOBAL::read_after_write"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__read_after_write"
+//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__readAfterWrite.*'",
+//!                 entry: "type_propagation_unknown_offset.ETSGLOBAL::readAfterWrite"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__readAfterWrite"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
@@ -24,30 +25,31 @@
 
 //! CHECKER         Check type of read at unknown index (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*__noinline__read_after_write.*'"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__read_after_write"
+//! RUN_PAOC        options: "--compiler-regex='.*__noinline__readAfterWrite.*'"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__readAfterWrite"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "IsInstance"
-//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::read_after_write"
+//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::readAfterWrite"
 
-function __noinline__read_after_write(idx1: int, idx2: int): boolean {
+function __noinline__readAfterWrite(idx1: int, idx2: int): boolean {
     const arr: FixedArray<Int|Double> = [1, 2];
     arr[idx1] = 1.0;
     // cannot optimize away instanceof (obviously)
     return arr[idx2] instanceof Int;
 }
 
-function read_after_write() {
-    arktest.assertEQ(__noinline__read_after_write(0, 1), true);
-    arktest.assertEQ(__noinline__read_after_write(0, 0), false);
+function readAfterWrite() {
+    arktest.assertEQ(__noinline__readAfterWrite(0, 1), true);
+    arktest.assertEQ(__noinline__readAfterWrite(0, 0), false);
 }
 
 //! CHECKER         Check type of read at unknown index in a loop
-//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__loop_read_unknown.*'", entry: "type_propagation_unknown_offset.ETSGLOBAL::loop_read_unknown"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__loop_read_unknown"
+//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__loopReadUnknown.*'",
+//!                 entry: "type_propagation_unknown_offset.ETSGLOBAL::loopReadUnknown"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__loopReadUnknown"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
@@ -56,35 +58,36 @@ function read_after_write() {
 
 //! CHECKER         Check type of read at unknown index in a loop (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*__noinline__loop_read_unknown.*'"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__loop_read_unknown"
+//! RUN_PAOC        options: "--compiler-regex='.*__noinline__loopReadUnknown.*'"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__loopReadUnknown"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "IsInstance"
-//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::loop_read_unknown"
+//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::loopReadUnknown"
 
-function __noinline__loop_read_unknown(val: Int|Double): boolean {
+function __noinline__loopReadUnknown(val: Int|Double): boolean {
     const arr: FixedArray<Int|Double> = [1, 4.0, val];
-    let favorite_elem: Int|Double = arr[0];
+    let favoriteElem: Int|Double = arr[0];
     for (let i = 0; i < arr.length; i++) {
         if (arr[i] === 4) {
-            favorite_elem = arr[i];
+            favoriteElem = arr[i];
         }
     }
     // cannot optimize away instanceof (obviously)
-    return favorite_elem instanceof Double;
+    return favoriteElem instanceof Double;
 }
 
-function loop_read_unknown() {
-    arktest.assertEQ(__noinline__loop_read_unknown(3), true);
-    arktest.assertEQ(__noinline__loop_read_unknown(4), false);
+function loopReadUnknown() {
+    arktest.assertEQ(__noinline__loopReadUnknown(3), true);
+    arktest.assertEQ(__noinline__loopReadUnknown(4), false);
 }
 
 //! DISABLED_CHECKER         Check write to aliasing array in function parameter
-//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__aliasing_write.*'", entry: "type_propagation_unknown_offset.ETSGLOBAL::aliasing_write"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__aliasing_write"
+//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__aliasingWrite.*'",
+//!                 entry: "type_propagation_unknown_offset.ETSGLOBAL::aliasingWrite"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__aliasingWrite"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
@@ -93,31 +96,32 @@ function loop_read_unknown() {
 
 //! DISABLED_CHECKER         Check write to aliasing array in function parameter (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*__noinline__aliasing_write.*'"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__aliasing_write"
+//! RUN_PAOC        options: "--compiler-regex='.*__noinline__aliasingWrite.*'"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__aliasingWrite"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "IsInstance"
-//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::aliasing_write"
+//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::aliasingWrite"
 
-function __noinline__aliasing_write(arr1: FixedArray<Int|Double>, arr2: FixedArray<Int|Double>): boolean {
+function __noinline__aliasingWrite(arr1: FixedArray<Int|Double>, arr2: FixedArray<Int|Double>): boolean {
     arr1[0] = 1.0;
     // cannot optimize away instanceof (obviously)
     return arr2[0] instanceof Int;
 }
 
-function aliasing_write() {
-    arktest.assertEQ(__noinline__aliasing_write([1, 2], [3, 4]), true);
-    arktest.assertEQ(__noinline__aliasing_write([1, 2], [1.0, 2]), false);
+function aliasingWrite() {
+    arktest.assertEQ(__noinline__aliasingWrite([1, 2], [3, 4]), true);
+    arktest.assertEQ(__noinline__aliasingWrite([1, 2], [1.0, 2]), false);
     const arr: FixedArray<Int|Double> = [1, 2];
-    arktest.assertEQ(__noinline__aliasing_write(arr, arr), false);
+    arktest.assertEQ(__noinline__aliasingWrite(arr, arr), false);
 }
 
 //! CHECKER         Check write to unknown index with possible optimization
-//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__positive_store.*'", entry: "type_propagation_unknown_offset.ETSGLOBAL::positive_store"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__positive_store"
+//! RUN             force_jit: true, options: "--compiler-regex='.*__noinline__positiveStore.*'",
+//!                 entry: "type_propagation_unknown_offset.ETSGLOBAL::positiveStore"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__positiveStore"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
@@ -126,23 +130,23 @@ function aliasing_write() {
 
 //! CHECKER         Check write to unknown index with possible optimization (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*__noinline__positive_store.*'"
-//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__positive_store"
+//! RUN_PAOC        options: "--compiler-regex='.*__noinline__positiveStore.*'"
+//! METHOD          "type_propagation_unknown_offset.ETSGLOBAL::__noinline__positiveStore"
 //! PASS_BEFORE     "Peepholes"
 //! INST            "IsInstance"
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_NOT        "IsInstance"
-//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::positive_store"
+//! RUN             options: "", entry: "type_propagation_unknown_offset.ETSGLOBAL::positiveStore"
 
-function __noinline__positive_store(idx: int, val: Int): boolean {
+function __noinline__positiveStore(idx: int, val: Int): boolean {
     const arr: FixedArray<Object> = [1, 2, 3];
     arr[idx] = val;
     // optimize it out!
     return arr[0] instanceof Double;
 }
 
-function positive_store() {
-    arktest.assertEQ(__noinline__positive_store(0, 1), false);
-    arktest.assertEQ(__noinline__positive_store(1, 2), false);
+function positiveStore() {
+    arktest.assertEQ(__noinline__positiveStore(0, 1), false);
+    arktest.assertEQ(__noinline__positiveStore(1, 2), false);
 }

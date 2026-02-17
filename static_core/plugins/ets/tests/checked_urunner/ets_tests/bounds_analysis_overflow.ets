@@ -14,7 +14,9 @@
  */
 
 //! CHECKER      Check overflow check in BoundsAnalysis
-//! RUN          force_jit: true, options: "--compiler-regex='.*ETSGLOBAL::crash' --compiler-inlining=false", entry: "bounds_analysis_overflow.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*ETSGLOBAL::crash' --compiler-inlining=false",
+//!              entry: "bounds_analysis_overflow.ETSGLOBAL::main"
 //! EVENT        /Exception,bounds_analysis_overflow.ETSGLOBAL::crash,.*,ARITHMETIC/
 //! METHOD       "bounds_analysis_overflow.ETSGLOBAL::crash"
 //! PASS_AFTER   "Codegen"
@@ -30,9 +32,9 @@ function crash(x: long): long {
 
 function main(): int {
     let x = (1 as long) << 62
-    let long_max = x - 1 + x
+    let longMax = x - 1 + x
     try {
-        let res = crash(long_max);
+        let res = crash(longMax);
     } catch (e) {
       if (e instanceof ArithmeticError) {
         return 0;

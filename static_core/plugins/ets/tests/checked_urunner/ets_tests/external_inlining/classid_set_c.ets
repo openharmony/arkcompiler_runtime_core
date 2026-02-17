@@ -17,7 +17,7 @@
   tags: [not-a-test]
 ---*/
 
-import { Base } from "./classid_set_b.ets";
+import { Base } from './classid_set_b.ets';
 
 class B extends Base {
   y: int;

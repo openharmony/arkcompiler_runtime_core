@@ -16,7 +16,7 @@
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
-let original: String = "abcde";
+let original: String = 'abcde';
 
 //! CHECKER       Equal Substring JIT
 //! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_string_substring.ETSGLOBAL::main"
@@ -41,15 +41,21 @@ let original: String = "abcde";
 //! RUN           options: "--compiler-enable-jit=false", entry: "ets_string_substring.ETSGLOBAL::main"
 
 
-function __noinline__SubString(str: String, begin: int, end: int): String {
+function __noinline__subString(str: String, begin: int, end: int): String {
     return str.substring(begin, end);
 }
 function main(): int {
-    let subs: String = __noinline__SubString(original, 0, original.getLength());
-    if(original !== subs) return 1;
-    let subs1: String = __noinline__SubString(original, -1, 100);
-    if(original !== subs1) return 2;
+    let subs: String = __noinline__subString(original, 0, original.getLength());
+    if (original !== subs) {
+        return 1;
+    }
+    let subs1: String = __noinline__subString(original, -1, 100);
+    if (original !== subs1) {
+        return 2;
+    }
     let subs2: String = original.substring(0, original.getLength());
-    if(original !== subs2) return 3;
+    if (original !== subs2) {
+        return 3;
+    }
     return 0
 }

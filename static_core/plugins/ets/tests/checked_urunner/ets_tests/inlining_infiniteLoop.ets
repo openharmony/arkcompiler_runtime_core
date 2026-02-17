@@ -19,7 +19,7 @@
 //! METHOD       "inlining_infiniteLoop.ETSGLOBAL::testInfiniteLoop"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "ReturnInlined", 1
-//! EVENT        /Inline,inlining_infiniteLoop.ETSGLOBAL::testInfiniteLoop,inlining_infiniteLoop.MyClass::<ctor>,9,STATIC,INF_LOOP/
+//! EVENT        /Inline,inlin.*Loop.ETSGLOBAL::testInfiniteLoop,inlin.*Loop.MyClass::<ctor>,9,STATIC,INF_LOOP/
 //!
 //! METHOD       "inlining_infiniteLoop.MyClass::<ctor>"
 //! PASS_AFTER   "Inline"
@@ -54,7 +54,9 @@ function testInfiniteLoop() : void {
 
 //! CHECKER      Check inlining not infiniteLoop
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex='.*test.*'", entry: "inlining_infiniteLoop.ETSGLOBAL::testNotInfiniteLoop"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*test.*'",
+//!              entry: "inlining_infiniteLoop.ETSGLOBAL::testNotInfiniteLoop"
 //! METHOD       "inlining_infiniteLoop.ETSGLOBAL::testNotInfiniteLoop"
 //! PASS_AFTER   "Inline"
 //! INST_COUNT   "ReturnInlined", 4

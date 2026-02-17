@@ -47,6 +47,6 @@ function testStringify(): string {
 }
 
 function main() : int {
-    arktest.assertEQ(testStringify(), "abcxx", 'Wrong result at testStringify()');
+    arktest.assertEQ(testStringify(), 'abcxx', 'Wrong result at testStringify()');
     return 0
 }

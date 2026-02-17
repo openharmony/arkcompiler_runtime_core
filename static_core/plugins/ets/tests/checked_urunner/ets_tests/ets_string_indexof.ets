@@ -24,9 +24,9 @@
 //! ASM_INST      /Intrinsic\.StdCoreStringIndexOf/
 //! ASM_INST      /Intrinsic\.StdCoreStringIndexOfAfter/
 
-let u8_line = new string('abcdefghijklmnopqrstuvwxyz');
+let u8Line = new string('abcdefghijklmnopqrstuvwxyz');
 
 function main() {
-    arktest.assertEQ(u8_line.indexOf(c'a'), 0);
-    arktest.assertEQ(u8_line.indexOf(c'a', 5), -1);
+    arktest.assertEQ(u8Line.indexOf(c'a'), 0);
+    arktest.assertEQ(u8Line.indexOf(c'a', 5), -1);
 }

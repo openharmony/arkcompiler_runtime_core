@@ -85,7 +85,7 @@ function test1(input: boolean): boolean {
 }
 
 // Check LowerBoxedBoolean optimization on Phi inside lambda.
-function test2(array: Array<Number>): number {
+function test2(array: Number[]): number {
     return array.findIndex((element: number) => {
         return element < -1;
     });
@@ -123,7 +123,7 @@ function test4(input: boolean): CustomBoolean {
 }
 
 // Check LowerBoxedBoolean doesn't optimize Phi inside a loop inside a lambda.
-function test5(array: Array<Number>, v: number): Boolean {
+function test5(array: Number[], v: number): Boolean {
     const f = () => {
         let result: Boolean = new Boolean(false);
         for (let i = 0; i < array.length; i++) {
@@ -139,16 +139,16 @@ function test5(array: Array<Number>, v: number): Boolean {
 }
 
 // Check that LowerBoxedBoolean skips optimization due to a recursive Phi cycle.
-function test6(array: Array<number>, value: number): boolean {
-    let has_number: Boolean = Boolean.FALSE;
+function test6(array: number[], value: number): boolean {
+    let hasNumber: Boolean = Boolean.FALSE;
     for (let i = 0; i < array.length; i++) {
         if (array[i] == value) {
-            if (!has_number) {
-                has_number = Boolean.TRUE;
+            if (!hasNumber) {
+                hasNumber = Boolean.TRUE;
             }
         }
     }
-    return has_number;
+    return hasNumber;
 }
 
 // Check LowerBoxedBoolean optimization on Compare with LoadStatic Boolean.TRUE as input.
@@ -160,29 +160,29 @@ function test7(): boolean {
     return true;
 }
 
-function get_a_string(flag: Boolean = Boolean.FALSE): string {
-    return "A";
+function getAString(flag: Boolean = Boolean.FALSE): string {
+    return 'A';
 }
 
 // Check that LowerBoxedBoolean safely skips optimization for SaveState with no users (preventing segfault).
 // CallStatic std.core.Boolean <- Phi <- SaveState <- None.
 function test8(obj: Object, flag: boolean = false): string {
-    let s = new StringBuilder("A");
+    let s = new StringBuilder('A');
     for (const i of Object.entries(obj)) {
-        s.append(get_a_string(flag));
+        s.append(getAString(flag));
     }
     return s.toString();
 }
 
 function main(): int {
     let result1: boolean = test1(true);
-    let array: Array<Number> = new Array<Number>(1, 2, 3, -2, 6, 7)
+    let array: Number[] = new Array<Number>(1, 2, 3, -2, 6, 7)
     let result2: number = test2(array);
     let result3: boolean = test3(true, false);
     let result4: CustomBoolean = test4(true);
     let result5: Boolean = test5(array, 5);
     let result6: Boolean = test6(array, 3);
     let result7: boolean = test7();
-    let result8: string = test8("A");
+    let result8: string = test8('A');
     return 0;
 }

@@ -14,7 +14,8 @@
  */
 
 //! CHECKER       JIT: copyWithin()
-//! RUN           force_jit: true,  options: "--compiler-regex=escompat.*Array::copyWithin", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
+//! RUN           force_jit: true,  options: "--compiler-regex=escompat.*Array::copyWithin",
+//!               entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
 //! METHOD        "escompat.Int8Array::copyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Intrinsic.Int8ArrayCopyWithinImpl/
@@ -53,279 +54,280 @@
 
 //! CHECKER       AOT: copyWithin()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test_.*array_.*", entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
-//! METHOD        "test_int8array_copy_within"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
+//!               entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
+//! METHOD        "testInt8arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int8Array::copyWithin/
-//! METHOD        "test_int16array_copy_within"
+//! METHOD        "testInt16arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int16Array::copyWithin/
-//! METHOD        "test_int32array_copy_within"
+//! METHOD        "testInt32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int32Array::copyWithin/
-//! METHOD        "test_bigint64array_copy_within"
+//! METHOD        "testBigint64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigInt64Array::copyWithin/
 //!
-//! METHOD        "test_float32array_copy_within"
+//! METHOD        "testFloat32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float32Array::copyWithin/
-//! METHOD        "test_float64array_copy_within"
+//! METHOD        "testFloat64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float64Array::copyWithin/
 //!
-//! METHOD        "test_uint8array_copy_within"
+//! METHOD        "testUint8arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8Array::copyWithin/
-//! METHOD        "test_uint8clampedarray_copy_within"
+//! METHOD        "testUint8clampedarrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint8ClampedArray::copyWithin/
-//! METHOD        "test_uint16array_copy_within"
+//! METHOD        "testUint16arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint16Array::copyWithin/
-//! METHOD        "test_uint32array_copy_within"
+//! METHOD        "testUint32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Uint32Array::copyWithin/
-//! METHOD        "test_biguint64array_copy_within"
+//! METHOD        "testBiguint64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigUint64Array::copyWithin/
 
 
-function check_array(arr: ArrayLike<number>, expected: ArrayLike<number>) {
+function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
     if (arr.length != expected.length) {
-        throw new Error("Unexpected array length")
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Error("Unexpected element with index " + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }
 
-function check_array(arr: BigInt64Array, expected: BigInt64Array) {
+function checkArray(arr: BigInt64Array, expected: BigInt64Array) {
     if (arr.length != expected.length) {
-        throw new Error("Unexpected array length")
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Error("Unexpected element with index " + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }
 
-function check_array(arr: BigUint64Array, expected: BigUint64Array) {
+function checkArray(arr: BigUint64Array, expected: BigUint64Array) {
     if (arr.length != expected.length) {
-        throw new Error("Unexpected array length")
+        throw new Error('Unexpected array length')
     }
     for (let i = 0; i < expected.length; i++) {
         if (arr[i] != expected[i]) {
-            throw new Error("Unexpected element with index " + i)
+            throw new Error('Unexpected element with index ' + i)
         }
     }
 }
 
-function test_int8array_copy_within() {
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int8Array.of(1, 1, 2, 3, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int8Array.of(1, 1, 2, 3, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int8Array.of(1, 1, 2, 3, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int8Array.of(1, 1, 2, 3, 4))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int8Array.of(1, 2, 3, 4, 5))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int8Array.of(1, 1, 2, 3, 4))
-    check_array(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int8Array.of(1, 1, 2, 3, 4))
+function testInt8arrayCopyWithin() {
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int8Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int8Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int8Array.of(1, 1, 2, 3, 4))
 }
 
-function test_int16array_copy_within() {
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int16Array.of(1, 1, 2, 3, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int16Array.of(1, 1, 2, 3, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int16Array.of(1, 1, 2, 3, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int16Array.of(1, 1, 2, 3, 4))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int16Array.of(1, 2, 3, 4, 5))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int16Array.of(1, 1, 2, 3, 4))
-    check_array(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int16Array.of(1, 1, 2, 3, 4))
+function testInt16arrayCopyWithin() {
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int16Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int16Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int16Array.of(1, 1, 2, 3, 4))
 }
 
-function test_int32array_copy_within() {
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int32Array.of(1, 1, 2, 3, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int32Array.of(1, 1, 2, 3, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int32Array.of(1, 1, 2, 3, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int32Array.of(1, 1, 2, 3, 4))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int32Array.of(1, 2, 3, 4, 5))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int32Array.of(1, 1, 2, 3, 4))
-    check_array(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int32Array.of(1, 1, 2, 3, 4))
+function testInt32arrayCopyWithin() {
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Int32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Int32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Int32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int32Array.of(1, 1, 2, 3, 4))
 }
 
-function test_bigint64array_copy_within() {
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), BigInt64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), BigInt64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), BigInt64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), BigInt64Array.of(1, 1, 2, 3, 4))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), BigInt64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), BigInt64Array.of(1, 1, 2, 3, 4))
-    check_array(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), BigInt64Array.of(1, 1, 2, 3, 4))
-}
-
-
-function test_float32array_copy_within() {
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Float32Array.of(1, 1, 2, 3, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Float32Array.of(1, 1, 2, 3, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Float32Array.of(1, 1, 2, 3, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Float32Array.of(1, 1, 2, 3, 4))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Float32Array.of(1, 2, 3, 4, 5))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Float32Array.of(1, 1, 2, 3, 4))
-    check_array(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float32Array.of(1, 1, 2, 3, 4))
-}
-
-function test_float64array_copy_within() {
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Float64Array.of(1, 1, 2, 3, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Float64Array.of(1, 1, 2, 3, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Float64Array.of(1, 1, 2, 3, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Float64Array.of(1, 1, 2, 3, 4))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Float64Array.of(1, 2, 3, 4, 5))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Float64Array.of(1, 1, 2, 3, 4))
-    check_array(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float64Array.of(1, 1, 2, 3, 4))
+function testBigint64arrayCopyWithin() {
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), BigInt64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), BigInt64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), BigInt64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), BigInt64Array.of(1, 1, 2, 3, 4))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), BigInt64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), BigInt64Array.of(1, 1, 2, 3, 4))
+    checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), BigInt64Array.of(1, 1, 2, 3, 4))
 }
 
 
-function test_uint8array_copy_within() {
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint8Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint8Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint8Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint8Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint8Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint8Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint8Array.of(1, 1, 2, 3, 4))
+function testFloat32arrayCopyWithin() {
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Float32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Float32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Float32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Float32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Float32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Float32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float32Array.of(1, 1, 2, 3, 4))
 }
 
-function test_uint8clampedarray_copy_within() {
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint8ClampedArray.of(1, 1, 2, 3, 4))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint8ClampedArray.of(1, 2, 3, 4, 5))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint8ClampedArray.of(1, 1, 2, 3, 4))
-    check_array(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint8ClampedArray.of(1, 1, 2, 3, 4))
+function testFloat64arrayCopyWithin() {
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Float64Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Float64Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Float64Array.of(1, 1, 2, 3, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Float64Array.of(1, 1, 2, 3, 4))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Float64Array.of(1, 2, 3, 4, 5))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Float64Array.of(1, 1, 2, 3, 4))
+    checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float64Array.of(1, 1, 2, 3, 4))
 }
 
-function test_uint16array_copy_within() {
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint16Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint16Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint16Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint16Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint16Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint16Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint16Array.of(1, 1, 2, 3, 4))
+
+function testUint8arrayCopyWithin() {
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint8Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint8Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint8Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint8Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint8Array.of(1, 1, 2, 3, 4))
 }
 
-function test_uint32array_copy_within() {
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint32Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint32Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint32Array.of(1, 1, 2, 3, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint32Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint32Array.of(1, 2, 3, 4, 5))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint32Array.of(1, 1, 2, 3, 4))
-    check_array(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint32Array.of(1, 1, 2, 3, 4))
+function testUint8clampedarrayCopyWithin() {
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint8ClampedArray.of(1, 1, 2, 3, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint8ClampedArray.of(1, 1, 2, 3, 4))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint8ClampedArray.of(1, 2, 3, 4, 5))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint8ClampedArray.of(1, 1, 2, 3, 4))
+    checkArray(new Uint8ClampedArray([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint8ClampedArray.of(1, 1, 2, 3, 4))
 }
 
-function test_biguint64array_copy_within() {
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), BigUint64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), BigUint64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), BigUint64Array.of(1, 1, 2, 3, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), BigUint64Array.of(1, 1, 2, 3, 4))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), BigUint64Array.of(1, 2, 3, 4, 5))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), BigUint64Array.of(1, 1, 2, 3, 4))
-    check_array(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), BigUint64Array.of(1, 1, 2, 3, 4))
+function testUint16arrayCopyWithin() {
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint16Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint16Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint16Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint16Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint16Array.of(1, 1, 2, 3, 4))
+}
+
+function testUint32arrayCopyWithin() {
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Uint32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), Uint32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), Uint32Array.of(1, 1, 2, 3, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), Uint32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Uint32Array.of(1, 2, 3, 4, 5))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Uint32Array.of(1, 1, 2, 3, 4))
+    checkArray(new Uint32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Uint32Array.of(1, 1, 2, 3, 4))
+}
+
+function testBiguint64arrayCopyWithin() {
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), BigUint64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(-6, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(9, 0, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -1, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -5, 3), BigUint64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, -6, 3), BigUint64Array.of(1, 1, 2, 3, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 5, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 9, 3), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -1), BigUint64Array.of(1, 1, 2, 3, 4))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -5), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), BigUint64Array.of(1, 2, 3, 4, 5))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), BigUint64Array.of(1, 1, 2, 3, 4))
+    checkArray(new BigUint64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), BigUint64Array.of(1, 1, 2, 3, 4))
 }
 
 
 function main(): void {
-    test_int8array_copy_within()
-    test_int16array_copy_within()
-    test_int32array_copy_within()
-    test_bigint64array_copy_within()
+    testInt8arrayCopyWithin()
+    testInt16arrayCopyWithin()
+    testInt32arrayCopyWithin()
+    testBigint64arrayCopyWithin()
 
-    test_float32array_copy_within()
-    test_float64array_copy_within()
+    testFloat32arrayCopyWithin()
+    testFloat64arrayCopyWithin()
 
-    test_uint8array_copy_within()
-    test_uint8clampedarray_copy_within()
-    test_uint16array_copy_within()
-    test_uint32array_copy_within()
-    test_biguint64array_copy_within()
+    testUint8arrayCopyWithin()
+    testUint8clampedarrayCopyWithin()
+    testUint16arrayCopyWithin()
+    testUint32arrayCopyWithin()
+    testBiguint64arrayCopyWithin()
 }

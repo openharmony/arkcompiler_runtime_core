@@ -18,18 +18,24 @@
 ---*/
 
 // deep inlining
-export function C(x: int): int { return x + 1; }
-export function B(x: int): int { return C(x); }
-export function A(x: int): int { return B(x); }
+export function C(x: int): int {
+    return x + 1; 
+}
+export function B(x: int): int {
+    return C(x); 
+}
+export function A(x: int): int {
+    return B(x); 
+}
 
 
 // deopt
 export function risky(arr: int[], i: int): int {
-    return maybe_throw(arr[i]);
+    return maybeThrow(arr[i]);
 }
 
 // deopt
-export function maybe_throw(x: int): int {
+export function maybeThrow(x: int): int {
     if (x == 0) {
         throw new Error('Error message');
     }
@@ -37,7 +43,7 @@ export function maybe_throw(x: int): int {
 }
 
 // bounds check fails
-export function sum_array(arr: int[]): int {
+export function sumArray(arr: int[]): int {
     let sum = 0;
     for (let i = 0; i <= arr.length; i++) {
         sum += arr[i];

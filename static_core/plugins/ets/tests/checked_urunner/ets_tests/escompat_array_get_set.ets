@@ -88,13 +88,13 @@
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
 //! RUN        entry: "escompat_array_get_set.ETSGLOBAL::test2"
 
-function arraySet(arr: Array<int>): void {
+function arraySet(arr: int[]): void {
     arr[1] = 2;
     arr[3] = 5;
     arr[8] = 13;
 }
 
-function arrayGet(arr: Array<int>): int {
+function arrayGet(arr: int[]): int {
     return arr[1] + arr[3] + arr[8];
 }
 
@@ -103,7 +103,7 @@ const WRONG_ERROR_THROWN = 1;
 const NO_ERROR_THROWN = 2;
 const WRONG_EXPRESSION_RESULT = 3;
 
-function __noinline__testRangeError(arr: Array<int>, index: int): int {
+function __noinline__testRangeError(arr: int[], index: int): int {
     try {
         arr[index] = 21;
     } catch (e) {
@@ -115,7 +115,7 @@ function __noinline__testRangeError(arr: Array<int>, index: int): int {
     return NO_ERROR_THROWN;
 }
 
-function __noinline__testClassCastError(arr: Array<int>, index: int): int {
+function __noinline__testClassCastError(arr: int[], index: int): int {
     const MAGIC_NUMBER = 1234567890;
     let dest = MAGIC_NUMBER;
     try {
@@ -156,14 +156,18 @@ class ExtArray<T> extends Array<T> {
 }
 
 //! CHECKER       Array getUnsafe cpp intrinsic
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! RUN           force_jit: true,
+//!               options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::pop",
+//!               entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
 //! METHOD        "std.core.Array::pop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArrayGetUnsafe"
 //! INST_NOT      /Call.*get_unsafe/
 
 //! CHECKER       Array getUnsafe IR intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::pop", entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex=std.core.Array::pop",
+//!               entry: "escompat_array_get_set.ETSGLOBAL::testGetUnsafe"
 //! METHOD        "std.core.Array::pop"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "LoadArray"
@@ -177,14 +181,18 @@ function testGetUnsafe() {
 }
 
 //! CHECKER       Array setUnsafe cpp intrinsic
-//! RUN           force_jit: true, options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! RUN           force_jit: true,
+//!               options: "--compiler-encode-intrinsics=false --compiler-regex=std.core.Array::with",
+//!               entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
 //! METHOD        "std.core.Array::with"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.EscompatArraySetUnsafe"
 //! INST_NOT      /Call.*set_unsafe/
 
 //! CHECKER       Array setUnsafe IR intrinsic
-//! RUN           force_jit: true, options: "--compiler-regex=std.core.Array::with", entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex=std.core.Array::with",
+//!               entry: "escompat_array_get_set.ETSGLOBAL::testSetUnsafe"
 //! METHOD        "std.core.Array::with"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "StoreArray"

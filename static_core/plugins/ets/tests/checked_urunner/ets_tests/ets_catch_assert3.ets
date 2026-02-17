@@ -15,24 +15,28 @@
 
 //! CHECKER      Try Catch Resolving JIT Optimize with false assert to check correctness of LSE optimization
 //! SKIP_IF       @architecture == "arm32"
-//! RUN          options: "--compiler-regex=ets_catch_assert3.ETSGLOBAL::main --compiler-enable-jit=true --compiler-check-final=true --gc-type=g1-gc --heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post --compiler-hotness-threshold=0 --no-async-jit=true --full-gc-bombing-frequency=0", entry: "ets_catch_assert3.ETSGLOBAL::main"
+//! RUN          options: "--compiler-regex=ets_catch_assert3.ETSGLOBAL::main --compiler-enable-jit=true \
+//!                        --compiler-check-final=true --gc-type=g1-gc \
+//!                        --heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post \
+//!                        --compiler-hotness-threshold=0 --no-async-jit=true --full-gc-bombing-frequency=0",
+//!              entry: "ets_catch_assert3.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_catch_assert3.ETSGLOBAL::main,.*,COMPILED/
 
 let a = 12;
 let b = 11;
-let res = "";
+let res = '';
 
 function foo(): string {
-    res += "foo called";
-    return "Assert message";
+    res += 'foo called';
+    return 'Assert message';
 }
 
 function main(): int {
-    res = "";
+    res = '';
     try {
         arktest.assertLT(a, b , foo()) // foo must be called
     } catch(e) {
         // expected
     }
-    return res == "" ? 1 : 0;
+    return res == '' ? 1 : 0;
 }

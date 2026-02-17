@@ -18,57 +18,57 @@
 
 //! CHECKER       AOT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
+//! RUN_PAOC      options: "--compiler-regex='.*Reserve[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve11"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve11"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve12"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve12"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve13"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve13"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switch_reserve14"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switchReserve14"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=4)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switch_reserve15"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switchReserve15"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::reverse_loop_reserve16"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::reverseLoopReserve16"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2_reverse_loop_reserve17"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2ReverseLoopReserve17"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2_reverse_loop_reserve18"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2ReverseLoopReserve18"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step5_loop_reserve19"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step5LoopReserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
@@ -76,109 +76,113 @@
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ets_string_builder_reserve_part11-19.ETSGLOBAL::main"
+//! RUN           force_jit: true,
+//!               options: "--compiler-regex='.*[Rr]eserve[0-9]*' --compiler-inlining=true",
+//!               entry: "ets_string_builder_reserve_part11-19.ETSGLOBAL::main"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve11"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve11"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve12"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve12"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountable_loop_reserve13"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::uncountableLoopReserve13"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switch_reserve14"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switchReserve14"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=4)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switch_reserve15"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::switchReserve15"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=10)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::reverse_loop_reserve16"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::reverseLoopReserve16"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2_reverse_loop_reserve17"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2ReverseLoopReserve17"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2_reverse_loop_reserve18"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step2ReverseLoopReserve18"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=3)"
 //!
-//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step5_loop_reserve19"
+//! METHOD        "ets_string_builder_reserve_part11-19.ETSGLOBAL::step5LoopReserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
 //! INST          "NewArray (size=5)"
 
-function uncountable_loop_reserve11() : string {
+function uncountableLoopReserve11() : string {
     let sb = new StringBuilder()            // not applied, due to uncountable loop
     sb.append(0)
-    for (let i:number = 1.0; i < 3.0; ++i)
+    for (let i:number = 1.0; i < 3.0; ++i) {
         sb.append(i)
+    }
     return sb.toString()
 }
 
-function uncountable_loop_reserve12() : string {
+function uncountableLoopReserve12() : string {
     let sb = new StringBuilder()            // not applied, due to uncountable loop
     let i = 0;
     sb.append(i++)
-    while (sb.toString().getLength() < 3.0)
+    while (sb.toString().getLength() < 3.0) {
         sb.append(i++)
+    }
     return sb.toString()
 }
 
-function uncountable_loop_reserve13() : string {
+function uncountableLoopReserve13() : string {
     let sb = new StringBuilder()            // not applied, due to uncountable loop
     let i = 0;
     sb.append(i++)
-    do
+    do {
         sb.append(i++)
-    while (sb.toString().getLength() < 3.0)
+    } while (sb.toString().getLength() < 3.0)
 
     return sb.toString()
 }
 
-function switch_reserve14(n : int) : string {
+function switchReserve14(n : int) : string {
     let sb = new StringBuilder              // applied
     switch (n) {
-        case 0:
+      case 0:
         break;
-        case 1:
+      case 1:
             sb.append(0)
         break;
-        case 2:
-            sb.append("0")
+      case 2:
+            sb.append('0')
             sb.append(1)
         break;
-        case 3:
-            sb.append("0")
+      case 3:
+            sb.append('0')
             sb.append(1)
             sb.append(2.0)
         break;
-        default:
-            sb.append("0")
+      default:
+            sb.append('0')
             sb.append(1)
             sb.append(2.0)
             sb.append(3)
@@ -187,21 +191,21 @@ function switch_reserve14(n : int) : string {
     return sb.toString()
 }
 
-function switch_reserve15(n : int) : string {
+function switchReserve15(n : int) : string {
     let sb = new StringBuilder              // applied
     switch (n) {
-        case 0:
-        case 1:
+      case 0:
+      case 1:
             sb.append(0)
-        case 2:
-            sb.append("0")
+      case 2:
+            sb.append('0')
             sb.append(1)
-        case 3:
-            sb.append("0")
+      case 3:
+            sb.append('0')
             sb.append(1)
             sb.append(2.0)
-        default:
-            sb.append("0")
+      default:
+            sb.append('0')
             sb.append(1)
             sb.append(2.0)
             sb.append(3)
@@ -209,44 +213,48 @@ function switch_reserve15(n : int) : string {
     return sb.toString()
 }
 
-function reverse_loop_reserve16() : string {
+function reverseLoopReserve16() : string {
     let sb = new StringBuilder()            // applied
-    for (let i = 2; i >= 0; --i)
+    for (let i = 2; i >= 0; --i) {
         sb.append(i)
+    }
     return sb.toString()
 }
 
-function step2_reverse_loop_reserve17() : string {
+function step2ReverseLoopReserve17() : string {
     let sb = new StringBuilder()            // applied
-    for (let i = 4; i >= 0; i -= 2)
+    for (let i = 4; i >= 0; i -= 2) {
         sb.append(i)
+    }
     return sb.toString()
 }
 
-function step2_reverse_loop_reserve18() : string {
+function step2ReverseLoopReserve18() : string {
     let sb = new StringBuilder()            // applied
-    for (let i = 5; i >= 0; i -= 2)
+    for (let i = 5; i >= 0; i -= 2) {
         sb.append(i)
+    }
     return sb.toString()
 }
 
-function step5_loop_reserve19() : string {
+function step5LoopReserve19() : string {
     let sb = new StringBuilder()            // applied
-    for (let i = 2; i < 24; i += 5)
+    for (let i = 2; i < 24; i += 5) {
         sb.append(i)
+    }
     return sb.toString()
 }
 
 function main() : int {
-    arktest.assertEQ(uncountable_loop_reserve11(), "012", "Wrong result at uncountable_loop_reserve11")
-    arktest.assertEQ(uncountable_loop_reserve12(), "012", "Wrong result at uncountable_loop_reserve12")
-    arktest.assertEQ(uncountable_loop_reserve13(), "012", "Wrong result at uncountable_loop_reserve13")
-    arktest.assertEQ(switch_reserve14(3), "012", "Wrong result at switch_reserve14")
-    arktest.assertEQ(switch_reserve15(3), "0120123", "Wrong result at switch_reserve15")
-    arktest.assertEQ(reverse_loop_reserve16(), "210", "Wrong result at reverse_loop_reserve16")
-    arktest.assertEQ(step2_reverse_loop_reserve17(), "420", "Wrong result at step2_reverse_loop_reserve17")
-    arktest.assertEQ(step2_reverse_loop_reserve18(), "531", "Wrong result at step2_reverse_loop_reserve18")
-    arktest.assertEQ(step5_loop_reserve19(), "27121722", "Wrong result at step5_loop_reserve19")
+    arktest.assertEQ(uncountableLoopReserve11(), '012', 'Wrong result at uncountableLoopReserve11')
+    arktest.assertEQ(uncountableLoopReserve12(), '012', 'Wrong result at uncountableLoopReserve12')
+    arktest.assertEQ(uncountableLoopReserve13(), '012', 'Wrong result at uncountableLoopReserve13')
+    arktest.assertEQ(switchReserve14(3), '012', 'Wrong result at switchReserve14')
+    arktest.assertEQ(switchReserve15(3), '0120123', 'Wrong result at switchReserve15')
+    arktest.assertEQ(reverseLoopReserve16(), '210', 'Wrong result at reverseLoopReserve16')
+    arktest.assertEQ(step2ReverseLoopReserve17(), '420', 'Wrong result at step2ReverseLoopReserve17')
+    arktest.assertEQ(step2ReverseLoopReserve18(), '531', 'Wrong result at step2ReverseLoopReserve18')
+    arktest.assertEQ(step5LoopReserve19(), '27121722', 'Wrong result at step5LoopReserve19')
 
     return 0
 }

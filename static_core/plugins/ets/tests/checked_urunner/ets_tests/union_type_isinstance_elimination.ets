@@ -15,7 +15,8 @@
 
 //! CHECKER         Check object type elimination for union type (AOT)
 //! SKIP_IF         @architecture == "arm32"
-//! RUN_PAOC        options: "--compiler-regex='.*checkElimination.*'", entry: "union_type_isinstance_elimination.ETSGLOBAL::main"
+//! RUN_PAOC        options: "--compiler-regex='.*checkElimination.*'",
+//!                 entry: "union_type_isinstance_elimination.ETSGLOBAL::main"
 //!
 //! METHOD          "union_type_isinstance_elimination.ETSGLOBAL::checkElimination"
 //! PASS_AFTER      "IrBuilder"
@@ -55,7 +56,7 @@ class D extends B {}
 
 function checkEliminationForBaseType() {
     // CC-OFFNXT(G.DCL.06) for test purposes
-    arktest.assertEQ(new Object() instanceof Int | D, false);
+    arktest.assertEQ(({} as Object) instanceof Int | D, false);
     arktest.assertEQ(new Int(123) instanceof Int | D, true);
     arktest.assertEQ(new D() instanceof Int | D, true);
     arktest.assertEQ(new B() instanceof Int | D, false);

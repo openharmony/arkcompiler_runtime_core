@@ -80,7 +80,7 @@ function test3(): number {
         arr[0] = 1;
         arr[1] = 2;
     } catch (e) {
-        arktest.assertTrue(e instanceof ArrayIndexOutOfBoundsError, "Throwed not ArrayIndexOutOfBoundsError");
+        arktest.assertTrue(e instanceof ArrayIndexOutOfBoundsError, 'Throwed not ArrayIndexOutOfBoundsError');
         arktest.assertEQ(arr[0], 1);
         return 0;
     }
@@ -89,17 +89,17 @@ function test3(): number {
 }
 
 function test4(): String {
-    return "".concat("a", "B", "c", "D", "a", "B", "c", "D");
+    return ''.concat('a', 'B', 'c', 'D', 'a', 'B', 'c', 'D');
 }
 
 function test5(a: String, b: String, c: String, d: String, e: String, f: String, g: String, h: String): String {
-    return "".concat(a, b, c, d, e, f, g, h);
+    return ''.concat(a, b, c, d, e, f, g, h);
 }
 
 function main() {
-    arktest.assertEQ(test1(), 21, "test1 failed");
-    arktest.assertEQ(test2(true), 10, "test2 failed");
-    arktest.assertEQ(test3(), 0, "test3 failed");
-    arktest.assertEQ(test4(), "aBcDaBcD", "test4 failed");
-    arktest.assertEQ(test5("a", "B", "c", "D", "a", "B", "c", "D"), "aBcDaBcD", "test5 failed");
+    arktest.assertEQ(test1(), 21, 'test1 failed');
+    arktest.assertEQ(test2(true), 10, 'test2 failed');
+    arktest.assertEQ(test3(), 0, 'test3 failed');
+    arktest.assertEQ(test4(), 'aBcDaBcD', 'test4 failed');
+    arktest.assertEQ(test5('a', 'B', 'c', 'D', 'a', 'B', 'c', 'D'), 'aBcDaBcD', 'test5 failed');
 }

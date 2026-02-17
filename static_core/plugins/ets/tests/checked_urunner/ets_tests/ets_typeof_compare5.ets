@@ -14,9 +14,12 @@
  */
 
 //! CHECKER      Check for typeof + compare peephole
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false", entry: "ets_typeof_compare5.ETSGLOBAL::main"
-//! EVENT        /Compilation,ets_typeof_compare5.ETSGLOBAL::__noinline__process_typeof,.*,COMPILED/
-//! METHOD       "ets_typeof_compare5.ETSGLOBAL::__noinline__process_typeof"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false",
+//!              entry: "ets_typeof_compare5.ETSGLOBAL::main"
+//! EVENT        /Compilation,ets_typeof_compare5.ETSGLOBAL::__noinline__processTypeof,.*,COMPILED/
+//! METHOD       "ets_typeof_compare5.ETSGLOBAL::__noinline__processTypeof"
 //! PASS_AFTER   "IrBuilder"
 //! INST_COUNT   "Intrinsic.StdCoreRuntimeTypeof",1
 //! INST_NOT     "IsInstance"
@@ -24,8 +27,8 @@
 //! INST_NOT     "Intrinsic.StdCoreRuntimeTypeof"
 //! INST_COUNT   "IsInstance",1
 
-function __noinline__process_typeof(u: string|double): int {
-   if (typeof (u) == "number") {
+function __noinline__processTypeof(u: string|double): int {
+   if (typeof (u) == 'number') {
      return 1;
    } else {
      return 2;
@@ -35,7 +38,7 @@ function __noinline__process_typeof(u: string|double): int {
 function main(): int {
   let res :int = 0;
   for (let i:double = 0; i < 25; ++i) {
-    res += __noinline__process_typeof(i);
+    res += __noinline__processTypeof(i);
   }
   console.log(res);
   return res - 25;

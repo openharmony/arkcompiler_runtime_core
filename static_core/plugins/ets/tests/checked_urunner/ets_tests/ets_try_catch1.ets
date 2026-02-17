@@ -14,7 +14,11 @@
  */
 
 //! CHECKER      Try Catch Resolving JIT Optimize with default catch only
-//! RUN          force_jit: true, options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 --compiler-enable-osr=false --compiler-regex=ets_try_catch1.MultipleCatch::__noinline__multipleCatch", entry: "ets_try_catch1.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-hotness-threshold=20 --compiler-profiling-threshold=0 \
+//!                        --compiler-enable-osr=false \
+//!                        --compiler-regex=ets_try_catch1.MultipleCatch::__noinline__multipleCatch",
+//!              entry: "ets_try_catch1.ETSGLOBAL::main"
 //! EVENT        /Compilation,ets_try_catch1.MultipleCatch::__noinline__multipleCatch,.*,COMPILED/
 //! METHOD       "ets_try_catch1.MultipleCatch::__noinline__multipleCatch"
 //! PASS_AFTER   "Inline"
@@ -51,9 +55,9 @@ class MultipleCatch {
         let k : int = i % 2;
         try {
             switch (k) {
-            case 0:
+              case 0:
                 throw new Error0();
-            case 1:
+              case 1:
                 throw new Error1();
             }
         } catch (e) {

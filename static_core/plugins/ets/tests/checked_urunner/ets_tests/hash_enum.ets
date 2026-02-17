@@ -34,14 +34,14 @@
 //! CHECKER           INTERP-CPP: Compare getting hash code values
 //! RUN               options: "--interpreter-type=cpp --compiler-enable-jit=false", entry: "hash_enum.ETSGLOBAL::main"
 
-const CONCAT_LHS = "xyzasadasdsadasaaaa"; // longer than 13 chars
+const CONCAT_LHS = 'xyzasadasdsadasaaaa'; // longer than 13 chars
 class MyEnum extends BaseEnum<string> {
     constructor(c: string) {
         super(CONCAT_LHS + c)
     }
 }
 function testGetHashCode() {
-  const CONCAT_RHS = Runtime.getHashCodeByValue("123123").toString(); // can't constant-fold
+  const CONCAT_RHS = Runtime.getHashCodeByValue('123123').toString(); // can't constant-fold
   const x = new MyEnum(CONCAT_RHS);
   const xHash = Runtime.getHashCodeByValue(x)
   const strHash = Runtime.getHashCodeByValue(CONCAT_LHS + CONCAT_RHS)
@@ -49,7 +49,7 @@ function testGetHashCode() {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("GenerateGetHashCodeByValue tests")
-    suite.addTest("Get hash code of enum class", testGetHashCode)
+    const suite = new arktest.ArkTestsuite('GenerateGetHashCodeByValue tests')
+    suite.addTest('Get hash code of enum class', testGetHashCode)
     return suite.run()
 }

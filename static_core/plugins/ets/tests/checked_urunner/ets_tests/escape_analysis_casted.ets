@@ -15,9 +15,11 @@
 
 //! CHECKER      Check escape analysis create cast in different sign types char
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "escape_analysis_casted.ETSGLOBAL::main_char"
-//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
-//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*mainChar.*",
+//!              entry: "escape_analysis_casted.ETSGLOBAL::mainChar"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::mainChar,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::mainChar"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 12
 //! PASS_AFTER   "EscapeAnalysis"
@@ -26,9 +28,11 @@
 
 //! CHECKER      Check escape analysis create cast in different sign types char (ARM32)
 //! SKIP_IF      @architecture != "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_char.*", entry: "escape_analysis_casted.ETSGLOBAL::main_char"
-//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_char,.*,COMPILED/
-//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_char"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*mainChar.*",
+//!              entry: "escape_analysis_casted.ETSGLOBAL::mainChar"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::mainChar,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::mainChar"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 12
 //! PASS_AFTER   "EscapeAnalysis"
@@ -45,7 +49,7 @@ class A {
 
 let s: byte = -128 as byte;
 
-function main_char(): int {
+function mainChar(): int {
     let c: char = new A(s).fld;
     if (c != c'\uFF80') {
         return 1;
@@ -57,9 +61,11 @@ function main_char(): int {
 
 //! CHECKER      Check escape analysis create cast in different sign types cutted char
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "escape_analysis_casted.ETSGLOBAL::main_long"
-//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
-//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*mainLong.*",
+//!              entry: "escape_analysis_casted.ETSGLOBAL::mainLong"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::mainLong,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::mainLong"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 13
 //! INST_COUNT   ".u16  Cast i8", 0
@@ -69,9 +75,11 @@ function main_char(): int {
 
 //! CHECKER      Check escape analysis create cast in different sign types cutted char (ARM32)
 //! SKIP_IF      @architecture != "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*main_long.*", entry: "escape_analysis_casted.ETSGLOBAL::main_long"
-//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::main_long,.*,COMPILED/
-//! METHOD       "escape_analysis_casted.ETSGLOBAL::main_long"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex=.*mainLong.*",
+//!              entry: "escape_analysis_casted.ETSGLOBAL::mainLong"
+//! EVENT        /Compilation,escape_analysis_casted.ETSGLOBAL::mainLong,.*,COMPILED/
+//! METHOD       "escape_analysis_casted.ETSGLOBAL::mainLong"
 //! PASS_BEFORE  "EscapeAnalysis"
 //! INST_COUNT   "Cast", 13
 //! INST_COUNT   ".u16  Cast i8", 0
@@ -89,7 +97,7 @@ class B {
 //           |will cut|  |will cut|
 let b: int = (1 << 17) + (1 << 8) + 1;
 
-function main_long(): int {
+function mainLong(): int {
     let c: char = new B(b).fld;
     if (c != c'\u0001') {
         return 1;
