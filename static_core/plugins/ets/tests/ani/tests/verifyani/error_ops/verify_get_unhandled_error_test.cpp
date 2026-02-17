@@ -40,12 +40,7 @@ TEST_F(GetUnhandledErrorTest, wrong_err)
     ASSERT_ERROR_ANI_ARGS_MSG("GetUnhandledError", testLines);
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33050)
-TEST_F(GetUnhandledErrorTest, DISABLED_throw_error)
-#else
 TEST_F(GetUnhandledErrorTest, throw_error)
-#endif
 {
     ThrowError();
 

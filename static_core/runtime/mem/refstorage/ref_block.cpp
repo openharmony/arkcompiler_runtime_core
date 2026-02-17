@@ -48,7 +48,7 @@ void RefBlock::Remove(const Reference *ref)
     auto index = (refPtr - blockPtr) / sizeof(ObjectPointer<ObjectHeader>);
     ASSERT(IsBusyIndex(index));
     slots_ |= static_cast<uint64_t>(1U) << index;
-    ASAN_POISON_MEMORY_REGION(refs_[index], sizeof(refs_[index]));
+    ASAN_POISON_MEMORY_REGION(&refs_[index], sizeof(refs_[index]));
 }
 
 void RefBlock::VisitObjects(const GCRootVisitor &gcRootVisitor, mem::RootType rootType)
@@ -129,7 +129,7 @@ uint8_t RefBlock::GetFreeIndex()
 void RefBlock::Set(uint8_t index, const ObjectHeader *object)
 {
     ASSERT(IsFreeIndex(index));
-    ASAN_UNPOISON_MEMORY_REGION(refs_[index], sizeof(refs_[index]));
+    ASAN_UNPOISON_MEMORY_REGION(&refs_[index], sizeof(refs_[index]));
     refs_[index] = object;
     slots_ &= ~(static_cast<uint64_t>(1U) << index);
 }
