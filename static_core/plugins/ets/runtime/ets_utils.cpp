@@ -124,8 +124,9 @@ void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
 
     auto resObj = ret.GetAs<ObjectHeader *>();
     if (resObj != nullptr) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR,
-                          resObj->ClassAddr<ark::Class>()->GetName() + " cannot be cast to void");
+        ThrowEtsException(coro, PlatformTypes()->coreClassCastError,
+                          std::string(utf::Mutf8AsCString(resObj->ClassAddr<Class>()->GetDescriptor())) +
+                              " cannot be cast to void");
     }
 }
 
@@ -267,14 +268,14 @@ bool GetExportedClassDescriptorsFromModule(ark::ets::EtsClass *etsGlobalClass, s
     panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
 
     bool found = false;
-    cda.EnumerateAnnotation(panda_file_items::class_descriptors::ANNOTATION_MODULE.data(),
+    cda.EnumerateAnnotation(EtsPlatformTypes::DESCRIPTOR_etsAnnotationModule,
                             [&outDescriptors, &found, pfile](panda_file::AnnotationDataAccessor &annotationAccessor) {
                                 const uint32_t count = annotationAccessor.GetCount();
                                 for (uint32_t i = 0; i < count; i++) {
                                     auto elem = annotationAccessor.GetElement(i);
                                     std::string nameStr =
                                         utf::Mutf8AsCString(pfile->GetStringData(elem.GetNameId()).data);
-                                    if (nameStr == panda_file_items::class_descriptors::ANNOTATION_MODULE_EXPORTED) {
+                                    if (nameStr == "exported") {
                                         auto classesArray = elem.GetArrayValue();
                                         ExtractClassDescriptorsFromArray(pfile, classesArray, outDescriptors);
                                         found = true;

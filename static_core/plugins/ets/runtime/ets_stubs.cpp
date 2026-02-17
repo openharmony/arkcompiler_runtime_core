@@ -84,45 +84,6 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
     return std::nullopt;
 }
 
-inline EtsMethod *FindGetMethod(EtsCoroutine *coro, EtsClass *cls)
-{
-    auto getMethod = cls->GetInstanceMethod(GET_INDEX_METHOD, INDEXED_INT_GET_METHOD_SIGNATURE.data());
-    if (getMethod == nullptr) {
-        ThrowEtsMethodNotFoundException(coro, cls->GetDescriptor(), GET_INDEX_METHOD,
-                                        INDEXED_INT_GET_METHOD_SIGNATURE.data());
-    }
-    return getMethod;
-}
-
-inline EtsMethod *FindSetMethod(EtsCoroutine *coro, EtsClass *cls)
-{
-    auto setMethod = cls->GetInstanceMethod(SET_INDEX_METHOD, INDEXED_INT_SET_METHOD_SIGNATURE.data());
-    if (setMethod == nullptr) {
-        ThrowEtsMethodNotFoundException(coro, cls->GetDescriptor(), SET_INDEX_METHOD,
-                                        INDEXED_INT_SET_METHOD_SIGNATURE.data());
-        return nullptr;
-    }
-    return setMethod;
-}
-
-inline EtsMethod *FindSetterMethod(EtsClass *cls, const char *methodName)
-{
-    auto setterMethod = cls->GetInstanceMethod((PandaString(SETTER_BEGIN) + methodName).c_str(), nullptr);
-    if (setterMethod == nullptr) {
-        return nullptr;
-    }
-    return setterMethod;
-}
-
-inline EtsMethod *FindGetterMethod(EtsClass *cls, const char *methodName)
-{
-    auto getterMethod = cls->GetInstanceMethod((PandaString(GETTER_BEGIN) + methodName).c_str(), nullptr);
-    if (getterMethod == nullptr) {
-        return nullptr;
-    }
-    return getterMethod;
-}
-
 bool EtsBigIntEquality(EtsBigInt *obj1, EtsBigInt *obj2)
 {
     auto bytes1 = obj1->GetBytes();
@@ -480,6 +441,72 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
         PANDA_ETS_INTEROP_JS_GUARD({ return interop::js::XRefObjectOperator::IsTrue(coro, obj); });
     }
     UNREACHABLE();
+}
+
+static void ThrowEtsFieldNotFoundException(EtsCoroutine *coroutine, const char *holderClassDescriptor,
+                                           const char *fieldName)
+{
+    PandaString message = "Field " + PandaString(fieldName) + " not found in " + PandaString(holderClassDescriptor);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+}
+
+static void ThrowEtsMethodNotFoundException(EtsCoroutine *coroutine, const char *holderClassDescriptor,
+                                            const char *methodName, const char *methodSignature)
+{
+    PandaString message = "Method " + PandaString(methodName) + "(" + methodSignature + ") not found in " +
+                          PandaString(holderClassDescriptor);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+}
+
+static void ThrowEtsInvalidKey(EtsCoroutine *coroutine, const char *classSignature)
+{
+    PandaString message = "Invalid key type: " + PandaString(classSignature);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+}
+
+static void ThrowEtsInvalidType(EtsCoroutine *coroutine, const char *classSignature)
+{
+    PandaString message = "Invalid operand type: " + PandaString(classSignature);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+}
+
+static inline EtsMethod *FindGetMethod(EtsCoroutine *coro, EtsClass *cls)
+{
+    auto getMethod = cls->GetInstanceMethod(GET_INDEX_METHOD, INDEXED_INT_GET_METHOD_SIGNATURE.data());
+    if (getMethod == nullptr) {
+        ThrowEtsMethodNotFoundException(coro, cls->GetDescriptor(), GET_INDEX_METHOD,
+                                        INDEXED_INT_GET_METHOD_SIGNATURE.data());
+    }
+    return getMethod;
+}
+
+static inline EtsMethod *FindSetMethod(EtsCoroutine *coro, EtsClass *cls)
+{
+    auto setMethod = cls->GetInstanceMethod(SET_INDEX_METHOD, INDEXED_INT_SET_METHOD_SIGNATURE.data());
+    if (setMethod == nullptr) {
+        ThrowEtsMethodNotFoundException(coro, cls->GetDescriptor(), SET_INDEX_METHOD,
+                                        INDEXED_INT_SET_METHOD_SIGNATURE.data());
+        return nullptr;
+    }
+    return setMethod;
+}
+
+static inline EtsMethod *FindSetterMethod(EtsClass *cls, const char *methodName)
+{
+    auto setterMethod = cls->GetInstanceMethod((PandaString(SETTER_BEGIN) + methodName).c_str(), nullptr);
+    if (setterMethod == nullptr) {
+        return nullptr;
+    }
+    return setterMethod;
+}
+
+static inline EtsMethod *FindGetterMethod(EtsClass *cls, const char *methodName)
+{
+    auto getterMethod = cls->GetInstanceMethod((PandaString(GETTER_BEGIN) + methodName).c_str(), nullptr);
+    if (getterMethod == nullptr) {
+        return nullptr;
+    }
+    return getterMethod;
 }
 
 bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisObj, [[maybe_unused]] EtsString *name)

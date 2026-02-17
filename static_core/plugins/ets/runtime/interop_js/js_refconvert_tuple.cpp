@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_tuple.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -55,7 +56,7 @@ static EtsObject *UnwrapJsValue(napi_env env, napi_value jsValue)
     } else if (IsNull<true>(env, jsValue)) {
         etsObject = ctx->GetNullValue();
     } else {
-        auto refconv = JSRefConvertResolve(ctx, ctx->GetObjectClass());
+        auto refconv = JSRefConvertResolve(ctx, PlatformTypes(coro)->coreObject->GetRuntimeClass());
         ASSERT(refconv != nullptr);
         etsObject = refconv->Unwrap(ctx, jsValue);
     }

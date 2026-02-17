@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/tests/runtime/types/ets_test_mirror_classes.h"
@@ -71,7 +71,7 @@ private:
 
 TEST_F(EtsBaseEnumMembers, MemoryLayout)
 {
-    auto *klass = GetClass(panda_file_items::class_descriptors::BASE_ENUM.data());
+    auto *klass = PlatformTypes()->coreBaseEnum;
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test

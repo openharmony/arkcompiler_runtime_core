@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "include/mem/panda_containers.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/regexp/ecmascript/regexp_parser.h"
 #include "runtime/include/mem/panda_string.h"
@@ -28,7 +29,7 @@ static void CheckAndSetFlag(char flagChar, uint32_t flagMask, uint32_t &nativeFl
         PandaString errorMsg = "SyntaxError: Duplicate RegExp flag '";
         errorMsg += flagChar;
         errorMsg += "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, errorMsg);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreSyntaxError, errorMsg);
     }
     nativeFlags |= flagMask;
 }
@@ -70,8 +71,7 @@ extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
                 PandaString errorMsg = "SyntaxError: Invalid RegExp flag '";
                 errorMsg += c;
                 errorMsg += "'";
-                ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR,
-                                  errorMsg);
+                ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreSyntaxError, errorMsg);
         }
     }
 
@@ -79,7 +79,7 @@ extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
     parse.Parse();
     if (parse.IsError()) {
         auto errormsg = ark::PandaStringToStd(parse.GetErrorMsg());
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, errormsg);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreSyntaxError, errormsg);
     }
 }
 

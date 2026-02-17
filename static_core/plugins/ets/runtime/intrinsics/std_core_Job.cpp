@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/ets_class_linker.h"
@@ -36,7 +37,7 @@ EtsObject *EtsAwaitJob(EtsJob *job)
         return nullptr;
     }
     if (currentCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(currentCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+        ThrowEtsException(currentCoro, PlatformTypes(currentCoro)->coreInvalidCoroutineOperationError,
                           "Cannot await in the current context!");
         return nullptr;
     }
@@ -95,8 +96,7 @@ void EtsFailJob(EtsJob *job, EtsObject *error)
     EtsHandle<EtsObject> herror(coro, error);
     EtsMutex::LockHolder lh(hjob);
 
-    EtsClassLinker *classLinker = coro->GetPandaVM()->GetClassLinker();
-    auto *errorClass = classLinker->GetClass(panda_file_items::class_descriptors::ERROR.data());
+    auto *errorClass = PlatformTypes(coro)->escompatError;
     if (!herror->IsInstanceOf(errorClass)) {
         ThrowRuntimeException("fail() argument is not an Error object");
         return;

@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ets_class_linker_context.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -516,12 +517,10 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
         cda.EnumerateAnnotations([this, &pfile, &flags, &errorHandler](panda_file::File::EntityId annotationId) {
             panda_file::AnnotationDataAccessor ada(*pfile, annotationId);
             auto *annotationName = pfile->GetStringData(ada.GetClassId()).data;
-            auto *annotationModuleName = panda_file_items::class_descriptors::ANNOTATION_MODULE.data();
-            auto *annotationFunctionalReferenceName =
-                panda_file_items::class_descriptors::ANNOTATION_FUNCTIONAL_REFERENCE.data();
-            if (utf::IsEqual(utf::CStringAsMutf8(annotationModuleName), annotationName)) {
+            if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_etsAnnotationModule), annotationName)) {
                 flags |= IS_MODULE;
-            } else if (utf::IsEqual(utf::CStringAsMutf8(annotationFunctionalReferenceName), annotationName)) {
+            } else if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_etsAnnotationFunctionalReference),
+                                    annotationName)) {
                 flags |= (IS_FUNCTION_REFERENCE | IS_VALUE_TYPED);
                 FunctionalReferenceAnnotationCallBack(this, pfile, &ada, errorHandler);
             }
@@ -677,8 +676,7 @@ EtsObject *EtsClass::CreateInstance()
 {
     auto coro = EtsCoroutine::GetCurrent();
     const auto throwCreateInstanceErr = [coro, this](std::string_view msg) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
-                               PandaString(msg) + " " + GetDescriptor());
+        ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError, PandaString(msg) + " " + GetDescriptor());
     };
 
     if (UNLIKELY(!GetRuntimeClass()->IsInstantiable() || IsArrayClass())) {

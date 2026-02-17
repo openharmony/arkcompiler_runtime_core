@@ -78,8 +78,7 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const C
     auto handledCb = EtsHandle<EtsObject>(coro, callback);
 
     if (!handledCb->GetClass()->IsFunction()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
-                          "Method have to be instance of function");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Method have to be instance of function");
     }
 
     EtsMethod *etsmethod = PlatformTypes(coro)->coreFunctionUnsafeCall;

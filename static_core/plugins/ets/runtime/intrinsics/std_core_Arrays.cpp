@@ -17,6 +17,7 @@
 #include "ets_vm.h"
 #include "intrinsics.h"
 #include "interpreter/runtime_interface.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
@@ -60,7 +61,7 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
 
     if (errmsg != nullptr) {
         auto *coroutine = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreArrayIndexOutOfBoundsError, errmsg);
     }
 }
 
@@ -299,7 +300,7 @@ void StdCoreCopyToForObjects(EtsCharArray *src, EtsCharArray *dst, int32_t dstSt
     if constexpr (CHECKED) {
         const char *errmsg = CheckCopyToPreConditions(srcStart, srcLen, srcEnd, dstStart, dstLen);
         if (errmsg != nullptr) {
-            ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
+            ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreArrayIndexOutOfBoundsError, errmsg);
             return;
         }
     }

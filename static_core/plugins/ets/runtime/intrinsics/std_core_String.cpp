@@ -224,7 +224,7 @@ EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Got error in process of normalization: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(coroutine, PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
 
@@ -238,7 +238,7 @@ EtsString *StdCoreStringNormalizeNFC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -250,7 +250,7 @@ EtsString *StdCoreStringNormalizeNFD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -262,7 +262,7 @@ EtsString *StdCoreStringNormalizeNFKC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -274,7 +274,7 @@ EtsString *StdCoreStringNormalizeNFKD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -548,7 +548,7 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     if (UNLIKELY(count < 0)) {
         PandaString message = "repeat: count is negative";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(coroutine, PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
 
@@ -563,7 +563,7 @@ EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
     if (UNLIKELY(result == nullptr)) {
         PandaString message = "repeat: memory allocation failed";
         auto coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, message);
+        ThrowEtsException(coro, PlatformTypes(coro)->coreOutOfMemoryError, message);
         return nullptr;
     }
 

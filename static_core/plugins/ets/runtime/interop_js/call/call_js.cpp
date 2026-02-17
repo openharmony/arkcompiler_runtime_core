@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "libarkbase/macros.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"
@@ -39,6 +40,11 @@ public:
           protoReader_(method, ctx_->GetClassLinker(), ctx_->LinkerCtx()),
           argReader_(CreateProxyBridgeArgReader(args, inStackArgs))
     {
+    }
+
+    ALWAYS_INLINE inline EtsCoroutine *Coro()
+    {
+        return coro_;
     }
 
     ALWAYS_INLINE ObjectHeader *SetupArgreader(bool isInstance)
@@ -344,7 +350,7 @@ ALWAYS_INLINE inline std::optional<Value> CallJSHandler::ConvertRetval(napi_valu
 
     if constexpr (IS_NEWCALL) {
         INTEROP_TRACE();
-        ASSERT(protoReader_.GetClass() == ctx_->GetJSValueClass());
+        ASSERT(protoReader_.GetClass() == PlatformTypes(coro_)->interopJSValue->GetRuntimeClass());
         auto res = JSConvertJSValue::Unwrap(ctx_, env, jsRet);
         if (UNLIKELY(!res.has_value())) {
             return std::nullopt;
@@ -395,8 +401,10 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSQNameBase(Method *method, ui
             st->SetupArgreader(false);
             napi_env env = ctx->GetJSEnv();
 
-            napi_value jsVal = JSConvertJSValue::Wrap(env, st->ReadFixedRefArg<JSValue>(ctx->GetJSValueClass()));
-            auto qnameStr = st->ReadFixedRefArg<coretypes::String>(ctx->GetStringClass());
+            napi_value jsVal = JSConvertJSValue::Wrap(
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+            auto qnameStr =
+                st->ReadFixedRefArg<coretypes::String>(PlatformTypes(st->Coro())->coreString->GetRuntimeClass());
 
             auto res = ResolveQualifiedReceiverTarget(env, jsVal, qnameStr);
             if (UNLIKELY(!res.has_value())) {
@@ -441,7 +449,8 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeCallJSBase(Method *method, uint8_t
             st->SetupArgreader(false);
             napi_env env = ctx->GetJSEnv();
 
-            napi_value jsVal = JSConvertJSValue::Wrap(env, st->ReadFixedRefArg<JSValue>(ctx->GetJSValueClass()));
+            napi_value jsVal = JSConvertJSValue::Wrap(
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
 
             auto classQnameOffset = GetClassQnameOffset(ctx, st->GetMethod());
             auto qnameStart = st->ReadFixedArg<panda_file::Type::TypeId::I32, int32_t>() + classQnameOffset;
@@ -490,8 +499,10 @@ extern "C" uint64_t JSRuntimeCallJSByValue(Method *method, uint8_t *args, uint8_
             st->SetupArgreader(false);
             napi_env env = ctx->GetJSEnv();
 
-            napi_value jsFn = JSConvertJSValue::Wrap(env, st->ReadFixedRefArg<JSValue>(ctx->GetJSValueClass()));
-            napi_value jsThis = JSConvertJSValue::Wrap(env, st->ReadFixedRefArg<JSValue>(ctx->GetJSValueClass()));
+            napi_value jsFn = JSConvertJSValue::Wrap(
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
+            napi_value jsThis = JSConvertJSValue::Wrap(
+                env, st->ReadFixedRefArg<JSValue>(PlatformTypes(st->Coro())->interopJSValue->GetRuntimeClass()));
 
             st->SetupJSCallee(jsThis, jsFn);
             return true;
@@ -558,7 +569,7 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
     // skip return type
     protoReader.Advance();
 
-    ASSERT(protoReader.GetClass() == ctx->GetJSValueClass());
+    ASSERT(protoReader.GetClass() == PlatformTypes()->interopJSValue->GetRuntimeClass());
     protoReader.Advance();
 
     if (protoReader.GetType().IsPrimitive()) {
@@ -575,7 +586,7 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
     if (protoReader.GetClass()->IsStringClass()) {
         return reinterpret_cast<void *>(JSRuntimeCallJSQNameBridge);
     }
-    if (protoReader.GetClass() == ctx->GetJSValueClass()) {
+    if (protoReader.GetClass() == PlatformTypes()->interopJSValue->GetRuntimeClass()) {
         return reinterpret_cast<void *>(JSRuntimeCallJSByValueBridge);
     }
     InteropFatal("Bad jscall signature");
@@ -584,14 +595,14 @@ static void *SelectCallJSEntrypoint(InteropCtx *ctx, Method *method)
 static void *SelectNewCallJSEntrypoint(InteropCtx *ctx, Method *method)
 {
     ASSERT(method->IsStatic());
+    auto ptypes = PlatformTypes();
     ProtoReader protoReader(method, ctx->GetClassLinker(), ctx->LinkerCtx());
-
-    if (protoReader.GetClass() != ctx->GetJSValueClass()) {
+    if (protoReader.GetClass() != ptypes->interopJSValue->GetRuntimeClass()) {
         return nullptr;
     }
     protoReader.Advance();
 
-    if (protoReader.GetClass() != ctx->GetJSValueClass()) {
+    if (protoReader.GetClass() != ptypes->interopJSValue->GetRuntimeClass()) {
         return nullptr;
     }
     protoReader.Advance();
@@ -607,7 +618,7 @@ static void *SelectNewCallJSEntrypoint(InteropCtx *ctx, Method *method)
         }
         return reinterpret_cast<void *>(JSRuntimeNewCallJSBridge);
     }
-    if (protoReader.GetClass() != ctx->GetStringClass()) {
+    if (protoReader.GetClass() != ptypes->coreString->GetRuntimeClass()) {
         return nullptr;
     }
     return reinterpret_cast<void *>(JSRuntimeNewCallJSQNameBridge);

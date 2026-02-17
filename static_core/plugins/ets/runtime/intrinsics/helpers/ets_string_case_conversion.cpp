@@ -19,6 +19,7 @@
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/string_flatten.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 #include "unicode/locid.h"
@@ -166,7 +167,7 @@ EtsString *ConvertStringCase(EtsString *thisStr, EtsString *langTag, FastCnvt fa
     auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, coroutine, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
         auto message = "Language tag '" + ConvertToString(langTagHandle.GetPtr()) + "' is invalid or not supported";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreRangeError, message);
         return nullptr;
     }
     return ConvertStringCase(thisStrHandle, locale, fastCnvt, icuCnvt);

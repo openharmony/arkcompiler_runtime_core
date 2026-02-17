@@ -302,15 +302,15 @@ bool UnhandledObjectManager::HasRejectedPromiseObjects(EtsCoroutine *coro, bool 
 static void InvokeErrorHandlerImpl(EtsClassLinker *etsClassLinker, EtsCoroutine *coro, EtsHandle<EtsObject> &exception)
 {
     ASSERT(coro != nullptr);
-    auto descr = exception->GetClass()->GetDescriptor();
-    if (descr == panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR ||
-        descr == panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR) {
+    auto *exceptionClass = exception->GetClass();
+    auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
+    if (exceptionClass == platformTypes->coreOutOfMemoryError ||
+        exceptionClass == platformTypes->coreStackOverflowError) {
         LOG(ERROR, RUNTIME) << "Unhandled exception: " << exception->GetCoreType()->ClassAddr<Class>()->GetName();
         PROCESS_EXIT(1);
         UNREACHABLE();
     }
     coro->ClearException();
-    auto *platformTypes = etsClassLinker->GetEtsClassLinkerExtension()->GetPlatformTypes();
     auto *method = platformTypes->coreStdProcessHandleUncaughtError->GetPandaMethod();
     ASSERT(method != nullptr);
     std::array args = {Value(exception->GetCoreType())};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
@@ -57,11 +58,11 @@ public:
 };
 
 template <typename Conv>
-static inline void RegisterBuiltinRefConvertor(JSRefConvertCache *cache, Class *klass)
+static inline void RegisterBuiltinRefConvertor(JSRefConvertCache *cache, EtsClass *klass)
 {
-    [[maybe_unused]] bool res = CheckClassInitialized<true>(klass);
+    [[maybe_unused]] bool res = CheckClassInitialized<true>(klass->GetRuntimeClass());
     ASSERT(res);
-    cache->Insert(klass, std::make_unique<JSRefConvertBuiltin<Conv>>());
+    cache->Insert(klass->GetRuntimeClass(), std::make_unique<JSRefConvertBuiltin<Conv>>());
 }
 
 static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
@@ -88,8 +89,6 @@ static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(
 }
 
 namespace {
-
-namespace descriptors = panda_file_items::class_descriptors;
 
 [[maybe_unused]] constexpr const ets_proxy::EtsClassWrapper::OverloadsMap *NO_OVERLOADS = nullptr;
 constexpr const char *NO_MIRROR = nullptr;
@@ -139,7 +138,7 @@ private:
     {
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_ERROR_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"), {"Lstd/core/String;Lescompat/ErrorOptions;:V", 2, "<ctor>"}}};
-        wError_ = RegisterClass(descriptors::ERROR, "Error", &W_ERROR_OVERLOADS);
+        wError_ = RegisterClass(PlatformTypes()->escompatError->GetDescriptor(), "Error", &W_ERROR_OVERLOADS);
 
         static const std::array STD_EXCEPTIONS_LIST = {
             // Errors
@@ -212,7 +211,7 @@ private:
             {utf::CStringAsMutf8("toSpliced"), {"II[Lstd/core/Object;:Lstd/core/Array;", 3, "toSpliced"}},
             {utf::CStringAsMutf8("push"), {"Lstd/core/Array;:I", 1, "pushArray"}}};
 
-        wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
+        wArray_ = RegisterClass(PlatformTypes()->escompatArray->GetDescriptor(), "Array", &W_ARRAY_OVERLOADS);
         wArray_->GetOverloadNameMapping()["pushOne"] = "push";
         wArray_->GetOverloadNameMapping()["pushArray"] = "push";
         NAPI_CHECK_FATAL(napi_object_seal(ctx_->GetJSEnv(), jsGlobalEts_));
@@ -220,11 +219,12 @@ private:
 
     void RegisterError()
     {
-        wRangeError_ = RegisterClassWithLeafMatcher(descriptors::RANGE_ERROR, "RangeError");
-        wReferenceError_ = RegisterClassWithLeafMatcher(descriptors::REFERENCE_ERROR, "ReferenceError");
-        wSyntaxError_ = RegisterClassWithLeafMatcher(descriptors::SYNTAX_ERROR, "SyntaxError");
-        wURIError_ = RegisterClassWithLeafMatcher(descriptors::URI_ERROR, "URIError");
-        wTypeError_ = RegisterClassWithLeafMatcher(descriptors::TYPE_ERROR, "TypeError");
+        wRangeError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreRangeError->GetDescriptor(), "RangeError");
+        wReferenceError_ =
+            RegisterClassWithLeafMatcher(PlatformTypes()->escompatReferenceError->GetDescriptor(), "ReferenceError");
+        wSyntaxError_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreSyntaxError->GetDescriptor(), "SyntaxError");
+        wURIError_ = RegisterClassWithLeafMatcher(PlatformTypes()->escompatURIError->GetDescriptor(), "URIError");
+        wTypeError_ = RegisterClassWithLeafMatcher(PlatformTypes()->escompatTypeError->GetDescriptor(), "TypeError");
         ASSERT(wRangeError_ != nullptr);
         ASSERT(wReferenceError_ != nullptr);
         ASSERT(wSyntaxError_ != nullptr);
@@ -248,7 +248,7 @@ private:
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_MAP_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
              {"{ULstd/core/Iterable;Lstd/core/Null;Lstd/core/ReadonlyArray;}:V", 2, "<ctor>"}}};
-        wMap_ = RegisterClassWithLeafMatcher(descriptors::MAP, "Map", &W_MAP_OVERLOADS);
+        wMap_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreMap->GetDescriptor(), "Map", &W_MAP_OVERLOADS);
     }
 
     void RegisterSet()
@@ -256,7 +256,7 @@ private:
         static const ets_proxy::EtsClassWrapper::OverloadsMap W_SET_OVERLOADS = {
             {utf::CStringAsMutf8("<ctor>"),
              {"{ULstd/core/Iterable;Lstd/core/Null;[Lstd/core/Object;}:V", 2, "<ctor>"}}};
-        wSet_ = RegisterClassWithLeafMatcher(descriptors::SET, "Set", &W_SET_OVERLOADS);
+        wSet_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreSet->GetDescriptor(), "Set", &W_SET_OVERLOADS);
     }
 
     void RegisterDate()
@@ -268,7 +268,7 @@ private:
             {utf::CStringAsMutf8("setUTCMilliseconds"), {"I:J", 2, "setUTCMilliseconds"}},
             {utf::CStringAsMutf8("setTime"), {"J:J", 2, "setTime"}},
         };
-        wDate_ = RegisterClassWithLeafMatcher(descriptors::DATE, "Date", &W_DATE_OVERLOADS);
+        wDate_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreDate->GetDescriptor(), "Date", &W_DATE_OVERLOADS);
     }
 
     EtsObject *MArray(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -326,7 +326,7 @@ private:
 
     void RegisterObject()
     {
-        wObject_ = RegisterClass(descriptors::OBJECT, "Object");
+        wObject_ = RegisterClass(PlatformTypes()->coreObject->GetDescriptor(), "Object");
     }
 
     EtsObject *MError(InteropCtx *ctxx, napi_value jsValue, bool verified = true)
@@ -493,19 +493,19 @@ public:
 
         RegisterDate();
         // #IC4UO2
-        RegisterClassWithLeafMatcher(descriptors::MAPITERATOR, nullptr);
-        RegisterClassWithLeafMatcher(descriptors::EMPTYMAPITERATOR, nullptr);
-        RegisterClassWithLeafMatcher(descriptors::SETITERATOR, nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreMapIteratorImpl->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreEmptyMapIteratorImpl->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreSetIteratorImpl->GetDescriptor(), nullptr);
 
         RegisterMap();
         RegisterSet();
 
-        RegisterClassWithLeafMatcher(descriptors::ARRAY_ENTRIES_ITERATOR_T, nullptr);
-        RegisterClassWithLeafMatcher(descriptors::ITERATOR_RESULT, nullptr);
-        RegisterClassWithLeafMatcher(descriptors::ARRAY_KEYS_ITERATOR, nullptr);
-        RegisterClassWithLeafMatcher(descriptors::ARRAY_VALUES_ITERATOR_T, nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->escompatArrayEntriesIteratorT->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreIteratorResult->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreArrayKeysIterator->GetDescriptor(), nullptr);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreArrayValuesIteratorT->GetDescriptor(), nullptr);
 
-        RegisterClassWithLeafMatcher(descriptors::PROXY);
+        RegisterClassWithLeafMatcher(PlatformTypes()->coreReflectProxy->GetDescriptor());
 
         RegisterError();
         RegisterArray();
@@ -573,25 +573,25 @@ void RegisterBuiltinJSRefConvertors(InteropCtx *ctx)
     EtsClassLinkerExtension *linkerExt = vm->GetClassLinker()->GetEtsClassLinkerExtension();
     auto ptypes = PlatformTypes(coro);
 
-    RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, ctx->GetJSValueClass());
-    RegisterBuiltinRefConvertor<JSConvertESError>(cache, ctx->GetESErrorClass());
-    RegisterBuiltinRefConvertor<JSConvertString>(cache, ctx->GetStringClass());
-    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreLineString->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreSlicedString->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreTreeString->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertJSValue>(cache, PlatformTypes()->interopJSValue);
+    RegisterBuiltinRefConvertor<JSConvertESError>(cache, PlatformTypes()->interopESError);
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, PlatformTypes()->coreString);
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreLineString);
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreSlicedString);
+    RegisterBuiltinRefConvertor<JSConvertString>(cache, ptypes->coreTreeString);
 
-    RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, ctx->GetBigIntClass());
-    RegisterBuiltinRefConvertor<JSConvertPromise>(cache, ctx->GetPromiseClass());
-    RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, ctx->GetNullValueClass());
+    RegisterBuiltinRefConvertor<JSConvertBigInt>(cache, PlatformTypes()->coreBigInt);
+    RegisterBuiltinRefConvertor<JSConvertPromise>(cache, PlatformTypes()->corePromise);
+    RegisterBuiltinRefConvertor<JSConvertEtsNull>(cache, PlatformTypes()->coreNull);
 
-    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, ptypes->coreBoolean->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, ptypes->coreByte->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, ptypes->coreChar->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, ptypes->coreShort->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, ptypes->coreInt->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, ptypes->coreLong->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, ptypes->coreFloat->GetRuntimeClass());
-    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, ptypes->coreDouble->GetRuntimeClass());
+    RegisterBuiltinRefConvertor<JSConvertStdlibBoolean>(cache, ptypes->coreBoolean);
+    RegisterBuiltinRefConvertor<JSConvertStdlibByte>(cache, ptypes->coreByte);
+    RegisterBuiltinRefConvertor<JSConvertStdlibChar>(cache, ptypes->coreChar);
+    RegisterBuiltinRefConvertor<JSConvertStdlibShort>(cache, ptypes->coreShort);
+    RegisterBuiltinRefConvertor<JSConvertStdlibInt>(cache, ptypes->coreInt);
+    RegisterBuiltinRefConvertor<JSConvertStdlibLong>(cache, ptypes->coreLong);
+    RegisterBuiltinRefConvertor<JSConvertStdlibFloat>(cache, ptypes->coreFloat);
+    RegisterBuiltinRefConvertor<JSConvertStdlibDouble>(cache, ptypes->coreDouble);
 
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_U1, JSConvertU1>(cache, linkerExt);
     RegisterBuiltinArrayConvertor<ClassRoot::ARRAY_I32, JSConvertI32>(cache, linkerExt);

@@ -278,24 +278,17 @@ PandaEtsVM *PandaEtsVM::GetCurrent()
     return g_pandaEtsVM;
 }
 
-static mem::Reference *PreallocSpecialReference(PandaEtsVM *vm, const char *desc, bool nonMovable = false)
+static mem::Reference *PreallocSpecialReference(PandaEtsVM *vm, EtsClass *cls, bool nonMovable = false)
 {
-    EtsClass *cls = vm->GetClassLinker()->GetClass(desc);
-    if (cls == nullptr) {
-        LOG(FATAL, RUNTIME) << "Cannot find a class for special object " << desc;
-    }
     EtsObject *obj = nonMovable ? EtsObject::CreateNonMovable(cls) : EtsObject::Create(cls);
     if (obj == nullptr) {
-        LOG(FATAL, RUNTIME) << "Cannot preallocate a special object " << desc;
+        LOG(FATAL, RUNTIME) << "Cannot preallocate a special object " << cls->GetDescriptor();
     }
     return vm->GetGlobalObjectStorage()->Add(obj->GetCoreType(), ark::mem::Reference::ObjectType::GLOBAL);
 }
 
-static mem::Reference *PreallocOOMError(PandaEtsVM *vm)
+static mem::Reference *PreallocOOMError(EtsCoroutine *coro, PandaEtsVM *vm)
 {
-    auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-
     auto *oom = EtsOutOfMemoryError::Create(coro);
     if (oom == nullptr) {
         LOG(FATAL, RUNTIME) << "Cannot preallocate OOM error";
@@ -317,9 +310,6 @@ bool PandaEtsVM::Initialize()
     classLinker_->GetEtsClassLinkerExtension()->InitializeBuiltinClasses();
 
     if (Runtime::GetOptions().ShouldLoadBootPandaFiles()) {
-        // NOLINTNEXTLINE(google-build-using-namespace)
-        using namespace panda_file_items::class_descriptors;
-
         ASSERT(Thread::GetCurrent() != nullptr);
         ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
         auto *coro = EtsCoroutine::GetCurrent();
@@ -330,9 +320,9 @@ bool PandaEtsVM::Initialize()
         ASSERT(PlatformTypes(coro) != nullptr);
 
         // Should be invoked after PlatformTypes is initialized in coroutine.
-        oomObjRef_ = PreallocOOMError(this);
-        nullValueRef_ = PreallocSpecialReference(this, NULL_VALUE.data(), true);
-        finalizableWeakRefList_ = PreallocSpecialReference(this, FINALIZABLE_WEAK_REF.data());
+        oomObjRef_ = PreallocOOMError(coro, this);
+        nullValueRef_ = PreallocSpecialReference(this, PlatformTypes(coro)->coreNull, true);
+        finalizableWeakRefList_ = PreallocSpecialReference(this, PlatformTypes(coro)->coreFinalizableWeakRef);
 
         coro->SetupNullValue(GetNullValue());
 
@@ -372,7 +362,7 @@ bool PandaEtsVM::InitializeFinish()
 {
     if (Runtime::GetOptions().ShouldLoadBootPandaFiles()) {
         // Preinitialize StackOverflowError, so we don't need to do this when stack overflow occurred
-        EtsClass *cls = classLinker_->GetClass(panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR.data());
+        EtsClass *cls = PlatformTypes()->coreStackOverflowError;
         if (cls == nullptr) {
             LOG(FATAL, ETS) << "Cannot preinitialize StackOverflowError";
             return false;
@@ -523,22 +513,15 @@ bool PandaEtsVM::CheckEntrypointSignature(Method *entrypoint)
     }
 
     auto name = pf->GetStringData(pda.GetReferenceType(0));
-    std::string_view expectedName(panda_file_items::class_descriptors::STRING_ARRAY);
+    auto *expectedClass = PlatformTypes()->coreStringFixedArray;
 
-    return utf::IsEqual({name.data, name.utf16Length},
-                        {utf::CStringAsMutf8(expectedName.data()), expectedName.length()});
+    return utf::IsEqual({name.data, name.utf16Length}, {utf::CStringAsMutf8(expectedClass->GetDescriptor()),
+                                                        std::strlen(expectedClass->GetDescriptor())});
 }
 
 static EtsObjectArray *CreateArgumentsArray(const std::vector<std::string> &args, PandaEtsVM *etsVm)
 {
-    ASSERT(etsVm != nullptr);
-
-    const char *classDescripor = panda_file_items::class_descriptors::STRING_ARRAY.data();
-    EtsClass *arrayKlass = etsVm->GetClassLinker()->GetClass(classDescripor);
-    if (arrayKlass == nullptr) {
-        LOG(FATAL, RUNTIME) << "Class " << classDescripor << " not found";
-        return nullptr;
-    }
+    EtsClass *arrayKlass = PlatformTypes(etsVm)->coreStringFixedArray;
 
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);

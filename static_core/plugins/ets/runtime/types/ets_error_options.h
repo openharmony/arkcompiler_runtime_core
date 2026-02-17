@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_ERROR_OPTIONS_H
 #define PANDA_PLUGINS_ETS_ERROR_OPTIONS_H
 
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "types/ets_primitives.h"
@@ -63,8 +64,7 @@ public:
 
     inline static EtsErrorOptions *Create(EtsCoroutine *etsCoroutine)
     {
-        EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetClass(
-            panda_file_items::class_descriptors::ERROR_OPTIONS_IMPL.data());
+        EtsClass *klass = PlatformTypes(etsCoroutine)->coreErrorOptionsImpl;
         EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
         return reinterpret_cast<EtsErrorOptions *>(etsObject);
     }

@@ -18,13 +18,29 @@
 #include "ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
-#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "types/ets_method.h"
 
-// NOLINTNEXTLINE(google-build-using-namespace)
-using namespace ark::ets::panda_file_items;
-
 namespace ark::ets {
+
+namespace {
+
+static constexpr std::string_view FIELDS_ACTUAL_LENGTH = "actualLength";
+static constexpr std::string_view FIELDS_BOOLEAN_FALSE = "FALSE";
+static constexpr std::string_view FIELDS_BOOLEAN_TRUE = "TRUE";
+static constexpr std::string_view FIELDS_BUF = "buf";
+static constexpr std::string_view FIELDS_BUFFER = "buffer";
+static constexpr std::string_view FIELDS_BYTE_OFFSET = "byteOffset";
+static constexpr std::string_view FIELDS_BYTE_OFFSET_INT = "byteOffsetInt";
+static constexpr std::string_view FIELDS_COMPRESS = "compress";
+static constexpr std::string_view FIELDS_DATA = "data";
+static constexpr std::string_view FIELDS_DATA_ADDRESS = "dataAddress";
+static constexpr std::string_view FIELDS_INDEX = "index";
+static constexpr std::string_view FIELDS_LENGTH = "length";
+static constexpr std::string_view FIELDS_LENGTH_INT = "lengthInt";
+static constexpr std::string_view FIELDS_VALUE = "value";
+
+}  // namespace
+
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
@@ -309,7 +325,7 @@ bool EtsRuntimeInterface::IsMethodTypedArrayCtor(MethodPtr method) const
 
 bool EtsRuntimeInterface::IsFieldTypedArrayLengthInt(FieldPtr field) const
 {
-    return IsClassEscompatTypedArray(FieldCast(field)->GetClass()) && GetFieldName(field) == fields::LENGTH_INT;
+    return IsClassEscompatTypedArray(FieldCast(field)->GetClass()) && GetFieldName(field) == FIELDS_LENGTH_INT;
 }
 
 uint32_t EtsRuntimeInterface::GetClassOffsetObjectsArray(MethodPtr method) const
@@ -330,22 +346,22 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayClass() const
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayBuffer(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::BUFFER.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUFFER.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayByteOffset(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::BYTE_OFFSET.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BYTE_OFFSET.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatUnsignedTypedArrayByteOffsetInt(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::BYTE_OFFSET_INT.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BYTE_OFFSET_INT.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatTypedArrayLengthInt(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::LENGTH_INT.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_LENGTH_INT.data()));
 }
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass() const
@@ -355,13 +371,13 @@ EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetEscompatArrayBufferClass()
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferDataAddress(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::DATA_ADDRESS.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_DATA_ADDRESS.data()));
 }
 
 // NOTE(@volkovanton, #31053) Will be refactored as a follow-up.
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBufferManagedData(ClassPtr klass) const
 {
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::DATA.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_DATA.data()));
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
@@ -392,41 +408,41 @@ EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetInstanceMethodByName(Clas
 
 bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
 {
-    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == fields::BOOLEAN_FALSE;
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == FIELDS_BOOLEAN_FALSE;
 }
 
 bool EtsRuntimeInterface::IsFieldBooleanTrue([[maybe_unused]] FieldPtr field) const
 {
-    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == fields::BOOLEAN_TRUE;
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == FIELDS_BOOLEAN_TRUE;
 }
 
 bool EtsRuntimeInterface::IsFieldBooleanValue([[maybe_unused]] FieldPtr field) const
 {
-    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == fields::VALUE;
+    return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == FIELDS_VALUE;
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderBuffer(ClassPtr klass) const
 {
     ASSERT(IsClassStringBuilder(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::BUF.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUF.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderIndex(ClassPtr klass) const
 {
     ASSERT(IsClassStringBuilder(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::INDEX.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_INDEX.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderLength(ClassPtr klass) const
 {
     ASSERT(IsClassStringBuilder(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::LENGTH.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_LENGTH.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress(ClassPtr klass) const
 {
     ASSERT(IsClassStringBuilder(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::COMPRESS.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_COMPRESS.data()));
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetGetterStringBuilderStringLength() const
@@ -437,23 +453,23 @@ EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetGetterStringBuilderString
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayActualLength(ClassPtr klass) const
 {
     ASSERT(IsClassEscompatArray(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::ACTUAL_LENGTH.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_ACTUAL_LENGTH.data()));
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetEscompatArrayBuffer(ClassPtr klass) const
 {
     ASSERT(IsClassEscompatArray(klass));
-    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(fields::BUFFER.data()));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8(FIELDS_BUFFER.data()));
 }
 
 bool EtsRuntimeInterface::IsFieldStringBuilderBuffer(FieldPtr field) const
 {
-    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == fields::BUF;
+    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == FIELDS_BUF;
 }
 
 bool EtsRuntimeInterface::IsFieldStringBuilderIndex(FieldPtr field) const
 {
-    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == fields::INDEX;
+    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == FIELDS_INDEX;
 }
 
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const

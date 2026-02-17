@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "types/ets_array.h"
@@ -29,8 +30,7 @@ extern "C" EtsObject *StdCoreReflectInternalsCreateFixedArray(EtsClass *componen
 
     auto *coro = EtsCoroutine::GetCurrent();
     if (UNLIKELY(length < 0)) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR,
-                               "Array length can't be negative");
+        ets::ThrowEtsException(coro, PlatformTypes(coro)->coreIllegalArgumentError, "Array length can't be negative");
         return nullptr;
     }
 

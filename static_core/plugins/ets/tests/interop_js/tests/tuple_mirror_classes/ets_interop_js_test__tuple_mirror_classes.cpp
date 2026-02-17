@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,6 @@
 #include "runtime/include/thread_scopes.h"
 
 namespace ark::ets::interop::js::testing {
-
-namespace descriptors = panda_file_items::class_descriptors;
 
 class EtsInteropTupleMirroredClassTest : public EtsInteropTest {};
 
@@ -51,7 +49,7 @@ static void CheckOffsetOfFields(const char *className, const std::vector<MemberI
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple1)
 {
-    CheckOffsetOfFields(descriptors::TUPLE1.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple1;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple1MirroredClass = EtsTuple<1>::FromEtsObject(nullptr);
@@ -64,7 +62,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple1)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple2)
 {
-    CheckOffsetOfFields(descriptors::TUPLE2.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple2;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple2MirroredClass = EtsTuple<2>::FromEtsObject(nullptr);
@@ -79,7 +77,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple2)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple3)
 {
-    CheckOffsetOfFields(descriptors::TUPLE3.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple3;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple3MirroredClass = EtsTuple<3>::FromEtsObject(nullptr);
@@ -96,7 +94,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple3)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple4)
 {
-    CheckOffsetOfFields(descriptors::TUPLE4.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple4;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple4MirroredClass = EtsTuple<4>::FromEtsObject(nullptr);
@@ -115,7 +113,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple4)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple5)
 {
-    CheckOffsetOfFields(descriptors::TUPLE5.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple5;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple5MirroredClass = EtsTuple<5>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -135,7 +133,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple5)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple6)
 {
-    CheckOffsetOfFields(descriptors::TUPLE6.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple6;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple6MirroredClass = EtsTuple<6>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -157,7 +155,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple6)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple7)
 {
-    CheckOffsetOfFields(descriptors::TUPLE7.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple7;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple7MirroredClass = EtsTuple<7>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -181,7 +179,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple7)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple8)
 {
-    CheckOffsetOfFields(descriptors::TUPLE8.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple8;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple8MirroredClass = EtsTuple<8>::FromEtsObject(nullptr);
@@ -208,7 +206,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple8)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple9)
 {
-    CheckOffsetOfFields(descriptors::TUPLE9.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple9;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple9MirroredClass = EtsTuple<9>::FromEtsObject(nullptr);
@@ -237,7 +235,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple9)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple10)
 {
-    CheckOffsetOfFields(descriptors::TUPLE10.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple10;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple10MirroredClass = EtsTuple<10>::FromEtsObject(nullptr);
@@ -267,7 +265,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple10)
 }
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple11)
 {
-    CheckOffsetOfFields(descriptors::TUPLE11.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple11;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple11MirroredClass = EtsTuple<11>::FromEtsObject(nullptr);
@@ -300,7 +298,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple11)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple12)
 {
-    CheckOffsetOfFields(descriptors::TUPLE12.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple12;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple12MirroredClass = EtsTuple<12>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -334,7 +332,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple12)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple13)
 {
-    CheckOffsetOfFields(descriptors::TUPLE13.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple13;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple13MirroredClass = EtsTuple<13>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -370,7 +368,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple13)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple14)
 {
-    CheckOffsetOfFields(descriptors::TUPLE14.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple14;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple14MirroredClass = EtsTuple<14>::FromEtsObject(nullptr);
@@ -409,7 +407,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple14)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple15)
 {
-    CheckOffsetOfFields(descriptors::TUPLE15.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple15;", []() -> std::vector<MemberInfo> {
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple15MirroredClass = EtsTuple<15>::FromEtsObject(nullptr);
         return std::vector<MemberInfo> {
@@ -449,7 +447,7 @@ TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple15)
 
 TEST_F(EtsInteropTupleMirroredClassTest, Filed_Tuple16)
 {
-    CheckOffsetOfFields(descriptors::TUPLE16.data(), []() -> std::vector<MemberInfo> {
+    CheckOffsetOfFields("Lstd/core/Tuple16;", []() -> std::vector<MemberInfo> {
         // just for get the offset
         // NOLINTNEXTLINE(readability-magic-numbers)
         auto tuple16MirroredClass = EtsTuple<16>::FromEtsObject(nullptr);

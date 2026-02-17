@@ -63,42 +63,50 @@ static AniMethodType GetAniMethodType(Method *method)
     panda_file::MethodDataAccessor mda(pf, method->GetFileId());
     mda.EnumerateAnnotations([&pf, &napiType](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::ANI_UNSAFE_QUICK) {
+        auto className = pf.GetStringData(ada.GetClassId()).data;
+        if (utf::IsEqual(className, utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_annotationsAniUnsafeQuick))) {
             napiType = AniMethodType::FAST;
-        } else if (className == panda_file_items::class_descriptors::ANI_UNSAFE_DIRECT) {
+        } else if (utf::IsEqual(className,
+                                utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_annotationsAniUnsafeDirect))) {
             napiType = AniMethodType::CRITICAL;
         }
     });
     return napiType;
 }
 
-static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
+static EtsClass *GetClassLinkerErrorClass(EtsPlatformTypes const *pt, ClassLinker::Error error)
 {
     switch (error) {
         case ClassLinker::Error::CLASS_NOT_FOUND:
-            return panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR;
+            return pt->coreLinkerClassNotFoundError;
         case ClassLinker::Error::FIELD_NOT_FOUND:
-            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR;
+            return pt->coreLinkerUnresolvedFieldError;
         case ClassLinker::Error::METHOD_NOT_FOUND:
-            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR;
+            return pt->coreLinkerUnresolvedMethodError;
         case ClassLinker::Error::NO_CLASS_DEF:
-            return panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR;
+            return pt->coreLinkerUnresolvedClassError;
         case ClassLinker::Error::CLASS_CIRCULARITY:
-            return panda_file_items::class_descriptors::LINKER_TYPE_CIRCULARITY_ERROR;
+            return pt->coreLinkerTypeCircularityError;
         case ClassLinker::Error::OVERRIDES_FINAL:
         case ClassLinker::Error::MULTIPLE_OVERRIDE:
         case ClassLinker::Error::MULTIPLE_IMPLEMENT:
-            return panda_file_items::class_descriptors::LINKER_METHOD_CONFLICT_ERROR;
+            return pt->coreLinkerMethodConflictError;
         default:
-            LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
+            LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error: " << helpers::ToUnderlying(error);
             UNREACHABLE();
     }
 }
 
 void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, const PandaString &message)
 {
-    ThrowEtsException(EtsCoroutine::GetCurrent(), GetClassLinkerErrorDescriptor(error), message);
+    auto *pt = PlatformTypes();
+    EtsClass *errCls = pt == nullptr ? nullptr : GetClassLinkerErrorClass(pt, error);
+    if (errCls == nullptr) {
+        LOG(FATAL, CLASS_LINKER) << "Exception occurs during class linker initialization: "
+                                 << helpers::ToUnderlying(error);
+        UNREACHABLE();
+    }
+    ThrowEtsException(EtsCoroutine::GetCurrent(), errCls, message);
 }
 
 void EtsClassLinkerExtension::InitializeClassRoots()
@@ -195,13 +203,13 @@ const uint8_t *EtsClassLinkerExtension::GetStringClassDescriptor(ClassRoot strCl
 {
     switch (strCls) {
         case ClassRoot::LINE_STRING:
-            return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINE_STRING.data());
+            return utf::CStringAsMutf8("Lstd/core/LineString;");
 
         case ClassRoot::SLICED_STRING:
-            return utf::CStringAsMutf8(panda_file_items::class_descriptors::SLICED_STRING.data());
+            return utf::CStringAsMutf8("Lstd/core/SlicedString;");
 
         case ClassRoot::TREE_STRING:
-            return utf::CStringAsMutf8(panda_file_items::class_descriptors::TREE_STRING.data());
+            return utf::CStringAsMutf8("Lstd/core/TreeString;");
 
         default:
             UNREACHABLE();
@@ -241,9 +249,6 @@ bool EtsClassLinkerExtension::InitializeStringClass([[maybe_unused]] Class *clas
 
 bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
-    // NOLINTNEXTLINE(google-build-using-namespace)
-    using namespace panda_file_items::class_descriptors;
-
     auto *coroutine = ets::EtsCoroutine::GetCurrent();
     langCtx_ = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     ASSERT(coroutine != nullptr);
@@ -273,10 +278,10 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         LOG(ERROR, CLASS_LINKER) << "Cannot create String classes";
         return false;
     }
-
-    auto *jsValueClass = GetClassLinker()->GetClass(utf::CStringAsMutf8(JS_VALUE.data()), false, GetBootContext());
+    auto *jsValueClass =
+        GetClassLinker()->GetClass(utf::CStringAsMutf8("Lstd/interop/js/JSValue;"), false, GetBootContext());
     if (jsValueClass == nullptr) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << JS_VALUE << "'";
+        LOG(ERROR, CLASS_LINKER) << "Cannot find XRef class";
         return false;
     }
     jsValueClass->SetXRefClass();
@@ -739,9 +744,6 @@ void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
 
 void EtsClassLinkerExtension::InitializeBuiltinClasses()
 {
-    // NOLINTNEXTLINE(google-build-using-namespace)
-    using namespace panda_file_items::class_descriptors;
-
     InitializeBuiltinSpecialClasses();
 
     auto *coro = EtsCoroutine::GetCurrent();

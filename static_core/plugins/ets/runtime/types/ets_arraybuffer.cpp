@@ -186,8 +186,7 @@ bool EtsEscompatArrayBuffer::DoBoundaryCheck(EtsInt pos) const
     if (pos < 0 || pos >= GetByteLength()) {
         PandaString message = "ArrayBuffer position ";
         message.append(ToPandaString(pos)).append(" is out of bounds");
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR,
-                          message.c_str());
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreIndexOutOfBoundsError, message.c_str());
         return false;
     }
     return true;

@@ -155,7 +155,7 @@ static void ThrowUnresolvedMethodException(Method *method, EtsCoroutine *corouti
 {
     PandaStringStream ss;
     ss << "No implementation found for " << method->GetFullName();
-    ThrowEtsException(coroutine, panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR, ss.str());
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreLinkerUnresolvedMethodError, ss.str());
 }
 
 // Disable warning because the function uses ARCH_COPY_METHOD_ARGS macro.
@@ -469,7 +469,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     }
     ASSERT(!currentCoro->HasPendingException());
     if (coroManager->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(currentCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+        ThrowEtsException(currentCoro, PlatformTypes(currentCoro)->coreInvalidCoroutineOperationError,
                           "Cannot call async in the current context!");
         return 0;
     }

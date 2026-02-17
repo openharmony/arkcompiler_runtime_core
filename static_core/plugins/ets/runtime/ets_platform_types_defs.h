@@ -19,155 +19,216 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // ETS runtime type dependencies list. Each entry MUST follow the common naming schema.
-// CC-OFFNXT(G.PRE.06) macro list
-#define ETS_PLATFORM_TYPES_LIST(T, I, S)                                                                             \
-    /* Core runtime type system */                                                                                   \
-    T("Lstd/core/Object;", coreObject)                                                                               \
-    T("Lstd/core/Class;", coreClass)                                                                                 \
-    T("Lstd/core/String;", coreString)                                                                               \
-    T("Lstd/core/LineString;", coreLineString)                                                                       \
-    T("Lstd/core/SlicedString;", coreSlicedString)                                                                   \
-    T("Lstd/core/TreeString;", coreTreeString)                                                                       \
-    /* Builtin numerics */                                                                                           \
-    T("Lstd/core/Boolean;", coreBoolean)                                                                             \
-    T("Lstd/core/Byte;", coreByte)                                                                                   \
-    T("Lstd/core/Char;", coreChar)                                                                                   \
-    T("Lstd/core/Short;", coreShort)                                                                                 \
-    T("Lstd/core/Int;", coreInt)                                                                                     \
-    T("Lstd/core/Long;", coreLong)                                                                                   \
-    T("Lstd/core/Float;", coreFloat)                                                                                 \
-    T("Lstd/core/Double;", coreDouble)                                                                               \
-    /* Builtin language support */                                                                                   \
-    T("Lstd/core/BigInt;", coreBigInt)                                                                               \
-    T("Lescompat/Error;", escompatError)                                                                             \
-    T("Lstd/core/Function;", coreFunction)                                                                           \
-    I("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)           \
-    T("Lstd/core/Tuple;", coreTuple)                                                                                 \
-    T("Lstd/core/TupleN;", coreTupleN)                                                                               \
-    /* Runtime linkage */                                                                                            \
-    T("Lstd/core/RuntimeLinker;", coreRuntimeLinker)                                                                 \
-    I("Lstd/core/RuntimeLinker;", "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",               \
-      coreRuntimeLinkerLoadClass)                                                                                    \
-    T("Lstd/core/BootRuntimeLinker;", coreBootRuntimeLinker)                                                         \
-    T("Lstd/core/AbcRuntimeLinker;", coreAbcRuntimeLinker)                                                           \
-    T("Lstd/core/MemoryRuntimeLinker;", coreMemoryRuntimeLinker)                                                     \
-    T("Lstd/core/AbcFile;", coreAbcFile)                                                                             \
-    /* Error handling */                                                                                             \
-    T("Lstd/core/OutOfMemoryError;", coreOutOfMemoryError)                                                           \
-    T("Lstd/core/StackTraceElement;", coreStackTraceElement)                                                         \
-    T("Lstd/core/LinkerClassNotFoundError;", coreLinkerClassNotFoundError)                                           \
-    T("Lescompat/ErrorOptions;", escompatErrorOptions)                                                               \
-    T("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
-    /* StringBuilder */                                                                                              \
-    T("Lstd/core/StringBuilder;", coreStringBuilder)                                                                 \
-    I("Lstd/core/StringBuilder;", "<ctor>", ":V", coreStringBuilderDefaultConstructor)                               \
-    I("Lstd/core/StringBuilder;", "<ctor>", "[C:V", coreStringBuilderConstructorWithCharArrayArg)                    \
-    I("Lstd/core/StringBuilder;", "<ctor>", "Lstd/core/String;:V", coreStringBuilderConstructorWithStringArg)        \
-    I("Lstd/core/StringBuilder;", "%%get-stringLength", ":I", coreStringBuilderStringLength)                         \
-    I("Lstd/core/StringBuilder;", "append", "Lstd/core/String;:Lstd/core/StringBuilder;",                            \
-      coreStringBuilderAppendString)                                                                                 \
-    I("Lstd/core/StringBuilder;", "toString", ":Lstd/core/String;", coreStringBuilderToString)                       \
-    /* String */                                                                                                     \
-    I("Lstd/core/String;", "concat", "Lstd/core/Array;:Lstd/core/String;", coreStringConcat)                         \
-    I("Lstd/core/String;", "getLength", ":I", coreStringGetLength)                                                   \
-    I("Lstd/core/String;", "%%get-length", ":I", coreStringLength)                                                   \
-    /* Object array */                                                                                               \
-    T("[Lstd/core/Object;", coreObjectArray)                                                                         \
-    /* Concurrency */                                                                                                \
-    T("Lstd/core/Promise;", corePromise)                                                                             \
-    T("Lstd/core/Job;", coreJob)                                                                                     \
-    I("Lstd/core/Promise;", "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V",                                 \
-      corePromiseSubscribeOnAnotherPromise)                                                                          \
-    T("Lstd/core/PromiseRef;", corePromiseRef)                                                                       \
-    T("Lstd/core/WaitersList;", coreWaitersList)                                                                     \
-    T("Lstd/core/Mutex;", coreMutex)                                                                                 \
-    T("Lstd/core/Event;", coreEvent)                                                                                 \
-    T("Lstd/core/CondVar;", coreCondVar)                                                                             \
-    T("Lstd/core/QueueSpinlock;", coreQueueSpinlock)                                                                 \
-    T("Lstd/core/RWLock;", coreRWLock)                                                                               \
-    /* Taskpool */                                                                                                   \
-    T("Lstd/concurrency/taskpool;", stdConcurrencyTaskpool)                                                          \
-    S("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerThreshold", "I:V",                                      \
-      stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerThreshold)                                                       \
-    S("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerMonitorInterval", "I:V",                                \
-      stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval)                                                 \
-    S("Lstd/concurrency/taskpool;", "retriggerTaskPoolBlockedExpandMonitor", ":V",                                   \
-      stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor)                                                   \
-    /* Finalization */                                                                                               \
-    T("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                     \
-    T("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                       \
-    T("Lstd/core/FinalizationRegistry;", coreFinalizationRegistry)                                                   \
-    S("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinRegNode;:V",                                   \
-      coreFinalizationRegistryExecCleanup)                                                                           \
-    T("Lstd/core/FinRegNode;", coreFinRegNode)                                                                       \
-    /* Containers */                                                                                                 \
-    T("Lstd/core/Array;", escompatArray)                                                                             \
-    I("Lstd/core/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                             \
-    I("Lstd/core/Array;", "%%get-length", ":I", escompatArrayGetLength)                                              \
-    I("Lstd/core/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                          \
-    I("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                         \
-    /* ArrayBuffer */                                                                                                \
-    T("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
-    T("Lstd/core/DataView;", coreDataView)                                                                           \
-    T("Lescompat/Int8Array;", escompatInt8Array)                                                                     \
-    T("Lescompat/Uint8Array;", escompatUint8Array)                                                                   \
-    T("Lescompat/Uint8ClampedArray;", escompatUint8ClampedArray)                                                     \
-    T("Lescompat/Int16Array;", escompatInt16Array)                                                                   \
-    T("Lescompat/Uint16Array;", escompatUint16Array)                                                                 \
-    T("Lescompat/Int32Array;", escompatInt32Array)                                                                   \
-    T("Lescompat/Uint32Array;", escompatUint32Array)                                                                 \
-    T("Lescompat/Float32Array;", escompatFloat32Array)                                                               \
-    T("Lescompat/Float64Array;", escompatFloat64Array)                                                               \
-    T("Lescompat/BigInt64Array;", escompatBigInt64Array)                                                             \
-    T("Lescompat/BigUint64Array;", escompatBigUint64Array)                                                           \
-    /* Containers */                                                                                                 \
-    T("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                        \
-    T("Lstd/core/ArrayLike;", coreArrayLike)                                                                         \
-    T("Lstd/core/Record;", coreRecord)                                                                               \
-    I("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:Lstd/core/Object;",   \
-      coreRecordGet)                                                                                                 \
-    I("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}Lstd/core/Object;:V",  \
-      coreRecordSet)                                                                                                 \
-    T("Lstd/core/Map;", coreMap)                                                                                     \
-    T("Lstd/core/Set;", coreSet)                                                                                     \
-    /* Interop */                                                                                                    \
-    T("Lstd/interop/js/JSValue;", interopJSValue)                                                                    \
-    T("Lstd/interop/ESValue;", interopESValue)                                                                       \
-    /* TypeAPI */                                                                                                    \
-    T("Lstd/core/Field;", coreField)                                                                                 \
-    T("Lstd/core/Method;", coreMethod)                                                                               \
-    T("Lstd/core/TypeAPIParameter;", coreTypeAPIParameter)                                                           \
-    T("Lstd/core/ClassType;", coreClassType)                                                                         \
-    T("Lstd/core/reflect/InstanceField;", coreReflectInstanceField)                                                  \
-    T("Lstd/core/reflect/InstanceMethod;", coreReflectInstanceMethod)                                                \
-    T("Lstd/core/reflect/StaticField;", coreReflectStaticField)                                                      \
-    T("Lstd/core/reflect/StaticMethod;", coreReflectStaticMethod)                                                    \
-    T("Lstd/core/reflect/Constructor;", coreReflectConstructor)                                                      \
-    /* Proxy */                                                                                                      \
-    T("Lstd/core/reflect/Proxy;", coreReflectProxy)                                                                  \
-    I("Lstd/core/reflect/Proxy;", "<ctor>", "Lstd/core/reflect/InvocationHandler;:V", coreReflectProxyConstructor)   \
-    I("Lstd/core/reflect/Proxy;", "getHandler", ":Lstd/core/reflect/InvocationHandler;", coreReflectProxyGetHandler) \
-    S("Lstd/core/reflect/Proxy;", "invoke",                                                                          \
-      "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[Lstd/core/Object;:Lstd/core/Object;",               \
-      coreReflectProxyInvoke)                                                                                        \
-    S("Lstd/core/reflect/Proxy;", "invokeSet",                                                                       \
-      "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;Lstd/core/Object;:V", coreReflectProxyInvokeSet)     \
-    S("Lstd/core/reflect/Proxy;", "invokeGet",                                                                       \
-      "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:Lstd/core/Object;", coreReflectProxyInvokeGet)      \
-    /* Process */                                                                                                    \
-    T("Lstd/core/StdProcess;", coreStdProcess)                                                                       \
-    S("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;:V", coreStdProcessListUnhandledJobs)           \
-    S("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;:V", coreStdProcessListUnhandledPromises)   \
-    S("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)      \
-    /* JSON */                                                                                                       \
-    T("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                   \
-    T("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                       \
-    T("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                           \
-    I("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/String;", coreJsonSerializableToJSON)                     \
-    /* RegExp */                                                                                                     \
-    T("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
-    /* Date */                                                                                                       \
-    T("Lstd/core/Date;", coreDate)                                                                                   \
+// CC-OFFNXTP(G.PRE.06) macro list
+#define ETS_PLATFORM_TYPES_LIST(TP, AN, IM, SM)                                                                       \
+    /* Core runtime type system */                                                                                    \
+    TP("Lstd/core/Object;", coreObject)                                                                               \
+    TP("Lstd/core/Class;", coreClass)                                                                                 \
+    TP("Lstd/core/Null;", coreNull)                                                                                   \
+    TP("Lstd/core/String;", coreString)                                                                               \
+    TP("Lstd/core/LineString;", coreLineString)                                                                       \
+    TP("Lstd/core/SlicedString;", coreSlicedString)                                                                   \
+    TP("Lstd/core/TreeString;", coreTreeString)                                                                       \
+    TP("[Lstd/core/String;", coreStringFixedArray)                                                                    \
+    /* Builtin numerics */                                                                                            \
+    TP("Lstd/core/Boolean;", coreBoolean)                                                                             \
+    TP("Lstd/core/Byte;", coreByte)                                                                                   \
+    TP("Lstd/core/Char;", coreChar)                                                                                   \
+    TP("Lstd/core/Short;", coreShort)                                                                                 \
+    TP("Lstd/core/Int;", coreInt)                                                                                     \
+    TP("Lstd/core/Long;", coreLong)                                                                                   \
+    TP("Lstd/core/Float;", coreFloat)                                                                                 \
+    TP("Lstd/core/Double;", coreDouble)                                                                               \
+    /* Builtin language support */                                                                                    \
+    TP("Lstd/core/BigInt;", coreBigInt)                                                                               \
+    TP("Lescompat/Error;", escompatError)                                                                             \
+    TP("Lstd/core/Function;", coreFunction)                                                                           \
+    IM("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)           \
+    TP("Lstd/core/Tuple;", coreTuple)                                                                                 \
+    TP("Lstd/core/TupleN;", coreTupleN)                                                                               \
+    TP("Lstd/core/BaseEnum;", coreBaseEnum)                                                                           \
+    /* Builtin language annotations */                                                                                \
+    AN("Lstd/annotations/InterfaceObjectLiteral;", annotationsInterfaceObjectLiteral)                                 \
+    AN("Lstd/annotations/functions/OptionalParametersAnnotation;", annotationsFunctionsOptionalParametersAnnotation)  \
+    AN("Lets/annotation/Module;", etsAnnotationModule)                                                                \
+    AN("Lets/annotation/FunctionalReference;", etsAnnotationFunctionalReference)                                      \
+    AN("Lets/coroutine/Async;", etsCoroutineAsync)                                                                    \
+    /* ANI */                                                                                                         \
+    AN("Lstd/annotations/ani/unsafe/Quick;", annotationsAniUnsafeQuick)                                               \
+    AN("Lstd/annotations/ani/unsafe/Direct;", annotationsAniUnsafeDirect)                                             \
+    /* Runtime linkage */                                                                                             \
+    TP("Lstd/core/RuntimeLinker;", coreRuntimeLinker)                                                                 \
+    IM("Lstd/core/RuntimeLinker;", "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",               \
+       coreRuntimeLinkerLoadClass)                                                                                    \
+    TP("Lstd/core/BootRuntimeLinker;", coreBootRuntimeLinker)                                                         \
+    TP("Lstd/core/AbcRuntimeLinker;", coreAbcRuntimeLinker)                                                           \
+    TP("Lstd/core/MemoryRuntimeLinker;", coreMemoryRuntimeLinker)                                                     \
+    TP("Lstd/core/AbcFile;", coreAbcFile)                                                                             \
+    TP("Lstd/core/AbcFileNotFoundError;", coreAbcFileNotFoundError)                                                   \
+    /* Linker errors */                                                                                               \
+    TP("Lstd/core/LinkerClassNotFoundError;", coreLinkerClassNotFoundError)                                           \
+    TP("Lstd/core/LinkerUnresolvedFieldError;", coreLinkerUnresolvedFieldError)                                       \
+    TP("Lstd/core/LinkerUnresolvedMethodError;", coreLinkerUnresolvedMethodError)                                     \
+    TP("Lstd/core/LinkerUnresolvedClassError;", coreLinkerUnresolvedClassError)                                       \
+    TP("Lstd/core/LinkerTypeCircularityError;", coreLinkerTypeCircularityError)                                       \
+    TP("Lstd/core/LinkerMethodConflictError;", coreLinkerMethodConflictError)                                         \
+    /* Core error handling */                                                                                         \
+    TP("Lstd/core/OutOfMemoryError;", coreOutOfMemoryError)                                                           \
+    TP("Lstd/core/StackOverflowError;", coreStackOverflowError)                                                       \
+    TP("Lstd/core/StackTraceElement;", coreStackTraceElement)                                                         \
+    TP("Lstd/core/IllegalArgumentError;", coreIllegalArgumentError)                                                   \
+    TP("Lstd/core/IllegalStateError;", coreIllegalStateError)                                                         \
+    TP("Lstd/core/IllegalLockStateError;", coreIllegalLockStateError)                                                 \
+    TP("Lstd/core/UnsupportedOperationError;", coreUnsupportedOperationError)                                         \
+    TP("Lstd/core/NegativeArraySizeError;", coreNegativeArraySizeError)                                               \
+    TP("Lstd/core/InvalidCoroutineOperationError;", coreInvalidCoroutineOperationError)                               \
+    TP("Lstd/core/RangeError;", coreRangeError)                                                                       \
+    TP("Lstd/core/SyntaxError;", coreSyntaxError)                                                                     \
+    TP("Lstd/core/IndexOutOfBoundsError;", coreIndexOutOfBoundsError)                                                 \
+    TP("Lstd/core/ArrayIndexOutOfBoundsError;", coreArrayIndexOutOfBoundsError)                                       \
+    TP("Lstd/core/ArgumentOutOfRangeError;", coreArgumentOutOfRangeError)                                             \
+    TP("Lstd/core/ClassCastError;", coreClassCastError)                                                               \
+    TP("Lstd/core/ExceptionInInitializerError;", coreExceptionInInitializerError)                                     \
+    TP("Lstd/core/NullPointerError;", coreNullPointerError)                                                           \
+    /* Escompat errors */                                                                                             \
+    TP("Lescompat/TypeError;", escompatTypeError)                                                                     \
+    TP("Lescompat/FormatError;", escompatFormatError)                                                                 \
+    TP("Lescompat/ReferenceError;", escompatReferenceError)                                                           \
+    TP("Lescompat/URIError;", escompatURIError)                                                                       \
+    TP("Lescompat/ErrorOptions;", escompatErrorOptions)                                                               \
+    TP("Lstd/core/ErrorOptionsImpl;", coreErrorOptionsImpl)                                                           \
+    /* ToStringCache */                                                                                               \
+    TP("Lstd/core/DoubleToStringCacheElement;", coreDoubleToStringCacheElement)                                       \
+    TP("Lstd/core/FloatToStringCacheElement;", coreFloatToStringCacheElement)                                         \
+    TP("Lstd/core/LongToStringCacheElement;", coreLongToStringCacheElement)                                           \
+    /* StringBuilder */                                                                                               \
+    TP("Lstd/core/StringBuilder;", coreStringBuilder)                                                                 \
+    IM("Lstd/core/StringBuilder;", "<ctor>", ":V", coreStringBuilderDefaultConstructor)                               \
+    IM("Lstd/core/StringBuilder;", "<ctor>", "[C:V", coreStringBuilderConstructorWithCharArrayArg)                    \
+    IM("Lstd/core/StringBuilder;", "<ctor>", "Lstd/core/String;:V", coreStringBuilderConstructorWithStringArg)        \
+    IM("Lstd/core/StringBuilder;", "%%get-stringLength", ":I", coreStringBuilderStringLength)                         \
+    IM("Lstd/core/StringBuilder;", "append", "Lstd/core/String;:Lstd/core/StringBuilder;",                            \
+       coreStringBuilderAppendString)                                                                                 \
+    IM("Lstd/core/StringBuilder;", "toString", ":Lstd/core/String;", coreStringBuilderToString)                       \
+    /* String */                                                                                                      \
+    IM("Lstd/core/String;", "concat", "Lstd/core/Array;:Lstd/core/String;", coreStringConcat)                         \
+    IM("Lstd/core/String;", "getLength", ":I", coreStringGetLength)                                                   \
+    IM("Lstd/core/String;", "%%get-length", ":I", coreStringLength)                                                   \
+    /* Object array */                                                                                                \
+    TP("[Lstd/core/Object;", coreObjectArray)                                                                         \
+    /* Concurrency */                                                                                                 \
+    TP("Lstd/core/Promise;", corePromise)                                                                             \
+    TP("Lstd/core/Job;", coreJob)                                                                                     \
+    IM("Lstd/core/Promise;", "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V",                                 \
+       corePromiseSubscribeOnAnotherPromise)                                                                          \
+    TP("Lstd/core/PromiseRef;", corePromiseRef)                                                                       \
+    TP("Lstd/core/WaitersList;", coreWaitersList)                                                                     \
+    TP("Lstd/core/Mutex;", coreMutex)                                                                                 \
+    TP("Lstd/core/Event;", coreEvent)                                                                                 \
+    TP("Lstd/core/CondVar;", coreCondVar)                                                                             \
+    TP("Lstd/core/QueueSpinlock;", coreQueueSpinlock)                                                                 \
+    TP("Lstd/core/RWLock;", coreRWLock)                                                                               \
+    /* Taskpool */                                                                                                    \
+    TP("Lstd/concurrency/taskpool;", stdConcurrencyTaskpool)                                                          \
+    SM("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerThreshold", "I:V",                                      \
+       stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerThreshold)                                                       \
+    SM("Lstd/concurrency/taskpool;", "setTaskPoolBlockedWorkerMonitorInterval", "I:V",                                \
+       stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval)                                                 \
+    SM("Lstd/concurrency/taskpool;", "retriggerTaskPoolBlockedExpandMonitor", ":V",                                   \
+       stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor)                                                   \
+    /* Finalization */                                                                                                \
+    TP("Lstd/core/BaseWeakRef;", coreBaseWeakRef)                                                                     \
+    TP("Lstd/core/FinalizableWeakRef;", coreFinalizableWeakRef)                                                       \
+    TP("Lstd/core/FinalizationRegistry;", coreFinalizationRegistry)                                                   \
+    SM("Lstd/core/FinalizationRegistry;", "execCleanup", "Lstd/core/FinRegNode;:V",                                   \
+       coreFinalizationRegistryExecCleanup)                                                                           \
+    TP("Lstd/core/FinRegNode;", coreFinRegNode)                                                                       \
+    /* Containers */                                                                                                  \
+    TP("Lstd/core/Array;", escompatArray)                                                                             \
+    IM("Lstd/core/Array;", "pop", ":Lstd/core/Object;", escompatArrayPop)                                             \
+    IM("Lstd/core/Array;", "%%get-length", ":I", escompatArrayGetLength)                                              \
+    IM("Lstd/core/Array;", "$_get", "I:Lstd/core/Object;", escompatArrayGet)                                          \
+    IM("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", escompatArraySet)                                         \
+    /* ArrayBuffer */                                                                                                 \
+    TP("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                     \
+    TP("Lstd/core/DataView;", coreDataView)                                                                           \
+    TP("Lescompat/Int8Array;", escompatInt8Array)                                                                     \
+    TP("Lescompat/Uint8Array;", escompatUint8Array)                                                                   \
+    TP("Lescompat/Uint8ClampedArray;", escompatUint8ClampedArray)                                                     \
+    TP("Lescompat/Int16Array;", escompatInt16Array)                                                                   \
+    TP("Lescompat/Uint16Array;", escompatUint16Array)                                                                 \
+    TP("Lescompat/Int32Array;", escompatInt32Array)                                                                   \
+    TP("Lescompat/Uint32Array;", escompatUint32Array)                                                                 \
+    TP("Lescompat/Float32Array;", escompatFloat32Array)                                                               \
+    TP("Lescompat/Float64Array;", escompatFloat64Array)                                                               \
+    TP("Lescompat/BigInt64Array;", escompatBigInt64Array)                                                             \
+    TP("Lescompat/BigUint64Array;", escompatBigUint64Array)                                                           \
+    /* Containers */                                                                                                  \
+    TP("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                        \
+    TP("Lstd/core/ArrayLike;", coreArrayLike)                                                                         \
+    TP("Lstd/core/Record;", coreRecord)                                                                               \
+    IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:Lstd/core/Object;",   \
+       coreRecordGet)                                                                                                 \
+    IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}Lstd/core/Object;:V",  \
+       coreRecordSet)                                                                                                 \
+    TP("Lstd/core/Map;", coreMap)                                                                                     \
+    TP("Lstd/core/Set;", coreSet)                                                                                     \
+    /* Iterators */                                                                                                   \
+    TP("Lstd/core/MapIteratorImpl;", coreMapIteratorImpl)                                                             \
+    TP("Lstd/core/SetIteratorImpl;", coreSetIteratorImpl)                                                             \
+    TP("Lstd/core/EmptyMapIteratorImpl;", coreEmptyMapIteratorImpl)                                                   \
+    TP("Lstd/core/ArrayEntriesIterator_T;", escompatArrayEntriesIteratorT)                                            \
+    TP("Lstd/core/ArrayKeysIterator;", coreArrayKeysIterator)                                                         \
+    TP("Lstd/core/ArrayValuesIterator_T;", coreArrayValuesIteratorT)                                                  \
+    TP("Lstd/core/IteratorResult;", coreIteratorResult)                                                               \
+    /* Interop */                                                                                                     \
+    TP("Lstd/interop/js/JSRuntime;", interopJSRuntime)                                                                \
+    TP("Lstd/interop/js/JSValue;", interopJSValue)                                                                    \
+    TP("Lstd/interop/ESValue;", interopESValue)                                                                       \
+    TP("Lstd/interop/js/ESError;", interopESError)                                                                    \
+    TP("Lstd/interop/js/NoInteropContextError;", interopNoInteropContextError)                                        \
+    TP("Lstd/interop/js/DynamicFunction;", interopDynamicFunction)                                                    \
+    TP("Lstd/interop/js/PromiseInterop;", interopPromiseInterop)                                                      \
+    SM("Lstd/interop/js/PromiseInterop;", "connectPromise", "Lstd/core/Promise;J:V",                                  \
+       interopPromiseInteropConnectPromise)                                                                           \
+    /* TypeAPI */                                                                                                     \
+    TP("Lstd/core/Field;", coreField)                                                                                 \
+    TP("Lstd/core/Method;", coreMethod)                                                                               \
+    TP("Lstd/core/TypeAPIParameter;", coreTypeAPIParameter)                                                           \
+    TP("Lstd/core/ClassType;", coreClassType)                                                                         \
+    TP("Lstd/core/reflect/InstanceField;", coreReflectInstanceField)                                                  \
+    TP("Lstd/core/reflect/InstanceMethod;", coreReflectInstanceMethod)                                                \
+    TP("Lstd/core/reflect/StaticField;", coreReflectStaticField)                                                      \
+    TP("Lstd/core/reflect/StaticMethod;", coreReflectStaticMethod)                                                    \
+    TP("Lstd/core/reflect/Constructor;", coreReflectConstructor)                                                      \
+    /* Proxy */                                                                                                       \
+    TP("Lstd/core/reflect/Proxy;", coreReflectProxy)                                                                  \
+    IM("Lstd/core/reflect/Proxy;", "<ctor>", "Lstd/core/reflect/InvocationHandler;:V", coreReflectProxyConstructor)   \
+    IM("Lstd/core/reflect/Proxy;", "getHandler", ":Lstd/core/reflect/InvocationHandler;", coreReflectProxyGetHandler) \
+    SM("Lstd/core/reflect/Proxy;", "invoke",                                                                          \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[Lstd/core/Object;:Lstd/core/Object;",               \
+       coreReflectProxyInvoke)                                                                                        \
+    SM("Lstd/core/reflect/Proxy;", "invokeSet",                                                                       \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;Lstd/core/Object;:V", coreReflectProxyInvokeSet)     \
+    SM("Lstd/core/reflect/Proxy;", "invokeGet",                                                                       \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:Lstd/core/Object;", coreReflectProxyInvokeGet)      \
+    /* Process */                                                                                                     \
+    TP("Lstd/core/StdProcess;", coreStdProcess)                                                                       \
+    SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;:V", coreStdProcessListUnhandledJobs)           \
+    SM("Lstd/core/StdProcess;", "listUnhandledPromises", "Lstd/core/Array;:V", coreStdProcessListUnhandledPromises)   \
+    SM("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)      \
+    /* JSON */                                                                                                        \
+    TP("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                   \
+    TP("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                       \
+    TP("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                           \
+    IM("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/String;", coreJsonSerializableToJSON)                     \
+    AN("Lstd/core/JSONStringifyIgnore;", coreJSONStringifyIgnore)                                                     \
+    AN("Lstd/core/JSONParseIgnore;", coreJSONParseIgnore)                                                             \
+    AN("Lstd/core/JSONRename;", coreJSONRename)                                                                       \
+    /* RegExp */                                                                                                      \
+    TP("Lstd/core/RegExpResultArray;", coreRegExpResultArray)                                                         \
+    /* Date */                                                                                                        \
+    TP("Lstd/core/Date;", coreDate)                                                                                   \
     /* Do not add anything below this line. */
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

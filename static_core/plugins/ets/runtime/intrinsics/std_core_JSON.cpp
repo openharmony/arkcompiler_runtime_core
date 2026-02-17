@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 
 namespace ark::ets::intrinsics {
 
-static EtsBoolean IsFieldHasAnnotation(EtsReflectField *reflectField, const std::string_view &annotClassDescriptor)
+static EtsBoolean IsFieldHasAnnotation(EtsReflectField *reflectField, char const *annotClassDescriptor)
 {
     EtsField *field = reflectField->GetEtsField();
     bool result = false;
@@ -29,8 +29,7 @@ static EtsBoolean IsFieldHasAnnotation(EtsReflectField *reflectField, const std:
     panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
     fda.EnumerateAnnotations([&pf, &result, &annotClassDescriptor](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == annotClassDescriptor) {
+        if (utf::IsEqual(utf::CStringAsMutf8(annotClassDescriptor), pf.GetStringData(ada.GetClassId()).data)) {
             result = true;
         }
     });
@@ -39,12 +38,12 @@ static EtsBoolean IsFieldHasAnnotation(EtsReflectField *reflectField, const std:
 
 EtsBoolean StdCoreJSONGetJSONStringifyIgnore(EtsReflectField *reflectField)
 {
-    return IsFieldHasAnnotation(reflectField, panda_file_items::class_descriptors::JSON_STRINGIFY_IGNORE);
+    return IsFieldHasAnnotation(reflectField, EtsPlatformTypes::DESCRIPTOR_coreJSONStringifyIgnore);
 }
 
 EtsBoolean StdCoreJSONGetJSONParseIgnore(EtsReflectField *reflectField)
 {
-    return IsFieldHasAnnotation(reflectField, panda_file_items::class_descriptors::JSON_PARSE_IGNORE);
+    return IsFieldHasAnnotation(reflectField, EtsPlatformTypes::DESCRIPTOR_coreJSONParseIgnore);
 }
 
 EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
@@ -59,8 +58,8 @@ EtsString *StdCoreJSONGetJSONRename(EtsReflectField *reflectField)
     panda_file::FieldDataAccessor fda(pf, field->GetRuntimeField()->GetFileId());
     fda.EnumerateAnnotations([&pf, &retStrHandle, &thread](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
-        const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
-        if (className == panda_file_items::class_descriptors::JSON_RENAME) {
+        if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_coreJSONRename),
+                         pf.GetStringData(ada.GetClassId()).data)) {
             const auto value = ada.GetElement(0).GetScalarValue();
             const auto id = value.Get<panda_file::File::EntityId>();
             auto stringData = pf.GetStringData(id);

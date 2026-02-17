@@ -34,6 +34,7 @@
 #include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -440,8 +441,7 @@ static ani_status DoFind(PandaAniEnv *pandaEnv, const char *descriptor, ScopedMa
     EtsClass *klass = classLinker->GetClass(descriptor, true, GetClassLinkerContext(s.GetCoroutine()));
     if (UNLIKELY(pandaEnv->HasPendingException())) {
         EtsThrowable *currentException = pandaEnv->GetThrowable();
-        std::string_view exceptionString = currentException->GetClass()->GetDescriptor();
-        if (exceptionString == panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR) {
+        if (currentException->GetClass() == PlatformTypes(s.GetCoroutine())->coreLinkerClassNotFoundError) {
             pandaEnv->ClearException();
             return ANI_NOT_FOUND;
         }

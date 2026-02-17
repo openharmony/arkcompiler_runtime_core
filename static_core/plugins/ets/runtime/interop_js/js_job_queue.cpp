@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_job_queue.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include <node_api.h>
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -127,7 +128,7 @@ static napi_value OnJsPromiseCompleted(napi_env env, [[maybe_unused]] napi_callb
             auto etsVal = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, value).value();
             ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), etsVal, ark::ets::ToEtsBoolean(false));
         } else {
-            auto refconv = JSRefConvertResolve<true>(ctx, ctx->GetErrorClass());
+            auto refconv = JSRefConvertResolve<true>(ctx, PlatformTypes(coro)->escompatError->GetRuntimeClass());
             ASSERT(refconv != nullptr);
             bool isInstanceof = false;
             EtsObject *error = nullptr;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_ARG_CONVERTORS_H
 
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 
@@ -47,17 +48,18 @@ template <typename FStore>
     auto env = ctx->GetJSEnv();
 
     // start fastpath
+    auto coro = EtsCoroutine::GetCurrent();
     if (IsUndefined<true>(env, jsVal)) {
         storeRes(nullptr);
         return true;
     }
     if (IsNull<true>(env, jsVal)) {
-        if (LIKELY(klass->IsAssignableFrom(ctx->GetNullValueClass()))) {
+        if (LIKELY(klass->IsAssignableFrom(PlatformTypes(coro)->coreNull->GetRuntimeClass()))) {
             storeRes(ctx->GetNullValue()->GetCoreType());
             return true;
         }
     }
-    if (klass == ctx->GetJSValueClass()) {
+    if (klass == PlatformTypes(coro)->interopJSValue->GetRuntimeClass()) {
         return UnwrapVal<JSConvertJSValue>(ctx, env, jsVal, storeRes);
     }
     if (klass->IsStringClass()) {
@@ -192,7 +194,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
 {
     INTEROP_TRACE();
     if (!protoReader.GetClass()->IsArrayClass()) {
-        ASSERT(protoReader.GetClass() == ctx->GetArrayClass());
+        ASSERT(protoReader.GetClass() == PlatformTypes(coro)->escompatArray->GetRuntimeClass());
         const size_t numRestParams = jsargv.size();
 
         EtsHandle<EtsEscompatArray> restArgsArray(coro, EtsEscompatArray::Create(coro, numRestParams));
@@ -205,7 +207,7 @@ static ObjectHeader **DoPackRestParameters(EtsCoroutine *coro, InteropCtx *ctx, 
             auto store = [restArgIdx, &restArgsArray](ObjectHeader *val) {
                 restArgsArray->EscompatArraySetUnsafe(restArgIdx, EtsObject::FromCoreType(val));
             };
-            if (UNLIKELY(!ConvertRefArgToEts(ctx, ctx->GetObjectClass(), store, jsVal))) {
+            if (UNLIKELY(!ConvertRefArgToEts(ctx, PlatformTypes(coro)->coreObject->GetRuntimeClass(), store, jsVal))) {
                 if (coro->HasPendingException()) {
                     ctx->ForwardEtsException(coro);
                 }
@@ -269,8 +271,9 @@ template <typename FRead>
     }
 
     auto klass = ref->template ClassAddr<Class>();
+    auto coro = EtsCoroutine::GetCurrent();
     // start fastpath
-    if (klass == ctx->GetJSValueClass()) {
+    if (klass == PlatformTypes(coro)->interopJSValue->GetRuntimeClass()) {
         return wrapRef(helpers::TypeIdentity<JSConvertJSValue>(), ref);
     }
     if (klass->IsStringClass()) {

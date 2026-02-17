@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -265,7 +265,7 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
     if (IsPrimitveDescriptor(sub.GetDescriptor()) || IsPrimitveDescriptor(super.GetDescriptor())) {
         return false;
     }
-    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8(panda_file_items::class_descriptors::OBJECT.data()))) {
+    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("Lstd/core/Object;"))) {
         return true;
     }
     if (ClassHelper::IsArrayDescriptor(super.GetDescriptor())) {

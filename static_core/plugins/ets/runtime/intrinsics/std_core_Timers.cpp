@@ -104,7 +104,7 @@ static bool CheckCoroutineSwitchEnabled(EtsCoroutine *etsCoro)
 {
     ASSERT(etsCoro != nullptr);
     if (etsCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(etsCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+        ThrowEtsException(etsCoro, PlatformTypes()->coreInvalidCoroutineOperationError,
                           "setTimeout/setInterval is not allowed in global scope or during static initialization "
                           "(<cctor>). Move the call into a function invoked after initialization.");
         return false;

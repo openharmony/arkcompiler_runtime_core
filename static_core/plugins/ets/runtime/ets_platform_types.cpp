@@ -69,8 +69,19 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     auto bootCtx = classLinker->GetEtsClassLinkerExtension()->GetBootContext();
     auto klass = classLinker->GetClass(descriptor.data(), false, bootCtx, &handler);
     if (klass == nullptr) {
-        // In some cases (i.e. unit-tests) we allow platform classes to be not found
-        LOG(ERROR, RUNTIME) << "Cannot find a platform class " << descriptor;
+        // NOTE(vpukhov): #33302 - some types are missing in the stdlib
+        static std::unordered_set<std::string_view> MISSING_TYPES_WHITELIST = {
+            "Lets/annotation/Module;",
+            "Lets/annotation/FunctionalReference;",
+            "Lets/coroutine/Async;",
+        };
+        if (MISSING_TYPES_WHITELIST.find(descriptor) != MISSING_TYPES_WHITELIST.end()) {
+            LOG(INFO, RUNTIME) << "Cannot find a platform class " << descriptor;
+        } else {
+            // In some cases (i.e. unit-tests) we allow platform classes to be not found,
+            // however it should not happen within a proper configuration
+            LOG(ERROR, RUNTIME) << "Cannot find a platform class " << descriptor;
+        }
         return nullptr;
     }
     return klass;
@@ -125,9 +136,6 @@ static EtsClass *GetTypeEntryClass(EtsPlatformTypes *ptypes, std::string_view de
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP, G.FUD.05) solid logic
 EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 {
-    // NOLINTNEXTLINE(google-build-using-namespace)
-    using namespace panda_file_items::class_descriptors;
-
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     [[maybe_unused]] size_t orderOffset = 0;
     auto const updateOffset = [this, &orderOffset](auto *slot) {
@@ -137,7 +145,8 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
         orderOffset = newOffset;
     };
     auto const findType = [this, classLinker, &updateOffset](EtsClass *ark::ets::EtsPlatformTypes::*field,
-                                                             std::string_view descriptor) {
+                                                             std::string_view descriptor,
+                                                             [[maybe_unused]] uint32_t accFlags) {
         auto slot = &(this->*field);
         PreloadType(classLinker, slot, descriptor);
         updateOffset(slot);
@@ -151,17 +160,22 @@ EtsPlatformTypes::EtsPlatformTypes([[maybe_unused]] EtsCoroutine *coro)
 
     // NOLINTBEGIN(cppcoreguidelines-macro-usage)
     // CC-OFFNXT(G.PRE.09) macro expansion
-#define T(descr, name) findType(&EtsPlatformTypes::name, descr);
+#define TP(descr, name) findType(&EtsPlatformTypes::name, descr, 0);
+// CC-OFFNXT(G.PRE.02) macro expansion
+#define AN(descr, name) findType(&EtsPlatformTypes::name, descr, ACC_ANNOTATION);
 #define M(descr, mname, msig, name, isStatic) \
     /* CC-OFFNXT(G.PRE.09) macro expansion */ \
     findMethod(&EtsPlatformTypes::name, GetTypeEntryClass(this, descr), mname, msig, isStatic);
-#define I(descr, mname, msig, name) M(descr, mname, msig, name, false)
-#define S(descr, mname, msig, name) M(descr, mname, msig, name, true)
-    ETS_PLATFORM_TYPES_LIST(T, I, S)
-#undef T
+// CC-OFFNXT(G.PRE.02) macro expansion
+#define IM(descr, mname, msig, name) M(descr, mname, msig, name, false)
+// CC-OFFNXT(G.PRE.02) macro expansion
+#define SM(descr, mname, msig, name) M(descr, mname, msig, name, true)
+    ETS_PLATFORM_TYPES_LIST(TP, AN, IM, SM)
+#undef TP
+#undef AN
 #undef M
-#undef I
-#undef S
+#undef IM
+#undef SM
     // NOLINTEND(cppcoreguidelines-macro-usage)
 
     for (size_t i = 0; i < coreFunctions.size(); ++i) {

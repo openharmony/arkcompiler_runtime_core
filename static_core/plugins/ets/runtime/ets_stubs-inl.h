@@ -17,10 +17,11 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_STUBS_INL_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/ets_stubs.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/ets_stubs.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
 #include "libarkfile/proto_data_accessor-inl.h"
 
 namespace ark::ets {
@@ -104,11 +105,7 @@ ALWAYS_INLINE inline void IsValidByType(EtsCoroutine *coro, ark::Class *argClass
     auto targetClass = isGetter ? metaField->ResolveTypeClass() : argClass;
     if (UNLIKELY(!targetClass->IsAssignableFrom(sourceClass))) {
         auto errorMsg = targetClass->GetName() + " cannot be cast to " + sourceClass->GetName();
-        ThrowEtsException(coro,
-                          utf::Mutf8AsCString(Runtime::GetCurrent()
-                                                  ->GetLanguageContext(panda_file::SourceLang::ETS)
-                                                  .GetClassCastExceptionClassDescriptor()),
-                          errorMsg);
+        ThrowEtsException(coro, PlatformTypes(coro)->coreClassCastError, errorMsg);
     }
 }
 
@@ -136,8 +133,7 @@ inline void LookUpException(ark::Class *klass, Field *rawField)
     auto type = IS_GETTER ? "getter" : "setter";
     auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and " +
                     ark::ConvertToString(type) + " with name " + utf::Mutf8AsCString(rawField->GetName().data);
-    ThrowEtsException(EtsCoroutine::GetCurrent(),
-                      panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data(), errorMsg);
+    ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedFieldError, errorMsg);
 }
 
 inline void LookUpException(ark::Class *klass, ark::Method *rawMethod)
@@ -145,8 +141,7 @@ inline void LookUpException(ark::Class *klass, ark::Method *rawMethod)
     auto rawMethodName = (rawMethod == nullptr) ? "null" : utf::Mutf8AsCString(rawMethod->GetName().data);
     auto errorMsg =
         "Class " + ark::ConvertToString(klass->GetName()) + " does not have method with name " + rawMethodName;
-    ThrowEtsException(EtsCoroutine::GetCurrent(),
-                      panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR.data(), errorMsg);
+    ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedMethodError, errorMsg);
 }
 
 template <bool IS_GETTER>

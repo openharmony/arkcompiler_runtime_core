@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_CONVERT_H
 
 #include "plugins/ets/runtime/interop_js/js_convert_base.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert_stdlib.h"
 #include "plugins/ets/runtime/interop_js/napi_impl/ark_napi_helper.h"
 #include "common_interfaces/objects/dynamic_object_accessor_util.h"
@@ -249,7 +250,7 @@ JSCONVERT_UNWRAP(BigInt)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle etsIntArrayHandle(coro, etsIntArray);
 
-    auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
+    auto bigintKlass = PlatformTypes(coro)->coreBigInt;
     auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
     bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), reinterpret_cast<EtsObject *>(etsIntArrayHandle.GetPtr()));
     bigInt->SetFieldPrimitive(EtsBigInt::GetSignOffset(), array.empty() ? 0 : signBit == 0 ? 1 : -1);
@@ -311,7 +312,7 @@ JSCONVERT_WRAP(ESError)
 
     ASSERT_MANAGED_CODE();
     auto klass = etsVal->GetClass();
-    INTEROP_FATAL_IF(klass->GetRuntimeClass() != ctx->GetESErrorClass());
+    INTEROP_FATAL_IF(klass != PlatformTypes()->interopESError);
 
     auto fieldIdx = etsVal->GetClass()->GetFieldIndexByName("err_");
     auto field = etsVal->GetClass()->GetFieldByIndex(fieldIdx);
@@ -409,7 +410,7 @@ JSCONVERT_WRAP(Promise)
         hpromise->Unlock();
         ASSERT_MANAGED_CODE();
         std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
-        ctx->GetPromiseInteropConnectMethod()->Invoke(coro, args.data());
+        PlatformTypes(coro)->interopPromiseInteropConnectPromise->GetPandaMethod()->Invoke(coro, args.data());
         hpromise->Lock();
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);

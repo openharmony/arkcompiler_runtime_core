@@ -127,8 +127,7 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
 
     auto nameStr = name->GetMutf8();
     if (nameStr.empty()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::FILE_NOT_FOUND_ERROR,
-                          "The native library path is empty");
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatError, "The native library path is empty");
         return;
     }
     PandaString fileNameStr = fileName != nullptr ? fileName->GetMutf8() : "";
@@ -144,7 +143,7 @@ void LoadNativeLibraryHandler(ark::ets::EtsString *name, bool shouldVerifyPermis
         PandaStringStream ss;
         ss << "Cannot load native library " << nameStr;
 
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR, ss.str());
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreExceptionInInitializerError, ss.str());
     }
 }
 
@@ -171,7 +170,7 @@ extern "C" void StdSystemScheduleCoroutine()
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
     if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->coreInvalidCoroutineOperationError,
                           "Cannot switch coroutines in the current context!");
         return;
     }

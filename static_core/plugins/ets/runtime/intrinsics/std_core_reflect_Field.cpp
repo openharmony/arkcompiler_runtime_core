@@ -19,6 +19,7 @@
 #include "ets_handle_scope.h"
 #include "intrinsics.h"
 #include "intrinsics/helpers/reflection_helpers.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_reflect_field.h"
 #include "types/ets_class.h"
@@ -68,7 +69,7 @@ extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsOb
 
     if (argH.GetPtr() == nullptr) {
         if (isFieldPrimitive) {
-            ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
+            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
                               "undefined argument is not allowed for primitive reciever");
             return;
         }
@@ -83,7 +84,7 @@ extern "C" void ReflectFieldSetValueInternal(ark::ObjectHeader *thisField, EtsOb
     } else if (!(fieldType->IsPrimitive() && argType->IsBoxed() &&
                  helpers::ResolveAndSetPrimitive(
                      coro, {thisObjH.GetPtr(), argH.GetPtr(), argType, fieldType->GetEtsType(), field}))) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError,
                           "Value is not assignable to the provided field");
     }
 }

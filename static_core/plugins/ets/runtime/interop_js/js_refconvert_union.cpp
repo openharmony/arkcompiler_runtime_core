@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "plugins/ets/runtime/interop_js/js_refconvert_union.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 namespace ark::ets::interop::js {
 
@@ -29,7 +30,7 @@ EtsObject *JSRefConvertUnion::UnwrapImpl(InteropCtx *ctx, napi_value jsVal)
         return sharedRef->GetEtsObject();
     }
 
-    auto *objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+    auto *objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
     ASSERT(objectConverter != nullptr);
     auto *ret = objectConverter->Unwrap(ctx, jsVal);
     if (!ret->IsInstanceOf(klass_)) {

@@ -35,15 +35,21 @@ class PANDA_PUBLIC_API EtsPlatformTypes {
 public:
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define T(descr, name) EtsClass *name = nullptr;
+#define TP(descr, name) EtsClass *name = nullptr;
+// CC-OFFNXT(G.PRE.02) macro expansion
+#define AN(descr, name)                       \
+    EtsClass *name = nullptr;                 \
+    /* CC-OFFNXT(G.PRE.09) macro expansion */ \
+    static constexpr char const *DESCRIPTOR_##name = descr;
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define I(descr, mname, msig, name) EtsMethod *name = nullptr;
+#define IM(descr, mname, msig, name) EtsMethod *name = nullptr;
 // CC-OFFNXT(G.PRE.09) macro expansion
-#define S(descr, mname, msig, name) EtsMethod *name = nullptr;
-    ETS_PLATFORM_TYPES_LIST(T, I, S)
-#undef T
-#undef I
-#undef S
+#define SM(descr, mname, msig, name) EtsMethod *name = nullptr;
+    ETS_PLATFORM_TYPES_LIST(TP, AN, IM, SM)
+#undef TP
+#undef AN
+#undef IM
+#undef SM
     // NOLINTEND(cppcoreguidelines-macro-usage)
 
     // Arity threshold for functional types
