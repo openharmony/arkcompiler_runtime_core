@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,15 +21,13 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Optional, Union, Iterable, List, Tuple
-from vmb.helpers import die, load_file, create_file
+from vmb.helpers import die, load_file, create_file, TS_FORMAT
 from vmb.cli import Args
 
 log = logging.getLogger('vmb')
 
 
 class TimeStamp:
-    ts_format = '%Y-%m-%dT%H:%M:%S.%fZ'
-
     def __init__(self, name: str, start: Union[str, datetime], end: Union[str, datetime] = ''):
         self.name: str = name
         self.start: Optional[datetime] = TimeStamp.parse_date(start)
@@ -43,14 +41,14 @@ class TimeStamp:
         if not ts:
             return None
         try:
-            return ts if isinstance(ts, datetime) else datetime.strptime(ts, TimeStamp.ts_format)
+            return ts if isinstance(ts, datetime) else datetime.strptime(ts, TS_FORMAT)
         except ValueError as e:
             log.debug('Error parsing [%s]: %s', str(ts), e)
             return None
 
     def set_end(self, end: Union[str, datetime]):
         self.end = end if isinstance(end, datetime) \
-            else datetime.strptime(end, TimeStamp.ts_format)
+            else datetime.strptime(end, TS_FORMAT)
 
     def get_seconds(self) -> int:
         if self.start is None or self.end is None:
