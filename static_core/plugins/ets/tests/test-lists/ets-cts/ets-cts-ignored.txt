@@ -155,6 +155,9 @@
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_type_resolution_n_8.ets
 05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_type_resolution_n_9.ets
 
+#754(spec)
+05.generics/02.generic_instantiations/03.implicit_generic_instantiations/implicit_return_type_n_6.ets
+
 #28900
 05.generics/03.utility_types/incorrect_utility_type_usage_0_0.ets
 05.generics/03.utility_types/incorrect_utility_type_usage_0_1.ets
