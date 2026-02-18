@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,10 +62,8 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticMethodGetName)
         "M0C0F0:methods_static.M0C0;void;",
         "M0C0F2:methods_static.M0C0;std.core.Promise;",
         "_ctor_:methods_static.M0C0;void;",
-        "$_invoke:methods_static.%%lambda-lambda_invoke-1;void;",
         "_ctor_:methods_static.%%lambda-lambda_invoke-1;void;",
         "invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;",
-        "$_invoke:methods_static.%%lambda-lambda_invoke-0;void;",
         "_ctor_:methods_static.%%lambda-lambda_invoke-0;void;",
         "invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;",
         "_cctor_:void;",
@@ -505,12 +503,10 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionGetParentClass)
         {"M0C0F0:methods_static.M0C0;void;", "M0C0"},
         {"M0C0F2:methods_static.M0C0;std.core.Promise;", "M0C0"},
         {"_ctor_:methods_static.M0C0;void;", "M0C0"},
-        {"$_invoke:methods_static.%%lambda-lambda_invoke-1;void;", "%%lambda-lambda_invoke-1"},
         {"_ctor_:methods_static.%%lambda-lambda_invoke-0;void;", "%%lambda-lambda_invoke-0"},
         {"_ctor_:methods_static.%%lambda-lambda_invoke-1;void;", "%%lambda-lambda_invoke-1"},
         {"invoke0:methods_static.%%lambda-lambda_invoke-0;std.core.Object;", "%%lambda-lambda_invoke-0"},
         {"invoke0:methods_static.%%lambda-lambda_invoke-1;std.core.Object;", "%%lambda-lambda_invoke-1"},
-        {"$_invoke:methods_static.%%lambda-lambda_invoke-0;void;", "%%lambda-lambda_invoke-0"},
     };
 
     helpers::EnumerateAllMethods(file, [&methodClasses](AbckitCoreFunction *method) {

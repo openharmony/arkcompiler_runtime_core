@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,21 +63,21 @@ let arraySplice4: Array<Number> = arrSplice4 as Array<Number>
 let arrayToSorted: Array<Number> = arrToSorted as Array<Number>
 let arrayUnShift: Array<Number> = arrUnShift as Array<Number>
 
-const funcPredicate1 = (num: number, index: int, array: Array<Number>): boolean => num % 2 === 0
+const funcPredicate1 = (num: number, index: number | int, array: Array<Number>): boolean => num % 2 === 0
 
-const funcPredicate2 = (num: number, index: int, array: Array<Number>): boolean => num < 6
+const funcPredicate2 = (num: number, index: number | int, array: Array<Number>): boolean => num < 6
 
-const mapAndFlatten = (num: number, k: int, arr: Array<Number>): Number => num * num
+const mapAndFlatten = (num: number, k: number | int, arr: Array<Number>): Number => num * num
 
 const flatMapAndFlatten = (num: number): FixedArray<Number> => [num * num]
 
-const processElement = (element: number, index: int, array: Array<Number>): void => result = (element === index + 1)
+const processElement = (element: number, index: number | int, array: Array<Number>): void => result = (element === index.toDouble() + 1)
 
-const sumReducer = (previousValue: number, currentValue: number, index: int, array: Array<Number>): number => {
+const sumReducer = (previousValue: number, currentValue: number, index: number | int, array: Array<Number>): number => {
     return previousValue + currentValue
 }
 
-const concatenateReducer = (previousValue: string, currentValue: string, index: int, array: Array<string>): string => {
+const concatenateReducer = (previousValue: string, currentValue: string, index: number | int, array: Array<string>): string => {
     return previousValue + "" + currentValue
 }
 

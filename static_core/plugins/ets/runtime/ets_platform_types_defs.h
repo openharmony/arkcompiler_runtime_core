@@ -41,6 +41,7 @@
     T("Lstd/core/BigInt;", coreBigInt)                                                                               \
     T("Lescompat/Error;", escompatError)                                                                             \
     T("Lstd/core/Function;", coreFunction)                                                                           \
+    I("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)           \
     T("Lstd/core/Tuple;", coreTuple)                                                                                 \
     T("Lstd/core/TupleN;", coreTupleN)                                                                               \
     /* Runtime linkage */                                                                                            \

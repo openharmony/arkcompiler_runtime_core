@@ -20,6 +20,8 @@
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 
 namespace ark::ets {
 
@@ -72,10 +74,24 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, const C
     auto *coroManager = coro->GetCoroutineManager();
     auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
 
-    EtsMethod *etsmethod = callback->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
-    auto *method = EtsMethod::ToRuntimeMethod(etsmethod);
-    ASSERT(method != nullptr);
-    auto args = PandaVector<Value> {Value(callback->GetCoreType())};
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    auto handledCb = EtsHandle<EtsObject>(coro, callback);
+
+    if (!handledCb->GetClass()->IsFunction()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
+                          "Method have to be instance of function");
+    }
+
+    EtsMethod *etsmethod = PlatformTypes(coro)->coreFunctionUnsafeCall;
+    auto *method = EtsMethod::ToRuntimeMethod(handledCb->GetClass()->ResolveVirtualMethod(etsmethod));
+
+    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    if (UNLIKELY(argArray == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return;
+    }
+
+    auto args = PandaVector<Value> {Value(handledCb->GetCoreType()), Value(argArray->GetCoreType())};
     auto launchResult =
         coroManager->Launch(event, method, std::move(args), groupId, EtsCoroutine::PROMISE_CALLBACK, false);
     if (UNLIKELY(launchResult == LaunchResult::COROUTINES_LIMIT_EXCEED)) {
