@@ -350,13 +350,20 @@ void IrBuilder::ProcessThrowableInstructions(InstBuilder &instBuilder, Inst *thr
         }
         COMPILER_LOG(DEBUG, IR_BUILDER) << "Throwable inst, Id = " << throwableInst->GetId();
         catchHandlers_.clear();
-        EnumerateTryBlocksCoveredPc(throwableInst->GetPc(), [this](const TryCodeBlock &tryBlock) {
-            auto tbb = tryBlock.beginBb;
+        // Use precomputed try-block set for this pc instead of scanning all tryBlocks_ every time.
+        auto it = tryBlocksByThrowablePc_.find(throwableInst->GetPc());
+        if (it == tryBlocksByThrowablePc_.end()) {
+            continue;
+        }
+        EVENT_IR_BUILDER_TRY_CACHE(GetGraph()->GetRuntime()->GetMethodFullName(GetGraph()->GetMethod()), "GET",
+                                   throwableInst->GetPc(), tryBlocksByThrowablePc_.size());
+        for (auto *tryBlock : it->second) {
+            auto tbb = tryBlock->beginBb;
             tbb->EnumerateCatchHandlers([this](BasicBlock *catchHandler, [[maybe_unused]] size_t typeId) {
                 catchHandlers_.insert(catchHandler);
                 return true;
             });
-        });
+        }
         if (!catchHandlers_.empty()) {
             instBuilder.AddCatchPhiInputs(catchHandlers_, instDefs_, throwableInst);
         }
@@ -520,22 +527,19 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, B
 {
     openedTryBlocks_.remove_if([pc](TryCodeBlock *tryBlock) { return tryBlock->boundaries.endPc == pc; });
 
-    if (tryBlocks_.count(pc) > 0) {
-        auto range = tryBlocks_.equal_range(pc);
-        for (auto it = range.first; it != range.second; ++it) {
-            auto &tryBlock = it->second;
-            if (tryBlock.boundaries.endPc > pc) {
-                openedTryBlocks_.push_back(&tryBlock);
-                auto allocator = GetGraph()->GetLocalAllocator();
-                tryBlock.basicBlocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-                tryBlock.throwBlocks = allocator->New<ArenaSet<BasicBlock *>>(allocator->Adapter());
-            } else {
-                // Empty try-block
-                ASSERT(tryBlock.boundaries.endPc == pc);
-            }
+    auto range = tryBlocks_.equal_range(pc);
+    for (auto it = range.first; it != range.second; ++it) {
+        auto &tryBlock = it->second;
+        if (tryBlock.boundaries.endPc <= pc) {
+            // Empty try-block
+            ASSERT(tryBlock.boundaries.endPc == pc);
+            continue;
         }
+        openedTryBlocks_.push_back(&tryBlock);
+        auto allocator = GetGraph()->GetLocalAllocator();
+        tryBlock.basicBlocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+        tryBlock.throwBlocks = allocator->New<ArenaSet<BasicBlock *>>(allocator->Adapter());
     }
-
     if (openedTryBlocks_.empty()) {
         return;
     }
@@ -550,14 +554,36 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, B
         for (auto &tryBlock : openedTryBlocks_) {
             tryBlock->containsThrowableInst = true;
         }
+        // The active try-block set for a given pc is stable while we connect blocks.
+        // Cache it once and reuse for all throwable IR instructions built from this bytecode pc.
+        CacheOpenedTryBlocksForThrowablePc(pc);
     }
-    if (GetGraph()->IsBytecodeOptimizer() && !g_options.IsCompilerNonOptimizing()) {
-        if (!info.deadInstructions && inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW) &&
-            !openedTryBlocks_.empty()) {
-            auto &tryBlock = *openedTryBlocks_.rbegin();
-            tryBlock->throwBlocks->insert(targetBb);
-        }
+    if (GetGraph()->IsBytecodeOptimizer() && !g_options.IsCompilerNonOptimizing() && !info.deadInstructions &&
+        inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
+        auto &tryBlock = *openedTryBlocks_.rbegin();
+        tryBlock->throwBlocks->insert(targetBb);
     }
+}
+
+void IrBuilder::CacheOpenedTryBlocksForThrowablePc(size_t pc)
+{
+    auto allocator = GetGraph()->GetLocalAllocator();
+    // Cache entry is created once per bytecode pc.
+    // If it already exists, don't overwrite it with different openedTryBlocks_ state.
+    auto [it, inserted] = tryBlocksByThrowablePc_.try_emplace(pc, allocator->Adapter());
+    if (!inserted) {
+        return;
+    }
+
+    // Persist current active try-block set for this throwable pc.
+    auto &cachedTryBlocks = it->second;
+    cachedTryBlocks.reserve(openedTryBlocks_.size());
+    for (auto *tryBlock : openedTryBlocks_) {
+        cachedTryBlocks.push_back(tryBlock);
+    }
+
+    EVENT_IR_BUILDER_TRY_CACHE(GetGraph()->GetRuntime()->GetMethodFullName(GetGraph()->GetMethod()), "PUT", pc,
+                               tryBlocksByThrowablePc_.size());
 }
 
 BasicBlock *IrBuilder::GetBlockToJump(BytecodeInstruction *inst, size_t pc)

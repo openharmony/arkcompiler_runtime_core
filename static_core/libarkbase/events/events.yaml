@@ -52,6 +52,17 @@ events:
     type: enum
     enum: [success, fail, fail_resolve, fail_megamorphic, unsuitable, noinline, lost_single_impl, limit, ignore_limit, devirtualized, inf_loop, skip_external]
 
+- name: ir_builder_try_cache
+  fields:
+  - name: method_name
+    type: std::string
+  - name: operation
+    type: std::string
+  - name: pc
+    type: size_t
+  - name: cache_entries
+    type: size_t
+
 - name: deoptimization
   fields:
   - name: method_name
