@@ -189,7 +189,7 @@
 05.generics/03.utility_types/06.record_utility_type/enum_record_0_n.ets
 
 #31619 TypeError: Type '[String, Double]' is not compatible with the enclosing method's return type '[Any, Any]'
-05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
+20.implementation_details/07.bridge_methods_for_generic_overrides/tuple_return_type.ets
 
 #31755
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/explicit_type_conversion_6.ets
