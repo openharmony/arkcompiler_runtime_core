@@ -28,18 +28,18 @@ class A {
 
 let a: A|null = null;
 
-function foo(a: A|null): number {
+function getAge(a: A|null): number {
     return a!.getAge()
 }
 
 function foo(): void {
   let a: A|null = null;
-  a = { name: "Bob", age: foo(a) } as A
+  a = { name: "Bob", age: getAge(a) } as A
 }
 
 let checkException = (e: Error): boolean => { return e instanceof NullPointerError }
 
 function main() {
     arktest.expectThrow(() => foo(), checkException)
-	arktest.assertEQ(a, null);
+    arktest.assertEQ(a, null);
 }

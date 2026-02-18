@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,35 +15,40 @@
 
 /*---
 desc: >-
-    Name-value pairs of the object literal are then executed from left to right
-    in the textual order they occur in the source code.
+    The execution of a nested object literal completes abruptly if so does
+    the execution of an inner object literal.
 ---*/
 
-class X {
-    a: number
-    b: number
-    c: number
+class Inner {
+    value: number
 }
 
-function mayThrow(n: number): number {
-    if (n == 1) {
+class Outer {
+    inner?: Inner
+    name?: string
+}
+
+let evaluationOrder: string = ""
+
+function track(s: string, n: number): number {
+    evaluationOrder += s
+    if (n < 0) {
         throw new NullPointerError()
     }
-    if (n == 2) {
-        throw new RangeError()
-    }
-    if (n == 3) {
-        throw new ArithmeticError()
-    }
-    return n;
-}
-
-function foo(): void {
-    let x: X = { c: mayThrow(1), b: mayThrow(2), a: mayThrow(3) }
+    return n
 }
 
 let checkException = (e: Error): boolean => { return e instanceof NullPointerError }
 
-function main() {
+function foo(): void {
+    let obj: Outer = {
+        inner: { value: track("i", -1) },
+        name: track("n", 0).toString()
+    }
+}
+
+function main(): void {
+    evaluationOrder = ""
     arktest.expectThrow(() => foo(), checkException)
+    arktest.assertEQ(evaluationOrder, "i")
 }

@@ -17,7 +17,6 @@
 desc: >-
     The first expression in keyValue denotes a key, and must be of type Key;
     the second expression denotes a value, and must be of type Value.
-tags: [compile-only]
 ---*/
 
 let map: Record<string, number> = {
@@ -25,4 +24,7 @@ let map: Record<string, number> = {
     "Mary": 21,
 }
 
-console.log(map["John"]) // prints 25
+function main(): void {
+    arktest.assertEQ(map["John"], 25)
+    arktest.assertEQ(map["Mary"], 21)
+}

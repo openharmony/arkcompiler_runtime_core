@@ -16,13 +16,15 @@
 {% for c in cases %}
 /*---
 desc: >-
-    If a key is a union type consisting of literals, then all variants must be listed
-    in the object literal; otherwise, a compile- time error occurs
+    Accessing a non-existent key in a Record with a generic key type
+    returns undefined and throws NullPointerError when forcefully unwrapped
 ---*/
 
 {{c.decl}}
 
 function main() {
     {{c.use|indent}}
+    let expectedException = (e: Error): boolean => {return (e instanceof NullPointerError)}
+    arktest.expectThrow(() => { {{c.call}} }, expectedException)
 }
 {% endfor %}

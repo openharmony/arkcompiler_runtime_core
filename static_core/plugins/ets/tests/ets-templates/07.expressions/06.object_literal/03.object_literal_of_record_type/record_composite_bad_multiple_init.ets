@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
- /*---
- desc: Compilation error when attempt to init field multiple times
- tags: [negative, compile-only]
- ---*/
+/*---
+desc: Compilation error when attempt to init field multiple times
+tags: [negative, compile-only]
+expected_out: "Semantic error ESE0263: An object literal cannot multiple properties with same name"
+---*/
 
 
- function main(): void {
+function main(): void {
     let map: Record<string, number> = {
         "John": 25,
         "John": 25,
         "John": 25,
     }
- }
+}

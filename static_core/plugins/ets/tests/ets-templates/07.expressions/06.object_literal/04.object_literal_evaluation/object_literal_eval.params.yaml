@@ -1,0 +1,449 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - decl: |
+      class C {
+          field: number
+          constructor(p?: number) {
+              this.field = p !== undefined ? p : 42
+          }
+      }
+    use: |
+      let c: C = {}
+    checks:
+      - call: c.field
+        value: 42
+
+  - decl: |
+      class C {
+          field: number
+          constructor(p1: number = 5, p2: number = 10) {
+              this.field = p1 + p2
+          }
+      }
+    use: |
+      let c: C = {}
+    checks:
+      - call: c.field
+        value: 15
+
+  - decl: |
+      class A {
+          field: string = 'a'
+      }
+
+      class B {
+          a: A = new A
+      }
+
+      class C {
+          b: B  = new B
+      }
+    use: |
+      let c: C = { b: {a: { } } }
+    checks:
+      - call: c.b.a.field
+        value: "'a'"
+
+  - decl: |
+      class A {
+          field: string
+          constructor(p?: string) {
+              this.field = p !== undefined ? p : "a"
+          }
+      }
+
+      class B {
+          a: A
+          constructor() {
+              this.a = new A
+          }
+      }
+
+      class C {
+          b: B  = new B
+          constructor() {
+              this.b = new B
+          }
+      }
+    use: |
+      let c: C = { b: {a: { } } }
+    checks:
+      - call: c.b.a!.field
+        value: "'a'"
+
+  - decl: |
+      class C {
+          numbers?: number[]
+          names?: string[]
+      }
+    use: |
+      let c: C = {
+          numbers: [1, 2, 3],
+          names: ["a", "b"]
+      }
+    checks:
+      - call: c.numbers!.length
+        value: 3
+      - call: c.numbers![1]
+        value: 2
+      - call: c.names!.length
+        value: 2
+      - call: c.names![0]
+        value: '"a"'
+
+  - decl: |
+      class C {
+          pair?: [number, string]
+          triple?: [number, number, number]
+      }
+    use: |
+      let c: C = {
+          pair: [42, "answer"],
+          triple: [1, 2, 3]
+      }
+    checks:
+      - call: c.pair![0]
+        value: 42
+      - call: c.pair![1]
+        value: '"answer"'
+      - call: c.triple![2]
+        value: 3
+
+  - decl: |
+      class A<T> {
+          value: T
+      }
+
+      class C {
+          intA?: A<number>
+          strA?: A<string>
+      }
+    use: |
+      let c: C = {
+          intA: { value: 42 },
+          strA: { value: "test" }
+      }
+    checks:
+      - call: c.intA!.value
+        value: 42
+      - call: c.strA!.value
+        value: '"test"'
+
+  - decl: |
+      let evaluationOrder: number[] = []
+
+      function recordEval(n: number): number {
+          evaluationOrder.push(n)
+          return n * 10
+      }
+
+      class C {
+          a: number
+          b: number
+          c: number
+      }
+    use: |
+      evaluationOrder = []
+      let c: C = {
+          c: recordEval(3),
+          a: recordEval(1),
+          b: recordEval(2)
+      }
+    checks:
+      - call: evaluationOrder.length
+        value: 3
+      - call: evaluationOrder[0]
+        value: 3
+      - call: evaluationOrder[1]
+        value: 1
+      - call: evaluationOrder[2]
+        value: 2
+      - call: c.a
+        value: 10
+      - call: c.b
+        value: 20
+      - call: c.c
+        value: 30
+
+  - decl: |
+      class C {
+          field: number
+      }
+    use: |
+      let c = { field: 42 } as C
+    checks:
+      - call: c.field
+        value: 42
+
+  - decl: |
+      class C {
+          value: number
+      }
+
+      function createC(): C {
+          return { value: 100 }
+      }
+    use: |
+      let c = createC()
+    checks:
+      - call: c.value
+        value: 100
+
+  - decl: |
+      class C {
+          field: number
+      }
+    use: |
+      let obj: Object = { field: 42 } as C
+    checks:
+      - call: (obj as C).field
+        value: 42
+
+  - decl: |
+      let sequence: string = ''
+
+      class A {
+          x: number = (() => { sequence += '1'; return 10 })()
+          constructor() {
+              sequence += '2'
+          }
+      }
+    use: |
+      sequence = ''
+      let a: A = { x: (() => { sequence += '3'; return 20 })() }
+    checks:
+      - call: sequence
+        value: "'123'"
+      - call: a.x
+        value: 20
+
+  - decl: |
+      let sequence: string = ''
+
+      class Inner {
+          constructor() { sequence += 'i' }
+      }
+
+      class Middle {
+          inner?: Inner
+          constructor() { sequence += 'm' }
+      }
+
+      class Outer {
+          m1?: Middle
+          m2?: Middle
+          constructor() { sequence += 'o' }
+      }
+    use: |
+      sequence = ''
+      let obj: Outer = {
+          m1: { inner: {} },
+          m2: { inner: {} }
+      }
+    checks:
+      - call: sequence
+        value: "'omimi'"
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          a: number
+          b: number
+          c: number
+          constructor() { sequence += 'x' }
+      }
+    use: |
+      sequence = ''
+      let obj: C = {
+          a: (() => { sequence += '1'; return 1 })(),
+          b: (() => { sequence += '2'; return 2 })(),
+          c: (() => { sequence += '3'; return 3 })()
+      }
+    checks:
+      - call: sequence
+        value: "'x123'"
+      - call: obj.a
+        value: 1
+      - call: obj.b
+        value: 2
+      - call: obj.c
+        value: 3
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          arr: number[] = []
+          constructor() { sequence += 'c' }
+      }
+    use: |
+      sequence = ''
+      let obj: C = {
+          arr: [
+              (() => { sequence += '1'; return 1 })(),
+              (() => { sequence += '2'; return 2 })(),
+              (() => { sequence += '3'; return 3 })()
+          ]
+      }
+    checks:
+      - call: sequence
+        value: "'c123'"
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          value: number
+          
+          constructor() {
+              sequence += 'a'
+              this.value = 0
+          }
+          
+          constructor(n: number) {
+              sequence += 'b'
+              this.value = n
+          }
+      }
+    use: |
+      sequence = ''
+      let obj: C = { value: 42 }
+    checks:
+      - call: sequence
+        value: "'a'"
+      - call: obj.value
+        value: 42
+
+  - decl: |
+      let sequence: string = ''
+
+      interface I {
+          a: number
+          b: number
+          c: number
+      }
+    use: |
+      sequence = ''
+      let obj: I = {
+          a: (() => { sequence += '1'; return 1 })(),
+          b: (() => { sequence += '2'; return 2 })(),
+          c: (() => { sequence += '3'; return 3 })()
+      }
+    checks:
+      - call: sequence
+        value: "'123'"
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          required: number
+          withDefault: number = (() => { sequence += 'd'; return 99 })()
+          optional?: number
+          
+          constructor() {
+              sequence += 'c'
+          }
+      }
+    use: |
+      sequence = ''
+      let obj: C = {
+          required: (() => { sequence += 'r'; return 1 })()
+      }
+    checks:
+      - call: sequence
+        value: "'dcr'"
+      - call: obj.required
+        value: 1
+      - call: obj.withDefault
+        value: 99
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          a: number
+          b: number
+          c: number
+          constructor() { sequence += 'x' }
+      }
+    use: |
+      sequence = ''
+      try {
+          let obj: C = {
+              a: (() => { sequence += '1'; return 1 })(),
+              b: (() => { sequence += '2'; throw new Error('test') })(),
+              c: (() => { sequence += '3'; return 3 })()
+          }
+      } catch (e) {
+      }
+    checks:
+      - call: sequence
+        value: "'x12'"
+
+  - decl: |
+      let sequence: string = ''
+
+      class C {
+          readonly x: number
+          constructor() {
+              sequence += 'c'
+              this.x = 0
+          }
+      }
+    use: |
+      sequence = ''
+      let obj: C = {
+          x: (() => { sequence += 'r'; return 42 })()
+      }
+    checks:
+      - call: sequence
+        value: "'cr'"
+      - call: obj.x
+        value: 42
+
+  - decl: |
+      class Base {
+          b: number = 1
+      }
+
+      class Derived extends Base {
+          d: string = 'd'
+      }
+    use: |
+      let d: Derived = { b: 42, d: "hello" }
+    checks:
+      - call: d.b
+        value: 42
+      - call: d.d
+        value: '"hello"'
+
+  - decl: |
+      class C {
+          a?: number
+          b?: string
+          c?: boolean
+      }
+    use: |
+      let c: C = {}
+    checks:
+      - call: c.a
+        value: 'undefined'
+      - call: c.b
+        value: 'undefined'
+      - call: c.c
+        value: 'undefined'
