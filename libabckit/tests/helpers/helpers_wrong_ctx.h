@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "libabckit/c/metadata_core.h"
 #include "libabckit/c/ir_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 
 #include "helpers/helpers.h"
 
@@ -80,6 +81,13 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inpu
                                             size_t argCount, ...));
 void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inputObj, AbckitString *fieldId,
                                             AbckitInst *value, AbckitTypeId typeId));
+
+void TestWrongCtx(
+    AbckitArktsImportDescriptor *(*apiToCheck)(AbckitArktsModule *importing, AbckitArktsModule *imported,
+                                               const struct AbckitArktsImportFromDynamicModuleCreateParams *));
+void TestWrongCtx(
+    AbckitArktsExportDescriptor *(*apiToCheck)(AbckitArktsModule *exporting, AbckitArktsModule *exported,
+                                               const struct AbckitArktsDynamicModuleExportCreateParams *));
 
 }  // namespace libabckit::test::helpers_wrong_ctx
 

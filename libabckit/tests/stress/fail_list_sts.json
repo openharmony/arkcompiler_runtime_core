@@ -230,5 +230,12 @@
     "/tmp/abckit_test_ets/spec/05.Generics/tuple_as_generic_args_0060.ets": 1,
     "/tmp/abckit_test_ets/std/core/ClassTest.ets": 1,
     "/tmp/abckit_test_ets/std/core/ReflectMethodTest.ets": 1,
-    "/tmp/abckit_test_ets/std/core/MethodAllTest.ets": 1
+    "/tmp/abckit_test_ets/std/core/MethodAllTest.ets": 1,
+    "/tmp/abckit_test_ets/regression/large_number_of_case_statement.ets": 1,
+    "/tmp/abckit_test_ets/std/core/regexp/RegExpGroupsTest.ets": 1,
+    "/tmp/abckit_test_ets/std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_clear.ets": 1,
+    "/tmp/abckit_test_ets/regression/15278_0.ets": 1,
+    "/tmp/abckit_test_ets/std/core/MethodAllTests.ets": 1,
+    "/tmp/abckit_test_ets/std/core/ProxyComplexTests.ets": 1,
+    "/tmp/abckit_test_ets/std/core/IntlDateTimeFormatTest.ets": 1
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,10 @@ set -o pipefail
 OHOS_DIR=""
 SANITIZERS=false
 COVERAGE=false
+SKIP_DOCS=false
+SKIP_FORMAT=false
+SKIP_BUILD=false
+SKIP_STRESS=false
 
 print_usage() {
     set +x
@@ -30,6 +34,10 @@ print_usage() {
     echo "  -c, --coverage  collect code coverage                   "
     echo "                                                          "
     echo "Options:                                                  "
+    echo "  --no-rebuild    skip build, only run checks and tests    "
+    echo "  --skip-docs     skip documentation (doxygen) check      "
+    echo "  --skip-format   skip clang-format check                 "
+    echo "  --skip-stress   skip stress tests (faster coverage run)  "
     echo "  -h, --help      print help text                         "
     set -x
 }
@@ -49,6 +57,22 @@ for i in "$@"; do
         OHOS_DIR="${OHOS_DIR/#\~/$HOME}"
         shift
         ;;
+    --skip-docs)
+        SKIP_DOCS=true
+        shift
+        ;;
+    --skip-format)
+        SKIP_FORMAT=true
+        shift
+        ;;
+    --skip-stress)
+        SKIP_STRESS=true
+        shift
+        ;;
+    --no-rebuild)
+        SKIP_BUILD=true
+        shift
+        ;;
     -h | --help)
         print_usage
         exit 1
@@ -65,7 +89,7 @@ build_standalone() {
     set -e
     rm -rf out/$TARGET
 
-    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
+    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true is_llvmbackend=false abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true abckit_enable_tests=true enable_cmc_gc=false"
 
     set +e
 }
@@ -112,7 +136,15 @@ build_and_run_tests() {
         ASAN_OPTIONS=verify_asan_link_order=0 \
         ./tests/unittest/arkcompiler/runtime_core/libabckit/abckit_gtests
 
-    if [ "$SANITIZERS" = "false" ]; then
+    if [ "$COVERAGE" = "true" ]; then
+        ninja abckit_mock_gtests
+        LD_LIBRARY_PATH=./arkcompiler/runtime_core/:./arkcompiler/ets_runtime/:./thirdparty/icu/:./thirdparty/zlib/:./thirdparty/libuv/:./arkui/napi/:./thirdparty/bounds_checking_function/:./arkui/napi/ \
+            LSAN_OPTIONS="$LSAN_OPTIONS" \
+            ASAN_OPTIONS=verify_asan_link_order=0 \
+            ./tests/unittest/arkcompiler/runtime_core/libabckit/abckit_mock_gtests || true
+    fi
+
+    if [ "$SANITIZERS" = "false" ] && [ "$SKIP_STRESS" = "false" ]; then
         ninja abckit_stress_tests_package
 
         if [ "$TARGET" = "x64.debug" ]; then
@@ -170,10 +202,10 @@ fi
 
 TARGET=x64.debug
 pushd "$OHOS_DIR" || exit 1
-build_standalone
+[ "$SKIP_BUILD" = "false" ] && build_standalone
 pushd out/$TARGET || exit 1
-run_check_documentation
-run_check_clang_format
+[ "$SKIP_DOCS" = "false" ] && run_check_documentation
+[ "$SKIP_FORMAT" = "false" ] && run_check_clang_format
 if [ "$COVERAGE" = "false" ] && [ "$SANITIZERS" = "false" ]; then
     run_check_clang_tidy
 fi
@@ -183,10 +215,10 @@ popd || exit 1
 if [ "$COVERAGE" = "false" ] && [ "$SANITIZERS" = "false" ]; then
     TARGET=x64.release
     pushd "$OHOS_DIR" || exit 1
-    build_standalone
+    [ "$SKIP_BUILD" = "false" ] && build_standalone
     pushd out/$TARGET || exit 1
-    run_check_documentation
-    run_check_clang_format
+    [ "$SKIP_DOCS" = "false" ] && run_check_documentation
+    [ "$SKIP_FORMAT" = "false" ] && run_check_clang_format
     run_check_clang_tidy
     build_and_run_tests
     popd || exit 1

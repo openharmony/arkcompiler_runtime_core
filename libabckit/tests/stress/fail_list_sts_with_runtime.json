@@ -218,5 +218,12 @@
   "/tmp/abckit_test_ets/std/math/BoundariesTest.sts": "ETS Test result changed. Was 0, now 14",
   "/tmp/abckit_test_ets/std/time/DateConstructorTest.sts": "ETS Test result changed. Was 0, now 1",
   "/tmp/abckit_test_ets/std/time/DateCtorTypes.sts": "ETS Test result changed. Was 0, now 1",
-  "/tmp/abckit_test_ets/std/time/ValidDateTest.sts": "ETS Test result changed. Was 0, now 1"
+  "/tmp/abckit_test_ets/std/time/ValidDateTest.sts": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/regression/large_number_of_case_statement.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/core/MethodAllTests.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/regression/15278_0.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/containers/concurrency/concurrent_hash_map/concurrent_hash_map_concurrent_clear.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/core/IntlDateTimeFormatTest.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/core/regexp/RegExpGroupsTest.ets": "ETS Test result changed. Was 0, now 1",
+  "/tmp/abckit_test_ets/std/core/ProxyComplexTests.ets": "ETS Test result changed. Was 0, now 1"
 }

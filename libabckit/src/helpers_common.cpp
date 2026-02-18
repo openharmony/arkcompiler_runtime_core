@@ -495,9 +495,15 @@ void TypeSetNameHelper(AbckitType *type, const char *name, size_t len)
     newHash = HashCombine(newHash, reinterpret_cast<size_t>(oldType->name));
     // Check if the new hash already exists in cache
     if (cache.count(newHash) > 0 && oldHash != newHash) {
-        // The new hash conflicts with an existing entry
-        // Delete the existing type from cache and replace it with the current type
+        // The new hash conflicts with an existing entry.
+        // existingType may be referenced by other types (e.g. union type's types vector).
+        // Replace all such references with oldType before deleting existingType to avoid use-after-free.
         auto existingType = cache[newHash];
+        for (auto &[_, cachedType] : cache) {
+            for (auto &slot : cachedType->types) {
+                slot = (slot == existingType) ? oldType : slot;
+            }
+        }
         cache.erase(newHash);
         delete existingType;
     }
@@ -533,9 +539,15 @@ void TypeSetRankHelper(AbckitType *type, size_t rank)
     newHash = HashCombine(newHash, reinterpret_cast<size_t>(oldType->name));
     // Check if the new hash already exists in cache
     if (cache.count(newHash) > 0 && oldHash != newHash) {
-        // The new hash conflicts with an existing entry
-        // Delete the existing type from cache and replace it with the current type
+        // The new hash conflicts with an existing entry.
+        // existingType may be referenced by other types (e.g. union type's types vector).
+        // Replace all such references with oldType before deleting existingType to avoid use-after-free.
         auto existingType = cache[newHash];
+        for (auto &[_, cachedType] : cache) {
+            for (auto &slot : cachedType->types) {
+                slot = (slot == existingType) ? oldType : slot;
+            }
+        }
         cache.erase(newHash);
         delete existingType;
     }

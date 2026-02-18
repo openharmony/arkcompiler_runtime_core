@@ -19,6 +19,7 @@
 #include "libabckit/c/ir_core.h"
 #include "libabckit/cpp/abckit_cpp.h"
 #include "libabckit/src/metadata_inspect_impl.h"
+#include "libabckit/src/adapter_static/modify_name_helper.h"
 #include "tests/helpers/helpers.h"
 #include "tests/helpers/helpers_runtime.h"
 
@@ -437,6 +438,53 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleImportClassMethod)
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modified.abc",
                                   "modules_static_modify", "main");
     ASSERT_TRUE(helpers::Match(output, "25\nPartial  undefined\nhellostring\n"));
+}
+
+// Test: exercise ModifyNameHelper::ModuleRefreshName for branch coverage (static adapter)
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleRefreshNameForCoverage)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
+
+    helpers::ModuleByNameContext ctxFinder = {nullptr, "modules_static_modify"};
+    g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(ctxFinder.module, nullptr);
+
+    AbckitCoreModule *module = ctxFinder.module;
+    const std::string newName = "RefreshedModuleForCoverage";
+    bool ok = libabckit::ModifyNameHelper::ModuleRefreshName(module, newName);
+    ASSERT_TRUE(ok);
+
+    auto *nameStr = g_implI->moduleGetName(module);
+    ASSERT_NE(nameStr, nullptr);
+    std::string name = g_implI->abckitStringToString(nameStr);
+    ASSERT_EQ(name, newName);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: exercise ModifyNameHelper::ClassRefreshName for branch coverage (static adapter)
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, ClassRefreshNameForCoverage)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/extensions/arkts/modify_api/modules/modules_static_modify.abc", &file);
+
+    helpers::ModuleByNameContext modCtx = {nullptr, "modules_static_modify"};
+    g_implI->fileEnumerateModules(file, &modCtx, helpers::ModuleByNameFinder);
+    ASSERT_NE(modCtx.module, nullptr);
+
+    helpers::ClassByNameContext classCtx = {nullptr, "C1"};
+    g_implI->moduleEnumerateClasses(modCtx.module, &classCtx, helpers::ClassByNameFinder);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(classCtx.klass, nullptr);
+
+    bool ok = libabckit::ModifyNameHelper::ClassRefreshName(classCtx.klass, "RefreshedClassForCoverage");
+    ASSERT_TRUE(ok);
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
 }  // namespace libabckit::test
