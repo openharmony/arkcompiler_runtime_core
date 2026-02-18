@@ -221,6 +221,7 @@ Class **PhiInst** inherits from **DynamicInputsInst** for phi instructions.
 **ImmediateMixin** is inherited in instruction classes with immediate(BinaryImmOperation, ReturnInstI and so on)  
 **ConditionMixin** is inherited in instruction classes with conditional code(CompareInst, SelectInst, IfInst and so on)  
 **TypeIdMixin** is inherited in instruction classes wich uses TypeId(LoadObjectInst, StoreObjectInst, NewObjectInst and so on)  
+**WithGCBarrierEntrypointMixin** is inherited in instruction classes which have a (potentially optional) input with the corresponding GC barrier entrypoint - if it was obtained previously and can be reused.
 
 #### Constant instruction
 

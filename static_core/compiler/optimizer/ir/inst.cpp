@@ -211,6 +211,38 @@ bool IsVolatileMemInst(const Inst *inst)
     }
 }
 
+void SetInstGCBarrierEntrypoint(Inst *inst, Inst *entrypoint)
+{
+    SwitchOverOpcodes(inst, [entrypoint](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
+            typedInst->SetGCBarrierEntrypoint(entrypoint);
+            return typedInst;
+        }
+        return {};
+    });
+}
+
+Inst *GetInstGCBarrierEntrypoint(Inst *inst)
+{
+    return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
+            return typedInst->GetGCBarrierEntrypoint();
+        }
+        return {};
+    });
+}
+
+void ResetInstGCBarrierEntrypoint(Inst *inst)
+{
+    SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
+        if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
+            typedInst->ResetGCBarrierEntrypoint();
+            return typedInst;
+        }
+        return {};
+    });
+}
+
 const ObjectTypeInfo ObjectTypeInfo::INVALID {};
 const ObjectTypeInfo ObjectTypeInfo::UNKNOWN {1};
 

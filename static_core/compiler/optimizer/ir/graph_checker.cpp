@@ -1251,6 +1251,64 @@ void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, Basi
     }
 }
 
+void GraphChecker::CheckGCBarrierEntrypointInputsCount([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                                       [[maybe_unused]] size_t count)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputsCount() == count,
+                                        (std::cerr << "This load/store has the wrong number of arguments (got "
+                                                   << inst->GetInputsCount() << ", expected " << count << ")\n",
+                                         inst->Dump(&std::cerr)));
+}
+
+void GraphChecker::CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                                 [[maybe_unused]] bool needBarrier)
+{
+    CHECKER_ASSERT(SwitchOverOpcodes(inst, [v, needBarrier](auto traits, auto *typedInst) -> std::optional<bool> {
+        if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
+            if (typedInst->GetGCBarrierEntrypoint() == nullptr) {
+                CheckGCBarrierEntrypointInputsCount(v, typedInst, typedInst->STATIC_INPUTS_CAPACITY - 1);
+            } else {
+                CheckGCBarrierEntrypointInputsCount(v, typedInst, typedInst->STATIC_INPUTS_CAPACITY);
+                CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                    v,
+                    typedInst->GetGCBarrierEntrypoint() ==
+                        typedInst->GetInput(typedInst->STATIC_INPUTS_CAPACITY - 1).GetInst(),
+                    (std::cerr << "This load/store has inconsistent GC barrier entrypoint input:\n",
+                     typedInst->Dump(&std::cerr)));
+                CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                    v, needBarrier,
+                    (std::cerr << "This load/store with GC barrier entrypoint doesn't need GC barriers:\n",
+                     typedInst->Dump(&std::cerr)));
+            }
+            return true;
+        }
+        return false;
+    }));
+}
+
+void GraphChecker::CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
+                                          [[maybe_unused]] bool needBarrier)
+{
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v,
+                                        DataType::IsTypeNumeric(inst->GetType()) ||
+                                            inst->GetType() == DataType::REFERENCE || inst->GetType() == DataType::ANY,
+                                        (std::cerr << "Memory instruction has wrong type\n", inst->Dump(&std::cerr)));
+    if (inst->IsStore() && (inst->GetInputType(0) != DataType::POINTER) && (inst->GetType() == DataType::ANY)) {
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, needBarrier, (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
+    }
+    if (InstHasGCBarrierEntrypointInput(inst->GetOpcode())) {
+        CheckGCBarrierEntrypointInput(v, inst, needBarrier);
+    }
+    auto asGraphChecker = static_cast<GraphChecker *>(v);
+    auto needsPreREB = asGraphChecker->GetGraph()->GetRuntime()->NeedsPreReadBarrier();
+    if (needsPreREB && inst->IsLoad() && (inst->GetInputType(0) != DataType::POINTER) &&
+        (inst->GetType() == DataType::REFERENCE)) {
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, needBarrier, (std::cerr << "This load/store should have barrier:\n", inst->Dump(&std::cerr)));
+    }
+}
+
 /*
  * Visitors to check instructions types
  */
@@ -1548,7 +1606,7 @@ void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, false);
     [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto idx = inst->CastToLoadPairPart()->GetImm();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op1->WithGluedInsts(),
@@ -1584,17 +1642,17 @@ void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
 {
+    bool needBarrier = inst->CastToStoreArrayPair()->GetNeedBarrier();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
         (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
-    CheckMemoryInstruction(v, inst);
+    CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and the first stored value are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, CheckCommonTypes(inst, inst->GetInputs()[3U].GetInst()),
         (std::cerr << "Types of store and the second stored value are not compatible\n", inst->Dump(&std::cerr)));
-    [[maybe_unused]] bool needBarrier = inst->CastToStoreArrayPair()->GetNeedBarrier();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
         v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreArrayPair has incorrect value NeedBarrier", inst->Dump(&std::cerr)));

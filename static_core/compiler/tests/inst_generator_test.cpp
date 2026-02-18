@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,15 +24,24 @@
 #include <optional>
 
 namespace ark::compiler {
-class InstGeneratorTest : public GraphTest {
+
+template <typename GraphGeneratorT>
+class InstGeneratorTestT : public GraphTest {
 public:
-    InstGeneratorTest()
+    InstGeneratorTestT()
     {
         // Disable regalloc verification as generated code may operate on
         // registers/stack slots containing uninitialized values
         g_options.SetCompilerVerifyRegalloc(false);
     }
+
+    GraphGeneratorT CreateGraphGenerator(ArenaAllocator &allocator, ArenaAllocator &localAllocator)
+    {
+        return GraphGeneratorT(allocator, localAllocator);
+    }
 };
+
+using InstGeneratorTest = InstGeneratorTestT<GraphCreator>;
 
 class CodegenStatisticGenerator : public StatisticGenerator {
 public:
@@ -103,52 +112,63 @@ private:
     }
 };
 
-TEST_F(InstGeneratorTest, AllInstTestARM64)
+template <typename T, Arch ARCH>
+struct ArchInstGeneratorTestParam {
+};
+
+template <typename Param>
+class ArchInstGeneratorTestT;
+
+template <typename GraphGeneratorT, Arch ARCH>
+class ArchInstGeneratorTestT<ArchInstGeneratorTestParam<GraphGeneratorT, ARCH>>
+    : public InstGeneratorTestT<GraphGeneratorT> {
+public:
+    static constexpr Arch GetArch()
+    {
+        return ARCH;
+    }
+
+    static constexpr const char *GetArchAsString()
+    {
+        switch (ARCH) {
+            case Arch::AARCH32:
+                return "ARM32";
+            case Arch::AARCH64:
+                return "ARM64";
+            case Arch::X86_64:
+                return "AMD64";
+            default:
+                UNREACHABLE();
+        }
+    }
+};
+
+TYPED_TEST_SUITE_P(ArchInstGeneratorTestT);
+
+TYPED_TEST_P(ArchInstGeneratorTestT, AllInstTest)
 {
     ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
     InstGenerator instGen(instAlloc);
 
     ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
     ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
+    auto graphCreator = this->CreateGraphGenerator(graphAlloc, graphLocalAlloc);
 
-    // ARM64
-    CodegenStatisticGenerator statGenArm64(instGen, graphCreator);
-    statGenArm64.Generate();
-    statGenArm64.GenerateHTMLPage("CodegenStatisticARM64.html");
+    graphCreator.SetRuntimeTargetArch(AllInstTest::GetArch());
+    CodegenStatisticGenerator statGen(instGen, graphCreator);
+    statGen.Generate();
+    statGen.GenerateHTMLPage(std::string("CodegenStatistic") + AllInstTest::GetArchAsString() + ".html");
 }
 
-TEST_F(InstGeneratorTest, AllInstTestARM32)
-{
-    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator instGen(instAlloc);
+REGISTER_TYPED_TEST_SUITE_P(ArchInstGeneratorTestT, AllInstTest);
 
-    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
-
-    // ARM32
-    graphCreator.SetRuntimeTargetArch(Arch::AARCH32);
-    CodegenStatisticGenerator statGenArm32(instGen, graphCreator);
-    statGenArm32.Generate();
-    statGenArm32.GenerateHTMLPage("CodegenStatisticARM32.html");
-}
-
-TEST_F(InstGeneratorTest, AllInstTestAMD64)
-{
-    ArenaAllocator instAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    InstGenerator instGen(instAlloc);
-
-    ArenaAllocator graphAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    ArenaAllocator graphLocalAlloc(SpaceType::SPACE_TYPE_COMPILER);
-    GraphCreator graphCreator(graphAlloc, graphLocalAlloc);
-
-    // AMD64
-    graphCreator.SetRuntimeTargetArch(Arch::X86_64);
-    CodegenStatisticGenerator statGenAmd64(instGen, graphCreator);
-    statGenAmd64.Generate();
-    statGenAmd64.GenerateHTMLPage("CodegenStatisticAMD64.html");
-}
+using Types = testing::Types<ArchInstGeneratorTestParam<GraphCreator, Arch::AARCH32>,
+                             ArchInstGeneratorTestParam<GraphCreator, Arch::AARCH64>,
+                             ArchInstGeneratorTestParam<GraphCreator, Arch::X86_64>,
+                             ArchInstGeneratorTestParam<GraphCreatorWithGCBarrierEntrypoints, Arch::AARCH64>,
+                             ArchInstGeneratorTestParam<GraphCreatorWithGCBarrierEntrypoints, Arch::X86_64>>;
+// CC-OFFNXT(G.FMT.16-CPP) empty variadic macro, project code style
+INSTANTIATE_TYPED_TEST_SUITE_P(GraphCreatorInstantiation, ArchInstGeneratorTestT, Types, );
 
 }  // namespace ark::compiler
 

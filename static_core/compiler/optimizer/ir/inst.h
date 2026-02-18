@@ -1174,12 +1174,7 @@ public:
         return GetOpcode() == Opcode::Shl || GetOpcode() == Opcode::Shr || GetOpcode() == Opcode::AShr;
     }
 
-    const SaveStateInst *GetSaveState() const
-    {
-        return const_cast<Inst *>(this)->GetSaveState();
-    }
-
-    SaveStateInst *GetSaveState()
+    SaveStateInst *GetSaveState() const
     {
         if (!RequireState()) {
             return nullptr;
@@ -2723,6 +2718,15 @@ public:
         return clone;
     }
 
+protected:
+#ifndef NDEBUG
+    bool ValidateInputsCount(unsigned index) const
+    {
+        auto inputsCount = GetInputsCount();
+        return index < inputsCount && inputsCount >= L && inputsCount <= H;
+    }
+#endif
+
 private:
     template <typename T, std::size_t... IS>
     constexpr auto CreateArray(T value, [[maybe_unused]] std::index_sequence<IS...> unused)
@@ -2730,7 +2734,6 @@ private:
         return std::array<T, sizeof...(IS)> {(static_cast<void>(IS), value)...};
     }
 
-private:
     std::array<Register, H> srcRegs_ = CreateArray(GetInvalidReg(), std::make_index_sequence<H>());
     Location tmpLocation_ {};
 };
@@ -2827,11 +2830,12 @@ private:
 /// Unary operation instruction
 class PANDA_PUBLIC_API UnaryOperation : public FixedInputsInst<1> {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<1>;
+    using Base::Base;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (GetOpcode() == Opcode::Cast) {
             return GetInput(0).GetInst()->GetType();
         }
@@ -2851,7 +2855,8 @@ public:
 /// Binary operation instruction
 class BinaryOperation : public FixedInputsInst<2U> {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<2U>;
+    using Base::Base;
 
     uint32_t Latency() const override
     {
@@ -2875,7 +2880,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         auto inputType = GetInput(index).GetInst()->GetType();
         auto type = GetType();
         if (GetOpcode() == Opcode::Sub && !DataType::IsTypeSigned(type)) {
@@ -2896,13 +2901,14 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API BinaryImmOperation : public FixedInputsInst<1>, public ImmediateMixin {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<1>;
+    using Base::Base;
 
-    BinaryImmOperation(Initializer t, uint64_t imm) : FixedInputsInst(std::move(t)), ImmediateMixin(imm) {}
+    BinaryImmOperation(Initializer t, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         auto inputType = GetInput(index).GetInst()->GetType();
         auto type = GetType();
         if (GetOpcode() == Opcode::SubI && !DataType::IsTypeSigned(type)) {
@@ -2932,7 +2938,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         static_cast<BinaryImmOperation *>(clone)->SetImm(GetImm());
         return clone;
     }
@@ -2944,16 +2950,17 @@ class PANDA_PUBLIC_API UnaryShiftedRegisterOperation : public FixedInputsInst<1>
                                                        public ImmediateMixin,
                                                        public ShiftTypeMixin {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<1>;
+    using Base::Base;
 
     UnaryShiftedRegisterOperation(Initializer t, uint64_t imm, ShiftType shiftType)
-        : FixedInputsInst(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
+        : Base(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetType();
     }
 
@@ -2968,16 +2975,17 @@ class PANDA_PUBLIC_API BinaryShiftedRegisterOperation : public FixedInputsInst<2
                                                         public ImmediateMixin,
                                                         public ShiftTypeMixin {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<2U>;
+    using Base::Base;
 
     BinaryShiftedRegisterOperation(Initializer t, uint64_t imm, ShiftType shiftType)
-        : FixedInputsInst(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
+        : Base(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetType();
     }
 
@@ -2988,16 +2996,17 @@ public:
 
 class PANDA_PUBLIC_API ExtractBitfieldInst : public FixedInputsInst<1> {
 public:
-    using FixedInputsInst::FixedInputsInst;
+    using Base = FixedInputsInst<1>;
+    using Base::Base;
 
     ExtractBitfieldInst(Initializer t, unsigned sourceBit, unsigned width, bool signExt = false)
-        : FixedInputsInst(std::move(t)), sourceBit_(sourceBit), width_(width), signExt_(signExt)
+        : Base(std::move(t)), sourceBit_(sourceBit), width_(width), signExt_(signExt)
     {
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetType();
     }
 
@@ -3218,7 +3227,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index == 0);
+        ASSERT(Base::ValidateInputsCount(index));
         // This is SaveState input
         return DataType::NO_TYPE;
     }
@@ -3226,7 +3235,7 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         ASSERT(targetGraph != nullptr);
-        auto instClone = FixedInputsInst1::Clone(targetGraph);
+        auto instClone = Base::Clone(targetGraph);
         auto rslvClone = static_cast<ResolveStaticInst *>(instClone);
         rslvClone->SetCallMethodId(GetCallMethodId());
         rslvClone->SetCallMethod(GetCallMethod());
@@ -3251,7 +3260,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(GetInputsCount() == 2U && index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
@@ -3266,7 +3275,7 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         ASSERT(targetGraph != nullptr);
-        auto instClone = FixedInputsInst2::Clone(targetGraph);
+        auto instClone = Base::Clone(targetGraph);
         auto rslvClone = static_cast<ResolveVirtualInst *>(instClone);
         rslvClone->SetCallMethodId(GetCallMethodId());
         rslvClone->SetCallMethod(GetCallMethod());
@@ -3298,7 +3307,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 0) {
             return DataType::REFERENCE;
         }
@@ -3319,7 +3328,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst2::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToInitString()->SetStringCtorType(GetStringCtorType());
         return clone;
     }
@@ -3439,13 +3448,13 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::REFERENCE;
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(static_cast<LengthMethodInst *>(clone)->IsArray() == IsArray());
         return clone;
     }
@@ -3473,13 +3482,13 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return GetOperandsType();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = BaseInst::Clone(targetGraph);
         ASSERT(clone->CastToCompare()->GetCc() == GetCc());
         ASSERT(clone->CastToCompare()->GetOperandsType() == GetOperandsType());
         return clone;
@@ -3564,7 +3573,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return GetInput(index).GetInst()->GetType();
     }
 
@@ -3573,7 +3582,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = BaseInst::Clone(targetGraph);
         ASSERT(clone->CastToCompareAnyType()->GetAnyType() == GetAnyType());
         return clone;
     }
@@ -3616,7 +3625,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return GetInput(index).GetInst()->GetType();
     }
 
@@ -3630,7 +3639,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToCastAnyTypeValue();
+        auto clone = BaseInst::Clone(targetGraph)->CastToCastAnyTypeValue();
         ASSERT(clone->GetAnyType() == GetAnyType());
         ASSERT(clone->GetType() == GetType());
         return clone;
@@ -3651,7 +3660,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return GetInput(index).GetInst()->GetType();
     }
 
@@ -3660,7 +3669,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToCastValueToAnyType();
+        auto clone = BaseInst::Clone(targetGraph)->CastToCastValueToAnyType();
         ASSERT(clone->GetAnyType() == GetAnyType());
         ASSERT(clone->GetType() == GetType());
         return clone;
@@ -3680,7 +3689,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return (index == 0) ? DataType::ANY : DataType::NO_TYPE;
     }
 
@@ -3688,7 +3697,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = BaseInst::Clone(targetGraph);
         ASSERT(clone->CastToAnyTypeCheck()->GetAnyType() == GetAnyType());
         return clone;
     }
@@ -3714,7 +3723,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return (index == 0) ? DataType::REFERENCE : DataType::NO_TYPE;
     }
 
@@ -4409,10 +4418,54 @@ private:
     std::bitset<BITS_PER_UINT32> rootsRegsMask_ {0};
 };
 
-/// Load value from array or string
-class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<LimitedInputsInst<2, 3>>> {
+template <typename T, size_t N>
+class WithGCBarrierEntrypointMixin : public T {
+    using Base = T;
+
 public:
-    using Base = ArrayInstMixin<NeedBarrierMixin<LimitedInputsInst<2, 3>>>;
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    static constexpr size_t INDEX_GC_BARRIER_ENTRYPOINT = N;
+
+    using Base::Base;
+
+    Inst *GetGCBarrierEntrypoint()
+    {
+        auto input = Base::GetInputOpt(INDEX_GC_BARRIER_ENTRYPOINT);
+        return input.has_value() ? input->GetInst() : nullptr;
+    }
+
+    void SetGCBarrierEntrypoint(Inst *entrypoint)
+    {
+        ASSERT(entrypoint != nullptr);
+        Base::SetInput(INDEX_GC_BARRIER_ENTRYPOINT, entrypoint);
+    }
+
+    void ResetGCBarrierEntrypoint()
+    {
+        Base::SetInput(INDEX_GC_BARRIER_ENTRYPOINT, nullptr);
+    }
+
+    DataType::Type GetInputType(size_t index) const override
+    {
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == INDEX_GC_BARRIER_ENTRYPOINT) {
+            return DataType::POINTER;
+        }
+        return DataType::NO_TYPE;
+    }
+};
+
+template <size_t N>
+using WithGCBarrierEntrypointInst = WithGCBarrierEntrypointMixin<LimitedInputsInst<N, N + 1>, N>;
+
+void SetInstGCBarrierEntrypoint(Inst *inst, Inst *entrypoint);
+Inst *GetInstGCBarrierEntrypoint(Inst *inst);
+void ResetInstGCBarrierEntrypoint(Inst *inst);
+
+/// Load value from array or string
+class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>> {
+public:
+    using Base = ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     explicit LoadInst(Opcode opcode, bool isArray = true) : Base(opcode)
@@ -4434,26 +4487,9 @@ public:
         return GetInput(0).GetInst();
     }
 
-    Inst *GetGCBarrierEntrypoint()
-    {
-        auto input = GetInputOpt(2);
-        return input.has_value() ? input->GetInst() : nullptr;
-    }
-
-    void SetGCBarrierEntrypoint(Inst *entrypoint)
-    {
-        ASSERT(entrypoint != nullptr);
-        SetInput(2, entrypoint);
-    }
-
-    void ResetGCBarrierEntrypoint()
-    {
-        SetInput(2, nullptr);
-    }
-
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0: {
                 auto inputType = GetInput(0).GetInst()->GetType();
@@ -4463,10 +4499,8 @@ public:
             }
             case 1:
                 return DataType::INT32;
-            case 2:
-                return DataType::POINTER;
             default:
-                return DataType::NO_TYPE;
+                return Base::GetInputType(index);
         }
     }
 
@@ -4503,7 +4537,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
@@ -4537,7 +4571,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
@@ -4549,9 +4583,9 @@ public:
     }
 };
 /// Store value into array element
-class StoreInst : public NeedBarrierMixin<FixedInputsInst3> {
+class StoreInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>> {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
+    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
 
     explicit StoreInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
@@ -4573,7 +4607,7 @@ public:
     }
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0: {
                 auto input = GetInput(0).GetInst();
@@ -4586,7 +4620,7 @@ public:
             case 2U:
                 return GetType();
             default:
-                return DataType::NO_TYPE;
+                return Base::GetInputType(index);
         }
     }
 
@@ -4599,10 +4633,11 @@ public:
 
 /// Load value from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadInstI : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>,
-                                   public ImmediateMixin {
+class PANDA_PUBLIC_API LoadInstI
+    : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
+      public ImmediateMixin {
 public:
-    using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>;
+    using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
     using Base::Base;
 
     LoadInstI(Opcode opcode, uint64_t imm, bool isArray = true) : Base(opcode), ImmediateMixin(imm)
@@ -4623,19 +4658,22 @@ public:
         return GetInput(0).GetInst();
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index == 0);
-        auto inputType = GetInput(0).GetInst()->GetType();
-        ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
-        return inputType;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            auto inputType = GetInput(0).GetInst()->GetType();
+            ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
+            return inputType;
+        }
+        return Base::GetInputType(index);
     }
 
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<LoadInstI *>(FixedInputsInst::Clone(targetGraph));
+        auto clone = static_cast<LoadInstI *>(Base::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->IsArray() == IsArray());
         ASSERT(clone->GetVolatile() == GetVolatile());
@@ -4650,9 +4688,10 @@ public:
 
 /// Load value from pointer with offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadMemInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
+                                      public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -4668,19 +4707,22 @@ public:
         return GetInput(0).GetInst();
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index == 0);
-        auto input0Type = GetInput(0).GetInst()->GetType();
-        ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
-        return input0Type;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            auto input0Type = GetInput(0).GetInst()->GetType();
+            ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+            return input0Type;
+        }
+        return Base::GetInputType(index);
     }
 
     PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<LoadMemInstI *>(FixedInputsInst::Clone(targetGraph));
+        auto clone = static_cast<LoadMemInstI *>(Base::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4694,9 +4736,10 @@ public:
 
 /// Store value into array element, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+                                    public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -4711,7 +4754,7 @@ public:
     }
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0: {
                 auto inputType = GetInput(0).GetInst()->GetType();
@@ -4721,13 +4764,13 @@ public:
             case 1:
                 return GetType();
             default:
-                UNREACHABLE();
+                return Base::GetInputType(index);
         }
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(targetGraph));
+        auto clone = static_cast<StoreInstI *>(Base::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4744,9 +4787,10 @@ public:
 
 /// Store value into pointer by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreMemInstI : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+                                       public ImmediateMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -4761,7 +4805,7 @@ public:
     }
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0: {
                 auto input0Type = GetInput(0).GetInst()->GetType();
@@ -4771,7 +4815,7 @@ public:
             case 1:
                 return GetType();
             default:
-                UNREACHABLE();
+                return Base::GetInputType(index);
         }
     }
 
@@ -4779,7 +4823,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<StoreMemInstI *>(FixedInputsInst::Clone(targetGraph));
+        auto clone = static_cast<StoreMemInstI *>(Base::Clone(targetGraph));
         clone->SetImm(GetImm());
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
@@ -4807,7 +4851,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToBoundsCheckI()->SetImm(GetImm());
         ASSERT(clone->CastToBoundsCheckI()->IsArray() == IsArray());
         return clone;
@@ -4833,13 +4877,14 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToBoundsCheck()->IsArray() == IsArray());
         return clone;
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == GetInputsCount() - 1) {
             return DataType::NO_TYPE;
         }
@@ -4864,6 +4909,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == GetInputsCount() - 1) {
             return DataType::NO_TYPE;
         }
@@ -4941,7 +4987,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 1) {
             return DataType::NO_TYPE;
         }
@@ -5132,7 +5178,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index == 0);
+        ASSERT(BaseInst::ValidateInputsCount(index));
         auto type = GetOperandsType();
         return type != DataType::NO_TYPE ? type : GetInput(0).GetInst()->GetType();
     }
@@ -5143,7 +5189,7 @@ public:
 
     PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = static_cast<CastInst *>(FixedInputsInst::Clone(targetGraph));
+        auto clone = static_cast<CastInst *>(BaseInst::Clone(targetGraph));
         ASSERT(clone->GetOperandsType() == GetOperandsType());
         return clone;
     }
@@ -5195,7 +5241,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(BaseInst::ValidateInputsCount(index));
         return GetOperandsType();
     }
 
@@ -5205,7 +5251,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = BaseInst::Clone(targetGraph);
         ASSERT(clone->CastToCmp()->GetOperandsType() == GetOperandsType());
         return clone;
     }
@@ -5217,11 +5263,12 @@ protected:
 
 /// Load value from instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>,
-                                        public TypeIdMixin,
-                                        public FieldMixin {
+class PANDA_PUBLIC_API LoadObjectInst
+    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>,
+      public TypeIdMixin,
+      public FieldMixin {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>>;
     using Base::Base;
 
     LoadObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
@@ -5232,13 +5279,15 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 1);
-        auto inputType = GetInput(0).GetInst()->GetType();
-        ASSERT(inputType == DataType::NO_TYPE || inputType == DataType::REFERENCE || inputType == DataType::ANY);
-        return inputType;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            auto inputType = GetInput(0).GetInst()->GetType();
+            ASSERT(inputType == DataType::NO_TYPE || inputType == DataType::REFERENCE || inputType == DataType::ANY);
+            return inputType;
+        }
+        return Base::GetInputType(index);
     }
 
     void SetVnObject(VnObject *vnObj) const override;
@@ -5246,7 +5295,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadObject()->SetTypeId(GetTypeId());
         clone->CastToLoadObject()->SetMethod(GetMethod());
         clone->CastToLoadObject()->SetObjField(GetObjField());
@@ -5263,9 +5312,10 @@ public:
 
 /// Load value from memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>> {
+class PANDA_PUBLIC_API LoadMemInst
+    : public ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>> {
 public:
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
+    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
     using Base::Base;
 
     explicit LoadMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
@@ -5276,17 +5326,19 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 2U);
-        if (index == 1U) {
-            return DataType::IsInt32Bit(GetInput(1).GetInst()->GetType()) ? DataType::INT32 : DataType::INT64;
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0: {
+                auto input0Type = GetInput(0).GetInst()->GetType();
+                ASSERT((GetInput(0).GetInst()->IsConst() && input0Type == DataType::INT64) ||
+                       input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+                return input0Type;
+            }
+            case 1:
+                return DataType::IsInt32Bit(GetInput(1).GetInst()->GetType()) ? DataType::INT32 : DataType::INT64;
+            default:
+                return Base::GetInputType(index);
         }
-
-        ASSERT(index == 0U);
-        auto input0Type = GetInput(0).GetInst()->GetType();
-        ASSERT((GetInput(0).GetInst()->IsConst() && input0Type == DataType::INT64) || input0Type == DataType::POINTER ||
-               input0Type == DataType::REFERENCE);
-        return input0Type;
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -5294,7 +5346,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetVolatile() == GetVolatile()) ||
                (clone->GetOpcode() == Opcode::LoadNative && clone->CastToLoadNative()->GetVolatile() == GetVolatile()));
         ASSERT((clone->GetOpcode() == Opcode::Load && clone->CastToLoad()->GetScale() == GetScale()) ||
@@ -5333,15 +5385,14 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(GetInputsCount() == 1U);
-        ASSERT(index == 0);
+        ASSERT(Base::ValidateInputsCount(index));
         // This is SaveState input
         return DataType::NO_TYPE;
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToResolveObjectField()->SetTypeId(GetTypeId());
         clone->CastToResolveObjectField()->SetMethod(GetMethod());
         return clone;
@@ -5358,10 +5409,11 @@ public:
 
 /// Load value from resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
-                                                     public TypeIdMixin {
+class PANDA_PUBLIC_API LoadResolvedObjectFieldInst
+    : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
+      public TypeIdMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
 
     LoadResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
@@ -5373,14 +5425,20 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(GetInputsCount() == 2U);
-        ASSERT(index < GetInputsCount());
-        return index == 0 ? DataType::REFERENCE : DataType::UINT32;
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;
+            case 1:
+                return DataType::INT32;
+            default:
+                return Base::GetInputType(index);
+        }
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadResolvedObjectField()->SetTypeId(GetTypeId());
         clone->CastToLoadResolvedObjectField()->SetMethod(GetMethod());
         ASSERT(clone->CastToLoadResolvedObjectField()->GetVolatile() == GetVolatile());
@@ -5397,11 +5455,12 @@ public:
 
 /// Store value into instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>,
-                                         public TypeIdMixin,
-                                         public FieldMixin {
+class PANDA_PUBLIC_API StoreObjectInst
+    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>,
+      public TypeIdMixin,
+      public FieldMixin {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
@@ -5415,14 +5474,20 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 2U);
-        return index == 0 ? DataType::REFERENCE : GetType();
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;
+            case 1:
+                return GetType();
+            default:
+                return Base::GetInputType(index);
+        }
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreObject()->SetTypeId(GetTypeId());
         clone->CastToStoreObject()->SetMethod(GetMethod());
         clone->CastToStoreObject()->SetObjField(GetObjField());
@@ -5442,9 +5507,10 @@ public:
 
 /// Store value into resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
+class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
+                                                      public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
+    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
@@ -5456,22 +5522,24 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index == 0) {
-            return DataType::REFERENCE;  // null-check
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;  // null-check
+            case 1:
+                return GetType();  // stored value
+            case 2U:
+                return DataType::UINT32;  // field offset
+            default:
+                return Base::GetInputType(index);
         }
-        if (index == 1) {
-            return GetType();  // stored value
-        }
-        return DataType::UINT32;  // field offset
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreResolvedObjectField()->SetTypeId(GetTypeId());
         clone->CastToStoreResolvedObjectField()->SetMethod(GetMethod());
         return clone;
@@ -5487,9 +5555,10 @@ public:
 
 /// Store value in memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>> {
+class PANDA_PUBLIC_API StoreMemInst
+    : public ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>> {
 public:
-    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
+    using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
     using Base::Base;
 
     static constexpr size_t STORED_INPUT_INDEX = 2;
@@ -5502,19 +5571,20 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        if (index == 1U) {
-            return DataType::IsInt32Bit(GetInput(1).GetInst()->GetType()) ? DataType::INT32 : DataType::INT64;
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0: {
+                auto input0Type = GetInput(0).GetInst()->GetType();
+                ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
+                return input0Type;
+            }
+            case 1:
+                return DataType::IsInt32Bit(GetInput(1).GetInst()->GetType()) ? DataType::INT32 : DataType::INT64;
+            case 2U:
+                return GetType();
+            default:
+                return Base::GetInputType(index);
         }
-        if (index == 2U) {
-            return GetType();
-        }
-
-        ASSERT(index == 0U);
-        auto input0Type = GetInput(0).GetInst()->GetType();
-        ASSERT(input0Type == DataType::POINTER || input0Type == DataType::REFERENCE);
-        return input0Type;
     }
 
     PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
@@ -5522,7 +5592,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(
             (clone->GetOpcode() == Opcode::Store && clone->CastToStore()->GetVolatile() == GetVolatile()) ||
             (clone->GetOpcode() == Opcode::StoreNative && clone->CastToStoreNative()->GetVolatile() == GetVolatile()));
@@ -5535,11 +5605,11 @@ public:
 
 /// Load static field from class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>,
+class PANDA_PUBLIC_API LoadStaticInst : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
                                         public TypeIdMixin,
                                         public FieldMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
@@ -5555,14 +5625,16 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(index == 0);
-        return DataType::REFERENCE;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            return DataType::REFERENCE;
+        }
+        return Base::GetInputType(index);
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadStatic()->SetTypeId(GetTypeId());
         clone->CastToLoadStatic()->SetMethod(GetMethod());
         clone->CastToLoadStatic()->SetObjField(GetObjField());
@@ -5587,7 +5659,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToResolveObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToResolveObjectFieldStatic()->SetMethod(GetMethod());
         return clone;
@@ -5595,8 +5667,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(GetInputsCount() == 1U);
-        ASSERT(index == 0);
+        ASSERT(Base::ValidateInputsCount(index));
         // This is SaveState input
         return DataType::NO_TYPE;
     }
@@ -5612,10 +5683,11 @@ public:
 
 /// Load value from resolved static instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadResolvedObjectFieldStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>,
-                                                           public TypeIdMixin {
+class PANDA_PUBLIC_API LoadResolvedObjectFieldStaticInst
+    : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>,
+      public TypeIdMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<1>>>;
     using Base::Base;
 
     LoadResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
@@ -5625,16 +5697,18 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(GetInputsCount() == 1U);
-        ASSERT(index < GetInputsCount());
-        return DataType::REFERENCE;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            return DataType::REFERENCE;
+        }
+        return Base::GetInputType(index);
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadResolvedObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToLoadResolvedObjectFieldStatic()->SetMethod(GetMethod());
         ASSERT(clone->CastToLoadResolvedObjectFieldStatic()->GetVolatile() == GetVolatile());
@@ -5651,11 +5725,11 @@ public:
 
 /// Store value into static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
+class PANDA_PUBLIC_API StoreStaticInst : public VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>,
                                          public TypeIdMixin,
                                          public FieldMixin {
 public:
-    using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
+    using Base = VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
@@ -5671,16 +5745,20 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;
+            case 1:
+                return GetType();
+            default:
+                return Base::GetInputType(index);
         }
-        return GetType();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreStatic()->SetTypeId(GetTypeId());
         clone->CastToStoreStatic()->SetMethod(GetMethod());
         clone->CastToStoreStatic()->SetObjField(GetObjField());
@@ -5695,7 +5773,12 @@ public:
     }
 };
 
-/// Store value into unresolved static field.
+/**
+ * Store value into unresolved static field.
+ * This instruction signature conflicts with optional inputs (SaveState must be the last input), so there is no version
+ * with GC barrier entrypoint input. However, codegen currently calls runtime anyway, so this optimization would not be
+ * that beneficial.
+ */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
@@ -5713,7 +5796,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 1) {
             // This is SaveState input
             return DataType::NO_TYPE;
@@ -5724,7 +5807,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToUnresolvedStoreStatic()->SetTypeId(GetTypeId());
         clone->CastToUnresolvedStoreStatic()->SetMethod(GetMethod());
         return clone;
@@ -5733,10 +5816,10 @@ public:
 
 /// Store value into resolved static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst2>,
+class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>,
                                                             public TypeIdMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst2>;
+    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<2U>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1U;
 
@@ -5748,17 +5831,20 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(GetInputsCount() == 2U);
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;
+            case 1:
+                return GetType();  // stored value
+            default:
+                return Base::GetInputType(index);
         }
-        return GetType();  // stored value
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreResolvedObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToStoreResolvedObjectFieldStatic()->SetMethod(GetMethod());
         return clone;
@@ -5777,7 +5863,7 @@ public:
     NewObjectInst(Initializer t, TypeIdMixin m) : Base(std::move(t)), TypeIdMixin(std::move(m)) {}
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 0) {
             return DataType::REFERENCE;
         }
@@ -5788,7 +5874,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToNewObject()->SetTypeId(GetTypeId());
         clone->CastToNewObject()->SetMethod(GetMethod());
         return clone;
@@ -5810,7 +5896,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case INDEX_CLASS:
                 return GetInput(0).GetInst()->GetType();
@@ -5828,7 +5914,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToNewArray()->SetTypeId(GetTypeId());
         clone->CastToNewArray()->SetMethod(GetMethod());
         return clone;
@@ -5845,7 +5931,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::NO_TYPE;
     }
 
@@ -5853,7 +5939,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadConstArray()->SetTypeId(GetTypeId());
         clone->CastToLoadConstArray()->SetMethod(GetMethod());
         return clone;
@@ -5873,7 +5959,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return index == 0 ? DataType::REFERENCE : DataType::NO_TYPE;
     }
 
@@ -5881,7 +5967,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToFillConstArray()->SetTypeId(GetTypeId());
         clone->CastToFillConstArray()->SetMethod(GetMethod());
         clone->CastToFillConstArray()->SetImm(GetImm());
@@ -5903,8 +5989,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
+        ASSERT(Base::ValidateInputsCount(index));
         if (index < 2U) {
             return DataType::REFERENCE;
         }
@@ -5915,7 +6000,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToCheckCast()->SetTypeId(GetTypeId());
         clone->CastToCheckCast()->SetMethod(GetMethod());
         ASSERT(clone->CastToCheckCast()->GetClassType() == GetClassType());
@@ -5939,8 +6024,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
+        ASSERT(Base::ValidateInputsCount(index));
         if (index < 2U) {
             return DataType::REFERENCE;
         }
@@ -5949,7 +6033,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToIsInstance()->SetTypeId(GetTypeId());
         clone->CastToIsInstance()->SetMethod(GetMethod());
         ASSERT(clone->CastToIsInstance()->GetClassType() == GetClassType());
@@ -5971,7 +6055,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::NO_TYPE;
     }
 
@@ -5979,7 +6063,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         static_cast<LoadFromPool *>(clone)->SetTypeId(GetTypeId());
         static_cast<LoadFromPool *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -5997,7 +6081,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::ANY;
     }
 
@@ -6005,7 +6089,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         static_cast<LoadFromPoolDynamic *>(clone)->SetTypeId(GetTypeId());
         static_cast<LoadFromPoolDynamic *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -6046,7 +6130,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         static_cast<ClassInst *>(clone)->SetTypeId(GetTypeId());
         static_cast<ClassInst *>(clone)->SetMethod(GetMethod());
         static_cast<ClassInst *>(clone)->SetClass(GetClass());
@@ -6065,6 +6149,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::NO_TYPE;
     }
 
@@ -6120,13 +6205,13 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return DataType::REFERENCE;
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        return FixedInputsInst::Clone(targetGraph);
+        return Base::Clone(targetGraph);
     }
 };
 
@@ -6146,7 +6231,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         static_cast<GlobalVarInst *>(clone)->SetTypeId(GetTypeId());
         static_cast<GlobalVarInst *>(clone)->SetMethod(GetMethod());
         return clone;
@@ -6158,7 +6243,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 0) {
             return DataType::ANY;
         }
@@ -6411,7 +6496,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index < 2U) {
             return GetType();
         }
@@ -6420,7 +6505,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(static_cast<SelectInst *>(clone)->GetCc() == GetCc());
         ASSERT(static_cast<SelectInst *>(clone)->GetOperandsType() == GetOperandsType());
         return clone;
@@ -6463,7 +6548,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index < 2U) {
             return GetType();
         }
@@ -6521,7 +6606,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetOperandsType();
     }
 
@@ -6531,7 +6616,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(static_cast<IfInst *>(clone)->GetCc() == GetCc());
         ASSERT(static_cast<IfInst *>(clone)->GetOperandsType() == GetOperandsType());
         static_cast<IfInst *>(clone)->SetMethod(GetMethod());
@@ -6579,13 +6664,13 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetOperandsType();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToIfImm()->GetCc() == GetCc());
         ASSERT(clone->CastToIfImm()->GetOperandsType() == GetOperandsType());
         clone->CastToIfImm()->SetMethod(GetMethod());
@@ -6643,10 +6728,11 @@ public:
 
 /// Load a pair of consecutive values from array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>,
-                                           public ImmediateMixin {
+class PANDA_PUBLIC_API LoadArrayPairInst
+    : public NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>,
+      public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
+    using Base = NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<2U>, 2U>>;
     using Base::Base;
 
     explicit LoadArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
@@ -6665,7 +6751,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPair();
+        auto clone = Base::Clone(targetGraph)->CastToLoadArrayPair();
         static_cast<LoadArrayPairInst *>(clone)->SetImm(GetImm());
 #ifndef NDEBUG
         for (size_t i = 0; i < GetDstCount(); ++i) {
@@ -6677,14 +6763,14 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
             case 1:
                 return DataType::INT32;
             default:
-                return DataType::NO_TYPE;
+                return Base::GetInputType(index);
         }
     }
 
@@ -6699,11 +6785,12 @@ public:
 /// Load a pair of consecutive values from object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class PANDA_PUBLIC_API LoadObjectPairInst
-    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>,
+    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>,
       public TypeIdMixin2,
       public FieldMixin2 {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>;
+    using Base =
+        ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>>>;
     using Base::Base;
 
     explicit LoadObjectPairInst(Initializer t) : Base(std::move(t))
@@ -6712,18 +6799,20 @@ public:
         SetNeedBarrier(false);
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 1);
-        auto inputType = GetInput(0).GetInst()->GetType();
-        ASSERT(inputType == DataType::REFERENCE || inputType == DataType::ANY);
-        return inputType;
+        ASSERT(Base::ValidateInputsCount(index));
+        if (index == 0) {
+            auto inputType = GetInput(0).GetInst()->GetType();
+            ASSERT(inputType == DataType::REFERENCE || inputType == DataType::ANY);
+            return inputType;
+        }
+        return Base::GetInputType(index);
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToLoadObjectPair()->SetTypeId0(GetTypeId0());
         clone->CastToLoadObjectPair()->SetTypeId1(GetTypeId1());
         clone->CastToLoadObjectPair()->SetMethod(GetMethod());
@@ -6744,9 +6833,10 @@ public:
 
 /// Store a pair of consecutive values to array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreArrayPairInst : public NeedBarrierMixin<WithGCBarrierEntrypointInst<4U>>,
+                                            public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
+    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<4U>>;
     using Base::Base;
 
     explicit StoreArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
@@ -6768,7 +6858,7 @@ public:
     }
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
@@ -6778,7 +6868,7 @@ public:
             case 3U:
                 return GetType();
             default:
-                return DataType::NO_TYPE;
+                return Base::GetInputType(index);
         }
     }
 
@@ -6790,7 +6880,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToStoreArrayPair();
+        auto clone = Base::Clone(targetGraph)->CastToStoreArrayPair();
         static_cast<StoreArrayPairInst *>(clone)->SetImm(GetImm());
         return clone;
     }
@@ -6800,11 +6890,12 @@ public:
 
 /// Store a pair of consecutive values to object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreObjectPairInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                                             public TypeIdMixin2,
-                                             public FieldMixin2 {
+class PANDA_PUBLIC_API StoreObjectPairInst
+    : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>,
+      public TypeIdMixin2,
+      public FieldMixin2 {
 public:
-    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
+    using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
@@ -6816,14 +6907,21 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
-        ASSERT(GetInputsCount() == 3U);
-        return index == 0 ? DataType::REFERENCE : GetType();
+        ASSERT(Base::ValidateInputsCount(index));
+        switch (index) {
+            case 0:
+                return DataType::REFERENCE;
+            case 1:
+            case 2U:
+                return GetType();
+            default:
+                return Base::GetInputType(index);
+        }
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreObjectPair()->SetTypeId0(GetTypeId0());
         clone->CastToStoreObjectPair()->SetTypeId1(GetTypeId1());
         clone->CastToStoreObjectPair()->SetMethod(GetMethod());
@@ -6845,10 +6943,11 @@ public:
 
 /// Load a pair of consecutive values from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API LoadArrayPairInstI : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>,
-                                            public ImmediateMixin {
+class PANDA_PUBLIC_API LoadArrayPairInstI
+    : public NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>,
+      public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>;
+    using Base = NeedBarrierMixin<MultipleOutputMixin<WithGCBarrierEntrypointInst<1>, 2U>>;
     using Base::Base;
 
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -6867,16 +6966,16 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 0) {
             return DataType::REFERENCE;
         }
-        return DataType::NO_TYPE;
+        return Base::GetInputType(index);
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPairI();
+        auto clone = Base::Clone(targetGraph)->CastToLoadArrayPairI();
         clone->SetImm(GetImm());
 #ifndef NDEBUG
         for (size_t i = 0; i < GetDstCount(); ++i) {
@@ -6894,9 +6993,10 @@ public:
 
 /// Store a pair of consecutive values to array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class PANDA_PUBLIC_API StoreArrayPairInstI : public NeedBarrierMixin<FixedInputsInst3>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreArrayPairInstI : public NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>,
+                                             public ImmediateMixin {
 public:
-    using Base = NeedBarrierMixin<FixedInputsInst3>;
+    using Base = NeedBarrierMixin<WithGCBarrierEntrypointInst<3U>>;
     using Base::Base;
 
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
@@ -6908,7 +7008,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return DataType::REFERENCE;
@@ -6916,7 +7016,7 @@ public:
             case 2U:
                 return GetType();
             default:
-                return DataType::NO_TYPE;
+                return Base::GetInputType(index);
         }
     }
     Inst *GetArray()
@@ -6942,7 +7042,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         clone->CastToStoreArrayPairI()->SetImm(GetImm());
         return clone;
     }
@@ -7120,7 +7220,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimize()->GetDeoptimizeType() == GetDeoptimizeType());
         return clone;
     }
@@ -7143,14 +7243,14 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeIf()->GetDeoptimizeType() == GetDeoptimizeType());
         return clone;
     }
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return GetInput(0).GetInst()->GetType();
@@ -7181,7 +7281,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst3::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeCompare()->GetDeoptimizeType() == GetDeoptimizeType());
         ASSERT(clone->CastToDeoptimizeCompare()->GetOperandsType() == GetOperandsType());
         ASSERT(clone->CastToDeoptimizeCompare()->GetCc() == GetCc());
@@ -7190,7 +7290,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
             case 1:
@@ -7224,7 +7324,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         switch (index) {
             case 0:
                 return GetInput(0).GetInst()->GetType();
@@ -7237,7 +7337,7 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst2::Clone(targetGraph);
+        auto clone = Base::Clone(targetGraph);
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetDeoptimizeType() == GetDeoptimizeType());
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetOperandsType() == GetOperandsType());
         ASSERT(clone->CastToDeoptimizeCompareImm()->GetCc() == GetCc());
@@ -7257,7 +7357,7 @@ public:
 
     DataType::Type GetInputType(size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         if (index == 0) {
             return DataType::REFERENCE;
         }
@@ -7274,7 +7374,7 @@ public:
     Inst *Clone(const Graph *targetGraph) const override
     {
         ASSERT(targetGraph != nullptr);
-        auto instClone = FixedInputsInst2::Clone(targetGraph);
+        auto instClone = Base::Clone(targetGraph);
         auto throwClone = static_cast<ThrowInst *>(instClone);
         throwClone->SetCallMethodId(GetCallMethodId());
         throwClone->SetCallMethod(GetCallMethod());
@@ -7294,7 +7394,7 @@ public:
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
-        ASSERT(index < GetInputsCount());
+        ASSERT(Base::ValidateInputsCount(index));
         return GetType();
     }
 
@@ -7316,6 +7416,15 @@ inline bool IsPseudoUserOfMultiOutput(Inst *inst)
         default:
             return false;
     }
+}
+
+/// Check if instruction has GC barrier entrypoint input
+constexpr bool InstHasGCBarrierEntrypointInput(Opcode opcode)
+{
+    // UnresolvedStoreStaticInst doesn't have GC barrier entrypoint input, see class declaration for more info
+    return (inst_flags::HasFlag(opcode, inst_flags::WRITE_BARRIER) ||
+            inst_flags::HasFlag(opcode, inst_flags::READ_BARRIER)) &&
+           opcode != Opcode::UnresolvedStoreStatic;
 }
 
 template <typename T>
@@ -7429,10 +7538,14 @@ template <Opcode OPCODE>
 struct OpcodeTraits;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SPECIALIZE_OPCODE_TRAITS(OPCODE, BASE, ...) \
-    template <>                                     \
-    struct OpcodeTraits<Opcode::OPCODE> {           \
-        using BaseType = BASE;                      \
+#define SPECIALIZE_OPCODE_TRAITS(OPCODE, BASE, ...)                       \
+    template <>                                                           \
+    struct OpcodeTraits<Opcode::OPCODE> {                                 \
+        static constexpr Opcode GetOpcode()                               \
+        {                                                                 \
+            return Opcode::OPCODE; /* CC-OFF(G.PRE.05) code generation */ \
+        }                                                                 \
+        using BaseType = BASE;                                            \
     }; /* CC-OFF(G.PRE.09) code generation */
 
 OPCODE_LIST(SPECIALIZE_OPCODE_TRAITS)
@@ -7455,6 +7568,26 @@ inline std::ostream &operator<<(std::ostream &os, const Inst &inst)
 {
     inst.Dump(&os, false);
     return os;
+}
+
+template <typename Callback>
+auto SwitchOverOpcodes(Inst *inst, Callback &&callback)
+{
+    switch (inst->GetOpcode()) {
+#define HANDLE_INST(OPCODE, BASE, ...)                                                  \
+    case Opcode::OPCODE: {                                                              \
+        auto value = callback(OpcodeTraits<Opcode::OPCODE> {}, inst->CastTo##OPCODE()); \
+        if (value.has_value()) {                                                        \
+            return *value; /* CC-OFF(G.PRE.05) code generation */                       \
+        }                                                                               \
+        break; /* CC-OFF(G.PRE.05) code generation */                                   \
+    }
+        OPCODE_LIST(HANDLE_INST)
+#undef HANDLE_INST
+        default:
+            break;
+    }
+    UNREACHABLE();
 }
 
 }  // namespace ark::compiler

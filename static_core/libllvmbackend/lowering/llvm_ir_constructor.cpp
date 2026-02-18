@@ -4108,6 +4108,7 @@ void LLVMIrConstructor::VisitLoadObject(GraphVisitor *v, Inst *inst)
     auto dataOff = ctor->GetGraph()->GetRuntime()->GetFieldOffset(field);
     auto ptrData = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), obj, dataOff);
 
+    // NOTE(nkholiavin, #33409): need to implement read barriers generation
     auto n = ctor->CreateLoadWithOrdering(inst, ptrData, ToAtomicOrdering(inst->CastToLoadObject()->GetVolatile()));
     ctor->ValueMapAdd(inst, n);
 }
