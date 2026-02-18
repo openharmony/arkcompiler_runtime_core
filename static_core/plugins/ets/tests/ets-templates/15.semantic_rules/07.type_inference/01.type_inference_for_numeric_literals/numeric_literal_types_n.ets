@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@ desc:
     The type of expression of a numeric type for Constant Expressions is first evaluated from the expression.
     The evaluated numeric result type can be inferred to a numeric target type from the context. A compile-time error
     occurs if the context is a union type, and the evaluated value can be treated as value of several of union component types.
+expected_out: |-
+    {{(c.expected_out)}}
 tags: [compile-only, negative]
 ---*/
 
