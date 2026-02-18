@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -6245,6 +6245,120 @@ TEST_F(IrBuilderTest, GroupOfThrowableInstructions)
             EXPECT_TRUE(GetGraph()->IsInstThrowable(firstRealInst));
         }
     }
+}
+
+TEST_F(IrBuilderTest, ThrowOutsideTryIsNotThrowable)
+{
+    // Throw without active try/catch must not participate in catch-phi handling.
+    auto source = R"(
+    .record E1 {}
+
+    .function void main(E1 a0) {
+        throw a0
+    }
+    )";
+
+    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
+
+    Inst *throwInst = nullptr;
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : bb->Insts()) {
+            if (inst->GetOpcode() == Opcode::Throw) {
+                ASSERT_EQ(throwInst, nullptr);
+                throwInst = inst;
+            }
+        }
+    }
+
+    ASSERT_NE(throwInst, nullptr);
+    // Outside try region, throw should not be marked as throwable for catch edges.
+    EXPECT_FALSE(GetGraph()->IsInstThrowable(throwInst));
+}
+
+TEST_F(IrBuilderTest, ThrowInCatchIsNotThrowable)
+{
+    // Throw in try should be throwable, throw in catch should not be re-routed to catch.
+    auto source = R"(
+    .record E1 {}
+
+    .function void main(E1 a0) {
+    try_begin:
+        throw a0
+    try_end:
+        return.void
+
+    catch_begin:
+        throw a0
+
+    .catch E1, try_begin, try_end, catch_begin
+    }
+    )";
+
+    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
+
+    Inst *tryThrowInst = nullptr;
+    Inst *catchThrowInst = nullptr;
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : bb->Insts()) {
+            if (inst->GetOpcode() != Opcode::Throw) {
+                continue;
+            }
+            if (bb->IsTry()) {
+                ASSERT_EQ(tryThrowInst, nullptr);
+                tryThrowInst = inst;
+                continue;
+            }
+            if (bb->IsCatch()) {
+                ASSERT_EQ(catchThrowInst, nullptr);
+                catchThrowInst = inst;
+            }
+        }
+    }
+
+    ASSERT_NE(tryThrowInst, nullptr);
+    ASSERT_NE(catchThrowInst, nullptr);
+    // Throw in try block must remain throwable.
+    EXPECT_TRUE(GetGraph()->IsInstThrowable(tryThrowInst));
+    // Throw inside catch block must not be marked throwable for the same handler path.
+    EXPECT_FALSE(GetGraph()->IsInstThrowable(catchThrowInst));
+}
+
+TEST_F(IrBuilderTest, ThrowInTryIsThrowable)
+{
+    // Throw inside try block should be marked throwable.
+    auto source = R"(
+    .record E1 {}
+
+    .function void main(E1 a0) {
+    try_begin:
+        throw a0
+    try_end:
+        return.void
+
+    catch_begin:
+        return.void
+
+    .catch E1, try_begin, try_end, catch_begin
+    }
+    )";
+
+    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
+
+    Inst *throwInst = nullptr;
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : bb->Insts()) {
+            if (inst->GetOpcode() != Opcode::Throw) {
+                continue;
+            }
+            ASSERT_TRUE(bb->IsTry());
+            ASSERT_EQ(throwInst, nullptr);
+            throwInst = inst;
+        }
+    }
+
+    ASSERT_NE(throwInst, nullptr);
+    // Ensure try-region throw keeps throwable semantics.
+    EXPECT_TRUE(GetGraph()->IsInstThrowable(throwInst));
 }
 
 OUT_GRAPH(InfiniteLoopInsideTryBlock, Graph *graph)
