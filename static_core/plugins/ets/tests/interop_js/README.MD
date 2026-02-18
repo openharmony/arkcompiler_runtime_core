@@ -20,7 +20,7 @@ If it is a `panda_ets_interop_js_gtest`, you'll have to add a `_gtests` suffix t
 To run interop tests with ArkJSVM you need to have ark_standalone three, so the first step is to obtain ark_standalone manifest (actual docs: https://gitee.com/ark_standalone_build/docs)
 
 ```
-repo init -u https://gitee.com/ark-standalone-build/manifest.git -b OpenHarmony_feature_20241108
+repo init -u https://gitee.com/ark-standalone-build/manifest.git -b <branch>
 repo sync -c -j8
 repo forall -c 'git lfs pull'
 
@@ -35,6 +35,12 @@ python ark.py x64.debug hybrid hybrid_tests
 Create build directory for static_core:
 ```
 mkdir arkcompiler/runtime_core/static_core/build
+```
+
+Make symlink for es2panda in static_core/tools directory
+```
+cd arkcompiler/runtime_core/static_core/tools
+ln -s ../../../ets_frontend/ets2panda/ es2panda
 ```
 
 Prepare environment for copying binaries script running:

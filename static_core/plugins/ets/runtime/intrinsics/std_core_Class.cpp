@@ -37,6 +37,7 @@
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/signature_utils.h"
 #include "runtime/handle_scope-inl.h"
 #include "libarkbase/utils/utf.h"
 
@@ -144,11 +145,11 @@ EtsClass *EtsRuntimeLinkerFindLoadedClass(EtsRuntimeLinker *runtimeLinker, EtsSt
     }
 
     ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    const auto name = parser.Resolve();
-    const auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
-    if (classDescriptor == nullptr) {
+    auto nameOpt = parser.Resolve();
+    if (UNLIKELY(!nameOpt.has_value())) {
         return nullptr;
     }
+    const auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
     return runtimeLinker->FindLoadedClass(classDescriptor);
 }
 
@@ -180,11 +181,11 @@ void EtsRuntimeLinkerInitializeContext(EtsRuntimeLinker *runtimeLinker)
 EtsClass *EtsBootRuntimeLinkerFindAndLoadClass(ObjectHeader *runtimeLinker, EtsString *clsName, EtsBoolean init)
 {
     ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    const auto name = parser.Resolve();
-    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
-    if (classDescriptor == nullptr) {
+    auto nameOpt = parser.Resolve();
+    if (UNLIKELY(!nameOpt.has_value())) {
         return nullptr;
     }
+    auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
 
     auto *coro = EtsCoroutine::GetCurrent();
     // Use core ClassLinker in order to pass nullptr as error handler,

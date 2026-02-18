@@ -459,9 +459,6 @@ TEST_F(MangleSignatureTest, Format_Wrong)
     desc = Mangle::ConvertSignature("A{A{c}}");
     ASSERT_FALSE(desc.has_value());
 
-    desc = Mangle::ConvertSignature("C{a:b}:f");
-    ASSERT_FALSE(desc.has_value());
-
     desc = Mangle::ConvertSignature("C{a/b}:");
     ASSERT_FALSE(desc.has_value());
 
@@ -472,6 +469,12 @@ TEST_F(MangleSignatureTest, Format_Wrong)
     ASSERT_FALSE(desc.has_value());
 
     desc = Mangle::ConvertSignature(":X{C{a.b}C{c/d}}");
+    ASSERT_FALSE(desc.has_value());
+
+    desc = Mangle::ConvertSignature("C{std:core:Object}:");
+    ASSERT_FALSE(desc.has_value());
+
+    desc = Mangle::ConvertSignature("E{a:b:c:d.Color}:");
     ASSERT_FALSE(desc.has_value());
 }
 

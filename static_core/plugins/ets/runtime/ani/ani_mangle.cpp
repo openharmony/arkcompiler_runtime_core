@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_method_signature.h"
 #include "plugins/ets/runtime/types/ets_type.h"
+#include "plugins/ets/runtime/signature_utils.h"
 
 namespace ark::ets::ani {
 
@@ -125,24 +126,31 @@ static size_t ParseBody(char type, const std::string_view data, PandaString &str
         return std::string_view::npos;
     }
     auto end = data.find('}', 1);
-    if (end != std::string_view::npos) {
-        str.push_back('L');
-        for (size_t pos = 1; pos < end; ++pos) {
-            if (data[pos] == '/' || data[pos] == ':') {
-                // The new format 'descriptor' can't contain '/'
-                return std::string_view::npos;
-            }
-            str.push_back(data[pos] == '.' ? '/' : data[pos]);
-        }
-        if (type == 'P') {
-            // e.g. "La/b/c/X;" -> "La/b/c/%%partial-X;"
-            size_t lastPos = str.find_last_of('/') + 1;
-            str.replace(lastPos, str.length(), "%%partial-" + str.substr(lastPos));
-        }
-        str.push_back(';');
-        return end + 1;
+    if (end == std::string_view::npos) {
+        return std::string_view::npos;
     }
-    return std::string_view::npos;
+
+    auto dataNormOpt = signature::NormalizePackageSeparators<PandaString, '.'>(data, 0, end);
+    if (UNLIKELY(!dataNormOpt.has_value())) {
+        return std::string_view::npos;
+    }
+    const PandaString &dataNorm = dataNormOpt.value();
+
+    str.push_back('L');
+    for (size_t pos = 1; pos < end; ++pos) {
+        if (dataNorm[pos] == '/') {
+            // The new format 'descriptor' can't contain '/'
+            return std::string_view::npos;
+        }
+        str.push_back(dataNorm[pos] == '.' ? '/' : dataNorm[pos]);
+    }
+    if (type == 'P') {
+        // e.g. "La/b/c/X;" -> "La/b/c/%%partial-X;"
+        size_t lastPos = str.find_last_of('/') + 1;
+        str.replace(lastPos, str.length(), "%%partial-" + str.substr(lastPos));
+    }
+    str.push_back(';');
+    return end + 1;
 }
 
 static size_t ParseType(char type, const std::string_view data, PandaString &str)
@@ -167,7 +175,7 @@ static size_t ParseType(char type, const std::string_view data, PandaString &str
         case 'E':
         case 'P': bodySize = ParseBody(type, data.substr(1), str); break;
         default:
-            // The 'descriptor' does not have a new format, so no conversion is required.
+            // The 'descriptor' does not match the expected format
             return std::string_view::npos;
     }
     // clang-format on
@@ -246,77 +254,137 @@ static EtsType GetTypeByFirstChar(char c)
     }
 }
 
-static size_t ProcessObjectParameter(PandaSmallVector<PandaString> &paramTypes, const std::string_view signature,
-                                     size_t i)
-{
-    PandaString str;
-    str.reserve(signature.size() - i);
-    size_t typeSize = ParseType(signature[i], signature.substr(i), str);
-    if (typeSize == PandaString::npos) {
-        return typeSize;
+class SignatureParser final {
+public:
+    explicit SignatureParser(std::string_view signature) : signature_(signature) {}
+
+    void Parse(std::optional<EtsMethodSignature> &output) &&;
+
+private:
+    size_t ProcessParameter(size_t i);
+    size_t ProcessReferenceParameter(size_t i);
+
+    void PushToShorty(panda_file::Type type)
+    {
+        if (UNLIKELY(foundReturnDelimiter_)) {
+            proto_.GetShorty()[0] = type;
+        } else {
+            proto_.GetShorty().push_back(type);
+        }
     }
-    paramTypes.push_back(str);
-    return typeSize + i;
+
+    void PushRefParamType(PandaString &&type)
+    {
+        if (UNLIKELY(foundReturnDelimiter_)) {
+            ASSERT(!refParamTypes_.empty());
+            ASSERT(refParamTypes_[0] == "");
+            refParamTypes_[0] = std::move(type);
+        } else {
+            refParamTypes_.emplace_back(std::move(type));
+        }
+    }
+
+private:
+    const std::string_view signature_;
+    Method::Proto proto_;
+    PandaSmallVector<PandaString> refParamTypes_;
+    bool foundReturnDelimiter_ {false};
+};
+
+void SignatureParser::Parse(std::optional<EtsMethodSignature> &output) &&
+{
+    if (UNLIKELY(signature_.empty())) {
+        return;
+    }
+
+    // Return type is stored at the beginning, need to reserve space for it
+    proto_.GetShorty().push_back(panda_file::Type(panda_file::Type::TypeId::INVALID));
+    if (signature_.size() > 1) {
+        if (signature_[signature_.size() - 2U] == ':') {
+            // Return type is encoded by a single symbol
+            EtsType returnType = GetTypeByFirstChar(signature_[signature_.size() - 1U]);
+            if (UNLIKELY(returnType == EtsType::UNKNOWN)) {
+                return;
+            }
+            if (returnType == EtsType::OBJECT) {
+                // Reserve space for a reference return type
+                refParamTypes_.push_back("");
+            }
+        } else if (signature_[signature_.size() - 1U] != ':') {
+            // Return type is encoded with multiple characters, hence it is a reference
+            // or incorrect encoding. Assume the former and reserve space
+            refParamTypes_.push_back("");
+        }
+    }
+
+    // Process parameters before ':'
+    size_t i = 0;
+    size_t end = signature_.size();
+    while (i < end && signature_[i] != ':') {
+        i = ProcessParameter(i);
+        if (UNLIKELY(i == std::string_view::npos)) {
+            return;
+        }
+    }
+    if (UNLIKELY(i >= end)) {
+        // No return type, the signature is incorrect
+        return;
+    }
+
+    // Parse return type
+    foundReturnDelimiter_ = true;
+    if (i == signature_.size() - 1) {
+        ASSERT(signature_[i] == ':');
+        PushToShorty(ConvertEtsTypeToPandaType(EtsType::VOID));
+    } else {
+        i = ProcessParameter(i + 1);
+        if (i != end) {
+            // The type is non-terminal or is incorrect
+            return;
+        }
+    }
+
+    output.emplace(std::move(proto_), std::move(refParamTypes_));
 }
 
-static size_t ProcessParameter(Method::Proto &proto, PandaSmallVector<PandaString> &paramTypes,
-                               const std::string_view signature, size_t i)
+size_t SignatureParser::ProcessParameter(size_t i)
 {
-    EtsType paramType = GetTypeByFirstChar(signature[i]);
-    // Check that type is valid
+    ASSERT(i < signature_.size());
+
+    EtsType paramType = GetTypeByFirstChar(signature_[i]);
     if (paramType == EtsType::UNKNOWN) {
         return std::string_view::npos;
     }
-    proto.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(paramType));
+    auto type = ConvertEtsTypeToPandaType(paramType);
+    PushToShorty(type);
 
     if (paramType != EtsType::OBJECT) {
         return i + 1;
     }
 
-    return ProcessObjectParameter(paramTypes, signature, i);
+    return ProcessReferenceParameter(i);
 }
 
-static size_t ParseReturnValue(Method::Proto &proto, PandaSmallVector<PandaString> &paramTypes,
-                               const std::string_view signature)
+size_t SignatureParser::ProcessReferenceParameter(size_t i)
 {
-    size_t dots = signature.rfind(':');
-    // Return if ':' wasn't founded
-    if (dots == std::string_view::npos) {
-        return dots;
-    }
+    ASSERT(i < signature_.size());
 
-    if (dots == signature.size() - 1) {
-        proto.GetShorty().push_back(ets::ConvertEtsTypeToPandaType(EtsType::VOID));
-        return dots;
+    PandaString str;
+    str.reserve(signature_.size() - i);
+    size_t typeSize = ParseType(signature_[i], signature_.substr(i), str);
+    if (typeSize == PandaString::npos) {
+        return typeSize;
     }
-    // Process return type after ':'
-    auto nextPos = ProcessParameter(proto, paramTypes, signature, dots + 1);
-    if (nextPos == std::string_view::npos || nextPos != signature.size()) {
-        return std::string_view::npos;
-    }
+    PushRefParamType(std::move(str));
 
-    return dots;
+    return typeSize + i;
 }
 
 void Mangle::ConvertSignatureToProto(std::optional<EtsMethodSignature> &methodSignature,
                                      const std::string_view signature)
 {
-    Method::Proto proto;
-    PandaSmallVector<PandaString> paramTypes;
-
-    size_t dots = ParseReturnValue(proto, paramTypes, signature);
-    if (dots == std::string_view::npos) {
-        return;
-    }
-
-    // Process parameters before ':'
-    for (size_t i = 0; i < dots;) {
-        i = ProcessParameter(proto, paramTypes, signature, i);
-        if (i == std::string_view::npos) {
-            return;
-        }
-    }
-    methodSignature.emplace(std::move(proto), std::move(paramTypes));
+    SignatureParser parser(signature);
+    std::move(parser).Parse(methodSignature);
 }
 
 }  // namespace ark::ets::ani
