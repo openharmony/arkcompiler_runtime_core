@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,9 @@ public:
 
     /// true if heap verification before G1-GC concurrent phase enabled
     bool BeforeG1ConcurrentHeapVerification() const;
+
+    /// True if heap verification after G1-GC remark phase enabled
+    bool AfterRemarkG1HeapVerification() const;
 
     /// @brief if true then fail execution if heap verifier found heap corruption
     bool FailOnHeapVerification() const;
@@ -235,6 +238,8 @@ private:
     bool postGcHeapVerification_ = false;
     /// True if heap verification before G1-GC concurrent phase enabled
     bool beforeG1ConcurrentHeapVerification_ = false;
+    /// True if heap verification after G1-GC remark phase enabled
+    bool afterRemarkHeapVerification_ = false;
     /// If true then fail execution if heap verifier found heap corruption
     bool failOnHeapVerification_ = false;
     /// If true then run gc every savepoint

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     postGcHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "post") != hvParams.end();
     beforeG1ConcurrentHeapVerification_ =
         std::find(hvParams.begin(), hvParams.end(), "before_g1_concurrent") != hvParams.end();
+    afterRemarkHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "after_g1_remark") != hvParams.end();
     failOnHeapVerification_ = std::find(hvParams.begin(), hvParams.end(), "fail_on_verification") != hvParams.end();
     runGcEverySafepoint_ = options.IsRunGcEverySafepoint();
     g1RegionGarbageRateThreshold_ = options.GetG1RegionGarbageRateThreshold() / PERCENT_100_D;
@@ -122,6 +123,11 @@ bool GCSettings::PostGCHeapVerification() const
 bool GCSettings::BeforeG1ConcurrentHeapVerification() const
 {
     return beforeG1ConcurrentHeapVerification_;
+}
+
+bool GCSettings::AfterRemarkG1HeapVerification() const
+{
+    return afterRemarkHeapVerification_;
 }
 
 bool GCSettings::FailOnHeapVerification() const

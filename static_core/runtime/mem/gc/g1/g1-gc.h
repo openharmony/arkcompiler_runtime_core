@@ -384,6 +384,7 @@ private:
     void SweepNonRegularVmRefs();
 
     void VerifyHeapBeforeConcurrent();
+    void VerifyHeapAfterRemark();
 
     void ConcurrentSweep(ark::GCTask &task, PandaVector<Region *> &&emptyTenuredRegions);
 

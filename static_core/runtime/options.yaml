@@ -784,6 +784,7 @@ options:
     - into
     - post
     - before_g1_concurrent
+    - after_g1_remark
     - fail_on_verification
   description: parameters for heap verification
   delimiter: ":"
