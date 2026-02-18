@@ -609,7 +609,7 @@ true:
       // OK, assigning to direct superclass
       t =  new C<int, boolean>
 
-      // CTE, cannot assign to subclass
+      // Compile-time error, cannot assign to subclass
       c =  new T<int, boolean>
 
 -  ``T`` is one of direct superinterfaces of ``C``
@@ -665,7 +665,7 @@ true:
       // OK, assigning subinterface (J<:I)
       i = j
 
-      // CTE, cannot assign superinterface (I>:JJ
+      // Compile-time error, cannot assign superinterface (I>:JJ
       j = i
 
 -  ``T`` is type ``Object`` (C<:Object) if
@@ -732,14 +732,14 @@ It is represented by the following code:
    // Generic with contravariant parameter
    class E<in T> {}
 
-   let e0: E<U0> = new E<U1> // CTE, E<U0> is subtype of E<U1>
+   let e0: E<U0> = new E<U1> // Compile-time error, E<U0> is subtype of E<U1>
    let e1: E<U1> = new E<U0> // OK, E<U1> is supertype for E<U0>
 
    // Generic with covariant parameter
    class F<out T> {}
 
    let f0: F<U0> = new F<U1> // OK, F<U0> is supertype for F<U1>
-   let f1: F<U1> = new F<U0> // CTE, F<U1> is subtype of F<U0>
+   let f1: F<U1> = new F<U0> // Compile-time error, F<U1> is subtype of F<U0>
 
 
 .. index::
@@ -973,16 +973,17 @@ and return type ``FR``  is a *subtype* of function type ``S`` with parameters
 ``SP``:sub:`1` ``, ... , SP``:sub:`n` and return type ``SR`` if **all** of the
 following conditions are met:
 
--  ``m`` :math:`\leq` ``n``;
-
+-  ``m`` :math:`\leq` ``n``.
 -  Parameter type of ``SP``:sub:`i` for each ``i`` :math:`\leq` ``m`` is a
-   subtype of parameter type of ``FP``:sub:`i` (contravariance),
-   and ``SP``:sub:`i` is:
-
-   -  Rest parameter where ``FP``:sub:`i` is a rest parameter;
-   -  Optional parameter where ``FP``:sub:`i` is an optional parameter.
-
+   subtype of parameter type of ``FP``:sub:`i` (contravariance).
+-  ``FP``:sub:`i` is a rest parameter only if ``SP``:sub:`i` is a rest parameter.
+-  ``FP``:sub:`i` is an optional parameter only if ``SP``:sub:`i` is an optional
+   parameter.
+-  ``FP``:sub:`i` is a required parameter only if ``SP``:sub:`i` is a required
+   parameter.
 -  Type ``FR`` is a subtype of ``SR`` (covariance).
+
+
 
 .. index::
    function type
@@ -1378,31 +1379,34 @@ The following semantic checks must be performed to arguments from the left to
 the right when checking the validity of any function, method, constructor, or
 lambda call:
 
-**Step 1**: All arguments in the form of spread expression (see
-:ref:`spread Expression`) are to be linearized recursively to ensure that
-no spread expression is left at the call site.
+**Step 1**: All arguments in the form of a spread expression (see
+:ref:`Spread Expression`) that spreads an array literal (see
+:ref:`Array Literal`) are to be linearized recursively to ensure
+that no spread expression of that form remains at the call site. 
 
 **Step 2**: The following checks are performed on all arguments from left to
 right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
 
-   if parameter at position ``par_pos`` is of non-rest form, then
+   if parameter at position ``par_pos`` is of non-rest form then
 
-      if `T`:sub:`arg_pos` <: `T`:sub:`par_pos`, then increment ``arg_pos`` and ``par_pos``
+      if `T`:sub:`arg_pos` <: `T`:sub:`par_pos` then increment ``arg_pos`` and ``par_pos``
       else a :index:`compile-time error` occurs, exit Step 2
 
    else // parameter is of rest form (see :ref:`Rest Parameter`)
 
-      if parameter is of rest_array_form, then
+      if parameter is of rest_array_form then
 
-         if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type`, then increment ``arg_pos``
+         if argument is a spread expression of an array of some type `U` and 
+         'U' <: `T`:sub:`rest_array_type` then increment ``arg_pos``
+         else if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type` then increment ``arg_pos``
          else increment ``par_pos``
 
       else // parameter is of rest_tuple_form
 
          for `rest_tuple_pos` in 1 .. rest_tuple_types.count do
 
-            if `T`:sub:`arg_pos` <: `T`:sub:`rest_tuple_pos`, then increment ``arg_pos`` and `rest_tuple_pos`
-            else if rest_tuple_pos < rest_tuple_types.count, then increment ``rest_tuple_pos``
+            if `T`:sub:`arg_pos` <: `T`:sub:`rest_tuple_pos` then increment ``arg_pos`` and `rest_tuple_pos`
+            else if rest_tuple_pos < rest_tuple_types.count then increment ``rest_tuple_pos``
             else a :index:`compile-time error` occurs, exit Step 2
 
          end
@@ -1445,9 +1449,19 @@ The checks are represented in the examples below:
 
     function call (...p: Object[]) {}
     call (...[1, "str", true], ...[ 123])  // Initial call form
-    call (1, "str", true, 123)             // To be unfolded into the form with no spread expressions
+    call (1, "str", true, 123)             // To be unfolded into the form with
+                                           // no spread expressions
 
+   let arr: number[] = [1, 2, 3]
+   tricky_call (...arr)  // Type 'number' is assignable to 'Object', and a new
+                         // array of type 'Object[]' is created from elements
+                         // of the array of numbers
 
+   function tricky_call (...p: Object[]) {
+      p[0] = true
+      console.log ("Initial array: ", arr)
+      console.log ("Parameter array: ", p)
+   }
 
     function foo1 (p: Object) {}
     foo1 (1)  // Type of '1' must be assignable to 'Object'
@@ -1468,11 +1482,6 @@ The checks are represented in the examples below:
     function foo4 (...p: number[]) {}
     foo4 (1, ...[2, 3])  //
               // p becomes array [1, 2, 3]
-
-    function foo5 (p1: number, ...p2: number[]) {}
-    foo5 (...[1, 2, 3])  //
-              // p1 becomes 1, p2 becomes array [2, 3]
-
 
 .. index::
    check
@@ -1713,7 +1722,7 @@ the following conditions:
 
 -  If there is no return statement, or if all return statements have no
    expressions, then the return type is ``void`` (see
-   :ref:`Types void or undefined`). It effectively implies that a call to a
+   :ref:`Type void or undefined`). It effectively implies that a call to a
    function, method, or lambda returns the value ``undefined``.
 -  If there are *k* return statements (where *k* is 1 or more) with
    the same type expression *R*, then ``R`` is the return type.
@@ -1893,6 +1902,7 @@ The usage and benefits of a *smart type* are represented in the example below:
    context
    subtype
    runtime
+   runtime error
    call
 
 The compiler uses data-flow analysis based on :ref:`Control-flow Graph` to
@@ -1902,7 +1912,7 @@ language features influence the computation:
 -  Variable declarations;
 -  Variable assignments (a variable initialization is handled as a variable
    declaration combined with an assignment);
--  :ref:`InstanceOf Expression` with variables;
+-  :ref:`instanceof Expression` with variables;
 -  Conditional statements and conditional expressions that include:
 
     -  :ref:`Equality Expressions` of a variable and an expression that
@@ -2188,7 +2198,7 @@ At an **assignment to the variable** ``v``: ``v = e``:
    namely:
 
     - Larger numeric type if *x* is a numeric type;
-    - *Enumeration base type* if *x* is an enumeration type.
+    - *Enumeration base type* if *x* is an enumeration or const enumeration type.
 
 The following table summarizes the contexts for map evaluation at an
 *assumption node*:
@@ -2521,7 +2531,7 @@ allows operations that are specific to the subtype:
    interface type
 
 Other examples are explicit calls to ``instanceof``
-(see :ref:`InstanceOf Expression`) or checks against ``null``
+(see :ref:`instanceof Expression`) or checks against ``null``
 (see :ref:`Equality Expressions`) as parts of ``if`` statements
 (see :ref:`if Statements`) or ternary conditional expressions
 (see :ref:`Ternary Conditional Expressions`):
@@ -2736,7 +2746,7 @@ applied:
    }
    class Derived extends Base {
       override method_1() {} // overriding
-      method_2(p: string) {} // compile-time error
+      override method_2(p: string) {} // compile-time error
    }
 
 .. code-block:: typescript
@@ -2784,7 +2794,7 @@ the superinterface, then the following semantic rules apply:
 - If a method is ``private`` in  superinterface but ``public`` in subinterface,
   then a :index:`compile-time error` occurs;
 
-- If signatures not are *override-compatible* (see
+- If signatures are not *override-compatible* (see
   :ref:`Override-Compatible Signatures`) and signatures formed by using
   *effective signature types* of original signatures are *override-compatible*, then a
   :index:`compile-time error` occurs.
@@ -3370,7 +3380,7 @@ to be called in a class instance creation expression (see :ref:`New Expressions`
     }
 
     new BigFloat(1)      // constructor, marked #1,  is used
-    new BigFloat("3.14") // constructor, marked #1,  is used
+    new BigFloat("3.14") // constructor, marked #2,  is used
 
 |
 
@@ -4091,7 +4101,7 @@ determined method *M* defined in the type *C* (where *T* is necessarily a subtyp
     satisfying the previous criterion that overrides *Mi* in the interface
     that defines *Mio*.
 
-  Note: That means, all considerered method belong to subinterfaces of
+  Note: That means, all considered method belong to subinterfaces of
   the declaring interface of *M*.
 
   If the set contains exactly one default method, this method is the result of
@@ -4103,7 +4113,7 @@ determined method *M* defined in the type *C* (where *T* is necessarily a subtyp
 
   In these cases, the resolution fails for type *T*.
 
-If the method resolution fails, a runtime error is thrown. 
+If the method resolution fails, then a :index:`runtime error` occurs.
 
 Note: For the set of programs compiled without source code updates
 the resolution always results in method resolved and does never throw.
@@ -4144,7 +4154,7 @@ up to undefined*.
 
 This property limits the possible applications of type-checking expressions:
 
--  :ref:`InstanceOf Expression`;
+-  :ref:`instanceof Expression`;
 -  :ref:`Cast Expression`.
 
 .. index::
@@ -4185,8 +4195,7 @@ member is excluded in the right-hand-side column for brevity):
 
        - *Covariant* type parameters are instantiated with the constraint type;
        - *Contravariant* type parameters are instantiated with type ``never``;
-       - *Invariant* type parameters are instantiated with no type argument,
-         i.e., ``Array<T>`` is instantiated as ``Array<>``.
+       - *Invariant* type parameters are instantiated with a *Wildcard Type*
    * - :ref:`Type Parameters`
      - :ref:`Type Parameter Constraint`
    * - :ref:`Union Types` in the form ``T1 | T2 ... Tn``
@@ -4196,7 +4205,7 @@ member is excluded in the right-hand-side column for brevity):
    * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)
      - Instantiations of ``FixedArray<T>`` (i.e., the effective type of type
        argument ``T`` is preserved).
-   * - :ref:`Function Types` in the form ``(P1, P2 ..., Pn)`` :math:`\geq` ``R``
+   * - :ref:`Function Types` in the form ``(P1, P2 ..., Pn) => R``
      - Instantiation of an internal generic function type with respect to the
        number of parameter types *n*. Parameter
        types ``P1, P2 ... Pn`` are instantiated with ``Any``. Return type ``R``
@@ -4206,6 +4215,8 @@ member is excluded in the right-hand-side column for brevity):
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
+   * - :ref:`Const Enumerations`
+     - Enumeration base type
    * - Awaited<T>
      - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then
          the Effective type (Awaited<T>) is the Effective type (T);
@@ -4262,7 +4273,7 @@ Otherwise, the original type is *preserved*.
    string
    literal type
    enumeration base type
-   const enum type
+   const enumeration type
    enumeration
    invariant type parameter
    parameter type
@@ -4273,8 +4284,8 @@ on certain cast expressions (see :ref:`Cast Expression`) which narrow
 values to types not *preserved up to undefined*,
 can cause ``ClassCastError`` thrown during the evaluation of
 :ref:`Field Access Expression`, :ref:`Method Call Expression`,
-or :ref:`Function Call Expression`. Checks that result in the above-mentioned
-runtime errors ensure type safety of program execution:
+or :ref:`Function Call Expression`. Checks that cause any :index:`runtime error`
+mentioned above ensure type safety of program execution:
 
 .. code-block:: typescript
    :linenos:
@@ -4461,15 +4472,19 @@ Extended Conditional Expressions
 |LANG| provides extended semantics for conditional expressions
 to ensure better |TS| alignment. It affects the semantics of the following:
 
--  Ternary conditional expressions (see :ref:`Ternary Conditional Expressions`,
-   :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
-   :ref:`Logical Complement`);
+- :ref:`Ternary Conditional Expressions`;
 
--  ``while`` and ``do`` statements (see :ref:`While Statements and Do Statements`);
+- :ref:`Conditional-And Expression`;
 
--  ``for`` statements (see :ref:`For Statements`);
+- :ref:`Conditional-Or Expression`;
 
--  ``if`` statements (see :ref:`if Statements`).
+- :ref:`Logical Complement`;
+
+- :ref:`While Statements and Do Statements`;
+
+- :ref:`For Statements`;
+
+- :ref:`if Statements`.
 
 .. note::
    The extended semantics is to be deprecated in one of the future versions of
@@ -4575,17 +4590,19 @@ as follows:
 
 -  For *conditional-and* expression ``A && B``:
 
-   - If ``A`` is known at compile time, then the type of an expression is type
-     of ``B`` when ``A`` is handled as ``true`` and type of ``A`` otherwise.
-   - If ``A`` is unknown at compile time, then the type of an expression is union
-     ``A | B``.
+   - If the value of ``A`` is known at compile time, then the type of an
+     expression is the type of ``B`` when ``A`` is handled as ``true``, and the
+     type of ``A`` otherwise.
+   - If the value of ``A`` is unknown at compile time, then the type of an
+     expression is union ``A | B``.
 
 -  For *conditional-or* expression ``A || B``:
 
-   - If ``A`` is known at compile time, then the type of an expression is type
-     of ``B`` when ``A`` is handled as ``false`` and type of ``A`` otherwise.
-   - If ``A`` is unknown at compile time, then the type of an expression is union
-     ``A | B``.
+   - If the value of ``A`` is known at compile time, then the type of an
+     expression is the type of ``B`` when ``A`` is handled as ``false``, and the
+     type of ``A`` otherwise.
+   - If the value of ``A`` is unknown at compile time, then the type of an
+     expression is union ``A | B``.
 
 The way this approach works in practice is represented in the example below.
 Any ``nonzero`` number is handled as ``true``. The loop continues until it
@@ -4596,10 +4613,14 @@ becomes ``zero`` that is handled as ``false``:
 .. code-block:: typescript
    :linenos:
 
+    console.log(typeof (false || 1) )
+    console.log(typeof (true || 1) )
     for (let i = 10; i; i--) {
        console.log (i)
     }
     /* And the output will be
+         int
+         boolean
          10
          9
          8

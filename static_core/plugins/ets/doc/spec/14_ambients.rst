@@ -103,7 +103,7 @@ Ambient Constant or Variable Declarations
 .. meta:
     frontend_status: Done
 
-The syntax of *ambient constant* or *variable declaration* is presented below:
+The syntax of *ambient* constant or variable declarations is presented below:
 
 .. code-block:: abnf
 
@@ -125,7 +125,20 @@ The syntax of *ambient constant* or *variable declaration* is presented below:
    constant declaration
    variable declaration
    declaration
-   non-ambient declaration
+
+An *ambient constant* and *variable declaration* must have an explicit type
+annotation, and must have no initializer. Otherwise,
+a :index:`compile-time error` occurs:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    declare let v1: number // ok
+    declare let v2 = 1     // compile-time error: ambient variable must have no initializer
+
+    declare const c1: number // ok
+    declare const c2 = 1     // compile-time error: ambient constant must have no initializer
 
 |
 

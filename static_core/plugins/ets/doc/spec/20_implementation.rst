@@ -186,7 +186,7 @@ Generic and Function Types Peculiarities
 The current compiler and runtime implementations use type erasure.
 Type erasure affects the behavior of generics and function types. It is
 expected to change in the future. A particular example is provided in the last
-bullet point in the list of compile-time errors in :ref:`InstanceOf Expression`.
+bullet point in the list of compile-time errors in :ref:`instanceof Expression`.
 
 .. index::
    generic
@@ -280,7 +280,7 @@ The use of the *bridge* method is represented by the following code:
 More formally, a bridge method ``m(C``:sub:`1` ``, ..., C``:sub:`n` ``)``
 is created in ``D``, in the following cases:
 
-- Class ``B`` comprises type parameters
+- Class ``B`` comprizes type parameters
   ``B<T``:sub:`1` ``extends C``:sub:`1` ``, ..., T``:sub:`n` ``extends C``:sub:`n` ``>``;
 - Subclass ``D`` is defined as ``class D extends B<X``:sub:`1` ``, ..., X``:sub:`n` ``>``;
 - Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,

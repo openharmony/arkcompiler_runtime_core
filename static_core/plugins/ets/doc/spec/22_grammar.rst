@@ -88,6 +88,7 @@ Grammar Summary
         classDeclaration
         | interfaceDeclaration
         | enumDeclaration
+        | constEnumDeclaration
         | typeAlias
         ;
 
@@ -210,7 +211,6 @@ Grammar Summary
         | stringInterpolation
         | lambdaExpression
         | lambdaExpressionWithReceiver
-        | launchExpression
         | awaitExpression
         ;
 
@@ -425,7 +425,7 @@ Grammar Summary
         ;
 
     stringInterpolation:
-        '`' (BacktickCharacter | embeddedExpression)* '`'
+        '`' (BackticksContentCharacter | embeddedExpression)* '`'
         ;
 
     embeddedExpression:
@@ -473,7 +473,7 @@ Grammar Summary
     statement:
         expressionStatement
         | block
-        | localDeclaration
+        | constantOrVariableDeclaration
         | ifStatement
         | loopStatement
         | breakStatement
@@ -492,7 +492,7 @@ Grammar Summary
         '{' statement* '}'
         ;
 
-    localDeclaration:
+    constantOrVariableDeclaration:
         annotationUsage?
         ( variableDeclaration
         | constantDeclaration
@@ -738,7 +738,7 @@ Grammar Summary
         ;
 
     enumDeclaration:
-        'const'? 'enum' identifier (':' type)? '{' enumConstantList? '}'
+        'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -749,8 +749,20 @@ Grammar Summary
         identifier ('=' constantExpression)?
         ;
 
+    constEnumDeclaration:
+        'const' 'enum' identifier (':' type)? '{' enumConstantList? '}'
+        ;
+
     moduleDeclaration:
-        importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        moduleHeader? importDirective* (topDeclaration | topLevelStatements | exportDirective)*
+        ;
+
+    moduleHeader:
+        'declare'? 'export'? 'module' moduleName
+        ;
+
+    moduleName:
+        StringLiteral
         ;
 
     importDirective:
@@ -985,7 +997,7 @@ Grammar Summary
         ;
 
       newArrayInstance:
-          'new' arrayElementType dimensionExpression+ (arrayElement)?
+          'new' arrayElementType dimensionExpression+ arrayElement?
           ;
 
       arrayElementType:
@@ -1039,10 +1051,7 @@ Grammar Summary
         arguments block
         ;
 
-      launchExpression:
-        'launch' functionCallExpression|methodCallExpression|lambdaExpression;
-
-      awaitExpression:
+    awaitExpression:
         'await' expression
         ;
 
@@ -1236,11 +1245,11 @@ Grammar Summary
         ;
 
     MultilineStringLiteral:
-        '`' (BacktickCharacter)* '`'
+        '`' (BackticksContentCharacter)* '`'
         ;
 
-    BacktickCharacter:
-        ~['\\\r\n]
+    BackticksContentCharacter:
+        ~[`\\\r\n]
         | '\\' EscapeSequence
         | LineContinuation
         ;
