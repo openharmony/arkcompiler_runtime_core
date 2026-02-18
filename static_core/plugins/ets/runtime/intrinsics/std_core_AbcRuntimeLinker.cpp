@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,11 +60,11 @@ EtsClass *EtsAbcRuntimeLinkerLoadClassFromAbcFiles(EtsAbcRuntimeLinker *runtimeL
                                                    EtsBoolean init)
 {
     ark::ets::ClassPublicNameParser parser(clsName->GetMutf8());
-    const auto name = parser.Resolve();
-    auto *classDescriptor = utf::CStringAsMutf8(name.c_str());
-    if (classDescriptor == nullptr) {
+    auto nameOpt = parser.Resolve();
+    if (UNLIKELY(!nameOpt.has_value())) {
         return nullptr;
     }
+    const auto *classDescriptor = utf::CStringAsMutf8(nameOpt.value().c_str());
 
     auto *coro = EtsCoroutine::GetCurrent();
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
