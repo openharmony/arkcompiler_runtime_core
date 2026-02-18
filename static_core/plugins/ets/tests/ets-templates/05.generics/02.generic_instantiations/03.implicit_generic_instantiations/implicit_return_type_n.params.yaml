@@ -1,0 +1,78 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<T> {
+            return [a, b]
+          }
+      use: |-
+          let o = new Object()
+          let arr = foo(1.0, o)
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo(Double, Object)
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<T> {
+            return [a, b]
+          }
+      use: |-
+          let arr = foo("str", "abc")
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo("str", "abc")
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<T> {
+            return [a, b]
+          }
+      use: |-
+          let arr = foo(null, undefined)
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo(null, undefined)
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<FixedArray<T>> {
+            return [[a, b], [a, b], [a, b]]
+          }
+      use: |-  
+          let o = new Object()
+          let arr = foo(1.0, o)
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo(Double, Object)
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<FixedArray<T>> {
+            return [[a, b], [a, b], [a, b]]
+          }
+      use: |-          
+          let arr = foo("str", "abc")
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo("str", "abc")
+    - decl: |-
+          function foo<T>(a: T, b: T): FixedArray<FixedArray<T>> {
+            return [[a, b], [a, b], [a, b]]
+          }
+      use: |-          
+          let arr = foo(null, undefined)
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo(null, undefined)
+    - decl: |-          
+          function foo<E>(arg: Any): FixedArray<E> {
+            return arg as FixedArray<E>
+          }
+
+          function bar(arg: Any) {
+            const x = foo(arg) // must be CTE (issue 31201)
+          }
+      use: |-
+          const arr: FixedArray<number> = [1.2]
+          bar(arr)
+      expected_out: |-
+          Semantic error ESE0127: No matching call signature for foo(Any)
