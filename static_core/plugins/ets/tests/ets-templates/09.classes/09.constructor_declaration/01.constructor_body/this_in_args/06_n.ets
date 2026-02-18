@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,37 +15,31 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    Mandatory call to another same-class constructor that uses the keyword this.
+    A compile-time error occurs if: An argument of the call uses this or super.
+expected_out: |-
+    Semantic error ESE0235: Using this is not allowed in constructor
+tags: [compile-only, negative]
 ---*/
 
 class A {
-    fldA: int
-
-    constructor(a: int) {
-        this.fldA = a
+    ref: A
+    constructor() {
+        this.ref = this
+    }
+    constructor(ref: A) {
+        this.ref = ref
     }
 }
 
 class B extends A {
-    constructor(a: int) {
-        try {
-            if (a == 0) {
-                throw new Error('Error thrown')
-            }
-            super(a)
-        } catch (e) {
-            super(-1)
-        }
+    ref: A
+    // primary
+    constructor(a: A) {
+        super(a)
     }
-}
-
-function main() {
-    let b: B
-
-    arktest.expectError(() => { b = new B(0) }, 'Error thrown')
-    arktest.assertEQ(b.fldA, -1)
-
-    b = new B(1)
-    arktest.assertEQ(b.fldA, 1)
+    // secondary
+    constructor() {
+        this(this.ref)  // CTE, cannot use super or this in arguments
+    }
 }

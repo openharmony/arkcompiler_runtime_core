@@ -186,9 +186,6 @@
 05.generics/generic_declarations/generic_classes/test_bridge_methods_in_generic_overrides/bridge_methods_generic_5.ets
 
 #31755
-06.contexts_and_conversions/04.implicit_conversions/02.enum_to_const_types_conversions/explicit_type_conversion_6.ets
-
-#31755
 17.experimental_features/04.enumerations_experimental/01.enumeration_with_explicit_type/explicit_type_conversion_6.ets
 
 #30469
@@ -343,7 +340,6 @@
 07.expressions/16.instanceof_expression/instanceof_func_17.ets
 07.expressions/16.instanceof_expression/instanceof_func_28.ets
 07.expressions/16.instanceof_expression/instanceof_func_31.ets
-07.expressions/16.instanceof_expression/instanceof_func_36.ets
 
 #730 (spec)
 07.expressions/16.instanceof_expression/instanceof_func_9.ets
@@ -366,10 +362,6 @@
 07.expressions/16.instanceof_expression/instanceof_func_27.ets
 
 #31769 Tuples and derived types can't be used as instanceof rhs
-07.expressions/16.instanceof_expression/instanceof_func_38.ets
-07.expressions/16.instanceof_expression/instanceof_func_39.ets
-07.expressions/16.instanceof_expression/instanceof_func_40.ets
-07.expressions/16.instanceof_expression/instanceof_func_41.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_0.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_1.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_2.ets
@@ -385,9 +377,6 @@
 
 #30583
 07.expressions/20.nullish-coalescing_expression/resulting_type_crash.ets
-
-#30891
-07.expressions/23.exponentiation_expression/enum.ets
 
 #32703
 07.expressions/23.exponentiation_expression/inf_27.ets
@@ -729,31 +718,18 @@
 #67 Cannot spread FixedArray<string> for rest parameter of FixedArray<T>
 09.classes/09.constructor_declaration/cons_parameters_gen_23.ets
 
-#28693 CTE when a call to `super` is not the first statement
+#33293 Class initialization execution sequence is not correct
 09.classes/09.constructor_declaration/01.constructor_body/spec_example1.ets
-09.classes/09.constructor_declaration/01.constructor_body/primary01.ets
-09.classes/09.constructor_declaration/01.constructor_body/primary02.ets
-09.classes/09.constructor_declaration/01.constructor_body/primary03.ets
-09.classes/09.constructor_declaration/01.constructor_body/primary04.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary01.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary03.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary05.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary07.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_2.ets
-09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_3.ets
 
 #28235 Constructor Names not yet work
 09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_same_class1.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary02.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary04.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary06.ets
-09.classes/09.constructor_declaration/01.constructor_body/secondary08.ets
-09.classes/09.constructor_declaration/01.constructor_body/spec_example2.ets
 09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass06.ets
 09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass08.ets
 09.classes/09.constructor_declaration/01.constructor_body/invocation_another_constructor_of_superclass10.ets
 
 #32863  CTE expected when 'this' is used in constructor arguments
+09.classes/09.constructor_declaration/01.constructor_body/this_in_args/01_n.ets
+09.classes/09.constructor_declaration/01.constructor_body/this_in_args/02_n.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_4.ets
 09.classes/09.constructor_declaration/02.explicit_constructor_call/explicit_cons_call_neg_11.ets
 
@@ -841,11 +817,8 @@
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_5.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_7.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_6.ets
-13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_8.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_2.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_3.ets
-13.modules_and_namespaces/08.program_entry_point/main_w_args_4.ets
-13.modules_and_namespaces/08.program_entry_point/main_w_args_5.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_n_0.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_n_1.ets
 
@@ -2245,27 +2218,9 @@
 03.types/19.union_types/union_type_assignment_66.ets
 03.types/19.union_types/union_type_assignment_77.ets
 07.expressions/16.instanceof_expression/instanceof_neg_35.ets
-09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_fields_17.ets
-09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_fields_20.ets
-10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method.ets
-10.interfaces/05.interface_method_declarations/overriding_requirements/same_name2.ets
-10.interfaces/05.interface_method_declarations/overriding_requirements/same_name3.ets
-10.interfaces/06.interface_inheritance/inheritance_private_method_with_declared_signature2.ets
 13.modules_and_namespaces/08.program_entry_point/function_foo_w_args_4.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_0.ets
 13.modules_and_namespaces/08.program_entry_point/main_w_args_1.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_26.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_28.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_29.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_18.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_20.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_2.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_25.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_27.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_10.ets
-15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_11.ets
 15.semantic_rules/12.type_erasure/instanceof_gen_24.ets
 15.semantic_rules/12.type_erasure/instanceof_gen_25.ets
 

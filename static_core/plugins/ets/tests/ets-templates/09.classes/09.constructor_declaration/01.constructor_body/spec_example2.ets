@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,8 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    Mandatory call to another same-class constructor that uses the keyword this.
+    Mandatory call to a superconstructor if a class has an extension clause.
 ---*/
 
 class Point {
@@ -38,21 +38,27 @@ class ColoredPoint extends Point {
         this.color = color;
     }
     // secondary constructor:
-    constructor zero(color: number) {
+    constructor(color: number) {
         this(0, 0, color);
     }
 }
 
 function main() {
-    let black = new ColoredPoint.zero(ColoredPoint.BLACK);
+    let black = new ColoredPoint(ColoredPoint.BLACK);
     arktest.assertTrue(black instanceof ColoredPoint);
     arktest.assertEQ(black.color, 1);
     arktest.assertEQ(black.x, 0.0);
     arktest.assertEQ(black.y, 0.0);
 
-    let white = new ColoredPoint.zero(ColoredPoint.WHITE);
+    let white = new ColoredPoint(ColoredPoint.WHITE);
     arktest.assertTrue(white instanceof ColoredPoint);
     arktest.assertEQ(white.color, 0);
     arktest.assertEQ(white.x, 0.0);
     arktest.assertEQ(white.y, 0.0);
+
+    let red = new ColoredPoint(1, 2, 3);
+    arktest.assertTrue(red instanceof ColoredPoint);
+    arktest.assertEQ(red.color, 3);
+    arktest.assertEQ(red.x, 1.0);
+    arktest.assertEQ(red.y, 2.0);
 }
