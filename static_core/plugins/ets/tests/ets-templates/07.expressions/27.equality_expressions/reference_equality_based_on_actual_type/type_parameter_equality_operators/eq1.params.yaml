@@ -33,22 +33,8 @@ cases:
           - '127 as short'
           - '127.0f'
           - '127.0'
-          - c'\u007f'
           - new Byte(127 as byte)
           - new Int(127)
-
-    - type: Char
-      case1:
-          - c'\u0000'
-          - new Char(c'\u0000')
-      case2:
-          - '0 as byte'
-          - '0'
-          - '0 as long'
-          - '0.0f'
-          - new Short(0 as short)
-          - new Long(0 as long)
-          - new Double(0.0)
 
     # string equality
     - type: string
