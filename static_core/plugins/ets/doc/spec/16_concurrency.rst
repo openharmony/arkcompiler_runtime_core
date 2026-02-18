@@ -25,7 +25,6 @@ Concurrency
 .. include:: ../concurrency/04_concurrency_synchronization.rst
 .. include:: ../concurrency/05_concurrency_apis.rst
 .. include:: ../concurrency/06_concurrency_runtime.rst
-.. include:: ../concurrency/08_concurrency_glossary.rst
 
 
 .. raw:: pdf

@@ -84,16 +84,22 @@ handling is provided below:
       }
     }
 
-    function get_array_element<T>(array: T[], index: number): T|null {
+    function get_array_element<T>(array: T[], index: int): T|undefined {
         try {
-          return array[index] // access array
+          return array[index] // RangeError if index < 0 or index >= array.length
         }
         catch (error) {
           if (error instanceof RangeError) // invalid index detected
-             return null
+             return undefined
           throw new UnknownError (error) // Unknown error occurred
         }
     }
+
+    let arr = [1, 2, 3]
+    let val = get_array_element(arr, -3) // RangeError: index -3 < 0
+
+   console.log(val) // output: undefined
+
 
 In most cases, errors are raised by the |LANG| runtime system, or by the
 standard library (see :ref:`Standard Library`) code.
@@ -115,7 +121,6 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
    throw statement
    error
    try statement
-   runtime system
 
 .. code-block:: typescript
    :linenos:

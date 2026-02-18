@@ -97,7 +97,7 @@ below.
 Endianness
 ==========
 
-All multi-byte values are little-endian as most target architectures are.
+All multibyte values are little-endian as most target architectures are.
 
 |
 
@@ -455,7 +455,7 @@ RegionHeader Format
 -------------------
 
 To address file entities by using 16-bit indices, a binary file is split
-into regions.The information on each region is stored in the ``RegionHeader`` format.
+into regions. The information on each region is stored in the ``RegionHeader`` format.
 
 **Alignment**: 4 bytes
 

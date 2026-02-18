@@ -391,7 +391,7 @@ occur in any position.
        fldT1: T1 // error: T1 in invariant position
 
       constructor (x: T2) { this.fldT2 = x } // OK
-      bar(x: T2) : T2 { return x }           // CTE (x in in-position)
+      bar(x: T2) : T2 { return x }           // Compile-time error, x in in-position
       readonly fldT2: T2                     // OK
       bar1() : T2 { return this.fldT2 }      // OK
 
@@ -430,6 +430,179 @@ have a variance modifier specified.
    variance
 
 |
+
+.. Wildcard Type:
+
+Wildcard Type
+=============
+
+.. meta:
+    frontend_status: Done
+
+*Wildcard Type* is a type that can be used as a *type argument* when
+:ref:`Generic Instantiations` occur to denote an unknown instantiation of a *invariant*
+(see :ref:`Type Parameter Variance`) *Type Parameter*. *Wildcard Type* is a semantic
+notion that may appear during the Type Inference, it can not be represented with
+|LANG| syntax.
+
+The notation * is used to o refer to the *Wildcard Type* in example descriptions.
+
+Type inference for Instanceof Expression with the actual *type argument*
+of some generic type is unknown is the case where the *Wildcard Type* occurs.
+The only known fact for such case is that the *type argument* is certainly
+a subtype of a corresponding constraint (see :ref:`Type Parameter Constraint`).
+
+Subtyping and instantiation rules of the *Wildcard Type* provide a notion
+of a generic type instantiated with some *type arguments*. The domain
+of operations applicable to the resultant type, and the corresponding type
+inference rules ensure that the program operates on the *arbitrary*
+generic type in a type-safe manner:
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<T> {
+        p: T
+        constructor(v: T) { this.p = v }
+    }
+
+    function bar(x: X<Any>) { x.p = "a" }
+
+    function foo(obj: object): void {
+        if (obj instanceof X) {
+            let x = obj // instanceof guarantees that the type is *some* X
+                        // yet the type parameter is unknown
+                        // The inferred type of obj is X<*>
+
+            bar(x)      // compile-time error: X<*> is not just X<Any>, and X<*> is not
+                        // a subtype of X<Any>. The type parameter
+                        // T is invariant, thus an arbitrary instantiation of
+                        // X is not strictly an X<Any>.
+
+            let e = obj.p // the type of expression is the constraint
+                          // of the corresponding type parameter, which
+                          // is Any
+        }
+    }
+
+The *Wildcard Type* is determined as follows:
+
+- *Wildcard Type* is associated with a particular *invariant* *Type Parameter*.
+
+- *Wildcard Type* is a subtype of the *constraint* of the corresponding *Type Parameter*.
+
+- When a generic type is instantiated with a *Wildcard Type*,
+  the corresponding *Type Parameter*:
+
+- If in the *out-* position, then substituted for the *Type Parameter Constraint*;
+
+- If in the *in-* position, then substituted for the type *never*.
+
+- Otherwise, the type is in the *invariant* position, and reads or writes to
+  the corresponding property or field follow the logic of the *out-* and *in-*
+  position access accordingly (see :ref:`Type Parameter Variance`).
+
+**Note**: The *Wildcard Type* certainly satisfies the constraint
+because any possible *type argument* must satisfy the corresponding
+*constraint*. This logic also applies in the *out-* position.
+Similarly, only type ``never`` guarantees type-safety in the *in-* position
+(see :ref:`Type Parameter Variance`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class C { }
+
+    interface X<T extends C> {
+        read(): T
+        write(p: T): void
+        prop: T
+    }
+
+    function foo(o: Object) {
+        if (o instanceof X) {
+            let o1: X<C> = o      // compile-time error, X<*> is not a subtype of X<C>
+            let o2: X<never> = o  // compile-time error, X<*> is not a subtype of X<never>
+
+            let p: C = o.read()   // OK, T in "out" position is instantiated with C
+            o.write(new C())      // compile-time error, T in "in" position is instantiated with never
+            o.prop = o.read()     // compile-time error, T in "invariant" position
+        }
+    }
+
+*Wildcard Type* never refers to *Type Parameters* of *out-variance* or
+*in-variance*because the notion of an *arbitrary* instantiation is
+effectively represented by one of the following:
+ 
+ - Instantiation with the corresponding *constraint* for *out-* variant *Type Parameter*; or
+ 
+ - Instantiation with type ``never`` for *in-* variant *Type Parameter*.
+
+For *out-* variance of a *Type Parameter*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C { }
+
+    interface X<out T extends C> {
+        read(): T
+    }
+
+    function foo(o: Object) {
+        if (o instanceof X) {     // type of o is X<C>
+            let o1: X<C> = o      // OK, X<C> is a subtype of X<C>
+            let o2: X<never> = o  // compile-time error, X<C> is not a subtype of X<never>
+
+            let p: C = o.read()   // OK, T was instantiated with C, C assigned to C
+        }
+    }
+
+For *in-* variance of a *Type Parameter*:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C { }
+
+    interface X<in T extends C> {
+        write(p: T): void
+    }
+
+    function foo(o: Object) {
+        if (o instanceof X) {     // type of o is X<never>
+            let o1: X<C> = o      // compile-time error, X<never> is not a subtype of X<C>
+            let o2: X<never> = o  // OK, X<never> is a subtype of X<never>
+
+            o.write(new C())      // compile-time error, T in "in" position is instantiated with never
+        }
+    }
+
+Note: As required by :ref:`Subtyping`, a *Wildcard Type* for a certain
+*Type Parameter* is identical to itself:  
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<T> {
+        p: T
+        constructor(p: T) { this.p = p }
+    }
+
+    function foo(a: Any, b: Any) {
+        if (a instanceof X && b instanceof X) {
+            let a1 = a // X<*> 
+            let a2 = b // X<*>
+            a1 = a2    // OK, inferred X<*> and X<*> types are identical
+                       // Despite concrete type arguments are not known,
+                       // the code is type-safe
+
+            a.p = b.p  // compile-time error defined by invariance
+        }
+    }
+
+    foo(new X<string>("a"), new X<number>(1))
+
 
 .. _Generic Instantiations:
 
@@ -687,7 +860,7 @@ Implicit instantiation is only possible for generic functions and methods.
 If a method of a generic class or interface
 *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> has its own type parameter ``U`` with
 default type (see :ref:`Type Parameter Default`) that equals ``T``:sub:`i`,
-and an implicit generic instantion of this method provides no information
+and an implicit generic instantiation of this method provides no information
 to infer a type argument, then the type argument correspondent to ``T``:sub:`i`
 is used as the type argument for ``U``.
 
@@ -697,8 +870,8 @@ This situation is represented in the example below:
    :linenos:
 
     class A <T> {  // T is the class type parameter
-        foo<U = T> (p: U) {} // U is own type paramater with default T
-        bar<V = T> () {}     // V is own type paramater with default T
+        foo<U = T> (p: U) {} // U is own type parameter with default T
+        bar<V = T> () {}     // V is own type parameter with default T
     }
 
     // Assume that X1 and X2 are two distinct types
@@ -820,9 +993,20 @@ NonNullable Utility Type
     frontend_status: None
 
 Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
-types. If type ``T`` contains neither ``null`` nor ``undefined``, then
-``NonNullable<T>`` leaves ``T`` intact. The use of type ``NonNullable<T>`` is
-represented in the example below:
+types. Formally it can be expressed like this (see :ref:`Difference Types`)
+
+``NonNullable<T> = T - null - undefined``.
+
+This implies:
+
+- ``NonNullable<T>`` leaves ``T`` intact if type ``T`` contains neither ``null``
+  nor ``undefined``;
+- ``NonNullable<null>``,  ``NonNullable<undefined>`` or application of
+  ``NonNullable<>`` to the union of ``null`` and ``undefined`` returns ``never``;
+- ``NonNullable<Any> = Any - null - undefined``
+
+
+The use of type ``NonNullable<T>`` is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -979,7 +1163,7 @@ example below:
         description?: string
     }
 
-    let c: Required<Issue> = { // CTE: 'description' should be defined
+    let c: Required<Issue> = { // Compile-time error, 'description' should be defined
         title: "aa"
     }
 

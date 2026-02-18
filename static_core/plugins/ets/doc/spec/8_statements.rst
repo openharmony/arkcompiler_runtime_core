@@ -28,14 +28,14 @@ like :ref:`Block` or :ref:`if Statements`.
 
     ...
     i++    // statement consists of single expression
-    ... 
+    ...
     if (i > 100) // 'if' statement starts
     {          // 'block' statement starts, it is a part of 'if' statement
         i %= 100        // statement belonging to 'block'
         console.log(i)  // another statement belonging to 'block'
     }   //  'block' statement ends, 'if' statement end
-    
-.. note:: 
+
+.. note::
    The difference between statements and expressions is that :ref:`Expressions`
    evaluate a value of a certain type, while statements do not.
 
@@ -55,7 +55,7 @@ The syntax of *statements* is presented below:
     statement:
         expressionStatement
         | block
-        | localDeclaration
+        | constantOrVariableDeclaration
         | ifStatement
         | loopStatement
         | breakStatement
@@ -82,8 +82,8 @@ Here is the list of statements in |LANG|:
      - :ref:`Expression Statements`
    * - '{}' (block)
      - :ref:`Block`
-   * - `let`, `const` (local declarations)
-     - :ref:`Local Declarations`
+   * - `let`, `const` (variable or constant declarations)
+     - :ref:`Constant Or Variable Declarations`
    * - if-then-else
      - :ref:`if Statements`
    * - `while`, `do`, `for`, `for-of`
@@ -187,7 +187,7 @@ until a return occurs (see :ref:`Return Statements`).
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void`` (see :ref:`Types void or undefined`), then the block can contain no
+return type ``void`` (see :ref:`Type void or undefined`), then the block can contain no
 return statement at all. Such a block is equivalent to one that ends in a
 ``return`` statement, and is executed accordingly.
 
@@ -207,46 +207,48 @@ return statement at all. Such a block is equivalent to one that ends in a
 
 |
 
-.. _Local Declarations:
+.. _Constant Or Variable Declarations:
 
-Local Declarations
-******************
+Constant Or Variable Declarations
+*********************************
 
 .. meta:
     frontend_status: Done
 
-*Local declarations* define new mutable or immutable variables within the
+*Constant or variable declarations* define new mutable or immutable variables within the
 enclosing context.
 
 ``Let`` and ``const`` declarations have the initialization part that presumes
 execution, and actually act as statements.
 
 .. index::
-   local declaration
+   variable declaration
+   constant declaration
    let declaration
    const declaration
 
-The syntax of *local declaration* is presented below:
+The syntax of *constant or variable declaration* is presented below:
 
 .. code-block:: abnf
 
-    localDeclaration:
+    constantOrVariableDeclaration:
         annotationUsage?
         ( variableDeclaration
         | constantDeclaration
         )
         ;
 
-The visibility of a local declaration name is determined by the surrounding
-function or method, and by the block scope rules (see :ref:`Scopes`). In order
-to avoid ambiguous interpretation, appropriate sections of this Specification
-are dedicated to a detailed discussion of the following entities:
+The visibility of declaration name is determined by the surrounding
+module, namespace, function, or method, and by the block scope rules (see
+:ref:`Scopes`). In order to avoid ambiguous interpretation, appropriate
+sections of this Specification are dedicated to a detailed discussion of the
+following entities: 
 
 - :ref:`if Statements`,
 - :ref:`For Statements`,
 - :ref:`For-Of Statements`.
 
-A local declaration can shadow another same-name declaration if any in the same
+Any declaration can shadow another same-name declaration (if any) in the same
 surrounding scope.
 
 .. code-block:: typescript
@@ -372,11 +374,11 @@ for such a statement.
       }
       else {
         let x: number = 20   // OK, no conflict, else-block scope
-        y = x;           // CTE, no y in scope
+        y = x;           // Compile-time error, no y in scope
       }
 
       console.log(x)  // OK, prints 2
-      console.log(y)  // CTE, y unknown
+      console.log(y)  // Compile-time error, y unknown
     }
 
 .. index::
@@ -438,7 +440,7 @@ within ``loopStatement``, or is used in lambda expressions (see
             }
         }
         const f2 = () => {
-            do 
+            do
                 break label // Compile-time error
             while (true)
         }
@@ -580,7 +582,7 @@ statement, or in a body block:
     for (let i: int = 1; i < 10; i++)
       k += i
     console.log(k)
-    // i =  k  // CTE when uncommented
+    // i =  k  // Compile-time error if uncommented
     let i: int = k  // OK
 
 |
@@ -596,7 +598,7 @@ statement, or in a body block:
 
 A ``for-of`` loop iterates elements of an instance of an *iterable type*
 (see :ref:`Iterable Types`) and executes the loop body having these elements
-avaialble.
+available.
 
 The syntax of *for-of statements* is presented below:
 
@@ -640,7 +642,7 @@ declares a new variable accessible inside the loop body only. Otherwise, the
 variable declared elsewhere is used.
 
 The modifier ``const`` forbids assignment into *forVariable*,
-while ``let`` allows modifications. 
+while the modifier ``let`` allows modifications.
 
 The type of *forVariable* declared inside the loop is inferred to be that
 of the *iterated* elements, namely:
@@ -863,7 +865,7 @@ Examples of ``continue`` statements with and without a label are presented below
 .. code-block:: typescript
    :linenos:
 
-    // continue     // would cause CTE if uncommented
+    // continue     // would cause compile-time error if uncommented
 
     // continue without label
     // will print 0, 1, 2, 4 (3 skipped)
@@ -927,7 +929,7 @@ following:
 - Initializer block;
 - Constructor body;
 - Function, method, or lambda body with return type ``void`` (see
-  :ref:`Types void or undefined`);
+  :ref:`Type void or undefined`);
 - Asynchronous function, method or lambda body with return type
   ``Promise<void>`` (see :ref:`Asynchronous execution`);
 
@@ -935,7 +937,7 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
 -  Functions or methods with return type ``void`` (see
-   :ref:`Types void or undefined`) that have an expression;
+   :ref:`Type void or undefined`) that have an expression;
 -  Functions or methods with a non-``void`` return type that have no
    expression.
 
@@ -1028,8 +1030,6 @@ The syntax of *switch statement* is presented below:
         : 'default' ':' statement*
         ;
 
-A ``switch`` expression can be of any type.
-
 If available, an optional identifier allows the ``break`` statement to transfer
 control out of a nested ``switch`` or ``loop`` statement (see
 :ref:`Break statements`).
@@ -1046,20 +1046,14 @@ control out of a nested ``switch`` or ``loop`` statement (see
    loop statement
    break statement
 
-A :index:`compile-time error` occurs if at least one of case expression types
-is not assignable (see :ref:`Assignability`) to the type of the ``switch``
-statement expression.
-
-.. index::
-   expression
-   expression type
-   switch statement
-   assignability
+A ``switch`` expression can be of a numeric type, type ``string``,
+type ``char``, or an enumeration type. Otherwise,
+a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
 
-    let arg = prompt("Enter a value?");
+    let arg: string = prompt("Enter a value?");
     switch (arg) {
       case '0':
       case '1':
@@ -1072,22 +1066,20 @@ statement expression.
         console.log('An unknown value')
     }
 
-    class A {}
-    let a: A| null = assignIt()
-    switch (a) {
-      case null:
-      case null: // One may have several case clauses with the same expression in
-        console.log ("a is null")
-        break
-      case new A:
-        console.log ("Never matches as new A is a new unique object")
-        break
-      default:
-        console.log ("a is A")
-    }
-    function assignIt () {
-        return new A
-    }
+A :index:`compile-time error` occurs, if:
+
+- A *case expression* is not a *constant expression*
+  (see :ref:`Constant Expressions`); or
+
+- A *case expression* type is not assignable (see :ref:`Assignability`)
+  to the type of the ``switch`` expression.
+
+.. index::
+   expression
+   expression type
+   case expression
+   switch statement
+   assignability
 
 
 The execution of a ``switch`` statement starts from the evaluation of the
@@ -1213,7 +1205,7 @@ The syntax of *try statement* is presented below:
 
 A ``try`` statement must contain:
 
-- ``finally`` clause; 
+- ``finally`` clause;
 - ``catch`` clause, or
 - Both a ``finally`` clause and a ``catch`` clause.
 
@@ -1294,6 +1286,7 @@ the ``ZeroDivisor``, and '*0*'  for all other errors.
 .. index::
    catch clause
    runtime
+   runtime error
    function
    divisor
 
@@ -1343,7 +1336,7 @@ can be performed while leaving the ``try-catch``:
 .. code-block:: typescript
 
     class SomeResource {
-      // some API
+      // some class members
       // ...
       close() {}
     }
@@ -1372,7 +1365,7 @@ can be performed while leaving the ``try-catch``:
 
 #. A ``try`` block and the entire ``try`` statement complete normally if no
    ``catch`` block is executed. The execution of a ``try`` block completes
-   abruptly if an error is thrown inside the ``try`` block. 
+   abruptly if an error is thrown inside the ``try`` block.
 
 #. The execution of a ``try`` block completes abruptly if error *x* is
    thrown inside the ``try`` block. If the ``catch`` clause is present, and the

@@ -18,15 +18,15 @@ Enumerations
 .. meta:
     frontend_status: Done
 
-Enumeration type ``enum`` specifies a distinct user-defined type with an
-associated set of named constants that define its possible values.
+Enumeration type ``enum`` specifies a distinct user-defined class type with an
+associated set of named constants that define its possible enumeration values.
 
 The syntax of *enumeration declaration* is presented below:
 
 .. code-block:: abnf
 
     enumDeclaration:
-        'const'? 'enum' identifier (':' type)? '{' enumConstantList? '}'
+        'enum' identifier (':' type)? '{' enumConstantList? '}'
         ;
 
     enumConstantList:
@@ -47,15 +47,11 @@ The syntax of *enumeration declaration* is presented below:
    enumeration declaration
    syntax
 
-Type ``const enum`` is supported for source-level compatibility with |TS|.
-The modifier ``const`` is skipped as it has no impact on ``enum`` semantics in
-|LANG|.
-
 Enumerations with explicitly specified type values are described in
 :ref:`Enumeration with explicit type`.
 
-Qualification by type is mandatory to access the enumeration constant, except
-enumeration constant initialization expressions:
+Qualification by type name is mandatory to access the enumeration constant,
+except enumeration constant initialization expressions:
 
 .. code-block:: typescript
    :linenos:
@@ -75,8 +71,6 @@ are exported along with the mandatory qualification ``Color``.
 
 .. index::
    source-level compatibility
-   const enum
-   const modifier
    semantics
    qualification
    access
@@ -84,14 +78,12 @@ are exported along with the mandatory qualification ``Color``.
    enumeration constant
    enumeration type
    enum constant
-   const enum
 
-The value of an enum constant can be set as follows:
+The value of an enumeration constant can be set as follows:
 
--  Explicitly as a numeric constant expression (expression of type ``int`` or
-   ``long`` ), or as a constant expression of type ``string``; or
+-  Explicitly as a constant expression of type ``int`` or of type ``string``; or
 -  Implicitly by omitting the constant expression, in which case the value of
-   the enum constant is set to an integer value (see
+   the enumeration constant is set to an integer value (see
    :ref:`Enumeration Integer Values`).
 
 A :index:`compile-time error` occurs if:
@@ -100,12 +92,11 @@ A :index:`compile-time error` occurs if:
   enumeration;
 - At least one initialization expression is not a constant expression; or
 - Enumeration values are set explicitly, and at least one initialization
-  expression type is other than ``int``, ``long``, or ``string``.
+  expression type is other than ``int`` or ``string``.
 
 
 .. index::
    enum constant
-   numeric constant expression
    expression
    value
    integer value
@@ -117,7 +108,7 @@ A :index:`compile-time error` occurs if:
    enumeration
 
 A type to which all enumeration constant values belong is called *enumeration
-base type*. This type is ``int``, ``long``, ``string``, or any explicitly
+base type*. This type is ``int``, ``string``, or any explicitly
 specified valid type (see :ref:`Enumeration with Explicit Type`).
 
 .. index::
@@ -126,8 +117,8 @@ specified valid type (see :ref:`Enumeration with Explicit Type`).
    type
 
 Any enumeration constant is of type ``enumeration``. Implicit conversion
-(see :ref:`Enumeration to Numeric Type Conversion`,
-:ref:`Enumeration to string Type Conversion`) of an enumeration constant
+(see :ref:`Enumeration and Const Enumeration to Numeric Type Conversion`,
+:ref:`Enumeration and Const Enumeration to string Type Conversion`) of an enumeration constant
 to numeric types or type ``string`` depends on the type of constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
@@ -177,7 +168,7 @@ Enumeration Integer Values
 The integer value of an ``enum`` constant is set implicitly if an enumeration
 constant specifies no value.
 
-A constant expression of type ``int`` or ``long`` can be used to set the value
+A constant expression of type ``int`` can be used to set the value
 explicitly:
 
 .. index::
@@ -191,16 +182,11 @@ explicitly:
    expression
    constant expression
    int type
-   long type
 
 .. code-block:: typescript
    :linenos:
 
     enum Background { White = 0xFF, Grey = 0x7F, Black = 0x00 }
-    enum LongEnum { A = 0x7FFF_FFFF_1, B, C }
-
-Choosing which type to use---``int`` or ``long``---is based on the same
-principle as for integer literals (see :ref:`Integer Literals`).
 
 If all constants have no value, then the first constant is assigned
 the value zero. The other constant is assigned the value of the
@@ -224,12 +210,8 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
 
 .. index::
    int type
-   long type
-   integer literal
-   assignment
    constant
    value
-   assignment
 
 |
 
@@ -313,6 +295,202 @@ in :ref:`Enumeration Methods` in the chapter Experimental Features.
    name
    constant
    enumeration constant
+
+
+.. _Const Enumerations:
+
+Const Enumerations
+******************
+
+*Const enumeration* (``const enum``) is a special form of enumeration that
+provides compile-time inlining of enumeration values. Unlike regular
+enumerations, const enumerations have no associated class type.
+
+The syntax of a *const enumeration declaration* uses the modifier ``const``
+before ``enum``:
+
+.. code-block:: abnf
+
+    constEnumDeclaration:
+        'const' 'enum' identifier (':' type)? '{' enumConstantList? '}'
+        ;
+
+
+A const enumeration is a distinct user-defined type at the source code level.
+All references to const enumeration members are replaced for their
+corresponding literal values during compilation.
+
+The *enumeration base type* of a const enumeration described in
+:ref:`Enumeration with explicit type`.
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Status {
+        Pending = 0,    // Base type: int
+        Active = 1,
+        Completed = 2
+    }
+
+    const enum Commands {
+        Open = "open",   // Base type: string
+        Close = "close"
+    }
+
+    const enum ByteFlags: byte {  // Explicit base type
+        None = 0,
+        Read = 1,
+        Write = 2
+    }
+
+If a const enumeration mixes integer and string constant values, then
+a :index:`compile-time error` occurs.
+
+.. index::
+   const enumeration type
+   const modifier
+   enumeration base type
+   integer type
+   string type
+   compile-time error
+
+|
+
+.. _Const Enum Value Initialization:
+
+Const Enum Value Initialization
+=================================
+
+All const enumeration constants must be initialized with *constant expressions*
+(see :ref:`Constant Expressions`) of respective enumeration base type.
+The initialization expressions are evaluated at compile time.
+Implicit values for integer-based const enums follow the same rules as those
+applied for regular enums, see :ref:`Enumeration Integer Values`
+
+.. index::
+   constant expression
+   initialization
+   compile time
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Flags {
+        None = 0,
+        Read = 1 << 0,              // Bitwise shift
+        Write = 1 << 1,             // Bitwise shift
+        Execute = 1 << 2,           // Bitwise shift
+        ReadWrite = Read | Write,   // Bitwise OR of const enum values
+        All = Read | Write | Execute
+    }
+
+    const enum Computed {
+        Base = 10,
+        Double = Base * 2,          // Arithmetic with const enum value
+        Triple = Base * 3,
+    }
+
+    const enum Size {
+        Small = 10,
+        Medium,                     // Implicitly 11
+        Large                       // Implicitly 12
+    }
+
+    const enum FileOps {
+        Open = "open",
+        Close = "close",
+        Read = "read"
+    }
+
+A :index:`compile-time error` occurs if:
+
+- Initialization expression of a const enumeration constant
+  is not a constant expression;
+- Evaluation of an initialization expression completes abruptly.
+
+.. index::
+   initialization expression
+   constant expression
+   compile-time error
+   evaluation
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Invalid {
+        A = Math.sqrt(4),        // Compile-time error: non-constant expression
+        B = someVariable,        // Compile-time error: non-constant expression
+    }
+
+    enum RegularEnum { X = 5 }
+    const enum Invalid2 {
+        C = RegularEnum.X        // Compile-time error: non-constant expression
+    }
+
+|
+
+.. _Const Enum Operations:
+
+Const Enum Operations
+======================
+
+Unlike regular enumerations, *const enumerations* support only a restricted
+set of operations. The operations allowed on const enumerations are
+represented below.
+
+- Access to const enumeration members which are inlined to literal values as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Status { Pending = 0, Active = 1 }
+    let s: Status = Status.Active;  // Inlined to: let s: number = 1;
+
+-  Equality comparisons using operators: ``==``, ``!=``, ``===``, ``!==``.
+-  Relational comparisons (for numeric const enums) using operators: ``<``, ``<=``, ``>``, ``>=``.
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Priority { Low = 1, Medium = 2, High = 3 }
+    let p: Priority = Priority.Medium;
+
+    if (p === Priority.High) { }       // Inlined to: if (2 === 3)
+    if (p < Priority.High) { }         // Inlined to: if (2 < 3)
+
+
+.. _Const Enum Values Outside Range:
+
+Values Outside Defined Range
+============================
+
+A variable of const enumeration type can hold a value that corresponds to not
+defined enumeration constant, because const enumerations are inlined to their
+base types. Holding such value can occur through an explicit cast as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    const enum Status { Pending = 0, Active = 1, Completed = 2 }
+    let s: Status = 99 as Status;  // OK: type inference in cast expression
+
+    switch (s) {
+        case Status.Pending:
+            console.log("pending");
+        case Status.Active:
+            console.log("active");
+        case Status.Completed:
+            console.log("completed");
+        default:
+            console.log("unknown");  // "unknown" will be printed
+    }
+
+No validation occurs at compile time nor runtime to check that a value of a const
+enumeration type corresponds to a defined constant.
+
+.. index::
+   explicit cast
+
 
 .. raw:: pdf
 

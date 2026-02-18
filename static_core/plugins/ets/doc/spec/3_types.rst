@@ -73,7 +73,7 @@ source code in |LANG|.
    ``never``, ``void``,      type parameters
 
    ``undefined``, ``null``,  enumeration types
-   ``Array<T>`` or ``T[]``,
+   ``Array<T>`` or ``T[]``,  const enumeration types
    ``FixedArray<T>``
    ========================= =========================
 
@@ -93,6 +93,7 @@ source code in |LANG|.
    function type
    type parameter
    enumeration type
+   const enumeration type
    alias
 
 Most *predefined types* have aliases to improve |TS| compatibility as follows:
@@ -150,7 +151,7 @@ Predefined types include the following:
 -  :ref:`Type Any`;
 -  :ref:`Type Object`;
 -  :ref:`Type never`;
--  :ref:`Types void or undefined`;
+-  :ref:`Type void or undefined`;
 -  :ref:`Type null`;
 -  :ref:`Type string`;
 -  :ref:`Type bigint`;
@@ -186,6 +187,7 @@ User-Defined Types
 -  Class types (see :ref:`Classes`);
 -  Interface types (see :ref:`Interfaces`);
 -  Enumeration types (see :ref:`Enumerations`);
+-  Const enumeration types (see :ref:`Const Enumerations`);
 -  :ref:`Function Types`;
 -  :ref:`Tuple Types`;
 -  :ref:`Union Types`;
@@ -197,6 +199,7 @@ User-Defined Types
    class type
    interface type
    enumeration type
+   const enumeration type
    function type
    union type
    type parameter
@@ -360,14 +363,15 @@ Named Types
 .. meta:
     frontend_status: Done
 
-*Named types* are classes, interfaces, enumerations, aliases, type parameters,
-and predefined types (see :ref:`Predefined Types`), except built-in arrays.
-Other types (i.e., array, function, and union types) are anonymous unless
-aliased. Respective named types are introduced by the following:
+*Named types* are classes, interfaces, enumerations, const enumerations, aliases,
+type parameters, and predefined types (see :ref:`Predefined Types`), except
+built-in arrays. Other types (i.e., array, function, and union types) are anonymous
+unless aliased. Respective named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
 -  Enumeration declarations (see :ref:`Enumerations`),
+-  Const enumeration declarations (see :ref:`Const enumerations`),
 -  Type alias declarations (see :ref:`Type Alias Declaration`), and
 -  Type parameter declarations (see :ref:`Type Parameters`).
 
@@ -384,6 +388,7 @@ substituted for the type parameters of a named type.
    class
    interface
    enumeration
+   const enumeration type
    alias
    type parameter
    predefined type
@@ -505,9 +510,16 @@ Value Types
 :ref:`Integer Types and Operations`), floating-point types (see
 :ref:`Floating-Point Types and Operations`), the boolean type (see
 :ref:`Type boolean`), character types (see
-:ref:`Type char`), and user-defined enumeration types (see
-:ref:`Enumerations`). The values of such types do *not* share state with other
+:ref:`Type char`), user-defined enumeration types (see
+:ref:`Enumerations`) and const enumeration types (see :ref:`Const Enumerations`).
+The values of such types do *not* share state with other
 values.
+
+.. note::
+
+   Tables in :ref:`Unary Expressions` and :ref:`Binary Expressions Overview`
+   summarize information about valid combinations of operand types and result
+   type for unary and binary operations.
 
 .. index::
    value type
@@ -519,6 +531,7 @@ values.
    enumeration
    user-defined type
    enumeration type
+   const enumeration type
    value
    state
 
@@ -601,6 +614,11 @@ Integer Types and Operations
 +------------+--------------------------------------------------------------------+
 | ``bigint`` | All integers with no limits                                        |
 +------------+--------------------------------------------------------------------+
+
+.. note::
+
+   The :ref:`type bigint` is not a numeric type yet it operates with integer values
+   of arbitrary precision. That is the reason, why it is mentioned in that subsection.
 
 |LANG| provides a number of operators to act on integer values as discussed
 below.
@@ -1019,7 +1037,7 @@ The boolean operators are as follows:
    ``string``.
 
 Type ``boolean`` is a class type that is a part of the :ref:`Standard Library`.
-It means that type ``boolen  is a subtype of ``Object``, and therefore can be
+It means that type ``boolean  is a subtype of ``Object``, and therefore can be
 used at any place where a class name is expected.
 
 .. code-block:: typescript
@@ -1074,7 +1092,7 @@ Reference Types
 -  :ref:`Type bigint`;
 -  :ref:`Type never`;
 -  :ref:`Type null`;
--  :ref:`Types void or undefined`; and
+-  :ref:`Type void or undefined`; and
 -  :ref:`Type Parameters`.
 
 .. index::
@@ -1129,7 +1147,7 @@ Type ``Any``
 
 Type ``Any`` is a predefined type which is the supertype of all types. Type
 ``Any`` is a predefined *nullish-type* (see :ref:`Nullish Types`), i.e., a
-supertype of :ref:`Types void or undefined` and :ref:`Type null` in particular.
+supertype of :ref:`Type void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
@@ -1148,7 +1166,7 @@ Type ``Object``
     frontend_status: Done
 
 Type ``Object`` is a predefined class type which is the supertype
-(see :ref:`Subtyping`) of all types except :ref:`Types void or undefined`,
+(see :ref:`Subtyping`) of all types except :ref:`Type void or undefined`,
 :ref:`Type null`, :ref:`Nullish Types`, :ref:`Type Parameters`, and
 :ref:`Union types` that contain type parameters.
 Type ``Object`` is a subtype of type ``Any`` (see :ref:`Type Any`).
@@ -1230,10 +1248,10 @@ Type ``never`` has no instance. Type ``never`` is used as one of the following:
 
 |
 
-.. _Types void or undefined:
+.. _Type void or undefined:
 
-Types ``void`` or ``undefined``
-********************************
+Type ``void`` or ``undefined``
+******************************
 
 .. meta:
     frontend_status: Done
@@ -1367,15 +1385,22 @@ Type ``null``
 The only value of type ``null`` is the literal ``null`` (see
 :ref:`Null Literal`).
 
-Using type ``null`` as type annotation is not recommended, except in
-nullish types (see :ref:`Nullish Types`).
+.. note::
+
+    - Type ``null`` is supported for |TS| compatibility. 
+      
+    - Using ``undefined`` instead of ``null`` is considered best practice in 
+      |TS| and |JS|.
+
+    - If not specifically required, using type ``null`` as type annotation
+      or in :ref:`Nullish Types` is not recommended.
+      Use type ``undefined`` instead.
+
+    - Type ``undefined`` provides better performance than type ``null``.
 
 .. index::
    null type
    null literal
-   keyword null
-   type annotation
-   nullish type
 
 |
 
@@ -1656,7 +1681,7 @@ requirement.
   performance.
 - *Fixed-Size arrays* have no methods defined.
 
-Any array type is a class type that has an appropritate class in the
+Any array type is a class type that has an appropriate class in the
 :ref:`Standard Library`. It means that array types are subtypes of
 ``Object``, and that they can be used at any place where a class
 name is expected. 
@@ -1771,8 +1796,8 @@ better |TS| compatibility. An error is caused by the following situations:
 
 The above situations cause errors as follows:
 
--  A runtime error, if the situation is identified at runtime, i.e., during
-   program execution; and
+-  A :index:`runtime error`, if the situation is identified at runtime,
+   i.e., during program execution; and
 -  A :index:`compile-time error`, if the situation is detected during
    compilation.
 
@@ -1804,7 +1829,7 @@ Array operations are illustrated below:
     let count = a.length // get the number of array elements
     a.length = 3 // shrink array
     y = a[2] // OK, 2 is the index of the last element now
-    y = a[3] // Will lead to runtime error - attempt to access non-existing array element
+    y = a[3] // Will cause a runtime error - attempt to access non-existing array element
 
     let b: Array<number> = a // 'b' points to the same array as 'a'
 
@@ -1908,7 +1933,7 @@ The syntax of *tuple type* is presented below:
         '[' (type (',' type)* ','?)? ']'
         ;
 
-The value of a tuple type is a group of values of types that comprise the tuple
+The value of a tuple type is a group of values of types that comprize the tuple
 type. The number of values in the group equals the number of types in a tuple
 type declaration. The order of types in a tuple type declaration specifies the
 type of the corresponding value in the group.
@@ -1917,9 +1942,9 @@ It implies that each element of a tuple has its own type.
 The operator ``'[]'`` (square brackets) is used to access the elements of a
 tuple in a manner similar to accessing the elements of an array.
 
-An index expression must be of integer type. The index of the first tuple
-element is *0*. Only constant expressions can be used as the index providing
-access to tuple elements:
+An index expression operand must be a *constant expression*
+(see :ref:`Constant Expressions`) of an integer type. The index of the first
+tuple element is *0*:
 
 .. code-block:: typescript
    :linenos:
@@ -2022,40 +2047,46 @@ An empty tuple type is identical to ``Tuple``:
 
     let empty: [] = [] // empty tuple with no elements in it
 
-Type ``Tuple`` is preserved by :ref:`Type Erasure`, so it can be used
-in :ref:`InstanceOf Expression` and :ref:`Cast Expression`.
+Type ``Tuple`` is preserved by :ref:`Type Erasure`, and can be used
+in :ref:`instanceof Expression` and :ref:`Cast Expression`.
 
-An element of a ``Tuple`` value cannot be accessed directly. A developer must use the
-``unsafeGet`` or  ``unsafeSet`` methods instead, which has the following signatures:
+An element of a ``Tuple`` value cannot be accessed directly.
+To get an element value, the method ``unsafeGet``
+with the following signature can be used:
 
 .. code-block:: typescript
    :linenos:
 
     unsafeGet(index: int): Any
-    unsafeSet(index: int, value: Any): void
 
-A runtime error error is caused in calls of these methods, if:
+Calls of the method ``unsafeGet`` cause a :index:`runtime error` if:
 
 -  ``index`` value is less than zero; or
--  ``index`` value is greater or equal than tuple length.
+-  ``index`` value is greater than or equal to the actual tuple length.
 
-Methods usage is illustrated below:
+.. index::
+   runtime error
+
+The usage of the method ``unsafeGet`` is illustrated below:
 
 .. code-block:: typescript
    :linenos:
 
-    function modify(x: Object) {
+    function log_1(x: Object) {
         if (x instanceof Tuple) {
-            console.log(x.unsafeGet(0))
-            x.unsafeSet(1, "aa")
+            console.log(x.unsafeGet(1))
         }
     }
 
     let a: [string, string] = ["aa", "bb"]
-    modify(a) // ok
+    log_1(a) // ok, output: 2, "bb"
 
     let b: [string] = ["aa"]
-    modify(b)     // runtime error in the 'modify' body
+    log_1(b)     // runtime error in ``unsafeGet`` call
+
+No element of a ``Tuple`` value can be changed. |LANG| does not support
+such change as it can cause a :index:`runtime error` at an unpredictable
+place during execution.
 
 |
 
@@ -2143,7 +2174,7 @@ default value.
     type FuncTypeWithOptionalParameters = (x?: number, y?: string) => void
     let foo: FuncTypeWithOptionalParameters
         = ():void => {}          // OK: as arguments are just ignored
-    foo = (p: number):void => {} // CTE as call with zero arguments is invalid
+    foo = (p: number):void => {} // Compile-time error as call with zero arguments is invalid
     foo = (p?: number):void => {} // OK: as call with zero or one argument is valid
     foo = (p1: number, p2?: string):void => {} // Compile-time error: as call with zero arguments is invalid
     foo = (p1?: number, p2?: string):void => {} // OK
@@ -2692,10 +2723,18 @@ Nullish Types
     frontend_status: Done
 
 |LANG| has *nullish types* that are in fact a specific form of union types (see
-:ref:`Union Types`).
+:ref:`Union Types`). Unions
 
-``T | null`` or ``T | undefined`` or ``T | undefined | null``
+- ``T | undefined``; 
+- ``T | null``;  or 
+- ``T | undefined | null``
+
 can be used as the type to specify a nullish version of type ``T``.
+
+.. note::
+
+    Using type ``T | undefined`` in *nullish types* is recommended.
+    See :ref:`Type null` for detail.
 
 All predefined types except :ref:`Type Any`, and all user-defined types are
 non-nullish types. Non-nullish types cannot have a ``null`` or ``undefined``
