@@ -19,10 +19,13 @@ desc: >-
     then all variants must be listed in the object literal.
     Otherwise, a compile-time error occurs
 tags: [compile-only, negative]
+expected_out: >- 
+    Semantic error ESE0265: All variants of literals listed in the enum
+    type must be listed in the object literal
 ---*/
 
 enum Enum {A, B}
 const map1: Record<Enum, number> = {
     Enum.A: 1
-} // compile-time error: key "Enum.b" is missing
+} // compile-time error: key "Enum.B" is missing
 // Note: Error message is masked by #28679 currently

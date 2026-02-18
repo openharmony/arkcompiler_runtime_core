@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
 desc: >-
-    If a key is a union of literal types or an enum type,
-    then all variants must be listed in the object literal.
-    Otherwise, a compile-time error occurs
-tags: [compile-only, negative]
-expected_out: >- 
-    Semantic error ESE0265: All variants of literals listed in the union
-    type must be listed in the object literal
+    Object literal evaluation - negative compile-time tests
+tags: ['compile-only', 'negative']
+expected_out: |-
+    {{c.expected.replace('\n', ' ')}}
 ---*/
 
-let map: Record<"aa" | "bb", number> = {
-    "aa": 1,
-} // compile-time error: "bb" key is missing
+{% if c.decl %}
+{{c.decl}}
+{% endif %}
+
+function main() {
+    {{c.use|indent}}
+}
+{% endfor %}

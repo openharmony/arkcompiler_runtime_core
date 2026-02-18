@@ -17,7 +17,6 @@
 desc: >-
     The first expression in keyValue denotes a key, and must be of type Key;
     the second expression denotes a value, and must be of type Value.
-tags: [compile-only]
 ---*/
 
 interface PersonInfo {
@@ -29,3 +28,11 @@ let map: Record<string, PersonInfo> = {
       "John": { age: 25, salary: 10},
       "Mary": { age: 21, salary: 20}
 }
+
+function main(): void {
+    arktest.assertEQ(map["John"]!.age, 25)
+    arktest.assertEQ(map["John"]!.salary, 10)
+    arktest.assertEQ(map["Mary"]!.age, 21)
+    arktest.assertEQ(map["Mary"]!.salary, 20)
+}
+

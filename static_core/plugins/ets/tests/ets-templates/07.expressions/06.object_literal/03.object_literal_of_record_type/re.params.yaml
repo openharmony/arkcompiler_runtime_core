@@ -17,9 +17,13 @@ cases:
           // empty records
           let a: Record<number, string> = {}
           let b: Record<number, string> = {}
-           arktest.assertEQ(a instanceof Record, true)
-           arktest.assertEQ(b instanceof Record, true)
-           arktest.assertEQ(a != b, true)
+      checks:
+          - call: a instanceof Record
+            value: 'true'
+          - call: b instanceof Record
+            value: 'true'
+          - call: a != b
+            value: 'true'
 
     - use: |-
           // number to string
@@ -28,14 +32,24 @@ cases:
               1: "One",
               3.14159: "PI",
           }
-           arktest.assertEQ(a[0], "Zero")
-           arktest.assertEQ(a[1], "One")
-           arktest.assertEQ(a[3.14159], "PI")
-           arktest.assertEQ(a[42], undefined)
+      checks:
+          - call: a[0]
+            value: '"Zero"'
+          - call: a[1]
+            value: '"One"'
+          - call: a[3.14159]
+            value: '"PI"'
+          - call: a[42]
+            value: 'undefined'
+      after: |-
           a = {}
-           arktest.assertEQ(a[0], undefined)
-           arktest.assertEQ(a[1], undefined)
-           arktest.assertEQ(a[3.14159], undefined)
+      second_checks:
+          - call: a[0]
+            value: 'undefined'
+          - call: a[1]
+            value: 'undefined'
+          - call: a[3.14159]
+            value: 'undefined'
 
     - decl: |-
           function foo(p: string): string {
@@ -48,14 +62,24 @@ cases:
               1: foo("One"),
               3.14159: "P" + foo("I"),
           }
-           arktest.assertEQ(a[0], "ZeroZero")
-           arktest.assertEQ(a[1], "OneOne")
-           arktest.assertEQ(a[3.14159], "PII")
-           arktest.assertEQ(a[42], undefined)
+      checks:
+          - call: a[0]
+            value: '"ZeroZero"'
+          - call: a[1]
+            value: '"OneOne"'
+          - call: a[3.14159]
+            value: '"PII"'
+          - call: a[42]
+            value: 'undefined'
+      after: |-
           a = {}
-           arktest.assertEQ(a[0], undefined)
-           arktest.assertEQ(a[1], undefined)
-           arktest.assertEQ(a[3.14159], undefined)
+      second_checks:
+          - call: a[0]
+            value: 'undefined'
+          - call: a[1]
+            value: 'undefined'
+          - call: a[3.14159]
+            value: 'undefined'
 
     - use: |-
           // string to number
@@ -65,16 +89,28 @@ cases:
               "Two": 2e00,
               "Minus PI": -3.14159,
           }
-           arktest.assertEQ(a["Zero"], 0)
-           arktest.assertEQ(a["One"], 1)
-           arktest.assertEQ(a["Two"], 2)
-           arktest.assertEQ(a["Minus PI"], -3.14159)
-           arktest.assertEQ(a["PI"], undefined)
+      checks:
+          - call: a["Zero"]
+            value: '0'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
+          - call: a["Minus PI"]
+            value: '-3.14159'
+          - call: a["PI"]
+            value: 'undefined'
+      after: |-
           a = {}
-           arktest.assertEQ(a["Zero"], undefined)
-           arktest.assertEQ(a["One"], undefined)
-           arktest.assertEQ(a["Two"], undefined)
-           arktest.assertEQ(a["Minus PI"], undefined)
+      second_checks:
+          - call: a["Zero"]
+            value: 'undefined'
+          - call: a["One"]
+            value: 'undefined'
+          - call: a["Two"]
+            value: 'undefined'
+          - call: a["Minus PI"]
+            value: 'undefined'
 
     - use: |-
           // string literals to number
@@ -83,9 +119,13 @@ cases:
               "One": 1.0,
               "Two": 2e00,
           }
-           arktest.assertEQ(a["Zero"], 0)
-           arktest.assertEQ(a["One"], 1)
-           arktest.assertEQ(a["Two"], 2)
+      checks:
+          - call: a["Zero"]
+            value: '0'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
 
     - use: |-
           // string literals and string to number
@@ -96,12 +136,19 @@ cases:
               "Two": 2e00,
               "PI constant value": 3.14159,
           }
-           arktest.assertEQ(a["Zero"], undefined)
-           arktest.assertEQ(a["One"], 1)
-           arktest.assertEQ(a["Two"], 2)
-           arktest.assertEQ(a[""], 0)
-           arktest.assertEQ(a[" "], 1)
-           arktest.assertEQ(a["PI constant value"], 3.14159)
+      checks:
+          - call: a["Zero"]
+            value: 'undefined'
+          - call: a["One"]
+            value: '1'
+          - call: a["Two"]
+            value: '2'
+          - call: a[""]
+            value: '0'
+          - call: a[" "]
+            value: '1'
+          - call: a["PI constant value"]
+            value: '3.14159'
 
     - use: |-
           // string literals to Record
@@ -114,11 +161,17 @@ cases:
                      42: false,
               },
           }
-           arktest.assertEQ(a["a"][1]!, true)
-           arktest.assertEQ(!(a["a"][42]!), true)
-           arktest.assertEQ(a["b"][123], undefined)
-           arktest.assertEQ(!(a["c"][1]!), true)
-           arktest.assertEQ(a["c"][42]!, true)
+      checks:
+          - call: a["a"][1]!
+            value: 'true'
+          - call: '!(a["a"][42]!)'
+            value: 'true'
+          - call: a["b"][123]
+            value: 'undefined'
+          - call: '!(a["c"][1]!)'
+            value: 'true'
+          - call: a["c"][42]!
+            value: 'true'
 
     - use: |-
           // string to Record
@@ -128,9 +181,13 @@ cases:
               },
               "b": {},
           }
-           arktest.assertEQ(a["b"]![123], undefined)
-           arktest.assertEQ(!(a["c"]![1]!), true)
-           arktest.assertEQ(a["c"]![42]!, true)
+      checks:
+          - call: a["b"]![123]
+            value: 'undefined'
+          - call: '!(a["c"]![1]!)'
+            value: 'true'
+          - call: a["c"]![42]!
+            value: 'true'
 
     - use: |-
           // short to Error
@@ -139,9 +196,13 @@ cases:
               22: new Error,
               333: new Error,
           }
-           arktest.assertEQ(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error, true)
-           arktest.assertEQ(a[1] != a[22] && a[1] != a[333], true)
-           arktest.assertEQ(a[2], undefined)
+      checks:
+          - call: a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error
+            value: 'true'
+          - call: a[1] != a[22] && a[1] != a[333]
+            value: 'true'
+          - call: a[2]
+            value: 'undefined'
 
     - use: |-
           // byte to union
@@ -151,11 +212,17 @@ cases:
               100: null,
               127: 127.0,
           }
-           arktest.assertEQ(a[0], 3.14159)
-           arktest.assertEQ(a[50], false)
-           arktest.assertEQ(a[100], null)
-           arktest.assertEQ(a[127], 127.0)
-           arktest.assertEQ(a[1], undefined)
+      checks:
+          - call: a[0]
+            value: '3.14159'
+          - call: a[50]
+            value: 'false'
+          - call: a[100]
+            value: 'null'
+          - call: a[127]
+            value: '127.0'
+          - call: a[1]
+            value: 'undefined'
 
     - decl: |-
           // union to union
@@ -167,10 +234,16 @@ cases:
               "A" : Color.Blue,
               "B": "green"
             }
-           arktest.assertEQ(a["A"], Color.Blue)
-           arktest.assertEQ(a["B"], "green")
+      checks:
+          - call: a["A"]
+            value: 'Color.Blue'
+          - call: a["B"]
+            value: '"green"'
+      after: |-
           a["A"] = Color.Red
-           arktest.assertEQ(a["A"], Color.Red)
+      second_checks:
+          - call: a["A"]
+            value: 'Color.Red'
 
     - decl: |-
           // infer Record type from function signature
@@ -182,9 +255,11 @@ cases:
                   return { "exitCode": "1" }
               }
           }
-      use: |-
-           arktest.assertEQ(foo({ "A": "B" })["exitCode"], "0")
-           arktest.assertEQ(foo({ "A": "C" })["exitCode"], "1")
+      checks:
+          - call: 'foo({ "A": "B" })["exitCode"]'
+            value: '"0"'
+          - call: 'foo({ "A": "C" })["exitCode"]'
+            value: '"1"'
 
     - use: |-
           // string to array
@@ -194,14 +269,23 @@ cases:
               "\u0002": ["", "1", "2"],
               "wrong key": [] as string[]
           }
-           arktest.assertEQ(r["\u0000"]![0], "")
-           arktest.assertEQ(r["\u0001"]![0], "")
-           arktest.assertEQ(r["\u0001"]![1], "1")
-           arktest.assertEQ(r["\u0002"]![0], "")
-           arktest.assertEQ(r["\u0002"]![1], "1")
-           arktest.assertEQ(r["\u0002"]![2], "2")
-           arktest.assertEQ(r["wrong key"]!.length, 0)
-           arktest.assertEQ(r["bad key"], undefined)
+      checks:
+          - call: r["\u0000"]![0]
+            value: '""'
+          - call: r["\u0001"]![0]
+            value: '""'
+          - call: r["\u0001"]![1]
+            value: '"1"'
+          - call: r["\u0002"]![0]
+            value: '""'
+          - call: r["\u0002"]![1]
+            value: '"1"'
+          - call: r["\u0002"]![2]
+            value: '"2"'
+          - call: r["wrong key"]!.length
+            value: '0'
+          - call: r["bad key"]
+            value: 'undefined'
 
     - use: |-
           // string literals to tuple
@@ -210,12 +294,19 @@ cases:
               "W": [1e10, 111111111n],
               "E": [1e20, 111111111111111111n]
           }
-          arktest.assertEQ(r["Q"][0], 1)
-          arktest.assertEQ(r["Q"][1], 1n)
-          arktest.assertEQ(r["W"][0], 1e10)
-          arktest.assertEQ(r["W"][1], 111111111n)
-          arktest.assertEQ(r["E"][0], 1e20)
-          arktest.assertEQ(r["E"][1], 111111111111111111n)
+      checks:
+          - call: r["Q"][0]
+            value: '1'
+          - call: r["Q"][1]
+            value: '1n'
+          - call: r["W"][0]
+            value: '1e10'
+          - call: r["W"][1]
+            value: '111111111n'
+          - call: r["E"][0]
+            value: '1e20'
+          - call: r["E"][1]
+            value: '111111111111111111n'
 
     - use: |-
           // string literals to function
@@ -223,10 +314,16 @@ cases:
               "add": (p: number): number => p + p,
               "mul": (p: number): number => p * p
           }
-          arktest.assertEQ(r["add"](42), 84)
-          arktest.assertEQ(r["mul"](12), 144)
+      checks:
+          - call: r["add"](42)
+            value: '84'
+          - call: r["mul"](12)
+            value: '144'
+      after: |-
           r["add"] = (p: number): number => p + p + p
-          arktest.assertEQ(r["add"](3), 9)
+      second_checks:
+          - call: r["add"](3)
+            value: '9'
 
     - use: |-
           // string to function
@@ -234,9 +331,13 @@ cases:
               "add": (p: number): number => p + p,
               "mul": (p: number): number => p * p
           }
-           arktest.assertEQ(r["add"]!(42), 84)
-           arktest.assertEQ(r["mul"]!(12), 144)
-           arktest.assertEQ(r["div"], undefined)
+      checks:
+          - call: r["add"]!(42)
+            value: '84'
+          - call: r["mul"]!(12)
+            value: '144'
+          - call: r["div"]
+            value: 'undefined'
 
     - use: |-
           // number to union
@@ -246,11 +347,17 @@ cases:
               3: null,
               4: undefined,
           }
-           arktest.assertEQ(r[1], "1")
-           arktest.assertEQ(r[2], 2.5)
-           arktest.assertEQ(r[3], null)
-           arktest.assertEQ(r[4], undefined)
-           arktest.assertEQ(r[5], undefined)
+      checks:
+          - call: r[1]
+            value: '"1"'
+          - call: r[2]
+            value: '2.5'
+          - call: r[3]
+            value: 'null'
+          - call: r[4]
+            value: 'undefined'
+          - call: r[5]
+            value: 'undefined'
 
     - use: |-
           // string literals to union
@@ -260,10 +367,16 @@ cases:
               "3": Long.MAX_VALUE,
               "4": new Error()
           }
-           arktest.assertEQ(r["1"], c'1')
-           arktest.assertEQ(r["2"], false)
-           arktest.assertEQ(r["3"], Long.MAX_VALUE)
-           arktest.assertEQ(r["4"] instanceof Error, true)
+      checks:
+          - call: r["1"]
+            value: "c'1'"
+          - call: r["2"]
+            value: 'false'
+          - call: r["3"]
+            value: 'Long.MAX_VALUE'
+          - call: r["4"] instanceof Error
+            value: 'true'
+
     - decl: |-
           class Test {
               me: int;
@@ -278,10 +391,14 @@ cases:
               "HW": new Test(150),
               "hW": new Test(225)
           }
+      checks:
+          - call: r["hw"].me
+            value: '100'
+          - call: r["HW"].me
+            value: '150'
+          - call: r["hW"].me
+            value: '225'
 
-           arktest.assertEQ(r["hw"].me, 100)
-           arktest.assertEQ(r["HW"].me, 150)
-           arktest.assertEQ(r["hW"].me, 225)
     - decl: |-
           enum Queen { Dont, Stop, Me, Now }
       use: |-
@@ -291,19 +408,27 @@ cases:
               "Me": Queen.Stop,
               "Now": Queen.Dont
           }
+      checks:
+          - call: r["Dont"]
+            value: 'Queen.Now'
+          - call: r["Stop"]
+            value: 'Queen.Me'
+          - call: r["Me"]
+            value: 'Queen.Stop'
+          - call: r["Now"]
+            value: 'Queen.Dont'
 
-           arktest.assertEQ(r["Dont"], Queen.Now)
-           arktest.assertEQ(r["Stop"], Queen.Me)
-           arktest.assertEQ(r["Me"], Queen.Stop)
-           arktest.assertEQ(r["Now"], Queen.Dont)
     - use: |-
           let r: Record<"concat"|"remove", (f: string, s: string) => string> = {
               "concat": (f: string, s: string): string => f + s,
               "remove": (f: string, s: string): string => f.replace(s, '')
           }
+      checks:
+          - call: 'r["concat"]("Hello, ", "world!")'
+            value: '"Hello, world!"'
+          - call: 'r["remove"]("What are you doing?", " doing")'
+            value: '"What are you?"'
 
-           arktest.assertEQ(r["concat"]("Hello, ", "world!"), "Hello, world!")
-           arktest.assertEQ(r["remove"]("What are you doing?", " doing"), "What are you?")
     - use: |-
           let r: Record<"Nor"|"Shall"|"Death"|"Brag", Record<"Thou"|"Wanderst"|"In"|"His"|"Shade", int>> = {
               "Nor": {
@@ -335,30 +460,48 @@ cases:
                   "Shade": 5000,
               }
           }
+      checks:
+          - call: r["Nor"]["Thou"]
+            value: '1'
+          - call: r["Nor"]["Wanderst"]
+            value: '2'
+          - call: r["Nor"]["In"]
+            value: '3'
+          - call: r["Nor"]["His"]
+            value: '4'
+          - call: r["Nor"]["Shade"]
+            value: '5'
+          - call: r["Shall"]["Thou"]
+            value: '10'
+          - call: r["Shall"]["Wanderst"]
+            value: '20'
+          - call: r["Shall"]["In"]
+            value: '30'
+          - call: r["Shall"]["His"]
+            value: '40'
+          - call: r["Shall"]["Shade"]
+            value: '50'
+          - call: r["Death"]["Thou"]
+            value: '100'
+          - call: r["Death"]["Wanderst"]
+            value: '200'
+          - call: r["Death"]["In"]
+            value: '300'
+          - call: r["Death"]["His"]
+            value: '400'
+          - call: r["Death"]["Shade"]
+            value: '500'
+          - call: r["Brag"]["Thou"]
+            value: '1000'
+          - call: r["Brag"]["Wanderst"]
+            value: '2000'
+          - call: r["Brag"]["In"]
+            value: '3000'
+          - call: r["Brag"]["His"]
+            value: '4000'
+          - call: r["Brag"]["Shade"]
+            value: '5000'
 
-           arktest.assertEQ(r["Nor"]["Thou"], 1);
-           arktest.assertEQ(r["Nor"]["Wanderst"], 2);
-           arktest.assertEQ(r["Nor"]["In"], 3);
-           arktest.assertEQ(r["Nor"]["His"], 4);
-           arktest.assertEQ(r["Nor"]["Shade"], 5);
-
-           arktest.assertEQ(r["Shall"]["Thou"], 10);
-           arktest.assertEQ(r["Shall"]["Wanderst"], 20);
-           arktest.assertEQ(r["Shall"]["In"], 30);
-           arktest.assertEQ(r["Shall"]["His"], 40);
-           arktest.assertEQ(r["Shall"]["Shade"], 50);
-
-           arktest.assertEQ(r["Death"]["Thou"], 100);
-           arktest.assertEQ(r["Death"]["Wanderst"], 200);
-           arktest.assertEQ(r["Death"]["In"], 300);
-           arktest.assertEQ(r["Death"]["His"], 400);
-           arktest.assertEQ(r["Death"]["Shade"], 500);
-
-           arktest.assertEQ(r["Brag"]["Thou"], 1000);
-           arktest.assertEQ(r["Brag"]["Wanderst"], 2000);
-           arktest.assertEQ(r["Brag"]["In"], 3000);
-           arktest.assertEQ(r["Brag"]["His"], 4000);
-           arktest.assertEQ(r["Brag"]["Shade"], 5000);
     - decl: |-
           let r: Record<"Please"|"Read"|"Beware"|"Of"|"Pity", string> = {
               "Please": "Book",
@@ -367,15 +510,21 @@ cases:
               "Of": "Zweig",
               "Pity": "in 1939"
           }
-      use: |-
-           arktest.assertEQ(r["Please"], "Book")
-           arktest.assertEQ(r["Read"], "Written by")
-           arktest.assertEQ(r["Beware"], "Stefan")
-           arktest.assertEQ(r["Of"], "Zweig")
-           arktest.assertEQ(r["Pity"], "in 1939")
+      checks:
+          - call: r["Please"]
+            value: '"Book"'
+          - call: r["Read"]
+            value: '"Written by"'
+          - call: r["Beware"]
+            value: '"Stefan"'
+          - call: r["Of"]
+            value: '"Zweig"'
+          - call: r["Pity"]
+            value: '"in 1939"'
+
     - decl: |-
           class VulkanAPI {
-              callMeOrDie() {
+              callMeOrDie(): boolean {
                   let r: Record<"Chill"|"Just"|"Joking :)", boolean> = {
                       "Chill": true,
                       "Just": true,
@@ -385,11 +534,15 @@ cases:
                    arktest.assertEQ(r["Chill"], true)
                    arktest.assertEQ(r["Just"], true)
                    arktest.assertEQ(!r["Joking :)"], true)
+                   return true
               }
           }
       use: |-
           let api: VulkanAPI = {}
-          api.callMeOrDie()
+      checks:
+          - call: api.callMeOrDie()
+            value: 'true'
+
     - decl: |-
           enum AB { A, B }
       use: |-
@@ -397,8 +550,12 @@ cases:
               AB.A: 1,
               AB.B: 2
           }
-          arktest.assertEQ(m[AB.A], 1)
-          arktest.assertEQ(m[AB.B], 2)
+      checks:
+          - call: m[AB.A]
+            value: '1'
+          - call: m[AB.B]
+            value: '2'
+
     - decl: |-
           enum DoubleEnum: double {a = 1.0, b = 2.0, c = 3.141592653589}
       use: |-
@@ -407,9 +564,14 @@ cases:
               DoubleEnum.b: "b",
               DoubleEnum.c: "c"
           }
-          arktest.assertEQ(m[DoubleEnum.a], "a")
-          arktest.assertEQ(m[DoubleEnum.b], "b")
-          arktest.assertEQ(m[DoubleEnum.c], "c")
+      checks:
+          - call: m[DoubleEnum.a]
+            value: '"a"'
+          - call: m[DoubleEnum.b]
+            value: '"b"'
+          - call: m[DoubleEnum.c]
+            value: '"c"'
+
     - decl: |-
           enum StringEnum {a = "a", b = "b"}
       use: |-
@@ -417,8 +579,12 @@ cases:
               StringEnum.a: "a",
               StringEnum.b: "b"
           }
-          arktest.assertEQ(m[StringEnum.a], "a")
-          arktest.assertEQ(m[StringEnum.b], "b")
+      checks:
+          - call: m[StringEnum.a]
+            value: '"a"'
+          - call: m[StringEnum.b]
+            value: '"b"'
+
     - decl: |-
           enum LongEnum { A = 0x7FFF_FFFF_1, B}
       use: |-
@@ -426,5 +592,58 @@ cases:
               LongEnum.A: 1,
               LongEnum.B: 2
           }
-          arktest.assertEQ(m[LongEnum.A], 1)
-          arktest.assertEQ(m[LongEnum.B], 2)
+      checks:
+          - call: m[LongEnum.A]
+            value: '1'
+          - call: m[LongEnum.B]
+            value: '2'
+
+    - use: |-
+          // Record reassignment with new literal
+          let a: Record<string, number> = {
+              "x": 1,
+              "y": 2,
+          }
+      checks:
+          - call: a["x"]
+            value: '1'
+          - call: a["y"]
+            value: '2'
+      after: |-
+          a = {
+              "x": 10,
+              "y": 20,
+              "z": 30,
+          }
+      second_checks:
+          - call: a["x"]
+            value: '10'
+          - call: a["y"]
+            value: '20'
+          - call: a["z"]
+            value: '30'
+
+    - use: |-
+          // Record with nullable values
+          let a: Record<string, number|null> = {
+              "present": 42,
+              "absent": null,
+          }
+      checks:
+          - call: a["present"]
+            value: '42'
+          - call: a["absent"]
+            value: 'null'
+          - call: a["missing"]
+            value: 'undefined'
+
+    - decl: |-
+          function sumRecord(r: Record<string, number>): number {
+              return r["a"]! + r["b"]!
+          }
+      checks:
+          - call: 'sumRecord({ "a": 10, "b": 20 })'
+            value: '30'
+          - call: 'sumRecord({ "a": -5, "b": 5 })'
+            value: '0'
+

@@ -31,7 +31,7 @@ class A {
 
 function foo(): void {
     let a: A|null = null;
-	a = { name: "Bob", age: 42 } as A
+    a = { name: "Bob", age: 42 } as A
 }
 
 let checkException = (e: Error): boolean => { return e instanceof ArithmeticError }

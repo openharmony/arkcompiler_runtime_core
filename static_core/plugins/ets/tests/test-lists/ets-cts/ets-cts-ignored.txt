@@ -222,11 +222,16 @@
 #25990
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets
 
-#28679 Record with enum keys
+#28679 Record with enum keys - no support in spec 121TP3 but planned in future
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_24.ets
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_25.ets
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_26.ets
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_27.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_18.ets
+07.expressions/06.object_literal/03.object_literal_of_record_type/spec_ex4.ets
+
+# 33206
+07.expressions/06.object_literal/03.object_literal_of_record_type/re_n_neg_19.ets
 
 #28898 Iterable refused as spread
 07.expressions/07.spread_expression/iterable0.ets

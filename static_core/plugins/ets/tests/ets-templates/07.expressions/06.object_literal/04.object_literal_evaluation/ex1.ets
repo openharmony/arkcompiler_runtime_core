@@ -34,5 +34,5 @@ let checkException = (e: Error): boolean => { return e instanceof RangeError }
 
 function main() {
     arktest.expectThrow(() => foo(), checkException)
-	arktest.assertEQ(a.age, 4);
+    arktest.assertEQ(a.age, 4);
 }
