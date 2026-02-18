@@ -214,6 +214,10 @@ bool Inlining::Do()
 
 #ifndef NDEBUG
     GetGraph()->SetInliningComplete();
+#else
+    if (inlined) {
+        GetGraph()->SetInliningComplete();
+    }
 #endif  // NDEBUG
 
     return inlined;

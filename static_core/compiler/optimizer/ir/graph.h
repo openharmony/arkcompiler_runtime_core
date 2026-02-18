@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -396,6 +396,14 @@ public:
     {
         FlagUnrollComplete::Set(true, &bitFields_);
     }
+    bool IsInliningComplete() const
+    {
+        return FlagInliningComplete::Get(bitFields_) || IsOsrMode();
+    }
+    void SetInliningComplete()
+    {
+        FlagInliningComplete::Set(true, &bitFields_);
+    }
 #ifdef COMPILER_DEBUG_CHECKS
     bool IsRegAllocApplied() const
     {
@@ -412,14 +420,6 @@ public:
     void SetRegAccAllocApplied()
     {
         FlagRegaccallocApplied::Set(true, &bitFields_);
-    }
-    bool IsInliningComplete() const
-    {
-        return FlagInliningComplete::Get(bitFields_) || IsOsrMode();
-    }
-    void SetInliningComplete()
-    {
-        FlagInliningComplete::Set(true, &bitFields_);
     }
     bool IsLowLevelInstructionsEnabled() const
     {
@@ -1414,12 +1414,12 @@ private:
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
     using FlagCanOptimizeNativeMethods = FlagThrowApplied::NextFlag;
     using FlagUnrollComplete = FlagCanOptimizeNativeMethods::NextFlag;
-#if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
-    using LastField = FlagUnrollComplete;
-#else
     using FlagRegallocApplied = FlagUnrollComplete::NextFlag;
     using FlagRegaccallocApplied = FlagRegallocApplied::NextFlag;
     using FlagInliningComplete = FlagRegaccallocApplied::NextFlag;
+#if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
+    using LastField = FlagUnrollComplete;
+#else
     using FlagLowLevelInstnsEnabled = FlagInliningComplete::NextFlag;
     using FlagDynUnitTest = FlagLowLevelInstnsEnabled::NextFlag;
     using LastField = FlagDynUnitTest;
