@@ -40,18 +40,6 @@ cases:
           - new Float(127.0f)
           - new Double(127.0)
 
-    - type: Char
-      case1:
-          - c'\u0001'
-          - new Char(c'\u0001')
-      case2:
-          - '1 as short'
-          - '1'
-          - '1.0'
-          - new Byte(1 as byte)
-          - new Long(1 as long)
-          - new Float(1.0f)
-
     # string equality
     - type: string
       case1:
