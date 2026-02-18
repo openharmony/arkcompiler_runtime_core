@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,8 @@ cases:
   - { use: "128", value: '32768', use_type: ": short | Object", expected_type: int }
   - { use: "1.0", value: '1', use_type: ": int | double", expected_type: int }
   - { use: "1.0f", value: '1', use_type: ": int | float", expected_type: int }
-  - { use: "123", value: '1 as byte', use_type: ": short", expected_type: short }
-  - { use: "127", value: '1 as short', use_type: ": int", expected_type: int }
-  - { use: "128", value: '1 as int', use_type: ": long", expected_type: long }
+  - { use: "123", value: '(1).toByte()', use_type: ": short", expected_type: short }
+  - { use: "127", value: '(1).toShort()', use_type: ": int", expected_type: int }
+  - { use: "128", value: '(1).toInt()', use_type: ": long", expected_type: long }
+  - { use: "3.14", value: '1', use_type: ": string | Object", expected_type: int }
+  - { use: "1", value: '1.0', use_type: ": string | Object", expected_type: double }
