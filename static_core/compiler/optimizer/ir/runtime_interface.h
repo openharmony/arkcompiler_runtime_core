@@ -1041,6 +1041,16 @@ public:
         return nullptr;
     }
 
+    virtual MethodPtr GetStringBuilderConstructorWithStringArg() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetStringBuilderConstructorWithCharArrayArg() const
+    {
+        return nullptr;
+    }
+
     // String offsets
     uint32_t GetStringDataOffset(Arch arch) const
     {

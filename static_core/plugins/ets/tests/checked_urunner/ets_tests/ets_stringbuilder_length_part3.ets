@@ -30,16 +30,19 @@
 //!                       --compiler-inlining=true --paoc-use-cha=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::reuseConcatLoop1"
-//! PASS_BEFORE "SimplifyStringBuilder"
+//! PASS_AFTER  "Inline"
 //! INST_COUNT  /StringBuilder::<ctor>/,1
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT  /LenArray/,0
 //! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,0
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /StringBuilder::<ctor>/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.buf/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.index/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.length/,1
+//! INST_COUNT  /StoreObject \d+ std.core.StringBuilder.compress/,1
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,1
-//! INST_NOT    /LenArray/
-//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,0
+//! INST_COUNT  /LenArray/,1
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,1
 //!
 //! RUN         options: "--compiler-regex='.*reuseConcatLoop1'",
 //!             entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
@@ -123,38 +126,44 @@
 //! CHECKER      JIT, StringBuilder getStringLength calls BCO optimized
 //! SKIP_IF      @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            BCO compiler-simplify-string-builder=false
-//! RUN          force_jit: true, options: "",
+//! RUN          force_jit: true, 
+//!              options: "--compiler-regex='.*getStringLengthCount(?:[0-9]+|Updated|NewSb).*'",
 //!              entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,1
+//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,0
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,1
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount32"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
+//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,0
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,2
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount22"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
+//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,0
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,2
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCountUpdated"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
+//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,0
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,2
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCountNewSb"
 //! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
 //! PASS_AFTER  "SimplifyStringBuilder"
-//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,2
+//! INST_COUNT  /std.core.StringBuilder::%%get-stringLength/,0
+//! INST_COUNT  /LoadObject \d+ std.core.StringBuilder.length/,2
 
 function reuseConcatLoop1(a: String, n: int): String {
     let str: String = '';
@@ -179,7 +188,7 @@ function getStringLengthCount32(){
   let len1 = sb.stringLength;
   sb.append(0)
   let len2 = sb.stringLength;
-  return len2
+  return len1 + len2
 }
 
 function getStringLengthCount22(){
@@ -189,7 +198,7 @@ function getStringLengthCount22(){
     sb.append(0);
   }
   let len1 = sb.stringLength;
-  return len1;
+  return len0 + len1;
 }
 
 function stringUpdate(sb: StringBuilder): void {    
@@ -201,7 +210,7 @@ function getStringLengthCountUpdated(){
   let len0 = sb.stringLength;
   stringUpdate(sb);
   let len1 = sb.stringLength;
-  return len1;
+  return len0 + len1;
 }
 
 function getStringLengthCountNewSb(){
@@ -209,7 +218,7 @@ function getStringLengthCountNewSb(){
   let len0 = sb.stringLength;
   let newSb = new StringBuilder();
   let len1 = newSb.stringLength;
-  return len1;
+  return len0 + len1;
 }
 
 function main() {

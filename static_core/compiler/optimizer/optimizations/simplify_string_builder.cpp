@@ -53,6 +53,64 @@ bool HasTryCatchBlocks(Graph *graph)
     return false;
 }
 
+bool IsInliningEnabled()
+{
+    return ark::compiler::g_options.IsCompilerInlining();
+}
+
+bool IsMethodInInliningBlackList(RuntimeInterface *runtime, Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::CallStatic);
+    CallInst *callInst = inst->CastToCallStatic();
+
+    auto &skipList = ark::compiler::g_options.GetCompilerInliningBlacklist();
+    if (!skipList.empty()) {
+        std::string methodName = runtime->GetMethodFullName(callInst->GetCallMethod());
+        if (std::find(skipList.begin(), skipList.end(), methodName) != skipList.end()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool IsSafeToProceed(Graph *graph)
+{
+    for (auto *bb : graph->GetBlocksRPO()) {
+        for (auto *inst : bb->Insts()) {
+            if (inst->GetOpcode() != Opcode::CallStatic) {
+                continue;
+            }
+
+            CallInst *callInst = inst->CastToCallStatic();
+            if (callInst->GetIsNative() && !graph->GetRuntime()->IsMethodIntrinsic(callInst->GetCallMethod())) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool SimplifyStringBuilder::ManuallyInlineMethods()
+{
+    bool isInlined = false;
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        if (block->IsEmpty()) {
+            continue;
+        }
+        for (Inst *curInst : block->Insts()) {
+            if (IsStringBuilderCtorCall(curInst) && !IsMethodInInliningBlackList(GetGraph()->GetRuntime(), curInst)) {
+                isInlined |= ManuallyInlineStringBuilderConstructor(GetGraph(), &ssb_, curInst->GetInput(0).GetInst());
+            } else if (IsMethodStringBuilderGetStringLength(curInst) &&
+                       !IsMethodInInliningBlackList(GetGraph()->GetRuntime(), curInst)) {
+                isInlined |= ManuallyInlineStringBuilderGetLength(curInst->GetDataFlowInput(0), curInst);
+            }
+        }
+    }
+
+    return isInlined;
+}
+
 bool SimplifyStringBuilder::RunImpl()
 {
     isApplied_ = false;
@@ -66,17 +124,8 @@ bool SimplifyStringBuilder::RunImpl()
     // NOTE: Disable this pass if there is a NativeApi call in the graph. That is because this pass can delete
     // StringBuilder instances, which will lead to incorrect state in case Native call deoptimizes (i.e. unsupported API
     // version). Remove this workaround after proper fix!
-    for (auto *bb : GetGraph()->GetBlocksRPO()) {
-        for (auto *inst : bb->Insts()) {
-            if (inst->GetOpcode() != Opcode::CallStatic) {
-                continue;
-            }
-
-            CallInst *callInst = inst->CastToCallStatic();
-            if (callInst->GetIsNative() && !GetGraph()->GetRuntime()->IsMethodIntrinsic(callInst->GetCallMethod())) {
-                return false;
-            }
-        }
+    if (!IsSafeToProceed(GetGraph())) {
+        return false;
     }
 
     // Loops with try-catch block and OSR mode are not supported in current implementation
@@ -105,6 +154,10 @@ bool SimplifyStringBuilder::RunImpl()
         isAppliedLocal |= OptimizeStringConcatenation(block);
         isAppliedLocal |= OptimizeStringBuilderAppendChain(block);
         isAppliedLocal |= OptimizeStringBuilderStringLength(block);
+    }
+
+    if (!GetGraph()->IsBytecodeOptimizer() && IsInliningEnabled()) {
+        isAppliedLocal |= ManuallyInlineMethods();
     }
 
     if (!GetGraph()->IsBytecodeOptimizer()) {
@@ -644,12 +697,13 @@ bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &ma
 
 SaveStateInst *FindPreHeaderSaveState(Loop *loop)
 {
-    for (const auto &inst : loop->GetPreHeader()->InstsReverse()) {
+    auto preheader = loop->GetPreHeader();
+    for (const auto &inst : preheader->InstsReverse()) {
         if (inst->GetOpcode() == Opcode::SaveState) {
             return inst->CastToSaveState();
         }
     }
-    return nullptr;
+    return FindFirstSaveStateInDominators(preheader);
 }
 
 size_t CountOuterLoopSuccs(BasicBlock *block)
@@ -2656,6 +2710,17 @@ bool SimplifyStringBuilder::OptimizeStringBuilderStringLength(BasicBlock *block)
         }
     }
     return isAppliedLocal;
+}
+
+bool SimplifyStringBuilder::ManuallyInlineStringBuilderGetLength(Inst *instance, Inst *getLengthCall)
+{
+    auto stringBuilderClass = GetObjectClass(instance);
+    ASSERT(stringBuilderClass != nullptr);
+
+    auto loadLengthField = LoadStringBuilderLengthField(GetGraph(), instance, stringBuilderClass, getLengthCall);
+    getLengthCall->ReplaceUsers(loadLengthField);
+    getLengthCall->ClearFlag(inst_flags::NO_DCE);
+    return true;
 }
 
 }  // namespace ark::compiler

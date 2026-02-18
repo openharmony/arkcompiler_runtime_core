@@ -210,7 +210,7 @@ lbl:
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/
 
 #! CHECKER      Change to CallStatic by instructions size at Regular AOT
-#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
+#! RUN_PAOC     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=9 --compiler-inlining-always-inline-bc-size=0"
 #! EVENT        /Inline,Test2::main,Test2::func,.*VIRTUAL,LIMIT/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,SUCCESS/

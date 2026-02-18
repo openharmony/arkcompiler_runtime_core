@@ -193,6 +193,7 @@ protected:
     uint32_t instructionsLimit_ {0};
     ArenaVector<BasicBlock *> returnBlocks_;
     ArenaUnorderedSet<std::string> blacklist_;
+    ArenaUnorderedSet<RuntimeInterface::MethodPtr> blacklistMethodPtr_;
     ArenaVector<RuntimeInterface::MethodPtr> inlinedStack_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 

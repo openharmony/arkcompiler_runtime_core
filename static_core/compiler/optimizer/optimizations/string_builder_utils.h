@@ -25,6 +25,11 @@
 
 namespace ark::compiler {
 
+constexpr size_t ARG_IDX_0 = 0;
+constexpr size_t ARG_IDX_1 = 1;
+constexpr size_t ARG_IDX_2 = 2;
+constexpr uint64_t SB_INITIAL_BUFFER_SIZE = 16;
+
 bool IsStringBuilderInstance(Inst *inst);
 bool IsMethodStringConcat(const Inst *inst);
 bool IsMethodStringBuilderGetStringLength(Inst *inst);
@@ -60,6 +65,7 @@ Inst *SkipSingleUserCheckInstruction(Inst *inst);
 const Inst *SkipSingleUserCheckInstruction(const Inst *inst);
 bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb);
 SaveStateInst *FindFirstSaveState(BasicBlock *block);
+SaveStateInst *FindFirstSaveStateInDominators(BasicBlock *block);
 
 template <bool ALLOW_INLINED = false>
 bool IsStringBuilderAppend(const Inst *inst, RuntimeInterface *runtime = nullptr)
@@ -88,6 +94,26 @@ bool BreakStringBuilderAppendChains(BasicBlock *block);
 Inst *GetArrayLengthConstant(Inst *newArray);
 bool CollectArrayElements(Inst *newArray, InstVector &arrayElements);
 void CleanupStoreArrayInstructions(Inst *inst);
+
+using StringBuilderConstructorSignature = StringCtorType;
+StringBuilderConstructorSignature GetStringBuilderConstructorSignature(Inst *instance, Inst *&ctorCall, Inst *&ctorArg);
+Inst *CreateInstructionNewObjectsArray(Graph *graph, Inst *ctorCall, uint64_t size);
+void StoreStringBuilderConstructorArgument(Graph *graph, Inst *arg, Inst *newObjectsArray, Inst *ctorCall);
+Inst *CreateStringBuilderConstructorArgumentLength(Graph *graph, Inst *arg, Inst *ctorCall);
+IntrinsicInst *CreateIntrinsicStringIsCompressed(Graph *graph, Inst *arg, SaveStateInst *saveState);
+Inst *CreateStringBuilderConstructorArgumentIsCompressed(Graph *graph, Inst *arg, Inst *ctorCall);
+Inst *StoreStringBuilderBufferField(Graph *graph, Inst *buffer, Inst *instance, RuntimeInterface::ClassPtr klass,
+                                    Inst *ctorCall);
+void StoreStringBuilderIndexField(Graph *graph, Inst *index, Inst *instance, RuntimeInterface::ClassPtr klass,
+                                  Inst *ctorCall);
+void StoreStringBuilderLengthField(Graph *graph, Inst *length, Inst *instance, RuntimeInterface::ClassPtr klass,
+                                   Inst *ctorCall);
+void StoreStringBuilderIsCompressedField(Graph *graph, Inst *isCompressed, Inst *instance,
+                                         RuntimeInterface::ClassPtr klass, Inst *ctorCall);
+bool ManuallyInlineStringBuilderConstructor(Graph *graph, SaveStateBridgesBuilder *ssb, Inst *instance,
+                                            uint64_t appendCallsCount = SB_INITIAL_BUFFER_SIZE);
+Inst *LoadStringBuilderLengthField(Graph *graph, Inst *instance, RuntimeInterface::ClassPtr klass, Inst *getLengthCall);
+
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_STRING_BUILDER_UTILS_H

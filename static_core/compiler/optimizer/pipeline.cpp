@@ -185,7 +185,6 @@ bool Pipeline::RunOptimizations()
     }
     graph->RunPass<BranchElimination>();
     graph->RunPass<OptimizeStringConcat>();
-    graph->RunPass<SimplifyStringBuilder>();
 
     // The problem with inlining in OSR mode can be found in `bitops-nsieve-bits` benchmark and it is in the
     // following: we inline the method that has user X within a loop, then peepholes optimize datflow and def of
@@ -195,6 +194,8 @@ bool Pipeline::RunOptimizations()
     if (!graph->IsOsrMode()) {
         graph->RunPass<Inlining>();
     }
+
+    graph->RunPass<SimplifyStringBuilder>();
     graph->RunPass<CatchInputs>();
     graph->RunPass<TryCatchResolving>();
     graph->RunPass<LowerBoxedBoolean>();

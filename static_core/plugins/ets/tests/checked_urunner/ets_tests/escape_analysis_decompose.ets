@@ -33,11 +33,11 @@
 //!
 //! METHOD       "escape_analysis_decompose.ETSGLOBAL::__noinline__next3"
 //! PASS_BEFORE  "EscapeAnalysis"
-//! INST_COUNT   "SaveState", 5
-//! INST_COUNT   "NullCheck", 1
+//! INST_COUNT   "SaveState", 4
+//! INST_COUNT   "NullCheck", 0
 //! PASS_AFTER   "EscapeAnalysis"
-//! INST_COUNT   "SaveState", 5
-//! INST_COUNT   "NullCheck", 1
+//! INST_COUNT   "SaveState", 4
+//! INST_COUNT   "NullCheck", 0
 //!
 //! METHOD       "escape_analysis_decompose.ETSGLOBAL::next4"
 //! PASS_BEFORE  "EscapeAnalysis"

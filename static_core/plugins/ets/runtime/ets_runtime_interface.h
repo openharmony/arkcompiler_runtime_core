@@ -68,6 +68,8 @@ public:
     ClassPtr GetStringBuilderClass() const override;
     ClassPtr GetEscompatArrayClass() const override;
     MethodPtr GetStringBuilderDefaultConstructor() const override;
+    MethodPtr GetStringBuilderConstructorWithStringArg() const override;
+    MethodPtr GetStringBuilderConstructorWithCharArrayArg() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
     MethodPtr GetInstanceMethodByName(ClassPtr klass, std::string_view name) const override;
     bool IsFieldBooleanFalse(FieldPtr field) const override;

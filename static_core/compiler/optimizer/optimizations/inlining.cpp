@@ -86,6 +86,7 @@ Inlining::Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInl
       instructionsLimit_(g_options.GetCompilerInliningMaxInsts()),
       returnBlocks_(graph->GetLocalAllocator()->Adapter()),
       blacklist_(graph->GetLocalAllocator()->Adapter()),
+      blacklistMethodPtr_(graph->GetLocalAllocator()->Adapter()),
       inlinedStack_(graph->GetLocalAllocator()->Adapter()),
       vregsCount_(graph->GetVRegsCount()),
       cha_(graph->GetRuntime()->GetCha()),
@@ -153,6 +154,14 @@ bool Inlining::RunImpl()
     for (const auto &methodName : blacklistNames) {
         blacklist_.insert(methodName);
     }
+
+    if (ark::compiler::g_options.IsCompilerSimplifyStringBuilder()) {
+        blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetStringBuilderDefaultConstructor());
+        blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetStringBuilderConstructorWithStringArg());
+        blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetStringBuilderConstructorWithCharArrayArg());
+        blacklistMethodPtr_.insert(GetGraph()->GetRuntime()->GetGetterStringBuilderStringLength());
+    }
+
     return Do();
 }
 
@@ -1408,7 +1417,8 @@ void RemoveDeadSafePoints(Graph *graphInl)
             if (!inst->IsSaveState()) {
                 continue;
             }
-            ASSERT(inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveStateDeoptimize);
+            ASSERT(inst->GetOpcode() == Opcode::SaveState || inst->GetOpcode() == Opcode::SafePoint ||
+                   inst->GetOpcode() == Opcode::SaveStateDeoptimize);
             ASSERT(inst->GetUsers().Empty());
             bb->RemoveInst(inst);
         }
@@ -1486,7 +1496,6 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
         graphInl->RunPass<Cleanup>(false);
     }
     graphInl->RunPass<OptimizeStringConcat>();
-    graphInl->RunPass<SimplifyStringBuilder>();
 
     auto inlinedInstsCount = CalculateInstructionsCount(graphInl);
     LOG_INLINING(DEBUG) << "Actual insts-bc ratio: (" << inlinedInstsCount << " insts) / ("
@@ -1619,6 +1628,15 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *
         if (blacklist_.find(methodName) != blacklist_.end()) {
             EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::NOINLINE);
             LOG_INLINING(DEBUG) << "Method is in the blacklist: " << GetMethodFullName(GetGraph(), ctx->method);
+            return false;
+        }
+    }
+
+    if (!blacklistMethodPtr_.empty()) {
+        if (blacklistMethodPtr_.find(ctx->method) != blacklistMethodPtr_.end()) {
+            EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::NOINLINE);
+            LOG_INLINING(DEBUG) << "Method is in the blacklistMethodPtr: "
+                                << GetMethodFullName(GetGraph(), ctx->method);
             return false;
         }
     }

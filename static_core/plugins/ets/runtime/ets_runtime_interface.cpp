@@ -378,13 +378,17 @@ EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetStdCoreArrayBufferManagedD
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
 {
-    for (auto ctor : PlatformTypes()->coreStringBuilder->GetConstructors()) {
-        if (IsMethodStringBuilderDefaultConstructor(ctor)) {
-            return ctor;
-        }
-    }
+    return PlatformTypes()->coreStringBuilderDefaultConstructor;
+}
 
-    UNREACHABLE();
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderConstructorWithStringArg() const
+{
+    return PlatformTypes()->coreStringBuilderConstructorWithStringArg;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderConstructorWithCharArrayArg() const
+{
+    return PlatformTypes()->coreStringBuilderConstructorWithCharArrayArg;
 }
 
 uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
