@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,6 @@ bool IrBuilder::RunImpl()
     }
     GetGraph()->SetVRegsCount(vregsCount);
     BuildBasicBlocks(pbcInstructions);
-    GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
 
     if (!BuildIr(vregsCount)) {
@@ -267,12 +266,16 @@ template <bool NEED_SS_DEOPT>
 bool IrBuilder::AddInstructionToBB(InstBuilder &instBuilder, BasicBlock *bb, BytecodeInstruction &inst,
                                    [[maybe_unused]] size_t pc, [[maybe_unused]] bool *ssDeoptWasBuilded)
 {
-    // Copy current defs for assigning them to catch-phi if current inst is throwable
-    ASSERT(instBuilder.GetCurrentDefs().size() == instDefs_.size());
-    std::copy(instBuilder.GetCurrentDefs().begin(), instBuilder.GetCurrentDefs().end(), instDefs_.begin());
+    auto needCatchPhiInputs = inst.CanThrow() && !tryBlocks_.empty() && bb->IsTry();
     auto currentBb = instBuilder.GetCurrentBlock();
     auto currentLastInst = currentBb->GetLastInst();
-    auto bbCount = GetGraph()->GetVectorBlocks().size();
+    size_t bbCount = 0;
+    if (needCatchPhiInputs) {
+        // Copy defs only for throwable instructions in try-path; needed for catch-phi inputs.
+        ASSERT(instBuilder.GetCurrentDefs().size() == instDefs_.size());
+        std::copy(instBuilder.GetCurrentDefs().begin(), instBuilder.GetCurrentDefs().end(), instDefs_.begin());
+        bbCount = GetGraph()->GetVectorBlocks().size();
+    }
     if constexpr (NEED_SS_DEOPT) {
         if (inst.IsJump()) {
             auto ss = instBuilder.CreateSaveStateDeoptimize(pc);
@@ -285,7 +288,7 @@ bool IrBuilder::AddInstructionToBB(InstBuilder &instBuilder, BasicBlock *bb, Byt
         COMPILER_LOG(WARNING, IR_BUILDER) << "Unsupported instruction";
         return false;
     }
-    if (inst.CanThrow()) {
+    if (needCatchPhiInputs) {
         // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction
         // in this group, and then mark all instructions as throwable; All instructions should be marked, since
         // some of them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before
