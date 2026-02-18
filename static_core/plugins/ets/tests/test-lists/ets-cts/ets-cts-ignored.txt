@@ -392,6 +392,15 @@
 #32703
 07.expressions/23.exponentiation_expression/inf_27.ets
 
+#26476 bigint literals with hex, oct, bin
+07.expressions/24.additive_expressions/bigint_operations/bigint_hex.ets
+
+#33056
+07.expressions/26.relational_expressions/02.numeric_relational_operators/bigint_relational_operators/bigint_greater_than_equal_mixed_n.ets
+07.expressions/26.relational_expressions/02.numeric_relational_operators/bigint_relational_operators/bigint_greater_than_mixed_n.ets
+07.expressions/26.relational_expressions/02.numeric_relational_operators/bigint_relational_operators/bigint_less_than_equal_mixed_n.ets
+07.expressions/26.relational_expressions/02.numeric_relational_operators/bigint_relational_operators/bigint_less_than_mixed_n.ets
+
 #32743 bigint and numerical ==/=== should always return false (now return true - false positive)
 07.expressions/27.equality_expressions/01.numerical_equality_operators/bigint_equality_operators/eq_numeric_0.ets
 
