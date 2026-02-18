@@ -248,17 +248,24 @@ For detailed skill documentation and learning paths, see `SKILLS/README.md`.
 For local development, CMake can be used instead of GN:
 ```bash
 cd ../../../  # to runtime_core root
-cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja
-cmake --build build  # or: cd build && ninja
+cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
+    -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
+    -S . -Werror=dev  -DPANDA_WITH_TESTS=ON\
+    -DPANDA_ETS_INTEROP_JS=ON
+cmake --build build --target panda_bins etssdk
 ```
 
 ### Universal Runner (urunner)
 Requires `~/.urunner.env` with ARKCOMPILER_RUNTIME_CORE_PATH, PANDA_BUILD, and WORK_DIR variables.
 
+Always use `--filter` option to filter affected api, to check which tests are affected need to check `../tests/ets_func_tests/std/`. 
+Example: `--filter std/core/json` if changed json api. If changed `Intl` need to use `--filter/std/core/Intl*`.
+
 Execute ets_func_tests from `../../../tests/tests-u-runner-2/`:
 ```bash
-cd ../../../tests/tests-u-runner-2/
-./runner.sh panda-int ets-func-tests --show-progress --force-generate --processes=all
+cd ../../../ # from current dir
+PANDA_BUILD="build" ARKCOMPILER_RUNTIME_CORE_PATH="../" ARKCOMPILER_ETS_FRONTEND_PATH="tools/es2panda/" ./runner.sh \
+  panda-int ets-func-tests --show-progress --force-generate --processes=all 
 ```
 
 Execute checker_tests from `../../../tests/tests-u-runner-2/`:
