@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
@@ -73,11 +74,8 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
 
     ScopedManagedCodeThread managedScope(coro);
     auto *etsThis = sharedRef->GetEtsObject();
-    ASSERT(etsThis != nullptr);
-    EtsMethod *method = etsThis->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
-    method = method == nullptr ? etsThis->GetClass()->GetInstanceMethod(STD_CORE_FUNCTION_UNSAFECALL_METHOD, nullptr)
-                               : method;
-    ASSERT(method != nullptr);
+    ASSERT(etsThis != nullptr && etsThis->GetClass()->IsFunction());
+    EtsMethod *method = etsThis->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreFunctionUnsafeCall);
 
     return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
 }
@@ -102,8 +100,8 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
             napi_value jsFn;
             auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference **uninitializedRef) {
                 ASSERT(uninitializedRef != nullptr);
-                NAPI_CHECK_FATAL(napi_create_function(env, ark::ets::INVOKE_METHOD_NAME, NAPI_AUTO_LENGTH,
-                                                      EtsLambdaProxyInvoke, uninitializedRef, &jsFn));
+                NAPI_CHECK_FATAL(napi_create_function(env, nullptr, NAPI_AUTO_LENGTH, EtsLambdaProxyInvoke,
+                                                      uninitializedRef, &jsFn));
                 return jsFn;
             };
 

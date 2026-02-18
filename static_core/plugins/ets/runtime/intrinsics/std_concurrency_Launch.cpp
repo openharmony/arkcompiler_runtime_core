@@ -17,6 +17,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/runtime.h"
 #include <libarkfile/include/source_lang_enum.h>
 #include "types/ets_array.h"
@@ -41,55 +42,14 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
         ThrowNullPointerException(ctx, coro);
         return nullptr;
     }
-
-    EtsMethod *method = func->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
+    if (!func->GetClass()->IsFunction()) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
+                          "Method have to be instance of std.core.Function");
+    }
+    auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreFunctionUnsafeCall);
     ASSERT(method != nullptr);
 
-    if (method->IsAbstract()) {
-        method = func->GetClass()->ResolveVirtualMethod(method);
-        ASSERT(method != nullptr);
-    }
-
-    if (UNLIKELY(!method->GetPandaMethod()->Verify())) {
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        ThrowVerificationException(ctx, method->GetPandaMethod()->GetFullName());
-        return nullptr;
-    }
-
     return method;
-}
-
-static PandaVector<Value> CreateArgsVector(VMHandle<EtsObject> func, EtsMethod *method, VMHandle<EtsArray> arr)
-{
-    size_t methArgsCount = method->GetNumArgs();
-    PandaVector<Value> realArgs {methArgsCount};
-    size_t firstRealArg = 0;
-
-    if (!method->IsStatic()) {
-        realArgs[0] = Value(func->GetCoreType());
-        firstRealArg = 1;
-    }
-
-    size_t numArgs = arr->GetLength();
-    if (methArgsCount - firstRealArg != numArgs) {
-        UNREACHABLE();
-    }
-
-    for (size_t i = 0; i < numArgs; i++) {
-        auto arg = arr->GetCoreType()->Get<ObjectHeader *>(i);
-        auto argType = method->GetArgType(firstRealArg + i);
-        if (argType == EtsType::OBJECT) {
-            realArgs[firstRealArg + i] = Value(arg);
-            continue;
-        }
-        EtsPrimitiveTypeEnumToComptimeConstant(argType, [&](auto type) -> void {
-            using T = EtsTypeEnumToCppType<decltype(type)::value>;
-            realArgs[firstRealArg + i] =
-                Value(EtsBoxPrimitive<T>::FromCoreType(EtsObject::FromCoreType(arg))->GetValue());
-        });
-    }
-
-    return realArgs;
 }
 
 template <typename CoroResult>
@@ -141,7 +101,8 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
-    PandaVector<Value> realArgs = CreateArgsVector(function, method, array);
+    auto realArgs = PandaVector<Value> {Value(function->GetCoreType()), Value(array->GetCoreType())};
+
     groupId = postToMain ? CoroutineWorkerGroup::FromDomain(coroManager, CoroutineWorkerDomain::MAIN) : groupId;
 
     LaunchResult launchResult = coro->GetCoroutineManager()->Launch(evt, method->GetPandaMethod(), std::move(realArgs),
@@ -177,12 +138,20 @@ void EtsLaunchSameWorker(EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
     EtsHandleScope scope(coro);
+
     VMHandle<EtsObject> hCallback(coro, callback->GetCoreType());
     ASSERT(hCallback.GetPtr() != nullptr);
-    PandaVector<Value> args = {Value(hCallback->GetCoreType())};
+
     auto *method = ResolveInvokeMethod(coro, hCallback);
+    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    if (UNLIKELY(argArray == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return;
+    }
+    auto args = PandaVector<Value> {Value(hCallback->GetCoreType()), Value(argArray->GetCoreType())};
     auto *coroMan = coro->GetCoroutineManager();
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroMan);
+
     [[maybe_unused]] LaunchResult launched = coroMan->Launch(
         evt, method->GetPandaMethod(), std::move(args),
         ark::CoroutineWorkerGroup::GenerateExactWorkerId(ark::ets::EtsCoroutine::GetCurrent()->GetWorker()->GetId()),

@@ -32,8 +32,8 @@ methodArgs[0] = arg;
 
 let obj = new TestObj();
 
-let clsVal = Type.of(obj) as ClassType;
+let clsVal = Class.of(obj);
 
-let method = clsVal.getMethodByName('testFunction');
+let method = clsVal.getInstanceMethod('testFunction');
 
-method.invoke(obj, methodArgs);
+method!.invoke(obj, methodArgs);

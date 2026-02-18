@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,15 @@
  */
 
 #include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/ets_class_root.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
+#include "runtime/include/exceptions.h"
 
 namespace ark::ets {
 
@@ -98,13 +103,29 @@ Value GetUnboxedValue(EtsCoroutine *coro, EtsObject *obj)
 void LambdaUtils::InvokeVoid(EtsCoroutine *coro, EtsObject *lambda)
 {
     ASSERT(lambda != nullptr);
-    EtsMethod *invoke = lambda->GetClass()->GetInstanceMethod(INVOKE_METHOD_NAME, nullptr);
-    if (invoke == nullptr) {
-        LOG(FATAL, RUNTIME) << "No method '$_invoke' found";
+    ASSERT(lambda->GetClass()->IsFunction());
+    auto resolvedMethod = PlatformTypes(coro)->coreFunctionUnsafeCall;
+    EtsMethod *call = lambda->GetClass()->ResolveVirtualMethod(resolvedMethod);
+
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    auto handledLambda = EtsHandle<EtsObject>(coro, lambda);
+
+    auto argArray = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, 0U);
+    if (UNLIKELY(argArray == nullptr)) {
+        ASSERT(coro->HasPendingException());
         return;
     }
-    Value arg(lambda->GetCoreType());
-    invoke->GetPandaMethod()->InvokeVoid(coro, &arg);
+
+    Value arg[2] = {Value(handledLambda->GetCoreType()), Value(argArray->GetCoreType())};
+
+    auto ret = call->GetPandaMethod()->Invoke(coro, arg);
+    ASSERT(ret.IsReference());
+
+    auto resObj = ret.GetAs<ObjectHeader *>();
+    if (resObj != nullptr) {
+        ThrowEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR,
+                          resObj->ClassAddr<ark::Class>()->GetName() + " cannot be cast to void");
+    }
 }
 
 EtsString *ManglingUtils::GetDisplayNameStringFromField(EtsField *field)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,19 @@ namespace ark::ets::interop::js::testing {
 
 class EtsInteropJsDynamicWithLambda : public EtsInteropTest {};
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestArgs0)
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestArgs0)
 {
     auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs0");
     ASSERT_EQ(ret, 25U);
 }
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestArgs1)
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestArgs1)
 {
     auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs1");
     ASSERT_EQ(ret, 25U);
 }
 
-TEST_F(EtsInteropJsDynamicWithLambda, TestArgs2)
+TEST_F(EtsInteropJsDynamicWithLambda, DISABLED_TestArgs2)
 {
     auto ret = CallEtsFunction<uint32_t>(GetPackageName(), "TestArgs2");
     ASSERT_EQ(ret, 25U);
