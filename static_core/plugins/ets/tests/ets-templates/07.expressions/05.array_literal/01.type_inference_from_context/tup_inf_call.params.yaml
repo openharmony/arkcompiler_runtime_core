@@ -18,11 +18,11 @@ cases:
           function foo(a: [byte, int, long]) {
               arktest.assertEQ(a[0], 3)
               arktest.assertEQ(a[1], 42)
-              arktest.assertEQ(a[2], -9223372036854775808)
+              arktest.assertEQ(a[2], -9223372036854775807-1)
           }
       use: |-
           // call context, tuple of value types
-          foo([0b11, 42, -9223372036854775808])
+          foo([0b11, 42, -9223372036854775807-1])
 
     - decl: |-
           function foo(a: [float, short, double, number]) {
@@ -40,11 +40,11 @@ cases:
               arktest.assertEQ(a[0], 1)
               arktest.assertEQ(a[1], 2)
               arktest.assertEQ(a[2], 3)
-              arktest.assertEQ(a[3], -9223372036854775808)
+              arktest.assertEQ(a[3], -9223372036854775807-1)
           }
       use: |-
           // call context, tuple of value types
-          foo([1, 2, 3, -9223372036854775808,])
+          foo([1, 2, 3, -9223372036854775807-1,])
 
     - decl: |-
           function foo(a: [Number, Float, Int]) {
@@ -105,13 +105,13 @@ cases:
           function foo(a: [[Float, Float], [Long, Long], [Short]]) {
               arktest.assertEQ(a[0][0], -16777215.0f)
               arktest.assertEQ(a[0][1], 16777215.0f)
-              arktest.assertEQ(a[1][0], -9223372036854775808)
+              arktest.assertEQ(a[1][0], -9223372036854775807-1)
               arktest.assertEQ(a[1][1], 9223372036854775807)
               arktest.assertEQ(a[2][0], 32767)
           }
       use: |-
           // call context, tuple of tuple of value types
-          foo([[-16777215, 16777215], [-9223372036854775808, 9223372036854775807], [32767]])
+          foo([[-16777215, 16777215], [-9223372036854775807-1, 9223372036854775807], [32767]])
 
     - decl: |-
           function sum(p: [number, number, number]): number {
@@ -152,7 +152,7 @@ cases:
               arktest.assertEQ(a[0][0], 0)
               arktest.assertEQ(a[0][1], 15)
               arktest.assertEQ(a[0][2], 127)
-              arktest.assertEQ(a[1][0], -9223372036854775808)
+              arktest.assertEQ(a[1][0], -9223372036854775807-1)
               arktest.assertEQ(a[1][1], 9223372036854775807)
               arktest.assertEQ(a[2][0], 'a')
               arktest.assertEQ(a[2][1], 'b')
@@ -160,14 +160,14 @@ cases:
           }
       use: |-
           // call context, tuple of arrays
-          foo([[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']])
+          foo([[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']])
 
     - decl: |-
           function foo(a: [Array<byte>, Array<long>, Array<string>]) {
               arktest.assertEQ(a[0][0], 0)
               arktest.assertEQ(a[0][1], 15)
               arktest.assertEQ(a[0][2], 127)
-              arktest.assertEQ(a[1][0], -9223372036854775808)
+              arktest.assertEQ(a[1][0], -9223372036854775807-1)
               arktest.assertEQ(a[1][1], 9223372036854775807)
               arktest.assertEQ(a[2][0], 'a')
               arktest.assertEQ(a[2][1], 'b')
@@ -175,14 +175,14 @@ cases:
           }
       use: |-
           // declaration context, tuple of arrays
-          foo([[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']])
+          foo([[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']])
 
     - decl: |-
           function foo(a: [FixedArray<byte>, FixedArray<long>, FixedArray<string>]) {
               arktest.assertEQ(a[0][0], 0)
               arktest.assertEQ(a[0][1], 15)
               arktest.assertEQ(a[0][2], 127)
-              arktest.assertEQ(a[1][0], -9223372036854775808)
+              arktest.assertEQ(a[1][0], -9223372036854775807-1)
               arktest.assertEQ(a[1][1], 9223372036854775807)
               arktest.assertEQ(a[2][0], 'a')
               arktest.assertEQ(a[2][1], 'b')
@@ -190,4 +190,4 @@ cases:
           }
       use: |-
           // declaration context, tuple of arrays
-          foo([[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']])
+          foo([[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']])

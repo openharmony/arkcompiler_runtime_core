@@ -16,9 +16,9 @@ cases:
     # casting context
     - use: |-
           // casting context, tuple of value types
-          let a = [1, 2, 3, -9223372036854775808] as [short, int, int, long]
+          let a = [1, 2, 3, -9223372036854775807-1] as [short, int, int, long]
           arktest.assertEQ(a[0], 1)
-          arktest.assertEQ(a[3], -9223372036854775808)
+          arktest.assertEQ(a[3], -9223372036854775807-1)
 
     - use: |-
           // casting context, tuple of value types
@@ -30,11 +30,11 @@ cases:
 
     - use: |-
           // casting context, tuple of value types
-          let a = [0b1, 2, 0x7f, -9223372036854775808,] as [Short, Int, Byte, Long]
+          let a = [0b1, 2, 0x7f, -9223372036854775807-1,] as [Short, Int, Byte, Long]
           arktest.assertEQ(a[0], 1)
           arktest.assertEQ(a[1], 2)
           arktest.assertEQ(a[2], 127)
-          arktest.assertEQ(a[3], -9223372036854775808)
+          arktest.assertEQ(a[3], -9223372036854775807-1)
 
     - use: |-
           // casting context, tuple of value types
@@ -81,12 +81,12 @@ cases:
 
     - use: |-
           // casting context, tuple of tuple of value types
-          let a = [9223372036854775807, [9007199254740991, -9007199254740991], [ 2147483647, -9223372036854775808]] as [Long, [Double, Number], [Int, Long]]
+          let a = [9223372036854775807, [9007199254740991, -9007199254740991], [ 2147483647, -9223372036854775807-1]] as [Long, [Double, Number], [Int, Long]]
           arktest.assertEQ(a[0], 9223372036854775807)
           arktest.assertEQ(a[1][0], 9007199254740991)
           arktest.assertEQ(a[1][1], -9007199254740991)
           arktest.assertEQ(a[2][0], 2147483647)
-          arktest.assertEQ(a[2][1], -9223372036854775808)
+          arktest.assertEQ(a[2][1], -9223372036854775807-1)
 
     - decl: |-
           enum Color { Red, Green, Blue }
@@ -110,11 +110,11 @@ cases:
 
     - use: |-
           // casting context, tuple of arrays
-          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [byte[], long[], string[]]
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']] as [byte[], long[], string[]]
           arktest.assertEQ(a[0][0], 0)
           arktest.assertEQ(a[0][1], 15)
           arktest.assertEQ(a[0][2], 127)
-          arktest.assertEQ(a[1][0], -9223372036854775808)
+          arktest.assertEQ(a[1][0], -9223372036854775807-1)
           arktest.assertEQ(a[1][1], 9223372036854775807)
           arktest.assertEQ(a[2][0], 'a')
           arktest.assertEQ(a[2][1], 'b')
@@ -122,11 +122,11 @@ cases:
 
     - use: |-
           // declaration context, tuple of arrays
-          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [Array<byte>, Array<long>, Array<string>]
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']] as [Array<byte>, Array<long>, Array<string>]
           arktest.assertEQ(a[0][0], 0)
           arktest.assertEQ(a[0][1], 15)
           arktest.assertEQ(a[0][2], 127)
-          arktest.assertEQ(a[1][0], -9223372036854775808)
+          arktest.assertEQ(a[1][0], -9223372036854775807-1)
           arktest.assertEQ(a[1][1], 9223372036854775807)
           arktest.assertEQ(a[2][0], 'a')
           arktest.assertEQ(a[2][1], 'b')
@@ -134,11 +134,11 @@ cases:
 
     - use: |-
           // declaration context, tuple of arrays
-          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775808, 9223372036854775807], ['a', 'b', 'c']] as [FixedArray<byte>, FixedArray<long>, FixedArray<string>]
+          let a = [[0x00, 0x0f, 0x7f], [-9223372036854775807-1, 9223372036854775807], ['a', 'b', 'c']] as [FixedArray<byte>, FixedArray<long>, FixedArray<string>]
           arktest.assertEQ(a[0][0], 0)
           arktest.assertEQ(a[0][1], 15)
           arktest.assertEQ(a[0][2], 127)
-          arktest.assertEQ(a[1][0], -9223372036854775808)
+          arktest.assertEQ(a[1][0], -9223372036854775807-1)
           arktest.assertEQ(a[1][1], 9223372036854775807)
           arktest.assertEQ(a[2][0], 'a')
           arktest.assertEQ(a[2][1], 'b')

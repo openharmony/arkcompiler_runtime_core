@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -70,12 +70,12 @@ cases:
     decl_variants:
       - |-
         enum Enum { Red, Green = 10, Blue,
-          First = -9223372036854775808, Second = 12345,
+          First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
       - |-
         const enum Enum { Red, Green = 10, Blue,
-          First = -9223372036854775808, Second = 12345,
+          First = -9223372036854775807-1, Second = 12345,
           Third = 9223372036854775807,
           One = 1, one = 1, oNe = 1 }
     sub_cases_logic:
@@ -95,7 +95,7 @@ cases:
         arktest.assertTrue(c.valueOf() instanceof long)
         arktest.assertEQ(c, Enum.Blue)
         arktest.assertEQ(Enum[c], "Blue")
-        c = Enum.fromValue(-9223372036854775808)
+        c = Enum.fromValue(-9223372036854775807-1)
         arktest.assertTrue(c instanceof Enum)
         arktest.assertTrue(c.valueOf() instanceof long)
         arktest.assertEQ(c, Enum.First)

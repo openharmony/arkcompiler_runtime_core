@@ -581,7 +581,7 @@ cases:
   - desc: |-
       Checking for min value in enum
     check_variants:
-      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "long", min_value: "-9223372036854775807-1"}
       - {check_type: "int", min_value: "-2147483648"}
       - {check_type: "short", min_value: "-32768"}
       - {check_type: "byte", min_value: "-128"}
@@ -889,7 +889,7 @@ cases:
   - desc: |-
       Checking integer type overflow on min value (Don't throw CTE at all)
     check_variants:
-      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "long", min_value: "-9223372036854775807-1"}
       - {check_type: "int", min_value: "-2147483648"}
       - {check_type: "short", min_value: "-32768"}
       - {check_type: "byte", min_value: "-128"}
@@ -913,7 +913,7 @@ cases:
   - desc: |-
       Checking integer type overflow on min value (Don't throw CTE at all)
     check_variants:
-      - {check_type: "long", min_value: "-9223372036854775808"}
+      - {check_type: "long", min_value: "-9223372036854775807-1"}
       - {check_type: "int", min_value: "-2147483648"}
       - {check_type: "short", min_value: "-32768"}
       - {check_type: "byte", min_value: "-128"}

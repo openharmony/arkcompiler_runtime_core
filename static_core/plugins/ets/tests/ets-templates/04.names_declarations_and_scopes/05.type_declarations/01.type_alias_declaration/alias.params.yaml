@@ -90,7 +90,7 @@ cases:
           type Func = (p: long) => Long
       use: |-
           let v: Func = foo
-          let ok = v(-9223372036854775808 as long) == Long.MIN_VALUE
+          let ok = v(-9223372036854775807-1 as long) == Long.MIN_VALUE
 
     # classes
     - defs: |-
