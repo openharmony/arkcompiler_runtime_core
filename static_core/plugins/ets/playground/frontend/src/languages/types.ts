@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 
-module.exports = {
-    editor: {
-        create: jest.fn(),
-        setModelLanguage: jest.fn(),
-        createModel: jest.fn(),
-        getModel: jest.fn(),
-        defineTheme: jest.fn(),
-    },
-    languages: {
-        register: jest.fn(),
-        setLanguageConfiguration: jest.fn(),
-        setMonarchTokensProvider: jest.fn(),
-        registerFoldingRangeProvider: jest.fn(() => ({ dispose: jest.fn() })),
-        FoldingRangeKind: { Region: 3 },
-    },
-};
+import type * as monaco from 'monaco-editor';
+
+export interface LanguagePlugin {
+    id: string;
+    monarchTokens: monaco.languages.IMonarchLanguage;
+    configuration?: monaco.languages.LanguageConfiguration;
+}

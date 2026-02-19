@@ -27,8 +27,10 @@ import * as monaco from 'monaco-editor';
 import { editor as monacoEditor } from 'monaco-editor';
 import { loader } from '@monaco-editor/react';
 import { selectHighlightErrors, selectJumpTo } from '../../store/selectors/logs';
+import { ensureThemes, getThemeName } from '../../languages';
 
 loader.config({ monaco });
+ensureThemes();
 
 const ArkTSEditor: React.FC = () => {
     const backendSyntax = useSelector(selectSyntax);
@@ -194,7 +196,7 @@ const ArkTSEditor: React.FC = () => {
                 }}
                 defaultLanguage="arkts"
                 defaultValue={'console.log("Hello, ArkTS!");'}
-                theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                theme={getThemeName(theme)}
                 onChange={handleEditorChange}
                 className={styles.editor}
                 options={{

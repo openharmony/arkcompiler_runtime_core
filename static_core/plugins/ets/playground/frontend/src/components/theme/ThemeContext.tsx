@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }): JSX.Elemen
             document.documentElement.style.setProperty('--background-sub-color', '#8f99a84d');
             document.documentElement.style.setProperty('--text-color', '#000000');
             document.documentElement.style.setProperty('--blue', '#1e90ff');
-            document.documentElement.style.setProperty('--divider', '#f3f3f3');
+            document.documentElement.style.setProperty('--divider', '#d0d0d0');
             document.documentElement.style.setProperty('--primary1', primaryColor || '#e32b49');
         }
 
