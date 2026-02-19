@@ -76,7 +76,13 @@ if (enable_irtoc) {
     inputs = sources
     inputs += [ "scripts/common.irt" ]
 
-    configs = [ "$ark_root:ark_config" ]
+    # GN generates build files for each toolchain.
+    # For example, we need to compile irtoc using host toolchain to
+    # generate object files for device.
+    # It means gn will do gn gen twice: the first one for the device toolchain
+    # and the second one for host toolchain.
+    # In irtoc we need to use defines for the target toolchain.
+    configs = [ "$ark_root:ark_config(${default_toolchain})" ]
 
     irt_args = rebase_path(irtoc_scripts, root_build_dir)
     irt_outputs = rebase_path(outputs, root_build_dir)
