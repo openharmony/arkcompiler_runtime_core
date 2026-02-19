@@ -20,15 +20,15 @@
 
 #include <array>
 #include <climits>
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 
 namespace ark::helpers::math {
 
 /**
  * @brief returns log2 for argument
- * @param X - should be power of 2
- * @return log2(X) or undefined if X 0
+ * @param x - should be power of 2
+ * @return log2(x) or undefined if x 0
  */
 constexpr unsigned GetIntLog2(const unsigned x)
 {
@@ -38,24 +38,24 @@ constexpr unsigned GetIntLog2(const unsigned x)
 
 /**
  * @brief returns log2 for argument
- * @param X - of type long, should be power of 2
- * @return log2(X) or undefined if X 0
+ * @param x - of type long, should be power of 2
+ * @return log2(x) or undefined if x 0
  */
-constexpr unsigned long GetIntLog2(const unsigned long x)
+constexpr unsigned long GetIntLog2(const unsigned long x)  // NOLINT(*-runtime-int)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<unsigned long>(PANDA_BIT_UTILS_CTZLL(x));
+    return static_cast<unsigned long>(PANDA_BIT_UTILS_CTZLL(x));  // NOLINT(*-runtime-int)
 }
 
 /**
  * @brief returns log2 for argument
- * @param X - of type long long, should be power of 2
- * @return log2(X) or undefined if X 0
+ * @param x - of type long long, should be power of 2
+ * @return log2(x) or undefined if x 0
  */
-constexpr unsigned long long GetIntLog2(const unsigned long long x)
+constexpr unsigned long long GetIntLog2(const unsigned long long x)  // NOLINT(*-runtime-int)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<unsigned long long>(PANDA_BIT_UTILS_CTZLL(x));
+    return static_cast<unsigned long long>(PANDA_BIT_UTILS_CTZLL(x));  // NOLINT(*-runtime-int)
 }
 
 template <typename T>
