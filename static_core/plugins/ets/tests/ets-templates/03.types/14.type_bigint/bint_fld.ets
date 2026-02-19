@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     Numeric type values, by using a call to the standard library
@@ -21,19 +20,29 @@ desc: >-
 ---*/
 class A {
     private _fld: bigint = 0n
-    set(p: {{c.from_type}}) {
+    {% for c in cases %}
+    set_{{loop.index}}(p: {{c.from_type}}) {
         this._fld = new BigInt(p)
     }
+    {%- endfor %}
     get fld(): bigint {
         return this._fld
     }
 }
 
-function main() {
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("GenericField_with_bigint");
     let a: A = new A()
-{%- for t in c['values'] %}
-    a.set({{t.expr|safe}})
-    arktest.assertTrue( a.fld == {{t.val}})
-{%- endfor %}
+    {% for c in cases %}
+    {% set outer_loop_index = loop.index %}
+        testSuite.addTest("bigint_field_{{loop.index}}", () => {
+        {%- for t in c['values'] %}
+        a.set_{{outer_loop_index}}({{t.expr|safe}})
+        arktest.assertTrue( a.fld == {{t.val}})
+        {%- endfor %}
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}

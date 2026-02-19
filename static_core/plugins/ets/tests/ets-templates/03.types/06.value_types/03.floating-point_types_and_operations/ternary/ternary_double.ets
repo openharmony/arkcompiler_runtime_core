@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
 /*---
 desc: check ternary if-else operation with condition of double operand
 ---*/
 
-function main(): void {
-    let a: double = {{v.condition}}
-    let b: double = {{v.ifTrue}}
-    let c: double = {{v.ifFalse}}
-    arktest.assertEQ((a ? b : c), {{v.result}})
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Ternary_doubles");
+
+    {% for v in values %}
+        testSuite.addTest("Ternary_double_{{loop.index}}", () => {
+            let a: double = {{v.condition}}
+            let b: double = {{v.ifTrue}}
+            let c: double = {{v.ifFalse}}
+            arktest.assertEQ((a ? b : c), {{v.result}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}

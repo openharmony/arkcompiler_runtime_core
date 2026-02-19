@@ -13,25 +13,37 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
 desc: >-
     Numeric type values, by using a call to the standard library
     (see Standard Library) class BigInt methods or constructors.
 ---*/
+
+{% for c in cases %}
+{% set outer_loop_index = loop.index %}
 {%- for t in c['values'] %}
-const prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+const prim{{outer_loop_index}}_{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
 {%- endfor %}
 
 {%- for t in c['values'] %}
-function foo{{loop.index}}(p: bigint = new BigInt(prim{{loop.index}})): bigint {
+function foo{{outer_loop_index}}_{{loop.index}}(p: bigint = new BigInt(prim{{outer_loop_index}}_{{loop.index}})): bigint {
     return p + 1n
 }
 {%- endfor %}
+{%- endfor %}
 
-function main() {
-{%- for t in c['values'] %}
-    arktest.assertTrue( foo{{loop.index}}() == foo{{loop.index}}({{t.val}}))
-{%- endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Func_with_bigintParam");
+    {% for c in cases %}
+    {% set outer_loop_index = loop.index %}
+        testSuite.addTest("bigint_func_{{loop.index}}", () => {
+            {%- for t in c['values'] %}
+            arktest.assertTrue( foo{{outer_loop_index}}_{{loop.index}}() == foo{{outer_loop_index}}_{{loop.index}}({{t.val}}))
+            {%- endfor %}
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}
