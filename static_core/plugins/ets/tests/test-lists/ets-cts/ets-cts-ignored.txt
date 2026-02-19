@@ -61,6 +61,10 @@
 03.types/19.union_types/united_switch_ext_5.ets
 03.types/19.union_types/united_switch_ext_8.ets
 
+#32346
+03.types/19.union_types/union_type_assignment_66.ets
+03.types/19.union_types/union_type_assignment_77.ets
+
 #30677
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
@@ -82,9 +86,6 @@
 #32380
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_0.ets
 04.names_declarations_and_scopes/06.variable_and_constant_declarations/04.type_inference_from_initializer/infer_ternary_1.ets
-
-#32341
-04.names_declarations_and_scopes/07.function_declarations/04.optional_parameters/opt_param_40.ets
 
 #2236
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/generic_array_type_as_rest.ets
@@ -646,10 +647,10 @@
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/implementing_property_pos_dif_comb1_11.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/implementing_property_pos_dif_comb1_12.ets
 
-#24
+#32611
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_neg_readonly_n.ets
 
-#25
+#32612
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/hiding_static_field_neg_wrong_type_n_0.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/hiding_static_field_neg_wrong_type_n_1.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/hiding_static_field_neg_wrong_type_n_2.ets
@@ -661,7 +662,7 @@
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/hiding_static_field_neg_wrong_type_n_8.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/hiding_static_field_neg_wrong_type_n_9.ets
 
-#186
+#32622
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_defv_0.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_defv_1.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_defv_2.ets
@@ -674,7 +675,7 @@
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_defv_9.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_defv_10.ets
 
-#187
+#32633
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_extend_am_0.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_extend_am_1.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_extend_am_2.ets
@@ -689,7 +690,7 @@
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_extend_am_11.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_instance_field_pos_extend_am_12.ets
 
-#188
+#32624
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/implementing_property_pos_obcf_0.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/implementing_property_pos_obcf_1.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/implementing_property_pos_obcf_2.ets
@@ -1742,7 +1743,7 @@
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_22.ets
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con3_23.ets
 
-#271
+#32664
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_creation.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_creation_0.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/unary_numeric_promotion/array_creation_1.ets
@@ -1835,7 +1836,7 @@
 17.experimental_features/03.resizable_array_creation_expressions/array_create_from_con3_2d_dim_assign_to_int_type.ets
 17.experimental_features/03.resizable_array_creation_expressions/expr_8.ets
 
-#312
+#32725
 17.experimental_features/03.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_0.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_1.ets
 17.experimental_features/03.resizable_array_creation_expressions/array_create_dim_not_assign_to_int_type_negative_2.ets
@@ -2259,8 +2260,6 @@
 18.annotations/base_annotation_syntax_n_6.ets
 
 #31690 review after merge
-03.types/19.union_types/union_type_assignment_66.ets
-03.types/19.union_types/union_type_assignment_77.ets
 07.expressions/16.instanceof_expression/instanceof_neg_35.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_fields_17.ets
 09.classes/06.field_declarations/06.override_fields_and_implement_properties/overriding_fields_20.ets
