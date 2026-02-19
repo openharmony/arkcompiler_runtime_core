@@ -18,6 +18,7 @@ import os
 import re
 from collections.abc import Sequence
 from copy import deepcopy
+from dataclasses import replace
 from fnmatch import translate
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -26,7 +27,7 @@ from typing_extensions import Self
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.flows.test_flow_registry import ITestFlow
 from runner.extensions.validators.base_validator import BaseValidator
@@ -277,10 +278,7 @@ class TestStandardFlow(ITestFlow, Test):
 
     @staticmethod
     def __add_options(options: list[str]) -> list[str]:
-        for index, option in enumerate(options):
-            if not option.startswith("--"):
-                options[index] = f"--{option}"
-        return options
+        return [opt if opt.startswith("--") else f"--{opt}" for opt in options]
 
     @staticmethod
     def _get_return_code_from_device(output: str, actual_return_code: int) -> int:
@@ -331,43 +329,41 @@ class TestStandardFlow(ITestFlow, Test):
         return self
 
     def prepare_compiler_step(self, step: Step) -> Step:
-        new_step = deepcopy(step)
         if self.__is_dependent:
-            new_step.args = self.__change_output_arg(step.args, new_step.args)
-            new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
-            return new_step
-        new_step.args = self.__change_arktsconfig_arg(step.args, new_step.args)
-        return new_step
+            args = self.__change_output_arg(step.args)
+            args = self.__change_arktsconfig_arg(args)
+        else:
+            args = self.__change_arktsconfig_arg(step.args)
+        return replace(step, args=args)
 
     def prepare_verifier_step(self, step: Step) -> Step:
         if self.dependent_tests and self.is_panda:
-            new_step = deepcopy(step)
-            new_step.args = self.__add_boot_panda_files(new_step.args)
-            return new_step
+            args = self.__add_boot_panda_files(step.args)
+            return replace(step, args=args)
         return step
 
     def prepare_aot_step(self, step: Step) -> Step:
         if not self.is_panda:
             return step
-        new_step = deepcopy(step)
+        args = step.args[:]
         if self.dependent_tests:
             for abc_file in list(self.dependent_abc_files):
-                new_step.args.extend([f'--paoc-panda-files={abc_file}'])
-        new_step.args.extend([f'--paoc-panda-files={self.test_abc}'])
-        return new_step
+                args.extend([f'--paoc-panda-files={abc_file}'])
+        args.extend([f'--paoc-panda-files={self.test_abc}'])
+        return replace(step, args=args)
 
     def prepare_runtime_step(self, step: Step) -> Step:
         if not self.is_panda:
             return step
-        new_step = deepcopy(step)
-        new_step.args.insert(-2, "--verification-mode=ahead-of-time")
+        args = step.args[:]
+        args.insert(-2, "--verification-mode=ahead-of-time")
 
-        new_step.args.insert(-2, self.__add_panda_files())
+        args.insert(-2, self.__add_panda_files())
         if self.metadata.test_cli:
-            new_step.args.append("--")
-            new_step.args.extend(self.metadata.test_cli)
+            args.append("--")
+            args.extend(self.metadata.test_cli)
 
-        return new_step
+        return replace(step, args=args)
 
     def compare_with_stdout(self, output: str) -> bool:
         """
@@ -397,23 +393,41 @@ class TestStandardFlow(ITestFlow, Test):
 
         return passed
 
-    def expand_last_call_macros(self, orig_step: Step) -> Step:
+    def configure_step_last_call(self, step: Step) -> Step:
         """
-        Checks all step fields that can contain macros and expand them
-        Returns a new step with corrected values. The original step is kept unchanged.
+        Configures and prepares a test step for execution by expanding macros and applying step-specific modifications.
+        
+        This method performs the final configuration of a test step before execution:
+        - Expands all macros in step arguments, stdout/stderr paths, and requirements
+        - Applies compiler-specific options from test metadata (es2panda_options)
+        - Applies runtime-specific options from test metadata (ark_options)
+        - Handles dynamic AST dumping and module flags for compiler steps
+        - Prepares environment variables for the step
+        
+        Args:
+            step (Step): The original step to configure. Contains arguments, paths, requirements,
+                        environment variables, and step kind information.
+        
+        Returns:
+            Step: A new Step instance with all macros expanded and step-specific modifications applied.
+                 The original step remains unchanged.
+        
+        Note:
+            - For compiler steps: applies es2panda_options like --dump-dynamic-ast and --module
+            - For runtime steps: prepends ark_options to the argument list
+            - Macros are expanded recursively until no macros remain in the arguments
+            - Environment variables are resolved from the step configuration and test environment
         """
-        step = deepcopy(orig_step)
+        cmd_env = self.flow_utils.get_step_env(step)
         flags = step.args[:]
         while utils.list_has_macros(flags):
             flags = self.__expand_last_call_in_args(flags)
-        if step.stdout:
-            step.stdout = self.__expand_last_call_in_path(step.stdout)
-        if step.stderr:
-            step.stderr = self.__expand_last_call_in_path(step.stderr)
-        step.pre_requirements = step.pre_requirements[:]
-        step.post_requirements = step.post_requirements[:]
-        for req in step.pre_requirements + step.post_requirements:
-            req.value = self.__expand_last_call_in_args([req.value])[0]
+        stdout = self.__expand_last_call_in_path(step.stdout) if step.stdout else step.stdout
+        stderr = self.__expand_last_call_in_path(step.stderr) if step.stderr else step.stderr
+        pre_requirements = [replace(req, value=self.__expand_last_call_in_args([req.value])[0])
+                            for req in step.pre_requirements]
+        post_requirements = [replace(req, value=self.__expand_last_call_in_args([req.value])[0])
+                             for req in step.post_requirements]
         if step.step_kind == StepKind.COMPILER and self.metadata.es2panda_options:
             if 'dynamic-ast' in self.metadata.es2panda_options:
                 index = flags.index("--dump-ast")
@@ -422,9 +436,9 @@ class TestStandardFlow(ITestFlow, Test):
                 flags.insert(0, "--module")
         if step.step_kind == StepKind.RUNTIME and self.metadata.ark_options:
             prepend_options = self.__add_options(self.metadata.ark_options)
-            flags = utils.prepend_list(prepend_options, flags)
-        step.args = flags
-        return step
+            flags = prepend_options + flags
+        return replace(step, args=flags, stdout=stdout, stderr=stderr, pre_requirements=pre_requirements,
+                       post_requirements=post_requirements, env=cmd_env)
 
     def _continue_after_process_dependent_files(self) -> bool:
         """
@@ -507,19 +521,6 @@ class TestStandardFlow(ITestFlow, Test):
             passed, report, fail_kind = self.__run_step(step)
         return passed, report, fail_kind
 
-    def _make_params(self, step: Step, cmd_env: dict[str, str]) -> BinaryParams:
-        assert step.executable_path is not None
-        params = BinaryParams(
-            executor=step.executable_path,
-            flags=step.args,
-            env=cmd_env,
-            stdout=step.stdout,
-            stderr=step.stderr,
-            timeout=step.timeout,
-            use_qemu=not step.skip_qemu
-        )
-        return params
-
     def _init_bytecode_paths(self, test_env: TestEnv) -> None:
         self.bytecode_path: Path = test_env.work_dir.intermediate
         self.test_abc: Path = self.bytecode_path / f"{self.test_id}.abc"
@@ -533,15 +534,17 @@ class TestStandardFlow(ITestFlow, Test):
                 result[index] = arg.replace(self.__DEFAULT_ENTRY_POINT, self.main_entry_point).strip()
         return [res for res in result if res]
 
-    def __change_output_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
-        for index, arg in enumerate(source_args):
+    def __change_output_arg(self, args: list[str]) -> list[str]:
+        new_args = args[:]
+        for index, arg in enumerate(args):
             if arg.startswith("--output="):
                 new_args[index] = f"--output={self.test_abc}"
                 break
         return new_args
 
-    def __change_arktsconfig_arg(self, source_args: list[str], new_args: list[str]) -> list[str]:
-        for index, arg in enumerate(source_args):
+    def __change_arktsconfig_arg(self, args: list[str]) -> list[str]:
+        new_args = args[:]
+        for index, arg in enumerate(args):
             if arg.startswith("--arktsconfig=") and self.metadata.arktsconfig is not None:
                 stdlib_path = self.test_env.config.general.static_core_root / 'plugins' / 'ets' / 'stdlib'
                 new_args[index] = f"--arktsconfig={self.metadata.arktsconfig}"
@@ -550,9 +553,7 @@ class TestStandardFlow(ITestFlow, Test):
         return new_args
 
     def __run_step(self, orig_step: Step) -> tuple[bool, TestReport, str | None]:
-        cmd_env = self.flow_utils.get_step_env(orig_step)
-        step = self.expand_last_call_macros(orig_step)
-        params = self._make_params(step, cmd_env)
+        step = self.configure_step_last_call(orig_step)
 
         pre_reqs_succeed, pre_reqs_result = step.check_pre_requirements()
         if not pre_reqs_succeed:
@@ -562,11 +563,9 @@ class TestStandardFlow(ITestFlow, Test):
 
         test_runner = OneTestRunner(self.test_env)
         passed, report, fail_kind = test_runner.run_with_coverage(
-            name=step.name,
-            step_kind=step.step_kind,
-            params=params,
+            step=step,
             result_validator=lambda out, err, return_code:
-                self.validator_utils.step_validator(step, out, err, return_code),
+            self.validator_utils.step_validator(step, out, err, return_code),
             return_code_interpreter=lambda out, err, return_code: self._get_return_code_from_device(out, return_code)
         )
         self.reproduce += test_runner.reproduce

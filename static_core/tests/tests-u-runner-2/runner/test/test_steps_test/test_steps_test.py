@@ -23,7 +23,7 @@ from typing import ClassVar, cast
 from unittest import TestCase
 from unittest.mock import patch
 
-from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
+from runner.common_exceptions import FileNotFoundException, InvalidConfiguration, MalformedStepConfigurationException
 from runner.options.cli_options import get_args
 from runner.options.config import Config
 from runner.options.options_step import StepKind
@@ -491,3 +491,26 @@ class TestStepsTest(TestCase):
         # clear up
         work_dir = Path(os.environ["WORK_DIR"])
         shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch('sys.argv', ["runner.sh", "workflow_bad_timeout", "test_suite", "--test-file", "simple1.ets"])
+    def test_check_bad_timeout(self) -> None:
+        """
+        Feature: workflow file uses not correct timeout
+        Expected:
+        - exception MalformedStepConfigurationException
+        """
+        try:
+            # preparation
+            args = get_args()
+            with self.assertRaises(MalformedStepConfigurationException):
+                RunnerStandardFlow(Config(args))
+        finally:
+            # clear up
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)

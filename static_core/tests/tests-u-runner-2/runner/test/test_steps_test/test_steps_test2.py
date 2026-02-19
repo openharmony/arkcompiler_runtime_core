@@ -323,7 +323,7 @@ class TestStepsTest2(TestCase):
             step_name = next(iter(step_dict))
             step_body = step_dict.get(step_name)
             self.assertIsNotNone(step_body)
-            restored_step = Step(step_name, cast(RawStepData, step_body))
+            restored_step = Step.create(step_name, cast(RawStepData, step_body))
             self.assertEqual(restored_step.executable_path, full_step.executable_path)
             self.assertEqual(restored_step.timeout, full_step.timeout)
             self.assertEqual(restored_step.can_be_instrumented, full_step.can_be_instrumented)

@@ -193,18 +193,16 @@ class WorkflowOptions(IOptions):
                 step_content[step_item] = Macros.correct_macro(step_value, self)
         self.__expand_macros_in_step_args(step_content)
         self.__expand_macros_in_step_env(step_content)
-        step = Step(step_name, step_content)
+        full_step_name = f"{self.parent_step_name}.{step_name}" if self.parent_step_name else step_name
+        step = Step.create(full_step_name, step_content)
         if step.enabled:
             if not step.executable_path_exists() and step.step_kind != StepKind.GTEST_RUNNER:
                 raise FileNotFoundException(f"Step executable path is empty or incorrect: {step.executable_path}"
-                                            f"\nCheck step '{step_name}' in the '{self.name}' workflow")
-
-            parent_step_name = f"{self.parent_step_name}." if self.parent_step_name else ""
-            step.name = f"{parent_step_name}{step.name}"
-            _LOGGER.all(f"Step '{step.name}' is loaded and added")
+                                            f"\nCheck step '{full_step_name}' in the '{self.name}' workflow")
+            _LOGGER.all(f"Step '{full_step_name}' is loaded and added")
             self.__steps.append(step)
         else:
-            _LOGGER.all(f"Step '{step_name}' is disabled and won't be loaded")
+            _LOGGER.all(f"Step '{full_step_name}' is disabled and won't be loaded")
 
     def __expand_macros_in_step_args(self, step_content: RawStepData) -> None:
         new_args = []

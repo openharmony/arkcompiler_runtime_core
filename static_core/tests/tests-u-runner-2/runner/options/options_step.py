@@ -45,8 +45,26 @@ class StepKind(BaseEnum):
     OTHER = "other"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Step(IOptions):
+    """
+    Represents a single execution step in a test workflow.
+    
+    The Step class encapsulates all configuration and execution parameters for a single
+    step within a test workflow, including executable path, arguments, environment variables,
+    timeout settings, and validation requirements. Each step can be of different kinds
+    (compiler, verifier, AOT, runtime, etc.) and supports pre/post requirements validation.
+    
+    Note: This class replaces the deprecated BinaryParams class which was removed.
+    All functionality previously provided by BinaryParams is now handled by
+    the Step class, providing a more comprehensive and unified approach to step configuration.
+    
+    The Step class provides methods for:
+    - Configuration parsing and validation from raw dictionary data
+    - Requirement checking (pre and post execution)
+    - String representation for logging and debugging
+    - Pretty formatting for command-line display
+    """
     name: str
     timeout: int
     args: list[str]
@@ -56,7 +74,6 @@ class Step(IOptions):
     enabled: bool = True
     executable_path: Path | None = None
     can_be_instrumented: bool = False
-    default_timeout: int = 30
     skip_qemu: bool = False
     pre_requirements: list[StepRequirements] = field(default_factory=list)
     post_requirements: list[StepRequirements] = field(default_factory=list)
@@ -65,29 +82,12 @@ class Step(IOptions):
     stdout: Path | None = None
     stderr: Path | None = None
 
+    __DEFAULT_TIMEOUT = 30
     __MIN_ARG_LENGTH = 15
     __MAX_ARG_LENGTH = 150
     __INDENT_STEP = "\t"
     __INDENT_ARG = __INDENT_STEP * 2
     __INDENT_SUB_ARG = __INDENT_STEP * 3
-
-    def __init__(self, name: str, step_body: RawStepData):
-        super().__init__()
-        self.name = name
-        self.executable_path = self.__get_path_property(step_body, 'executable-path')
-        self.timeout = self.__get_int_property(step_body, 'timeout', self.default_timeout)
-        self.can_be_instrumented = self.__get_bool_property(step_body, 'can-be-instrumented', False)
-        self.enabled = self.__get_bool_property(step_body, 'enabled', True)
-        self.step_kind = self.__get_kind_property(step_body, 'step-type', StepKind.OTHER)
-        self.args = self.__get_list_of_str(step_body, 'args', [])
-        self.skip_qemu = self.__get_bool_property(step_body, 'skip-qemu', False)
-        self.env = self.__get_dict_property(step_body, 'env', {})
-        self.step_filter = self.__get_str_property(step_body, 'step-filter', '*')
-        self.pre_requirements = self.__get_pre_reqs(step_body)
-        self.post_requirements = self.__get_post_reqs(step_body)
-        self.validator_class, self.validator = self.__get_validator(step_body, 'validator')
-        self.stdout = self.__get_path_property(step_body, 'stdout')
-        self.stderr = self.__get_path_property(step_body, 'stderr')
 
     def __str__(self) -> str:
         indent = 3
@@ -116,6 +116,28 @@ class Step(IOptions):
         return "\n".join(result)
 
     @staticmethod
+    def create(name: str, step_body: RawStepData) -> 'Step':
+        validator_class, validator = Step.__get_validator(step_body, 'validator')
+        return Step(
+            name,
+            timeout=Step.__get_int_property(step_body, 'timeout', Step.__DEFAULT_TIMEOUT),
+            args=Step.__get_list_of_str(step_body, 'args', []),
+            env=Step.__get_dict_property(step_body, 'env', {}),
+            step_kind=Step.__get_kind_property(step_body, 'step-type', StepKind.OTHER),
+            step_filter=Step.__get_str_property(step_body, 'step-filter', '*'),
+            enabled=Step.__get_bool_property(step_body, 'enabled', True),
+            executable_path=Step.__get_path_property(step_body, 'executable-path'),
+            can_be_instrumented=Step.__get_bool_property(step_body, 'can-be-instrumented', False),
+            skip_qemu=Step.__get_bool_property(step_body, 'skip-qemu', False),
+            pre_requirements=Step.__get_pre_reqs(step_body),
+            post_requirements=Step.__get_post_reqs(step_body),
+            validator_class=validator_class,
+            validator=validator,
+            stdout=Step.__get_path_property(step_body, 'stdout'),
+            stderr=Step.__get_path_property(step_body, 'stderr')
+        )
+
+    @staticmethod
     def _check_requirements(reqs: list[StepRequirements]) -> tuple[bool, list[str]]:
         failures: list[str] = []
         final_result = True
@@ -131,8 +153,8 @@ class Step(IOptions):
         value = Step.__get_property(step_body, name, default)
         try:
             return int(cast(str, value))
-        except ValueError:
-            return False
+        except ValueError as exc:
+            raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'") from exc
 
     @staticmethod
     def __get_bool_property(step_body: RawStepData, name: str, default: bool) -> bool:
@@ -184,7 +206,7 @@ class Step(IOptions):
             raise MalformedStepConfigurationException(f"Incorrect value '{value}' for property '{name}'. "
                                                       "Expected list.")
         if real_type is StepRequirements:
-            return [real_type(**v) for v in cast(dict, value)]
+            return [StepRequirements.create(**v) for v in cast(dict, value)]
 
         return cast(Sequence[str], value)
 

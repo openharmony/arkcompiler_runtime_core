@@ -19,15 +19,17 @@ import subprocess
 import tempfile
 from collections.abc import Callable
 from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import cast
 
+from runner.common_exceptions import InvalidConfiguration
 from runner.enum_types.fail_kind import FailureReturnCode
-from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.logger import Log
-from runner.options.options_step import StepKind
+from runner.options.options_step import Step, StepKind
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -84,43 +86,44 @@ class OneTestRunner:
     def __fail_kind_passed(name: str) -> str:
         return f"{name.upper()}_PASSED"
 
-    def run_with_coverage(self, name: str, step_kind: StepKind, params: BinaryParams,
+    def run_with_coverage(self, step: Step,
                           result_validator: CommonResultValidator,
                           return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
 
         coverage_per_binary = self.coverage_config.coverage_per_binary
-        profraw_file, profdata_file, params = self.__get_prof_files(name, params)
+        profraw_file, profdata_file, step = self.__get_prof_files(step.name, step)
 
         if self.coverage_config.use_lcov and coverage_per_binary:
-            gcov_prefix, gcov_prefix_strip = self.coverage_manager.lcov_tool.get_gcov_prefix(params.component_name)
-            params = deepcopy(params)
-            params.env['GCOV_PREFIX'] = gcov_prefix
-            params.env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
+            component_name = step.executable_path.stem if step.executable_path else "no_component"
+            gcov_prefix, gcov_prefix_strip = self.coverage_manager.lcov_tool.get_gcov_prefix(component_name)
+            env = deepcopy(step.env)
+            env['GCOV_PREFIX'] = gcov_prefix
+            env['GCOV_PREFIX_STRIP'] = gcov_prefix_strip
+            step = replace(step, env=env)
 
-        passed, report, fail_kind = self.run_one_step(name, step_kind, params,
-                                                      result_validator, return_code_interpreter)
+        passed, report, fail_kind = self.run_one_step(step, result_validator, return_code_interpreter)
 
         if self.coverage_config.use_llvm_cov and profraw_file and profdata_file:
             self.coverage_manager.llvm_cov_tool.merge_and_delete_profraw_files(profraw_file, profdata_file)
 
         return passed, report, fail_kind
 
-    def run_one_step(self, name: str, step_kind: StepKind, params: BinaryParams,
+    def run_one_step(self, step: Step,
                      result_validator: CommonResultValidator,
                      return_code_interpreter: ReturnCodeInterpreter = lambda _, _2, rtc: rtc) \
             -> tuple[bool, TestReport, str | None]:
-
+        name = step.name
         passed = False
         output = ""
         error = ""
 
         try:
-            if step_kind == StepKind.GTEST_RUNNER:
+            if step.step_kind == StepKind.GTEST_RUNNER:
                 (passed, fail_kind, output,
-                 error, return_code) = self.__run_gtest(name, params, cast(GTestResultValidator, result_validator))
+                 error, return_code) = self.__run_gtest(step, cast(GTestResultValidator, result_validator))
             else:
-                passed, fail_kind, output, error, return_code = self.__run(name, params,
+                passed, fail_kind, output, error, return_code = self.__run(step,
                                                                            cast(ResultValidator, result_validator),
                                                                            return_code_interpreter)
         except subprocess.SubprocessError as ex:
@@ -140,119 +143,6 @@ class OneTestRunner:
         )
 
         return passed, report, fail_kind.upper() if fail_kind else fail_kind
-
-    def __log_cmd(self, cmd: str) -> None:
-        self.reproduce += f"\n{cmd}"
-
-    def __run(self, name: str, params: BinaryParams, result_validator: ResultValidator,
-              return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
-        cmd = [str(params.executor)]
-        if params.use_qemu:
-            cmd = [*self.test_env.cmd_prefix, *cmd]
-        cmd.extend(params.flags)
-        passed = False
-        output = ""
-
-        self.__log_cmd(f"{name}: {' '.join(cmd)}")
-        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
-
-        with (subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=params.env,
-                encoding='utf-8',
-                errors='ignore',
-        ) as process):
-            fail_kind: str | None = None
-            try:
-                output, error = process.communicate(timeout=params.timeout)
-                if params.stdout:
-                    params.stdout.write_text(output, encoding="utf-8")
-                if params.stderr:
-                    params.stderr.write_text(error, encoding="utf-8")
-                return_code = return_code_interpreter(output, error, process.returncode)
-                validation_result = result_validator(output, error, return_code)
-                passed = validation_result.passed
-                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
-                if not passed:
-                    if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
-                                                  ValidatorFailKind.STDERR_NOT_EMPTY,
-                                                  ValidatorFailKind.POST_REQ_FAILED]:
-                        kind = validation_result.kind.value
-                        fail_kind = self.__failed_kind_special(name, kind)
-                        error += validation_result.description
-                    else:
-                        fail_kind = self._detect_fail_kind(name, return_code)
-
-            except subprocess.TimeoutExpired:
-                self.__log_cmd(f"{name}: Failed by timeout after {params.timeout} sec")
-                fail_kind = self.__fail_kind_timeout(name)
-                return_code = process.returncode
-                output, error = self._terminate_timed_out_process(process, name)
-        return passed, fail_kind, output, error, return_code
-
-    def __run_gtest(self, name: str,
-                    params: BinaryParams,
-                    result_validator: GTestResultValidator) -> tuple[bool, str | None, str, str, int]:
-        cmd = [str(params.executor)]
-        if params.use_qemu:
-            cmd = [*self.test_env.cmd_prefix, *cmd]
-        cmd.extend(params.flags)
-        passed = False
-        fail_kind: str | None = None
-
-        self.__log_cmd(f"{name}: {' '.join(cmd)}")
-        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
-
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as f:
-            json_file = f.name
-
-            try:
-                result = subprocess.run(
-                    [*cmd, f"--gtest_output=json:{json_file}"],
-                    capture_output=True,
-                    text=True,
-                    timeout=params.timeout,
-                    env=params.env,
-                    check=False
-                )
-                output = result.stdout
-                error = result.stderr
-                return_code = result.returncode
-                validator_result = result_validator(json_file, result)
-                passed = validator_result.passed
-                fail_kind = validator_result.kind.value
-                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
-            except subprocess.TimeoutExpired as pt:
-                self.__log_cmd(f"{name}: Failed by timeout after {params.timeout} sec")
-                fail_kind = self.__fail_kind_timeout(name)
-                error = pt.stderr.decode() if pt.stderr else ""
-                output = pt.stdout.decode() if pt.stdout else ""
-                return_code = -1
-
-        return passed, fail_kind, output, error, return_code
-
-    def __get_prof_files(
-            self,
-            name: str,
-            params: BinaryParams
-    ) -> tuple[Path | None, Path | None, BinaryParams]:
-        profraw_file, profdata_file = None, None
-        llvm_cov_tool = self.coverage_manager.llvm_cov_tool
-
-        if not self.coverage_config.use_llvm_cov:
-            return profraw_file, profdata_file, params
-
-        if self.coverage_config.coverage_per_binary:
-            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths(name)
-        else:
-            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths()
-
-        params = deepcopy(params)
-        params.env['LLVM_PROFILE_FILE'] = str(profraw_file)
-
-        return profraw_file, profdata_file, params
 
     def _detect_fail_kind(self, name: str, return_code: int) -> str:
         if return_code in FailureReturnCode.SEGFAULT_RETURN_CODE.value:
@@ -277,3 +167,120 @@ class OneTestRunner:
             self.__log_cmd(f"{name}: Failed by second timeout on retrieving partial output after {timeout} sec")
             error = f"Failed by second timeout on retrieving partial output after {timeout} sec"
         return output, error
+
+    def __log_cmd(self, cmd: str) -> None:
+        self.reproduce += f"\n{cmd}"
+
+    def __run(self, step: Step, result_validator: ResultValidator,
+              return_code_interpreter: ReturnCodeInterpreter) -> tuple[bool, str | None, str, str, int]:
+        if step.executable_path is None:
+            raise InvalidConfiguration(f"Cannot run step without executable path: {step.name}")
+        cmd = [step.executable_path.as_posix()]
+        if self.test_env.cmd_prefix and not step.skip_qemu:
+            cmd = [*self.test_env.cmd_prefix, *cmd]
+        cmd.extend(step.args)
+        passed = False
+        output = ""
+        name = step.name
+
+        self.__log_cmd(f"{name}: {' '.join(cmd)}")
+        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
+
+        with (subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=step.env,
+                encoding='utf-8',
+                errors='ignore',
+        ) as process):
+            fail_kind: str | None = None
+            try:
+                output, error = process.communicate(timeout=step.timeout)
+                if step.stdout:
+                    step.stdout.write_text(output, encoding="utf-8")
+                if step.stderr:
+                    step.stderr.write_text(error, encoding="utf-8")
+                return_code = return_code_interpreter(output, error, process.returncode)
+                validation_result = result_validator(output, error, return_code)
+                passed = validation_result.passed
+                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
+                if not passed:
+                    if validation_result.kind in [ValidatorFailKind.COMPARE_OUTPUT,
+                                                  ValidatorFailKind.STDERR_NOT_EMPTY,
+                                                  ValidatorFailKind.POST_REQ_FAILED]:
+                        kind = validation_result.kind.value
+                        fail_kind = self.__failed_kind_special(name, kind)
+                        error += validation_result.description
+                    else:
+                        fail_kind = self._detect_fail_kind(name, return_code)
+
+            except subprocess.TimeoutExpired:
+                self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
+                fail_kind = self.__fail_kind_timeout(name)
+                return_code = process.returncode
+                output, error = self._terminate_timed_out_process(process, name)
+        return passed, fail_kind, output, error, return_code
+
+    def __run_gtest(self, step: Step,
+                    result_validator: GTestResultValidator) -> tuple[bool, str | None, str, str, int]:
+        if step.executable_path is None:
+            raise InvalidConfiguration(f"Cannot run step without executable path: {step.name}")
+        cmd = [step.executable_path.as_posix()]
+        if self.test_env.cmd_prefix and not step.skip_qemu:
+            cmd = [*self.test_env.cmd_prefix, *cmd]
+        cmd.extend(step.args)
+        passed = False
+        name = step.name
+
+        self.__log_cmd(f"{name}: {' '.join(cmd)}")
+        _LOGGER.all(f"Run {name}: {' '.join(cmd)}")
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as f:
+            json_file = f.name
+
+            try:
+                result = subprocess.run(
+                    [*cmd, f"--gtest_output=json:{json_file}"],
+                    capture_output=True,
+                    text=True,
+                    timeout=step.timeout,
+                    env=step.env,
+                    check=False
+                )
+                output = result.stdout
+                error = result.stderr
+                return_code = result.returncode
+                validator_result = result_validator(json_file, result)
+                passed = validator_result.passed
+                fail_kind: str | None = validator_result.kind.value
+                self.__log_cmd(f"{name}: Actual output: {output.strip()}")
+            except subprocess.TimeoutExpired as pt:
+                self.__log_cmd(f"{name}: Failed by timeout after {step.timeout} sec")
+                fail_kind = self.__fail_kind_timeout(name)
+                error = pt.stderr.decode() if pt.stderr else ""
+                output = pt.stdout.decode() if pt.stdout else ""
+                return_code = -1
+
+        return passed, fail_kind, output, error, return_code
+
+    def __get_prof_files(
+            self,
+            name: str,
+            step: Step
+    ) -> tuple[Path | None, Path | None, Step]:
+        profraw_file, profdata_file = None, None
+        llvm_cov_tool = self.coverage_manager.llvm_cov_tool
+
+        if not self.coverage_config.use_llvm_cov:
+            return profraw_file, profdata_file, step
+
+        if self.coverage_config.coverage_per_binary:
+            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths(name)
+        else:
+            profraw_file, profdata_file = llvm_cov_tool.get_uniq_profraw_profdata_file_paths()
+
+        env = deepcopy(step.env)
+        env['LLVM_PROFILE_FILE'] = str(profraw_file)
+
+        return profraw_file, profdata_file, replace(step, env=env)
