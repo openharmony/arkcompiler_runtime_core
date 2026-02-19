@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,7 +40,7 @@ function (ets_native_test_helper TARGET)
     cmake_parse_arguments(
         ARG # give prefix `ARG` to each argument
         ""
-        "ETS_CONFIG;ETS_GTEST_ABC_PATH;VERIFY_SOURCES;TEST_GROUP"
+        "ETS_CONFIG;ETS_GTEST_ABC_PATH;VERIFY_SOURCES;TEST_GROUP;COMPILE_GTEST_GROUP"
         "CPP_SOURCES;ETS_SOURCES;LIBRARIES;TSAN_EXTRA_OPTIONS;INCLUDE_DIRS"
         ${ARGN}
     )
@@ -65,6 +65,10 @@ function (ets_native_test_helper TARGET)
     if (DEFINED ARG_TEST_GROUP)
         set(TEST_GROUP "TEST_GROUP;${ARG_TEST_GROUP}")
     endif()
+    set(COMPILE_GTEST_GROUP "")
+    if (DEFINED ARG_COMPILE_GTEST_GROUP)
+        set(COMPILE_GTEST_GROUP "COMPILE_GTEST_GROUP;${ARG_COMPILE_GTEST_GROUP}")
+    endif()
 
     # Add launcher <${TARGET}_gtests> target
     set(NATIVE_TESTS_DIR "${PANDA_BINARY_ROOT}/tests/native")
@@ -83,6 +87,7 @@ function (ets_native_test_helper TARGET)
         DEPS_TARGETS etsstdlib ${TARGET_GTEST_PACKAGE}
         TEST_RUN_DIR ${NATIVE_TESTS_DIR}
         OUTPUT_DIRECTORY ${NATIVE_TESTS_DIR}
+        ${COMPILE_GTEST_GROUP}
         ${TEST_GROUP}
     )
 
