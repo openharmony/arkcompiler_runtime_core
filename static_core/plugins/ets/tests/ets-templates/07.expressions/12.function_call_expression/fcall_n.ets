@@ -16,11 +16,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A compile-time error occurs if:
-      - The typeArguments clause is present, and any of the type arguments
-      is a wildcard.
-      - The expression type is different than the function type.
-      - The expression type is nullish but no ‘?.’ is present.
+    Compile-time error occurs if the expression type is one of the following:
+     • Different than the function type;
+     • Nullish type without '?.'
 tags: [compile-only, negative]
 ---*/
 

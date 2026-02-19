@@ -13,87 +13,80 @@
 
 ---
 cases:
+#0
     - decl: |-
-          function foo<T extends Object>(p: T): number {
+          function foo<T extends number>(p: T): number {
               return p.toString().length
           }
       use: |-
-          arktest.assertEQ( foo<out>(0.0), 1 ) // CTE: wildcard in type arguments
-
+          foo<int>(0.0) // CTE: ESE0127: No matching call signature
+#1
     - decl: |-
-          function foo<T extends Object>(p: T): number {
+          function foo<T>(p: T): number {
               return p.toString().length
           }
       use: |-
-          arktest.assertEQ( foo<out Number>(0.0), 1 ) // CTE: wildcard in type arguments
-
-    - decl: |-
-          function foo<T extends Object>(p: T): number {
-              return p.toString().length
-          }
-      use: |-
-          arktest.assertEQ( foo<in Number>(0.0), 1 ) // CTE: wildcard in type arguments
-
+          foo<Any>(0.0) // CTE: ESE0010: Value is possibly nullish
+#2
     - decl: |-
           function bar(p: string): string {
               return p + p
           }
           let ft = "bar"
       use: |-
-          arktest.assertEQ( ft("A"), "AA" ) // CTE: not a function type called
-
+          ft("A") // CTE: not callable expression
+#3
     - decl: |-
           function bar(p: string): string {
               return p + p
           }
           let ft: ((p: string) => string)|null = bar
       use: |-
-          arktest.assertEQ( ft("A"), "AA" ) // CTE: no ?. for nullish expression
-
+          ft("A") // CTE: not callable expression - smart typing for global variable doesnt't work
+#4
     - decl: |-
           function foo() {}
       use: |-
           let e = foo() // CTE: void cannot be used as type annotation
-
+#5
     - decl: |-
           function bar(callee: () => void): void {}
       use: |-
           bar("A") // CTE: not a function type called
-
+#6
     - decl: |-
           function bar(callee: () => void): void {
             callee()
           }
       use: |-
           bar((): int => { return 1 }) // CTE: No matching call signature
-
+#7
     - decl: |-
           type LO = (() => void) | Object        
           function foo(input: LO): Boolean { return true }
       use: |-
         foo(null) // CTE: No matching call signature
-
+#8
     - decl: |-
         type LO = (() => void) | Object        
         function foo(input: LO): Boolean { return true }
       use: |-
         foo(undefined) // CTE: No matching call signature
-        
-
+#9        
     - decl: |-
           function bar(callee: () => void): void {
             callee()
           }
       use: |-
           bar((a: int): void => {}) // CTE: No matching call signature
-
+#10
     - decl: |-
           function bar(callee: (a: int) => void): void {
             callee(1)
           }
       use: |-
           bar((a: int, b: int): void => {}) // CTE: No matching call signature
-
+#11
     - decl: |-
         function foo(s: Object, i: Object, b: Object): Boolean {
           calls++
@@ -106,7 +99,7 @@ cases:
       use: |-
         let lc: LT = getLambdaOrNull()
         let r = lc.('Hello', 42, true)
-
+#12
     - decl: |-
         function foo(s: Object, i: Object, b: Object): Boolean {
           calls++
@@ -119,7 +112,7 @@ cases:
       use: |-
         let lc: LT = getLambdaOrNull()
         let r = lc('Hello', 42, true)
-
+#13
     - decl: |-
         let calls: int = 0;
         interface User {

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
+
 /*---
 desc: check less or equal operation for two doubles
 ---*/
 
-function main(): void {
-  const a: double = {{v.left}}
-  const b: double = {{v.right}}
-  arktest.assertEQ(a <= b, {{v.result}})
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("LOE_doubles");
+
+    {% for v in values %}
+        testSuite.addTest("LOE_double_{{loop.index}}", () => {
+            const a: double = {{v.left}}
+            const b: double = {{v.right}}
+            arktest.assertEQ(a <= b, {{v.result}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}

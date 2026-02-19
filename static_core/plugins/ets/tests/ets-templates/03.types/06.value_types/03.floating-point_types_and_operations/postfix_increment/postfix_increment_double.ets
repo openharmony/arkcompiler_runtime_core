@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
 /*---
 desc: check postfix increment for double
 ---*/
 
-function main(): void {
-  let value: double = {{v.value}}
-  let result: double = value++
-  arktest.assertEQ(value, {{v.result}})
-  arktest.assertEQ(result, {{v.value}})
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("PostfixIncr_doubles");
+
+    {% for v in values %}
+        testSuite.addTest("PostfixIncr_double_{{loop.index}}", () => {
+            let value: double = {{v.value}}
+            let result: double = value++
+            arktest.assertEQ(value, {{v.result}})
+            arktest.assertEQ(result, {{v.value}})
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}

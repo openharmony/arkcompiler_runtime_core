@@ -13,14 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
 /*---
 desc: Tuple type with prefix readonly.
 ---*/
 
-function main() {
-  let y: readonly [{{c.type}}] = [{{c.use}}]
-}
+function main(): int {
+    let testSuite = new arktest.ArkTestsuite("Readonly_tuple");
+  
+    {% for c in cases %}
+        testSuite.addTest("{{c.type}}_readonlyTuple", () => {
+        let y: readonly [{{c.type}}] = [{{c.use}}]
+    });
+        
+    {% endfor %}
 
-{% endfor %}
+    return testSuite.run();
+}

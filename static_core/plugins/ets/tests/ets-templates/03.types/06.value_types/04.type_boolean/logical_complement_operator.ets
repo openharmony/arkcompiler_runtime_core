@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: The numerical comparison operators with type boolean.
+desc: The logical not-operator with type boolean.
 ---*/
 
 function main(): void {
-  let a: boolean = true;
-  let b: boolean = false;
+    let a: boolean = true;
+    let b: boolean = false;
 
-  arktest.assertTrue( !b == true )
-  arktest.assertTrue( !a == false )
+    arktest.assertTrue( !b == true )
+    arktest.assertTrue( !a == false )
 }

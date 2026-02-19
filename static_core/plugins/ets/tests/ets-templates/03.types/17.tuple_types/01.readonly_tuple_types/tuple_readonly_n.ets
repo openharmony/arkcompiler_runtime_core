@@ -13,16 +13,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-
-{% for c in cases %}
 /*---
 desc: Tuple type with prefix readonly negative.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0058: Cannot modify an array or tuple content that has the readonly parameter"
 ---*/
 
-function main() {
-  let y: readonly [{{c.type}}] = [{{c.use}}]
-  y[0] = {{c.use}}
-}
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Readonly_tuple_neg");
+  
+    {% for c in cases %}
 
-{% endfor %}
+        testSuite.addTest("{{c.type}}_readonlyTuple_neg", () => {
+          let y: readonly [{{c.type}}] = [{{c.use}}]
+          y[0] = {{c.use}}
+        }); 
+        
+    {% endfor %}
+
+    return testSuite.run();
+}
