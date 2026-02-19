@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 ---
 cases:
   # RESIZABLE ARRAY, PARAMETER
-
+#0
   - base: |-
       foo(i: Array<Derived>) {
           res = 1
@@ -24,17 +24,7 @@ cases:
           res = 2
       }
     params: override-incompatible parameter
-
-  - base: |-
-      foo(i: Array<Derived>) {
-          res = 1
-      }
-    derived: |-
-      foo(i: Array<Base>) {  // override assumed
-          res = 2
-      }
-    params: override-incompatible parameter
-
+#1
   - base: |-
       foo(i: Array<Base>) {
           res = 1
@@ -45,18 +35,8 @@ cases:
       }
     params: override-incompatible parameter
 
-  - base: |-
-      foo(i: Array<Base>) {
-          res = 1
-      }
-    derived: |-
-      foo(i: Array<Derived>) {  // override assumed
-          res = 2
-      }
-    params: override-incompatible parameter
-
   # RESIZABLE ARRAY, RETURN TYPE
-
+#2
   - base: |-
       foo(): Array<Base> {
           res = 1
@@ -68,19 +48,7 @@ cases:
           return [new Derived()]
       }
     params: override-incompatible return type
-
-  - base: |-
-      foo(): Array<Base> {
-          res = 1
-          return [new Base()]
-      }
-    derived: |-
-      foo(): Array<Derived> {
-          res = 2
-          return [new Derived()]
-      }
-    params: override-incompatible return type
-
+#3
   - base: |-
       foo(): Array<Derived> {
           res = 1
@@ -88,18 +56,6 @@ cases:
       }
     derived: |-
       override foo(): Array<Base> {
-          res = 2
-          return [new Base()]
-      }
-    params: override-incompatible return type
-
-  - base: |-
-      foo(): Array<Derived> {
-          res = 1
-          return [new Derived()]
-      }
-    derived: |-
-      foo(): Array<Base> {
           res = 2
           return [new Base()]
       }

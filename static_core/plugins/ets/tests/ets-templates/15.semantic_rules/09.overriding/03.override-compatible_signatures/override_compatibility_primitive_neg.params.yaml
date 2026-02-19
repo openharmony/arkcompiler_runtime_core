@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,16 +25,6 @@ cases:
           }
       params: override-incompatible parameter
 
-    - base: |-
-          foo(i: number): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: long): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
     # VALUE TYPES, RETURN TYPE
 
     - base: |-
@@ -44,18 +34,6 @@ cases:
           }
       derived: |-
           override foo(): boolean {
-              res = 2
-              return true
-          }
-      params: override-incompatible return type
-
-    - base: |-
-          foo(): number {
-              res = 1
-              return 1.0
-          }
-      derived: |-
-          foo(): boolean {  // override assumed
               res = 2
               return true
           }

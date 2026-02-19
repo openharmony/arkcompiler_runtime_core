@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 /*---
 desc: >-
     Default method for child interface to override parent interface
-    (parentinterface call the rewritten result should be output).
+    (rewritten result should be output).
 ---*/
 
 interface ParentInterface {
@@ -42,5 +42,5 @@ class ChildClass implements ChildInterface {
 
 function main(): void {
   let instance: ParentInterface = new ChildClass();
-  arktest.assertNE(instance.parentMethod(), "Overridden implementation of parentMethod in ChildInterface");
+  arktest.assertEQ(instance.parentMethod(), "Overridden implementation of parentMethod in ChildInterface");
 }

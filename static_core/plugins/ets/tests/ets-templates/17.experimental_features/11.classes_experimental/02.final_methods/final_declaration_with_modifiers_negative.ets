@@ -16,15 +16,14 @@ limitations under the License.
 {% for mod in modifiers %}
 
 /*---
-desc: Final method declaraion with '{{mod.keyword}}' keyword.
-assert: A compile-time error occurs if a method declaration contains keyword abstract or static along with the keyword final.
+desc: Final method declaraion with '{{mod.keyword}}' keyword. CTE occurs if a method declaration contains keyword abstract or static along with the keyword final.
 params: {{mod.keyword}}
 tags: [compile-only, negative]
 expected_out: "{{mod.expected_out}}"
 ---*/
 
 class A {
-  {{mod.keyword}} final run(): void;
+  {{mod.keyword}} final run(): void {};
 }
 
 {% endfor %}

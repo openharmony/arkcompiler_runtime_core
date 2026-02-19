@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,32 +14,27 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Inheritance method from superinterface with declared method with same signature in interface.
-assert: >-
-      An interface I inherits from its direct superinterfaces all abstract and default methods m
-      for which all of the following are true - No method declared in I has a signature that is
-      a subsignature of the signature of m.
+desc: Conflict default private interface methods. Must be resolved by class method (foo) override.
 ---*/
 
 interface A {
-  foo(): int {
-    return 1;
-  }
+    private foo(): int {
+        return 1;
+    }
 }
 
 interface B extends A {
-  foo(): int {
-    return 2;
-  }
+    foo(): int {
+       return 2;
+    }
 }
 
 class C implements B {
-  foo(...p: Any[]): Any {
-    return 3
-  }
+    foo(): int {
+       return 3;
+    }
 }
 
-function main(): void {
-  let instance: C = new C();
-  arktest.assertEQ(instance.foo(), 3)
+function main() {
+    arktest.assertEQ( new C().foo(), 3)
 }

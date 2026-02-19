@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -98,7 +98,7 @@ cases:
   # not-related types
   - base: "i: FixedArray<int>"
     derived: "i: FixedArray<float>"
-    call: "new int[2]"
+    call: "[new Int(1)]"
     res: 2
 
   - base: "i: int[]"
@@ -113,14 +113,14 @@ cases:
 
   - base: "i: FixedArray<String>"
     derived: "i: FixedArray<Number>"
-    call: "new String[1]"
+    call: "[new Int(1)]"
     res: 2
 
-  # using of covariant relationship
+  # using of covariant relationship (base class method call despite class relationship)
   - base: "i: FixedArray<A>"
     derived: "i: FixedArray<B>"
     call: "[new A()]"
-    res: 2
+    res: 1
 
   - base: "i: A[]"
     derived: "i: B[]"

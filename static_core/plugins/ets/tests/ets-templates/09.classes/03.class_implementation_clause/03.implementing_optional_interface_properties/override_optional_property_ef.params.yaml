@@ -14,37 +14,46 @@
 ---
 
 cases:
-
-
+#0
   - decl: |-
-     n: number|undefined = 42
+      n: number|undefined = 42
     check: |-
       function main() {
-        arktest.assertEQ(new C().n, 42)
+          arktest.assertEQ(new C().n, 42)
       }
     doc: optional property is implemented as union
-
+#1
   - decl: |-
-     get n(): number|undefined {
-       return 1
-     }
-     set n(i: number|undefined) {}
-    check: |-
-      function main() {
-        let a: C = new C()
-        arktest.assertEQ(a.n, 1)
-        a.n = 41
-        arktest.assertEQ(a.n, 1)
+      get n(): number|undefined {
+         return 1
       }
-
+      set n(i: number|undefined) {}
+    check: |-
+      function main() {
+          let a: C = new C()
+          arktest.assertEQ(a.n, 1)
+          a.n = 41
+          arktest.assertEQ(a.n, 1)
+      }
     doc: optional property is implemented as getter and setter
-
+#2
   - decl: |-
      get n(): number|undefined {
-       return undefined
+         return undefined
      }
     check: |-
       function main() {
-        arktest.assertEQ(new C().n, undefined)
+          arktest.assertEQ(new C().n, undefined)
       }
     doc: optional property is implemented as getter
+#3
+  - decl: |-
+      set n(i: number|undefined) {
+      }
+    check: |-
+      function main() {
+          let a: C = new C()
+          a.n = 2
+          arktest.assertEQ(a.n, undefined)
+      }
+    doc: optional property is implemented as setter

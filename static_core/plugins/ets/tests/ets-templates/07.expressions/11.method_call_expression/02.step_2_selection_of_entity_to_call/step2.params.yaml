@@ -13,6 +13,7 @@
 
 ---
 cases:
+    #step2_0
     - decl: |-
           class C {
               met(p: number): string {
@@ -25,7 +26,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
 
-
+    #step2_1
     - decl: |-
           class C {
               met(p: Number): string {
@@ -37,7 +38,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "N" )
           arktest.assertEQ( c.met(new Number()),  "N" )
-
+    
+    #step2_2
     - decl: |-
           class C {
               met(...p: number[]): string {
@@ -50,7 +52,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nR" )
           arktest.assertEQ( c.met(new Number()),  "nR" )
 
-
+    #step2_3
     - decl: |-
           class C {
               met(...p: Number[]): string {
@@ -62,7 +64,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "NR" )
           arktest.assertEQ( c.met(new Number()),  "NR" )
-
+    
+    #step2_4
     - decl: |-
           class C {
               met(p: number, q: number = 0.0): string {
@@ -75,7 +78,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nD1" )
           arktest.assertEQ( c.met(new Number()),  "nD1" )
 
-
+    #step2_5
     - decl: |-
           class C {
               met(p: Number, q: number = 0.0): string {
@@ -88,7 +91,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "ND1" )
           arktest.assertEQ( c.met(new Number()),  "ND1" )
 
-
+    #step2_6
     - decl: |-
           class C {
               met(p: number, q?: Number): string {
@@ -101,7 +104,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nD2" )
           arktest.assertEQ( c.met(new Number()),  "nD2" )
 
-
+    #step2_7
     - decl: |-
           class C {
               met(p: Number, q?: Number): string {
@@ -114,7 +117,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "ND2" )
           arktest.assertEQ( c.met(new Number()),  "ND2" )
 
-    # step2_12
+    # step2_8
     # If an overload set is formed from implicit overloads only, then the order of the overload
     # set corresponds to the textual order of entity declaration.
     - decl: |-
@@ -132,7 +135,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nR", "Failed at default parameter" )
           arktest.assertEQ( c.met(1, 2),  "nR", "Failed at rest parameter" )
 
-    # step2_13
+    #step2_9
     - decl: |-
           class C {
               met(...p: number[]): string {
@@ -148,7 +151,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nR", "Failed at default parameter" )
           arktest.assertEQ( c.met(2, 3),  "nR", "Failed at rest parameter" )
 
-    # step2_14
+    # step2_10
     - decl: |-
           class C {
               met(p: number, q: number = 0.0): string {
@@ -164,7 +167,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "nD1", "Failed at default parameter" )
           arktest.assertEQ( c.met(3, 4),  "nD1", "Failed at rest parameter" )
 
-    # step2_15
+    # step2_11
     - decl: |-
           class C {
               met(p: number, q?: Number): string {
@@ -179,7 +182,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "nD2", "Failed at default parameter" )
           arktest.assertEQ( c.met(4, 5),  "nD2", "Failed at rest parameter" )
-
+    
+    #step2_12
     - decl: |-
           class C {
               met(p: number): string {
@@ -195,8 +199,8 @@ cases:
           arktest.assertEQ( c.met(0.0),  'n' )
           arktest.assertEQ( c.met(new Number(), new Number(), new Number()),  'NR' )
           arktest.assertEQ( c.met(1, 2,  new Number()),  'NR' )
-
-
+    
+    #step2_13
     - decl: |-
           class C {
               met(p: Number): string {
@@ -212,7 +216,8 @@ cases:
           arktest.assertEQ( c.met(0.0),  'N' )
           arktest.assertEQ( c.met(new Number(), new Number(), new Number()),  'nR' )
           arktest.assertEQ( c.met(1, 2, 3),  'nR' )
-
+    
+    #step2_14
     - decl: |-
           class C {
               met(p: number): string {
@@ -227,8 +232,8 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
-
-
+    
+    #step2_15
     - decl: |-
           class C {
               met(p: number): string {
@@ -244,7 +249,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
 
-
+    #step2_16
     - decl: |-
           class C {
               met(p: Number): string {
@@ -260,7 +265,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "N" )
           arktest.assertEQ( c.met(new Number()),  "N" )
 
-
+    #step2_17
     - decl: |-
           class C {
               met(p: number): string {
@@ -276,7 +281,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  "n" )
           arktest.assertEQ( c.met(new Number()),  "n" )
 
-
+    #step2_18
     - decl: |-
           class C {
               overload met { metNumber, metNumberAndOptional }
@@ -294,7 +299,7 @@ cases:
           arktest.assertEQ( c.met(0.0),  'n' )
           arktest.assertEQ( c.met(new Number(), 20.0),  'nD2' )
 
-    # step2_25
+    # step2_19
     - decl: |-
           class A {
               met(p: boolean): string {
@@ -317,7 +322,8 @@ cases:
 
           let b: B = new B()
           arktest.assertEQ( b.met(false),  "B-false" )
-
+    
+    #step2_20
     - decl: |-
           class C {
               met(p: number): string {
@@ -335,6 +341,7 @@ cases:
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
 
+    #step2_21
     - decl: |-
           class C {
               met(p: number): string {
@@ -351,18 +358,22 @@ cases:
           // more than one applicable method
           let c: C = new C()
           arktest.assertEQ( c.met(0.0),  "n" )
-
+    
+    #step2_22
     - decl: |-
         class C {
-            met(p: number): string
-            met(...p: number[]): string
+            met(p: number): string {
+                return 'test'
+            }
+            met(...p: number[]): string {
+                return 'spread_test'
+            }
             met(...args: Any[]): Any {
-              if(args.length = 1) return 'n'
-              return 'nR'
+                return 'neverever'
             }
         }
       use: |-
-        // more than one applicable method
+        // first match method within several appliable
         let c: C = new C()
-        arktest.assertEQ( c.met(0.0),  "n" )
-        arktest.assertEQ( c.met(0.0, 1, 2, 3),  'nR' )
+        arktest.assertEQ( c.met(0.0),  "test" )
+        arktest.assertEQ( c.met(0.0, 1, 2, 3),  'spread_test' )

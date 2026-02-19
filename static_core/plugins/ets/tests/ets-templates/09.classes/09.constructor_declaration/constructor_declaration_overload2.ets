@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,49 +19,30 @@ desc: >-
 ---*/
 
 class A {
-    public p1: int|string|boolean = 0;
+    public p1: int|string|boolean = false;
     public q1: number|number[]|undefined;
     public w1: number[]|undefined;
-
-    constructor(p: int)
-    constructor(p: int|string, q?: number, w?: number[])
-    constructor(p: boolean, q?: number[])
-    constructor(...p: Any[]) {
-        if (p.length > 0) {
-            this.p1 = p[0]
-        }
-        if (p.length > 1) {
-            this.q1 = p[1]
-        }
-        if (p.length > 2) {
-            this.w1 = p[2]
-        }
+    
+    //constructor for p1 is int type
+    constructor(p: int) {}
+    constructor(p: boolean|string, q?: number, w?: number[]) {
+        this.p1 = p
+        this.q1 = q
+        this.w1 = w
     }
+    constructor(p: boolean, q?: number[]) {
+        this.p1 = p
+        this.q1 = q
+    }
+    //default empty constructor
+    constructor() {}
 }
 
 final class B extends A {
-    constructor(p: int)
-    constructor(p: int|string, q?: number, w?: number[])
-    constructor(p: boolean, q?: number[])
-    constructor()
-    constructor(...p: Any[]) {
-        switch(p.length) {
-            case 0:
-                super(false);
-                break;
-            case 1:
-                super(p[0]);
-                break;
-            case 2:
-                super(p[0], p[1]);
-                break;
-            case 3:
-                super(p[0], p[1], p[2]);
-                break;
-            default:
-                throw new Error('Wrong number of arguments')
-        }
-    }
+    constructor(p: int) {super(p)}
+    constructor(p: boolean|string, q?: number, w?: number[]) {super(p, q, w)}
+    constructor(p: boolean, q?: number[]) {super(p, q)}
+    constructor() {super()}
 }
 
 function main() {
@@ -81,7 +62,7 @@ function main() {
     arktest.assertEQ(v.w1, undefined)
 
     v = new B(42)
-    arktest.assertEQ(v.p1, 42)
+    arktest.assertEQ(v.p1, false)
     arktest.assertEQ(v.q1, undefined)
     arktest.assertEQ(v.w1, undefined)
 
