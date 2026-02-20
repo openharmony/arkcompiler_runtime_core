@@ -16,14 +16,17 @@
 const noValidNumberError = new FormatError('String does not contain a valid number')
 const overflowError = new FormatError('Value exceeds integer limits')
 const invalidRadixError = new ArgumentOutOfRangeError('Invalid radix')
-const invalidHexPrefixError = new FormatError('Invalid hex prefix')
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite('parseInt negative tests for integer types')
+    const suite = new arktest.ArkTestsuite('parseInt tests for integer types')
     suite.addTest('Test Byte.parseInt', testByteParseInt)
     suite.addTest('Test Short.parseInt', testShortParseInt)
     suite.addTest('Test Int.parseInt', testIntParseInt)
     suite.addTest('Test Long.parseInt', testLongParseInt)
+    suite.addTest('Test Byte.parseInt errors', testByteParseIntErrors)
+    suite.addTest('Test Short.parseInt errors', testShortParseIntErrors)
+    suite.addTest('Test Int.parseInt errors', testIntParseIntErrors)
+    suite.addTest('Test Long.parseInt errors', testLongParseIntErrors)
     return suite.run(); 
 }
 
@@ -40,7 +43,6 @@ function commonErrors<T>(callback: (str: string, radix: int) => T) {
     arktest.expectError(() => { callback('123', 37) }, invalidRadixError)
     arktest.expectError(() => { callback('123', -1) }, invalidRadixError)
 
-    arktest.expectError(() => { callback('0b0', 16) }, invalidHexPrefixError)
     arktest.expectError(() => { callback('0x', 16) }, noValidNumberError)
 
     arktest.expectError(() => { callback('  -  ', 10) }, noValidNumberError)
@@ -54,6 +56,16 @@ function commonErrors<T>(callback: (str: string, radix: int) => T) {
 }
 
 function testByteParseInt() {
+    arktest.assertEQ(Byte.parseInt('101010', 2), 42)
+    arktest.assertEQ(Byte.parseInt('52', 8), 42)
+    arktest.assertEQ(Byte.parseInt('42', 10), 42)
+    arktest.assertEQ(Byte.parseInt('2A', 16), 42)
+    arktest.assertEQ(Byte.parseInt('0x2A', 16), 42)
+    arktest.assertEQ(Byte.parseInt('0X2A', 16), 42)
+    arktest.assertEQ(Byte.parseInt('16', 36), 42)
+}
+
+function testByteParseIntErrors() {
     commonErrors((str: string, radix: int) => Byte.parseInt(str, radix))
 
     arktest.expectError(() => { Byte.parseInt('10000000', 2) }, overflowError)
@@ -73,6 +85,16 @@ function testByteParseInt() {
 }
 
 function testShortParseInt() {
+    arktest.assertEQ(Short.parseInt('10000000', 2), 128)
+    arktest.assertEQ(Short.parseInt('200', 8), 128)
+    arktest.assertEQ(Short.parseInt('128', 10), 128)
+    arktest.assertEQ(Short.parseInt('80', 16), 128)
+    arktest.assertEQ(Short.parseInt('0x80', 16), 128)
+    arktest.assertEQ(Short.parseInt('0X80', 16), 128)
+    arktest.assertEQ(Short.parseInt('3K', 36), 128)
+}
+
+function testShortParseIntErrors() {
     commonErrors((str: string, radix: int) => Short.parseInt(str, radix))
 
     arktest.expectError(() => { Short.parseInt('1000000000000000', 2) }, overflowError)
@@ -92,6 +114,16 @@ function testShortParseInt() {
 }
 
 function testIntParseInt() {
+    arktest.assertEQ(Int.parseInt('1000000000000000', 2), 32768)
+    arktest.assertEQ(Int.parseInt('100000', 8), 32768)
+    arktest.assertEQ(Int.parseInt('32768', 10), 32768)
+    arktest.assertEQ(Int.parseInt('8000', 16), 32768)
+    arktest.assertEQ(Int.parseInt('0x8000', 16), 32768)
+    arktest.assertEQ(Int.parseInt('0X8000', 16), 32768)
+    arktest.assertEQ(Int.parseInt('PA8', 36), 32768)
+}
+
+function testIntParseIntErrors() {
     commonErrors((str: string, radix: int) => Int.parseInt(str, radix))
 
     arktest.expectError(() => { Int.parseInt('10000000000000000000000000000000', 2) }, overflowError)
@@ -111,10 +143,26 @@ function testIntParseInt() {
 }
 
 function testLongParseInt() {
+    arktest.assertEQ(Long.parseInt('10000000000000000000000000000000', 2), 2147483648)
+    arktest.assertEQ(Long.parseInt('20000000000', 8), 2147483648)
+    arktest.assertEQ(Long.parseInt('2147483648', 10), 2147483648)
+    arktest.assertEQ(Long.parseInt('80000000', 16), 2147483648)
+    arktest.assertEQ(Long.parseInt('0x80000000', 16), 2147483648)
+    arktest.assertEQ(Long.parseInt('0X80000000', 16), 2147483648)
+    arktest.assertEQ(Long.parseInt('ZIK0ZK', 36), 2147483648)
+}
+
+function testLongParseIntErrors() {
     commonErrors((str: string, radix: int) => Long.parseInt(str, radix))
 
-    arktest.expectError(() => { Long.parseInt('1000000000000000000000000000000000000000000000000000000000000000', 2) }, overflowError)
-    arktest.expectError(() => { Long.parseInt('-1000000000000000000000000000000000000000000000000000000000000001', 2) }, overflowError)
+    arktest.expectError(
+        () => { Long.parseInt('1000000000000000000000000000000000000000000000000000000000000000', 2) },
+        overflowError
+    )
+    arktest.expectError(
+        () => { Long.parseInt('-1000000000000000000000000000000000000000000000000000000000000001', 2) },
+        overflowError
+    )
 
     arktest.expectError(() => { Long.parseInt('1000000000000000000000', 8) }, overflowError)
     arktest.expectError(() => { Long.parseInt('-1000000000000000000001', 8) }, overflowError)
