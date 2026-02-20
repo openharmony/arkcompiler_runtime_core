@@ -150,9 +150,9 @@ function sanitizeAscii(str: string): string {
 function sanitizeUtf8(str: string): string {
     const sb = new StringBuilder();
     for (let i = 0; i < str.length; i++) {
-        const cu = str.charCodeAt(i).toInt().toChar();
+        const cu = str.charCodeAt(i).toChar();
         if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
-            const cu2 = str.charCodeAt(i + 1).toInt().toChar();
+            const cu2 = str.charCodeAt(i + 1).toChar();
             if (Char.isLowSurrogate(cu2)) {
                 sb.append(str.charAt(i));
                 sb.append(str.charAt(i + 1));
@@ -603,7 +603,7 @@ export default namespace buffer {
         if (toEnc == 'ascii') {
             let newStr = "";
             for (let i = 0; i < str.length; ++i) {
-                if (str.charAt(i).toInt() <= 128) {
+                if (str.charAt(i) <= 128) {
                     newStr += str.charAt(i);
                 } else {
                     newStr += '?';
@@ -1885,7 +1885,7 @@ Received value is: ${value}`)
         public writeBigInt64BE(value: bigint, offset: int = 0): int {
             this.checkOffset(offset, 8);
             this.checkValue(value, Long.MIN_VALUE, Long.MAX_VALUE, "-(2n ** 63n)", "2n ** 63n");
-            this.getDataView().setBigInt64(offset.toInt(), value, false);
+            this.getDataView().setBigInt64(offset, value, false);
             return offset + 8;
         }
 
@@ -1899,7 +1899,7 @@ Received value is: ${value}`)
         public writeBigInt64LE(value: bigint, offset: int = 0): int {
             this.checkOffset(offset, 8);
             this.checkValue(value, Long.MIN_VALUE, Long.MAX_VALUE, "-(2n ** 63n)", "2n ** 63n");
-            this.getDataView().setBigInt64(offset.toInt(), value, true);
+            this.getDataView().setBigInt64(offset, value, true);
             return offset + 8;
         }
 
@@ -1913,7 +1913,7 @@ Received value is: ${value}`)
         public writeBigUInt64BE(value: bigint, offset: int = 0): int {
             this.checkOffset(offset, 8);
             this.checkValue(value, 0, ((1n << 64n) - 1n), "0", "2n ** 64n - 1n");
-            this.getDataView().setBigUint64(offset.toInt(), value, false);
+            this.getDataView().setBigUint64(offset, value, false);
             return offset + 8;
         }
 
@@ -1927,7 +1927,7 @@ Received value is: ${value}`)
         public writeBigUInt64LE(value: bigint, offset: int = 0): int {
             this.checkOffset(offset, 8);
             this.checkValue(value, 0, ((1n << 64n) - 1n), "0", "2n ** 64n - 1n");
-            this.getDataView().setBigUint64(offset.toInt(), value, true);
+            this.getDataView().setBigUint64(offset, value, true);
             return offset + 8;
         }
 
@@ -1940,7 +1940,7 @@ Received value is: ${value}`)
         */
         public writeDoubleBE(value: double, offset: int = 0): int {
             this.checkOffset(offset, 8);
-            this.getDataView().setFloat64(offset.toInt(), value, false);
+            this.getDataView().setFloat64(offset, value, false);
             return offset + 8;
         }
 
@@ -1953,7 +1953,7 @@ Received value is: ${value}`)
         */
         public writeDoubleLE(value: double, offset: int = 0): int {
             this.checkOffset(offset, 8);
-            this.getDataView().setFloat64(offset.toInt(), value, true);
+            this.getDataView().setFloat64(offset, value, true);
             return offset + 8;
         }
 
@@ -1966,7 +1966,7 @@ Received value is: ${value}`)
         */
         public writeFloatBE(value: double, offset: int = 0): int {
             this.checkOffset(offset, 4);
-            this.getDataView().setFloat32(offset.toInt(), value, false);
+            this.getDataView().setFloat32(offset, value, false);
             return offset + 4;
         }
 
@@ -1979,7 +1979,7 @@ Received value is: ${value}`)
         */
         public writeFloatLE(value: double, offset: int = 0): int {
             this.checkOffset(offset, 4);
-            this.getDataView().setFloat32(offset.toInt(), value, true);
+            this.getDataView().setFloat32(offset, value, true);
             return offset + 4;
         }
 
@@ -1993,7 +1993,7 @@ Received value is: ${value}`)
         public writeInt8(value: long, offset: int = 0): int {
             this.checkOffset(offset, 1);
             this.checkValue(value, (-Math.pow(2, 7).toLong()), (Math.pow(2, 7).toLong() - 1), (-Math.pow(2, 7)).toString(), (Math.pow(2, 7) - 1).toString());
-            this.getDataView().setInt8(offset.toInt(), value);
+            this.getDataView().setInt8(offset, value);
             return offset + 1;
         }
 
@@ -2007,7 +2007,7 @@ Received value is: ${value}`)
         public writeInt16BE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 2);
             this.checkValue(value, (-Math.pow(2, 15).toLong()), (Math.pow(2, 15).toLong() - 1), (-Math.pow(2, 15)).toString(), (Math.pow(2, 15) - 1).toString());
-            this.getDataView().setInt16(offset.toInt(), value, false);
+            this.getDataView().setInt16(offset, value, false);
             return offset + 2;
         }
 
@@ -2021,7 +2021,7 @@ Received value is: ${value}`)
         public writeInt16LE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 2);
             this.checkValue(value, (-Math.pow(2, 15).toLong()), (Math.pow(2, 15).toLong() - 1), (-Math.pow(2, 15)).toString(), (Math.pow(2, 15) - 1).toString());
-            this.getDataView().setInt16(offset.toInt(), value, true);
+            this.getDataView().setInt16(offset, value, true);
             return offset + 2;
         }
 
@@ -2035,7 +2035,7 @@ Received value is: ${value}`)
         public writeInt32BE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 4);
             this.checkValue(value, (-Math.pow(2, 31).toLong()), (Math.pow(2, 31).toLong() - 1), (-Math.pow(2, 31)).toString(), (Math.pow(2, 31) - 1).toString());
-            this.getDataView().setInt32(offset.toInt(), value, false);
+            this.getDataView().setInt32(offset, value, false);
             return offset + 4;
         }
 
@@ -2049,7 +2049,7 @@ Received value is: ${value}`)
         public writeInt32LE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 4);
             this.checkValue(value, (-Math.pow(2, 31).toLong()), (Math.pow(2, 31).toLong() - 1), (-Math.pow(2, 31)).toString(), (Math.pow(2, 31) - 1).toString());
-            this.getDataView().setInt32(offset.toInt(), value, true);
+            this.getDataView().setInt32(offset, value, true);
             return offset + 4;
         }
 
@@ -2063,7 +2063,7 @@ Received value is: ${value}`)
         public writeUInt8(value: long, offset: int = 0): int {
             this.checkOffset(offset, 1);
             this.checkValue(value, 0, 255, "0", "255");
-            this.getDataView().setUint8(offset.toInt(), value);
+            this.getDataView().setUint8(offset, value);
             return offset + 1;
         }
 
@@ -2077,7 +2077,7 @@ Received value is: ${value}`)
         public writeUInt16BE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 2);
             this.checkValue(value, 0, (Math.pow(2, 16).toLong() - 1), "0", (Math.pow(2, 16) - 1).toString());
-            this.getDataView().setUint16(offset.toInt(), value, false);
+            this.getDataView().setUint16(offset, value, false);
             return offset + 2;
         }
 
@@ -2091,7 +2091,7 @@ Received value is: ${value}`)
         public writeUInt16LE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 2);
             this.checkValue(value, 0, (Math.pow(2, 16).toLong() - 1), "0", (Math.pow(2, 16) - 1).toString());
-            this.getDataView().setUint16(offset.toInt(), value, true);
+            this.getDataView().setUint16(offset, value, true);
             return offset + 2;
         }
 
@@ -2105,7 +2105,7 @@ Received value is: ${value}`)
         public writeUInt32BE(value: long, offset: int = 0): int {
             this.checkOffset(offset, 4);
             this.checkValue(value, 0, (Math.pow(2, 32).toLong() - 1), "0", (Math.pow(2, 32) - 1).toString());
-            this.getDataView().setUint32(offset.toInt(), value, false);
+            this.getDataView().setUint32(offset, value, false);
             return offset + 4;
         }
 
@@ -2152,7 +2152,7 @@ Received value is: ${value}`)
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "length" is out of range. \
 It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             }
-            return this.getDataView().getUint8(index.toInt()).toLong()
+            return this.getDataView().getUint8(index).toLong()
         }
 
         /**
@@ -2165,7 +2165,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
             if (index < 0 || index >= this.length) {
                 return;
             }
-            this.getDataView().setUint8(index.toInt(), value);
+            this.getDataView().setUint8(index, value);
         }
 
         /**

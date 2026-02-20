@@ -41,7 +41,7 @@ public:
 
     static EtsString *CreateFromUtf16(const uint16_t *utf16, uint32_t length);
 
-    static EtsString *CreateNewStringFromCharCode(EtsDouble charCode);
+    static EtsString *CreateNewStringFromCharCode(EtsInt charCode);
 
     static EtsString *CreateNewStringFromChars(uint32_t offset, uint32_t length, EtsArray *chararray);
 
@@ -343,13 +343,9 @@ public:
             coretypes::LineString::AllocLineStringObject(length, compressed, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
 
-    static uint16_t CodeToChar(double code)
+    static uint16_t CodeToChar(int code)
     {
-        if (std::isnan(code) || std::isinf(code)) {
-            return 0;
-        }
-        constexpr double UTF16_CHAR_DIVIDER = 0x10000;
-        return static_cast<uint16_t>(static_cast<int64_t>(std::fmod(code, UTF16_CHAR_DIVIDER)));
+        return static_cast<uint16_t>(code);
     }
 
     EtsString() = delete;

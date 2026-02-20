@@ -25,11 +25,11 @@
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
-//! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER    "Peephole"
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
-//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingle/
-//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! PASS_AFTER_NTH "Peephole", 2
+//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! INST_NOT       /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       AOT IR Builder, check String creation from a single and numerous char code(s) with no string caches
 //! RUN_PAOC      options: "--compiler-regex='.*from.*CharCode.*' --compiler-inlining=true \
@@ -43,10 +43,10 @@
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
-//! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER    "Peephole"
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
-//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! PASS_AFTER_NTH "Peephole", 2
+//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 
 //! CHECKER       JIT IR Builder, check String creation from a single and numerous char code(s)
 //! RUN           force_jit: true,
@@ -61,11 +61,11 @@
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 //! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
 //!
-//! METHOD        "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
-//! PASS_AFTER    "Peephole"
-//! INST_NOT      /Intrinsic.StdCoreStringFromCharCodeSingle/
-//! INST_NOT      /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
-//! INST          /Intrinsic.CompilerEtsStringFromCharCodeSingle/
+//! METHOD         "ets_string_from_char_code.ETSGLOBAL::fromLargeCharCode"
+//! PASS_AFTER_NTH "Peephole", 2
+//! INST_NOT       /Intrinsic.StdCoreStringFromCharCodeSingle/
+//! INST_NOT       /Intrinsic.CompilerEtsStringFromCharCodeSingleNoCache/
+//! INST           /Intrinsic.CompilerEtsStringFromCharCodeSingle/
 
 function fromCharCodes(code1: int, code2: int): string {
     return string.fromCharCode(code1, code2);

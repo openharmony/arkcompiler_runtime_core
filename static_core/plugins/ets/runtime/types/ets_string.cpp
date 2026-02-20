@@ -100,7 +100,7 @@ EtsString *EtsString::CreateFromUtf16(const EtsChar *utf16, uint32_t length)
 }
 
 /* static */
-EtsString *EtsString::CreateNewStringFromCharCode(EtsDouble charCode)
+EtsString *EtsString::CreateNewStringFromCharCode(EtsInt charCode)
 {
     constexpr size_t SINGLE_CHAR_LENGTH = 1U;
     uint16_t character = CodeToChar(charCode);

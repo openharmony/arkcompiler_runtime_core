@@ -864,7 +864,7 @@ bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *
 
     auto pc = intrinsic->GetPc();
     auto *charCode = intrinsic->GetInput(0).GetInst();
-    auto charCodeInt = graph->CreateInstBitcast(DataType::UINT64, pc, charCode);
+    auto charCodeInt = graph->CreateInstCast(DataType::INT32, pc, charCode);
     IntrinsicInst *createStringInst = nullptr;
     if (graph->GetRuntime()->IsStringCachesUsed()) {
         Inst *cache = nullptr;
@@ -888,14 +888,14 @@ bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *
             DataType::REFERENCE, pc,
             RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE);
         createStringInst->SetInputs(graph->GetAllocator(), {{cache, DataType::REFERENCE},
-                                                            {charCodeInt, DataType::UINT64},
+                                                            {charCodeInt, DataType::INT32},
                                                             {intrinsic->GetSaveState(), DataType::NO_TYPE}});
     } else {
         createStringInst = graph->CreateInstIntrinsic(
             DataType::REFERENCE, pc,
             RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE_NO_CACHE);
         createStringInst->SetInputs(graph->GetAllocator(),
-                                    {{charCodeInt, DataType::UINT64}, {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+                                    {{charCodeInt, DataType::INT32}, {intrinsic->GetSaveState(), DataType::NO_TYPE}});
     }
     intrinsic->InsertBefore(charCodeInt);
     intrinsic->ReplaceUsers(createStringInst);

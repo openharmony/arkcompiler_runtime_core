@@ -62,7 +62,7 @@ export namespace url {
                 Helper.specialCharForBit[i] = 1;
             }
             for (let i = 0; i < specialSymbolsTmp.length; i++) {
-                let specialChar = specialSymbolsTmp[i].charCodeAt(0).toInt();
+                let specialChar = specialSymbolsTmp[i].charCodeAt(0)
                 Helper.specialCharForBit[specialChar] = 1;
             }
             Helper.specialCharForBit[Helper.ASCII_127] = 1;
@@ -177,7 +177,7 @@ export namespace url {
     function checkCharacter(input: string) {
         let inputLen = input.length;
         for (let i = 0; i < inputLen; i++) {
-            let charPos: int = input.charCodeAt(i).toInt();
+            let charPos: int = input.charCodeAt(i)
             if (charPos >= 0 && charPos < 128) {
                 if (Helper.specialCharForBit[charPos]) {
                     return false;
@@ -700,7 +700,7 @@ export namespace url {
             }
             let inputLength = input.length;
             if (input.charAt(0) == c'[') {
-                if (input.charAt(inputLength.toInt() - 1) == c']') {
+                if (input.charAt(inputLength - 1) == c']') {
                     input = input.substring(1, inputLength - 1);
                     this.analysizeIPv6Host(input);
                     return;
@@ -2569,7 +2569,7 @@ export namespace url {
         const UNICODE_0XFFFD = 0XFFFD;
         const UNICODE_0x1F = 0x1F;
         while (i < uint8Array.length) {
-            const byte1 = uint8Array[i];
+            const byte1 = uint8Array[i].toInt()
             if ((byte1 & UNICODE_0x80) === 0) {
                 //  (0xxxxxxx)
                 result += String.fromCharCode(byte1);
@@ -2581,9 +2581,9 @@ export namespace url {
                     continue;
                 }
                 //  (110xxxxx 10xxxxxx)
-                const byte2 = uint8Array[i + 1];
-                const codePoint = ((byte1 & UNICODE_0x1F) << 6) | (byte2 & UNICODE_0x3F)
-                result += String.fromCharCode(codePoint)
+                const byte2 = uint8Array[i + 1].toInt()
+                const codePoint: int = ((byte1 & UNICODE_0x1F) << 6) | (byte2 & UNICODE_0x3F);
+                result += String.fromCharCode(codePoint);
                 i += 2;
             } else if ((byte1 & UNICODE_0xF0) === UNICODE_0xE0) {
                 if (i + 2 >= uint8Array.length) {
@@ -2592,10 +2592,10 @@ export namespace url {
                     continue;
                 }
                 //  (1110xxxx 10xxxxxx 10xxxxxx)
-                const byte2 = uint8Array[i + 1];
-                const byte3 = uint8Array[i + 2];
-                const codePoint = ((byte1 & UNICODE_0x0F) << 12) | ((byte2 & UNICODE_0x3F) << 6) | (byte3 & UNICODE_0x3F)
-                result += String.fromCharCode(codePoint)
+                const byte2 = uint8Array[i + 1].toInt()
+                const byte3 = uint8Array[i + 2].toInt()
+                const codePoint = ((byte1 & UNICODE_0x0F) << 12) | ((byte2 & UNICODE_0x3F) << 6) | (byte3 & UNICODE_0x3F);
+                result += String.fromCharCode(codePoint.toInt());
                 i += 3;
             } else if ((byte1 & 0xF8) === UNICODE_0xF0) {
                 // (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
@@ -2612,7 +2612,7 @@ export namespace url {
                 result += String.fromCodePoint(codePoint.toInt());
                 i += 4;
             } else {
-                result += String.fromCharCode(UNICODE_0XFFFD);
+                result += String.fromCharCode(UNICODE_0XFFFD.toInt());
                 i++;
             }
         }
@@ -2651,8 +2651,8 @@ export namespace url {
         // Process '%' encoding
         const handlePercentEncoding = () => {
             if (srcIndex + 2 < s.length) {
-                const hex1 = Helper.unhexTable[s.charCodeAt(srcIndex + 1).toInt()];
-                const hex2 = Helper.unhexTable[s.charCodeAt(srcIndex + 2).toInt()];
+                const hex1 = Helper.unhexTable[s.charCodeAt(srcIndex + 1)];
+                const hex2 = Helper.unhexTable[s.charCodeAt(srcIndex + 2)];
 
                 if (hex1 !== -1 && hex2 !== -1) {
                     outBuffer[outIndex++] = hex1 * 16 + hex2;
@@ -2807,7 +2807,7 @@ export namespace url {
         const UNICODE_0x10000 = 0x10000;
         outer:
         for (; i < len; i++) {
-            let c = str.charCodeAt(i).toInt();
+            let c = str.charCodeAt(i)
 
             // ASCII
             while (c < UNICODE_0x80) {
@@ -2821,7 +2821,7 @@ export namespace url {
                 if (++i == len)
                     break outer;
 
-                c = str.charCodeAt(i).toInt();
+                c = str.charCodeAt(i)
             }
 
             if (lastPos < i)
@@ -2844,7 +2844,7 @@ export namespace url {
             // Surrogate pair
             ++i;
 
-            const c2 = str.charCodeAt(i).toInt() & UNICODE_0x3FF;
+            const c2 = str.charCodeAt(i) & UNICODE_0x3FF;
 
             lastPos = i + 1;
             c = UNICODE_0x10000 + (((c & UNICODE_0x3FF) << 10) | c2);

@@ -523,7 +523,7 @@ EtsString *StdCoreStringFromCharCode(EtsEscompatArray *charCodes)
     return helpers::CreateNewStringFromCharCode(charCodes);
 }
 
-EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
+EtsString *StdCoreStringFromCharCodeSingle(EtsInt charCode)
 {
     if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
         auto character = EtsString::CodeToChar(charCode);

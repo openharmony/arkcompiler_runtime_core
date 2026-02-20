@@ -661,11 +661,25 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     and ending at index before another specified index.
      *     If 'begin' < 0, then 'begin' is assumed to be equal to zero.
      *     If 'begin' > this.length, then 'begin' is assumed to be equal to the this.length.
+     * @param { int } begin to start substring
+     * @returns { String } new String which is a substring of this String
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    public substring(begin: int): String {
+        return this.substring(begin, this.getLength());
+    }
+
+    /**
+     * Selects a substring of this String, starting at a specified index
+     *     and ending at index before another specified index.
+     *     If 'begin' < 0, then 'begin' is assumed to be equal to zero.
+     *     If 'begin' > this.length, then 'begin' is assumed to be equal to the this.length.
      *     If 'end' < 0, then 'end' is assumed to be equal to zero.
      *     If 'end' > this.length, then 'end' is assumed to be equal to this.length.
      *     If 'begin' > 'end', then these are swapped.
      *     If 'begin' == 'end', then an empty string is returned.
-     *
      * @param { int } begin to start substring
      * @param { int } end to end before at
      * @returns { String } new String which is a substring of this String
@@ -675,22 +689,6 @@ export final class String extends Object implements Comparable<String>, Iterable
      */
     // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     public native substring(begin: int, end: int): String;
-
-    /**
-     * Selects a substring of this String, starting at a specified index
-     * and ending at index before another specified index.
-     *
-     * @param { number } begin to start substring
-     * @param { int } [end] to end before at
-     * @returns { String } new String which is a substring of this String
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
-    public substring(begin: number, end?: int): String {
-        return this.substring(begin.toInt(), end ?? this.getLength())
-    }
 
     /**
      * Concatenation of this and array of strings.
@@ -903,7 +901,7 @@ export final class String extends Object implements Comparable<String>, Iterable
                 strLen = limit;
             }
             for (let i = 0; i < strLen; ++i) {
-                out.pushOne(String.fromCharCode(this.charAt(i).toDouble()));
+                out.pushOne(String.fromCharCode(this.charAt(i).toInt()));
             }
             return out;
         }
@@ -1462,11 +1460,10 @@ export final class String extends Object implements Comparable<String>, Iterable
         return this.charAt(index).toInt()
     }
 
-    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
     /**
      * fromCharCodeImpl
      *
-     * @param { Array<number> } codes is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @param { Array<int> } codes is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      * @returns { String } consisting of the specified UTF-16 code unit.
      * @throws { NegativeArraySizeError } - Input parameter error.
      * @static
@@ -1474,25 +1471,23 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      * @since 24
      */
-    public static native fromCharCodeImpl(codes: Array<number>): String;
-
+    private static native fromCharCodeImpl(codes: Array<int>): String;
     /**
      * The String.fromCharCode() static method returns a string created from the specified UTF-16 code unit
      *
-     * @param { number } code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @param { int } code is a number between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      * @returns { String } string consisting of the specified UTF-16 code unit.
      * @static
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    // NOTE(zaytsevaekaterina): fix num-> int & intrinsic tests #31034
-    public static native fromCharCode(code: number): String;
+    public static native fromCharCode(code: int): String;
 
     /**
      * The String.fromCharCode() static method returns a string created from the specified sequence of UTF-16 code units
      *
-     * @param { number[] } codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
+     * @param { int[] } codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      * @returns { String } string consisting of the specified UTF-16 code units.
      * @throws { NegativeArraySizeError } - Input parameter error.
      * @static
@@ -1500,7 +1495,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      * @since 24
      */
-    public static fromCharCode(...codes: number[]): String {
+    public static fromCharCode(...codes: int[]): String {
         if (codes.length < 0) {
             throw new NegativeArraySizeError("The value must be non negative")
         }

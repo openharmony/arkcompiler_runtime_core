@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,22 @@
 function testArrayToLocaleString1(): void {
     const array = ['￥7', 500, 8123, 12];
     let value = array.toLocaleString();
-    arktest.assertEQ(value, '￥7,500,8,123,12')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '￥7,500,8,123,12')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '￥7,500,8 123,12')
+    }
 }
 function testArrayToLocaleString2(): void {
     const array = ['$10', 500, 823, 1234];
     let value = array.toLocaleString();
-    arktest.assertEQ(value, '$10,500,823,1,234')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '$10,500,823,1,234')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '$10,500,823,1 234')
+    }
 }
 function testArrayToLocaleString3(): void {
     const array = [new Short(100), new Char(c'B'), new Byte(50)];
@@ -31,17 +41,32 @@ function testArrayToLocaleString3(): void {
 function testArrayToLocaleString4(): void {
     const array = [new Long(1000000), new Short(25), new Char(c'X')];
     let value = array.toLocaleString();
-    arktest.assertEQ(value, '1,000,000,25,X')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '1,000,000,25,X')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '1 000 000,25,X')
+    }
 }
 function testArrayToLocaleString5(): void {
     const array = [new Byte(10), new Long(1000000000), new Float(3.14)];
     let value = array.toLocaleString();
-    arktest.assertEQ(value, '10,1,000,000,000,3.14')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '10,1,000,000,000,3.14')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '10,1 000 000 000,3,14')
+    }
 }
 function testNaNToLocaleString(): void {
     const num = NaN;
     let value = num.toLocaleString();
-    arktest.assertEQ(value, 'NaN')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, 'NaN')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, "не число")
+    }
 }
 function testInfinityToLocaleString(): void {
     const num = Infinity;
@@ -51,7 +76,12 @@ function testInfinityToLocaleString(): void {
 function testNegativeToLocaleString(): void {
     const num = new Int(-1234);
     let value = num.toLocaleString();
-    arktest.assertEQ(value, '-1,234')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '-1,234')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '-1 234')
+    }
 }
 function testbyteToLocaleString(): void {
     const num = new Byte(10)
@@ -66,17 +96,32 @@ function testshortToLocaleString(): void {
 function testintToLocaleString(): void {
     const num = new Int(1000)
     let value = num.toLocaleString();
-    arktest.assertEQ(value, '1,000')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '1,000')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '1 000')
+    }
 }
 function testlongToLocaleString(): void {
     const num = new Long(100000000000)
     let value = num.toLocaleString();
-    arktest.assertEQ(value, '100,000,000,000')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '100,000,000,000')
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '100 000 000 000')
+    }
 }
 function testfloatToLocaleString(): void {
     const num = new Float(1000.1)
     let value = num.toLocaleString();
-    arktest.assertEQ(value, '1,000.1')
+    const defaultLocale = new Intl.NumberFormat().resolvedOptions().locale;
+    if (defaultLocale.startsWith("en")) {
+        arktest.assertEQ(value, '1,000.1') 
+    } else if (defaultLocale.startsWith("ru")) {
+        arktest.assertEQ(value, '1 000,1')
+    }
 }
 function testcharToLocaleString(): void {
     const num = new Char(c'a')

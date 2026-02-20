@@ -1415,7 +1415,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.String
-      args: [ f64 ]
+      args: [ i32 ]
     impl: ark::ets::intrinsics::StdCoreStringFromCharCodeSingle
     peephole_func: PeepholeStringFromCharCodeSingle
 
