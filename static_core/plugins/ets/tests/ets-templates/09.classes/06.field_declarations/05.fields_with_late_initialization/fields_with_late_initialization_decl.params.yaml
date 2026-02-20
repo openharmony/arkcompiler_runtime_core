@@ -69,6 +69,35 @@ cases:
   - desc: |-
       Checking for initialization from constructor.
     check_variants:
+      - {check_type: "long", check_value: "5"}
+      - {check_type: "int", check_value: "5"}
+      - {check_type: "byte", check_value: "5"}
+      - {check_type: "short", check_value: "5"}
+      - {check_type: "double", check_value: "7.3"}
+      - {check_type: "number", check_value: "5"}
+      - {check_type: "float", check_value: "7.3f"}
+      - {check_type: "bigint", check_value: "5n"}
+      - {check_type: "string", check_value: "\"abc\""}
+      - {check_type: "char", check_value: "c'a'"}
+      - {check_type: "boolean", check_value: "false"}
+      - {check_type: "Object", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          field!: [check_type]
+          constructor (arg: [check_type]) {
+            this.field = arg
+          }
+        }
+    sub_cases_logic:
+      - |-
+        let a: A = new A([check_value])
+        arktest.assertTrue(a.field instanceof [check_type])
+        arktest.assertEQ(a.field, [check_value])
+
+  - desc: |-
+      Checking for initialization from constructor.
+    check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
     decl_variants:
@@ -158,6 +187,42 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
+
+  - desc: |-
+      >-
+        Checking for initialization from object literal.
+        Only class fields that have default values (see Default Values for Types)
+        or explicit initializers (see Variable and Constant Declarations)
+        can be skipped in an object literal. Otherwise, a compile-time error occurs.
+    check_variants:
+      - {check_type: "long", check_value: "5"}
+      - {check_type: "int", check_value: "5"}
+      - {check_type: "byte", check_value: "5"}
+      - {check_type: "short", check_value: "5"}
+      - {check_type: "double", check_value: "7.3"}
+      - {check_type: "number", check_value: "5"}
+      - {check_type: "float", check_value: "7.3f"}
+      - {check_type: "bigint", check_value: "5n"}
+      - {check_type: "string", check_value: "\"abc\""}
+      - {check_type: "char", check_value: "c'a'"}
+      - {check_type: "boolean", check_value: "false"}
+      - {check_type: "Object", check_value: "5"}
+    decl_variants:
+      - |-
+        class A {
+          f1: number
+          f2: string = "xyz"
+          f3!: [check_type]
+        }
+    sub_cases_logic:
+      - |-
+        let a: A = {f3: [check_value]}
+        arktest.assertTrue(a.f1 instanceof number)
+        arktest.assertEQ(a.f1, 0.0)
+        arktest.assertTrue(a.f2 instanceof string)
+        arktest.assertEQ(a.f2, "xyz")
+        arktest.assertTrue(a.f3 instanceof [check_type])
+        arktest.assertEQ(a.f3, [check_value])
 
   - desc: |-
       Checking for initialization from class method call.

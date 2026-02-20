@@ -62,6 +62,85 @@ cases:
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
     check_variants:
+      - {check_type: "long", check_value: "5"}
+      - {check_type: "int", check_value: "5"}
+      - {check_type: "byte", check_value: "5"}
+      - {check_type: "short", check_value: "5"}
+      - {check_type: "double", check_value: "7.3"}
+      - {check_type: "number", check_value: "5"}
+      - {check_type: "float", check_value: "7.3f"}
+      - {check_type: "char", check_value: "c'a'"}
+      - {check_type: "boolean", check_value: "false"}
+    decl_variants:
+      - |-
+        class A {
+          field!: [check_type]
+          constructor () {
+            let v: [check_type] = this.field
+          }
+        }
+      - |-
+        class A {
+          field!: [check_type]
+          constructor (arg: [check_type] = [check_value]) {
+            let v: [check_type] = this.field
+          }
+        }
+      - |-
+        class A {
+          field!: [check_type]
+          constructor (...args: Any[]) {
+            let v: [check_type] = this.field
+          }
+        }
+    sub_cases_logic:
+      - |-
+        let expectedError = (e: Error): boolean => {
+            return (e instanceof Error)
+        }
+        arktest.expectThrow(() => {
+          let a: A = new A()
+        }, expectedError)
+
+  - desc: |-
+      >-
+        As all other fields, a field with late initialization
+        must be initialized before it is used for the first time.
+    check_variants:
+      - {check_type: "long", check_value: "5"}
+      - {check_type: "int", check_value: "5"}
+      - {check_type: "byte", check_value: "5"}
+      - {check_type: "short", check_value: "5"}
+      - {check_type: "double", check_value: "7.3"}
+      - {check_type: "number", check_value: "5"}
+      - {check_type: "float", check_value: "7.3f"}
+      - {check_type: "char", check_value: "c'a'"}
+      - {check_type: "boolean", check_value: "false"}
+    decl_variants:
+      - |-
+        class A {
+          field!: [check_type]
+          constructor (arg: [check_type]) {
+            let v: [check_type] = this.field
+          }
+        }
+    sub_cases_logic:
+      - |-
+        let expectedError = (e: Error): boolean => {
+            return (e instanceof Error)
+        }
+        arktest.expectThrow(() => {
+          let a: A = new A([check_value])
+        }, expectedError)
+
+  - desc: |-
+      >-
+        As all other fields, a field with late initialization
+        must be initialized before it is used for the first time.
+        Field with late initialization must be initialized explicitly,
+        even though its type has a default value which is ignored
+        at the point of declaration.
+    check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
       - {check_type: "byte", cv_decl_data: ""}
@@ -95,6 +174,9 @@ cases:
       >-
         As all other fields, a field with late initialization
         must be initialized before it is used for the first time.
+        Field with late initialization must be initialized explicitly,
+        even though its type has a default value which is ignored
+        at the point of declaration.
     check_variants:
       - {check_type: "long", cv_decl_data: ""}
       - {check_type: "int", cv_decl_data: ""}
@@ -417,50 +499,4 @@ cases:
         }
         arktest.expectThrow(() => {
           waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
-        }, expectedError)
-
-  - desc: |-
-      >-
-        As all other fields, a field with late initialization
-        must be initialized before it is used for the first time.
-        A field with the modifier readonly is a readonly field.
-        Changing the value of a readonly field after initialization is
-        not allowed.
-    check_variants:
-      - {check_type: "long", cv_decl_data: ""}
-      - {check_type: "int", cv_decl_data: ""}
-      - {check_type: "byte", cv_decl_data: ""}
-      - {check_type: "short", cv_decl_data: ""}
-      - {check_type: "double", cv_decl_data: ""}
-      - {check_type: "number", cv_decl_data: ""}
-      - {check_type: "float", cv_decl_data: ""}
-      - {check_type: "bigint", cv_decl_data: ""}
-      - {check_type: "string", cv_decl_data: ""}
-      - {check_type: "char", cv_decl_data: ""}
-      - {check_type: "boolean", cv_decl_data: ""}
-      - {check_type: "Object", cv_decl_data: ""}
-      - {check_type: "C", cv_decl_data: "class C {}"}
-    decl_variants:
-      - |-
-        [cv_decl_data]
-        class A {
-          readonly field!: [check_type]
-        }
-    sub_cases_logic:
-      - |-
-        let a: A = new A()
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
-        }
-        arktest.expectThrow(() => {
-          let v: [check_type] = a.field
-        }, expectedError)
-      - |-
-        let a: A = new A()
-        const lambda = () => a.field
-        let expectedError = (e: Error): boolean => {
-            return (e instanceof Error)
-        }
-        arktest.expectThrow(() => {
-          let v: [check_type] = lambda()
         }, expectedError)
