@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,9 +23,9 @@ from unittest.mock import patch
 from runner.options.cli_options import get_args
 from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
+from runner.options.options_step import StepKind
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
-from runner.options.step import StepKind
 
 
 class WorkflowImportConfigTest(unittest.TestCase):

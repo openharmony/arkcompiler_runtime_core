@@ -40,10 +40,11 @@ from runner.extensions.suites.test_suite_registry import ITestSuite
 from runner.logger import Log
 from runner.options.options import IOptions
 from runner.options.options_collections import CollectionsOptions
+from runner.options.root_dir import RootDir
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
-from runner.utils import correct_path, get_group_number, get_test_id, is_executable_file
+from runner.utils import correct_path, escape, get_group_number, get_test_id, is_executable_file
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -56,7 +57,7 @@ class TestSuite(ITestSuite):
         self._test_env = test_env
         self.__suite_name = test_env.config.test_suite.suite_name
         self.__work_dir = test_env.work_dir
-        self._list_root = Path(test_env.config.test_suite.list_root)
+        self._list_roots: list[RootDir] = test_env.config.test_suite.list_roots
 
         self.config = test_env.config
 
@@ -65,11 +66,11 @@ class TestSuite(ITestSuite):
         self._preparation_steps: list[TestPreparationStep] = self.set_preparation_steps()
         self._collections_parameters = self.__get_collections_parameters()
 
+        self._test_lists = TestLists(self._list_roots, self._test_env, self.jit_repeats)
         self._explicit_file: Path | None = None
-        self._explicit_list: Path | None = None
-        self._test_lists = TestLists(self._list_root, self._test_env, self.jit_repeats)
-        self._test_lists.collect_excluded_test_lists(test_name=self.__suite_name)
-        self._test_lists.collect_ignored_test_lists(test_name=self.__suite_name)
+        self._explicit_list: Path | None = self._test_lists.explicit_list
+        self._test_lists.collect_excluded_test_lists()
+        self._test_lists.collect_ignored_test_lists()
         self.excluded = 0
         self.ignored_tests: list[Path] = []
         self.ignored_tests_with_failures: dict[Path, str] = {}
@@ -162,8 +163,8 @@ class TestSuite(ITestSuite):
         return self.__suite_name
 
     @cached_property
-    def list_root(self) -> Path:
-        return self._list_root
+    def list_roots(self) -> list[RootDir]:
+        return self._list_roots
 
     @property
     def explicit_list(self) -> Path | None:
@@ -174,15 +175,27 @@ class TestSuite(ITestSuite):
         return self._explicit_file
 
     def process(self, force_generate: bool) -> list[ITestFlow]:
-        raw_set = self._get_raw_set(force_generate)
-        self._explicit_file = self._set_explicit_file()
-        self._explicit_list = self._set_explicit_list()
-        executed_set = self._get_executed_files(raw_set)
-        self._search_both_excluded_and_ignored_tests()
-        executed_set = self._get_by_groups(executed_set)
-        tests = self._create_tests(executed_set)
-        _LOGGER.default(f"Loaded {len(tests)} test files from the folder '{self.test_root}'. "
-                        f"Excluded {self.excluded} tests are not loaded.")
+        """
+        Main processing method that orchestrates the entire test suite workflow.
+        
+        This method follows a systematic pipeline to prepare, filter, and create test objects:
+        1. Prepares test files (generates new ones or reuses existing)
+        2. Resolves explicit test file if specified
+        3. Filters test files based on execution criteria (excluded/ignored lists, filters, chapters) and
+        by group number if group filtering is enabled
+        4. Creates test objects from the filtered test files
+        
+        :param force_generate: if True, forces regeneration of test files even if they exist.
+                              If False, reuses existing test files when available.
+        :return: list of ITestFlow objects ready for execution
+        :raises InvalidConfiguration: if no tests are loaded for execution
+        """
+        prepared_test_files = self.__prepare_test_files(force_generate)
+        self._explicit_file = self._get_explicit_file(self._test_env.config.test_suite.test_lists.explicit_file)
+        filtered_test_files = self._resolve_test_files(prepared_test_files)
+        tests = self._create_tests(filtered_test_files)
+        _LOGGER.short(f"Loaded {len(tests)} test files from the folder '{self.test_root}'. "
+                      f"Excluded {self.excluded} tests are not loaded.")
         return tests
 
     def set_preparation_steps(self) -> list[TestPreparationStep]:
@@ -213,6 +226,20 @@ class TestSuite(ITestSuite):
             if self.jit_repeats > 0:
                 steps.extend(self.__add_jit_steps(collection, copy_source_path, extension))
         return steps
+
+    def _locate_chapters_file(self) -> Path:
+        """
+        Searches for chapters file (by default it is chapters.yaml) in all existing list roots
+        First found file path is returned
+        If neither list root contains the chapters file the FileNotFoundException raises
+        """
+        for root in self.list_roots:
+            file_path = correct_path(root.root_dir, self.config.test_suite.groups.chapters_file)
+            if path.isfile(file_path):
+                return file_path
+        raise FileNotFoundException(
+            f"Not found '{self.config.test_suite.groups.chapters_file}' in any list root "
+            f"'{self.list_roots!s}'")
 
     def __add_copy_steps(self, collection: CollectionsOptions, copy_source_path: Path, extension: str) \
             -> list[TestPreparationStep]:
@@ -264,7 +291,15 @@ class TestSuite(ITestSuite):
             ))
         return steps
 
-    def _get_raw_set(self, force_generate: bool) -> list[Path]:
+    def __prepare_test_files(self, force_generate: bool) -> list[Path]:
+        """
+        Prepares test files by either generating them according to preparation_steps or loading existing ones
+        :param force_generate: if True and the test files exist, it forces the test files' regeneration.
+            If False then the existing test files are reused.
+            If no test files exist, the generation occurs anyway.
+        :return: list of prepared test file paths (unique, no duplicates)
+        Note: Handles both generation of new test files and reuse of existing generated files
+        """
         util = StepUtils()
         tests: list[Path] = []
         if not force_generate and util.are_tests_generated(self.test_root):
@@ -289,12 +324,17 @@ class TestSuite(ITestSuite):
         return tests
 
     def __load_generated_test_files(self) -> list[Path]:
+        """
+        Searches starting from `test_root` and collects all existing files with specified extension.
+        Collections are taken into account.
+        :return: list of unique found files
+        """
         tests = []
         for collection in self.config.test_suite.collections:
             extension = self.config.test_suite.extension(collection)
             glob_expression = path.join(self.test_root, collection.name, f"**/*.{extension}")
             tests.extend(glob(glob_expression, recursive=True))
-        return self.__load_test_files([Path(test) for test in set(tests)])
+        return [Path(test) for test in set(tests)]
 
     def __get_explicit_test_path(self, test_id: str) -> Path | None:
         for collection in self.config.test_suite.collections:
@@ -309,30 +349,46 @@ class TestSuite(ITestSuite):
                 return test_path
         return None
 
-    def _get_executed_files(self, raw_test_files: list[Path]) -> list[Path]:
+    def _resolve_test_files(self, original_test_files: list[Path]) -> list[Path]:
         """
-        Browse the directory, search for files with the specified extension
+        Resolves the final list of test files by processing explicit selections or applying comprehensive filtering.
+        
+        :param original_test_files: full list of files with the specified extension that exist under the test_root
+        :return: resolved list of test files ready for test object creation
         """
         _LOGGER.short(f"Loading tests from the directory {self.test_root}")
-        test_files: list[Path] = []
+
+        test_files = self._get_explicit_test_files() or self._get_discovered_test_files(original_test_files)
+        return self._filter_by_group(test_files)
+
+    def _get_explicit_test_files(self) -> list[Path] | None:
+        """Returns test files from explicit selection (file or list), or None if no explicit selection."""
         if self.explicit_file is not None:
-            test_files.append(self.explicit_file)
-        elif self.explicit_list is not None:
-            test_files.extend(self._load_tests_from_lists([self.explicit_list]))
-        else:
-            if not self.config.test_suite.test_lists.skip_test_lists:
-                self.excluded_tests = self._load_excluded_tests()
-                self.ignored_tests = self._load_ignored_tests()
-                self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
-                    self._test_lists.ignored_lists)
-            test_files.extend(self.__load_test_files(raw_test_files))
+            return [self.explicit_file]
+        if self.explicit_list is not None:
+            return self._load_tests_from_lists([self.explicit_list])
+        return None
+
+    def _get_discovered_test_files(self, original_test_files: list[Path]) -> list[Path]:
+        """Performs automatic test discovery with comprehensive filtering."""
+        self._load_test_lists_if_needed()
+        test_files = self.__load_test_files(original_test_files)
         return test_files
 
-    def _get_by_groups(self, raw_test_files: list[Path]) -> list[Path]:
+    def _load_test_lists_if_needed(self) -> None:
+        """Loads excluded and ignored test lists if not skipped."""
+        if not self.config.test_suite.test_lists.skip_test_lists:
+            self.excluded_tests = self._load_excluded_tests()
+            self.ignored_tests = self._load_ignored_tests()
+            self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
+                self._test_lists.ignored_lists)
+            self._search_both_excluded_and_ignored_tests()
+
+    def _filter_by_group(self, original_test_files: list[Path]) -> list[Path]:
         if self.config.test_suite.groups.quantity > 1:
-            filtered_tests = {test for test in raw_test_files if self.__in_group_number(test)}
+            filtered_tests = {test for test in original_test_files if self.__in_group_number(test)}
             return list(filtered_tests)
-        return raw_test_files
+        return original_test_files
 
     def __get_n_group(self) -> int:
         groups = self.config.test_suite.groups.quantity
@@ -366,10 +422,10 @@ class TestSuite(ITestSuite):
             return weights[name]
         return None
 
-    def _create_tests(self, raw_test_files: list[Path]) -> list[ITestFlow]:
+    def _create_tests(self, test_files: list[Path]) -> list[ITestFlow]:
         all_tests: set[ITestFlow] = set()
-        for test in raw_test_files:
-            all_tests.add(self._create_test(test, test in self.ignored_tests))
+        for test_file in test_files:
+            all_tests.add(self._create_test(test_file, test_file in self.ignored_tests))
 
         not_tests = {t for t in all_tests if not t.is_valid_test}
         valid_tests = all_tests - not_tests
@@ -383,16 +439,21 @@ class TestSuite(ITestSuite):
     def _get_test_root_pattern(self, mask: str) -> re.Pattern:
         return re.compile(f"{self.test_root / mask}")
 
-    def __load_test_files(self, raw_test_files: list[Path]) -> list[Path]:
+    def __load_test_files(self, original_test_files: list[Path]) -> list[Path]:
+        """
+        Applies excluded list, filters, chapters and collections to input original_test_files list
+        :param original_test_files: unprocessed list of test files
+        :return: filtered list.
+        """
         if self.config.test_suite.filter != "*" and self.config.test_suite.groups.chapters:
             raise InvalidConfiguration(
                 "Incorrect configuration: specify either filter or chapter options"
             )
-        test_files: list[Path] = raw_test_files
+        test_files: list[Path] = original_test_files
         excluded: list[Path] = list(self.excluded_tests)[:]
         if self.config.test_suite.groups.chapters:
             test_files = self.__filter_by_chapters(self.test_root, test_files)
-        mask = self.config.test_suite.filter.replace(".", r"\.").replace("*", ".*")
+        mask = escape(self.config.test_suite.filter)
         coll_names = "|".join(self._collections_parameters.keys())
         mask = f"({coll_names})?/{mask}" if coll_names else mask
         pattern = self._get_test_root_pattern(mask)
@@ -400,29 +461,29 @@ class TestSuite(ITestSuite):
 
     def __filter_by_chapters(self, base_folder: Path, files: list[Path]) -> list[Path]:
         test_files: set[Path] = set()
-        chapters: Chapters = self.__parse_chapters()
+        chapters: Chapters = self.__get_chapters()
         for chapter in self.config.test_suite.groups.chapters:
             test_files.update(chapters.filter_by_chapter(chapter, base_folder, files))
         return list(test_files)
 
-    def __parse_chapters(self) -> Chapters:
-        chapters: Chapters | None = None
-        if path.isfile(self.config.test_suite.groups.chapters_file):
-            chapters = Chapters(self.config.test_suite.groups.chapters_file)
-        else:
-            corrected_chapters_file = correct_path(self.list_root,
-                                                   self.config.test_suite.groups.chapters_file)
-            if path.isfile(corrected_chapters_file):
-                chapters = Chapters(corrected_chapters_file)
-            else:
-                raise FileNotFoundException(
-                    f"Not found either '{self.config.test_suite.groups.chapters_file}' or "
-                    f"'{corrected_chapters_file}'")
-        return chapters
+    def __get_chapters(self) -> Chapters:
+        chapters_file = self.config.test_suite.groups.chapters_file \
+            if path.isfile(self.config.test_suite.groups.chapters_file) \
+            else self._locate_chapters_file()
+        return Chapters(chapters_file)
 
-    def _set_explicit_file(self) -> Path | None:
-        explicit_file = self.config.test_suite.test_lists.explicit_file
-        if explicit_file is not None and self.list_root is not None:
+    def _get_explicit_file(self, explicit_file: str | None) -> Path | None:
+        """
+        Calculates a full file path to be used as a test file (specified in the option `--test-list`) if it exists.
+
+        If both 'explicit_file' and 'test_root' are provided, this method attempts to locate the specified test file
+        within the test root directory structure.
+
+        :param explicit_file: name or related path from LIST_ROOT, taken from --test-list option
+        :return: the full path if the test list specified or None if `explicit_file` was not given
+        :raise TestNotExistException: if the test list is specified, but no real file is found
+        """
+        if explicit_file is not None and self.test_root is not None:
             test_path = self.__get_explicit_test_path(explicit_file)
             if test_path and test_path.exists():
                 return test_path
@@ -430,8 +491,9 @@ class TestSuite(ITestSuite):
         return None
 
     def _set_explicit_list(self) -> Path | None:
-        if self.config.test_suite.test_lists.explicit_list is not None and self.list_root is not None:
-            return correct_path(self.list_root, self.config.test_suite.test_lists.explicit_list)
+        if self.config.test_suite.test_lists.explicit_list is not None and self.list_roots is not None:
+            for list_root in self.list_roots:
+                return correct_path(list_root.root_dir, self.config.test_suite.test_lists.explicit_list)
         return None
 
     def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:
@@ -459,9 +521,10 @@ class TestSuite(ITestSuite):
         """
         Read excluded_lists and load list of excluded tests
         """
-        excluded_tests = self._get_by_groups(self._load_tests_from_lists(self._test_lists.excluded_lists))
+        excluded_tests = self._filter_by_group(self._load_tests_from_lists(self._test_lists.excluded_lists))
         self._search_duplicates(excluded_tests, "excluded")
-        self.excluded = len(set(excluded_tests))
+        excluded_tests = list(set(excluded_tests))
+        self.excluded = len(excluded_tests)
         return excluded_tests
 
     def _load_ignored_tests(self) -> list[Path]:
@@ -490,16 +553,27 @@ class TestSuite(ITestSuite):
         return result
 
     def _get_tests_from_ignore_with_failures(self, lists: list[Path]) -> dict[Path, str]:
+        """
+        Detects whether the test from ignored test list has an expected failure
+        :param lists: list of loaded ignored test lists
+        :return: a map where a test file is paired with the expected error message
+        """
         tests: dict[Path, str] = {}
         for list_path in lists:
             tests_from_list = self._get_tests_with_comment(list_path)
             tests = {**tests, **tests_from_list}
 
-        tests = {key: val for key, val in tests.items() if TestSuite._comment_has_failure(val)}
-        tests = {key: TestSuite._get_failure_text(val) for key, val in tests.items()}
+        tests = {key: val for key, val in tests.items() if self._comment_has_failure(val)}
+        tests = {key: self._get_failure_text(val) for key, val in tests.items()}
         return tests
 
     def _get_tests_with_comment(self, list_path: Path) -> dict[Path, str]:
+        """
+        Searches the test with comments in the excluded/ignored test list
+        :param list_path: the investigated test list
+        :return: a map where a test file is paired with the comment
+        Note: only tests with comments are returned
+        """
         tests: dict[Path, str] = {}
         comment_lines: list[str] = []
         prev_line_was_comment = False
@@ -668,9 +742,9 @@ class GTestSuite(TestSuite):
         else:
             raw_set = self._get_raw_set(force_generate)
 
-        executed_set = list(set(self._get_executed_files(raw_set)))
+        executed_set = list(set(self._resolve_test_files(raw_set)))
         self._search_both_excluded_and_ignored_tests()
-        executed_set = self._get_by_groups(executed_set)
+        executed_set = self._filter_by_group(executed_set)
         tests = self._create_tests(executed_set)
         _LOGGER.default(f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
                         f"Excluded {self.excluded} tests are not loaded.")
@@ -691,7 +765,7 @@ class GTestSuite(TestSuite):
 
         return test
 
-    def _get_raw_set(self, force_generate: bool, file_name: str | None = None) -> list[Path]:
+    def _get_raw_set(self, _: bool, file_name: str | None = None) -> list[Path]:
         return self.__load_precompiled_files(file_name)
 
     def _get_test_root_pattern(self, mask: str) -> re.Pattern:
@@ -699,11 +773,11 @@ class GTestSuite(TestSuite):
 
     def _set_explicit_file(self) -> Path | None:
         test_id = self.config.test_suite.test_lists.explicit_file
-        if test_id is not None and self.list_root is not None:
+        if test_id is not None and self.list_roots is not None:
             return Path(test_id)
         return None
 
-    def _get_executed_files(self, raw_test_files: list[Path]) -> list[Path]:
+    def _resolve_test_files(self, original_test_files: list[Path]) -> list[Path]:
         """
         Browse the directory, search for files with the specified extension
         """
@@ -717,7 +791,7 @@ class GTestSuite(TestSuite):
                 self.ignored_tests = self._load_ignored_tests()
                 self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
                     self._test_lists.ignored_lists)
-            test_files.extend([test_file for test_file in raw_test_files if test_file not in self.excluded_tests])
+            test_files.extend([test_file for test_file in original_test_files if test_file not in self.excluded_tests])
         return test_files
 
     def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:

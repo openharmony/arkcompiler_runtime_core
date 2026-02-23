@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 from runner.logger import Log
 from runner.options.config import Config
+from runner.options.root_dir import RootDir
 from runner.test_base import Test
-from runner.utils import correct_path
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -41,12 +41,12 @@ class Runner(ABC):
         # directory where test files are located - it's either set explicitly to the absolute value
         # or the current folder (where this python file is located!) parent
         self.test_root: Path | None = None
-        # directory where list files (files with list of ignored, excluded, and other tests) are located
+        # directories where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
-        self.list_root: Path | None = config.test_suite.list_root
-        if self.list_root is not None:
-            _LOGGER.short(f"LIST_ROOT set to {self.list_root}")
+        self.list_roots: list[RootDir] = config.test_suite.list_roots
+        if self.list_roots:
+            _LOGGER.short(f"LIST_ROOT set to {self.list_roots}")
 
         # runner init time
         self.start_time = datetime.now(pytz.UTC)
@@ -69,14 +69,6 @@ class Runner(ABC):
         self.tests: set[Test] = set([])
         # list of results of every executed test
         self.results: list[Test] = []
-        # name of file with a list of only tests what should be executed
-        # if it's specified other tests are not executed
-        self.explicit_list = correct_path(self.list_root, config.test_suite.test_lists.explicit_list) \
-            if config.test_suite.test_lists.explicit_list is not None and self.list_root is not None \
-            else None
-        # name of the single test file in form of a relative path from test_root what should be executed
-        # if it's specified other tests are not executed even if test_list is set
-        self.explicit_test = config.test_suite.test_lists.explicit_file
 
         # Counters:
         # failed + ignored + passed + excluded_after = len of all executed tests

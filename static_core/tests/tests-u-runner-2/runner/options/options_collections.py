@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,11 +19,10 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, cast
 
-from runner import utils
-from runner.common_exceptions import InvalidConfiguration
 from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
+from runner.options.root_dir import RootDir
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -42,8 +41,15 @@ class CollectionsOptions(IOptions):
         self.__name = name
         self._parent: IOptions = parent
         self.__args: dict[str, Any] = args  # type: ignore[explicit-any]
-        self.__test_root = self.__get_arg(self.__TEST_ROOT)
-        self.__list_root = self.__get_arg(self.__LIST_ROOT)
+        self.__test_root: RootDir = RootDir.get_test_root(obj=self.__args, options=self) \
+            if not name \
+            else RootDir(cast(Path, parent.get_value('test_root')), name, self)
+        parent_list_roots: list[RootDir] = cast(list[RootDir], parent.get_value('list_roots'))
+        self.__list_roots: list[RootDir] = RootDir.get_list_roots(
+            obj=self.__args,
+            default_name=cast(str, parent.get_value('suite_name')),
+            default_list_roots=parent_list_roots,
+            options=self)
         self.__exclude: list[str] = args[self.__EXCLUDE] if args and self.__EXCLUDE in args else []
         self.__parameters: dict[str, Any] = (  # type: ignore[explicit-any]
             args)[self.__PARAMETERS] if args and self.__PARAMETERS in args else {}
@@ -58,11 +64,11 @@ class CollectionsOptions(IOptions):
 
     @cached_property
     def test_root(self) -> Path:
-        return Path(self.__test_root)
+        return self.__test_root()
 
     @cached_property
-    def list_root(self) -> Path:
-        return Path(self.__list_root)
+    def list_roots(self) -> list[RootDir]:
+        return self.__list_roots
 
     @cached_property
     def generator_class(self) -> str | None:
@@ -90,22 +96,6 @@ class CollectionsOptions(IOptions):
 
     def __get_from_args(self, key: str, default_value: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
         return self.__args[key] if self.__args and key in self.__args else default_value
-
-    def __get_arg(self, prop_name_minused: str) -> str:
-        result = ""
-        prop_name_underscored = utils.convert_minus(prop_name_minused)
-        if self.__args and prop_name_minused in self.__args:
-            result = cast(str, Macros.correct_macro(self.__args[prop_name_minused], self._parent))
-        elif prop_name_underscored in self._parent.properties():
-            result = cast(str, self._parent.get_value(prop_name_underscored))
-            result = cast(str, Macros.correct_macro(result, self._parent))
-        elif self.__PARAMETERS in self._parent.properties():
-            params = cast(dict, self._parent.get_value(self.__PARAMETERS))
-            if prop_name_minused in params:
-                result = cast(str, Macros.correct_macro(params[prop_name_minused], self._parent))
-        else:
-            raise InvalidConfiguration(f"Unknown key {prop_name_minused}")
-        return result
 
     def __expand_macros_in_parameters(self) -> None:
         for param_name, param_value in self.__parameters.items():

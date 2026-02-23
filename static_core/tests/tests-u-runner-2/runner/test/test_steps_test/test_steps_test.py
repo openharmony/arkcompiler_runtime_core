@@ -26,7 +26,7 @@ from unittest.mock import patch
 from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.options.cli_options import get_args
 from runner.options.config import Config
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.test import test_utils

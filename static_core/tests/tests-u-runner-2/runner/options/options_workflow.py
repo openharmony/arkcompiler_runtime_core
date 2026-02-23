@@ -24,8 +24,8 @@ from runner.common_exceptions import FileNotFoundException, InvalidConfiguration
 from runner.logger import Log
 from runner.options.macros import MacroNotExpanded, Macros, ParameterNotFound
 from runner.options.options import IOptions
+from runner.options.options_step import RawStepData, Step, StepKind
 from runner.options.options_test_suite import TestSuiteOptions
-from runner.options.step import RawStepData, Step, StepKind
 from runner.utils import indent as utils_indent
 
 _LOGGER = Log.get_logger(__file__)
