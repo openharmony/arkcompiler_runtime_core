@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,9 +22,9 @@ from unittest.mock import patch
 
 from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
+from runner.options.options_step import StepKind
 from runner.options.options_test_suite import TestSuiteOptions
 from runner.options.options_workflow import WorkflowOptions
-from runner.options.step import StepKind
 from runner.test.config_test.data import data_3
 
 
@@ -113,7 +113,8 @@ class WorkflowArkJsConfigTest(unittest.TestCase):
         test_suite, _ = self.prepare_test()
         self.assertEqual(test_suite.suite_name, "test_suite1")
         self.assertEqual(test_suite.test_root, Path.cwd().resolve())
-        self.assertEqual(test_suite.list_root, Path.cwd().resolve())
+        self.assertEqual(len(test_suite.list_roots), 1)
+        self.assertEqual(test_suite.list_roots[0].root_dir, Path.cwd().resolve())
         self.assertEqual(test_suite.extension(), "sts")
         self.assertEqual(test_suite.load_runtimes(), "ets")
         self.assertEqual(test_suite.work_dir, ".")

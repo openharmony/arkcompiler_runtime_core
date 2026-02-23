@@ -25,7 +25,7 @@ from runner.extensions.validators.astchecker.diag_type import DiagType
 from runner.extensions.validators.astchecker.util_astchecker import UtilASTChecker
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
-from runner.options.step import StepKind
+from runner.options.options_step import StepKind
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.utils import unlines
 

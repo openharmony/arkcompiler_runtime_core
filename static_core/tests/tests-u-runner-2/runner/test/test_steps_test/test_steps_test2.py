@@ -27,7 +27,7 @@ import yaml
 from runner.common_exceptions import MalformedStepConfigurationException
 from runner.options.cli_options import get_args
 from runner.options.config import Config
-from runner.options.step import RawStepData, Step
+from runner.options.options_step import RawStepData, Step
 from runner.options.step_reqs import ReqKind, StepRequirements
 from runner.suites.runner_standard_flow import RunnerStandardFlow
 from runner.suites.test_standard_flow import TestStandardFlow

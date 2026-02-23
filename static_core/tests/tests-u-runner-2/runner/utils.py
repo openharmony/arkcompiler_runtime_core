@@ -569,3 +569,23 @@ def strip_test_name(test_name: Path) -> tuple[str, str]:
 
 def unlines(lines: Iterable[str]) -> str:
     return ''.join(line + "\n" for line in lines)
+
+
+def escape(line: str, *, escaped_chars: str = ".+?", add_dots: str = "*") -> str:
+    r"""
+    Prepares the line to be used in regexp.
+
+    We cannot use `re.escape` because it escapes `*` too, but we need to convert it to regexp .* symbol
+    :param line: the original string
+    :param escaped_chars: the string with chars that should be used as is without converting into
+        regexp controlling symbols. Mainly, this is '.' symbol that should be converted into '\.'
+    :param add_dots: the string with chars that should be used as regexp controlling symbols.
+        Mainly, this is '*' symbol that should be converted into '.*'
+    """
+    dst = line
+    for char in escaped_chars:
+        dst = dst.replace(char, fr"\{char}")
+    for char in add_dots:
+        dst = dst.replace(char, f".{char}")
+
+    return dst
