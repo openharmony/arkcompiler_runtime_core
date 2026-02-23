@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference types="node" />
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

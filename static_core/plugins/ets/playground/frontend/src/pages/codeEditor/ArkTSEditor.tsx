@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ import { selectHighlightErrors, selectJumpTo } from '../../store/selectors/logs'
 loader.config({ monaco });
 
 const ArkTSEditor: React.FC = () => {
-    let backendSyntax = useSelector(selectSyntax);
+    const backendSyntax = useSelector(selectSyntax);
     const monaco = useMonaco();
     const dispatch = useDispatch<AppDispatch>();
     const {theme} = useTheme();
@@ -133,13 +133,13 @@ const ArkTSEditor: React.FC = () => {
 
         window.addEventListener('flushPendingCodeUpdate', handleFlush);
 
-        return () => {
+        return (): void => {
             window.removeEventListener('flushPendingCodeUpdate', handleFlush);
             const d = debouncedDispatchRef.current;
             if (hasCancel(d)) {
                 d.cancel();
-            };
-        }
+            }
+        };
     }, []);
 
     const handleEditorChange = (value?: string): void => {
