@@ -34,7 +34,7 @@ test.describe('User Scenarios', () => {
             await page.getByRole('button', { name: 'Run' }).click();
             await expect(page.getByRole('button', { name: 'Run' })).toBeEnabled({ timeout: TIMEOUT.compile });
             await page.getByRole('tab', { name: 'Execute' }).click();
-            await expect(page.getByText('Test runtime error')).toBeVisible({ timeout: TIMEOUT.ui });
+            await expect(page.getByTestId('log-message').filter({ hasText: 'Test runtime error' })).toBeVisible({ timeout: TIMEOUT.ui });
         });
 
         test('should show non-zero exit code for failed compilation', async ({ page }) => {

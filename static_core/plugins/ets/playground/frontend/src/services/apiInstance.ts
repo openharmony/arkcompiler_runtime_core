@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
     headers: AxiosHeaders;
 }
 
-let isRefreshing = false;
+const isRefreshing = false;
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (error: AxiosError) => void }> = [];
 
 const processQueue = (error: AxiosError | null, token: string | null = null): void => {

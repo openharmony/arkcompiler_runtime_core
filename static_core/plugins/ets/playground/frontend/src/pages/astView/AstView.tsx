@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,22 +25,16 @@ import { selectASTLoading, selectASTRes } from '../../store/selectors/ast';
 import { AppDispatch } from '../../store';
 import { fetchAst } from '../../store/actions/ast';
 import { selectAstMode } from '../../store/selectors/features';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 
 loader.config({ monaco });
-// @ts-ignore
 globalThis.MonacoEnvironment = {
-    // @ts-ignore
-    getWorker(_, label): Worker {
+    getWorker(_: string, label: string): Worker {
         if (label === 'json') {
-            return new Worker(
-                new URL('monaco-editor/esm/vs/language/json/json.worker?worker', import.meta.url),
-                { type: 'module' }
-            );
+            return new jsonWorker();
         }
-        return new Worker(
-            new URL('monaco-editor/esm/vs/editor/editor.worker?worker', import.meta.url),
-            { type: 'module' }
-        );
+        return new editorWorker();
     }
 };
 

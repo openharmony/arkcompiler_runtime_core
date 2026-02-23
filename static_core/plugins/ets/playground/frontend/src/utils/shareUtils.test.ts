@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,10 @@ describe('share utils', () => {
   });
 
   describe('decodeShareData', () => {
+    beforeEach(() => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
     it('returns null for invalid base64 input', () => {
       expect(decodeShareData('@@@not_base64@@@')).toBeNull();
     });
@@ -94,6 +98,7 @@ describe('share utils', () => {
     });
 
     it('returns false when clipboard API is unavailable', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
       Object.defineProperty(navigator, 'clipboard', {
         configurable: true,
         value: undefined,
@@ -105,6 +110,7 @@ describe('share utils', () => {
     });
 
     it('returns false when clipboard API throws permission error', async () => {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
       const writeText = jest.fn().mockRejectedValue(new Error('Permission denied'));
       Object.defineProperty(navigator, 'clipboard', {
         configurable: true,

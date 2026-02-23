@@ -38,17 +38,19 @@ export async function setupPage(page: Page): Promise<void> {
     await expect(page.getByText('ArkTS playground')).toBeVisible({ timeout: TIMEOUT.ui });
 }
 
-// Helper to type code in Monaco editor
+// Helper to replace code in Monaco editor (select all + paste, like a real user)
 export async function typeInEditor(page: Page, code: string): Promise<void> {
-    const editor = page.locator('.monaco-editor textarea').first();
-    await editor.focus();
-    await page.waitForTimeout(100);
-    // Select all and delete, then type new code
+    await page.locator('.monaco-editor').first().click();
     await page.keyboard.press('ControlOrMeta+a');
-    await page.waitForTimeout(50);
-    await page.keyboard.press('Backspace');
-    await page.waitForTimeout(50);
-    await page.keyboard.type(code, { delay: 5 });
+    await page.evaluate((text) => {
+        const clipboardData = new DataTransfer();
+        clipboardData.setData('text/plain', text);
+        document.activeElement?.dispatchEvent(new ClipboardEvent('paste', {
+            clipboardData,
+            bubbles: true,
+            cancelable: true,
+        }));
+    }, code);
 }
 
 // Re-export test and expect from Playwright
