@@ -63,9 +63,15 @@ public:
 
     bool ProcessObjectPointer([[maybe_unused]] ObjectHeader *obj, ObjectPointerType *p)
     {
-        if (*p != 0) {
-            visitor_(reinterpret_cast<common::RefField<> &>(*reinterpret_cast<common::BaseObject **>(p)));
+        if (*p == 0) {
+            return true;
         }
+        auto **ref = reinterpret_cast<common::BaseObject **>(p);
+        auto *oldValue = *ref;
+        visitor_(reinterpret_cast<common::RefField<> &>(*ref));
+        auto *newValue = reinterpret_cast<ObjectHeader *>(*ref);
+        LOG(DEBUG, MM_OBJECT_EVENTS) << "Forward object " << oldValue << " -> " << newValue << " "
+                                     << GetDebugInfoAboutObject(newValue) << " accessed from: " << obj;
         return true;
     }
 
