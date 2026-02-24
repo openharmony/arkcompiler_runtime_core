@@ -1008,8 +1008,8 @@ static std::pair<Inst *, Inst *> BuildLoadPropertyChain(IntrinsicInst *intrinsic
     Inst *cpOffsetForClass = intrinsic->GetInput(3U).GetInst();
     for (uint32_t strIndexInAnnot = qnameStart; strIndexInAnnot < qnameStart + qnameLen; strIndexInAnnot++) {
         IntrinsicInst *jsProperty = nullptr;
-        auto uniqueStrIndex = graph->GetRuntime()->GetAnnotationElementUniqueIndex(
-            klass, "Lets/annotation/DynamicCall;", strIndexInAnnot);
+        auto uniqueStrIndex =
+            graph->GetRuntime()->GetAnnotationElementUniqueIndex(klass, "###33445-deprecated", strIndexInAnnot);
         auto strIndexInAnnotConst = graph->FindOrCreateConstant(uniqueStrIndex);
         auto indexInst = graph->CreateInstAdd(DataType::INT32, pc, cpOffsetForClass, strIndexInAnnotConst);
         intrinsic->InsertBefore(indexInst);

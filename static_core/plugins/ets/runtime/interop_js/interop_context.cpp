@@ -179,7 +179,7 @@ void ConstStringStorage::LoadDynamicCallClass(Class *klass)
     auto *pf = klass->GetPandaFile();
     panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
     [[maybe_unused]] auto annotationFound = cda.EnumerateAnnotation(
-        "Lets/annotation/DynamicCall;", [this, pf, startFrom, jsArr, env](panda_file::AnnotationDataAccessor &ada) {
+        "###33445-deprecated", [this, pf, startFrom, jsArr, env](panda_file::AnnotationDataAccessor &ada) {
             for (uint32_t i = 0; i < ada.GetCount(); i++) {
                 auto adae = ada.GetElement(i);
                 auto *elemName = pf->GetStringData(adae.GetNameId()).data;

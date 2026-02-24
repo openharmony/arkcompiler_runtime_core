@@ -2827,7 +2827,7 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementStatic(AbckitCoreAnn
     annoElem->name = CreateStringStatic(file, annoElemName.data(), annoElemName.size());
     annoElem->value = valuePtr;
 
-    // Get full annotation name (e.g. "ets.annotation.FunctionalReference" instead of just "FunctionalReference")
+    // Get full annotation name (e.g. "arkruntime.annotation.FunctionReference" instead of just "FunctionalReference")
     std::string fullAnnotationName;
     if (anno->ai) {
         auto *aiName = AnnotationInterfaceGetNameStatic(anno->ai);

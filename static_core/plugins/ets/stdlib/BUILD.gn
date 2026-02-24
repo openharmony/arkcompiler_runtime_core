@@ -28,6 +28,8 @@ action("copy_stdlib") {
     rebase_path("std"),
     "--escompat-dir",
     rebase_path("escompat"),
+    "--arkruntime-dir",
+    rebase_path("arkruntime"),
     "--target-dir",
     rebase_path("${root_out_dir}/arkcompiler/stdlib"),
     "--json-file",

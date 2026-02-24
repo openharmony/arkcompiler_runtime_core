@@ -13,13 +13,13 @@
 
 .language eTS
 
-.record ets.annotation.Module <external>
+.record arkruntime.annotation.Module <external>
 .record std.core.Object <external>
 .record std.core.String <external>
 .record std.core.StringBuilder <external>
 
 .function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>
-.record ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public, ets.annotation.type=class, ets.annotation.class=ets.annotation.Module, ets.annotation.id=id_457> {
+.record ETSGLOBAL <ets.abstract, ets.extends=std.core.Object, access.record=public, ets.annotation.type=class, ets.annotation.class=arkruntime.annotation.Module, ets.annotation.id=id_457> {
 }
 .function void ETSGLOBAL._cctor_() <cctor, static> {
 	return.void

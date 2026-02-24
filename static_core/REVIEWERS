@@ -170,6 +170,7 @@ static_core/plugins/ets/runtime/types/ets_class*                              @v
 static_core/plugins/ets/runtime/types/ets_method*                             @vpukhov ^igelhaus ^Prof
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    ^nazarovkonstantin @slynkodenis @shilei123 @vpukhov
+static_core/plugins/ets/stdlib/arkruntime/                                    @vpukhov @igelhaus @Prof @schernykh ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 @slynkodenis
 static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
 static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg

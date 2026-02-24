@@ -159,7 +159,7 @@ static bool ProcessAsyncAnnotationsInFunctionTable(std::map<std::string, ark::pa
                                                    const std::string &oldFunctionKeyName,
                                                    const std::string &newFunctionKeyName, bool isStatic)
 {
-    constexpr std::string_view ASYNC_ANNOTATION = "ets.coroutine.Async";
+    constexpr std::string_view ASYNC_ANNOTATION = "arkruntime.annotation.Async";
     constexpr std::string_view ELEMENT_NAME = "value";
 
     for (auto &[functionKeyName, func] : functionTable) {
@@ -407,7 +407,7 @@ static bool FunctionRefreshFunctionOverloadAnnotationElements(AbckitCoreFunction
 static bool CheckFunctionalReferenceNeedsUpdate(ark::pandasm::AnnotationData &anno, const std::string &elementName,
                                                 const std::string &oldFunctionKeyName)
 {
-    if (anno.GetName() != "ets.annotation.FunctionalReference") {
+    if (anno.GetName() != "arkruntime.annotation.FunctionReference") {
         return false;
     }
     for (const auto &elem : anno.GetElements()) {
@@ -462,7 +462,8 @@ static bool FunctionRefreshLambdaAnnotationElements(AbckitCoreFunction *function
 
     auto *prog = function->owningModule->file->GetStaticProgram();
     const std::string LAMBDA_RECORD_KEY = "%%lambda-";
-    const std::string FUNCTIONAL_REFERENCE_ANNO = "ets.annotation.FunctionalReference";
+    // CC-OFFNXT(G.NAM.03-CPP) project code style
+    const std::string FUNCTIONAL_REFERENCE_ANNO = "arkruntime.annotation.FunctionReference";
     const std::string NAMED_FUNCTION_OBJECT_ANNO = "std.core.NamedFunctionObject";
     const std::string ELEMENT_NAME = "value";
     const std::string NAME_ELEMENT = "name";
@@ -548,8 +549,10 @@ static bool UpdateAnnotationElementValueString(ark::pandasm::RecordMetadata *met
     return UpdateAnnotationElementValue(metadata, annoName, elementName, std::move(newVal));
 }
 
-static bool UpdateAnnotationElementValueRecord(ark::pandasm::RecordMetadata *metadata, const std::string &annoName,
-                                               const std::string &elementName, const std::string &recordName)
+[[maybe_unused]] static bool UpdateAnnotationElementValueRecord(ark::pandasm::RecordMetadata *metadata,
+                                                                const std::string &annoName,
+                                                                const std::string &elementName,
+                                                                const std::string &recordName)
 {
     auto recordType = ark::pandasm::Type::FromName(recordName, true);
     auto newVal = std::make_unique<ark::pandasm::ScalarValue>(
@@ -660,7 +663,7 @@ static bool RefreshModuleExportedAnnotationElements(ark::pandasm::Record *record
         return true;
     }
 
-    constexpr const char *MODULE_ANNOTATION = "ets.annotation.Module";
+    constexpr const char *MODULE_ANNOTATION = "arkruntime.annotation.Module";
     constexpr const char *EXPORTED_ELEMENT = "exported";
 
     bool found = false;
@@ -747,7 +750,7 @@ static void RefreshNamespaceExportedElementsRecursive(AbckitCoreNamespace *ns, c
     }
 }
 
-static ark::pandasm::RecordMetadata *GetRecordMetadata(
+[[maybe_unused]] static ark::pandasm::RecordMetadata *GetRecordMetadata(
     std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *> object)
 {
     return std::visit(
@@ -764,94 +767,6 @@ static ark::pandasm::RecordMetadata *GetRecordMetadata(
         object);
 }
 
-static bool RefreshEnclosingClassAnnotationElement(
-    std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *> object)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    auto *metadata = GetRecordMetadata(object);
-    if (metadata == nullptr) {
-        return true;
-    }
-
-    std::string parentName;
-
-    if (std::holds_alternative<AbckitCoreNamespace *>(object)) {
-        auto ns = std::get<AbckitCoreNamespace *>(object);
-        if (ns->parentNamespace != nullptr) {
-            std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
-                         AbckitCoreEnum *, AbckitCoreAnnotationInterface *>
-                variantObj = ns->parentNamespace;
-            auto record = libabckit::GetStaticImplRecord(variantObj);
-            if (record != nullptr) {
-                parentName = record->name;
-            }
-        }
-    } else if (std::holds_alternative<AbckitCoreClass *>(object)) {
-        auto klass = std::get<AbckitCoreClass *>(object);
-        if (klass->parentNamespace != nullptr) {
-            std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
-                         AbckitCoreEnum *, AbckitCoreAnnotationInterface *>
-                variantObj = klass->parentNamespace;
-            auto record = libabckit::GetStaticImplRecord(variantObj);
-            if (record != nullptr) {
-                parentName = record->name;
-            }
-        }
-    } else if (std::holds_alternative<AbckitCoreEnum *>(object)) {
-        auto enm = std::get<AbckitCoreEnum *>(object);
-        if (enm->parentNamespace != nullptr) {
-            std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *,
-                         AbckitCoreEnum *, AbckitCoreAnnotationInterface *>
-                variantObj = enm->parentNamespace;
-            auto record = libabckit::GetStaticImplRecord(variantObj);
-            if (record != nullptr) {
-                parentName = record->name;
-            }
-        }
-    }
-
-    if (parentName.empty()) {
-        return true;
-    }
-
-    LIBABCKIT_LOG(DEBUG) << "Updating EnclosingClass annotation element to: " << parentName << std::endl;
-    UpdateAnnotationElementValueRecord(metadata, "ets.annotation.EnclosingClass", "value", parentName);
-
-    return true;
-}
-
-static bool RefreshInnerClassAnnotationElement(
-    std::variant<AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreEnum *> object)
-{
-    LIBABCKIT_LOG_FUNC;
-
-    auto *metadata = GetRecordMetadata(object);
-    if (metadata == nullptr) {
-        return true;
-    }
-
-    std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *, AbckitCoreInterface *, AbckitCoreEnum *,
-                 AbckitCoreAnnotationInterface *>
-        variantObj = std::visit(
-            [](auto &obj) -> std::variant<AbckitCoreModule *, AbckitCoreNamespace *, AbckitCoreClass *,
-                                          AbckitCoreInterface *, AbckitCoreEnum *, AbckitCoreAnnotationInterface *> {
-                return obj;
-            },
-            object);
-    auto progRecord = libabckit::GetStaticImplRecord(variantObj);
-    if (progRecord == nullptr) {
-        return true;
-    }
-
-    std::string fullName = progRecord->name;
-
-    LIBABCKIT_LOG(DEBUG) << "Updating InnerClass annotation name element to: " << fullName << std::endl;
-    UpdateAnnotationElementValueString(metadata, "ets.annotation.InnerClass", "name", fullName);
-
-    return true;
-}
-
 static bool RefreshExportedAnnotationElement(ark::pandasm::Record *record, const std::string &oldName,
                                              const std::string &newName)
 {
@@ -865,7 +780,7 @@ static bool RefreshExportedAnnotationElement(ark::pandasm::Record *record, const
         return true;
     }
 
-    constexpr const char *MODULE_ANNOTATION = "ets.annotation.Module";
+    constexpr const char *MODULE_ANNOTATION = "arkruntime.annotation.Module";
     constexpr const char *EXPORTED_ELEMENT = "exported";
 
     bool found = false;
@@ -1029,16 +944,6 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshName(AbckitCoreNamespace *ns, 
         if (!RefreshExportedAnnotationElement(parentRecord, oldFullName, newFullName)) {
             return false;
         }
-    }
-
-    // Refresh namespace annotation elements for the current namespace first
-    if (!RefreshEnclosingClassAnnotationElement(ns)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to refresh EnclosingClass annotation element" << std::endl;
-        return false;
-    }
-    if (!RefreshInnerClassAnnotationElement(ns)) {
-        LIBABCKIT_LOG(ERROR) << "Failed to refresh InnerClass annotation element" << std::endl;
-        return false;
     }
 
     // Update FunctionOverload annotation elements in the namespace record
@@ -1526,29 +1431,6 @@ bool libabckit::ModifyNameHelper::NamespaceRefreshAnnotationInterfaces(AbckitCor
 bool libabckit::ModifyNameHelper::NamespaceRefreshAnnotationElements(AbckitCoreNamespace *ns)
 {
     LIBABCKIT_LOG_FUNC;
-
-    for (const auto &[_, klass] : ns->ct) {
-        if (!RefreshEnclosingClassAnnotationElement(klass.get())) {
-            LIBABCKIT_LOG(ERROR) << "Failed to refresh EnclosingClass annotation element" << std::endl;
-            return false;
-        }
-        if (!RefreshInnerClassAnnotationElement(klass.get())) {
-            LIBABCKIT_LOG(ERROR) << "Failed to refresh InnerClass annotation element" << std::endl;
-            return false;
-        }
-    }
-
-    for (const auto &[_, enm] : ns->et) {
-        if (!RefreshEnclosingClassAnnotationElement(enm.get())) {
-            LIBABCKIT_LOG(ERROR) << "Failed to refresh EnclosingClass annotation element" << std::endl;
-            return false;
-        }
-        if (!RefreshInnerClassAnnotationElement(enm.get())) {
-            LIBABCKIT_LOG(ERROR) << "Failed to refresh InnerClass annotation element" << std::endl;
-            return false;
-        }
-    }
-
     return true;
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -135,6 +135,9 @@ def main():
         "--escompat-dir", type=Path, help="Directory containing escompact files"
     )
     parser.add_argument(
+        "--arkruntime-dir", type=Path, help="Directory containing arkruntime files"
+    )
+    parser.add_argument(
         "--target-dir", type=Path, help="Target directory for processed files"
     )
     parser.add_argument(
@@ -145,11 +148,12 @@ def main():
 
     std_lib_dir = args.std_dir
     escompat_lib_dir = args.escompat_dir
+    arkruntime_lib_dir=args.arkruntime_dir
     target_dir = args.target_dir
     json_file = args.json_file
 
-    if not std_lib_dir or not escompat_lib_dir or not target_dir or not json_file:
-        parser.error("std-dir, escompact-dir, target-dir, and json-files are required.")
+    if not std_lib_dir or not escompat_lib_dir or not arkruntime_lib_dir or not target_dir or not json_file:
+        parser.error("std-dir, escompact-dir, arkruntime-dir, target-dir, and json-files are required.")
 
     target_dir.mkdir(parents=True, exist_ok=True)
     hiddable_apis = read_hiddable_apis(std_lib_dir, json_file)
@@ -158,6 +162,8 @@ def main():
     escompat_target_dir = target_dir / escompat_lib_dir.name
     shutil.copytree(escompat_lib_dir, escompat_target_dir, dirs_exist_ok=True)
 
+    arkruntime_target_dir = target_dir / arkruntime_lib_dir.name
+    shutil.copytree(arkruntime_lib_dir, arkruntime_target_dir, dirs_exist_ok=True)
 
 if __name__ == "__main__":
     main()

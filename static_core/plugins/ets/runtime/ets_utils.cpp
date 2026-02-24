@@ -268,7 +268,7 @@ bool GetExportedClassDescriptorsFromModule(ark::ets::EtsClass *etsGlobalClass, s
     panda_file::ClassDataAccessor cda(*pfile, runtimeClass->GetFileId());
 
     bool found = false;
-    cda.EnumerateAnnotation(EtsPlatformTypes::DESCRIPTOR_etsAnnotationModule,
+    cda.EnumerateAnnotation(EtsPlatformTypes::DESCRIPTOR_arkruntimeAnnotationModule,
                             [&outDescriptors, &found, pfile](panda_file::AnnotationDataAccessor &annotationAccessor) {
                                 const uint32_t count = annotationAccessor.GetCount();
                                 for (uint32_t i = 0; i < count; i++) {

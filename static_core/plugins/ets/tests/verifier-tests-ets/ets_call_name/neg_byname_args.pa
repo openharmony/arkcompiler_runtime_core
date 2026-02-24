@@ -13,7 +13,7 @@
 
 .language eTS
 
-.record ets.annotation.Module <external>
+.record arkruntime.annotation.Module <external>
 
 .record std.core.Console <external>
 

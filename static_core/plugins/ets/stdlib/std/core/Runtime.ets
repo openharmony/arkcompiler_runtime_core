@@ -19,6 +19,8 @@
 
 package std.core;
 
+import * as arkruntime from 'arkruntime'
+
 /**
  * Provides core functionality of ArkTS runtime.
  * @syscap SystemCapability.Utils.Lang

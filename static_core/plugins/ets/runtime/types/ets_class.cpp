@@ -517,10 +517,13 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
         cda.EnumerateAnnotations([this, &pfile, &flags, &errorHandler](panda_file::File::EntityId annotationId) {
             panda_file::AnnotationDataAccessor ada(*pfile, annotationId);
             auto *annotationName = pfile->GetStringData(ada.GetClassId()).data;
-            if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_etsAnnotationModule), annotationName)) {
+            if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_arkruntimeAnnotationModule),
+                             annotationName)) {
                 flags |= IS_MODULE;
-            } else if (utf::IsEqual(utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_etsAnnotationFunctionalReference),
-                                    annotationName)) {
+            } else if (utf::IsEqual(
+                           // CC-OFFNXT(G.FMT.06-CPP) project code style
+                           utf::CStringAsMutf8(EtsPlatformTypes::DESCRIPTOR_arkruntimeAnnotationFunctionReference),
+                           annotationName)) {
                 flags |= (IS_FUNCTION_REFERENCE | IS_VALUE_TYPED);
                 FunctionalReferenceAnnotationCallBack(this, pfile, &ada, errorHandler);
             }
