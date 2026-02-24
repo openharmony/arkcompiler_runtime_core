@@ -59,8 +59,29 @@ function testXor() {
     }
 }
 
+function testUnsignedXorOverflow() {
+    const U8VAL: long = 150;
+    Atomics.store(uint8array, 0, U8VAL);
+    let storedVal = Atomics.xor(uint8array, 0, 0);
+    arktest.assertEQ(storedVal, U8VAL);
+    arktest.assertEQ(uint8array[0], U8VAL);
+
+    const U16VAL: long = 32918;
+    Atomics.store(uint16array, 0, U16VAL);
+    storedVal = Atomics.xor(uint16array, 0, 0);
+    arktest.assertEQ(storedVal, U16VAL);
+    arktest.assertEQ(uint16array[0], U16VAL);
+
+    const U32VAL: long = 2147483798;
+    Atomics.store(uint32array, 0, U32VAL);
+    storedVal = Atomics.xor(uint32array, 0, 0);
+    arktest.assertEQ(storedVal, U32VAL);
+    arktest.assertEQ(uint32array[0], U32VAL);
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics base_operation_xor tests')
     suite.addTest('Function testXor', testXor)
+    suite.addTest('Function testUnsignedXorOverflow', testUnsignedXorOverflow)
     return suite.run()
 }

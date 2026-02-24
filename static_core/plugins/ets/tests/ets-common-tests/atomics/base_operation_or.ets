@@ -59,8 +59,29 @@ function testOr() {
     }
 }
 
+function testUnsignedOrOverflow() {
+    const U8VAL: long = 150;
+    Atomics.store(uint8array, 0, U8VAL);
+    let storedVal = Atomics.or(uint8array, 0, U8VAL);
+    arktest.assertEQ(storedVal, U8VAL);
+    arktest.assertEQ(uint8array[0], U8VAL);
+
+    const U16VAL: long = 32918;
+    Atomics.store(uint16array, 0, U16VAL);
+    storedVal = Atomics.or(uint16array, 0, U16VAL);
+    arktest.assertEQ(storedVal, U16VAL);
+    arktest.assertEQ(uint16array[0], U16VAL);
+
+    const U32VAL: long = 2147483798;
+    Atomics.store(uint32array, 0, U32VAL);
+    storedVal = Atomics.or(uint32array, 0, U32VAL);
+    arktest.assertEQ(storedVal, U32VAL);
+    arktest.assertEQ(uint32array[0], U32VAL);
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('Function Atomics base_operation_or tests')
     suite.addTest('Function testOr', testOr)
+    suite.addTest('Function testUnsignedOrOverflow', testUnsignedOrOverflow)
     return suite.run()
 }
