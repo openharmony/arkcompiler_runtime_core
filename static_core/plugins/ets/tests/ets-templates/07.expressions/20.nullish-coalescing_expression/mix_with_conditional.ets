@@ -24,11 +24,16 @@ desc: |-
 
 type boolean_nullish = boolean | null | undefined
 
+function foo(a_nullish: boolean_nullish) {
+  return {{c.mix_with_parentheses}}
+}
+
 function main(): void {
   let a_nullish: boolean_nullish = {{c.nullish_value}};
 
   let x = {{c.mix_with_parentheses}};
-  arktest.assertTrue(x instanceof boolean)
+  arktest.assertTrue(x instanceof boolean, "expect boolean in main")
+  arktest.assertTrue(foo(a_nullish) instanceof boolean, "expect boolean in foo")
 }
 
 {%- endfor %}

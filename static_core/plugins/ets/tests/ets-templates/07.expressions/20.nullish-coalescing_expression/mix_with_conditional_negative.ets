@@ -14,21 +14,33 @@
  */
 
 {%- for c in cases %}
+{% for ctx in context %}
 
 /*---
 desc: |-
     A compile-time error occurs if the nullish-coalescing operator is mixed with conditional-and or
     conditional-or operators without parentheses.
 tags: [negative, compile-only]
+expected_out: "Syntax error ESY0059: Nullish coalescing operator ?? requires parens when mixing with logical operators."
 ---*/
 
 type boolean_nullish = boolean | null | undefined
 
+function foo(a_nullish: boolean_nullish) {
+  {{c.mix_without_parentheses}}
+}
+
 function main(): void {
   let a_nullish: boolean_nullish = {{c.nullish_value}};
 
-  let x = {{c.mix_without_parentheses}};
-  arktest.assertTrue(x instanceof boolean)
+{% if "main" in ctx %}
+  let x = {{c.mix_without_parentheses}}
+{% else %}
+  foo(a_nullish)
+{% endif %}
+
+  arktest.assertTrue(false, "code here is not expected to execute")
 }
 
+{%- endfor %}
 {%- endfor %}
