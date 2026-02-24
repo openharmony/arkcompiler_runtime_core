@@ -74,8 +74,20 @@ operations:
       result_value: -9.3, result_type: "double"
     }
   - {
-      value1: 1986.3, type1: "double", 
-      value2: 130.6, type2: "double", 
-      operation: "+", 
+      value1: 1986.3, type1: "double",
+      value2: 130.6, type2: "double",
+      operation: "+",
       result_value: 2116.9, result_type: "double"
+    }
+  - {
+      value1: 3.5, type1: "double",
+      value2: 2, type2: "byte",
+      operation: "+",
+      result_value: 5.5, result_type: "double"
+    }
+  - {
+      value1: 3.5f, type1: "float",
+      value2: 2, type2: "long",
+      operation: "+",
+      result_value: 5.5f, result_type: "float"
     }
