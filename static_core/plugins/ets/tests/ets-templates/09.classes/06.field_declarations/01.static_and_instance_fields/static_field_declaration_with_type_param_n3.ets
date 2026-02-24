@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,20 +15,12 @@ limitations under the License.
 
 /*---
 desc: >-
-    Static fields are declared with the modifier static. A static field is not part of a class instance. There is one
-    copy of a static field irrespective of how many instances of the class (even if zero) are eventually created.
+    A compile-time error occurs if the name of a type parameter of the
+    surrounding declaration is used as the type of a static field.
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0172: No static $_invoke method and static $_instantiate method in x. x() is not allowed."
+expected_out: "Semantic error ESE170021: Static members cannot reference class type parameters 'V'"
 ---*/
 
-class A {
-    public static x: int = 42
-    public x(): number {
-        return 41.0
-    }
-}
-
-function main() {
-    arktest.assertEQ( A.x, 42 )
-    arktest.assertEQ( A.x(), 41 )
+class A<U, V> {
+  static field: U | V
 }

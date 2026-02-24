@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -17,18 +17,30 @@ limitations under the License.
 desc: >-
     Static fields are declared with the modifier static. A static field is not part of a class instance. There is one
     copy of a static field irrespective of how many instances of the class (even if zero) are eventually created.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0172: No static $_invoke method and static $_instantiate method in x. x() is not allowed."
 ---*/
 
 class A {
-    public static x: int = 42
-    public x(): number {
-        return 41.0
-    }
+  static x: int = 42
+  x: number = 41.0
 }
 
 function main() {
-    arktest.assertEQ( A.x, 42 )
-    arktest.assertEQ( A.x(), 41 )
+  arktest.assertTrue(A.x instanceof int)
+  arktest.assertEQ(A.x, 42)
+  let a: A = new A()
+  arktest.assertTrue(A.x instanceof int)
+  arktest.assertEQ(A.x, 42)
+  arktest.assertTrue(a.x instanceof number)
+  arktest.assertEQ(a.x, 41.0)
+  a.x = 43.0
+  arktest.assertTrue(A.x instanceof int)
+  arktest.assertEQ(A.x, 42)
+  arktest.assertTrue(a.x instanceof number)
+  arktest.assertEQ(a.x, 43.0)
+  A.x = 44
+  arktest.assertTrue(A.x instanceof int)
+  arktest.assertEQ(A.x, 44)
+  arktest.assertTrue(a.x instanceof number)
+  arktest.assertEQ(a.x, 43.0)
+  A.x = 42 // reset due to jit mode warmup
 }
