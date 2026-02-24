@@ -194,8 +194,8 @@ export class RegExpResultArray extends Array<String | undefined> {
         if (hasIndices) {
             this.indices_ = new Array<Array<int>>(n)
             for (let i = 0; i < data.length; i += 2) {
-                const index: int = Number.parseInt(data[i]).toInt()
-                const endIndex: int = Number.parseInt(data[i + 1]).toInt()
+                const index: int = Int.parseInt(data[i], 10)
+                const endIndex: int = Int.parseInt(data[i + 1], 10)
                 const pos: int = (i / 2);
                 if (index == -1 || endIndex == -1) {
                     this.indices_[pos] = [0, 0]
@@ -208,8 +208,8 @@ export class RegExpResultArray extends Array<String | undefined> {
         } else {
             this.indices_ = []
             for (let i = 0; i < data.length; i += 2) {
-                const index = Number.parseInt(data[i]).toInt()
-                const endIndex = Number.parseInt(data[i + 1]).toInt()
+                const index = Int.parseInt(data[i], 10)
+                const endIndex = Int.parseInt(data[i + 1], 10)
                 const pos: int = (i / 2);
                 if (index != -1 && endIndex != -1) {
                     const str = this.input_.substring(index, endIndex)
@@ -274,7 +274,7 @@ export class RegExpMatchArray extends RegExpResultArray {
      */
     public get index(): int | undefined {
         if (this.hasIndex_) {
-            return this.index_.toInt()
+            return this.index_
         }
         return undefined
     }
@@ -340,8 +340,8 @@ export class RegExpMatchArray extends RegExpResultArray {
             if (unitData.length != 3) {
                 throw new Error("internal error: invalid group data")
             }
-            let index = Double.parseInt(unitData[1]).toInt()
-            let endIndex = Double.parseInt(unitData[2]).toInt()
+            let index = Int.parseInt(unitData[1], 10)
+            let endIndex = Int.parseInt(unitData[2], 10)
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes")
@@ -408,7 +408,7 @@ export class RegExpExecArray extends RegExpResultArray {
      * @since 24
      */
     public get index(): int {
-        return this.index_.toInt()
+        return this.index_
     }
 
     /**
@@ -462,8 +462,8 @@ export class RegExpExecArray extends RegExpResultArray {
             if (unitData.length != 3) {
                 throw new Error("internal error: invalid group data")
             }
-            let index = Double.parseInt(unitData[1]).toInt()
-            let endIndex = Double.parseInt(unitData[2]).toInt()
+            let index = Int.parseInt(unitData[1], 10)
+            let endIndex = Int.parseInt(unitData[2], 10)
             if (index >= 0 && endIndex >= 0) {
                 if (endIndex > this.input_.length || index > endIndex) {
                     throw new Error("internal error: incorrect substring indexes index = " + index + " endIndex = " + endIndex + 
@@ -551,6 +551,7 @@ export class RegExp extends Object {
     public lastIndex: int = 0
     private source_: String = ""
     private flags_: String = ""
+    private flagsSorted_: boolean = false
 
     /**
      * Gets the flags of the regular expression.
@@ -560,6 +561,10 @@ export class RegExp extends Object {
      * @since 24
      */
     get flags(): String {
+        if (!this.flagsSorted_) {
+            this.flags_ = this.flags_.split("").sort().join("")
+            this.flagsSorted_ = true
+        }
         return this.flags_
     }
 
@@ -672,7 +677,7 @@ export class RegExp extends Object {
      * @since 24
      */
     public constructor(pattern: String, flags?: String) {
-        this.init(pattern, flags)
+        RegExp.init(this, pattern, flags === undefined ? "" : flags!)
     }
 
     /**
@@ -685,7 +690,7 @@ export class RegExp extends Object {
      * @since 24
      */
     public constructor(regexp: RegExp, flags?: String) {
-        this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
+        RegExp.init(this, regexp.pattern_, flags === undefined ? regexp.flags : flags!)
     }
 
     /**
@@ -699,9 +704,10 @@ export class RegExp extends Object {
      */
     public constructor(regexp: RegExp | String, flags?: String) {
         if (regexp instanceof String) {
-            this.init(regexp as String, flags)
+            RegExp.init(this, regexp as String, flags === undefined ? "" : flags!)
         } else {
-            this.init(regexp as RegExp, flags)
+            let re = regexp as RegExp
+            RegExp.init(this, re.pattern_, flags === undefined ? re.flags : flags!)
         }
     }
 
@@ -731,7 +737,8 @@ export class RegExp extends Object {
      */
     public compile(pattern: String, flags?: String): RegExp {
         this.pattern_ = pattern
-        this.flags_ = flags === undefined ? "" : flags!
+        this.flags_ = RegExp.normalizeFlags(pattern, flags === undefined ? "" : flags!)
+        this.flagsSorted_ = false
         this.source_ = RegExp.escapePattern(pattern)
         return this.compile()
     }
@@ -822,9 +829,8 @@ export class RegExp extends Object {
         this.lastIndex = previousLastIndex
         if (result == null) {
             return -1
-        } else {
-            return result.index.toInt()
         }
+        return result.index
     }
 
     /**
@@ -854,18 +860,18 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
             }
         }
         let lengthS = str.getLength()
-        let accumulatedResult = ""
+        let accumulatedResult = new StringBuilder()
         let nextSourcePosition = 0
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
             let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
-            let position = max(min(result.index, lengthS), 0).toInt();
+            let position = max(min(result.index, lengthS), 0);
             let captures = new containers.UndefinableStringArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
@@ -873,14 +879,14 @@ export class RegExp extends Object {
             }
             let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), result.groups, replaceValue)
             if (position >= nextSourcePosition) {
-                accumulatedResult += str.substring(nextSourcePosition, position) + replacement
+                accumulatedResult.append(str.substring(nextSourcePosition, position)).append(replacement)
                 nextSourcePosition = position + matchLength
             }
         }
         if (nextSourcePosition >= lengthS) {
-            return accumulatedResult
+            return accumulatedResult.toString()
         }
-        return accumulatedResult + str.substring(nextSourcePosition)
+        return accumulatedResult.append(str.substring(nextSourcePosition)).toString()
     }
 
     /**
@@ -910,18 +916,18 @@ export class RegExp extends Object {
             }
             let matchStr = result.$_get(0)
             if (matchStr == "") {
-                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex.toInt(), this.unicode)
+                this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)
             }
         }
         let lengthS = str.getLength()
-        let accumulatedResult = ""
+        let accumulatedResult = new StringBuilder()
         let nextSourcePosition = 0
         for (let i = 0; i < results.length; ++i) {
             let result = results.at(i)!;
             let nCaptures = result.length;
             let matched = result.$_get(0)!;
             let matchLength = matched.getLength();
-            let position = (max(min(result.index, lengthS), 0)).toInt();
+            let position = (max(min(result.index, lengthS), 0));
             let args = new containers.UndefinableObjectArray(nCaptures);
             for (let n = 1; n < nCaptures; n++) {
                 let capN = result.$_get(n);
@@ -935,14 +941,14 @@ export class RegExp extends Object {
             }
             let replacement = replacer(matched, args.toArray());
             if (position >= nextSourcePosition) {
-                accumulatedResult += str.substring(nextSourcePosition, position) + replacement
+                accumulatedResult.append(str.substring(nextSourcePosition, position)).append(replacement)
                 nextSourcePosition = position + matchLength
             }
         }
         if (nextSourcePosition >= lengthS) {
-            return accumulatedResult
+            return accumulatedResult.toString()
         }
-        return accumulatedResult + str.substring(nextSourcePosition)
+        return accumulatedResult.append(str.substring(nextSourcePosition)).toString()
     }
 
     /**
@@ -1098,7 +1104,7 @@ export class RegExp extends Object {
      * @since 24
      */
     public override toString(): String {
-        return "/" + this.source + "/" + this.flags_
+        return "/" + this.source + "/" + this.flags
     }
 
     /**
@@ -1187,32 +1193,18 @@ export class RegExp extends Object {
         return s.replaceAll("\\", "\\")
     }
 
-    /**
-     * Inits regexp from pattern and flags
-     *
-     * @param pattern description of a pattern
-     *
-     * @param flags description of flags to be used
-     */
-    private init(pattern: String, flags?: String) {
-        this.pattern_ = pattern
-        this.flags_ = flags === undefined ? "" : flags!
-        if (!this.pattern_.isWellFormed()) {
-            this.flags_ = this.flags_.replaceAll('u', '');
-        }
-        this.source_ = RegExp.escapePattern(pattern)
-        this.flags_ = Array.from(this.flags_.split("")).sort().join("")
-        RegExp.parse(pattern, this.flags_)
+    private static init(re: RegExp, pattern: String, flags: String): void {
+        re.pattern_ = pattern
+        re.flags_ = RegExp.normalizeFlags(pattern, flags)
+        re.source_ = RegExp.escapePattern(pattern)
+        RegExp.parse(pattern, re.flags_)
     }
 
-    /**
-     * Inits regexp from RegExp. It uses regexp's flags if flags aren't provided
-     *
-     * @param regexp other regexp
-     *
-     * @param flags description of flags to be used
-     */
-    private init(regexp: RegExp, flags?: String) {
-        this.init(regexp.pattern_, flags === undefined ? regexp.flags : flags!)
+    private static normalizeFlags(pattern: String, flags: String): String {
+        let result = flags
+        if (!pattern.isWellFormed()) {
+            result = result.replaceAll('u', '');
+        }
+        return result
     }
 }
