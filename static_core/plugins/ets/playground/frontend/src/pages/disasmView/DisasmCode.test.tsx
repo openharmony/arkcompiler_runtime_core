@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,12 +56,12 @@ describe('DisasmView component', () => {
     it('applies correct theme based on context', () => {
         localStorage.setItem('theme', 'dark');
         renderWithProviders(<DisasmCode />);
-        expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'vs-dark');
+        expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'playground-dark');
     });
     it('applies correct theme based on context light', () => {
         localStorage.setItem('theme', 'light');
         renderWithProviders(<DisasmCode />);
-        expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'light');
+        expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'playground-light');
     });
     it('applies correct run loading', () => {
         store = mockStore({

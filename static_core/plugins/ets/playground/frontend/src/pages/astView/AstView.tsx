@@ -27,8 +27,10 @@ import { fetchAst } from '../../store/actions/ast';
 import { selectAstMode } from '../../store/selectors/features';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import {ensureThemes, getThemeName} from '../../languages';
 
 loader.config({ monaco });
+ensureThemes();
 globalThis.MonacoEnvironment = {
     getWorker(_: string, label: string): Worker {
         if (label === 'json') {
@@ -78,7 +80,7 @@ const AstView: React.FC = () => {
             language={'json'}
             defaultValue={astCode}
             value={isASTLoading ? 'Loading...' : astCode}
-            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            theme={getThemeName(theme)}
             className={styles.editor}
             height="100%"
             options={{

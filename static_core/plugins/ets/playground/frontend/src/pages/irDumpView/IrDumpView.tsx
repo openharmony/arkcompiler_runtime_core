@@ -22,17 +22,11 @@ import {useSelector} from 'react-redux';
 import {selectCompileLoading, selectRunLoading, selectRunRes, selectCompileRes} from '../../store/selectors/code';
 import {IIrDumpFile} from '../../models/code';
 
-loader.config({ monaco });
+import {irdumpPlugin, registerLanguage, ensureThemes, getThemeName} from '../../languages';
 
-const IR_DUMP_LANGUAGE_ID = 'irdump';
-let irdumpRegistered = false;
-const ensureIrdumpLanguage = (): void => {
-    if (irdumpRegistered) {
-        return;
-    }
-    monaco.languages.register({ id: IR_DUMP_LANGUAGE_ID });
-    irdumpRegistered = true;
-};
+loader.config({ monaco });
+registerLanguage(irdumpPlugin);
+ensureThemes();
 
 const normalizeDumpFiles = (
     compilerDump: IIrDumpFile[] | null | undefined
@@ -125,7 +119,7 @@ const IrDumpViewBase: React.FC<IrDumpViewProps> = ({ dumpType }) => {
             return;
         }
 
-        foldingProviderRef.current = monaco.languages.registerFoldingRangeProvider(IR_DUMP_LANGUAGE_ID, {
+        foldingProviderRef.current = monaco.languages.registerFoldingRangeProvider(irdumpPlugin.id, {
             provideFoldingRanges(): monaco.languages.FoldingRange[] {
                 const text = codeRef.current;
                 if (!text) {
@@ -164,15 +158,11 @@ const IrDumpViewBase: React.FC<IrDumpViewProps> = ({ dumpType }) => {
         };
     }, []);
 
-    if (isCompiler) {
-        ensureIrdumpLanguage();
-    }
-
     return (
         <Editor
-            defaultLanguage={isCompiler ? IR_DUMP_LANGUAGE_ID : 'plaintext'}
+            defaultLanguage={isCompiler ? irdumpPlugin.id : 'plaintext'}
             value={isCompileLoading || isRunLoading ? 'Loading...' : code}
-            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            theme={getThemeName(theme)}
             className={styles.editor}
             onMount={handleEditorMount}
             options={{

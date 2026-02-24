@@ -181,13 +181,13 @@ describe('IrDumpView components', () => {
         it('applies dark theme', () => {
             localStorage.setItem('theme', 'dark');
             renderWithProviders(<DisasmDumpView />);
-            expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'vs-dark');
+            expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'playground-dark');
         });
 
         it('applies light theme', () => {
             localStorage.setItem('theme', 'light');
             renderWithProviders(<DisasmDumpView />);
-            expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'light');
+            expect(screen.getByTestId('editor')).toHaveAttribute('data-theme', 'playground-light');
         });
     });
 });
