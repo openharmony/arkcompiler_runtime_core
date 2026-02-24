@@ -407,7 +407,7 @@ public:
         RemarkAndPreforwardVisitor visitor(collectStack, collector_);
         Mutator *mutator = getNextMutator_();
         while (mutator != nullptr) {
-            VisitMutatorRoot(visitor, *mutator);
+            VisitMutatorRoots(visitor, *mutator);
             mutator = getNextMutator_();
         }
         collectStack.Publish();
@@ -453,7 +453,7 @@ void ArkCollector::ParallelRemarkAndPreforward(GlobalMarkStack &globalMarkStack)
     VisitGlobalRoots(visitor);
     Mutator *mutator = getNextMutator();
     while (mutator != nullptr) {
-        VisitMutatorRoot(visitor, *mutator);
+        VisitMutatorRoots(visitor, *mutator);
         mutator = getNextMutator();
     }
     collectStack.Publish();
@@ -674,13 +674,7 @@ void ArkCollector::PreforwardFlip()
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
         SetGCThreadQosPriority(common::PriorityMode::FOREGROUND);
 
-        if (Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG) {
-            // only visit weak roots that may reference young objects
-            VisitDynamicWeakGlobalRoots(weakVisitor);
-        } else {
-            VisitDynamicWeakGlobalRoots(weakVisitor);
-            VisitDynamicWeakGlobalRootsOld(weakVisitor);
-        }
+        VisitWeakGlobalRoots(weakVisitor, Heap::GetHeap().GetGCReason() == GC_REASON_YOUNG);
     };
     FlipFunction forwardMutatorRoot = [this](Mutator &mutator) {
         WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
@@ -983,7 +977,7 @@ CArrayList<CArrayList<BaseObject *>> ArkCollector::EnumRootsFlip(STWParam& param
     FlipFunction enumMutatorRoot = [&rootSet, &stackMutex](Mutator &mutator) {
         CArrayList<BaseObject *> roots;
         RefFieldVisitor localVisitor = [&roots](RefField<> &root) { roots.emplace_back(root.GetTargetObject()); };
-        VisitMutatorRoot(localVisitor, mutator);
+        VisitMutatorRoots(localVisitor, mutator);
         std::lock_guard<std::mutex> lockGuard(stackMutex);
         rootSet.emplace_back(std::move(roots));
     };

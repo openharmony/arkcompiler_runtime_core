@@ -23,6 +23,7 @@ crt_sources = [
   "common/run_type.cpp",
   "common_runtime/base_runtime.cpp",
   "common_runtime/base_runtime_param.cpp",
+  "common_runtime/hooks.cpp",
   "heap/allocator/allocator.cpp",
   "heap/allocator/fix_heap.cpp",
   "heap/allocator/memory_map.cpp",
@@ -73,7 +74,6 @@ crt_sources = [
   "taskpool/runner.cpp",
   "taskpool/task_queue.cpp",
   "taskpool/taskpool.cpp",
-  "tests/test_hooks.cpp",
   "thread/thread_holder.cpp",
   "thread/thread_holder_manager.cpp",
 ]

@@ -58,6 +58,10 @@
 #include "plugins/ets/runtime/ets_object_state_table.h"
 #include "libarkbase/taskmanager/task_manager.h"
 
+namespace ark::mem::ets {
+void RegisterCmcGcCallbacks();
+}  // namespace ark::mem::ets
+
 namespace ark::ets {
 
 static PandaEtsVM *g_pandaEtsVM = nullptr;
@@ -83,6 +87,10 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
     mem::GCSettings gcSettings(options, panda_file::SourceLang::ETS);
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
+
+#ifdef ARK_HYBRID
+    ark::mem::ets::RegisterCmcGcCallbacks();
+#endif
 
     return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
 }

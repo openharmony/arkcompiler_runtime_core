@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ **/
 
 #ifndef COMMON_INTERFACES_HEAP_VISITOR_H
 #define COMMON_INTERFACES_HEAP_VISITOR_H
@@ -36,10 +36,10 @@ void VisitConcurrentRoots(const RefFieldVisitor &visitor);
 
 // GlobalRoots are subsets of roots which are shared in all mutator threads.
 void VisitGlobalRoots(const RefFieldVisitor &visitor);
-void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc);
+void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitorFunc, bool isYoung);
 void VisitPreforwardRoots(const RefFieldVisitor &visitor);
 
-void VisitMutatorRoot(const RefFieldVisitor &visitor, Mutator &mutator);
+void VisitMutatorRoots(const RefFieldVisitor &visitor, Mutator &mutator);
 void VisitWeakMutatorRoot(const WeakRefFieldVisitor &visitor, Mutator &mutator);
 void VisitMutatorPreforwardRoot(const RefFieldVisitor &visitor, Mutator &mutator);
 // Static VM Roots scanning
@@ -54,15 +54,11 @@ using UpdateStaticRootsHookFunc = void (*)(const RefFieldVisitor &visitor);
 using SweepStaticRootsHookFunc = void (*)(const WeakRefFieldVisitor &visitor);
 using UnmarkAllXRefsHookFunc = void (*)();
 using SweepUnmarkedXRefsHookFunc = void (*)();
-using AddXRefToStaticRootsHookFunc = void (*)();
-using RemoveXRefFromStaticRootsHookFunc = void (*)();
 
 PUBLIC_API void RegisterVisitStaticRootsHook(VisitStaticRootsHookFunc func);
 PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
 PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
 PUBLIC_API void RegisterUnmarkAllXRefsHook(UnmarkAllXRefsHookFunc func);
 PUBLIC_API void RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsHookFunc func);
-PUBLIC_API void RegisterAddXRefToStaticRootsHook(AddXRefToStaticRootsHookFunc func);
-PUBLIC_API void RegisterRemoveXRefFromStaticRootsHook(RemoveXRefFromStaticRootsHookFunc func);
 }  // namespace common
 #endif  // COMMON_INTERFACES_HEAP_VISITOR_H

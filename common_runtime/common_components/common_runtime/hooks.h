@@ -11,7 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ **/
 
 #ifndef COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
 #define COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
@@ -39,15 +39,25 @@ PUBLIC_API void VisitDynamicConcurrentRoots(const RefFieldVisitor &visitorFunc);
 
 PUBLIC_API void InvokeSharedNativePointerCallbacks();
 
-// Visit roots of specific local thread.
+// Visit roots of specific mutator.
 PUBLIC_API void VisitDynamicThreadRoot(const RefFieldVisitor &visitorFunc, void *vm);
 PUBLIC_API void VisitDynamicWeakThreadRoot(const WeakRefFieldVisitor &visitorFunc, void *vm);
 PUBLIC_API void VisitDynamicThreadPreforwardRoot(const RefFieldVisitor &visitorFunc, void *vm);
 
+PUBLIC_API void VisitAllStaticRoots(const RefFieldVisitor &visitorFunc);
+PUBLIC_API void SetVisitAllStaticRootsCallback(void (*callback)(const RefFieldVisitor &));
+PUBLIC_API void VisitStaticMutatorRoots(const RefFieldVisitor &visitorFunc, void *mutator);
+PUBLIC_API void SetVisitStaticMutatorRootsCallback(void (*callback)(const RefFieldVisitor &, void *));
+PUBLIC_API void VisitStaticGlobalRoots(const RefFieldVisitor &visitor);
+PUBLIC_API void SetVisitStaticGlobalRootsCallback(void (*callback)(const RefFieldVisitor &));
+PUBLIC_API void UpdateAndSweepStaticRefs(const WeakRefFieldVisitor &visitor);
+PUBLIC_API void SetUpdateAndSweepStaticRefsCallback(void (*callback)(const WeakRefFieldVisitor &visitor));
+PUBLIC_API void VisitStaticConcurrentRoots(const RefFieldVisitor &visitor);
+PUBLIC_API void SetVisitStaticConcurrentRootsCallback(void (*callback)(const RefFieldVisitor &));
+
 PUBLIC_API void AddXRefToDynamicRoots();
 PUBLIC_API void RemoveXRefFromDynamicRoots();
 
-PUBLIC_API void VisitJSThread(void *jsThread, CommonRootVisitor visitor);
 PUBLIC_API void SynchronizeGCPhaseToJSThread(void *jsThread, GCPhase gcPhase);
 
 // CMC-GC dependent interface
@@ -59,11 +69,11 @@ PUBLIC_API bool IsPostForked();
 // Jit interfaces
 PUBLIC_API void SweepThreadLocalJitFort();
 PUBLIC_API bool IsMachineCodeObject(uintptr_t obj);
-PUBLIC_API void JitFortUnProt(size_t size, void* base);
-PUBLIC_API void MarkThreadLocalJitFortInstalled(void *thread, void *machineCode);
+PUBLIC_API void JitFortUnProt(size_t size, void *base);
+PUBLIC_API void MarkThreadLocalJitFortInstalled(void *mutator, void *machineCode);
 
 // Used for init/fini BaseRuntime from static
 PUBLIC_API void CheckAndInitBaseRuntime(const RuntimeParam &param);
 PUBLIC_API void CheckAndFiniBaseRuntime();
-} // namespace common
-#endif // COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
+}  // namespace common
+#endif  // COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
