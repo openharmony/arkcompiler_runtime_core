@@ -29,7 +29,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Debug -GNinja \
 cd build && ninja panda_bins
 
 # Or single command from root:
-cmake --build build --target panda_bins
+cmake --build build --target panda_bins etssdk
 ```
 
 ## Build Workflow
@@ -40,8 +40,12 @@ First time setup from project root:
 
 ```bash
 cd ../../../
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake -S . -Werror=dev -DCMAKE_CXX_FLAGS="-fno-limit-debug-info" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPANDA_ETS_INTEROP_JS=ON -DPANDA_WITH_TESTS=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -GNinja \
+    -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
+    -S . -Werror=dev -DCMAKE_CXX_FLAGS="-fno-limit-debug-info" \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPANDA_ETS_INTEROP_JS=ON -DPANDA_WITH_TESTS=ON
 
+```
 Common build types:
 - `Release` - Optimized production build
 - `Debug` - Debug symbols, no optimization
@@ -54,16 +58,16 @@ After configuration:
 
 ```bash
 # From project root
-cmake --build build --target panda_bins
+cmake --build build --target panda_bins etssdk
 
 # Or directly in build directory
-cd build && ninja panda_bins
+cd build && ninja panda_bins etssdk
 
 # Parallel build (default)
-cd build && ninja -j$(nproc) panda_bins
+cd build && ninja -j$(nproc) panda_bins etssdk
 
 # Specific target
-cd build && ninja panda_bins
+cd build && ninja panda_bins etssdk
 ```
 
 ### Clean Rebuild
@@ -77,7 +81,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Debug -GNinja \
     -S . -Werror=dev -DCMAKE_CXX_FLAGS="-fno-limit-debug-info" \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPANDA_ETS_INTEROP_JS=ON \
     -DPANDA_WITH_TESTS=ON
-cmake --build build --target panda_bins
+cmake --build build --target panda_bins etssdk
 ```
 
 ## Build Targets
@@ -92,7 +96,7 @@ Key targets related to stdlib:
 Build specific target:
 
 ```bash
-cd ../../../build && ninja panda_bins
+cd ../../../build && ninja panda_bins etssdk
 ```
 
 ## CMake Options
@@ -122,14 +126,17 @@ After successful build:
 ```bash
 # Clean cache and reconfigure
 rm -rf build/CMakeCache.txt build/CMakeFiles
-cd ../../../ && cmake -B build -DCMAKE_BUILD_TYPE=Debug -GNinja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake -S . -Werror=dev -DCMAKE_CXX_FLAGS="-fno-limit-debug-info" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPANDA_ETS_INTEROP_JS=ON -DPANDA_WITH_TESTS=ON
+cd ../../../ && cmake -B build -DCMAKE_BUILD_TYPE=Debug \
+    -GNinja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
+    -S . -Werror=dev -DCMAKE_CXX_FLAGS="-fno-limit-debug-info" \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPANDA_ETS_INTEROP_JS=ON -DPANDA_WITH_TESTS=ON
 ```
 
 ### Ninja Build Fails
 
 ```bash
 # Clean specific target and rebuild
-cd ../../../build && ninja -t clean panda_bins && ninja panda_bins
+cd ../../../build && ninja -t clean panda_bins etssdk && ninja panda_bins etssdk
 ```
 
 ### Missing Dependencies
