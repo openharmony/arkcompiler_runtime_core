@@ -452,8 +452,8 @@ vmb all -p hap -A examples/benchmarks/ets
 
 | platform       | int-mode | aot-mode | jit-mode | gc-stats | jit-stats | aot-stats | imports |
 |----------------|:--------:|:--------:|:--------:|:--------:|:---------:|:---------:|:-------:|
-| ark_js_vm_host |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
-| ark_js_vm_ohos |   n/a    |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| ark_js_vm_host |    V     |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
+| ark_js_vm_ohos |    V     |    V     |    V     |   n/a    |    n/a    |    n/a    |    V    |
 | arkts_device   |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
 | arkts_host     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |
 | arkts_ohos     |    V     |    V     |    V     |    V     |     V     |     V     |    V    |

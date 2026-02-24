@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,7 +26,8 @@ from typing import Union, Iterable, Optional, List, Set, Dict, Tuple, Any
 from dataclasses import dataclass
 from statistics import geometric_mean, mean
 from pathlib import Path
-from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, Timer, check_file_exists
+from vmb.helpers import Jsonable, pad_left, read_list_file, create_file, \
+    Timer, check_file_exists, TS_FORMAT
 from vmb.unit import BenchUnit
 from vmb.result import RunReport, TestResult, AotStatEntry, AotPasses, \
     MachineMeta, BUStatus
@@ -249,8 +250,8 @@ class VMBReport(Jsonable):
                        f'RSS(GM): {self.rss_gm:.1f}'
 
     def print_full_time(self) -> None:
-        s = datetime.strptime(self.report.run.start_time, Timer.tm_format)
-        e = datetime.strptime(self.report.run.end_time, Timer.tm_format)
+        s = datetime.strptime(self.report.run.start_time, TS_FORMAT)
+        e = datetime.strptime(self.report.run.end_time, TS_FORMAT)
         print(f'Run took {e - s}')
 
     def compile_time(self) -> None:
@@ -714,8 +715,8 @@ def report_main(args: Args,
                                if bu.status not in (BUStatus.NOT_RUN,
                                                     BUStatus.SKIPPED)])
         if timer:
-            rep.run.start_time = Timer.format(timer.begin)
-            rep.run.end_time = Timer.format(timer.end)
+            rep.run.start_time = timer.begin
+            rep.run.end_time = timer.end
         else:
             rep.run.end_time = Timer.format(datetime.now(timezone.utc))
         vmb_rep = VMBReport(report=rep)
