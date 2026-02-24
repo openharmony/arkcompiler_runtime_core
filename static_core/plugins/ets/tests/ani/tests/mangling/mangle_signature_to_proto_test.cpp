@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,19 +101,21 @@ TEST_F(MangleSignatureToProtoTest, ObjectsSignature)
 
 TEST_F(MangleSignatureToProtoTest, UnionsSignature)
 {
-    CheckSignatureParsing("X{C{std.core.String}dC{Fun}}:",
+    CheckSignatureParsing(
+        "X{C{std.core.String}C{std.core.Number}C{Fun}}:",
+        Method::Proto(
+            Method::Proto::ShortyVector {
+                panda_file::Type {panda_file::Type::TypeId::VOID},
+                panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+            },
+            Method::Proto::RefTypeVector {std::string_view {"{ULFun;Lstd/core/Number;Lstd/core/String;}"}}));
+
+    CheckSignatureParsing(":X{C{Sun}C{std.core.Boolean}C{Fun}}",
                           Method::Proto(
                               Method::Proto::ShortyVector {
-                                  panda_file::Type {panda_file::Type::TypeId::VOID},
                                   panda_file::Type {panda_file::Type::TypeId::REFERENCE},
                               },
-                              Method::Proto::RefTypeVector {std::string_view {"{ULFun;DLstd/core/String;}"}}));
-
-    CheckSignatureParsing(":X{C{Sun}zC{Fun}}", Method::Proto(
-                                                   Method::Proto::ShortyVector {
-                                                       panda_file::Type {panda_file::Type::TypeId::REFERENCE},
-                                                   },
-                                                   Method::Proto::RefTypeVector {std::string_view {"{ULFun;LSun;Z}"}}));
+                              Method::Proto::RefTypeVector {std::string_view {"{ULFun;LSun;Lstd/core/Boolean;}"}}));
 }
 
 TEST_F(MangleSignatureToProtoTest, ArraysSignature)
