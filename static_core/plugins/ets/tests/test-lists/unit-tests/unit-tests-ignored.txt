@@ -1,6 +1,9 @@
 # 30894
 ets-common-tests/taskpool/common_tasks.ets
 
+#33350
+ets-common-tests/taskpool/concurrent_container_set_tasks.ets
+
 #33011
 ets-common-tests/taskpool/common_tasks_new.ets
 
