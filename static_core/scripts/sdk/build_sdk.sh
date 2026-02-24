@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,7 @@ export ICU_DAT_FILE="false"
 export PANDA_LLVM_BACKEND="ON"
 export PANDA_BUILD_LLVM_BINARIES="OFF"
 export PANDA_WITH_SAFEPOINT_CHECKER="OFF"
+export PANDA_USE_64_BIT_POINTER="false"
 export PANDA_TRACK_INTERNAL_ALLOCATIONS=0
 export LLVM_BIN_AARCH64_RELEASE="/opt/llvm-15-release-aarch64"
 export LLVM_BIN_AARCH64_FASTVERIFY="/opt/llvm-15-release-aarch64-fastverify"
