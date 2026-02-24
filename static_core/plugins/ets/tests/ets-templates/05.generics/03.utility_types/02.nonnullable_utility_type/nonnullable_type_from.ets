@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,18 +17,15 @@
 
 /*---
 desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+      Type.from with NonNullable
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
+{% if c.decl %}
+{{c.decl}}
+{% endif %}
 
 function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+    arktest.assertTrue({{c.type}}.equals(Type.from<{{c.check}}>()) )
 }
-
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
 
 {% endfor %}

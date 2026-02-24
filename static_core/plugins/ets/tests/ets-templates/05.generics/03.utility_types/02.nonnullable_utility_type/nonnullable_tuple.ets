@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,16 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
-
 /*---
-desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+desc: NonNullable with tuple types - resolves to the tuple type
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
+type T = [string, number]
 
 function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+    let t: NonNullable<T|null> = ["hello", 42]
+    let tt: T = t
+
+    let t2: NonNullable<[boolean, string]|null|undefined> = [true, "world"]
+    let tt2: [boolean, string] = t2
 }
-
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
-
-{% endfor %}

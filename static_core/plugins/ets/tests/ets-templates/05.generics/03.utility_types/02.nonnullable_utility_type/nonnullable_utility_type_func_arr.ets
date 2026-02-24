@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,18 +17,16 @@
 
 /*---
 desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+      Type function and arrays
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
+type StringNullishArr = (string | null | undefined)[];
+const snArr: StringNullishArr = [null, undefined, "d"]
+
+{{c.decl}}
 
 function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+    {{c.use|indent}}
 }
-
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
 
 {% endfor %}

@@ -1,0 +1,107 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # NonNullable with functions
+  - decl: |-
+      type NFUNC = NonNullable<() => void>
+    use: |-
+      const a1: NFUNC = () => {}
+  - decl: |-
+      type A = NonNullable<(n: NonNullable<number|null|undefined>) => NonNullable<number|null|undefined>>;
+      type B = (n: number) => number
+    use: |-
+      let a: A = (n: NonNullable<number|null|undefined>) => { return n }
+      let b: B = (n: number) => { return n }
+      b = a
+      a = b
+  - decl: |-
+      class Base {
+        b: number = 1
+      }
+      class Derived extends Base {
+        b: number = 2
+      }
+      type B = NonNullable<(n: NonNullable<Base|null>) => NonNullable<Derived|null|undefined>>;
+      type D = (n: Derived) => Base;
+    use: |-
+      let b: B = (n: NonNullable<Base|null|undefined>) => { return n as Derived }
+      let d: D = (n: NonNullable<Derived|null|undefined>) => { return new Base }
+      d = b
+  # NonNullable with arrays
+  - decl: |-
+      type NullishArray = NonNullable<Array<string|null|undefined>>
+    use: |-
+      const a1: NullishArray = ["", null, undefined]
+  - decl: |-
+      function filterNonNullable<T>(this: T[]): T[] {
+            return this.filter((item: T) => 
+                item instanceof NonNullable<string|null|undefined>
+            );
+      }
+    use: |-
+      let nonNullableArr = snArr.filterNonNullable<string|null|undefined>()
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+  - decl: |-
+      function filterNonNullable<T>(f: T[]): T[] {
+            return f.filter((item: T) => 
+                item instanceof NonNullable<string|null|undefined>
+            );
+      }
+    use: |-
+      let nonNullableArr = filterNonNullable<string|null|undefined>(snArr)
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+  - decl: |-
+      function filterNonNullable<T>(this: T[]): T[] {
+          let a: T[] = []
+          for (const item of this) {
+              if (item instanceof NonNullable<string|null|undefined>) {
+                  a.push(item)
+              }
+          }
+          return a
+      }
+    use: |-
+      let nonNullableArr = snArr.filterNonNullable<string|null|undefined>()
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+  - decl: |-
+      function filterNonNullable<T>(f: T[]): T[] {
+          let a: T[] = []
+          for (const item of f) {
+              if (item instanceof NonNullable<string|null|undefined>) {
+                  a.push(item)
+              }
+          }
+          return a
+      }
+    use: |-
+      let nonNullableArr = filterNonNullable<string|null|undefined>(snArr)
+      arktest.assertEQ(nonNullableArr.length, 1)
+      arktest.assertEQ(nonNullableArr[0], "d")
+
+  # NonNullable with instanceof and as expression
+  - decl: |-
+      type N = number|null|undefined
+    use: |-
+      let n: N = null
+      arktest.assertTrue(n instanceof N)
+      arktest.assertTrue(n instanceof N as boolean)
+      arktest.assertFalse(n instanceof NonNullable<N>)
+      arktest.assertFalse(n instanceof NonNullable<N> as boolean)
+      n = undefined
+      arktest.assertFalse(n instanceof NonNullable<N>)
+      arktest.assertFalse(n instanceof NonNullable<N> as boolean)

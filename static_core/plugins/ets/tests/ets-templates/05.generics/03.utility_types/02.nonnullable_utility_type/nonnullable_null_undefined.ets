@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,22 @@
  */
 
 {% for c in cases %}
-
 /*---
-desc: Type NonNullable<T> constructs a type by excluding null and undefined types
-tags: [compile-only, negative]
+desc: Type NonNullable<T> constructs a type by excluding null and undefined types -
+      corner case with null and undefined
+tags: [negative, compile-only]
+expected_out: "{{ c.expected }}"
 ---*/
 
-type OnlyNullable = null | undefined
-type Cleared = NonNullable<OnlyNullable> // type never is expected
+type NU = null|undefined
+type SNU = string|null|undefined
 
 function main() {
-    let a1: OnlyNullable = null
-    let a2: OnlyNullable = undefined
-    let b: Cleared = /* @@ label */{{c.value}};
+    // NonNullable applied to only null and only undefined (separated from union)
+    // NonNullable<null> resolves to never, NonNullable<undefined> resolves to never
+    let n: null = null
+    let u: undefined = undefined
+
+    let nn: {{ c.type }} = {{c.var}} 
 }
-
-/* @@@ label Error Semantic error ESE0318: Type '{{c.error_type}}' cannot be assigned to type 'never'  */
-
 {% endfor %}
