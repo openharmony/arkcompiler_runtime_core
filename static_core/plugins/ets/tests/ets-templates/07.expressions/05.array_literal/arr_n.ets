@@ -18,6 +18,9 @@
 desc: >-
   An array literal is an expression that can be used to create an array, and provide some initial values.
 tags: [compile-only, negative]
+{% if c.out is defined %}
+expected_out: "{{c.out}}"
+{% endif -%}
 ---*/
 
 {{c.decl}}

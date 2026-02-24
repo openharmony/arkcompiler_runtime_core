@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: A spread expression can be used only within the array literal or argument passing.
-tags: [negative, compile-only]
-{% if c.expected_out is defined %}
-expected_out: '{{c.expected_out}}'
-{% endif -%}
+desc: Variable declaration with circular dependency.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0308: Circular dependency detected for identifier: source"
 ---*/
 
-{{c.decl}}
-
-function main() {
-    {{c.use|indent}}
+function main(): void {
+   let source = [1, 2, 3, 4, ...source]
 }
-{% endfor %}

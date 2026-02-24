@@ -258,3 +258,44 @@ cases:
           arktest.assertTrue(x[1] instanceof double|string)
           arktest.assertTrue(x[2] instanceof Object)
           arktest.assertTrue(x[3] instanceof string)
+
+    - decl: |-
+        let source = ['1', '2', '3']
+        let target = [...source]
+      use: |-
+        arktest.assertTrue(target instanceof Array)
+        arktest.assertEQ(3, target.length)
+        arktest.assertTrue(target[0] instanceof string)
+
+    - decl: |-
+        let source = [1, true, '3']
+        let target = [...source]
+      use: |-
+        arktest.assertTrue(target instanceof Array)
+        arktest.assertEQ(3, target.length)
+        arktest.assertTrue(target[0] instanceof string|int|boolean)
+
+    - decl: |-
+        let source = ['1', '2', '3']
+        let target = [1, true, ...source]
+      use: |-
+        arktest.assertTrue(target instanceof Array)
+        arktest.assertEQ(5, target.length)
+        arktest.assertTrue(target[0] instanceof int|string|boolean)
+
+    - decl: |-
+        let source = [['1', '2', '3']]
+        let target = [1, true, ...source]
+      use: |-
+        arktest.assertTrue(target instanceof Array)
+        arktest.assertEQ(3, target.length)
+        arktest.assertTrue(target[0] instanceof int|Array|boolean)
+
+    - decl: |-
+        type TS = string|undefined
+        let source: TS[] = ['1', '2', '3']
+        let target = [1, true, ...source]
+      use: |-
+        arktest.assertTrue(target instanceof Array)
+        arktest.assertEQ(5, target.length)
+        arktest.assertTrue(target[0] instanceof int|boolean|TS)
