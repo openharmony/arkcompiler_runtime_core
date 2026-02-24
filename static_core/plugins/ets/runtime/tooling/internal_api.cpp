@@ -13,44 +13,30 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/tooling/internal_api.h"
 
-namespace ark::ets::interop::js {
-
-bool ForEachFrameInUnionStack(const std::function<void(const void *frame, bool isStaticFrame)> &callback)
+extern "C" PANDA_PUBLIC_API int ArkParseArkFrameInfoLocal(ark::tooling::LocalTrace localTracePtr, uintptr_t byteCodePc,
+                                                          uintptr_t mapBase, uintptr_t loadOffset,
+                                                          ark::tooling::Function *function)
 {
-    auto *mutator = Mutator::GetCurrent();
-    if (UNLIKELY(mutator == nullptr)) {
-        return false;
+    ASSERT(localTracePtr != nullptr);
+    auto localTrace = reinterpret_cast<ark::tooling::LocalStackTrace *>(localTracePtr);
+    if (localTrace->GetArkFrameInfo(byteCodePc, mapBase, loadOffset, function)) {
+        return 1;
     }
-    auto *execCtx = EtsExecutionContext::GetCurrent();
-    if (UNLIKELY(execCtx == nullptr)) {
-        return false;
-    }
-    auto *ctx = interop::js::InteropCtx::Current(execCtx);
-    if (UNLIKELY(ctx == nullptr)) {
-        return false;
-    }
-    return ctx->GetOrCreateCallStack().ForEachInteropFrame(callback);
+    return -1;
 }
 
-bool UnionStackIsEmpty(bool *isEmpty)
+extern "C" PANDA_PUBLIC_API void ArkCreateLocalStackTrace(ark::tooling::LocalTrace *localTracePtr)
 {
-    auto *mutator = Mutator::GetCurrent();
-    if (UNLIKELY(mutator == nullptr)) {
-        return false;
-    }
-    auto *execCtx = EtsExecutionContext::GetCurrent();
-    if (UNLIKELY(execCtx == nullptr)) {
-        return false;
-    }
-    auto *ctx = interop::js::InteropCtx::Current(execCtx);
-    if (UNLIKELY(ctx == nullptr)) {
-        return false;
-    }
-    *isEmpty = ctx->GetInteropHybridStackEnabled() && (ctx->GetOrCreateCallStack().GetRecords().Size() == 0);
-    return true;
+    ASSERT(localTracePtr != nullptr);
+    auto localTrace = ark::tooling::LocalStackTrace::Create();
+    *localTracePtr = reinterpret_cast<ark::tooling::LocalTrace>(localTrace);
 }
 
-}  // namespace ark::ets::interop::js
+extern "C" PANDA_PUBLIC_API void ArkDestroyLocalStackTrace(ark::tooling::LocalTrace localTracePtr)
+{
+    ASSERT(localTracePtr != nullptr);
+    auto localTrace = reinterpret_cast<ark::tooling::LocalStackTrace *>(localTracePtr);
+    ark::tooling::LocalStackTrace::Destroy(localTrace);
+}

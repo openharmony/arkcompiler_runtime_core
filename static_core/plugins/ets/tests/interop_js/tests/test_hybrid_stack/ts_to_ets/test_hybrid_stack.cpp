@@ -14,7 +14,7 @@
  */
 
 #include "ets_interop_js_gtest.h"
-#include "plugins/ets/runtime/tooling/internal_api.h"
+#include "plugins/ets/runtime/interop_js/tooling/internal_api.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 #include <ani.h>

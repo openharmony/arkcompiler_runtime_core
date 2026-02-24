@@ -30,6 +30,8 @@ set(SOURCES
     class_initializer.cpp
     tooling/backtrace/backtrace.cpp
     tooling/backtrace/symbol_extractor.cpp
+    tooling/backtrace/local_stacktrace.cpp
+    tooling/backtrace/base_defs.cpp
     tooling/coverage_listener.cpp
     tooling/debugger.cpp
     tooling/evaluation/expression_loader.cpp

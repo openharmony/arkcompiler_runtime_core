@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@
 #include <filesystem>
 #include "runtime/tooling/backtrace/backtrace.h"
 #include "runtime/tooling/backtrace/base_defs.h"
+#include "runtime/tooling/backtrace/local_stacktrace.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/thread.h"
 #include "libarkbase/utils/logger.h"
 
 static bool ReadMemTestFunc([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value, bool isRead32)
@@ -66,20 +68,28 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     uintptr_t fp = startFp;
     uintptr_t sp = 0;
     uintptr_t pc = 0;
-    uintptr_t bcCode = 0;
+    uintptr_t bcOffset = 0;
     std::vector<ark::tooling::Function> frames;
+
+    auto localStackTrace = ark::tooling::LocalStackTrace::Create();
+
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     while (fp != 0 &&
-           ark::tooling::Backtrace::StepArkByManagedFrame(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode) != 0) {
+           ark::tooling::Backtrace::StepArkByManagedFrame(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcOffset) != 0) {
         ark::tooling::Function function;
-        if (ark::tooling::Backtrace::SymbolizeByManagedFrame(pc, fileHeader, bcCode, abcBuffer.data(), abcSize,
-                                                             &function) == 1) {
+        uintptr_t mapBase = fileHeader;
+        uintptr_t loadOffset = 0;
+        uintptr_t byteCodePc = pc + bcOffset;
+        if (localStackTrace->GetArkFrameInfo(byteCodePc, mapBase, loadOffset, &function)) {
             frames.emplace_back(function);
         } else {
             LOG(INFO, TOOLING) << "Symbolize failed";
             return 0;
         }
     }
+
+    ark::tooling::LocalStackTrace::Destroy(localStackTrace);
+
     if (expectFrames.size() == frames.size()) {
         for (size_t i = 0; i < expectFrames.size(); ++i) {
             ark::Method *method = std::get<0>(expectFrames[i]);
@@ -94,6 +104,8 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
                 return 0;
             }
         }
+    } else {
+        return 0;
     }
     return 1;
 }
@@ -109,7 +121,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"callBacktrace", nullptr, reinterpret_cast<void *>(CallBacktrace)},
     };
     ani_module module;
-    if (env->FindModule("call_backtrace", &module) != ANI_OK) {
+    if (env->FindModule("call_backtrace_local", &module) != ANI_OK) {
         LOG(ERROR, TOOLING) << "Cannot find module!";
         return ANI_ERROR;
     }
