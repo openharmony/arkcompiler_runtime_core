@@ -159,6 +159,8 @@ export enum FaultID {
   NoImportType,
   NoConstructorInInterface,
   NoGetAccessorType,
+  NoInvalidSDKType,
+  NoInvalidSDKImportExport,
   // this should always be last enum
   LAST_ID
 }

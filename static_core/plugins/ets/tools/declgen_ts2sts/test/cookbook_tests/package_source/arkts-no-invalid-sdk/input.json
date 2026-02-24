@@ -1,0 +1,7 @@
+[
+    "./decl.d.ts",
+    "./bridge1.ts",
+    "./bridge2.d.ts",
+    "./@ohos.base.d.ts",
+    "./main.ts"
+]

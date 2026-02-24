@@ -148,7 +148,16 @@ function runTestSuite(testSuite: string, opts: TestRunnerCLIOptions): TestResult
 function runTest(test: Test): TestResult {
   Logger.info(`Running test ${test.name}`);
 
-  const declgen = new Declgen({ outDir: test.outDir, rootDir: test.rootDir, inputFiles: test.testSource, inputDirs: [] });
+  const declgenOptions = { outDir: test.outDir, rootDir: test.rootDir, inputFiles: test.testSource, inputDirs: [] }
+  let compilerOptions: ts.CompilerOptions | undefined = undefined
+
+  if (test.suite === 'package_source') {
+    compilerOptions = {
+      baseUrl: test.rootDir
+    }
+  }
+
+  const declgen = new Declgen(declgenOptions, undefined, compilerOptions);
 
   const { emitResult, checkResult } = declgen.run();
 

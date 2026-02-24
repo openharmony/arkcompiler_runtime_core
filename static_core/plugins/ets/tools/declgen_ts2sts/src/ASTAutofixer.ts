@@ -17,6 +17,7 @@ import * as ts from 'typescript';
 
 import { FaultID } from '../utils/lib/FaultId';
 import { visitVisitResult } from './utils/ASTHelpers';
+import { Extension } from './utils/Extension';
 import {
   ETSKeyword,
   FINAL_CLASS,
@@ -28,8 +29,10 @@ import {
   UtilityTypes,
   SpecificTypes,
   InvalidFuncParaNames,
-  BuiltInType
+  BuiltInType,
+  InvalidSDKs
 } from '../utils/lib/TypeUtils';
+import * as path from 'path';
 
 export class Autofixer {
   private readonly typeChecker: ts.TypeChecker;
@@ -67,7 +70,8 @@ export class Autofixer {
         this[FaultID.AddDeclareToTopLevelVariable].bind(this),
         this[FaultID.AddDeclareToTopLevelFunction].bind(this),
         this[FaultID.AddDeclareToTopLevelNamespace].bind(this),
-        this[FaultID.AddDeclareToTopLevelClass].bind(this)
+        this[FaultID.AddDeclareToTopLevelClass].bind(this),
+        this[FaultID.NoInvalidSDKImportExport].bind(this)
       ]
     ],
     [
@@ -120,7 +124,8 @@ export class Autofixer {
         this[FaultID.InstanceType].bind(this),
         this[FaultID.NoBuiltInType].bind(this),
         this[FaultID.ESObjectType].bind(this),
-        this[FaultID.UtilityType].bind(this)
+        this[FaultID.UtilityType].bind(this),
+        this[FaultID.NoInvalidSDKType].bind(this),
       ]
     ],
     [
@@ -159,7 +164,7 @@ export class Autofixer {
       ts.SyntaxKind.ImportDeclaration,
       [
         this[FaultID.NoEmptyImport].bind(this),
-        this[FaultID.NoLazyImport].bind(this),
+        this[FaultID.NoLazyImport].bind(this)
       ]
     ],
     [ts.SyntaxKind.ImportSpecifier, [this[FaultID.NoETSKeyword].bind(this)]],
@@ -1880,6 +1885,57 @@ export class Autofixer {
   private [FaultID.NoImportType](node: ts.Node): ts.VisitResult<ts.Node> {
     return this.context.factory.createTypeReferenceNode(this.context.factory.createIdentifier(JSValue));
   }
+
+  /**
+   * Rule: `arkts-no-invalid-sdk-type`
+   */
+  private [FaultID.NoInvalidSDKType](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isTypeReferenceNode(node)) {
+      const type = this.typeChecker.getTypeAtLocation(node);
+      const symbol = type.getSymbol();
+      if (!symbol) {
+        return node;
+      }
+      for (const decl of symbol.getDeclarations() || []) {
+        const sourceFilePath = decl.getSourceFile().fileName;
+        const sourceName = path.basename(sourceFilePath, Extension.DTS);
+        if (isInvalidSDK(sourceName)) {
+          return this.context.factory.createTypeReferenceNode(
+            this.context.factory.createIdentifier(JSValue)
+          );
+        }
+      }
+    }
+    return node;
+  }
+
+  /**
+   * Rule: `arkts-no-invalid-sdk-import`
+   */
+  private [FaultID.NoInvalidSDKImportExport](node: ts.Node): ts.VisitResult<ts.Node> {
+    if (ts.isSourceFile(node)) {
+      const statements: ts.Statement[] = [];
+      for (const stmt of node.statements) {
+        if (ts.isImportDeclaration(stmt)) {
+          const filted = filterImportDeclarationFromInvalidSDK(stmt, this.typeChecker, node, this.context);
+          filted && statements.push(filted);
+        }
+        else if (ts.isExportDeclaration(stmt)) {
+          const filted = filterExportDeclarationFromInvalidSDK(stmt, this.typeChecker, node, this.context);
+          filted && statements.push(filted);
+        }
+        else if (ts.isExportAssignment(stmt)) {
+          const filted = filterExportAssignmentFromInvalidSDK(stmt, this.typeChecker, node);
+          filted && statements.push(filted);
+        }
+        else {
+          statements.push(stmt);
+        }
+      }
+      return this.context.factory.updateSourceFile(node, statements);
+    }
+    return node;
+  }
 }
 
 /**
@@ -3171,4 +3227,205 @@ function removeDuplicateTypes(types: ts.TypeNode[]): ts.TypeNode[] {
   }
 
   return uniqueTypes;
+}
+
+function isInvalidSDK(sdkName: string): boolean {
+  return InvalidSDKs.has(sdkName);
+}
+
+function getBaseNameFromFilePath(filePath: string): string {
+  if (filePath.endsWith(Extension.DTS)) {
+    return path.basename(filePath, Extension.DTS);
+  }
+  return path.basename(filePath);
+}
+
+function isSymbolFromInvalidSDK(symbol: ts.Symbol, currentFile: ts.SourceFile): boolean {
+  const declarations = symbol.getDeclarations();
+  if (declarations) {
+    for (const decl of declarations) {
+      const sourceFileName = decl.getSourceFile().fileName;
+      const sdkName = getBaseNameFromFilePath(sourceFileName);
+      const currentFileName = getBaseNameFromFilePath(currentFile.fileName);
+      if (isInvalidSDK(sdkName) && sdkName !== currentFileName) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function filterImportDeclarationFromInvalidSDK(
+  stmt: ts.ImportDeclaration,
+  checker: ts.TypeChecker,
+  current: ts.SourceFile,
+  context: ts.TransformationContext
+): ts.ImportDeclaration | undefined {
+  if (isInvalidSDKDirectImport(stmt)) {
+    return undefined;
+  }
+
+  const clause = stmt.importClause;
+  if (!clause) {
+    return stmt;
+  }
+
+  const updated = updateInvalidSDKImportClause(clause, checker, current, context);
+  if (!updated) {
+    return undefined;
+  }
+
+  return context.factory.updateImportDeclaration(
+    stmt,
+    stmt.modifiers,
+    updated,
+    stmt.moduleSpecifier,
+    stmt.assertClause
+  );
+}
+
+function isInvalidSDKDirectImport(stmt: ts.ImportDeclaration): boolean {
+  const spec = stmt.moduleSpecifier;
+  if (!ts.isStringLiteral(spec)) {
+    return false;
+  }
+  return isInvalidSDK(spec.text);
+}
+
+function updateInvalidSDKImportClause(
+  clause: ts.ImportClause,
+  checker: ts.TypeChecker,
+  current: ts.SourceFile,
+  context: ts.TransformationContext
+): ts.ImportClause | undefined {
+  const newName = filterInvalidSDKDefaultImport(clause.name, checker, current);
+  const newBindings = filterInvalidSDKNamedImports(clause.namedBindings, checker, current, context);
+
+  if (!newName && !newBindings) {
+    return undefined;
+  }
+
+  return context.factory.updateImportClause(
+    clause,
+    clause.isTypeOnly,
+    newName,
+    newBindings
+  );
+}
+
+function filterInvalidSDKDefaultImport(
+  name: ts.Identifier | undefined,
+  checker: ts.TypeChecker,
+  current: ts.SourceFile
+): ts.Identifier | undefined {
+  if (!name) {
+    return name;
+  }
+
+  const imported = checker.getSymbolAtLocation(name);
+  const real = imported ? checker.getAliasedSymbol(imported) : undefined;
+
+  if (real && isSymbolFromInvalidSDK(real, current)) {
+    return undefined;
+  }
+
+  return name;
+}
+
+function filterInvalidSDKNamedImports(
+  bindings: ts.NamedImportBindings | undefined,
+  checker: ts.TypeChecker,
+  current: ts.SourceFile,
+  context: ts.TransformationContext
+): ts.NamedImportBindings | undefined {
+  if (!bindings || !ts.isNamedImports(bindings)) {
+    return bindings;
+  }
+
+  const valid: ts.ImportSpecifier[] = [];
+
+  for (const element of bindings.elements) {
+    const imported = checker.getSymbolAtLocation(element.name);
+    const real = imported ? checker.getAliasedSymbol(imported) : undefined;
+
+    if (real && !isSymbolFromInvalidSDK(real, current)) {
+      valid.push(element);
+    }
+  }
+
+  if (valid.length === 0) {
+    return undefined;
+  }
+
+  return context.factory.updateNamedImports(bindings, valid);
+}
+
+function filterExportDeclarationFromInvalidSDK(
+  stmt: ts.ExportDeclaration,
+  checker: ts.TypeChecker,
+  current: ts.SourceFile,
+  context: ts.TransformationContext
+): ts.ExportDeclaration | undefined {
+  if (isInvalidSDKReExport(stmt)) {
+    return undefined;
+  }
+
+  const clause = stmt.exportClause;
+  if (!clause || !ts.isNamedExports(clause)) {
+    return stmt;
+  }
+
+  const valid = filterInvalidSDKExportSpecifiers(clause.elements, checker, current);
+  if (valid.length === 0) {
+    return undefined;
+  }
+
+  return context.factory.updateExportDeclaration(
+    stmt,
+    stmt.modifiers,
+    stmt.isTypeOnly,
+    context.factory.createNamedExports(valid),
+    stmt.moduleSpecifier,
+    stmt.assertClause
+  );
+}
+
+function isInvalidSDKReExport(stmt: ts.ExportDeclaration): boolean {
+  const spec = stmt.moduleSpecifier;
+  if (!spec || !ts.isStringLiteral(spec)) {
+    return false;
+  }
+  return isInvalidSDK(spec.text);
+}
+
+function filterInvalidSDKExportSpecifiers(
+  elements: readonly ts.ExportSpecifier[],
+  checker: ts.TypeChecker,
+  current: ts.SourceFile
+): ts.ExportSpecifier[] {
+  const valid: ts.ExportSpecifier[] = [];
+
+  for (const element of elements) {
+    const exported = checker.getSymbolAtLocation(element.name);
+    const real = exported ? checker.getAliasedSymbol(exported) : undefined;
+
+    if (real && !isSymbolFromInvalidSDK(real, current)) {
+      valid.push(element);
+    }
+  }
+
+  return valid;
+}
+
+
+function filterExportAssignmentFromInvalidSDK(
+  stmt: ts.ExportAssignment,
+  typeChecker: ts.TypeChecker,
+  currentSourceFile: ts.SourceFile,
+): ts.ExportAssignment | undefined {
+  const symbol = typeChecker.getSymbolAtLocation(stmt.expression);
+  if (symbol && isSymbolFromInvalidSDK(symbol, currentSourceFile)) {
+    return undefined;
+  }
+  return stmt;
 }
