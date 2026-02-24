@@ -18,29 +18,43 @@ API details and restrictions
 .. meta:
     frontend_status: Done
 
+This section describes the noteworthy details and the notable restrictions for
+the concurrency APIs described in the previous sections.
 
-.. _Worker domains:
+.. _launch API details and restrictions:
 
-Worker domains
-==============
+``launch`` API details and restrictions
+=======================================
 
 .. meta:
     frontend_status: Done
 
-This section describes the concept of **worker domain** that is used by the ``launch
-API``.
+The ``launch`` API allows for defining a set of |C_WORKERS| that a newly created
+|C_JOB| can run on. This set is defined in terms of |C_WORKER| *domains* and
+*groups*.
 
-.. index::
-   unhandled promise
-   rejected promise
-   unhandled rejection
-   rejection handler
-   call
-   program completion
+|C_WORKER| domain
+  This is the definition of the domain.
+
+|C_WORKER| group
+  This is the definition of the group.
 
 |
 
+.. _Using async API:
 
+Using the asynchronous APIs
+===========================
+
+This section describes how to use the async APIs and covers the asyncification
+of interfaces and the async ``main``.
+
+
+.. note::
+   Maybe, this section should be moved to the handbook.
+
+
+|
 
 .. _Promise API:
 

@@ -179,8 +179,6 @@ A :index:`compile-time error` occurs if:
 -  `typeReference`` in the ``extends`` clause refers directly to, or is an
    alias of non-interface type.
 -  Interface type named by ``typeReference`` is not :ref:`Accessible`.
--  Current interface is exported but the ``typeReference`` refers to a
-   non-exported interface.
 -  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
    parameterized type that is not well-formed (see
    :ref:`Generic Instantiations`).

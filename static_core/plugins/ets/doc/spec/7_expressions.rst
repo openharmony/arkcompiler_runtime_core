@@ -496,8 +496,8 @@ is provided in the value attached to the error object.
    error object
    value
 
-Runtime errors can occur as a result of expression or operator evaluation as
-follows:
+A :index:`runtime error` can occur as a result of expression or operator
+evaluation as follows:
 
 -  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
@@ -984,7 +984,7 @@ Array Literal
 .. meta:
     frontend_status: Done
     todo: let x : int = [1,2,3][1] - valid?
-    todo: let x = ([1,2,3][1]) - should be CTE, but it isn't
+    todo: let x = ([1,2,3][1]) - should be a compile-time error but is not
     todo: implement it properly for invocation context to get type from the context, not from the first element
 
 *Array literal* is an expression that can be used to create an array or tuple
@@ -1074,9 +1074,9 @@ Type of an *array literal expression* is inferred by the following rules:
 
 -  If a context is available, then type is inferred from the context. If
    successful, then type of an array literal is the inferred type. Otherwise,
-   a :index:`compile-time error` occurs.    
+   a :index:`compile-time error` occurs.
 -  If no context is available, then type is inferred from the types of array
-   literal elements (see :ref:`Array Type Inference from Types of Elements`). 
+   literal elements (see :ref:`Array Type Inference from Types of Elements`).
 
 More details of both cases are presented below.
 
@@ -1165,10 +1165,10 @@ is **not** one of the following:
 - Fixed-size array type;
 - Resizable array type;
 - Superinterface of a resizable array type;
-- Union type that contains at least one consitituent type from the above list.
+- Union type that contains at least one constituent type from the above list.
 
 If type used in a context is ``Any`` or ``Object``, then
-:ref:`Array Type Inference from Types of Elements` is used: 
+:ref:`Array Type Inference from Types of Elements` is used:
 
 .. code-block:: typescript
    :linenos:
@@ -1180,7 +1180,7 @@ then it is inferred as an array literal type on the following conditions:
 
 - Number of expressions equals the number of constituent types;
 - Type of each expression in the array literal is assignable (see
-  :ref:`Assignability`) to the constituent type at the respective position. 
+  :ref:`Assignability`) to the constituent type at the respective position.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -1193,7 +1193,7 @@ Otherwise, a :index:`compile-time error` occurs.
 If type used in a context is a *fixed-size array type* (see
 :ref:`Fixed-size Array Types`), and type of each expression is
 assignable to an array element type, then an array literal is of
-the specified type. Otherwise, a :index:`compile-time error` occurs. 
+the specified type. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1202,7 +1202,7 @@ the specified type. Otherwise, a :index:`compile-time error` occurs.
     let b: FixedArray<string> = [1, 2]             // compile-time error
     let c: FixedArray<Object> = [1, "hello"]       // ok
 
-If type used in a context is a *resizeble array type* (see
+If type used in a context is a *resizable array type* (see
 :ref:`Resizable Array Types` and including :ref:`Readonly Array Types`),
 and type of each expression is assignable to an array element type,
 then an array literal is of the specified type.
@@ -1316,13 +1316,15 @@ from the initialization expression instead by using the following algorithm:
 #. If each initialization expression is of a numeric type (see
    :ref:`Numeric Types`), then the array literal type is ``number[]``.
 
-#. Otherwise, the array literal type is constructed as the union type
-   ``T``:sub:1 ``| ... | T``:sub:`N`,
+#. Otherwise, the array literal type is constructed as the array of a union
+   type:
+   ``(T``:sub:`1` ``| ... | T``:sub:`N` ``)[]``,
    where ``T``:sub:`i` is the type of *expr*:sub:`i`, and then:
 
-    - If ``T``:sub:`i` is a literal type, then it is replaced for its supertype;
+    - If ``T``:sub:`i` is a literal type, then it is replaced for its
+      supertype;
 
-    - If ``T``:sub:`i` is a union type comprised of literal types, then each
+    - If ``T``:sub:`i` is a union type comprized of literal types, then each
       constituent literal type is replaced for its supertype.
 
     - :ref:`Union Types Normalization` is applied to the resultant union type
@@ -1423,7 +1425,7 @@ More details are here :ref:`Object Literal of Class Type` and
          m(): void
       }
       abstract class B {
-         m(): void
+         abstract m(): void
       }
       const a: A = { m(): void {} } // compile-time error: no m() in class A
       const i: I = { m(): void {} } // OK
@@ -1584,7 +1586,7 @@ field type:
 
 Only class fields that have default values (see :ref:`Default Values for Types`)
 or explicit initializers (see :ref:`Variable and Constant Declarations`) can be
-skipped in an object literal. Otherwise, a :index:`compile-time` error occurs.
+skipped in an object literal. Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1711,13 +1713,13 @@ object literal. Otherwise, a :index:`compile-time error` occurs:
    setter
    object literal
 
-If a class is an abstract one it can be also used with *object literals*:
+If a class is an abstract one, it can be also used with *object literals*:
 
 .. code-block:: typescript
    :linenos:
 
     abstract class A {
-        foo () : void
+        abstract foo () : void
     }
     const a1: A = { foo() {} } // OK, foo() is properly defined
     const a2: A = {} // compile-time error as foo() implementation is not defined
@@ -2127,7 +2129,7 @@ Spread Expression
 *Spread expression* can be used only within an array literal (see
 :ref:`Array Literal`) or argument passing (see :ref:`Rest Parameter`).
 The *expression* must be of an iterable type (see :ref:`Iterable Types`)
-or a tuple type (see :ref:`Tuple Types`). 
+or of a tuple type (see :ref:`Tuple Types`).
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -2272,6 +2274,26 @@ or for the *rest parameter*:
    function foo(...p_ro: readonly int[]) {
       p_ro[1] = 1 // compile-time error
    }
+
+
+If a *spread expression* is used to pass arguments (see :ref:`Rest Parameter`),
+then the sequence of spread expressions passed as sequential arguments yields 
+a single sequence of values.
+
+.. code-block:: typescript
+   :linenos:
+
+   function accept_spreads_with_rest_parameter (...args: number[]) {
+       console.log (args)
+   }
+   let arr = [1, 2, 3]
+   accept_spreads_with_rest_parameter (...arr, ...arr)
+      // Output: 1 2 3 1 2 3
+
+   function g1() { return [1, 2] }
+   function g2() { return [3, 4, 5] }
+   accept_spreads_with_rest_parameter (...g1(), ...g2())
+      // Output: 1 2 3 4 5
 
 
 A spread expression for tuples is represented in the example below:
@@ -3815,9 +3837,9 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 
 |
 
-.. _InstanceOf Expression:
+.. _instanceof Expression:
 
-``InstanceOf`` Expression
+``instanceof`` Expression
 *************************
 
 .. meta:
@@ -3871,7 +3893,7 @@ The approach is represented in the following example:
       console.log(x instanceof B)        // OK
       console.log(x instanceof B<T>)     // compile-time error, T was erased
 
-      if(a instanceof B) {  // OK, type of instanceOf will be used for smart
+      if(a instanceof B) {  // OK, type of instanceof will be used for smart
                             // cast in `if` clause
          let b = a as B<T>  // OK
       }
@@ -3976,18 +3998,12 @@ Two specific cases of a *cast expression* are described in the sections below:
 
 - :ref:`Runtime Checking in Cast Expression` otherwise.
 
-If none of conditions stated in these sections are satisfied, then a
-:index:`compile-time error` occurs.
-
-
 .. index::
-   constant expression
    cast expression
+   numeric literal
    object literal
    array literal
    type inference
-   expression
-   runtime
 
 |
 
@@ -4027,9 +4043,9 @@ The following combinations of ``expr`` and ``target`` are considered for the
    object literal
 
 This kind of a *cast expression* results in inferring the target type for
-``expr``. This expression never causes a runtime error
+``expr``. This expression never causes a :index:`runtime error`
 by itself. However, the evaluation of array literal elements or
-object literal properties can cause a runtime error.
+object literal properties can cause a :index:`runtime error`.
 
 Casting for numeric literals is represented in the
 example below:
@@ -4094,7 +4110,7 @@ the usage of the resulting value can cause type violation, and ``ClassCastError`
 is thrown as a consequence (see :ref:`Type Erasure` for detail).
 
 Semantically, a *cast expression* of this kind is coupled tightly with
-:ref:`Instanceof Expression` as follows:
+:ref:`instanceof Expression` as follows:
 
 .. index::
    runtime check
@@ -4108,7 +4124,7 @@ Semantically, a *cast expression* of this kind is coupled tightly with
    effective type
 
 -  If the result of ``x instanceof T`` is ``true``, then ``x as T`` succeeds and
-   causes no runtime error;
+   causes no :index:`runtime error`;
 
 -  If the result of ``x instanceof T`` is ``false``, then ``x as T`` causes
    ``ClassCastError`` thrown at runtime.
@@ -4130,9 +4146,9 @@ This situation is represented in the following example:
     foo("aa") // OK
     foo(1)    // runtime error is thrown in foo by 'as' operator application
 
-:ref:`Instanceof Expression` can be used to prevent runtime errors. Moreover,
-the :ref:`Instanceof Expression` makes *cast conversion* unnecessary in many
-cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
+:ref:`instanceof Expression` can be used to prevent a :index:`runtime error`.
+Moreover, the :ref:`instanceof Expression` makes *cast conversion* unnecessary
+in many cases as *smart cast* is applied (see :ref:`Smart Casts and Smart Types`):
 
 .. code-block:: typescript
    :linenos:
@@ -4178,9 +4194,9 @@ a :index:`compile-time warning` is issued:
 
 |
 
-.. _TypeOf Expression:
+.. _typeof Expression:
 
-``TypeOf`` Expression
+``typeof`` Expression
 *********************
 
 .. meta:
@@ -4204,7 +4220,7 @@ evaluation. If this evaluation causes an error, then the ``typeof`` expression
 evaluation terminates abruptly. Otherwise, the value of a ``typeof expression``
 is defined as follows:
 
-1. The value of a ``TypeOf`` expression is known at compile time
+1. The value of a ``typeof`` expression is known at compile time
 
 .. index::
    syntax
@@ -4216,7 +4232,7 @@ is defined as follows:
    value
 
 +---------------------------------+-------------------------+-----------------------------+
-|       Expression Type           |  TypeOf Result          |   Code Example              |
+|       Expression Type           |  typeof Result          |   Code Example              |
 +=================================+=========================+=============================+
 | ``string``                      | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
@@ -4258,8 +4274,8 @@ is defined as follows:
 | interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| enumeration type                | name of enumeration     | .. code-block:: typescript  |
-|                                 | base type               |                             |
+| enumeration type,               | name of enumeration     | .. code-block:: typescript  |
+| const enumeration type          | base type               |                             |
 |                                 |                         |  enum C {R, G, B}           |
 |                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c // "int"          |
@@ -4280,7 +4296,7 @@ is defined as follows:
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 
-2. The value of a ``TypeOf`` expression is determined at runtime
+2. The value of a ``typeof`` expression is determined at runtime
 
 The result is the name of an actual type used at runtime for the following
 expression types:
@@ -4511,8 +4527,48 @@ decrement operators) group right-to-left for ``'~+x'`` to have the same meaning
 as ``'~(+x)'``.
 
 The type of *unaryExpression* is not necessarily the same as the type
-of the *expression* provided. Further in the text, the type of
-*unaryExpression* is stated explicitly for each *unary operator*.
+of the operand provided. The following table states explicitly the type of
+*unaryExpression* for each *unary operator*:
+
++------------------------+-------------------------+---------------------------+
+| *unary operator*       | type of operand         | type of result            |
++========================+=========================+===========================+
+| '++', '--'             | byte                    | byte                      |
+| (unary, prefix and     +-------------------------+---------------------------+
+| ostfix)                | short                   | short                     |
+|                        +-------------------------+---------------------------+
+|                        | int                     | int                       |
+|                        +-------------------------+---------------------------+
+|                        | long                    | long                      |
+|                        +-------------------------+---------------------------+
+|                        | float                   | float                     |
+|                        +-------------------------+---------------------------+
+|                        | double                  | double                    |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '+', '-' (unary)       | byte, short, int        | int                       |
+|                        +-------------------------+---------------------------+
+|                        | long                    | long                      |
+|                        +-------------------------+---------------------------+
+|                        | float                   | float                     |
+|                        +-------------------------+---------------------------+
+|                        | double                  | double                    |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '~'                    | byte, short, int, float | int                       |
+| (bitwise complement)   +-------------------------+---------------------------+
+|                        | long, double            | long                      |
+|                        +-------------------------+---------------------------+
+|                        | bigint                  | bigint                    |
++------------------------+-------------------------+---------------------------+
+| '!'                    | boolean or type         | boolean                   |
+| (logical complement)   | mentioned in            |                           |
+|                        | :ref:`extended          |                           | 
+|                        | conditional             |                           |
+|                        | expressions`            |                           |
++------------------------+-------------------------+---------------------------+
 
 .. index::
    unary expression
@@ -5061,6 +5117,135 @@ converted) operand value is ``false``, and ``false`` if the operand value
 
 |
 
+.. _Binary Expressions Overview:
+
+Binary Expressions Overview
+***************************
+
+The syntax of *binary expression* is presented below:
+
+.. code-block:: abnf
+
+    binaryExpression:
+        multiplicativeExpression
+        | exponentiationExpression
+        | additiveExpression
+        | shiftExpression
+        | relationalExpression
+        | equalityExpression
+        | bitwiseAndLogicalExpression
+        | conditionalAndExpression
+        | conditionalOrExpression
+        ;
+
+Every *binaryExpression* has a form *expression 1* ``op`` *expression 2*,
+where ``op`` is a binary operator (operator sign) and *expression 1* and
+*expression 2* are its operands.
+
+The subgroups of binary expressions are described further in that chapter.
+
+The possible combinations of types of the *expression 1* and *expression 2*
+as well as the type of the resulting *binaryExpression*  is given in the
+following table. Type combinations not listed in the table issue either a
+compile-time error when it is detected at compile time, or run-time error
+otherwise.
+
++----------------+--------------------------------+-------------------------------+-------------------------+
+|                | type of                        | type of                       | type of                 |
+|    *Operator*  | 1st/2nd *operand*              | 2nd/1st *operand*             | result                  |
++================+================================+===============================+=========================+
+| '*', '/', '%'  | byte, short, int               |  byte, short, int             |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long                           | any numeric except float      |    long                 |
+|                |                                | or double                     |                         |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | float                          |  any numeric except double    |    float                |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | double                         |  any numeric                  |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '**'           | any numeric type               |  any numeric type             |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '+'            | string                         |  converted to a string        |    string               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '+', '-'       | byte, short, int               |  byte, short, int             |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long                           |  any numeric except float     |    long                 |
+|                |                                |  or double                    |                         |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | float                          |  any numeric except double    |    float                |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | double                         |  any numeric                  |    double               |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<<', '>>'     | bigint                         |  bigint                       |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<<', '>>',    | *1st* is byte, short, int,     |  *2nd* is any numeric         |    int                  |
+|                | float                          |                               |                         |      
+| '>>>'          +--------------------------------+-------------------------------+-------------------------+
+|                | *1st* is long, double          |  *2nd* is any numeric         |    long                 |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '<', '<=',     | string, string literal         |  string, string literal       |    boolean              |
+| '>', '>='      +--------------------------------+-------------------------------+-------------------------+
+|                | boolean                        |  boolean                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | numeric                        |  numeric                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum (numeric value)           |  enum (numeric value)         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum (string value)            |  enum (string value)          |    boolean              |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '==', '===',   | string, string literal         |  string, string literal       |    boolean              |
+| '!=',  '!=='   +--------------------------------+-------------------------------+-------------------------+
+|                | boolean                        |  boolean                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | numeric                        |  numeric                      |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         |  bigint                       |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | char                           |  char                         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | enum                           |  enum                         |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | function                       |  function                     |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | null, undefined                |  null, undefined              |    boolean              |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '&', '^', '|'  | boolean                        | boolean                       |    boolean              |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | byte, short, int, float        | byte, short, int, float       |    int                  |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | long, double                   | long, double                  |    long                 |
+|                +--------------------------------+-------------------------------+-------------------------+
+|                | bigint                         | bigint                        |    bigint               |
++----------------+--------------------------------+-------------------------------+-------------------------+
+| '&&', '||'     | boolean or type mentioned      | boolean or type mentioned     | boolean                 |
+|                | in extended conditional        | in extended conditional       | (except cases with      |
+|                | expressions.                   | expressions.                  | extended semantics)     |
++----------------+--------------------------------+-------------------------------+-------------------------+
+
+.. note::
+   In the table above
+
+   -  For shift operators '<<', '>>', '>>>' with operands of numeric types, the
+      type of result depends on the type of the 1st (left) operand and does not
+      depend on the type of the second (right) operand. 
+   -  Equality operators '==', '===', '!=',  '!==' are defined for any types but
+      combinations explicitly listed in the table have specific behavior.
+   -  Equality operators for types containing ``null`` or ``undefined``, are
+      described in :ref:`Extended Equality with null or undefined`.
+   -  Extended semantics for logical operators '&&', '||' is described in
+      :ref:`Extended Conditional Expressions`.
+
+
+.. meta:
+    frontend_status: Done
+
+
 .. _Multiplicative Expressions:
 
 Multiplicative Expressions
@@ -5113,7 +5298,7 @@ This behavior is represented by the following example:
 
 |
 
-A numeric types conversion (see :ref:`Widening Numeric Conversions`) 
+A numeric types conversion (see :ref:`Widening Numeric Conversions`)
 of an expression with operands convertible (see :ref:`Numeric Operator Contexts`)
 to a numeric type is performed on both operands to ensure
 that the resultant type is the type of the multiplicative expression.
@@ -5191,7 +5376,7 @@ Integer multiplication is associative when all operands are of the same type.
 Floating-point multiplication is not associative.
 
 Type of a *multiplication expression* with numeric operands
-is the *largest* type (see :ref:`Numeric Types`) of its operands *after* aplying
+is the *largest* type (see :ref:`Numeric Types`) of its operands *after* applying
 :ref:`Widening numeric conversions`.
 
 If overflow occurs during integer multiplication, then:
@@ -5289,8 +5474,9 @@ Bigint division rounds toward *0*, i.e., the quotient of bigint operands
 *n* and *d* is the ``bigint`` value *q* with the largest possible magnitude that
 satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
-If the divisor value of the ``bigint`` division operator is *0n*, then a
-:index:`runtime error` is thrown during execution.
+If the divisor value of the ``bigint`` division operator is *0n*, then either
+a compile-time error occurs (when detected at compile time), or a :index:`runtime error`
+is thrown during exection.
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
@@ -5397,7 +5583,7 @@ error despite possible overflow, underflow, division by zero, or loss of
 information.
 
 The type of a *division expression* with operands of numeric types is the
-*largest* numeric type (see :ref:`Numeric Types`) of its operands  *after* aplying
+*largest* numeric type (see :ref:`Numeric Types`) of its operands  *after* applying
 :ref:`Widening numeric conversions`.
 
 
@@ -5447,7 +5633,9 @@ If the divisor value of the ``bigint`` remainder operator is *0n*, then a
 
 The remainder operation on integer operands produces a result value, i.e.,
 :math:`(a/b)*b+(a\%b)` equals *a*. Numeric type conversion on remainder
-operation is discussed in :ref:`Widening Numeric Conversions`.
+operation is discussed in :ref:`Widening Numeric Conversions`. The result of
+remainder operation produces value of type ``int`` for byte, short or float, or
+``long`` for value of types `long` or `double`
 
 .. index::
    binary operator
@@ -5553,7 +5741,7 @@ an error, even if the right-hand operand is zero. Overflow, underflow, or
 loss of precision cannot occur.
 
 The type of a *remainder expression* with numeric operands is the
-*largest* numeric type (see :ref:`Numeric Types`) of its operands   *after* aplying
+*largest* numeric type (see :ref:`Numeric Types`) of its operands   *after* applying
 :ref:`Widening numeric conversions`.
 
 
@@ -5608,8 +5796,11 @@ both operands are as follows:
 
 Any other combination of operand types causes a :index:`compile-time error`.
 
-If the second operand of type ``bigint`` is negative, then a
-:index:`runtime error` is thrown.
+The result of raising to power `0n`` is always `1n`, including case `0n**0n`.
+
+If the second operand of type ``bigint`` is negative, then either a compile-time
+error occurs (when detected at compile time), or a :index:`runtime error` is
+thrown during exection.
 
 Both variants of the operator ``'**'`` are represented in example below:
 
@@ -5623,7 +5814,7 @@ Both variants of the operator ``'**'`` are represented in example below:
 
    let v = a ** 2n // OK 'bigint' ** 'bigint'
    let u = a ** 0n // OK 'bigint' ** 'bigint'
-   let w = a ** -1n // Runtime error, exponent must be non-negative
+   let w = a ** -1n // compile-time error, exponent must be non-negative
 
    let x = a ** c // compile-time error, 'c' is not 'bigint'
    let y = b ** d // 'd' is converted to 'double'
@@ -5631,7 +5822,8 @@ Both variants of the operator ``'**'`` are represented in example below:
 
 
 The binary operator ``'**'`` with *numeric operands* is equivalent to
-`Math.pow()`. It causes neither a compile-time, nor a runtime error.
+`Math.pow()`. It causes neither a :index:`compile-time error`, nor a
+:index:`runtime error`.
 
 Special cases of the binary operator ``'**'`` according to IEEE 754 are
 represented below.
@@ -5717,7 +5909,7 @@ The following rules apply where the operator  ``'-'`` is used:
 
 Otherwise, a :index:`compile-time error` occurs.
 
-Type of an *additive expression* with a valid 
+Type of an *additive expression* with a valid
 combination of types is determined as follows:
 
 -  If any operand is of type ``string``, then ``string``;
@@ -6119,8 +6311,9 @@ Character Relational Operators
     frontend_status: Done
 
 Attempting to use type ``char`` as one operand or both operands in a relational
-operator causes a compile-time error if detected at compile time, or a runtime
-error otherwise (see :ref:`Character Equality and Relational Operators`).
+operator causes a :index:`compile-time error` if detected at compile time.
+A :index:`runtime error` occurs otherwise (see
+:ref:`Character Equality and Relational Operators`).
 
 |
 
@@ -6315,16 +6508,17 @@ Enumeration Relational Operators
 .. meta:
     frontend_status: Done
 
-If both operands are of the same enumeration type (see :ref:`Enumerations`),
-then :ref:`Numeric Relational Operators` or :ref:`String Relational Operators`
-are used depending on the kind of enumeration constant value
-( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
+If both operands are of the same enumeration (see :ref:`Enumerations`) or const
+enumeration (see :ref:`Const Enumerations`) type, then :ref:`Numeric Relational Operators`
+or :ref:`String Relational Operators` are used depending on the kind of enumeration
+constant value ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    enumeration relational operator
    enumeration constant
    enumeration type
+   const enumeration type
    value
    string value
    relational operator
@@ -6409,12 +6603,14 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   operands represent the same Unicode code point
   (see :ref:`Character Equality and Relational Operators`);
 
-- Both operands are of the same enumeration type (see :ref:`Enumerations`)
-  and have the same numeric value or the same string contents, depending on
-  the type of enumeration constant values;
+- Both operands are of the same enumeration (see :ref:`Enumerations`) or const enumeration
+  (see :ref:`Const Enumerations`) type and have the same numeric value or the same string
+  contents, depending on the type of enumeration constant values;
 
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
+
+- Both operands are of the same type and refer to the same object;
 
 .. index::
    operand
@@ -6426,6 +6622,7 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
    NaN
    numeric equality operator
    enumeration type
+   const enumeration type
    numeric value
    string
    equality operator
@@ -6914,8 +7111,6 @@ result, and the same side effects occur in the same order for any *a*, *b*, and
 
 A *conditional-and* expression is always of type ``boolean`` except the
 extended semantics (see :ref:`Extended Conditional Expressions`).
-A *conditional-and* expression with extended semantics can be of the first
-expression type.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``,
 or of a type mentioned in :ref:`Extended Conditional Expressions`.
@@ -6972,8 +7167,6 @@ and *c*).
 
 A *conditional-or* expression is always of type ``boolean``  except the
 extended semantics (see :ref:`Extended Conditional Expressions`).
-A *conditional-or* expression with extended semantics can be of the first
-expression type.
 
 .. index::
    conditional-or expression
@@ -7639,7 +7832,7 @@ The syntax of *string interpolation expression* is presented below:
 .. code-block:: abnf
 
     stringInterpolation:
-        '`' (BacktickCharacter | embeddedExpression)* '`'
+        '`' (BackticksContentCharacter | embeddedExpression)* '`'
         ;
 
     embeddedExpression:
@@ -7887,10 +8080,10 @@ If a *lambda body* is a single ``expression``, then it is handled as follows:
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
 If *lambda signature* return type is neither ``void`` (see
-:ref:`Types void or undefined`) nor ``never`` (see :ref:`Type never`), and the
+:ref:`Type void or undefined`) nor ``never`` (see :ref:`Type never`), and the
 execution path of the lambda body has neither a return statement (see
 :ref:`Return Statements`) nor a single expression as a body, then a
-:index:`compile-time error` occurs. 
+:index:`compile-time error` occurs.
 
 .. index::
    lambda body
@@ -8110,7 +8303,7 @@ following:
 -  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
 
--  Enumeration type constants;
+-  Const enumeration type values;
 
 -  Unary operators ``'+'``, ``'-'``, ``'~'``, and ``'!'``, but not ``'++'``
    or ``'--'`` (see :ref:`Unary Plus`, :ref:`Unary Minus`,

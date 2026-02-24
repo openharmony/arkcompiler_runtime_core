@@ -18,12 +18,12 @@ Asynchronous execution
 .. meta:
     frontend_status: Done
 
-The asynchronous execution capability addresses the situation when developer's
-code regularly needs to wait for external (e.g network, timers or user input) or
-internal (e.g. status updates from a |C_JOB| that is running on another
-|C_WORKER|) events. For such cases, |LANG| provides a way to suspend execution
-of a |C_JOB|, mark the |C_JOB| as blocked on a wait for certain event and resume
-its execution later, once the event happens.
+The :term:`asynchronous execution` capability addresses the situation when
+developer's code regularly needs to wait for external (e.g network, timers or
+user input) or internal (e.g. status updates from a |C_JOB| that is running on
+another |C_WORKER|) events. For such cases, |LANG| provides a way to suspend
+execution of a |C_JOB|, mark the |C_JOB| as blocked on a wait for certain event
+and resume its execution later, once the event happens.
 
 The |LANG| features that provide the asynchronous execution support are:
 
@@ -81,7 +81,7 @@ return a ``Promise<T>`` instance (in this case, the returned value  is returned
 instance of ``Promise<T>``. Both options are allowed to be the ``expression`` of
 the ``return`` statement inside the ``async`` function body (see :ref:`return
 Statements` and :ref:`Return Type Inference`). ``T`` here is a subtype of
-:ref:`Type Any`. If ``T`` has ``void`` or ``undefined`` type (see :ref:`Types
+:ref:`Type Any`. If ``T`` has ``void`` or ``undefined`` type (see :ref:`Type
 void or undefined`) then, like in non-asynchronous functions, an argumentless
 ``return`` statement is allowed.
 
@@ -184,6 +184,31 @@ The ``expression`` here should be a subtype of :ref:`Type Any`. The semantics of
   then ``await`` defines a suspension point.
 - Otherwise, the ``await`` does not define a suspension point and the type and
   value of the ``awaitExpression`` match those of the ``expression``.
+
+.. code-block:: typescript
+   :linenos:
+
+   async function g(): Promise<Object> { /* returns Promise */ }
+
+   async function f() { // await is allowed in async context only
+     // ...
+
+     // v1 is Awaited<Promise<Object>>, which is effectively Object
+     // g returns Promise, hence await is a suspension point
+     let v1 = await g()
+
+     // v2 is Int
+     // await returns an Int, hence no suspension point here
+     let v2 = await new Int(5)
+
+     // implying that anotherMethod returns a Promise:
+     //  - method returned an object: await can suspend; v3 is the await result
+     //  - method returned undefined: no suspension, v3 is undefined
+     // v3 is Awaited<ReturnType(anotherMethod)> | undefined
+     let v3 = await obj.method()?.anotherMethod()
+
+     // ...
+   }
 
 If ``awaitExpression`` defines a suspension point, then:
 
