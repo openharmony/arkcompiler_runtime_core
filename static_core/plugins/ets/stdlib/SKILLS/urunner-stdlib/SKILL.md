@@ -37,10 +37,19 @@ Or run: `./runner.sh init` for interactive setup.
 
 From stdlib directory (stdlib/):
 
+Always use `--filter` option to filter affected api, to check which tests are affected need to check `../tests/ets_func_tests/std/`. 
+Example: `--filter std/core/json` if changed json api. If changed `Intl` need to use `--filter/std/core/Intl*`.
+
+```bash
+# Run only affected tests  std/core/json should be changed to affected tests like regex array etc...
+cd ../../../tests/tests-u-runner-2/
+./runner.sh panda-int ets-func-tests --show-progress --force-generate --processes=all --filter std/core/json`
+```
+
 ```bash
 # Run all stdlib tests
 cd ../../../tests/tests-u-runner-2/
-./runner.sh panda-int ets-func-tests ets-es-checked
+./runner.sh panda-int ets-func-tests ets-es-checked --show-progress --force-generate --processes=all 
 
 # Or with specific options
 ./runner.sh panda-int ets-func-tests --show-progress --force-generate
@@ -160,7 +169,11 @@ sudo static_core/scripts/install-deps-ubuntu -i=test
 ```bash
 # Ensure panda is built
 cd ../../../
-cmake --build build
+cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
+    -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/host_clang_14.cmake \
+    -S . -Werror=dev  -DPANDA_WITH_TESTS=ON\
+    -DPANDA_ETS_INTEROP_JS=ON
+cmake --build build --target panda_bins etssdk
 ```
 
 ## Direct Python Usage
