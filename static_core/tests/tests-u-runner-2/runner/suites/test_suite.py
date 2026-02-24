@@ -88,6 +88,10 @@ class TestSuite(ITestSuite):
         self.ignored_tests_with_failures: dict[Path, str] = {}
         self.excluded_tests: list[Path] = []
         self.workflow_kind = self.config.workflow.workflow_type
+        self.supported_extensions: list[str] = list({
+            self.config.test_suite.extension(collection)
+            for collection in self.config.test_suite.collections
+        })
 
     @property
     def test_root(self) -> Path:
@@ -671,8 +675,8 @@ class TestSuite(ITestSuite):
         comment_lines: list[str] = []
         prev_line_was_comment = False
 
-        with open(list_path, encoding="utf-8") as f:
-            for line in f:
+        with open(list_path, encoding="utf-8") as file_handler:
+            for line in file_handler:
                 line = line.rstrip('\n').strip()
                 if not line:
                     continue
@@ -686,7 +690,7 @@ class TestSuite(ITestSuite):
 
                 prev_line_was_comment = False
 
-                if not line.endswith(".ets"):
+                if all(not line.endswith(f".{ext}") for ext in self.supported_extensions):
                     continue
 
                 test_path = self.test_root / line

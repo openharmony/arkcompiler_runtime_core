@@ -42,6 +42,8 @@ class StepKind(BaseEnum):
     AOT = "aot"
     RUNTIME = "runtime"
     GTEST_RUNNER = "gtest-runner"
+    DECLGEN = "declgen"
+    TSC = "tsc"
     OTHER = "other"
 
 

@@ -27,6 +27,7 @@ from typing_extensions import Self
 
 from runner import utils
 from runner.common_exceptions import InvalidConfiguration
+from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.validation_result import ValidationResult, ValidatorFailKind
 from runner.extensions.flows.itest_flow import ITestFlow
 from runner.extensions.flows.test_flow_registry import workflow_registry
@@ -183,6 +184,7 @@ class TestStandardFlow(ITestFlow, Test):
         self.__is_dependent = is_dependent
         self.__boot_panda_files: str = ""
         self.validator_utils.add_additional_validator()
+        self._is_declgen = any(step.step_kind == StepKind.DECLGEN for step in self.test_env.config.workflow.steps)
 
     @property
     def is_negative_runtime(self) -> bool:
@@ -291,7 +293,7 @@ class TestStandardFlow(ITestFlow, Test):
 
         self._log_invalid_tags_if_any()
         compile_only_test = self._is_compile_only_test()
-        allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
+        allowed_steps = [StepKind.COMPILER, StepKind.DECLGEN]  # steps to run for compile only or not-a-test tests
         steps = self._collect_steps(compile_only_test, allowed_steps)
         for i, step in enumerate(steps):
             pattern = re.compile(translate(step.step_filter))
@@ -310,9 +312,7 @@ class TestStandardFlow(ITestFlow, Test):
                 return self
 
         if not steps:
-            # no step runs, so nothing bad occurs, and we consider the test is passed
-            self.passed = True
-            self.fail_kind = 'PASSED'
+            self._mark_test_exclude()
 
         if self.continue_if_failed:
             self._finalize_test_status(steps)
@@ -476,6 +476,7 @@ class TestStandardFlow(ITestFlow, Test):
             package_neg_compile = self.dependent_packages.get(dep_package, False)
             if simple_failed or negative_compile or package_neg_compile:
                 self.passed = dependent_result.passed if not package_neg_compile else True
+                self.excluded = dependent_result.excluded
                 self.report = dependent_result.report
                 self.fail_kind = dependent_result.fail_kind
                 self.last_failure_check_passed = dependent_result.last_failure_check_passed
@@ -548,6 +549,14 @@ class TestStandardFlow(ITestFlow, Test):
         self.test_an: Path = self.bytecode_path / f"{self.test_id}.an"
         self.test_abc.parent.mkdir(parents=True, exist_ok=True)
 
+    def _mark_test_exclude(self) -> None:
+        # no step runs, so nothing bad occurs, and we consider the test is passed
+        # but set the flag `excluded` to track correct statistics
+        # The test without steps is considered as self-excluded or excluded-after
+        self.passed = True
+        self.fail_kind = FailKind.NOT_RUN.make_fail_kind("")
+        self.excluded = True
+
     def _collect_steps(self, compile_only_test: bool, allowed_steps: list[StepKind]) -> list[Step]:
         return [step for step in self.test_env.config.workflow.steps
                 if step.executable_path is not None and
@@ -615,16 +624,15 @@ class TestStandardFlow(ITestFlow, Test):
         return Path(line)
 
     def __expand_last_call_in_line(self, arg: str) -> list[str]:
-        line: str = Macros.process_special_macros(arg, self.test_id)
-        if utils.has_macro(line):
+        line: str = arg
+        while utils.has_macro(line):
+            line = Macros.process_special_macros(line, self.test_id)
             try:
-                line_expanded: str | list[str] = Macros.correct_macro(line, self.test_extra_params)
+                expanded_line: str | list[str] = Macros.correct_macro(line, self.test_extra_params)
             except ParameterNotFound:
-                line_expanded = Macros.correct_macro(line, self.test_env.config.workflow)
-            if isinstance(line_expanded, list):
-                return line_expanded
-            return line_expanded.split()
-        return [line]
+                expanded_line = Macros.correct_macro(line, self.test_env.config.workflow)
+            line = " ".join(expanded_line) if isinstance(expanded_line, list) else expanded_line
+        return line.split()
 
     def __expand_last_call_in_args(self, args: list[str]) -> list[str]:
         flags: list[str] = []

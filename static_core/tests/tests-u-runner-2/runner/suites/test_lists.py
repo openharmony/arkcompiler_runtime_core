@@ -44,12 +44,12 @@ _CMAKE_BUILD_PROPERTIES_FILE_NAME = "CMakeCache.txt"
 
 class TestLists:
     """Manages test list discovery, filtering, and configuration for test execution.
-    
+
     This class is responsible for discovering and managing test list files based on
     build configuration, test environment, and various filtering criteria. It handles
     different build systems (GN/CMAKE), sanitizers, architectures, and test configurations
     to locate appropriate test lists for execution.
-    
+
     The class supports:
     - Automatic detection of build properties and configuration
     - Pattern-based test list filtering and matching
@@ -57,7 +57,7 @@ class TestLists:
     - Multiple test configuration kinds (AOT, JIT, Interpreter)
     - Architecture and OS-specific test list selection
     - Sanitizer-aware test list discovery
-    
+
     Attributes:
         list_roots: List of RootDir objects containing test list directories
         config: TestEnv configuration object with test settings
@@ -159,12 +159,12 @@ class TestLists:
             filter_list: bool | None = None
     ) -> list[Path]:
         """Collect and filter test list files based on configuration and patterns.
-        
+
         This method discovers test list files from configured root directories by matching
         filenames against a generated pattern that incorporates build configuration,
         architecture, OS, and other test parameters. It supports optional filtering
         based on additional pattern lists.
-        
+
         Args:
             kind: Type of test lists to collect (e.g., "excluded", "ignored").
                   Used to generate the appropriate filename pattern.
@@ -175,14 +175,14 @@ class TestLists:
                         - None: No filtering, return all discovered test lists
                         - True: Return only test lists matching extra_lists patterns
                         - False: Return test lists excluding those matching extra_lists patterns
-        
+
         Returns:
             List of Path objects representing discovered and filtered test list files.
             The behavior depends on the filter_list parameter:
             - None: All matching test lists from all root directories
             - True: Only test lists matching patterns in extra_lists
             - False: All test lists except those matching patterns in extra_lists
-            
+
         Note:
             - Uses _get_test_list_pattern() to generate regex patterns based on test configuration
             - Searches for .txt files in all configured root directories recursively

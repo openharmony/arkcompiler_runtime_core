@@ -48,7 +48,7 @@ class Macros:
     @staticmethod
     def process_special_macros(line: str, test_id: str) -> str:
         result = replace_macro(line, "test-id", test_id)
-        result = replace_macro(result, "test-id-name", Path(test_id).stem)
+        result = replace_macro(result, "test-id-name", Path(test_id).with_suffix("").as_posix())
         return result
 
     @classmethod
