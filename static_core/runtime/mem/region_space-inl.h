@@ -131,14 +131,8 @@ template <OSPagesPolicy OS_PAGES_POLICY>
 void RegionPool::FreeRegion(Region *region)
 {
     bool releasePages = OS_PAGES_POLICY == OSPagesPolicy::IMMEDIATE_RETURN;
-    if (block_.IsAddrInRange(region)) {
-        region->IsYoung() ? spaces_->ReduceYoungOccupiedInSharedPool(region->Size())
-                          : spaces_->ReduceTenuredOccupiedInSharedPool(region->Size());
-        block_.FreeRegion(region, releasePages);
-    } else {
-        region->IsYoung() ? spaces_->FreeYoungPool(region, region->Size(), releasePages)
-                          : spaces_->FreeTenuredPool(region, region->Size(), releasePages);
-    }
+    region->IsYoung() ? spaces_->FreeYoungPool(region, region->Size(), releasePages)
+                      : spaces_->FreeTenuredPool(region, region->Size(), releasePages);
 }
 
 template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY>
@@ -212,6 +206,34 @@ bool RegionSpace::IsLive(const ObjectHeader *object) const
 
     // check if the object is live in the range
     return region != nullptr && region->IsInAllocRange(object);
+}
+
+template <typename Mutex>
+void RegionSpace::PromoteYoungRegionToTargetSpace(Region *region, RegionSpace *targetSpace, Mutex *regionLock,
+                                                  Mutex *targetRegionLock)
+{
+    ASSERT(region->GetSpace() == this);
+    ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
+    if (region->IsTLAB()) {
+        region->AddFlag(RegionFlag::IS_MIXEDTLAB);
+        region->SetTop(ToUintPtr(region->GetLastTLAB()->GetEndAddr()));
+    }
+    regionPool_->PromoteYoungRegion(region);
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    [[maybe_unused]] auto previousRegionsInUse = youngRegionsInUse_.fetch_sub(1, std::memory_order_relaxed);
+    ASSERT(previousRegionsInUse > 0);
+
+    if (targetSpace != this) {
+        os::memory::LockHolder lock1(*regionLock);
+        os::memory::LockHolder lock2(*targetRegionLock);
+        regions_.erase(region->AsListNode());
+        targetSpace->regions_.push_back(region->AsListNode());
+        region->SetSpace(targetSpace);
+
+        // We must reset allocator pointer in pool manager
+        PoolManager().GetMmapMemPool()->PromotePoolToOtherAllocator(region, targetSpace->GetPool());
+    }
 }
 
 }  // namespace ark::mem

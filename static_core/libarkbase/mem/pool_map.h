@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,8 +45,9 @@ class AllocatorInfo {
 public:
     explicit constexpr AllocatorInfo(AllocatorType type, const void *addr) : type_(type), headerAddr_(addr)
     {
-        // We can't create AllocatorInfo without correct pointer to the allocator header
-        ASSERT(headerAddr_ != nullptr);
+        // Header must be either not nullptr or type must be UNDEFINED
+        // for allocator info for addresses that are not allocated by any allocator
+        ASSERT(headerAddr_ != nullptr || type_ == AllocatorType::UNDEFINED);
     }
 
     AllocatorType GetType() const
@@ -84,6 +85,8 @@ public:
     PANDA_PUBLIC_API SpaceType GetSpaceType(const void *addr) const;
 
     PANDA_PUBLIC_API bool IsEmpty() const;
+
+    PANDA_PUBLIC_API void PromotePoolToOtherAllocator(void *addr, void *allocatorAddr);
 
 private:
     static constexpr uint64_t POOL_MAP_COVERAGE = PANDA_MAX_HEAP_SIZE;
@@ -147,6 +150,13 @@ private:
         SpaceType GetSpaceType() const
         {
             return spaceType_;
+        }
+
+        // Promote pool from young to tenured region allocator
+        void PromotePool(const void *newAllocatorAddr)
+        {
+            ASSERT(allocatorType_ == AllocatorType::REGION_ALLOCATOR);
+            allocatorAddr_ = newAllocatorAddr;
         }
 
     private:

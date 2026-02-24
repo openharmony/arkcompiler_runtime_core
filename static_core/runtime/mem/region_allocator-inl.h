@@ -32,30 +32,16 @@ namespace ark::mem {
 template <typename LockConfigT>
 RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces,
                                                       SpaceType spaceType, AllocatorType allocatorType,
-                                                      size_t initSpaceSize, bool extend, size_t regionSize,
-                                                      size_t emptyTenuredRegionsMaxCount)
+                                                      size_t regionSize, size_t emptyTenuredRegionsMaxCount)
     : memStats_(memStats),
       spaceType_(spaceType),
       spaces_(spaces),
-      regionPool_(regionSize, extend, spaces,
-                  InternalAllocatorPtr(InternalAllocator<>::GetInternalAllocatorFromRuntime())),
-      regionSpace_(spaceType, allocatorType, &regionPool_, emptyTenuredRegionsMaxCount),
-      initBlock_(0, nullptr)
+      regionPool_(regionSize, spaces, InternalAllocatorPtr(InternalAllocator<>::GetInternalAllocatorFromRuntime())),
+      regionSpace_(spaceType, allocatorType, &regionPool_, emptyTenuredRegionsMaxCount)
 {
     ASSERT(spaceType_ == SpaceType::SPACE_TYPE_OBJECT || spaceType_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT ||
            spaceType_ == SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     ASSERT(regionSize != 0);
-    initBlock_ = NULLPOOL;
-    if (initSpaceSize > 0) {
-        ASSERT(initSpaceSize % regionSize == 0);
-        initBlock_ = spaces_->AllocSharedPool(initSpaceSize, spaceType, AllocatorType::REGION_ALLOCATOR, this);
-        ASSERT(initBlock_.GetMem() != nullptr);
-        ASSERT(initBlock_.GetSize() >= initSpaceSize);
-        if (initBlock_.GetMem() != nullptr) {
-            regionPool_.InitRegionBlock(ToUintPtr(initBlock_.GetMem()), ToUintPtr(initBlock_.GetMem()) + initSpaceSize);
-            ASAN_POISON_MEMORY_REGION(initBlock_.GetMem(), initBlock_.GetSize());
-        }
-    }
 }
 
 template <typename LockConfigT>
@@ -65,9 +51,8 @@ RegionAllocatorBase<LockConfigT>::RegionAllocatorBase(MemStatsType *memStats, Ge
     : memStats_(memStats),
       spaces_(spaces),
       spaceType_(spaceType),
-      regionPool_(0, false, spaces, nullptr),  // unused
-      regionSpace_(spaceType, allocatorType, sharedRegionPool, emptyTenuredRegionsMaxCount),
-      initBlock_(0, nullptr)  // unused
+      regionPool_(0, spaces, nullptr),  // unused
+      regionSpace_(spaceType, allocatorType, sharedRegionPool, emptyTenuredRegionsMaxCount)
 {
     ASSERT(spaceType_ == SpaceType::SPACE_TYPE_OBJECT || spaceType_ == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
 }
@@ -131,13 +116,15 @@ double RegionAllocatorBase<LockConfigT>::CalculateDeadObjectsRatio()
 
 template <typename AllocConfigT, typename LockConfigT>
 RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
-                                                            SpaceType spaceType, size_t initSpaceSize, bool extend,
-                                                            size_t emptyTenuredRegionsMaxCount)
-    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, initSpaceSize,
-                                       extend, REGION_SIZE, emptyTenuredRegionsMaxCount),
+                                                            SpaceType spaceType, size_t emptyTenuredRegionsMaxCount)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, REGION_SIZE,
+                                       emptyTenuredRegionsMaxCount),
       fullRegion_(nullptr, 0, 0),
       edenCurrentRegion_(&fullRegion_)
 {
+    if (regionQueues_ == nullptr) {
+        regionQueues_ = Runtime::GetCurrent()->GetInternalAllocator()->New<RegionQueues>();
+    }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -149,6 +136,18 @@ RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memSta
       fullRegion_(nullptr, 0, 0),
       edenCurrentRegion_(&fullRegion_)
 {
+    if (regionQueues_ == nullptr) {
+        regionQueues_ = Runtime::GetCurrent()->GetInternalAllocator()->New<RegionQueues>();
+    }
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+RegionAllocator<AllocConfigT, LockConfigT>::~RegionAllocator()
+{
+    if (regionQueues_ != nullptr) {
+        Runtime::GetCurrent()->GetInternalAllocator()->Delete(regionQueues_);
+        regionQueues_ = nullptr;
+    }
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -255,7 +254,7 @@ RegionMem RegionAllocator<AllocConfigT, LockConfigT>::AllocExt(size_t size, Alig
         }
         // Do it after memory init because we can reach this memory after setting live bitmap
         if ((REGION_TYPE == RegionFlag::IS_OLD) || pinned) {
-            auto liveBitmap = this->GetRegion(reinterpret_cast<ObjectHeader *>(regionMem.mem))->GetLiveBitmap();
+            auto liveBitmap = ObjectToRegion(reinterpret_cast<ObjectHeader *>(regionMem.mem))->GetLiveBitmap();
             ASSERT(liveBitmap != nullptr);
             liveBitmap->AtomicTestAndSet(regionMem.mem);
         }
@@ -439,6 +438,21 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactAllSpecificRegions(const
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+template <bool USE_MARKED_BITMAP>
+void RegionAllocator<AllocConfigT, LockConfigT>::CompactYoungToTenured(
+    const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler,
+    RegionAllocator<AllocConfigT, LockConfigT> *tenuredAllocator)
+{
+    this->GetSpace()->IterateRegions([this, &deathChecker, &moveHandler, &tenuredAllocator](Region *region) {
+        if (!region->HasFlag(RegionFlag::IS_EDEN)) {
+            return;
+        }
+        CompactSpecificRegion<RegionFlag::IS_EDEN, RegionFlag::IS_OLD, USE_MARKED_BITMAP>(
+            region, deathChecker, moveHandler, tenuredAllocator);
+    });
+}
+
+template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP>
 void RegionAllocator<AllocConfigT, LockConfigT>::CompactSeveralSpecificRegions(const PandaVector<Region *> &regions,
                                                                                const GCObjectVisitor &deathChecker,
@@ -460,6 +474,16 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *r
                                                                        const GCObjectVisitor &deathChecker,
                                                                        const ObjectVisitorEx &moveHandler)
 {
+    CompactSpecificRegion<REGIONS_TYPE_FROM, REGIONS_TYPE_TO, USE_MARKED_BITMAP>(region, deathChecker, moveHandler,
+                                                                                 this);
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP>
+void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(
+    Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler,
+    RegionAllocator<AllocConfigT, LockConfigT> *allocator)
+{
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
     if constexpr (REGIONS_TYPE_FROM == REGIONS_TYPE_TO) {
         // It is bad if we compact one region into itself.
@@ -467,13 +491,13 @@ void RegionAllocator<AllocConfigT, LockConfigT>::CompactSpecificRegion(Region *r
         ASSERT(!isCurrentRegion);
     }
     auto createNewRegion = [&]() {
-        os::memory::LockHolder lock(this->regionLock_);
-        Region *regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGIONS_TYPE_TO);
+        os::memory::LockHolder lock(allocator->regionLock_);
+        Region *regionTo = allocator->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGIONS_TYPE_TO);
         ASSERT(regionTo != nullptr);
         return regionTo;
     };
 
-    Region *regionTo = PopFromRegionQueue<true, REGIONS_TYPE_TO>();
+    Region *regionTo = allocator->PopFromRegionQueue<true, REGIONS_TYPE_TO>();
     if (regionTo == nullptr) {
         regionTo = createNewRegion();
     }
@@ -543,9 +567,9 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ReleaseReservedRegion()
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool USE_MARKED_BITMAP, bool FULL_GC>
-size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *region,
-                                                                      const GCObjectVisitor &deathChecker,
-                                                                      const ObjectVisitor &aliveObjectsHandler)
+size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegionToTargetAlloc(
+    Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitor &aliveObjectsHandler,
+    RegionAllocator<AllocConfigT, LockConfigT> *targetAlloc)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
     size_t aliveMoveCount = 0;
@@ -576,7 +600,8 @@ size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *re
     }
     // We set not actual value here but we will update it later
     region->SetLiveBytes(region->GetAllocatedBytes());
-    this->GetSpace()->PromoteYoungRegion(region);
+    this->GetSpace()->PromoteYoungRegionToTargetSpace(region, targetAlloc->GetSpace(), &this->regionLock_,
+                                                      &targetAlloc->regionLock_);
     return aliveMoveCount;
 }
 
@@ -613,9 +638,9 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ResetSeveralSpecificRegions(con
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::RegionNonmovableAllocator(
-    MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType, size_t initSpaceSize, bool extend)
-    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, ObjectAllocator::GetAllocatorType(), initSpaceSize,
-                                       extend, REGION_SIZE, 0),
+    MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, ObjectAllocator::GetAllocatorType(), REGION_SIZE,
+                                       0),
       objectAllocator_(memStats, spaceType)
 {
 }
@@ -750,8 +775,7 @@ template <typename AllocConfigT, typename LockConfigT>
 RegionHumongousAllocator<AllocConfigT, LockConfigT>::RegionHumongousAllocator(MemStatsType *memStats,
                                                                               GenerationalSpaces *spaces,
                                                                               SpaceType spaceType)
-    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, 0, true,
-                                       REGION_SIZE, 0)
+    : RegionAllocatorBase<LockConfigT>(memStats, spaces, spaceType, AllocatorType::REGION_ALLOCATOR, REGION_SIZE, 0)
 {
 }
 

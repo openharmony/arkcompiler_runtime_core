@@ -539,14 +539,21 @@ inline std::tuple<Pool, AllocatorInfo, SpaceType> MmapMemPool::FindAddrInNonObje
     uintptr_t poolStart =
         (element != nonObjectMmapedPools_.end()) ? ToUintPtr(element->first) : (std::numeric_limits<uintptr_t>::max());
     if (ToUintPtr(addr) < poolStart) {
-        ASSERT(element != nonObjectMmapedPools_.begin());
+        if (element == nonObjectMmapedPools_.begin()) {
+            // Wrong address
+            return {Pool(0, nullptr), AllocatorInfo(AllocatorType::UNDEFINED, nullptr),
+                    SpaceType::SPACE_TYPE_UNDEFINED};
+        }
         element = std::prev(element);
         poolStart = ToUintPtr(element->first);
     }
     ASSERT(element != nonObjectMmapedPools_.end());
     [[maybe_unused]] uintptr_t poolEnd = poolStart + std::get<0>(element->second).GetSize();
-    ASSERT((poolStart <= ToUintPtr(addr)) && (ToUintPtr(addr) < poolEnd));
-    return element->second;
+    if ((poolStart <= ToUintPtr(addr)) && (ToUintPtr(addr) < poolEnd)) {
+        return element->second;
+    }
+    // Wrong address
+    return {Pool(0, nullptr), AllocatorInfo(AllocatorType::UNDEFINED, nullptr), SpaceType::SPACE_TYPE_UNDEFINED};
 }
 
 inline AllocatorInfo MmapMemPool::GetAllocatorInfoForAddrImpl(const void *addr) const
@@ -700,6 +707,11 @@ inline bool MmapMemPool::ReleasePagesInMainPoolWithInterruption(const InterruptF
         auto poolSize = std::min(RELEASE_MEM_SIZE, unreturnedSize);
         commonSpace_.ReleasePagesInMainPool(poolSize);
     }
+}
+
+inline void MmapMemPool::PromotePoolToOtherAllocator(void *addr, void *allocatorAddr)
+{
+    poolMap_.PromotePoolToOtherAllocator(ToVoidPtr(ToUintPtr(addr) - GetMinObjectAddress()), allocatorAddr);
 }
 
 inline void MmapMemPool::SpaceMemory::ReleasePagesInMainPool(size_t poolSize)

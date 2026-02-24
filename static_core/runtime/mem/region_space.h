@@ -76,6 +76,11 @@ public:
         return space_;
     }
 
+    void SetSpace(RegionSpace *newSpace)
+    {
+        space_ = newSpace;
+    }
+
     uintptr_t Begin() const
     {
         return begin_;
@@ -430,99 +435,10 @@ inline std::ostream &operator<<(std::ostream &out, const Region &region)
     return DumpRegionRange(out, region);
 }
 
-// RegionBlock is used for allocate regions from a continuous big memory block
-// |--------------------------|
-// |.....RegionBlock class....|
-// |--------------------------|
-// |.......regions_end_.......|--------|
-// |.......regions_begin_.....|----|   |
-// |--------------------------|    |   |
-//                                 |   |
-// |   Continuous Mem Block   |    |   |
-// |--------------------------|    |   |
-// |...........Region.........|<---|   |
-// |...........Region.........|        |
-// |...........Region.........|        |
-// |..........................|        |
-// |..........................|        |
-// |..........................|        |
-// |..........................|        |
-// |..........................|        |
-// |..........................|        |
-// |..........................|        |
-// |...........Region.........|<-------|
-class RegionBlock {
-public:
-    RegionBlock(size_t regionSize, InternalAllocatorPtr allocator) : regionSize_(regionSize), allocator_(allocator) {}
-
-    ~RegionBlock()
-    {
-        if (!occupied_.Empty()) {
-            allocator_->Free(occupied_.Data());
-        }
-    }
-
-    NO_COPY_SEMANTIC(RegionBlock);
-    NO_MOVE_SEMANTIC(RegionBlock);
-
-    void Init(uintptr_t regionsBegin, uintptr_t regionsEnd);
-
-    Region *AllocRegion();
-
-    Region *AllocLargeRegion(size_t largeRegionSize);
-
-    void FreeRegion(Region *region, bool releasePages = true);
-
-    bool IsAddrInRange(const void *addr) const
-    {
-        return ToUintPtr(addr) < regionsEnd_ && ToUintPtr(addr) >= regionsBegin_;
-    }
-
-    Region *GetAllocatedRegion(const void *addr) const
-    {
-        ASSERT(IsAddrInRange(addr));
-        os::memory::LockHolder lock(lock_);
-        return occupied_[RegionIndex(addr)];
-    }
-
-    size_t GetFreeRegionsNum() const
-    {
-        os::memory::LockHolder lock(lock_);
-        return occupied_.Size() - numUsedRegions_;
-    }
-
-private:
-    Region *RegionAt(size_t index) const
-    {
-        return reinterpret_cast<Region *>(regionsBegin_ + index * regionSize_);
-    }
-
-    size_t RegionIndex(const void *addr) const
-    {
-        return (ToUintPtr(addr) - regionsBegin_) / regionSize_;
-    }
-
-    size_t regionSize_;
-    InternalAllocatorPtr allocator_;
-    uintptr_t regionsBegin_ = 0;
-    uintptr_t regionsEnd_ = 0;
-    size_t numUsedRegions_ = 0;
-    Span<Region *> occupied_ GUARDED_BY(lock_);
-    mutable os::memory::Mutex lock_;
-};
-
-// RegionPool supports to work in three ways:
-// 1.alloc region in pre-allocated buffer(RegionBlock)
-// 2.alloc region in mmap pool directly
-// 3.mixed above two ways
 class RegionPool {
 public:
-    explicit RegionPool(size_t regionSize, bool extend, GenerationalSpaces *spaces, InternalAllocatorPtr allocator)
-        : block_(regionSize, allocator),
-          regionSize_(regionSize),
-          spaces_(spaces),
-          allocator_(allocator),
-          extend_(extend)
+    explicit RegionPool(size_t regionSize, GenerationalSpaces *spaces, InternalAllocatorPtr allocator)
+        : regionSize_(regionSize), spaces_(spaces), allocator_(allocator)
     {
     }
 
@@ -538,31 +454,18 @@ public:
 
     void PromoteYoungRegion(Region *region);
 
-    void InitRegionBlock(uintptr_t regionsBegin, uintptr_t regionsEnd)
-    {
-        block_.Init(regionsBegin, regionsEnd);
-    }
-
     bool IsAddrInPoolRange(const void *addr) const
     {
-        return block_.IsAddrInRange(addr) || IsAddrInExtendPoolRange(addr);
+        return IsAddrInExtendPoolRange(addr);
     }
 
     template <bool CROSS_REGION = false>
     Region *GetRegion(const void *addr) const
     {
-        if (block_.IsAddrInRange(addr)) {
-            return block_.GetAllocatedRegion(addr);
-        }
         if (IsAddrInExtendPoolRange(addr)) {
             return AddrToRegion<CROSS_REGION>(addr);
         }
         return nullptr;
-    }
-
-    size_t GetFreeRegionsNumInRegionBlock() const
-    {
-        return block_.GetFreeRegionsNum();
     }
 
     bool HaveTenuredSize(size_t size) const;
@@ -597,18 +500,13 @@ private:
 
     bool IsAddrInExtendPoolRange(const void *addr) const
     {
-        if (extend_) {
-            AllocatorInfo allocInfo = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(const_cast<void *>(addr));
-            return allocInfo.GetAllocatorHeaderAddr() == this;
-        }
-        return false;
+        AllocatorInfo allocInfo = PoolManager::GetMmapMemPool()->GetAllocatorInfoForAddr(const_cast<void *>(addr));
+        return allocInfo.GetAllocatorHeaderAddr() == this;
     }
 
-    RegionBlock block_;
     size_t regionSize_;
     GenerationalSpaces *spaces_ {nullptr};
     InternalAllocatorPtr allocator_;
-    bool extend_ = true;
 };
 
 class RegionSpace {
@@ -642,7 +540,9 @@ public:
               OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
     void FreeRegion(Region *region);
 
-    void PromoteYoungRegion(Region *region);
+    template <typename Mutex>
+    void PromoteYoungRegionToTargetSpace(Region *region, RegionSpace *targetSpace, Mutex *regionLock,
+                                         Mutex *targetRegionLock);
 
     void FreeAllRegions();
 

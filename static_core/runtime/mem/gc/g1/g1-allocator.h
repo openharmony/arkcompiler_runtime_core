@@ -122,20 +122,20 @@ public:
     void GetTopGarbageRegions(double garbageThreshold, GarbageRegions &garbageRegions,
                               PandaVector<Region *> &emptyRegions)
     {
-        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold, garbageRegions,
-                                                                                       emptyRegions);
+        return objectTenuredAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(
+            garbageThreshold, garbageRegions, emptyRegions);
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
 
     void ReserveRegionIfNeeded()
     {
-        objectAllocator_->ReserveRegionIfNeeded();
+        objectTenuredAllocator_->ReserveRegionIfNeeded();
     }
 
     void ReleaseReservedRegion()
     {
-        objectAllocator_->ReleaseReservedRegion();
+        objectTenuredAllocator_->ReleaseReservedRegion();
     }
 
     void ResetYoungAllocator() final;
@@ -154,8 +154,12 @@ public:
                 regions);
             return;
         }
-        objectAllocator_->ResetSeveralSpecificRegions<REGIONS_TYPE, REGIONS_RELEASE_POLICY, OS_PAGES_POLICY, NEED_LOCK>(
-            regions);
+        if constexpr (REGIONS_TYPE == RegionFlag::IS_OLD) {
+            objectTenuredAllocator_->template ResetSeveralSpecificRegions<RegionFlag::IS_OLD, REGIONS_RELEASE_POLICY,
+                                                                          OS_PAGES_POLICY, NEED_LOCK>(regions);
+            return;
+        }
+        UNREACHABLE();
     }
 
     TLAB *CreateNewTLAB(size_t tlabSize) final;
@@ -199,12 +203,12 @@ public:
 
     void AddPromotedRegionToQueueIfPinned(Region *region)
     {
-        objectAllocator_->AddPromotedRegionToQueueIfPinned(region);
+        objectTenuredAllocator_->AddPromotedRegionToQueueIfPinned(region);
     }
     template <RegionFlag REGION_TYPE, bool USE_MARKBITMAP = false>
     void CompactRegion(Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveChecker)
     {
-        objectAllocator_->template CompactSpecificRegion<REGION_TYPE, RegionFlag::IS_OLD, USE_MARKBITMAP>(
+        objectTenuredAllocator_->template CompactSpecificRegion<REGION_TYPE, RegionFlag::IS_OLD, USE_MARKBITMAP>(
             region, deathChecker, moveChecker);
     }
 
@@ -213,8 +217,8 @@ public:
                               const ObjectVisitor &promotionChecker)
     {
         ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-        return objectAllocator_->template PromoteYoungRegion<USE_MARKBITMAP, FULL_GC>(region, deathChecker,
-                                                                                      promotionChecker);
+        return objectYoungAllocator_->template PromoteYoungRegionToTargetAlloc<USE_MARKBITMAP, FULL_GC>(
+            region, deathChecker, promotionChecker, objectTenuredAllocator_.get());
     }
 
     void CompactTenuredRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &deathChecker,
@@ -223,24 +227,24 @@ public:
     template <bool USE_ATOMIC = true>
     Region *PopFromOldRegionQueue()
     {
-        return objectAllocator_->template PopFromRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>();
+        return objectTenuredAllocator_->template PopFromRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>();
     }
 
     template <bool USE_ATOMIC = true>
     void PushToOldRegionQueue(Region *region)
     {
-        objectAllocator_->template PushToRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>(region);
+        objectTenuredAllocator_->template PushToRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>(region);
     }
 
     template <bool USE_ATOMIC = true>
     Region *CreateAndSetUpNewOldRegion()
     {
-        return objectAllocator_->template CreateAndSetUpNewRegionWithLock<USE_ATOMIC, RegionFlag::IS_OLD>();
+        return objectTenuredAllocator_->template CreateAndSetUpNewRegionWithLock<USE_ATOMIC, RegionFlag::IS_OLD>();
     }
 
     void ClearCurrentTenuredRegion()
     {
-        objectAllocator_->template ClearCurrentRegion<IS_OLD>();
+        objectTenuredAllocator_->template ClearCurrentRegion<IS_OLD>();
     }
 
     static constexpr size_t GetRegionSize()
@@ -250,12 +254,14 @@ public:
 
     bool HaveTenuredSize(size_t numRegions) const
     {
-        return objectAllocator_->GetSpace()->GetPool()->HaveTenuredSize(numRegions * ObjectAllocator::REGION_SIZE);
+        return objectTenuredAllocator_->GetSpace()->GetPool()->HaveTenuredSize(numRegions *
+                                                                               ObjectAllocator::REGION_SIZE);
     }
 
     bool HaveFreeRegions(size_t numRegions) const
     {
-        return objectAllocator_->GetSpace()->GetPool()->HaveFreeRegions(numRegions, ObjectAllocator::REGION_SIZE);
+        return objectTenuredAllocator_->GetSpace()->GetPool()->HaveFreeRegions(numRegions,
+                                                                               ObjectAllocator::REGION_SIZE);
     }
 
     static constexpr size_t GetYoungAllocMaxSize()
@@ -264,15 +270,15 @@ public:
         return ObjectAllocator::GetMaxRegularObjectSize();
     }
 
-    template <RegionFlag REGION_TYPE, OSPagesPolicy OS_PAGES_POLICY>
-    void ReleaseEmptyRegions()
+    template <OSPagesPolicy OS_PAGES_POLICY>
+    void ReleaseTenuredRegions()
     {
-        objectAllocator_->ReleaseEmptyRegions<REGION_TYPE, OS_PAGES_POLICY>();
+        objectTenuredAllocator_->ReleaseEmptyRegions<RegionFlag::IS_OLD, OS_PAGES_POLICY>();
     }
 
     void SetDesiredEdenLength(size_t edenLength)
     {
-        objectAllocator_->SetDesiredEdenLength(edenLength);
+        objectYoungAllocator_->SetDesiredEdenLength(edenLength);
     }
 
     double CalculateNonMovableExternalFragmentation()
@@ -282,7 +288,7 @@ public:
 
     double CalculateInternalOldFragmentation()
     {
-        return objectAllocator_->CalculateInternalOldFragmentation();
+        return objectTenuredAllocator_->CalculateInternalOldFragmentation();
     }
 
     double CalculateInternalHumongousFragmentation()
@@ -292,7 +298,7 @@ public:
 
     double CalculateOldDeadObjectsRatio()
     {
-        return objectAllocator_->CalculateDeadObjectsRatio();
+        return objectTenuredAllocator_->CalculateDeadObjectsRatio();
     }
 
     double CalculateNonMovableDeadObjectsRatio()
@@ -303,7 +309,8 @@ public:
 private:
     Alignment CalculateAllocatorAlignment(size_t align) final;
 
-    PandaUniquePtr<ObjectAllocator> objectAllocator_ {nullptr};
+    PandaUniquePtr<ObjectAllocator> objectYoungAllocator_ {nullptr};
+    PandaUniquePtr<ObjectAllocator> objectTenuredAllocator_ {nullptr};
     PandaUniquePtr<NonMovableAllocator> nonmovableAllocator_ {nullptr};
     PandaUniquePtr<HumongousObjectAllocator> humongousObjectAllocator_ {nullptr};
     MemStatsType *memStats_ {nullptr};

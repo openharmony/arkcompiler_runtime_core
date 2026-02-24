@@ -73,8 +73,7 @@ public:
     NO_COPY_SEMANTIC(RegionAllocatorBase);
 
     explicit RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
-                                 AllocatorType allocatorType, size_t initSpaceSize, bool extend, size_t regionSize,
-                                 size_t emptyTenuredRegionsMaxCount);
+                                 AllocatorType allocatorType, size_t regionSize, size_t emptyTenuredRegionsMaxCount);
     explicit RegionAllocatorBase(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
                                  AllocatorType allocatorType, RegionPool *sharedRegionPool,
                                  size_t emptyTenuredRegionsMaxCount);
@@ -113,11 +112,6 @@ protected:
     void ClearRegionsPool()
     {
         regionSpace_.FreeAllRegions();
-
-        if (initBlock_.GetMem() != nullptr) {
-            spaces_->FreeSharedPool(initBlock_.GetMem(), initBlock_.GetSize());
-            initBlock_ = NULLPOOL;
-        }
     }
 
     template <OSPagesAllocPolicy OS_ALLOC_POLICY>
@@ -147,8 +141,6 @@ protected:
     RegionPool regionPool_;  // self created pool, only used by this allocator
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     RegionSpace regionSpace_;  // the target region space used by this allocator
-    // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
-    Pool initBlock_;  // the initial memory block for region allocation
 };
 
 /// @brief A region-based bump-pointer allocator.
@@ -167,12 +159,10 @@ public:
      * @brief Create new region allocator
      * @param mem_stats - memory statistics
      * @param space_type - space type
-     * @param init_space_size - initial continuous space size, 0 means no need for initial space
-     * @param extend - true means that will allocate more regions from mmap pool if initial space is not enough
      */
     explicit RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
-                             SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT, size_t initSpaceSize = 0,
-                             bool extend = true, size_t emptyTenuredRegionsMaxCount = 0);
+                             SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT,
+                             size_t emptyTenuredRegionsMaxCount = 0);
 
     /**
      * @brief Create new region allocator with shared region pool specified
@@ -183,7 +173,7 @@ public:
     explicit RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
                              RegionPool *sharedRegionPool, size_t emptyTenuredRegionsMaxCount = 0);
 
-    ~RegionAllocator() override = default;
+    ~RegionAllocator() override;
 
     template <RegionFlag REGION_TYPE = RegionFlag::IS_EDEN, bool UPDATE_MEMSTATS = true>
     void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT, bool pinned = false);
@@ -268,6 +258,10 @@ public:
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
     void CompactAllSpecificRegions(const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler);
 
+    template <bool USE_MARKED_BITMAP = false>
+    void CompactYoungToTenured(const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler,
+                               RegionAllocator<AllocConfigT, LockConfigT> *tenuredAllocator);
+
     template <RegionFlag REGION_TYPE>
     void ClearCurrentRegion()
     {
@@ -303,6 +297,11 @@ public:
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
     void CompactSpecificRegion(Region *regions, const GCObjectVisitor &deathChecker,
                                const ObjectVisitorEx &moveHandler);
+
+    template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
+    void CompactSpecificRegion(Region *regions, const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveHandler,
+                               RegionAllocator<AllocConfigT, LockConfigT> *allocator);
+
     /**
      * Promote region and return a counter of moved alive objects during MixedGC if use_marked_bitmap == true, or 0 in
      * any other case scenarios.
@@ -311,10 +310,13 @@ public:
      * @param region - region needed to proceed.
      * @param death_checker - checker what will return objects status for iterated object.
      * @param alive_objects_handler - called for every alive object.
+     * @param targetAlloc - Target object allocator to move region
      */
+
     template <bool USE_MARKED_BITMAP = false, bool FULL_GC = false>
-    size_t PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
-                              const ObjectVisitor &aliveObjectsHandler);
+    size_t PromoteYoungRegionToTargetAlloc(Region *region, const GCObjectVisitor &deathChecker,
+                                           const ObjectVisitor &aliveObjectsHandler,
+                                           RegionAllocator<AllocConfigT, LockConfigT> *targetAllocator);
 
     /**
      * Reset all regions with type /param regions_type.
@@ -496,7 +498,7 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD || REGION_TYPE == RegionFlag::IS_PINNED) {
-            return &oldQueueLock_;
+            return &regionQueues_->oldQueueLock;
         }
         UNREACHABLE();
         return nullptr;
@@ -507,9 +509,9 @@ private:
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
-            return &oldRegionQueue_;
+            return &regionQueues_->oldRegionQueue;
         } else if constexpr (REGION_TYPE == RegionFlag::IS_PINNED) {
-            return &pinnedRegionQueue_;
+            return &regionQueues_->pinnedRegionQueue;
         }
         UNREACHABLE();
         return nullptr;
@@ -522,13 +524,23 @@ private:
     Region fullRegion_;
     Region *edenCurrentRegion_;
     Region *reservedRegion_ = nullptr;
-    os::memory::Mutex oldQueueLock_;
-    PandaVector<Region *> oldRegionQueue_;
-    PandaVector<Region *> pinnedRegionQueue_;
     // To store partially used Regions that can be reused later.
     ark::PandaMultiMap<size_t, Region *, std::greater<size_t>> retainedTlabs_;
     friend class test::RegionAllocatorTest;
+
+    struct RegionQueues {
+        os::memory::Mutex oldQueueLock;
+        PandaVector<Region *> oldRegionQueue;
+        PandaVector<Region *> pinnedRegionQueue;
+    };
+
+    // Must be common for tenured and young
+    static RegionQueues *regionQueues_;
 };
+
+template <typename AllocConfigT, typename LockConfigT>
+typename RegionAllocator<AllocConfigT, LockConfigT>::RegionQueues
+    *RegionAllocator<AllocConfigT, LockConfigT>::regionQueues_ = nullptr;
 
 template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
 class RegionNonmovableAllocator final : public RegionAllocatorBase<LockConfigT> {
@@ -538,8 +550,7 @@ public:
     NO_MOVE_SEMANTIC(RegionNonmovableAllocator);
     NO_COPY_SEMANTIC(RegionNonmovableAllocator);
 
-    explicit RegionNonmovableAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
-                                       size_t initSpaceSize = 0, bool extend = true);
+    explicit RegionNonmovableAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType);
     explicit RegionNonmovableAllocator(MemStatsType *memStats, GenerationalSpaces *spaces, SpaceType spaceType,
                                        RegionPool *sharedRegionPool);
 

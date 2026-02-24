@@ -276,6 +276,8 @@ public:
         return nonObjectSpacesMaxSize_[SpaceTypeToIndex(SpaceType::SPACE_TYPE_COMPILER)];
     }
 
+    void PromotePoolToOtherAllocator(void *addr, void *allocatorAddr);
+
 private:
     template <class ArenaT = Arena, OSPagesAllocPolicy OS_ALLOC_POLICY>
     ArenaT *AllocArenaImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType, const void *allocatorAddr);

@@ -28,8 +28,10 @@ ObjectAllocatorG1<MT_MODE>::ObjectAllocatorG1(MemStatsType *memStats, [[maybe_un
     : ObjectAllocatorGenBase(memStats, GCCollectMode::GC_ALL, false)
 {
     size_t reservedTenuredRegionsCount = Runtime::GetOptions().GetG1NumberOfTenuredRegionsAtMixedCollection();
-    objectAllocator_ = MakePandaUnique<ObjectAllocator>(memStats, &heapSpaces_, SpaceType::SPACE_TYPE_OBJECT, 0, true,
-                                                        reservedTenuredRegionsCount);
+    objectYoungAllocator_ = MakePandaUnique<ObjectAllocator>(memStats, &heapSpaces_, SpaceType::SPACE_TYPE_OBJECT,
+                                                             reservedTenuredRegionsCount);
+    objectTenuredAllocator_ = MakePandaUnique<ObjectAllocator>(memStats, &heapSpaces_, SpaceType::SPACE_TYPE_OBJECT,
+                                                               reservedTenuredRegionsCount);
     nonmovableAllocator_ =
         MakePandaUnique<NonMovableAllocator>(memStats, &heapSpaces_, SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
     humongousObjectAllocator_ =
@@ -93,9 +95,9 @@ TLAB *ObjectAllocatorG1<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize
     TLAB *newTlab = nullptr;
     if constexpr (MT_MODE == MT_MODE_SINGLE) {
         // For single-threaded VMs allocate a whole region for TLAB
-        newTlab = objectAllocator_->CreateRegionSizeTLAB();
+        newTlab = objectYoungAllocator_->CreateRegionSizeTLAB();
     } else {
-        newTlab = objectAllocator_->CreateTLAB(tlabSize);
+        newTlab = objectYoungAllocator_->CreateTLAB(tlabSize);
     }
     if (newTlab != nullptr) {
         auto region = AddrToRegion(newTlab->GetStartAddr());
@@ -130,8 +132,10 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverObjectsInRange(MemRange memRange, co
     auto spaceType = PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(ToVoidPtr(memRange.GetStartAddress()));
     switch (spaceType) {
         case SpaceType::SPACE_TYPE_OBJECT:
-            objectAllocator_->IterateOverObjectsInRange(objectVisitor, ToVoidPtr(memRange.GetStartAddress()),
-                                                        ToVoidPtr(memRange.GetEndAddress()));
+            objectYoungAllocator_->IterateOverObjectsInRange(objectVisitor, ToVoidPtr(memRange.GetStartAddress()),
+                                                             ToVoidPtr(memRange.GetEndAddress()));
+            objectTenuredAllocator_->IterateOverObjectsInRange(objectVisitor, ToVoidPtr(memRange.GetStartAddress()),
+                                                               ToVoidPtr(memRange.GetEndAddress()));
             break;
         case SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT: {
             if (pygoteSpaceAllocator_ != nullptr) {
@@ -162,7 +166,7 @@ bool ObjectAllocatorG1<MT_MODE>::ContainObject(const ObjectHeader *obj) const
     if (pygoteSpaceAllocator_ != nullptr && pygoteSpaceAllocator_->ContainObject(obj)) {
         return true;
     }
-    if (objectAllocator_->ContainObject(obj)) {
+    if (objectTenuredAllocator_->ContainObject(obj) || objectYoungAllocator_->ContainObject(obj)) {
         return true;
     }
     if (nonmovableAllocator_->ContainObject(obj)) {
@@ -181,8 +185,11 @@ bool ObjectAllocatorG1<MT_MODE>::IsLive(const ObjectHeader *obj)
     if (pygoteSpaceAllocator_ != nullptr && pygoteSpaceAllocator_->ContainObject(obj)) {
         return pygoteSpaceAllocator_->IsLive(obj);
     }
-    if (objectAllocator_->ContainObject(obj)) {
-        return objectAllocator_->IsLive(obj);
+    if (objectYoungAllocator_->ContainObject(obj)) {
+        return objectYoungAllocator_->IsLive(obj);
+    }
+    if (objectTenuredAllocator_->ContainObject(obj)) {
+        return objectTenuredAllocator_->IsLive(obj);
     }
     if (nonmovableAllocator_->ContainObject(obj)) {
         return nonmovableAllocator_->IsLive(obj);
@@ -200,7 +207,7 @@ void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
-        RegionMem regionMem = objectAllocator_->AllocExt(size, align, pinned);
+        RegionMem regionMem = objectYoungAllocator_->AllocExt(size, align, pinned);
         if (objInit == ObjMemInitPolicy::REQUIRE_INIT && !regionMem.isZeroed) {
             ObjectMemoryInit(regionMem.mem, size);
         }
@@ -266,7 +273,8 @@ void ObjectAllocatorG1<MT_MODE>::VisitAndRemoveAllPools(const MemVisitor &memVis
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->VisitAndRemoveAllPools(memVisitor);
     }
-    objectAllocator_->VisitAndRemoveAllPools(memVisitor);
+    objectYoungAllocator_->VisitAndRemoveAllPools(memVisitor);
+    objectTenuredAllocator_->VisitAndRemoveAllPools(memVisitor);
     nonmovableAllocator_->VisitAndRemoveAllPools(memVisitor);
     humongousObjectAllocator_->VisitAndRemoveAllPools(memVisitor);
 }
@@ -282,7 +290,7 @@ void ObjectAllocatorG1<MT_MODE>::VisitAndRemoveFreePools(const MemVisitor &memVi
 template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::IterateOverYoungObjects(const ObjectVisitor &objectVisitor)
 {
-    auto youngRegions = objectAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    auto youngRegions = objectYoungAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
     for (auto r : youngRegions) {
         r->template IterateOverObjects(objectVisitor);
     }
@@ -297,19 +305,22 @@ size_t ObjectAllocatorG1<MT_MODE>::GetMaxYoungRegionsCount()
 template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetYoungRegions()
 {
-    return objectAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    return objectYoungAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>();
 }
 
 template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetMovableRegions()
 {
-    return objectAllocator_->GetAllRegions();
+    PandaVector<Region *> youngRegions = objectYoungAllocator_->GetAllRegions();
+    PandaVector<Region *> tenuredRegions = objectTenuredAllocator_->GetAllRegions();
+    youngRegions.insert(youngRegions.end(), tenuredRegions.begin(), tenuredRegions.end());
+    return youngRegions;
 }
 
 template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetNonYoungRegions() const
 {
-    PandaVector<Region *> regions = objectAllocator_->GetAllSpecificRegions<RegionFlag::IS_OLD>();
+    PandaVector<Region *> regions = objectTenuredAllocator_->GetAllSpecificRegions<RegionFlag::IS_OLD>();
     PandaVector<Region *> nonMovableRegions = nonmovableAllocator_->GetAllRegions();
     PandaVector<Region *> humongousRegions = humongousObjectAllocator_->GetAllRegions();
     regions.insert(regions.end(), nonMovableRegions.begin(), nonMovableRegions.end());
@@ -320,9 +331,11 @@ PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetNonYoungRegions() const
 template <MTModeT MT_MODE>
 PandaVector<Region *> ObjectAllocatorG1<MT_MODE>::GetAllRegions()
 {
-    PandaVector<Region *> regions = objectAllocator_->GetAllRegions();
+    PandaVector<Region *> regions = objectYoungAllocator_->GetAllRegions();
+    PandaVector<Region *> tenuredRegions = objectTenuredAllocator_->GetAllRegions();
     PandaVector<Region *> nonMovableRegions = nonmovableAllocator_->GetAllRegions();
     PandaVector<Region *> humongousRegions = humongousObjectAllocator_->GetAllRegions();
+    regions.insert(regions.end(), tenuredRegions.begin(), tenuredRegions.end());
     regions.insert(regions.end(), nonMovableRegions.begin(), nonMovableRegions.end());
     regions.insert(regions.end(), humongousRegions.begin(), humongousRegions.end());
     return regions;
@@ -353,7 +366,8 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverTenuredObjects(const ObjectVisitor &
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->IterateOverObjects(objectVisitor);
     }
-    objectAllocator_->IterateOverObjects(objectVisitor);
+    objectYoungAllocator_->IterateOverObjects(objectVisitor);
+    objectTenuredAllocator_->IterateOverObjects(objectVisitor);
     nonmovableAllocator_->IterateOverObjects(objectVisitor);
     IterateOverHumongousObjects(objectVisitor);
 }
@@ -380,7 +394,10 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverObjects(const ObjectVisitor &objectV
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->IterateOverObjects(objectVisitor);
     }
-    for (Region *region : objectAllocator_->GetAllRegions()) {
+    for (Region *region : objectYoungAllocator_->GetAllRegions()) {
+        IterateOverObjectsInRegion(region, objectVisitor);
+    }
+    for (Region *region : objectTenuredAllocator_->GetAllRegions()) {
         IterateOverObjectsInRegion(region, objectVisitor);
     }
     for (Region *region : nonmovableAllocator_->GetAllRegions()) {
@@ -394,7 +411,8 @@ void ObjectAllocatorG1<MT_MODE>::IterateOverObjects(const ObjectVisitor &objectV
 template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::IterateRegularSizeObjects(const ObjectVisitor &objectVisitor)
 {
-    objectAllocator_->IterateOverObjects(objectVisitor);
+    objectYoungAllocator_->IterateOverObjects(objectVisitor);
+    objectTenuredAllocator_->IterateOverObjects(objectVisitor);
     nonmovableAllocator_->IterateOverObjects(objectVisitor);
 }
 
@@ -412,8 +430,10 @@ void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
 {
     // clear because we have move all objects in it to pygote space
     // NOTE(dtrubenkov): FIX clean object_allocator_
-    objectAllocator_.reset(new (std::nothrow) ObjectAllocator(memStats_, &heapSpaces_));
-    ASSERT(objectAllocator_.get() != nullptr);
+    objectYoungAllocator_.reset(new (std::nothrow) ObjectAllocator(memStats_, &heapSpaces_));
+    objectTenuredAllocator_.reset(new (std::nothrow) ObjectAllocator(memStats_, &heapSpaces_));
+    ASSERT(objectYoungAllocator_.get() != nullptr);
+    ASSERT(objectTenuredAllocator_.get() != nullptr);
 }
 
 template <MTModeT MT_MODE>
@@ -430,7 +450,7 @@ void ObjectAllocatorG1<MT_MODE>::ResetYoungAllocator()
         return true;
     };
     Mutator::GetCurrent()->GetVM()->GetThreadManager()->EnumerateThreads(callback);
-    objectAllocator_->ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
+    objectYoungAllocator_->ResetAllSpecificRegions<RegionFlag::IS_EDEN>();
 }
 
 template <MTModeT MT_MODE>
@@ -450,7 +470,7 @@ void ObjectAllocatorG1<MT_MODE>::UpdateSpaceData()
 {
     ASSERT(GetYoungRanges().empty());
     ASSERT(GetYoungBitmaps().empty());
-    for (auto r : objectAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>()) {
+    for (auto r : objectYoungAllocator_->template GetAllSpecificRegions<RegionFlag::IS_EDEN>()) {
         GetYoungRanges().emplace_back(r->Begin(), r->End());
         GetYoungBitmaps().push_back(r->GetMarkBitmap());
     }
@@ -460,8 +480,7 @@ template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::CompactYoungRegions(const GCObjectVisitor &deathChecker,
                                                      const ObjectVisitorEx &moveChecker)
 {
-    objectAllocator_->template CompactAllSpecificRegions<RegionFlag::IS_EDEN, RegionFlag::IS_OLD>(deathChecker,
-                                                                                                  moveChecker);
+    objectYoungAllocator_->template CompactYoungToTenured(deathChecker, moveChecker, objectTenuredAllocator_.get());
 }
 
 template <MTModeT MT_MODE>
@@ -469,23 +488,27 @@ void ObjectAllocatorG1<MT_MODE>::CompactTenuredRegions(const PandaVector<Region 
                                                        const GCObjectVisitor &deathChecker,
                                                        const ObjectVisitorEx &moveChecker)
 {
-    objectAllocator_->template CompactSeveralSpecificRegions<RegionFlag::IS_OLD, RegionFlag::IS_OLD>(
+    objectTenuredAllocator_->template CompactSeveralSpecificRegions<RegionFlag::IS_OLD, RegionFlag::IS_OLD>(
         regions, deathChecker, moveChecker);
 }
 
 template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::PinObject(ObjectHeader *object)
 {
-    if (objectAllocator_->ContainObject(object)) {
-        objectAllocator_->PinObject(object);
+    if (objectYoungAllocator_->ContainObject(object)) {
+        objectYoungAllocator_->PinObject(object);
+    } else if (objectTenuredAllocator_->ContainObject(object)) {
+        objectTenuredAllocator_->PinObject(object);
     }
 }
 
 template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::UnpinObject(ObjectHeader *object)
 {
-    if (objectAllocator_->ContainObject(object)) {
-        objectAllocator_->UnpinObject(object);
+    if (objectYoungAllocator_->ContainObject(object)) {
+        objectYoungAllocator_->UnpinObject(object);
+    } else if (objectTenuredAllocator_->ContainObject(object)) {
+        objectTenuredAllocator_->UnpinObject(object);
     }
 }
 
