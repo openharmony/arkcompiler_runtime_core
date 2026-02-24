@@ -45,9 +45,10 @@ from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparat
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
 from runner.types.test_env import TestEnv
-from runner.utils import correct_path, escape, get_group_number, get_test_id, is_executable_file
+from runner.utils import correct_path, get_group_number, get_test_id, is_executable_file
 
 _LOGGER = Log.get_logger(__file__)
+DEFAULT_EXTENSION = "ets"
 
 
 class TestSuite(ITestSuite):
@@ -81,6 +82,10 @@ class TestSuite(ITestSuite):
     @property
     def test_root(self) -> Path:
         return self.__work_dir.gen
+
+    @property
+    def extension(self) -> str:
+        return cast(str, self.config.test_suite.get_parameter("extension", DEFAULT_EXTENSION))
 
     @staticmethod
     def __load_list(test_root: Path, test_list_path: Path, prefixes: list[str]) -> tuple[list[Path], list[Path]]:
@@ -146,6 +151,16 @@ class TestSuite(ITestSuite):
     def __is_path_excluded(collection: CollectionsOptions, tested_path: Path) -> bool:
         excluded = [excl for excl in collection.exclude if tested_path.as_posix().endswith(excl)]
         return len(excluded) > 0
+
+    @staticmethod
+    def __matches_filter(rel: Path, matched_by_filter: set[str] | None) -> bool:
+        """
+        Applies glob filter result to a relative path.
+        If matched_by_filter is None, filter is treated as default.
+        """
+        if matched_by_filter is None:
+            return True
+        return rel.as_posix() in matched_by_filter
 
     @staticmethod
     def _comment_has_failure(comment: str | None) -> bool:
@@ -350,6 +365,27 @@ class TestSuite(ITestSuite):
                 return test_path
         return None
 
+    def __check_test_in_coll(self, rel: Path, collections: list[Path]) -> bool:
+        """
+        Checks whether test path belongs to at least one collection.
+        If no collections specified, returns True.
+        """
+        if not collections:
+            return True
+
+        for col in collections:
+            # collection points to a specific test file
+            if (self.config.test_suite.test_root / col.name).is_file():
+                if rel == col:
+                    return True
+                continue
+
+            # collection points to a directory
+            if rel == col or rel.is_relative_to(col):
+                return True
+
+        return False
+
     def _resolve_test_files(self, original_test_files: list[Path]) -> list[Path]:
         """
         Resolves the final list of test files by processing explicit selections or applying comprehensive filtering.
@@ -453,11 +489,58 @@ class TestSuite(ITestSuite):
         excluded: list[Path] = list(self.excluded_tests)[:]
         if self.config.test_suite.groups.chapters:
             test_files = self.__filter_by_chapters(self.test_root, test_files)
-        mask = escape(self.config.test_suite.filter)
-        coll_names = "|".join(self._collections_parameters.keys())
-        mask = f"({coll_names})?/{mask}" if coll_names else mask
-        pattern = self._get_test_root_pattern(mask)
-        return [test for test in test_files if test not in excluded and pattern.search(str(test))]
+
+        filter_mask = self.config.test_suite.filter
+        matched_by_filter = self.__build_filter_match_set(filter_mask)
+        collections = self.__get_collections_paths()
+
+        result: list[Path] = []
+        for test in test_files:
+            if test in excluded:
+                continue
+
+            rel = self.__to_rel_posix_path(test)
+
+            if self.__check_test_in_coll(rel, collections) and TestSuite.__matches_filter(rel, matched_by_filter):
+                result.append(test)
+
+        return result
+
+    def __build_filter_match_set(self, filter_mask: str) -> set[str] | None:
+        """
+        Returns a set of relative paths matched by glob filter,
+        if filter matches dirs - the tests from the dirs are included recursively.
+        Returns None when filter is '*' (default val - no filtering).
+        """
+        if filter_mask == "*":
+            return None
+
+        matched: set[str] = set()
+
+        test_glob = f"*.{self.extension}"
+
+        for p in self.test_root.glob(filter_mask):
+            if p.is_file():
+                matched.add(p.relative_to(self.test_root).as_posix())
+            elif p.is_dir():
+                for f in p.rglob(test_glob):
+                    if f.is_file():
+                        matched.add(f.relative_to(self.test_root).as_posix())
+
+        return matched
+
+    def __get_collections_paths(self) -> list[Path]:
+        """
+        Collection entries are stored as relative POSIX paths.
+        They can be either dirs or to a specific .ets file.
+        """
+        return [Path(col_name) for col_name in self._collections_parameters]
+
+    def __to_rel_posix_path(self, test: Path) -> Path:
+        """
+        Converts absolute test path to relative path from test_root in POSIX form.
+        """
+        return test.relative_to(self.test_root)
 
     def __filter_by_chapters(self, base_folder: Path, files: list[Path]) -> list[Path]:
         test_files: set[Path] = set()

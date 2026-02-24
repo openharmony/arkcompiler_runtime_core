@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import subprocess
 from abc import ABC, abstractmethod
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor
+from functools import cached_property
 from pathlib import Path
 
 from runner.common_exceptions import InvalidConfiguration, TestGenerationException, TimeoutException, UnknownException
@@ -32,6 +33,7 @@ from runner.suites.test_metadata import TestMetadata
 from runner.utils import UiUpdater, copy, get_class_by_name, read_file, write_2_file
 
 _LOGGER = Log.get_logger(__file__)
+EXPECTED_EXT = ".expected"
 
 
 class TestPreparationStep(ABC):
@@ -39,6 +41,7 @@ class TestPreparationStep(ABC):
                  extension: str = "ets") -> None:
         self.__test_source_path = test_source_path.resolve()
         self.__test_gen_path = test_gen_path.resolve()
+
         self.config = config
         self.extension = extension
         self.collection = collection
@@ -51,9 +54,77 @@ class TestPreparationStep(ABC):
     def test_gen_path(self) -> Path:
         return self.__test_gen_path
 
+    @staticmethod
+    def get_expected_files_for_test(test_path: Path) -> set[Path]:
+        parent = test_path.parent
+        pattern = f"{test_path.stem}*{EXPECTED_EXT}*"
+        return set(parent.glob(pattern))
+
+    @staticmethod
+    def get_d_ets_files(test_path: Path) -> set[Path]:
+        d_ets_files = set()
+        for file_name in test_path.parent.iterdir():
+            if file_name.is_file() and file_name.suffixes[-2:] == [".d", ".ets"]:
+                d_ets_files.add(file_name)
+        return d_ets_files
+
+    @cached_property
+    def test_gen_root(self) -> Path:
+        return self._get_root_from_path(self.test_gen_path)
+
+    @cached_property
+    def test_source_root(self) -> Path:
+        return self._get_root_from_path(self.test_source_path)
+
+    def get_metadata_test_files(self, test_path: Path) -> set[Path]:
+        seen: set[Path] = set()
+        result: set[Path] = set()
+
+        self._collect_deps(test_path, seen, result)
+        return result
+
     @abstractmethod
     def transform(self, force_generated: bool) -> Generator[Path, None, None]:
         pass
+
+    def _get_root_from_path(self, path: Path) -> Path:
+        base = path
+        if base.is_file():
+            base = base.parent
+        rel = Path(self.collection.name)
+        if rel.suffix:
+            rel = rel.parent
+
+        parts = [part for part in rel.parts if part not in (".", "")]
+
+        return base.parents[len(parts) - 1] if parts else base
+
+    def _collect_deps(self, test_path: Path, seen: set[Path], result: set[Path]) -> None:
+        """
+        Recursively collect all dependent files for a given test file.
+        """
+
+        if test_path in seen:
+            return
+
+        seen.add(test_path)
+
+        if not test_path.is_file():
+            return
+
+        if test_path.suffixes[-2:] == ['.d', '.ets']:
+            return
+
+        test_metadata = TestMetadata.get_metadata(test_path)
+        for dep_file in (test_metadata.files or []):
+            if self.test_source_path.is_file():
+                full_dep_path = (self.test_source_path.parent / Path(dep_file)).resolve()
+            else:
+                full_dep_path = (self.test_source_path / Path(dep_file)).resolve()
+            result.add(full_dep_path)
+
+            if full_dep_path.is_file() and full_dep_path.suffix == f".{self.extension}":
+                self._collect_deps(full_dep_path, seen, result)
 
 
 class CustomGeneratorTestPreparationStep(TestPreparationStep):
@@ -134,7 +205,18 @@ class CopyStep(TestPreparationStep):
         try:
             if self.test_source_path != self.test_gen_path:
                 copy(self.test_source_path, self.test_gen_path, remove_if_exist=False)
-            yield from self.test_gen_path.rglob(f"**/*.{self.extension}")
+                if self.test_source_path.is_file():
+                    dep_files = self.get_metadata_test_files(self.test_source_path)
+                    expected_files = self.get_expected_files_for_test(self.test_source_path)
+                    d_ets = self.get_d_ets_files(self.test_source_path)
+                    for dep_file in dep_files | expected_files | d_ets:
+                        rel_path = dep_file.parent.relative_to(self.test_source_root)
+                        dep_file_dest = self.test_gen_root / rel_path / dep_file.name
+                        copy(dep_file, dep_file_dest, remove_if_exist=False)
+            if self.test_gen_path.is_file():
+                yield from self.test_gen_path.parent.rglob(f"**/*.{self.extension}")
+            else:
+                yield from self.test_gen_path.rglob(f"**/*.{self.extension}")
         except FileNotFoundError:
             yield from []
 

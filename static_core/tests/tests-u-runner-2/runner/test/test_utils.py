@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import functools
+import os
 import random
+import shutil
 import subprocess
 import unittest
 from collections.abc import Callable
@@ -157,3 +159,8 @@ def set_process_mock(mock_popen: MagicMock, return_code: int, output: str = "",
     mock_popen.return_value = proc
     if timeout_exception:
         proc.communicate.side_effect = subprocess.TimeoutExpired(cmd="", timeout=3)
+
+
+def clear_after_test() -> None:
+    work_dir = Path(os.environ["WORK_DIR"])
+    shutil.rmtree(work_dir, ignore_errors=True)
