@@ -7290,6 +7290,19 @@ intrinsics:
       args: [ u1 ]
     impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodsInternal
 
+  - name: StdCoreClassGetInstanceMethodInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getInstanceMethodInternal
+    static: false
+    signature:
+      ret: std.core.reflect.InstanceMethod
+      args:
+        - std.core.String
+        - std.core.Class[]
+        - u1
+    impl: ark::ets::intrinsics::StdCoreClassGetInstanceMethodInternal
+
   - name: StdCoreClassGetInstanceFieldByNameInternal
     space: ets
     class_name: std.core.Class
