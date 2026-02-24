@@ -14,7 +14,7 @@
 |
 
 This chapter covers the |LANG| execution model and the language features that
-provide support for asynchronous and parallel code execution.
+provide support for concurrent (asynchronous and parallel) code execution.
 
 |
 
@@ -26,9 +26,10 @@ Execution model
 .. meta:
     frontend_status: Done
 
-A program in |LANG| defines one or more tasks (|C_JOBS|) that are executed by
-the runtime environment. If requested, and if target platform allows this,
-|C_JOBS| can run in parallel for efficient hardware resource utilization. 
+A program in |LANG| defines one or more |C_JOBS| that are executed by the
+runtime environment. A |C_JOB| is a piece of code that can be executed
+concurrently (that is, either asynchronously or in parallel with other |C_JOBS|)
+and communicate its return value via the language provided mechanism. 
 
 Given that the target platform allows for concurrent code execution, a
 |C_WORKER| is an abstraction over platform provided unit of concurrency.
@@ -36,15 +37,22 @@ Typically, it will map 1:1 with OS threads. That means:
 
 -  every |C_JOB| is hosted by a |C_WORKER| with only one |C_JOB| per |C_WORKER|
    being executed at once
--  if two |C_JOBS| run on different |C_WORKERS| then their code is able to run
-   in parallel
--  if two |C_JOBS| share the same |C_WORKER| then their code can never run in
-   parallel
+-  if two or more |C_JOBS| run on different |C_WORKERS| then their code is able
+   to run in parallel (this execution mode will be referred to as
+   :term:`parallel execution`)
+-  if several |C_JOBS| share the same |C_WORKER| then their code can never run in
+   parallel (this execution mode will be referred to as :term:`asynchronous
+   execution`).
 
-A |C_JOB| can have zero or more suspension points. |C_JOB| execution can be
+A |C_JOB|'s body has the starting point (the beginning of the corresponding
+piece of code) and the completion point (the end of the corresponding piece of
+code). A |C_JOB|'s body can (but is not obliged to) map 1:1 to such language
+entities as functions, methods or lambdas.
+
+A |C_JOB| can have zero or more suspension points. Execution of a |C_JOB| can be
 paused at a suspension point and resumed at a later moment in time. Once
 suspended, a |C_JOB| allows another |C_JOB| to be executed on the same
-|C_WORKER| .
+|C_WORKER|.
 
 Any |LANG| program implicitly defines one **main** |C_JOB|, which corresponds to
 the :ref:`Program Entry Point`. The execution starts from it, and its completion
@@ -70,7 +78,8 @@ machinery for trustworthy concurrent programs by providing the following:
 - :ref:`Asynchronous execution` primitives: ``async`` / ``await`` / ``Promise``;
 - :ref:`Parallel execution` API: ``EAWorker API`` / ``Taskpool API`` / 
   ``launch API``, including the structured concurrency support;
-- :ref:`Synchronization` API: ``this`` and ``that``;
+- :ref:`Synchronization` API: locks API, atomics API and other means of
+     synchronization;
 
 The :ref:`API details and restrictions` section provides the detailed API
 description and the restrictions on its usage.

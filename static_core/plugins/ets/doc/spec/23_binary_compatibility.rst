@@ -41,7 +41,7 @@ an error.
 
 *Type* or *namespace* is *resolvable* if all of its members, such as
 *namespace* variables and functions or *class* fields and *methods*, can
-be accessed with no *resoltuion* errors, i.e. errors that do not appear
+be accessed with no *resolution* errors, i.e. errors that do not appear
 within the consistently compiled programs. *Resolvable* type is always
 *loadable*.
 
@@ -58,7 +58,7 @@ within the consistently compiled programs. *Resolvable* type is always
 
       // The type I must be loadable, otherwise the f and the whole N is not loadable.
       //
-      // Example case: the defintition of I is removed during the change in
+      // Example case: the definition of I is removed during the change in
       // the source1.ets, while the code of function f was not recompiled.
       export function f(i: I) {
 
@@ -97,11 +97,11 @@ cause some entity to remain *resolvable*, not *resolvable* but *loadable*, or
 not *loadable*. For example,
 
 - If a *public* or *exported* type is removed from the source code,
-  the code that accesses the type becomes invalid, making some depenent code not *loadable*.
+  the code that accesses the type becomes invalid, making some dependent code not *loadable*.
 
 - *Dynamic Method Resolution* may fail if the method definition is missing or
-  some method defintions are conflicting. The fail results in an error thrown
-  during an invokation of the method, while the considered class remains
+  some method definitions are conflicting. The fail results in an error thrown
+  during an invocation of the method, while the considered class remains
   *loadable*, yet not *resolvable*.
 
 - Changes in the type hierarchy may cause a *type circularity*. Types
@@ -131,7 +131,7 @@ Changes that don't affect the binary compatibility:
 
 - Adding a new *function* or *variable*.
 
-- Adding a new member type defintion, such as *class*, *interface*, *enum* or *type alias*.
+- Adding a new member type definition, such as *class*, *interface*, *enum* or *type alias*.
 
 Some of the changes that break the binary compatibility:
 
@@ -162,7 +162,7 @@ Changes that don't affect the binary compatibility:
 Some of the changes that can make some compiled code not *resolvable*:
 
 - If some derived class contains several method definitions of the same name,
-  the following conditions may cause a conflict during the method resoltuion:
+  the following conditions may cause a conflict during the method resolution:
 
   - Adding a new *public* method to an *exported* class.
 
@@ -172,7 +172,7 @@ Some of the changes that can make some compiled code not *resolvable*:
     cause a conflict during the method resolution.
 
 - Adding a *required property* or *method* without a *default implementation*
-  to an interface may cause a method 
+  to an interface can cause a method.
 
 - Adding an *abstract* method to an existing *exported* *abstract* class.
 
@@ -187,11 +187,24 @@ Some of the changes that can make some compiled code not *loadable*:
 
 For *Enum Declarations*:
 
-Changes that don't affect the binary compatibility:
+Changes that do not affect binary compatibility:
 
 - Adding new enum constants.
 
 - Changing the value of enum constants while preserving its type.
+
+
+For *Const Enumeration Declarations*:
+
+Changes that do not affect binary compatibility:
+
+- Adding new enumeration constants.
+
+Changes that break the binary compatibility:
+
+- Changing a value of an enumeration constants.
+
+- Changing enumeration base type.
 
 .. raw:: pdf
 

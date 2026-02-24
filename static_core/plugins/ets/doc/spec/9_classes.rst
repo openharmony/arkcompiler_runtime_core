@@ -26,7 +26,7 @@ A class body contains declarations and initializer blocks.
 Declarations can introduce class members (see :ref:`Class Members`) or class
 constructors (see :ref:`Constructor Declaration`).
 
-The body of the declaration of a member comprises the scope of a
+The body of the declaration of a member comprizes the scope of a
 declaration (see :ref:`Scopes`).
 
 Class members include:
@@ -308,9 +308,6 @@ A :index:`compile-time error` occurs if:
 -  ``typeReference`` names a class type that is not accessible (see
    :ref:`Accessible`).
 
--  Current class is exported but ``typeReference`` refers to a non-exported
-   class.
-
 -  ``extends`` clause appears in the declaration of the class ``Object``.
 
 -  ``extends`` graph has a cycle.
@@ -376,12 +373,6 @@ superclass.
          }
        }
 
-       class B {}
-       export class D extends B {}
-          /* Compile-time error as the derived class is exported but
-             the base one is not */
-
-
 
 The transitive closure of a *direct subclass* relationship is the *subclass*
 relationship. Class ``A`` can be a subclass of class ``C`` if:
@@ -437,18 +428,6 @@ If ``typeReference`` fails to name an accessible interface type (see
 
     // File2
     class C implements I {} // Compile-time error I is not accessible
-
-If the current class is exported but ``typeReference`` refers to a non-exported
-interface, then a :index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I { } // Not exported
-    export class C implements I {}
-       /* Compile-time error as the current class is expoprted but the
-          interface it implements is not */
-
 
 If some interface is repeated as a direct superinterface in a single
 ``implements`` clause (even if that interface is named differently), then all
@@ -542,6 +521,49 @@ is static and the other is not.
    static class
    non-static class
 
+If a class has both an ``extends`` clause and an ``implements`` clause, and
+methods with the same name and the same or overload-equivalent signature (see
+:ref:`Overload-Equivalent Signatures`) but different method bodies
+are inherited from a superclass and at least one of superinterfaces,
+then a method from the superclass overrides all other methods.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+       foo () { console.log ("I.foo()") }
+    }
+    class C1 {
+       foo () { console.log ("C1.foo()") }
+    }
+    class C2 extends C1 implements I {} // Valid class
+
+    (new C2).foo()      // Will output "C1.foo()"
+    (new C2 as I).foo() // Will output "C1.foo()"
+
+
+If a class has an ``implements`` clause and methods with the same name and the
+same or overload-equivalent signature (see
+:ref:`Overload-Equivalent Signatures`) but different method bodies are
+inherited from several superinterfaces but not from the superclass, then a 
+:index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 {
+       foo () { console.log ("I1.foo()") }
+    }
+    interface I2 {
+       foo () { console.log ("I2.foo()") }
+    }
+    class C1 {}
+    class C2 extends C1 implements I1, I2 {} // Compile-time error
+
+    abstract class C3 { abstract foo(): void }
+    class C4 extends C3 implements I1, I2 {} // Compile-time error
+
+
 |
 
 .. _Implementing Interface Methods:
@@ -584,18 +606,18 @@ Otherwise, a :index:`compile-time error` occurs.
     }
 
     class C2 implements I1, I2 {
-       // Compile-time error as foo() from I1 and foo() from I2 have different implementations
+       // Compile-time error as foo() from I1 and foo() from I2 have different method bodies
     }
 
     interface I3 extends I1 {}
     interface I4 extends I1 {}
     class C3 implements I3, I4 {
-       // OK, as foo() from I3 and foo() from I4 refer to the same implementation
+       // OK, as foo() from I3 and foo() from I4 refer to the same method
     }
 
     interface I5 extends I1 { foo() {} } // override method from I1
     class C4 implements I1, I5 {
-       // Compile-time error as foo() from I1 and foo() from I5 have different implementations
+       // Compile-time error as foo() from I1 and foo() from I5 have different method bodies
     }
 
     class Base {}
@@ -666,7 +688,7 @@ If a class field is used to implement an interface property in any form, then:
   a getter or a setter;
 
 - If an interface property is defined in a field form, then a getter and
-  a setter (if the property is not ``readonly``) are generated implictly
+  a setter (if the property is not ``readonly``) are generated implicitly
   in the class by the compiler.
 
 This is represented in the following example:
@@ -862,7 +884,7 @@ Such error situations are represented by the example below:
         set n(x: number) {}
     }
     class D1 extends D {
-        n: number = 2 // compile-time error: 'n' cannot be overriden by a field
+        n: number = 2 // compile-time error: 'n' cannot be overridden by a field
     }
 
 A field that implements an interface property can override a field of the same
@@ -932,7 +954,7 @@ the property can be ``readonly`` or not ``readonly`` as follows:
         }
     }
 
-If a writeble interface property is implemented as ``readonly`` as represented
+If a writeable interface property is implemented as ``readonly`` as represented
 in the example below, then a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
@@ -954,6 +976,19 @@ in the example below, then a :index:`compile-time error` occurs:
     class E implements I, J {
         r: number = 1 // OK
     }
+
+If no implementation for the property is provided, then a
+:index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        property: number
+    }
+    class C implements I { // compile-time error: no implementation at all
+    }
+
 
 .. index::
    property
@@ -1538,9 +1573,9 @@ while an instance field can be accessed with the object reference qualification
 (see :ref:`Field Access Expression`).
 
 
-If a field declaration is an implemention of one or more properties inherited
+If a field declaration is an implementation of one or more properties inherited
 from superinterfaces (see :ref:`Interface Inheritance`) then the types of the
-field and all propeties must be the same.
+field and all properties must be the same.
 Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -1863,7 +1898,7 @@ Each time a *field with late initialization* is read, a field initialization
 check is performed. If the compiler identifies that a field is not
 initialized, then a :index:`compile-time error` occurs. Otherwise, a check
 is performed at runtime, and if a non-initialized field is encountered, then
-a runtime error occurs:
+a :index:`runtime error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -1906,10 +1941,10 @@ a runtime error occurs:
 
 |
 
-.. _Override Fields and Implement Properties:
+.. _Override Fields:
 
-Override Fields and Implement Properties
-========================================
+Override Fields
+===============
 
 .. meta:
     frontend_status: None
@@ -1918,6 +1953,12 @@ When extending a class, an instance field declared in a superclass can be
 overridden by a same-name, same-type field. The new declaration adds no new
 field to the class type but allows changing field initialization. Using the
 keyword ``override`` is not required.
+
+.. note::
+
+    Implementing interface properties by fields is discussed in detail
+    in :ref:`Implementing Required Interface Properties` and
+    :ref:`Implementing Optional Interface Properties`. 
 
 A :index:`compile-time error` occurs if:
 
@@ -2004,6 +2045,30 @@ initialization is normally performed in the context of *superclass* constructors
    overriding
    field
 
+The term *same-type* in case of generic classes means that the type of a field
+in a derived class must be the same as in the base class instantiated with a
+parameter of the same type as the type of the field in the derived class.
+
+The situation is represented in the example below:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class B<T> {
+       f1: T
+       f2: T
+       constructor (v: T) { this.f1 = v; this.f2 = v }
+    }
+    class D<U, V> extends B<U>  {
+       f1: U // valid overriding as D extends B<U>, and type of f1 in B<U> is U
+       f2: V // compile-time error, wrong overriding
+       constructor (v: U) {
+           super (v)
+       }
+    }
+
+
 A :index:`compile-time error` occurs if a field is not declared as ``readonly``
 in a superclass, while an overriding field is marked as ``readonly``:
 
@@ -2030,77 +2095,6 @@ both in a superclass:
     class D extends C {
         num: number = 2 // compile-time error, wrong overriding
     }
-
-If a single accessor or both accessors are defined in an interface, then the
-accessors can be implemented as a field in a class.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface C {
-        get num(): number
-        set num(x: number)
-    }
-    class D implements C {
-        num: number = 2 // OK!
-    }
-
-.. index::
-   accessor
-   field
-   implementing property
-   interface
-
-A property can be implemented as a field in different combinations:
-
-.. code-block:: typescript
-   :linenos:
-
-
-    interface I {
-        f: number // property is declared
-    }
-
-    class Base1 implements I {
-        f: number = 1 // field implements a property
-        // accessors for field 'f' are also provided
-    }
-
-    class Derived1 extends Base1 {
-        override f: number = 1 // field overrides a field
-    }
-
-    class Base2 {
-        f: number = 3 // field is declared
-    }
-
-    class Derived2 extends Base2 implements I {
-        // field inherited from Base2 implements a property coming from I
-        // accessors for field 'f' are also provided
-    }
-
-    // Usage
-    function foo (i: I) {
-        console.log ("Getter: ", i.f) // getter is used as i.f is a property
-    }
-    // Field access and getter returns the same value
-    let base1 = new Base1
-    foo (base1)
-    console.log ("Field access: ", base1.f)
-    let base2 = new Derived2
-    foo (base2)
-    console.log ("Field access: ", base2.f)
-
-    function bar (i: I) {
-        i.f = 123
-        console.log ("Setter: ", i.f) // setter has new value to i.f property
-    }
-    // Setters change the field
-    bar (base1)
-    console.log ("Field: ", base1.f)
-    bar (base2)
-    console.log ("Field: ", base2.f)
-
 
 Overriding a field by a single accessor or by both accessors causes a
 :index:`compile-time error` as follows:
@@ -2887,12 +2881,6 @@ for a subtype, but is available for a call in all derived class constructors via
 
     class D1 extends C {
         constructor (n: number) {
-            super("" + n)
-        }
-    }
-
-    class D1 extends C {
-        constructor (n: number) {
             super("" + n) // ok
         }
     }
@@ -3146,11 +3134,9 @@ constructor body execution sequence is represented by the example below:
 
    class BWPoint extends ColoredPoint {
       constructor(x: number, y: number, black: boolean) {
-        console.log ("Code which does not use 'this'")
-        // zone where super() is called
-        if (black) { super (x, y, ColoredPoint.BLACK) }
-        else { super (x, y, ColoredPoint.WHITE) }
-        console.log ("Any code as this was initialized")
+        console.log ("Code that uses neither 'this' nor 'super'")
+        super (x, y, black ? ColoredPoint.BLACK : ColoredPoint.WHITE)
+        console.log ("Any code after that point")
       }
     }
 
@@ -3194,11 +3180,13 @@ The example below represents *primary* and *secondary* constructors:
         super(x, y) // calls base class constructor as class has 'extends'
         this.color = color
       }
-      // secondary constructors:
-      constructor zero(color: number) {
+      // secondary constructor:
+      constructor (color: number) {
         this(0, 0, color) // calls same class primary constructor
       }
-      constructor (color: number) {
+
+      // secondary named constructor:
+      constructor zero(color: number) {
         this(0, 0, color) // calls same class primary constructor
       }
     }
@@ -3420,14 +3408,17 @@ The method of each inherited abstract method must be defined with
 Semantic checks performed while overriding inherited methods and accessors are
 described in :ref:`Overriding in Classes`.
 
+Semantic checks performed while overriding fields and
+implementing properties are described in the following sections:
+
+- :ref:`Override Fields`,
+- :ref:`Implementing Required Interface Properties`,
+- :ref:`Implementing Optional Interface Properties`.
+
 Constructors from the direct superclass of ``C``  are not subject of overriding
 because such constructors are not accessible (see :ref:`Accessible`) in ``C``
 directly, and can only be called from a constructor of ``C`` (see
 :ref:`Constructor Body`).
-
-Semantic checks performed while overriding fields and implementing properties
-are described in :ref:`Override Fields and Implement Properties`.
-
 
 .. index::
    class

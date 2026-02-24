@@ -28,11 +28,15 @@ introduced in this Chapter is approved and/or implemented, the corresponding
 section is moved to the body of the specification as appropriate.
 
 The *array creation* feature introduced in
-:ref:`Resizable Array Creation Expressions`
-enables users to dynamically create objects of array type by using runtime
-expressions that provide the array size. This addition is useful to other
-array-related features of the language, such as array literals.
-This feature can also be used to create arrays of arrays.
+:ref:`Resizable Array Creation Expressions` enables programmers to create
+objects of the array type at runmtime by providing the following as arguments:
+
+- Array size;
+- One element to fill the array with, or a lambda to generate a set of elements
+  to fill the array with.
+
+This addition is useful to other array-related features of the language, such
+as array literals. This feature can also be used to create arrays of arrays.
 
 Overloading functions, methods, or constructors is a practical and convenient
 way to write program actions that are similar in logic but different in
@@ -143,7 +147,7 @@ Predefined constructors, methods, and constants for ``char`` type are
 parts of the |LANG| :ref:`Standard Library`.
 
 Type ``char`` is a class type that has an appropriate class as a part of the
-:ref:`Standard Library`. It means that type ``char`` is a subtype of 
+:ref:`Standard Library`. It means that type ``char`` is a subtype of
 ``Object``, and that it can be used at any place where a class name is
 expected.
 
@@ -237,7 +241,8 @@ The result of ':math:`!=`' and ':math:`!==`' is ``false`` when values are same.
 Otherwise, the result is ``true``.
 
 Attempting to use type ``char`` as an operand in a relational expression causes
-a compile-time error if detected at compile time, or a runtime error otherwise:
+a :index:`compile-time error` if detected at compile time, or a
+:index:`runtime error` otherwise:
 
 .. code-block:: typescript
    :linenos:
@@ -368,7 +373,7 @@ example:
     a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
     let y = a[2] /* get the last element of array 'a' */
     let count = a.length // get the number of array elements
-    y = a[3] // Will lead to runtime error - attempt to access non-existing array element
+    y = a[3] // Will cause a runtime error - attempt to access non-existing array element
 
 .. index::
    fixed-size array type
@@ -451,7 +456,7 @@ The syntax of *array creation expression* is presented below:
 .. code-block:: abnf
 
       newArrayInstance:
-          'new' arrayElementType dimensionExpression+ (arrayElement)?
+          'new' arrayElementType dimensionExpression+ arrayElement
           ;
 
       arrayElementType:
@@ -470,7 +475,7 @@ The syntax of *array creation expression* is presented below:
 .. code-block:: typescript
    :linenos:
 
-      let x = new number[2][2] // create 2x2 matrix
+      let x = new number[2][2] (0) // create 2x2 matrix filled with 0 value
 
 .. index::
    resizable array
@@ -512,13 +517,14 @@ time.
    constant expression
    compile time
 
-If ``arrayElement`` is provided, then the type of the ``expression`` can be
-as follows:
+Type of ``arrayElement`` ``expression`` must be one of the two:
 
 - Type of array element denoted by ``arrayElementType``, or
 - Lambda function with the return type equal to the type of array element
   denoted by ``arrayElementType`` and the parameters of type ``int``, and the
   number of parameters equal to the number of array dimensions.
+
+Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    type
@@ -539,25 +545,18 @@ as follows:
    parameter
 
 
-Otherwise, a :index:`compile-time error` occurs.
-
 .. code-block:: typescript
    :linenos:
 
-      let x = new number[-3] // compile-time error
+      let x = new number[-3] (0) // compile-time error
 
-      let y = new number[3.141592653589]  // compile-time error
+      let y = new number[3.141592653589] (0) // compile-time error
 
       foo (-3)
       function foo (length: int) {
-         let y = new number[length]  // runtime error
+         let y = new number[length] (0)  // runtime error
       }
 
-A :index:`compile-time error` occurs if ``arrayElementType`` refers to a
-class that does not contain an accessible (see :ref:`Accessible`) parameterless
-constructor, or constructor with all parameters of the second form of optional
-parameters (see :ref:`Optional Parameters`), or if ``type`` has no default
-value:
 
 .. index::
    class
@@ -569,22 +568,6 @@ value:
    optional parameter
    default value
 
-.. code-block-meta:
-   expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-      class C{
-        constructor (n: number) {}
-      }
-      let x = new C[3] // compile-time error: no parameterless constructor
-
-      class A {
-         constructor (p1?: number, p2?: string) {}
-      }
-      let y = new A[2] // OK, as all 3 elements of array will be filled with
-      // new A() objects
 
 A :index:`compile-time error` occurs if ``arrayElementType`` is a type
 parameter:
@@ -593,14 +576,13 @@ parameter:
    :linenos:
 
       class A<T> {
-         foo() {
-            new T[2] // compile-time error: cannot create an array of type parameter elements
+         foo(element: T) {
+            new T[2] (element) // compile-time error: cannot create an array of type parameter elements
          }
       }
 
 .. index::
    compile-time error
-   parameterless constructor
    constructor
    type parameter
    array
@@ -613,7 +595,6 @@ The creation of an array with a known number of elements is presented below:
       class A {
         constructor (x: number) {}
       }
-      // A has no default value or parameterless constructor
 
       let array_size = 5
 
@@ -646,7 +627,7 @@ below:
 .. code-block:: typescript
    :linenos:
 
-      let array_of_union = new (Object|undefined) [5] // filled with undefined
+      let array_of_union = new (Object|undefined) [5] (undefined) // filled with undefined
       let array_of_functor = new (() => void) [5] ( (): void => {})
       type aliasTypeName = number []
       let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
@@ -677,12 +658,9 @@ as follows:
    sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
    and the evaluation of the array creation expression completes abruptly.
 
-#. When an array with one dimension is created, each
-   element of that array is initialized to its default value if type default
-   value is defined (:ref:`Default Values for Types`).
-   If the default value for an element type is not defined, but the element
-   type is a class type, then its *parameterless* constructor is used to
-   create the value of each element.
+#. When a one-dimensional array is created, each element of the array is
+   initialized either with the value passed or by calls to the lambda
+   generating a set of values.
 
 #. When array with several dimensions is created,
    the array creation effectively executes a set of nested loops of depth *n-1*.
@@ -702,9 +680,6 @@ as follows:
    runtime
    runtime evaluation
    evaluation
-   default value
-   parameterless constructor
-   class type
    initialization
    nested loop
    array of arrays
@@ -738,7 +713,7 @@ Enumeration with Explicit Type
 
 All enumeration constants of a declared enumeration are of the *explicit type*
 specified in the declaration, i.e., the *explicit type* is the
-*enumeration base type* (see :ref:`Enumerations`).
+*enumeration base type* (see :ref:`Enumerations` and :ref:`Const Enumerations`).
 
 .. index::
    enumeration base type
@@ -776,11 +751,11 @@ A :index:`compile-time error` occurs in the following situations:
 .. code-block:: typescript
    :linenos:
 
-    enum DoubleEnum: double { A = 0.0, B = 1, C = 3.141592653589 } // OK
+    enum DoubleEnum: double { A = 0.0, B = 1, C = 3.14159 } // OK
     enum LongEnum: long { A = 0, B = 1, C = 3 } // OK
 
-    enum IncorrectEnum1: double { A, B, C } // compile-time error
-    enum IncorrectEnum2: double { A = 1.0, B = 2, C = "a string" } // compile-time error
+    enum Wrong1: double { A, B, C } // compile-time error: must be explicitly initialized
+    enum Wrong2: long { A = 1, B = "abc" } // compile-time error: not assignable to 'long'
 
 |
 
@@ -792,8 +767,8 @@ Enumeration Methods
 .. meta:
     frontend_status: Done
 
-Several static methods are available to handle each enumeration type
-as follows:
+Several static methods are available for each enumeration class type as
+follows:
 
 -  Method ``static values()`` returns an array of enumeration constants
    in the order of declaration.
@@ -1074,7 +1049,7 @@ An *iterable* class ``C`` is represented in the example below:
         next(): IteratorResult<string> {
           return {
             done: this.index >= this.base.data.length,
-            value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
+            value: this.index >= this.base.data.length ? "" : this.base.data[this.index++]
           }
         }
       }
@@ -3088,7 +3063,7 @@ Receiver Type
     frontend_status: Done
 
 *Receiver type* is the type of the *receiver parameter* in a function,
-function type, and lambda with receiver. 
+function type, and lambda with receiver.
 
 Using array type as a *receiver type* is presented in the example below:
 
@@ -3411,7 +3386,7 @@ variable of *function type with receiver*. Attempting to do so causes a
    x.foo(y) // ok
 
    // compile time error - can not assign entity with method call syntax
-   // to a functon type
+   // to a function type
    x.foo(x.bar)
    x.foo(x.bar<int>)
    let z = x.bar
@@ -4033,7 +4008,7 @@ first element (i.e., the element with the index ``0``) of an array or a tuple:
 
     function foo(x: string[]) {
         let a = ""
-        let b = ""
+        let b = "";
         [a, , b] = x
         // this line works the same as the previous line:
         a = x[0]; b = x[2]

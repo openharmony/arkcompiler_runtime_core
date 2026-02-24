@@ -35,7 +35,7 @@ version = u'1.2.1'
 
 # The full version, including alpha/beta/rc tags
 # CC-OFFNXT(G.NAM.01): project code style
-release = u'1.2.1-alpha TECHNICAL PREVIEW 3'
+release = u'1.2.1-alpha TECHNICAL PREVIEW 4'
 
 # Common glossary for the entire documentation bundle:
 rst_epilog = '''
@@ -52,12 +52,12 @@ rst_epilog = '''
 .. |LANG| replace:: {lang}
 .. |UIFW| replace:: ArkUI
 .. |TS| replace:: TypeScript
-.. |C_JOB| replace:: Job
-.. |C_JOBS| replace:: Jobs
-.. |C_CORO| replace:: Suspendable Job
-.. |C_COROS| replace:: Suspendable Jobs
-.. |C_WORKER| replace:: Worker Thread
-.. |C_WORKERS| replace:: Worker Threads
+.. |C_JOB| replace:: job
+.. |C_JOBS| replace:: jobs
+.. |C_CORO| replace:: suspendable job
+.. |C_COROS| replace:: suspendable jobs
+.. |C_WORKER| replace:: worker thread
+.. |C_WORKERS| replace:: worker threads
 '''.format(lang=project)
 
 #

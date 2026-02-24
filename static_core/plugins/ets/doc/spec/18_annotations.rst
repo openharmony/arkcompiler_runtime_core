@@ -189,6 +189,7 @@ The choice of *types for annotation fields* is limited to the following:
 - Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
+- Const Enumeration types (see :ref:`Const Enumerations`);
 - Array of the above types (e.g., ``string[]``), including arrays of arrays
   (e.g., ``string[][]``).
 
@@ -202,6 +203,7 @@ an *annotation field*.
    boolean type
    string type
    enumeration type
+   const enumeration type
    array
 
 |
@@ -290,7 +292,7 @@ Annotations can be applied to the following:
 - :ref:`Top-Level Declarations`;
 
 - Class members (see :ref:`Class Members`) except overridden fields
-  (see :ref:`Override Fields and Implement Properties`);
+  (see the example below);
 
 - Interface members (see :ref:`Interface Members`);
 
@@ -301,7 +303,7 @@ Annotations can be applied to the following:
 - Lambda expression (see :ref:`Lambda Expressions` and
   :ref:`Lambda Expressions with Receiver`);
 
-- :ref:`Local Declarations`.
+- :ref:`Constant Or Variable Declarations`.
 
 .. index::
    annotation
@@ -325,6 +327,21 @@ Otherwise, a :index:`compile-time error` occurs:
    :linenos:
 
     function foo () @MyAnno() {} // wrong target for annotation
+
+
+A :index:`compile-time error` occurs if an annotation is applied to 
+an overridden field (see :ref:`Override Fields`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        field: int = 1
+    }
+    class D extends C {
+        @MyAnno() // compile-time error
+        field: int = 2
+    }
 
 Repeatable annotations are not supported, i.e., an annotation can be applied
 to an entity no more than once:
@@ -556,8 +573,8 @@ The syntax of *ambient annotations* is presented below:
 
 Such a declaration does not introduce a new annotation but provides type
 information that is required to use the annotation. The annotation itself
-must be defined elsewhere. A runtime error occurs if no annotation corresponds
-to the ambient annotation used in the program.
+must be defined elsewhere. A :index:`runtime error` occurs if no annotation
+corresponds to the ambient annotation used in the program.
 
 An ambient annotation and the annotation that implements it must be exactly
 identical, including field initialization:

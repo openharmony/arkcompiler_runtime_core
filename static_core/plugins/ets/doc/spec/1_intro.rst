@@ -16,7 +16,7 @@ Introduction
 ############
 
 This document presents complete information on the new common-purpose,
-multiparadigm programming language called |LANG|.
+multi-paradigm programming language called |LANG|.
 
 |
 
@@ -40,15 +40,15 @@ The semantic correctness is checked at compile time.
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
 power from |TS| and its predecessor |JS|, and the static
-typing principle from Java and Kotlin. The overall design keeps the |LANG|
+typing principle from Java and Kotlin. Overall design keeps the |LANG|
 syntax style similar to that of those languages, and some of its important
 constructs are almost identical to theirs on purpose.
 
-In other words, there is a significant *common subset* of features of |LANG|
-on the one hand, and of |TS|, |JS|, Java, and Kotlin on the other.
-Consequently, the |LANG| style and constructs are no puzzle for the |TS| and
-Java users who can intuitively sense the meaning of most constructs of the new
-language even if not understand them completely.
+In other words, |LANG| has a significant *common subset* of features with
+|TS|, |JS|, Java, and Kotlin. Consequently, the |LANG| style and constructs
+are no puzzle for the |TS| and Java users who can intuitively sense the
+meaning of most constructs of the new language even if not understand them
+completely.
 
 .. index::
    construct
@@ -125,7 +125,7 @@ The |LANG| language as a whole is characterized by the following:
    particular use case.
 
    A classical illustration is the notion of a list that represents the
-   ‘idea’ of an abstract data structure. An abstract notion can be turned
+   ‘idea’ of abstract data structure. An abstract notion can be turned
    into a concrete list by providing additional information (i.e., type of
    list elements).
 
@@ -144,7 +144,7 @@ The |LANG| language as a whole is characterized by the following:
    generic
    template
 
--  **Multitargeting**
+-  **Multi-Targeting**
 
    |LANG| provides an efficient application development solution for a wide
    range of devices. The developer-friendly |LANG| ecosystem is a
@@ -154,7 +154,7 @@ The |LANG| language as a whole is characterized by the following:
    realizing the full potential of any target-specific hardware.
 
 .. index::
-   multitargeting
+   multi-targeting
    cross-platform development
    high-level language
    low-level representation
@@ -186,7 +186,7 @@ The |LANG| lexical notation defines a set of rules, or productions that specify
 the structure of the elementary language  parts called *tokens*. All tokens are
 defined in :ref:`Lexical Elements`. The set of tokens (identifiers, keywords,
 numbers/numeric literals, operator signs, delimiters), special characters
-(white spaces and line separators), and comments comprises the language’s
+(white spaces and line separators), and comments comprizes the language’s
 *alphabet*.
 
 .. index::
@@ -221,7 +221,7 @@ sequences of tokens can form syntactically correct programs.
    nonterminal
 
 Lexical and syntactic grammars are defined as a range of productions, and each
-production is comprised of the following:
+production is comprized of the following:
 
 - Abstract symbol (*nonterminal*) as its left-hand side,
 - Sequence of one or more *nonterminal* and *terminal* symbols as its
@@ -277,7 +277,7 @@ with terminal and nonterminal symbols:
 
 The metasymbols specify the structuring rules for terminal and nonterminal
 sequences. However, they are not part of terminal symbol sequences that
-comprise the resultant program text.
+comprize the resultant program text.
 
 The example below represents a production that specifies a list of expressions:
 
@@ -288,7 +288,7 @@ The example below represents a production that specifies a list of expressions:
       ;
 
 This production introduces the following structure defined by the
-nonterminal *expressionList*. The expression list must consist of a
+nonterminal *expressionList*. The expression list must comprize a
 sequence of *expressions* separated by the terminal symbol ``','``. The
 sequence must have at least one *expression*. The list is optionally
 terminated by the terminal symbol ``','``.
@@ -321,17 +321,17 @@ as used in other languages, application areas, or industries.
 
    compile-time warning
      -- a text message displayed by the compiler if a program code is found
-     to have some logical inconsistencies, and a programmer is recommended to
-     reconsider design and actual coding.
+     to have some logical inconsistencies that require to reconsider design
+     and actual coding.
 
    expression
      -- a formula for calculating values. The syntactic form of an expression
-     is a composition of operators and parentheses, where parentheses are used
-     to change the order of calculation. The default order of calculation is
-     determined by operator preferences.
+     is a combination of operators and parentheses, where the parentheses are
+     used to change the order of calculation. The default order of calculation
+     is determined by operator preferences.
 
    operator (in programming languages)
-     -- the term can have several meanings as follows:
+     -- the term can have the following meanings:
 
      (1) a token that denotes the action to be performed on a value (addition,
      subtraction, comparison, etc.).
@@ -340,16 +340,14 @@ as used in other languages, application areas, or industries.
      an expression. An operator normally consists of an operator sign and
      one or more operands.
 
-     In unary operators that have a single operand, the operator sign can be
-     placed either before or after an operand (*prefix* and *postfix*
-     unary operator respectively).
-
-     If both operands are available, then the operator sign can be placed
-     between the two (*infix* binary operator). A conditional operator with
+     The operator sign in a unary operator with a single operand can be
+     placed either before or after the operand (*prefix* and *postfix* unary
+     operator respectively). An operator sign placed between two operands
+     is called an *infix* binary operator. A conditional operator with
      three operands is called *ternary*.
 
      Some operators have special notations. For example, an indexing operator
-     has a conventional form like a[i] while formally being a binary operator.
+     is formally a binary operator which has a conventional form like a[i].
 
      Some languages treat operators as *syntactic sugar*, i.e., a conventional
      version of a more common construct or *function call*. Therefore,
@@ -359,10 +357,10 @@ as used in other languages, application areas, or industries.
 
    operation sign
      -- a language token that signifies an operator and conventionally
-     denotes a usual mathematical operator, e.g., ``'+'`` for addition,
+     denotes a common mathematical operator, e.g., ``'+'`` for addition,
      ``'/'`` for division, etc. However, some languages allow using
      identifiers to denote operators, and/or arbitrarily combining characters
-     that are not tokens in the alphabet of that language (i.e., operator
+     that are not tokens in the alphabet of a specific language (i.e., operator
      signs).
 
    operand
@@ -386,10 +384,10 @@ as used in other languages, application areas, or industries.
      tokens can form syntactically correct programs.
 
    token
-     -- an elementary part of a programming language: identifier, keyword,
+     -- an elementary part of a programming language, i.e., identifier, keyword,
      operator and punctuator, or literal. Tokens are lexical input elements
      that form the vocabulary of a language, and can act as terminal symbols
-     of the language's syntactic grammar.
+     of the syntactic grammar of a language.
 
    tokenization
      -- finding the longest sequence of characters that forms a valid token
@@ -398,7 +396,7 @@ as used in other languages, application areas, or industries.
 
    punctuator
      -- a token that serves to separate, complete, or otherwise organize
-     program elements and parts: commas, semicolons, parentheses, square
+     program elements and parts, i.e., commas, semicolons, parentheses, square
      brackets, etc.
 
    literal
@@ -406,7 +404,7 @@ as used in other languages, application areas, or industries.
 
    comment
      -- a piece of text, insignificant for the syntactic grammar, that is
-     added to a stream in order to document and compliment source code.
+     added to a stream in order to document and complement source code.
 
    generic type
      -- a named type (class or interface) that has type parameters.
@@ -430,7 +428,7 @@ as used in other languages, application areas, or industries.
      that can hold values of type ``T`` and its derived types.
 
    nullish value
-     -- a reference that is null or undefined.
+     -- a reference that is ``null`` or ``undefined``.
 
    simple name
      -- a name that consists of a single identifier.
@@ -489,7 +487,7 @@ as used in other languages, application areas, or industries.
      -- a set of rules that describe what possible sequences of terminal and
      nonterminal symbols a programming language interprets as correct.
 
-     Grammar is a range of productions. Each production comprises an
+     Grammar is a range of productions. Each production comprizes an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
      Each production contains the character ``':'`` as a separator between the
@@ -504,16 +502,8 @@ as used in other languages, application areas, or industries.
      to improve the source code readability and avoid ambiguities.
 
    widening conversion
-     -- a conversion causing no loss of information about the overall
+     -- a conversion that causes no loss of information about the overall
      magnitude of a numeric value.
-
-   narrowing conversion
-     -- a conversion causing a loss of information about the overall
-     magnitude of a numeric value, and a potential loss of precision
-     and range.
-
-   function types conversion
-     -- a conversion of one function type to another.
 
    casting conversion
      -- a conversion of an operand of a cast expression to an explicitly
@@ -547,7 +537,7 @@ as used in other languages, application areas, or industries.
      a derived class.
 
    interface level scope
-     -- a name declared inside an interface is considered to have interface
+     -- a name declared inside an interface is considered to have the interface
      level scope. It is accessible inside and outside the interface.
 
    function type parameter scope
@@ -556,9 +546,9 @@ as used in other languages, application areas, or industries.
 
    method scope
      -- a scope of a name declared immediately inside the body of a method
-     (function) declaration. Method scope is identical to the body of that
-     method (function) declaration from the place of declaration and up to
-     the end of the body.
+     declaration or function declaration. Method scope is identical to the
+     body of that method declaration or function declaration from the place
+     of declaration and up to the end of the body.
 
    function scope
      -- same as *method scope*.
@@ -566,7 +556,7 @@ as used in other languages, application areas, or industries.
    type parameter scope
      -- the scope of a name of a type parameter that is declared in a class or
      an interface. Type parameter scope is identical to the entire declaration
-     (except static member declarations).
+     (except in static member declarations).
 
    static member
      -- a class member that is not related to a particular class instance.
@@ -586,8 +576,8 @@ as used in other languages, application areas, or industries.
 
    own (adj.)
      -- of a member textually declared in a class, interface, type, etc., as
-     opposed to members inherited from base class (superclass), base interfaces
-     (superinterface), base type (supertype), etc.
+     opposed to members inherited from a base class (superclass) or a base
+     interface (superinterface).
 
    supercomponent (base component, parent component)
      -- a component from which another component is derived.
@@ -601,7 +591,7 @@ as used in other languages, application areas, or industries.
 
    resizable array type
      -- a built-in type that consists of more than one element, and can have
-     its number of constituent elements changed at runtime.
+     the number of its constituent elements changed at runtime.
 
    fixed-size array type
      -- a built-in type that consists of more than one element, and has its
@@ -610,12 +600,41 @@ as used in other languages, application areas, or industries.
    array type
      -- a type that consists of more than one element.
 
-   ``AsyncLock``
-     -- a class that implements an asynchronous lock and allows performing
-     asynchronous operations under a lock.
+   concurrent execution
+     -- :term:`asynchronous execution` or :term:`parallel execution` (see
+     :ref:`Execution model`).
+
+   parallel execution
+     -- a mode of execution when given |C_JOBS| run on different |C_WORKERS| and
+     hence can make forward progress simultaniously (see :ref:`Execution model`).
+
+   asynchronous execution
+     -- a mode of execution when several |C_JOBS| share the same |C_WORKER| (see
+     :ref:`Execution model`).
+
+   |C_WORKER|
+     -- an abstraction over platform provided unit of concurrency, for example
+     an OS thread (see :ref:`Execution model`).
+
+   |C_JOB|
+     -- a piece of code that can be executed concurrently with other |C_JOBS|
+     and communicate its return value via the language provided mechanism (see
+     :ref:`Execution model`). The 
 
    coroutine
-     -- a part of a program that can be suspended and resumed during execution.
+     -- a synonym for a |C_CORO|: a |C_JOB| with suspension points. Its
+     execution can be suspended and, later on, resumed (see :ref:`Execution
+     model`).
+
+.. narrowing conversion
+     -- a conversion that causes a loss of information about the overall
+     magnitude of a numeric value, and a potential loss of precision
+     and range.
+     
+   function types conversion
+     -- a conversion of one function type to another.
+
+
 
 .. raw:: pdf
 
