@@ -851,6 +851,16 @@ add_gtests(
     ${LAYOUT_TESTS_SOURCES}
 )
 
+panda_add_gtest(
+    NAME arkruntime_core_algo_test
+    SOURCES
+        tests/kmp_test.cpp
+    LIBRARIES
+        arkruntime
+    SANITIZERS
+        ${PANDA_SANITIZERS_LIST}
+)
+
 add_gtests(
     arkruntime_get_method_test
     tests/getmethod_test.cpp

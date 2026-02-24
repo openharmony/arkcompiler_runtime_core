@@ -160,12 +160,10 @@ public:
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length, uint16_t non);
     static bool CanBeCompressedMUtf8(const uint8_t *mutf8Data);
 
-    int32_t IndexOf(String *rhs, const LanguageContext &ctx, int pos = 0);
-    int32_t LastIndexOf(String *rhs, const LanguageContext &ctx, int pos = INT32_MAX);
+    int32_t IndexOf(String *pattern, const LanguageContext &ctx, int pos = 0);
+    int32_t LastIndexOf(String *pattern, const LanguageContext &ctx, int pos = INT32_MAX);
 
-    static int32_t IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
-                           int pos = 0);
-
+    static int32_t IndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx, int pos);
     static int32_t LastIndexOf(VMHandle<String> &receiver, VMHandle<String> &search, const LanguageContext &ctx,
                                int pos);
 

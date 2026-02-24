@@ -186,5 +186,3 @@ bool EmitStringToLocaleUpperCase(Inst *inst)
     ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_TO_LOCALE_UPPER_CASE_TLAB, 2U);
 }
-
-bool EmitDefaultLocaleSupportsFastLatinCaseConversion(Inst *inst);
