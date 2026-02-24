@@ -32,5 +32,5 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I64:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F64:
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE:
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MAP_IS_SAME_REFERENCE:
     UNREACHABLE();
