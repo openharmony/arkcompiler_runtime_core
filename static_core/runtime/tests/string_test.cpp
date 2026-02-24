@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -569,7 +569,7 @@ TEST_F(StringTest, AtTest)
     }
 }
 
-TEST_F(StringTest, IndexOfTest)
+TEST_F(StringTest, IndexOfShortTest)
 {
     std::vector<uint8_t> data1 {'a', 'b', 'c', 'd', 'z', 0};
     std::vector<uint8_t> data2 {'b', 'c', 'd', 0};
@@ -588,62 +588,914 @@ TEST_F(StringTest, IndexOfTest)
     auto index1 = string1->IndexOf(string4, GetLanguageContext(), 1);
     auto index2 = string3->IndexOf(string2, GetLanguageContext(), 1);
     auto index3 = string3->IndexOf(string4, GetLanguageContext(), 1);
-    std::cout << index << std::endl;
-    ASSERT_EQ(index, index2);
-    ASSERT_EQ(index1, index3);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
     index = string1->IndexOf(string2, GetLanguageContext(), 2_I);
     index1 = string1->IndexOf(string4, GetLanguageContext(), 2_I);
     index2 = string3->IndexOf(string2, GetLanguageContext(), 2_I);
     index3 = string3->IndexOf(string4, GetLanguageContext(), 2_I);
-    std::cout << index << std::endl;
-    ASSERT_EQ(index, index2);
-    ASSERT_EQ(index1, index3);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+}
+
+TEST_F(StringTest, IndexOfShortTest2)
+{
+    std::vector<uint8_t> data1 {'b', 0};
+    std::vector<uint16_t> data2 {'b', 0};
+    String *string5 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string6 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string7 = String::CreateFromUtf16(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string8 = String::CreateFromUtf16(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    auto index = string5->IndexOf(string6, GetLanguageContext(), 0);
+    auto index1 = string7->IndexOf(string8, GetLanguageContext(), 0);
+    auto index2 = string5->IndexOf(string7, GetLanguageContext(), 0);
+    auto index3 = string7->IndexOf(string5, GetLanguageContext(), 0);
+    EXPECT_EQ(-1, string5->IndexOf(string6, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, index);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+}
+
+TEST_F(StringTest, IndexOfShortTest3)
+{
+    std::vector<uint8_t> stringData {'b', 0};
+    std::vector<uint8_t> patternData {'b', 'c', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, IndexOfShortTest4)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+}
+
+TEST_F(StringTest, IndexOfShortTest5)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'c', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(pattern->GetLength() + 1, string->IndexOf(pattern, GetLanguageContext(), 1));
+    EXPECT_EQ(pattern->GetLength() + 1, string->IndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 1));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 6_I));
+
+    String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, emptyString->IndexOf(emptyString, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, emptyString->IndexOf(emptyString, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, emptyString->IndexOf(string, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->IndexOf(emptyString, GetLanguageContext(), -3_I));
+    EXPECT_EQ(pattern->GetLength() - 1, string->IndexOf(emptyString, GetLanguageContext(), pattern->GetLength() - 1));
+    EXPECT_EQ(string->GetLength(), string->IndexOf(emptyString, GetLanguageContext(), string->GetLength() + 3_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest6)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'c', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> aCharPatternData {'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *aPattern = String::CreateFromMUtf8(aCharPatternData.data(), aCharPatternData.size() - 1,
+                                               GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(aPattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->IndexOf(aPattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(aPattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->IndexOf(aPattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(4_I, string->IndexOf(aPattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->IndexOf(aPattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(6_I, string->IndexOf(aPattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(string->GetLength() - 1, string->IndexOf(aPattern, GetLanguageContext(), string->GetLength() - 1));
+    EXPECT_EQ(-1, string->IndexOf(aPattern, GetLanguageContext(), string->GetLength()));
+
+    std::vector<uint8_t> cCharPatternData {'c', 0};
+    String *cPattern = String::CreateFromMUtf8(cCharPatternData.data(), cCharPatternData.size() - 1,
+                                               GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(3_I, string->IndexOf(cPattern, GetLanguageContext(), -1));
+    EXPECT_EQ(3_I, string->IndexOf(cPattern, GetLanguageContext(), 0));
+    EXPECT_EQ(3_I, string->IndexOf(cPattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(3_I, string->IndexOf(cPattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->IndexOf(cPattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(-1, string->IndexOf(cPattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(-1, string->IndexOf(cPattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(-1, string->IndexOf(cPattern, GetLanguageContext(), string->GetLength() - 1));
+    EXPECT_EQ(-1, string->IndexOf(cPattern, GetLanguageContext(), string->GetLength()));
+}
+
+TEST_F(StringTest, IndexOfShortTest7)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1_I,
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest8)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(8_I, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(8_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(8_I, string->IndexOf(pattern, GetLanguageContext(), 7_I));
+    EXPECT_EQ(8_I, string->IndexOf(pattern, GetLanguageContext(), 8_I));
+    EXPECT_EQ(9_I, string->IndexOf(pattern, GetLanguageContext(), 9_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1_I,
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest9)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'c', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> string1Data {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'a', 'b', 'c', 'b', 'a', 'b', 0};
+    String *string1 = String::CreateFromMUtf8(string1Data.data(), string1Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->IndexOf(pattern, GetLanguageContext(), 0));
+
+    std::vector<uint8_t> string2Data {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'c', 'a', 'a', 'b', 0};
+    String *string2 = String::CreateFromMUtf8(string2Data.data(), string2Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(6_I, string2->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(6_I, string2->IndexOf(pattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(6_I, string2->IndexOf(pattern, GetLanguageContext(), 6_I));
+    EXPECT_EQ(-1, string2->IndexOf(pattern, GetLanguageContext(), 7_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest10)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'a', 'b', 'c', 'b', 'a', 'b', 0};
+    String *string1 = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->IndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, IndexOfShortTest11)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'c', 'b', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest12)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, IndexOfShortTest13)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', 'g', 0};
+    std::vector<uint8_t> patternData {'d', 'e', 'f', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+}
+
+TEST_F(StringTest, IndexOfShortTest14)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+}
+
+TEST_F(StringTest, IndexOfShortTest15)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+}
+
+TEST_F(StringTest, IndexOfTest)
+{
+    std::vector<uint8_t> data1 {'a', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'w', 0};
+    std::vector<uint8_t> data2 {'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 0};
+    std::vector<uint16_t> data3 {'a', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'w', 0};
+    std::vector<uint16_t> data4 {'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 0};
+    String *string1 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string2 = String::CreateFromMUtf8(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string3 = String::CreateFromUtf16(data3.data(), data3.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string4 = String::CreateFromUtf16(data4.data(), data4.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    auto index = string1->IndexOf(string2, GetLanguageContext(), 1);
+    auto index1 = string1->IndexOf(string4, GetLanguageContext(), 1);
+    auto index2 = string3->IndexOf(string2, GetLanguageContext(), 1);
+    auto index3 = string3->IndexOf(string4, GetLanguageContext(), 1);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+    index = string1->IndexOf(string2, GetLanguageContext(), 2_I);
+    index1 = string1->IndexOf(string4, GetLanguageContext(), 2_I);
+    index2 = string3->IndexOf(string2, GetLanguageContext(), 2_I);
+    index3 = string3->IndexOf(string4, GetLanguageContext(), 2_I);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
 }
 
 TEST_F(StringTest, IndexOfTest2)
 {
-    {
-        std::vector<uint8_t> stringData {'a', 'b', 'a', 'c', 'a', 'b', 'a', 0};
-        std::vector<uint8_t> patternData {'a', 'b', 'a', 0};
-        String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
-                                                 Runtime::GetCurrent()->GetPandaVM());
-        String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
-                                                  Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), -1));
-        ASSERT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 1));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 6_I));
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a',
+                                     'a', 'b', 'a', 'c', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b',
+                                     'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(pattern->GetLength() + 1, string->IndexOf(pattern, GetLanguageContext(), 1));
+    EXPECT_EQ(pattern->GetLength() + 1, string->IndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 1));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 21_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 22_I));
 
-        String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(-1, emptyString->IndexOf(string, GetLanguageContext(), 0));
-        ASSERT_EQ(0, string->IndexOf(emptyString, GetLanguageContext(), -3_I));
-        ASSERT_EQ(2_I, string->IndexOf(emptyString, GetLanguageContext(), 2_I));
-        ASSERT_EQ(7_I, string->IndexOf(emptyString, GetLanguageContext(), 10_I));
-    }
-    {
-        std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', 'g', 0};
-        std::vector<uint8_t> patternData {'d', 'e', 'f', 0};
-        String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
-                                                 Runtime::GetCurrent()->GetPandaVM());
-        String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
-                                                  Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 0));
-    }
-    {
-        std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
-        std::vector<uint8_t> patternData {'a', 'a', 'a', 0};
-        String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
-                                                 Runtime::GetCurrent()->GetPandaVM());
-        String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
-                                                  Runtime::GetCurrent()->GetPandaVM());
-        ASSERT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
-        ASSERT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 2_I));
-        ASSERT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
-        ASSERT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
-        ASSERT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
-    }
+    String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, emptyString->IndexOf(emptyString, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, emptyString->IndexOf(emptyString, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, emptyString->IndexOf(string, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->IndexOf(emptyString, GetLanguageContext(), -3_I));
+    EXPECT_EQ(pattern->GetLength() - 1, string->IndexOf(emptyString, GetLanguageContext(), pattern->GetLength() - 1));
+    EXPECT_EQ(string->GetLength(), string->IndexOf(emptyString, GetLanguageContext(), string->GetLength() + 3_I));
+}
+
+TEST_F(StringTest, IndexOfTest3)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3',
+                                     '4', '5', '6', '7', '8', '9', '0', 'g', 0};
+    std::vector<uint8_t> patternData {'d', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+}
+
+TEST_F(StringTest, IndexOfTest4)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+                                     'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->IndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1_I,
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, IndexOfTest5)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 'f', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> string1Data {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                      'a', 'a', 'b', 'c', 'd', 'e', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string1 = String::CreateFromMUtf8(string1Data.data(), string1Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->IndexOf(pattern, GetLanguageContext(), 0));
+
+    std::vector<uint8_t> string2Data {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                      'a', 'b', 'c', 'd', 'e', 'a', 'f', 'a', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string2 = String::CreateFromMUtf8(string2Data.data(), string2Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(9_I, string2->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(9_I, string2->IndexOf(pattern, GetLanguageContext(), 8_I));
+    EXPECT_EQ(9_I, string2->IndexOf(pattern, GetLanguageContext(), 9_I));
+    EXPECT_EQ(-1, string2->IndexOf(pattern, GetLanguageContext(), 10_I));
+}
+
+TEST_F(StringTest, IndexOfTest6)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                     'a', 'a', 'b', 'c', 'd', 'e', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string1 = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->IndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, IndexOfTest7)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                     'a', 'b', 'c', 'd', 'e', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(4_I, string->IndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), 5_I));
+}
+
+TEST_F(StringTest, IndexOfTest8)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->IndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, IndexOfTest9)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->IndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest)
+{
+    std::vector<uint8_t> data1 {'a', 'b', 'c', 'd', 'z', 0};
+    std::vector<uint8_t> data2 {'b', 'c', 'd', 0};
+    std::vector<uint16_t> data3 {'a', 'b', 'c', 'd', 'z', 0};
+    std::vector<uint16_t> data4 {'b', 'c', 'd', 0};
+    String *string1 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string2 = String::CreateFromMUtf8(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string3 = String::CreateFromUtf16(data3.data(), data3.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string4 = String::CreateFromUtf16(data4.data(), data4.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+
+    auto index = string1->LastIndexOf(string2, GetLanguageContext(), 1_I);
+    auto index1 = string1->LastIndexOf(string4, GetLanguageContext(), 1_I);
+    auto index2 = string3->LastIndexOf(string2, GetLanguageContext(), 1_I);
+    auto index3 = string3->LastIndexOf(string4, GetLanguageContext(), 1_I);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+    index = string1->LastIndexOf(string2, GetLanguageContext(), 0);
+    index1 = string1->LastIndexOf(string4, GetLanguageContext(), 0);
+    index2 = string3->LastIndexOf(string2, GetLanguageContext(), 0);
+    index3 = string3->LastIndexOf(string4, GetLanguageContext(), 0);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+}
+
+TEST_F(StringTest, LastIndexOfShortTest2)
+{
+    std::vector<uint8_t> data1 {'b', 0};
+    std::vector<uint16_t> data2 {'b', 0};
+    String *string1 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string2 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string3 = String::CreateFromUtf16(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string4 = String::CreateFromUtf16(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    auto index = string1->LastIndexOf(string2, GetLanguageContext(), 0);
+    auto index1 = string3->LastIndexOf(string4, GetLanguageContext(), 0);
+    auto index2 = string1->LastIndexOf(string3, GetLanguageContext(), 0);
+    auto index3 = string3->LastIndexOf(string1, GetLanguageContext(), 0);
+    EXPECT_EQ(0, string1->LastIndexOf(string2, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, index);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+}
+
+TEST_F(StringTest, LastIndexOfShortTest3)
+{
+    std::vector<uint8_t> stringData {'b', 0};
+    std::vector<uint8_t> patternData {'b', 'c', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest4)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest5)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'c', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength()));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 1_I));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 2_I));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 3_I));
+
+    String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, emptyString->LastIndexOf(emptyString, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, emptyString->LastIndexOf(string, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(emptyString, GetLanguageContext(), -3_I));
+    EXPECT_EQ(pattern->GetLength() - 1,
+              string->LastIndexOf(emptyString, GetLanguageContext(), pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength(), string->LastIndexOf(emptyString, GetLanguageContext(), string->GetLength() + 3_I));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest6)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest7)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 7_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest8)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'c', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> aCharPatternData {'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *aPattern = String::CreateFromMUtf8(aCharPatternData.data(), aCharPatternData.size() - 1,
+                                               GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(aPattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->LastIndexOf(aPattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(aPattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(aPattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(aPattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->LastIndexOf(aPattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(4_I, string->LastIndexOf(aPattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(string->GetLength() - 1, string->LastIndexOf(aPattern, GetLanguageContext(), string->GetLength() - 1));
+    EXPECT_EQ(string->GetLength() - 1, string->LastIndexOf(aPattern, GetLanguageContext(), string->GetLength()));
+
+    std::vector<uint8_t> cCharPatternData {'c', 0};
+    String *cPattern = String::CreateFromMUtf8(cCharPatternData.data(), cCharPatternData.size() - 1,
+                                               GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(cPattern, GetLanguageContext(), -1));
+    EXPECT_EQ(-1, string->LastIndexOf(cPattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(cPattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(-1, string->LastIndexOf(cPattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(cPattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(cPattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(cPattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(cPattern, GetLanguageContext(), string->GetLength() - 1));
+    EXPECT_EQ(3_I, string->LastIndexOf(cPattern, GetLanguageContext(), string->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest9)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', 'g', 0};
+    std::vector<uint8_t> patternData {'d', 'e', 'f', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(3_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(3_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest10)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'c', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> string1Data {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'a', 'b', 'c', 'b', 'a', 'b', 0};
+    String *string1 = String::CreateFromMUtf8(string1Data.data(), string1Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext()));
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext(), 0));
+
+    std::vector<uint8_t> string2Data {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'c', 'a', 'a', 'b', 0};
+    String *string2 = String::CreateFromMUtf8(string2Data.data(), string2Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string2->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string2->LastIndexOf(pattern, GetLanguageContext(), 5_I));
+    EXPECT_EQ(6_I, string2->LastIndexOf(pattern, GetLanguageContext(), 6_I));
+    EXPECT_EQ(6_I, string2->LastIndexOf(pattern, GetLanguageContext(), 7_I));
+    EXPECT_EQ(6_I, string2->LastIndexOf(pattern, GetLanguageContext(), 8_I));
+    EXPECT_EQ(6_I, string2->LastIndexOf(pattern, GetLanguageContext(), string2->GetLength() - 1));
+    EXPECT_EQ(6_I, string2->LastIndexOf(pattern, GetLanguageContext(), string2->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest11)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'a', 'b', 'c', 'b', 'a', 'b', 0};
+    String *string1 = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext()));
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest12)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'c', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'c', 'b', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), 4_I));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest13)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'b', 'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest14)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1));
+}
+
+TEST_F(StringTest, LastIndexOfShortTest15)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 7_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1));
+}
+
+TEST_F(StringTest, LastIndexOfTest)
+{
+    std::vector<uint8_t> data1 {'a', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'w', 0};
+    std::vector<uint8_t> data2 {'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 0};
+    std::vector<uint16_t> data3 {'a', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 'w', 0};
+    std::vector<uint16_t> data4 {'b', 'c', 'y', 'w', 'd', 'z', 'y', 'b', 'c', 'y', 'w', 'd', 'z', 'y', 0};
+    String *string1 = String::CreateFromMUtf8(data1.data(), data1.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string2 = String::CreateFromMUtf8(data2.data(), data2.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string3 = String::CreateFromUtf16(data3.data(), data3.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string4 = String::CreateFromUtf16(data4.data(), data4.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+
+    auto index = string1->LastIndexOf(string2, GetLanguageContext(), 2_I);
+    auto index1 = string1->LastIndexOf(string4, GetLanguageContext(), 2_I);
+    auto index2 = string3->LastIndexOf(string2, GetLanguageContext(), 2_I);
+    auto index3 = string3->LastIndexOf(string4, GetLanguageContext(), 2_I);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+    index = string1->LastIndexOf(string2, GetLanguageContext(), 0);
+    index1 = string1->LastIndexOf(string4, GetLanguageContext(), 0);
+    index2 = string3->LastIndexOf(string2, GetLanguageContext(), 0);
+    index3 = string3->LastIndexOf(string4, GetLanguageContext(), 0);
+    EXPECT_EQ(index, index2);
+    EXPECT_EQ(index1, index3);
+}
+
+TEST_F(StringTest, LastIndexOfTest2)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'c',
+                                     'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 'a', 'b', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), -1));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength()));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 1_I));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 2_I));
+    EXPECT_EQ(pattern->GetLength() + 1, string->LastIndexOf(pattern, GetLanguageContext(), pattern->GetLength() + 3_I));
+
+    String *emptyString = String::CreateEmptyString(GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, emptyString->LastIndexOf(emptyString, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, emptyString->LastIndexOf(string, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(emptyString, GetLanguageContext(), -3_I));
+    EXPECT_EQ(pattern->GetLength() - 1_I,
+              string->LastIndexOf(emptyString, GetLanguageContext(), pattern->GetLength() - 1_I));
+    EXPECT_EQ(pattern->GetLength() - 1_I,
+              string->LastIndexOf(emptyString, GetLanguageContext(), pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength(), string->LastIndexOf(emptyString, GetLanguageContext(), string->GetLength() + 3_I));
+}
+
+TEST_F(StringTest, LastIndexOfTest3)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3',
+                                     '4', '5', '6', '7', '8', '9', '0', 'g', 0};
+    std::vector<uint8_t> patternData {'d', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(3_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(3_I,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfTest4)
+{
+    std::vector<uint8_t> stringData {'a', 'b', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+                                     'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 2_I));
+    EXPECT_EQ(3_I, string->LastIndexOf(pattern, GetLanguageContext(), 3_I));
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), 4_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength() - 1,
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 2_I));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(string->GetLength() - pattern->GetLength(),
+              string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1_I));
+}
+
+TEST_F(StringTest, LastIndexOfTest5)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 'f', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> string1Data {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                      'a', 'a', 'b', 'c', 'd', 'e', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string1 = String::CreateFromMUtf8(string1Data.data(), string1Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext(), 0));
+
+    std::vector<uint8_t> string2Data {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                      'a', 'b', 'c', 'd', 'e', 'a', 'f', 'a', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string2 = String::CreateFromMUtf8(string2Data.data(), string2Data.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string2->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(-1, string2->LastIndexOf(pattern, GetLanguageContext(), 8_I));
+    EXPECT_EQ(9_I, string2->LastIndexOf(pattern, GetLanguageContext(), 9_I));
+    EXPECT_EQ(9_I, string2->LastIndexOf(pattern, GetLanguageContext(), 10_I));
+    EXPECT_EQ(9_I, string2->LastIndexOf(pattern, GetLanguageContext(), 14_I));
+    EXPECT_EQ(9_I, string2->LastIndexOf(pattern, GetLanguageContext(), string2->GetLength() - 1));
+    EXPECT_EQ(9_I, string2->LastIndexOf(pattern, GetLanguageContext(), string2->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfTest6)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'c', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                     'a', 'a', 'b', 'c', 'd', 'e', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string1 = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(-1, string1->LastIndexOf(pattern, GetLanguageContext(), 0));
+}
+
+TEST_F(StringTest, LastIndexOfTest7)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'b', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e',
+                                     'a', 'b', 'c', 'd', 'e', 'a', 'f', 'b', 'a', 'b', 'c', 'd', 'e', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(4_I, string->LastIndexOf(pattern, GetLanguageContext(), 4_I));
+}
+
+TEST_F(StringTest, LastIndexOfTest8)
+{
+    std::vector<uint8_t> patternData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd',
+                                      'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint8_t> stringData {'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 'b', 'c', 'd', 'e', 'a', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 0));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), 1_I));
+    EXPECT_EQ(0, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+}
+
+TEST_F(StringTest, LastIndexOfTest9)
+{
+    std::vector<uint8_t> stringData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    std::vector<uint8_t> patternData {'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 0};
+    String *string = String::CreateFromMUtf8(stringData.data(), stringData.size() - 1, GetLanguageContext(),
+                                             Runtime::GetCurrent()->GetPandaVM());
+    String *pattern = String::CreateFromMUtf8(patternData.data(), patternData.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(2_I, string->GetLength() - pattern->GetLength());
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength()));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), 7_I));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() + 1));
+    EXPECT_EQ(2_I, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength()));
+    EXPECT_EQ(-1, string->LastIndexOf(pattern, GetLanguageContext(), string->GetLength() - pattern->GetLength() - 1));
 }
 
 TEST_F(StringTest, CompareTestUtf8)
