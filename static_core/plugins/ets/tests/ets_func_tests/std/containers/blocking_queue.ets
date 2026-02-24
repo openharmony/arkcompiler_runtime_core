@@ -104,7 +104,7 @@ function popperStr(): Array<String> {
 }
 
 function concurrentPushPopTestInt() {
-    let p1 = launch<void, () => void>(pusherInt);
+    let p1 = launch(pusherInt);
     p1.Await();
     let arrayToCheck = popperInt();
     for (let i = 0; i < elementsNum; i++) {
@@ -114,7 +114,7 @@ function concurrentPushPopTestInt() {
 }
 
 function concurrentPushPopTestObj() {
-    let p1 = launch<void, () => void>(pusherObj);
+    let p1 = launch(pusherObj);
     p1.Await();
     let arrayToCheck = popperObj();
     for (let i = 0; i < elementsNum; i++) {
@@ -124,7 +124,7 @@ function concurrentPushPopTestObj() {
 }
 
 function concurrentPushPopTestStr() {
-    let p1 = launch<void, () => void>(pusherStr);
+    let p1 = launch(pusherStr);
     p1.Await();
     let arrayToCheck = popperStr();
     for (let i = 0; i < elementsNum; i++) {

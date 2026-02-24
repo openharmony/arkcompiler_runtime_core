@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ function main(): int {
             arktest.assertEQ(el, queueInt.pop());
         }
         arktest.assertEQ(queueInt.size, 0);
-        let p1 = launch<void, () => void>(queueIntGetEnddata);
+        let p1 = launch(queueIntGetEnddata);
         queueInt.push(elementsNum);
         p1.Await();
         arktest.assertEQ(queueInt.size, 1);
@@ -60,7 +60,7 @@ function main(): int {
             arktest.assertEQ(el, queueInt.pop());
         }
         arktest.assertEQ(queueInt.size, 0);
-        let p1 = launch<void, () => void>(queueIntGetEnddata);
+        let p1 = launch(queueIntGetEnddata);
         queueInt.push(elementsNum);
         p1.Await();
         arktest.assertEQ(queueInt.size, 1);
@@ -81,7 +81,7 @@ function main(): int {
             arktest.assertEQ(el, queueInt.pop());
         }
         arktest.assertEQ(queueInt.size, 0);
-        let p1 = launch<void, () => void>(queueIntGetEnddata);
+        let p1 = launch(queueIntGetEnddata);
         let a1: int = 10;
         let a2: int = 20;
         queueInt.push(a1);
@@ -94,10 +94,10 @@ function main(): int {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
-        let p1 = launch<void, () => void>(queueIntGetEndB1data);
-        let p2 = launch<void, () => void>(queueIntAddTwodata);
-        let p3 = launch<void, () => void>(queueIntGetEndB2data);
-        let p4 = launch<void, () => void>(queueIntAddTwodata);
+        let p1 = launch(queueIntGetEndB1data);
+        let p2 = launch(queueIntAddTwodata);
+        let p3 = launch(queueIntGetEndB2data);
+        let p4 = launch(queueIntAddTwodata);
         p1.Await();
         p2.Await();
         p3.Await();
@@ -110,12 +110,12 @@ function main(): int {
             queueInt.pop();
         }
         queueInt.push(10);
-        let p1 = launch<void, () => void>(queueIntGetEnddata);
-        let p2 = launch<void, () => void>(queueIntGetEnddata);
+        let p1 = launch(queueIntGetEnddata);
+        let p2 = launch(queueIntGetEnddata);
         queueInt.push(20);
         p1.Await();
         p2.Await();
-        let p3 = launch<void, () => void>(queueIntGetEnddata);
+        let p3 = launch(queueIntGetEnddata);
         p3.Await();
         arktest.assertEQ(queueInt.getEnd(), 20);
     });

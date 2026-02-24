@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ function runConcurrently(coroutinesCount: number, callback: () => void) {
         return true;
     };
     for (let i = 0; i < coroutinesCount; ++i) {
-        let j = launch<boolean, () => boolean>(guard);
+        let j = launch(guard);
         jobs.push(j);
     }
     for (let job of jobs) {

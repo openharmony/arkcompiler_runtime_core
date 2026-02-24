@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,8 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch<void, () => void>(addAll);
-        let p2 = launch<void, () => void>(toStringTest);
+        let p1 = launch(addAll);
+        let p2 = launch(toStringTest);
         p1.Await();
         p2.Await();
         let str: string = ConcurrentSetTestOne.toString();
@@ -84,7 +84,7 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
-        let p = launch<void, () => void>(addAll);
+        let p = launch(addAll);
         p.Await();
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
     });
@@ -92,8 +92,8 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch<void, () => void>(addAll);
-        let p2 = launch<void, () => void>(hasAll);
+        let p1 = launch(addAll);
+        let p2 = launch(hasAll);
         p1.Await();
         p2.Await();
         for (let i: int = 0; i < 10; i++) {
@@ -104,8 +104,8 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch<void, () => void>(addAll);
-        let p2 = launch<void, () => void>(getSize);
+        let p1 = launch(addAll);
+        let p2 = launch(getSize);
         p1.Await();
         p2.Await();
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
@@ -115,8 +115,8 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addFront();
-        let p1 = launch<void, () => void>(addBack);
-        let p2 = launch<void, () => void>(deleteAll);
+        let p1 = launch(addBack);
+        let p2 = launch(deleteAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 6);
@@ -125,8 +125,10 @@ function main(): int {
     {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
-        let p1 = launch<void, (i: int) => void>(addOneTest, 2);
-        let p2 = launch<void, () => void>(clearTest);
+        let p1 = launch() {
+            addOneTest(2)
+        };
+        let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 2);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,7 +86,9 @@ function getEndConcurrentTest() {
     let lock = new AsyncLock()
     let jobs: Job<void>[] = []
     for (let i = 0; i < JOB_COUNT; i++) {
-        jobs.push(launch<void, (a0: containers.LinkedBlockingQueue<int>, a1: AsyncLock, a2: AtomicFlag) => void>(getEndConcurrent, testBlockingQueue, lock, flag))
+        jobs.push(launch() {
+            getEndConcurrent(testBlockingQueue, lock, flag);
+        })
     }
     for (let i = 0; i < JOB_COUNT; i++) {
         jobs[i].Await()

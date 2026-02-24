@@ -2640,7 +2640,7 @@ export namespace taskpool {
                 return;
         }
 
-        let initTask = ()=> {
+        launch() {
             ConcurrencyHelpers.lockGuard(workersMutex, () => {
                 if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                     return;
@@ -2666,8 +2666,7 @@ export namespace taskpool {
                 }
                 isWorkersInitialized.set(true);
             })
-        }
-        launch<void, ()=>void>(initTask);
+        };
         isInitTaskLaunched.set(true);
 
     }
@@ -3024,7 +3023,7 @@ export namespace taskpool {
      * @param priority task execution priority
      */
     function launchImpl(task: Task, priority?: Priority): Promise<Any> {
-        const job: Job<Any> = launch<Any, () => Any>(
+        const job: Job<Any> = launch(
             InternalTask.of(task).execute
         );
         let promise = new Promise<Any>((resolve, reject) => {
@@ -3137,6 +3136,6 @@ function launchPromise(f: Function, ...args: FixedArray<Any>): Promise<Any> {
             rejecter!(e as Error)
         }
     }
-    launch<void, () => void>(cb)
+    launch(cb)
     return p;
 }

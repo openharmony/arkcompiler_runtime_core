@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,9 @@ function runConcurrently(callback: callbackT, coroutines: number) {
     let jobs = new Array<Job<void>>(coroutines.toInt());
     for (let i = 0; i < coroutines; ++i) {
         const id = i.toInt();
-        jobs[id] = launch<void, callbackT>(callback, id);
+        jobs[id] = launch() {
+            return callback(id)
+        };
     }
     return new SharedJob<Job<void>>(jobs);
 }
@@ -150,13 +152,13 @@ function readWriteMutualExclusionTest() {
 
     readLock.lock();
 
-    let job = launch<void, () => void>(() => {
+    let job = launch() {
         writeLockAttempted = true;
         event.Fire();
         writeLock.lock();
         writeAcquired = true;
         writeLock.unlock();
-    });
+    };
     event.Wait();
 
     arktest.assertTrue(writeLockAttempted);

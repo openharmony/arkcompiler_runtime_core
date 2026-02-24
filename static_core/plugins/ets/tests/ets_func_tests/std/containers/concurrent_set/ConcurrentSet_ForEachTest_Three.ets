@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,8 +49,8 @@ function main(): int {
         ConcurrentSetTestOne.clear();
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
-        let p1 = launch<void, () => void>(forEachThree);
-        let p2 = launch<void, () => void>(addAll);
+        let p1 = launch(forEachThree);
+        let p2 = launch(addAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size >= 0);
@@ -58,11 +58,11 @@ function main(): int {
     ConcurrentSetTestsuite.addTest("ForEach&DeteleTest004", () =>
     {
         ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0); 
         flag = 0;
         addAll();
-        let p1 = launch<void, () => void>(forEachThree);
-        let p2 = launch<void, () => void>(deleteAllBack);
+        let p1 = launch(forEachThree);
+        let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);
@@ -73,8 +73,8 @@ function main(): int {
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
-        let p1 = launch<void, () => void>(forEachThree);
-        let p2 = launch<void, () => void>(hasAll);
+        let p1 = launch(forEachThree);
+        let p2 = launch(hasAll);
         p1.Await();
         p2.Await();
         arktest.assertEQ(ConcurrentSetTestOne.size, 10);
@@ -82,11 +82,11 @@ function main(): int {
     ConcurrentSetTestsuite.addTest("ForEach&ClearTest004", () =>
     {
         ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0); 
+        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
-        let p1 = launch<void, () => void>(forEachThree);
-        let p2 = launch<void, () => void>(clearTest);
+        let p1 = launch(forEachThree);
+        let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
         arktest.assertTrue(ConcurrentSetTestOne.size < 11);

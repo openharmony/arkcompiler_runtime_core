@@ -16,7 +16,7 @@
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
 function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
-	arr.push(launch <T, ()=>T>(func));
+	arr.push(launch(func));
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {

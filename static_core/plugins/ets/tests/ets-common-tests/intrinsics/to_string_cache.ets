@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,7 +150,9 @@ function doTest<T>(values: T[], workers: int) {
         const work = (w: Worker<T>, s: long, i: int, c: boolean) => { 
             return w.work(s, i, c);
         }
-        jobs[i] = launch<string, (w: Worker<T>, s: long, i: int, c: boolean) => string>(work, worker, state, iterCount, check);
+        jobs[i] = launch<string>() {
+            return work(worker, state, iterCount, check)
+        };
     }
     for (let i = 0; i < workers; i++) {
         let res = jobs[i]!.Await();

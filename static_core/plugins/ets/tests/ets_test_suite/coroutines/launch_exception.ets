@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ function launchStackOverflow(): boolean {
     let overflow: boolean = false;
 
     try {
-        launch<Object | null, () => Object | null>(coroStackOverflow).Await();
+        launch(coroStackOverflow).Await();
         L.log('No errors thrown by coroStackOverflow() but should be!')
         overflow = false;
     } catch (e) {
@@ -55,7 +55,7 @@ function launchError(): boolean {
     let hasError: boolean = false;
 
     try {
-        launch<Object, () => Object>(coroError).Await();
+        launch(coroError).Await();
         L.log('No errors thrown by coroError() but should be!')
         hasError = false;
     } catch (e) {

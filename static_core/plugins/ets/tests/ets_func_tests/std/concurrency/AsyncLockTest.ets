@@ -612,7 +612,9 @@ function sequentialLock(): boolean {
     flagBuf[0] = 0;
     // NOTE(mredkin): #23718 signatures needed
     // taskpool.execute(lockHolderJob, lockNameB, 100, flagBuf);
-    launch(lockHolderJob, lockNameB, 100, flagBuf)
+    launch() {
+        lockHolderJob(lockNameB, 100, flagBuf)
+    }
     let p = new Promise<Any>((resolve, reject) => {
         let lockA = new AsyncLock();
         lockA.lockAsync(() => {
@@ -858,7 +860,9 @@ function doubleExitSharedLock(): boolean {
         mainExecutor(1, flagBuf, 300),
         // NOTE(mredkin): #23718 signatures needed
         // taskpool.execute(taskExecutor, flagBuf, 100),
-        launch(taskExecutor, flagBuf, 100),
+        launch() {
+            taskExecutor(flagBuf, 100)
+        },
     ]), "doubleExitSharedLock"));
 }
 

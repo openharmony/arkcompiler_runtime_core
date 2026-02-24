@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,13 @@ function out_of_coro_test() {
 
     arktest.expectError(() => {
         let wait_func = (arr: Int32Array) => {Atomics.wait(arr, 0, 0);}
-        let mainWaitJob = launch<void, (arr: Int32Array) => void> (wait_func, arr);
+        let mainWaitJob = launch() {
+            wait_func(arr)
+        }
         let awaitIt = ()=>{ mainWaitJob.Await(); }
 
         for (let i = 1; i < coro_to_create; ++ i) {
-            jobs.push(launch<void, () => void> (awaitIt));
+            jobs.push(launch(awaitIt));
         }
     }, new CoroutinesLimitExceedError('Unable to create a new coroutine: reached the limit for the number of existing coroutines.'));
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ function asyncCall(): boolean {
 
 // LaunchCallMethod
 function launchCall(): boolean {
-    let p = launch<boolean, () => boolean>(call);
+    let p = launch(call);
     return p.Await();
 }
 
@@ -77,7 +77,7 @@ function mainRoutine() {
         eWorkerLaunchEvent.wait();
         mainEvent.fire();
     }
-    launch<void, () => void>(l);
+    launch(l);
 }
 
 function eWorkerRoutine(): boolean {
@@ -90,7 +90,7 @@ function eWorkerRoutine(): boolean {
         mainEvent.wait();
         eWorkerAsyncEvent.fire();
     }
-    launch<void, () => void>(l);
+    launch(l);
     return true;
 }
 
@@ -104,17 +104,17 @@ function clearCounter() {
 
 function scheduleACoroutine(): boolean {
     clearCounter();
-    launch<void, ()=>void>(():void => {
+    launch() {
         add(5);
-    });
+    };
     Coroutine.Schedule();
     return counter == 5 && call();
 }
 
 async function asyncAdd(a: int) {
-    launch<void, ()=>void>(():void => {
+    launch() {
         add(6);
-    });
+    };
     counter += a;
 }
 
@@ -126,12 +126,12 @@ function scheduleAJCoroutine(): boolean {
 }
 
 function launchCallWithoutAwait(): Job<boolean> {
-    return launch<boolean, ()=>boolean>(call) as Job<boolean>;
+    return launch(call) as Job<boolean>;
 }
 
 // recursive launch
 function recursiveLaunch(): boolean {
-    let res : Job<Job<boolean>> = launch<Job<boolean>, ()=>Job<boolean>>(launchCallWithoutAwait) as Job<Job<boolean>>;
+    let res : Job<Job<boolean>> = launch(launchCallWithoutAwait) as Job<Job<boolean>>;
     return res.Await().Await();
 }
 
@@ -154,12 +154,12 @@ function launchAsyncFunctions(): Promise<boolean> {
 }
 
 function ACoroutineCallAsyncFunctions(): boolean {
-    let res : Job<Promise<boolean>> = launch<Promise<boolean>, ()=>Promise<boolean>>(launchAsyncFunctions) as Job<Promise<boolean>>
+    let res : Job<Promise<boolean>> = launch(launchAsyncFunctions) as Job<Promise<boolean>>
     return waitForCompletion<boolean>(() => res.Await());
 }
 
 async function asyncFunctionLaunchCall() {
-    return launch<boolean, ()=>boolean>(call);
+    return launch(call);
 }
 
 function asyncFunctionLaunchACoroutine(): boolean {
@@ -176,7 +176,7 @@ function testOOM(): boolean {
     try {
         const veryBigNumberOfCoroutines: int = 500000000;
         for (let i = 0; i < veryBigNumberOfCoroutines; ++i) {
-            launch<Object, ()=>Object>(body);
+            launch(body);
         }
     } catch (e) {
         if (e instanceof CoroutinesLimitExceedError) {
@@ -194,7 +194,7 @@ function testOOM(): boolean {
 
 function test_stack_overflow(): boolean {
     try {
-        launch<Object | null, ()=>Object | null>(coro_stack_overflow).Await();
+        launch(coro_stack_overflow).Await();
         console.println("No exceptions thrown by coro_stack_overflow() but should be!")
         return false;
     } catch (e) {
@@ -221,7 +221,7 @@ function coro_error(): Object {
 
 function test_error(): boolean {
     try {
-        let res = launch<Object, ()=>Object>(coro_error);
+        let res = launch(coro_error);
         res.Await();
         console.println("No exceptions thrown by coro_error() but should be!")
         return false;
@@ -249,9 +249,9 @@ let e2m: containers.LinkedBlockingQueue<boolean> = new containers.LinkedBlocking
 let m2e: containers.LinkedBlockingQueue<boolean> = new containers.LinkedBlockingQueue<boolean>();
 
 function EACoroutineSendToMain(): boolean {
-    launch<void, ()=>void>(():void => {
+    launch() {
         e2m.push(true);
-    });
+    };
     return m2e.pop();
 }
 

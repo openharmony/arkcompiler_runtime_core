@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,10 @@ function main(): int {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
-        let p1 = launch<void, () => void>(queueIntAdddata);
-        let p2 = launch<void, () => void>(queueIntAdddata);
-        let p3 = launch<void, () => void>(queueIntAdddata);
-        let p4 = launch<void, () => void>(queueIntAdddata);
+        let p1 = launch(queueIntAdddata);
+        let p2 = launch(queueIntAdddata);
+        let p3 = launch(queueIntAdddata);
+        let p4 = launch(queueIntAdddata);
         p1.Await();
         p2.Await();
         p3.Await();
@@ -61,7 +61,7 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.add(i);
         }
-        let p1 = launch<void, () => void>(queueIntFrontF1data);
+        let p1 = launch(queueIntFrontF1data);
         p1.Await();
         arktest.assertEQ(queueInt.size, elementsNum);
     });
@@ -73,7 +73,7 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.add(i);
         }
-        let p1 = launch<void, () => void>(queueIntBackB1data);
+        let p1 = launch(queueIntBackB1data);
         p1.Await();
         arktest.assertFalse(queueInt.isEmpty());
     });

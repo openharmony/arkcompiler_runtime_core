@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,9 +43,11 @@ function bar(p: Job<int>) : int {
 }
 
 function testConcurrentAwait(): void {
-    let p1 = launch<int, () => int>(foo);
+    let p1 = launch(foo);
     for (let i = 0; i < 2; ++i) {
-        let p2 = launch<int, (p: Job<int>) => int>(bar, p1);
+        let p2 = launch<int>() {
+            return bar(p1)
+        };
     }
     // NOTE(panferovi): for more determinism we need to make sure
     // that bar coroutines are waiting for its awakening

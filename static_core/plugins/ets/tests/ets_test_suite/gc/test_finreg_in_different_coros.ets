@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ function InitFinRegAndFill(callback: (value: int) => void, isMainCoro: boolean =
 function runGCInDiffThreads() {
     doFullGC();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    launch<void, () => void>(doFullGC).Await();
+    launch(doFullGC).Await();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
@@ -62,7 +62,7 @@ function testFinRegOnMainAndDiffCoro() {
         result_finreg_not_main = value;
     }
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    launch<void, (cb: (v: int) => void, f: boolean) => void>(InitFinRegAndFill, cb, false).Await();
+    launch() { InitFinRegAndFill(cb, false) }.Await();
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
     InitFinRegAndFill((value: int) => {
         result_finreg_main = value;

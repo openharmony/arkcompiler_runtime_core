@@ -277,7 +277,9 @@ class Test {
         const jobs = new Array<Job<void>>();
         // Add all files except "additional1.ets"
         for (let i = 1; i < allAbcFiles.length; i++) {
-            jobs.push(launch<void, (l: AbcRuntimeLinker, p: string) => void>(Test.addSingleAbcFile, linker, allAbcFiles[i]));
+            jobs.push(launch() {
+                Test.addSingleAbcFile(linker, allAbcFiles[i])
+            });
         }
         // Try to load a class from "additional1.ets"
         arktest.expectThrow(() => { linker.loadClass(Test.additionalClass1Name, true); },

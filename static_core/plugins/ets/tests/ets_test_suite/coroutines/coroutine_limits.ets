@@ -55,7 +55,7 @@ function launchLimitTest() {
     let launchLimit = (limit: CoroutineLimit) => {
         let wGroup: LaunchParams = { workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [0]) };
         while (true) {
-            launch(() => {}, wGroup);
+            launch(wGroup) {};
             limit.coroCount++;
         }
     };

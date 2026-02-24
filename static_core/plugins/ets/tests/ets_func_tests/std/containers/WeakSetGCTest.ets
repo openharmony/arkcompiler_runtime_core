@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,9 @@ function weakSetElementGarbageCollection(): void {
     reclaimedElemId = NULL_ID
 
     // using coroutine to avoid WeakSet creation function inlining
-    const weakSetCreator = launch<WeakSet<Key>, (elemId: int) => WeakSet<Key>>(createTestWeakSet, ELEM_ID)
+    const weakSetCreator = launch<WeakSet<Key>>() {
+        return createTestWeakSet(ELEM_ID)
+    }
     const weakSet = weakSetCreator.Await()
 
     while (reclaimedElemId != ELEM_ID) {

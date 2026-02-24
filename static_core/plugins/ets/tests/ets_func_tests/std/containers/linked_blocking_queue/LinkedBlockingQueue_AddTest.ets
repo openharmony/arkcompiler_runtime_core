@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,7 @@ function main(): int {
         }
         let jobs = new Array<Job<void>>(5);
         for (let i = 0; i < 5; i++) {
-            jobs[i] = launch<void, () => void>(queueAddData);
+            jobs[i] = launch(queueAddData);
         }
         for (let i: int = 0; i < 5; i++) {
             jobs[i].Await();
@@ -68,8 +68,8 @@ function main(): int {
         let jobs = new Array<Job<void>>(6);
         let p = 0;
         for (let i = 0; i < 3; i++) {
-            jobs[p++] = launch<void, () => void>(queueAddData);
-            jobs[p++] = launch<void, () => void>(queuePopData);
+            jobs[p++] = launch(queueAddData);
+            jobs[p++] = launch(queuePopData);
         }
         for (let i: int = 0; i < 6; i++) {
             jobs[i].Await();
@@ -84,10 +84,10 @@ function main(): int {
         let jobs = new Array<Job<void>>(10);
         let p = 0;
         for (let i = 0; i < 5; i++) {
-            jobs[p++] = launch<void, () => void>(queueAddData);
+            jobs[p++] = launch(queueAddData);
         }
         for (let i = 5; i < 10; i++) {
-            jobs[p++] = launch<void, () => void>(queueGetFirstData);
+            jobs[p++] = launch(queueGetFirstData);
         }
         for (let i: int = 0; i < 10; i++) {
             jobs[i].Await();

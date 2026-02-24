@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,32 +55,42 @@ function fiveargs(x: int, y: int, z: int, w: int, v: int): null {
 }
 
 function testLaunchNoArgs(): void {
-    launch<Object | null , () => Object | null>(noarg);
+    launch(noarg);
     Coroutine.Schedule();
 }
 
 function testLaunchOneArgs(): void {
-    launch<Object | null , (x: int) => Object | null>(onearg, 1);
+    launch<Object | null>() {
+        return onearg(1)
+    };
     Coroutine.Schedule();
 }
 
 function testLaunchTwoArgs(): void {
-    launch<Object | null , (x1: int, x2: int) => Object | null>(twoargs, 1, 2);
+    launch<Object | null>() {
+        return twoargs(1, 2)
+    };
     Coroutine.Schedule();
 }
 
 function testLaunchThreeArgs(): void {
-    launch<Object | null , (x1: int, x2: int, x3: int) => Object | null>(threeargs, 1, 2, 3);
+    launch<Object | null>() {
+        return threeargs(1, 2, 3)
+    };
     Coroutine.Schedule();
 }
 
 function testLaunchFourArgs(): void {
-    launch<Object | null , (x1: int, x2: int, x3: int, x4: int) => Object | null>(fourargs, 1, 2, 3, 4);
+    launch<Object | null>() {
+        return fourargs(1, 2, 3, 4)
+    };
     Coroutine.Schedule();
 }
 
 function testLaunchFiveArgs(): void {
-    launch<Object | null , (x1: int, x2: int, x3: int, x4: int, x5: int) => Object | null>(fiveargs, 1, 2, 3, 4, 5);
+    launch<Object | null>() {
+        return fiveargs(1, 2, 3, 4, 5)
+    };
     Coroutine.Schedule();
 }
 

@@ -57,17 +57,17 @@ async function asyncCondVarNotifyOneTest() {
         event.ResetFlag();
         let afterWait = new AtomicBoolean(false);
         let afterSet = new AtomicBoolean(false);
-        let job1 = launch<void, () => void>(() => {
+        let job1 = launch() {
             await event.Wait();
             arktest.assertTrue(afterSet.load());
             afterWait.store(true);
-        });
-        let job2 = launch<void, () => void>(() => {
+        };
+        let job2 = launch() {
             Coroutine.Schedule();
             arktest.assertFalse(afterWait.load());
             afterSet.store(true);
             await event.SetOne();
-        });
+        };
         job1.Await();
         job2.Await();
         arktest.assertTrue(afterWait.load());
@@ -83,16 +83,16 @@ async function asyncCondVarNotifyAllTest() {
         let jobs = new Array<Job<void>>(tasks_counter);
         for (let i = 0; i < tasks_counter; ++i) {
             const id = i.toInt();
-            jobs[id] = launch<void, () => void>(() => {
+            jobs[id] = launch() {
                 await event.Wait();
                 counter.fetchAdd(1);
-            })
+            };
         }
         arktest.assertEQ(counter.load(), 0);
-        let setAll = launch<void, () => void>(() => {
+        let setAll = launch() {
             Coroutine.Schedule();
             await event.SetAll();
-        });
+        };
         setAll.Await();
         for (let job of jobs) { 
            job.Await();
@@ -105,14 +105,14 @@ async function asyncCondVarTestNotifyWithoutWaiters() {
     let workload = 1000;
     let mutex_ = new concurrency.stackless.AsyncMutex();
     let flagCV_ = new concurrency.stackless.AsyncCondVar();
-    launch<void, () => void>(() => {
+    launch() {
         for (let i = 0; i < workload; ++i) {
             await mutex_.lock();
             flagCV_.notifyOne(mutex_);
             flagCV_.notifyAll(mutex_);
             mutex_.unlock();
         }
-    }).Await();
+    }.Await();
 }
 
 function main(): int {

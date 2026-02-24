@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,14 +31,14 @@ function main(): int {
         for (let i: int = 0; i < elementsNum; ++i) {
             queueInt.push(i);
         }
-        let p1 = launch<void, () => void>(queueIntSizedata);
-        let p2 = launch<void, () => void>(queueIntSizedata);
-        let p3 = launch<void, () => void>(queueIntSizedata);
-        let p4 = launch<void, () => void>(queueIntSizedata);
-        p1.Await(); 
-        p2.Await(); 
-        p3.Await(); 
-        p4.Await(); 
+        let p1 = launch(queueIntSizedata);
+        let p2 = launch(queueIntSizedata);
+        let p3 = launch(queueIntSizedata);
+        let p4 = launch(queueIntSizedata);
+        p1.Await();
+        p2.Await();
+        p3.Await();
+        p4.Await();
         arktest.assertEQ(queueInt.size, elementsNum);
     });
 

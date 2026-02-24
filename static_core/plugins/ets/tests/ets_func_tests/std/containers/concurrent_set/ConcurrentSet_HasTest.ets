@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,8 +98,10 @@ function main(): int {
         arktest.assertEQ(ConcurrentSetTestOne.size, 0);
         addAll();
         arktest.assertEQ(ConcurrentSetTestOne.has(3), true);
-        let p1 = launch<void, (i: int) => void>(hasOne, 0);
-        let p2 = launch<void, () => void>(clearTest);
+        let p1 = launch() {
+            hasOne(0)
+        }
+        let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
         arktest.assertEQ(ConcurrentSetTestOne.has(0), false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,10 +27,14 @@ async function async_f(a: int): Promise<String> {
 
 async function testCoroStats(): Promise<void> {
     for (let i = 0; i < 10; ++i) {
-        launch<String, (i: int) => String>(sync_f, 5);
+        launch<String>() {
+            return sync_f(5)
+        };
     }
     for (let i = 0; i < 10; ++i) {
-        launch<String, (i: int) => String>(sync_f, 5).Await();
+        launch<String>() {
+            return sync_f(5)
+        }.Await();
     }
     for (let i = 0; i < 10; ++i) {
         async_f(5);

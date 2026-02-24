@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,9 @@ function weakMapKeyGarbageCollection(): void {
     reclaimedKeyId = NULL_ID
 
     // using coroutine to avoid WeakMap creation function inlining
-    const weakMapCreator = launch< WeakMap<Key, Val>, (keyId: int) => WeakMap<Key, Val>>(createTestWeakMap, KEY_ID)
+    const weakMapCreator = launch<WeakMap<Key,Val>>() {
+        return createTestWeakMap(KEY_ID)
+    }
     const weakMap = weakMapCreator.Await()
 
     while (reclaimedKeyId != KEY_ID) {

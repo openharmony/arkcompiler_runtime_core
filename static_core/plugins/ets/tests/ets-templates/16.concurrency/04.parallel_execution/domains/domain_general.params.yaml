@@ -29,7 +29,7 @@ cases:
 
       // Run multiple times to increase confidence
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const launchedWorkerId: int = job.Await();
 
           // Verify that the coroutine did NOT run on the main worker
@@ -61,7 +61,7 @@ cases:
 
       // Run multiple times to increase confidence
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const launchedWorkerId: int = job.Await();
 
           // Verify that the coroutine did NOT run on the EA worker
@@ -87,7 +87,7 @@ cases:
       };
       
       for (let i = 0; i < 10; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, defaultParams);
+          let job: Job<int> = launch<int>(defaultParams, getWorkerId);
           generalWorkerIds.add(job.Await());
       }
 
@@ -109,7 +109,7 @@ cases:
 
       // Run multiple times - should always execute on the hinted worker
       for (let i = 0; i < 5; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const resultId: int = job.Await();
           
           arktest.assertEQ(resultId, targetWorkerId,
@@ -133,7 +133,7 @@ cases:
 
       // Run multiple times - should never execute on main worker
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const launchedWorkerId: int = job.Await();
 
           // Verify that the coroutine did NOT run on main worker despite hint
@@ -165,7 +165,7 @@ cases:
 
       // Run multiple times - should never execute on EA worker
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const launchedWorkerId: int = job.Await();
 
           // Verify that the coroutine did NOT run on EA worker despite hint
@@ -195,7 +195,7 @@ cases:
       // Collect worker IDs from multiple coroutine launches
       let workerIds = new Set<int>();
       for (let i = 0; i < TEST_ITERATIONS; i++) {
-          let job: Job<int> = launch<int, () => int>(getWorkerId, params);
+          let job: Job<int> = launch<int>(params, getWorkerId);
           const workerId: int = job.Await();
           
           // Verify it's not main worker

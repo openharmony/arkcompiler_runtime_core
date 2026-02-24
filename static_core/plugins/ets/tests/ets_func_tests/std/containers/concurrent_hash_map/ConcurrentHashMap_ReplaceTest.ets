@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +78,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
         Atomics.store(flag, 0, 0);
-        let p1 = launch<void, () => void>(replaceAll);
-        let p2 = launch<void, () => void>(replaceAll);
+        let p1 = launch(replaceAll);
+        let p2 = launch(replaceAll);
         p1.Await();
         p2.Await();
         for (let i = 0; i < 10; i++) {
@@ -93,8 +93,8 @@ function main(): int {
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(replaceAll);
-        let p2 = launch<void, () => void>(isEmptyFun);
+        let p1 = launch(replaceAll);
+        let p2 = launch(isEmptyFun);
         p1.Await();
         p2.Await();
         arktest.assertEQ(Atomics.load(flag, 0), 10);
@@ -103,14 +103,14 @@ function main(): int {
             arktest.assertEQ(concurrentHashMapOne.get(i), reVal);
         }
     });
-    concurrentHashMapTestsuite.addTest("replaceAndTest_002", () => 
+    concurrentHashMapTestsuite.addTest("replaceAndTest_002", () =>
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         Atomics.store(flag, 0, 0);
         setAll();
-        let p1 = launch<void, () => void>(replaceAllBack);
-        let p2 = launch<void, () => void>(clearAll);
+        let p1 = launch(replaceAllBack);
+        let p2 = launch(clearAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
@@ -122,8 +122,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();
-        let p1 = launch<void, () => void>(replaceAll);
-        let p2 = launch<void, () => void>(removeAllBack);
+        let p1 = launch(replaceAll);
+        let p2 = launch(removeAllBack);
         p1.Await();
         p2.Await();
         let flagCounter: int = 0;

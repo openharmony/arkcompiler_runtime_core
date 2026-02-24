@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ function testMain() {
     bytearr_i64 = new BigInt64Array(buf_2, 0, 1)
 
     for (let i = 0; i < N; i++) {
-        launch<Int, () => Int>(task1)
+        launch(task1)
     }
     let cur: byte = Atomics.load(bytearr_i8, 0).toByte()
     while (cur != N) {
@@ -46,7 +46,7 @@ function testMain() {
     }
 
     for (let i = 0; i < N; i++) {
-        launch<Int, () => Int>(task2)
+        launch(task2)
     }
     let cur_64: long = Atomics.load(bytearr_i64, 0).getLong()
     while (cur_64 != N) {

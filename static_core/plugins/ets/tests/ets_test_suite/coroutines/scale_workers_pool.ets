@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,12 @@ function testScaleWorkersPool() {
 
     CoroutineExtras.scaleWorkersPool(1);
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
-    let workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
+    let workerId = launch(CoroutineExtras.getWorkerId).Await();
     CoroutineExtras.scaleWorkersPool(-1);
     arktest.assertNE(mainId, workerId);
 
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
-    workerId = launch<Int, () => Int>((): Int => { return CoroutineExtras.getWorkerId(); }).Await();
+    workerId = launch(CoroutineExtras.getWorkerId).Await();
     arktest.assertEQ(mainId, workerId);
 }
 

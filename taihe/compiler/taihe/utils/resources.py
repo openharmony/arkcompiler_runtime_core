@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -384,8 +384,8 @@ class _LegacyPandaVm(PathResource):
 class PandaVm(CachedResource):
     CLI_NAME = "panda-vm"
     PATH_CACHE = "panda-vm"
-    VERSION: Final = "sdk-1.5.0-dev.54451"
-    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/54451"
+    VERSION: Final = "sdk-1.5.0-dev.57154"
+    URL: Final = "https://gitcode.com/m0_52007851/panda_vm/releases/download/57154"
 
     # Computed attributes
     ani_header_dir: Path = field(init=False)

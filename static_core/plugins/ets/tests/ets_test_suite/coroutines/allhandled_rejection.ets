@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,10 +45,10 @@ function testAllhandledRejection(): void {
         });
     });
 
-    let g = launch<string, () => string>(Failing);
+    let g = launch(Failing);
 
     try {
-        launch<string, () => string>(Failing).Await();
+        launch(Failing).Await();
     } catch(e) {
     }
 
@@ -76,7 +76,7 @@ function testAllhandledRejection(): void {
     } catch (e) {
     }
 
-    launch<null, () => null>(SingleRejectedJob);
+    launch(SingleRejectedJob);
 }
 
 function main(): int {

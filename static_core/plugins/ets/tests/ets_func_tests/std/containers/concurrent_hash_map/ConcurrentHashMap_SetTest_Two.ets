@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,8 +38,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch<void, () => void>(setBack);
-        let p2 = launch<void, () => void>(getAll);
+        let p1 = launch(setBack);
+        let p2 = launch(getAll);
         p1.Await();
         p2.Await();
         for (let i: int = 0; i < 10; i++) {
@@ -58,8 +58,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch<void, () => void>(setBack);
-        let p2 = launch<void, () => void>(deleteAll);
+        let p1 = launch(setBack);
+        let p2 = launch(deleteAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.size <= 5);
@@ -69,8 +69,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch<void, () => void>(setBack);
-        let p2 = launch<void, () => void>(replaceAll);
+        let p1 = launch(setBack);
+        let p2 = launch(replaceAll);
         p1.Await();
         p2.Await();
         flag = 0;
@@ -86,8 +86,8 @@ function main(): int {
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
-        let p1 = launch<void, () => void>(setAll);
-        let p2 = launch<void, () => void>(isEmptyFun);
+        let p1 = launch(setAll);
+        let p2 = launch(isEmptyFun);
         p1.Await();
         p2.Await();
         arktest.assertEQ(concurrentHashMapOne.size, 10);
@@ -96,8 +96,8 @@ function main(): int {
     {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
-        let p1 = launch<void, () => void>(setAll);
-        let p2 = launch<void, () => void>(clearAll);
+        let p1 = launch(setAll);
+        let p2 = launch(clearAll);
         p1.Await();
         p2.Await();
         arktest.assertTrue(concurrentHashMapOne.get(9) == undefined || concurrentHashMapOne.get(9) == "nine");
@@ -108,8 +108,8 @@ function main(): int {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setFront();
-        let p1 = launch<void, () => void>(setBack);
-        let p2 = launch<void, () => void>(removeAll);
+        let p1 = launch(setBack);
+        let p2 = launch(removeAll);
         p1.Await();
         p2.Await();
         flag = 0;

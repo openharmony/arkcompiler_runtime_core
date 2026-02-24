@@ -16,7 +16,7 @@
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
 function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
-	arr.push(launch <T, ()=>T>(func));
+	arr.push(launch(func));
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
@@ -57,7 +57,7 @@ function testConcurrentSizeAndSR1() {
 			Coroutine.Schedule();
 		}
 	}
-	let sizeJob = launch<void, ()=>void>(sizeF);
+	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);
@@ -85,7 +85,7 @@ function testConcurrentSizeAndSRI() {
 			Coroutine.Schedule();
 		}
 	}
-	let sizeJob = launch<void, ()=>void>(sizeF);
+	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i)
 		addLaunch(srJobs, srF);

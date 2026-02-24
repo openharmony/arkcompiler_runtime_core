@@ -55,7 +55,9 @@ function spinLoopWithNoYield(wId: int) {
 function loadThisWorker(wId: int) {
     let isLaunchedOnSameWorker: AtomicFlag = new AtomicFlag(false);
     while (!isLaunchedOnSameWorker.get()) {
-        launch<void, (wId: int, flg: AtomicFlag) => void>(task, wId, isLaunchedOnSameWorker);
+        launch() {
+            task(wId, isLaunchedOnSameWorker)
+        };
         Coroutine.Schedule();
     }
 }
@@ -74,7 +76,7 @@ function testLaunch(): void {
 
 function checkLaunchMigration(): void {
     // scheduled on worker 1 or 2
-    launch<void, () => void>(testLaunch).Await();
+    launch(testLaunch).Await();
 }
 
 function testMigration(): void {

@@ -765,7 +765,7 @@ export namespace Atomics {
                 rejecter!(e as Error)
             }
         }
-        launch<void, () => void>(cb)
+        launch(cb)
         return p;
     }
 

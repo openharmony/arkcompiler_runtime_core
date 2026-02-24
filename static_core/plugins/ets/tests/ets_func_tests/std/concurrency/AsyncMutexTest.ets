@@ -22,7 +22,7 @@ async function asyncMutexStressTest() {
     let jobs = new Array<Job<void>>(tasks_counter);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
-        jobs[id] = launch<void, () => void>(() => {
+        jobs[id] = launch() {
             for (let i = 0; i < workload; ++i) {
                 await mutex.lock();
                 let temp = count;
@@ -31,7 +31,7 @@ async function asyncMutexStressTest() {
                 arktest.assertEQ(temp + 1, count);
                 mutex.unlock();
             }
-        })
+        };
     }
     for (let job of jobs) { 
         job.Await();
@@ -52,10 +52,10 @@ async function asyncMutexHardUnlockTest() {
     let jobs = new Array<Job<void>>(tasks_counter);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
-        jobs[id] = launch<void, () => void>(() => {
+        jobs[id] = launch() {
             await mutex.lock();
             mutex.unlock();
-        })
+        };
     }
 
     for (let job of jobs) { 
@@ -74,7 +74,7 @@ async function asyncMutexExclusiveAcquireTest() {
     let jobs = new Array<Job<void>>(tasks_counter);
     for (let i = 0; i < tasks_counter; ++i) {
         const id = i.toInt();
-        jobs[id] = launch<void, () => void>(() => {
+        jobs[id] = launch() {
             await mutex.lock();
             Coroutine.Schedule();
             arktest.assertEQ(flag, false);
@@ -83,7 +83,7 @@ async function asyncMutexExclusiveAcquireTest() {
             arktest.assertEQ(flag, true);
             flag = false;
             mutex.unlock();
-        });
+        };
     }
     for (let job of jobs) { 
         job.Await();
