@@ -71,12 +71,7 @@ TEST_F(WeakReferenceGetReferenceTest, from_object_ref)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33051)
-TEST_F(WeakReferenceGetReferenceTest, DISABLED_freed_wref)
-#else
 TEST_F(WeakReferenceGetReferenceTest, freed_wref)
-#endif
 {
     ani_ref objectRef;
     ASSERT_EQ(env_->String_NewUTF8("x", 1, reinterpret_cast<ani_string *>(&objectRef)), ANI_OK);
