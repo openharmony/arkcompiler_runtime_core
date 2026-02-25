@@ -208,12 +208,7 @@ static void TestDescribeError(ani_env *env, ani_function func, ani_int arg, std:
     ASSERT_EQ(errorExists, ANI_TRUE);
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_error_test_one_frame)
-#else
 TEST_F(ErrorHandlingTest, describe_error_test_one_frame)
-#endif
 {
     auto func = GetThrowErrorFunction();
 
@@ -223,12 +218,7 @@ TEST_F(ErrorHandlingTest, describe_error_test_one_frame)
     CheckErrorDescription(output, std::string(MESSAGE_FROM_THROW_ERROR), {GetTraceLine("throwError")});
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_error_test_nested)
-#else
 TEST_F(ErrorHandlingTest, describe_error_test_nested)
-#endif
 {
     auto func = GetThrowErrorNested();
 
@@ -267,12 +257,7 @@ static ani_long callThroughNative([[maybe_unused]] ani_env *env, ani_int a)
     // NOLINTEND(clang-analyzer-deadcode.DeadStores)
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_error_thrown_through_native)
-#else
 TEST_F(ErrorHandlingTest, describe_error_thrown_through_native)
-#endif
 {
     ani_namespace ns = nullptr;
     ani_function func = nullptr;
@@ -392,12 +377,7 @@ TEST_F(ErrorHandlingTest, reset_env_invalid_test)
     ASSERT_EQ(env_->c_api->ResetError(nullptr), ANI_INVALID_ARGS);
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_multiple_call_test_1)
-#else
 TEST_F(ErrorHandlingTest, describe_multiple_call_test_1)
-#endif
 {
     auto func = GetThrowErrorFunction();
 
@@ -415,12 +395,7 @@ TEST_F(ErrorHandlingTest, describe_multiple_call_test_2)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_multiple_call_test_3)
-#else
 TEST_F(ErrorHandlingTest, describe_multiple_call_test_3)
-#endif
 {
     auto func = GetThrowErrorFunction();
 
@@ -434,12 +409,7 @@ TEST_F(ErrorHandlingTest, describe_multiple_call_test_3)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_describe_multiple_call_test_4)
-#else
 TEST_F(ErrorHandlingTest, describe_multiple_call_test_4)
-#endif
 {
     auto func = GetThrowErrorFunction();
 
@@ -481,12 +451,7 @@ TEST_F(ErrorHandlingTest, throw_multiple_call_test)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_manual_create_and_throw_error_test)
-#else
 TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
-#endif
 {
     ani_class errorClass {};
     ASSERT_EQ(env_->FindClass("escompat.Error", &errorClass), ANI_OK);
@@ -531,12 +496,7 @@ TEST_F(ErrorHandlingTest, manual_create_and_throw_error_test)
     ASSERT_EQ(hasError, ANI_FALSE);
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_throw_combined_scenes_test_1)
-#else
 TEST_F(ErrorHandlingTest, throw_combined_scenes_test_1)
-#endif
 {
     auto func = GetThrowErrorFunction();
 
@@ -620,12 +580,7 @@ TEST_F(ErrorHandlingTest, get_unhandled_multiple_call_test_5)
     }
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33045)
-TEST_F(ErrorHandlingTest, DISABLED_combined_scenes_test_1)
-#else
 TEST_F(ErrorHandlingTest, combined_scenes_test_1)
-#endif
 {
     auto func = GetThrowErrorFunction();
 

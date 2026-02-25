@@ -75,12 +75,7 @@ TEST_F(StackTraceTest, PrintStackTrace)
     ASSERT_NE(pos, std::string::npos);
 }
 
-#if (defined(PANDA_TARGET_64) && !defined(PANDA_32_BIT_MANAGED_POINTER))
-// NOTE(verkinamaria, #33052)
-TEST_F(StackTraceTest, DISABLED_ErrorDescribe)
-#else
 TEST_F(StackTraceTest, ErrorDescribe)
-#endif
 {
     ani_class klass {};
     auto status = env->FindClass("StackTraceTest.StackTraceTest", &klass);
