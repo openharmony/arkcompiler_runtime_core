@@ -27,14 +27,14 @@ namespace ark::ets {
 
 StaticObjectAccessor StaticObjectAccessor::stcObjAccessor_;
 
-bool StaticObjectAccessor::HasProperty([[maybe_unused]] common::ThreadHolder *thread, const common::BaseObject *obj,
+bool StaticObjectAccessor::HasProperty([[maybe_unused]] common::Mutator *mutator, const common::BaseObject *obj,
                                        const char *name)
 {
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
     return etsObj->GetClass()->GetFieldIDByName(name) != nullptr;
 }
 
-common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::ThreadHolder *thread,
+common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::Mutator *mutator,
                                                      const common::BaseObject *obj, const char *name)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -51,7 +51,7 @@ common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::Th
     return reinterpret_cast<common::BoxedValue>(GetPropertyValue(coro, etsObj, field));
 }
 
-bool StaticObjectAccessor::SetProperty([[maybe_unused]] common::ThreadHolder *thread, common::BaseObject *obj,
+bool StaticObjectAccessor::SetProperty([[maybe_unused]] common::Mutator *mutator, common::BaseObject *obj,
                                        const char *name, common::BoxedValue value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -70,7 +70,7 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] common::ThreadHolder *th
     return SetPropertyValue(coro, etsObj, field, reinterpret_cast<EtsObject *>(value));
 }
 
-bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common::ThreadHolder *thread,
+bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common::Mutator *mutator,
                                            [[maybe_unused]] const common::BaseObject *obj,
                                            [[maybe_unused]] const uint32_t index)
 {
@@ -78,7 +78,7 @@ bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common::ThreadHolder
     return false;
 }
 
-common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common::ThreadHolder *thread,
+common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common::Mutator *mutator,
                                                          const common::BaseObject *obj, const uint32_t index)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -94,7 +94,7 @@ common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common
     return reinterpret_cast<common::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
 }
 
-bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common::ThreadHolder *thread, common::BaseObject *obj,
+bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common::Mutator *mutator, common::BaseObject *obj,
                                            uint32_t index, const common::BoxedValue value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();

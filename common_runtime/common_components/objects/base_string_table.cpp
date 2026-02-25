@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,8 +30,7 @@
 #include "common_interfaces/objects/string/tree_string-inl.h"
 #include "common_interfaces/objects/string/sliced_string.h"
 #include "common_interfaces/objects/string/sliced_string-inl.h"
-#include "common_interfaces/thread/thread_holder.h"
-#include "common_interfaces/thread/thread_state_transition.h"
+#include "common_interfaces/thread/mutator_state_transition.h"
 #include "common_interfaces/heap/heap_allocator.h"
 
 namespace common {
@@ -48,7 +47,7 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::AllocateLineStringObject(s
 
 template <bool ConcurrentSweep>
 BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternFlattenString(
-    ThreadHolder* holder, const HandleCreator& handleCreator,
+    Mutator* mutator, const HandleCreator& handleCreator,
     BaseString* string)
 {
     DCHECK_CC(!string->IsTreeString());
@@ -66,15 +65,15 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternFlattenString(
     if (loadResult.value != nullptr) {
         return loadResult.value;
     }
-    ReadOnlyHandle<BaseString> stringHandle = handleCreator(holder, string);
+    ReadOnlyHandle<BaseString> stringHandle = handleCreator(mutator, string);
     BaseString* result = stringTable_.template StoreOrLoad(
-        holder, readBarrier, hashcode, loadResult, stringHandle);
+        mutator, readBarrier, hashcode, loadResult, stringHandle);
     DCHECK_CC(result != nullptr);
     return result;
 }
 
 template <bool ConcurrentSweep>
-BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternStringFromCompressedSubString(ThreadHolder* holder,
+BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternStringFromCompressedSubString(Mutator* mutator,
     const HandleCreator& handleCreator,
     const ReadOnlyHandle<BaseString>& string,
     uint32_t offset, uint32_t utf8Len)
@@ -95,15 +94,15 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternStringFromCompr
         return AllocateLineStringObject(size);
     };
     BaseString* result = stringTable_.template StoreOrLoad(
-        holder, hashcode, loadResult,
-        [holder, string, offset, utf8Len, hashcode, handleCreator, allocator]() {
+        mutator, hashcode, loadResult,
+        [mutator, string, offset, utf8Len, hashcode, handleCreator, allocator]() {
             BaseString* str = LineString::CreateFromUtf8CompressedSubString(
                 std::move(allocator), string, offset, utf8Len);
             str->SetMixHashcode(hashcode);
             DCHECK_CC(!str->IsInternString());
             DCHECK_CC(!str->IsTreeString());
             // Strings in string table should not be in the young space.
-            ReadOnlyHandle<BaseString> strHandle = handleCreator(holder, str);
+            ReadOnlyHandle<BaseString> strHandle = handleCreator(mutator, str);
             return strHandle;
         },
         [utf8Len, string, offset](const BaseString* foundString) {
@@ -120,7 +119,7 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternStringFromCompr
 }
 
 template <bool ConcurrentSweep>
-BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(ThreadHolder* holder,
+BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(Mutator* mutator,
                                                                         const HandleCreator& handleCreator,
                                                                         const uint8_t* utf8Data,
                                                                         uint32_t utf8Len,
@@ -132,13 +131,13 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(ThreadHo
         return AllocateLineStringObject(size);
     };
     BaseString* result = stringTable_.template LoadOrStore<true>(
-        holder, hashcode,
-        [holder, hashcode, utf8Data, utf8Len, canBeCompress, handleCreator, allocator]() {
+        mutator, hashcode,
+        [mutator, hashcode, utf8Data, utf8Len, canBeCompress, handleCreator, allocator]() {
             BaseString* value = LineString::CreateFromUtf8(std::move(allocator), utf8Data, utf8Len, canBeCompress);
             value->SetMixHashcode(hashcode);
             DCHECK_CC(!value->IsInternString());
             DCHECK_CC(!value->IsTreeString());
-            ReadOnlyHandle<BaseString> stringHandle = handleCreator(holder, value);
+            ReadOnlyHandle<BaseString> stringHandle = handleCreator(mutator, value);
             return stringHandle;
         },
         [utf8Data, utf8Len, canBeCompress](BaseString* foundString) {
@@ -156,7 +155,7 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(ThreadHo
 
 template <bool ConcurrentSweep>
 BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(
-    ThreadHolder* holder, const HandleCreator& handleCreator,
+    Mutator* mutator, const HandleCreator& handleCreator,
     const uint16_t* utf16Data, uint32_t utf16Len,
     bool canBeCompress)
 {
@@ -166,15 +165,15 @@ BaseString* BaseStringTableInternal<ConcurrentSweep>::GetOrInternString(
         return AllocateLineStringObject(size);
     };
     BaseString* result = stringTable_.template LoadOrStore<true>(
-        holder, hashcode,
-        [holder, utf16Data, utf16Len, canBeCompress, hashcode, handleCreator, allocator]() {
+        mutator, hashcode,
+        [mutator, utf16Data, utf16Len, canBeCompress, hashcode, handleCreator, allocator]() {
             BaseString* value = LineString::CreateFromUtf16(std::move(allocator), utf16Data, utf16Len,
                                                             canBeCompress);
             value->SetMixHashcode(hashcode);
             DCHECK_CC(!value->IsInternString());
             DCHECK_CC(!value->IsTreeString());
             // Strings in string table should not be in the young space.
-            ReadOnlyHandle<BaseString> stringHandle = handleCreator(holder, value);
+            ReadOnlyHandle<BaseString> stringHandle = handleCreator(mutator, value);
             return stringHandle;
         },
         [utf16Data, utf16Len](BaseString* foundString) {
@@ -241,29 +240,29 @@ void BaseStringTableInternal<ConcurrentSweep>::SweepWeakRef(const WeakRefFieldVi
 
 template void BaseStringTableInternal<false>::SweepWeakRef<false>(const WeakRefFieldVisitor& visitor);
 
-BaseString* BaseStringTableImpl::GetOrInternFlattenString(ThreadHolder* holder, const HandleCreator& handleCreator,
+BaseString* BaseStringTableImpl::GetOrInternFlattenString(Mutator* mutator, const HandleCreator& handleCreator,
                                                           BaseString* string)
 {
-    return stringTable_.GetOrInternFlattenString(holder, handleCreator, string);
+    return stringTable_.GetOrInternFlattenString(mutator, handleCreator, string);
 }
 
 BaseString* BaseStringTableImpl::GetOrInternStringFromCompressedSubString(
-    ThreadHolder* holder, const HandleCreator& handleCreator,
+    Mutator* mutator, const HandleCreator& handleCreator,
     const ReadOnlyHandle<BaseString>& string, uint32_t offset, uint32_t utf8Len)
 {
-    return stringTable_.GetOrInternStringFromCompressedSubString(holder, handleCreator, string, offset, utf8Len);
+    return stringTable_.GetOrInternStringFromCompressedSubString(mutator, handleCreator, string, offset, utf8Len);
 }
 
-BaseString* BaseStringTableImpl::GetOrInternString(ThreadHolder* holder, const HandleCreator& handleCreator,
+BaseString* BaseStringTableImpl::GetOrInternString(Mutator* mutator, const HandleCreator& handleCreator,
                                                    const uint8_t* utf8Data, uint32_t utf8Len, bool canBeCompress)
 {
-    return stringTable_.GetOrInternString(holder, handleCreator, utf8Data, utf8Len, canBeCompress);
+    return stringTable_.GetOrInternString(mutator, handleCreator, utf8Data, utf8Len, canBeCompress);
 }
 
-BaseString* BaseStringTableImpl::GetOrInternString(ThreadHolder* holder, const HandleCreator& handleCreator,
+BaseString* BaseStringTableImpl::GetOrInternString(Mutator* mutator, const HandleCreator& handleCreator,
                                                    const uint16_t* utf16Data, uint32_t utf16Len, bool canBeCompress)
 {
-    return stringTable_.GetOrInternString(holder, handleCreator, utf16Data, utf16Len, canBeCompress);
+    return stringTable_.GetOrInternString(mutator, handleCreator, utf16Data, utf16Len, canBeCompress);
 }
 
 BaseString* BaseStringTableImpl::TryGetInternString(const ReadOnlyHandle<BaseString>& string)

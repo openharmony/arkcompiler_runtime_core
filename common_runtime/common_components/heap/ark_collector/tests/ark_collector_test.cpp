@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "common_components/tests/test_helper.h"
+#include "common_interfaces/thread/mutator.h"
 
 #include "common_components/heap/ark_collector/ark_collector.h"
 #include "common_components/heap/ark_collector/ark_collector.cpp"
@@ -120,7 +121,7 @@ HWTEST_F_L0(ArkCollectorTest, ForwardUpdateRawRefTest0)
 void FlipTest()
 {
     MutatorManager &mutatorManager = MutatorManager::Instance();
-    ThreadHolder::CreateAndRegisterNewThreadHolder(nullptr);
+    Mutator::CreateAndRegisterNewMutator(nullptr);
     bool stwCallbackExecuted = false;
     auto stwTest = [&mutatorManager, &stwCallbackExecuted]() {
         EXPECT_TRUE(mutatorManager.WorldStopped());

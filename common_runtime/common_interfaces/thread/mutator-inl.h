@@ -76,5 +76,26 @@ bool Mutator::TransitionToCpuProfile(bool bySelf)
         }
     } while (true);
 }
+
+void Mutator::TransferToRunning()
+{
+    DoLeaveSaferegion();
+}
+
+void Mutator::TransferToNative()
+{
+    DoEnterSaferegion();
+}
+
+bool Mutator::TransferToRunningIfInNative()
+{
+    return LeaveSaferegion();
+}
+
+bool Mutator::TransferToNativeIfInRunning()
+{
+    return EnterSaferegion(false);
+}
+
 }  // namespace common
 #endif  // COMMON_INTERFACES_THREAD_MUTATOR_INL_H

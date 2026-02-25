@@ -154,15 +154,15 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
     }
 }
 
-void Coroutine::LinkToExternalHolder([[maybe_unused]] bool useSharedHolder, [[maybe_unused]] CoroutineWorker *w)
+void Coroutine::LinkToExternalMutator([[maybe_unused]] bool useSharedMutator, [[maybe_unused]] CoroutineWorker *w)
 {
 #ifdef ARK_HYBRID
-    auto wasCreated = CreateExternalHolderIfNeeded(useSharedHolder, w ? w->GetThreadHolder() : nullptr);
+    auto wasCreated = CreateExternalMutatorIfNeeded(useSharedMutator, w ? w->GetMutator() : nullptr);
     if (wasCreated) {
-        auto wasInRunning = GetThreadHolder()->TransferToNativeIfInRunning();
-        GetThreadHolder()->RegisterCoroutine(this);
+        auto wasInRunning = GetMutator()->TransferToNativeIfInRunning();
+        GetMutator()->RegisterCoroutine(this);
         if (wasInRunning) {
-            GetThreadHolder()->TransferToRunningIfInNative();
+            GetMutator()->TransferToRunningIfInNative();
         }
     }
 #endif
