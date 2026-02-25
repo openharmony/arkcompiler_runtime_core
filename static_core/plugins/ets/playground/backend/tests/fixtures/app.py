@@ -18,8 +18,8 @@ import pytest
 import yaml
 from fastapi.testclient import TestClient
 
-from src.arkts_playground.app import create_app
-from src.arkts_playground.deps.runner import get_runner
+from arkts_playground.app import create_app
+from arkts_playground.deps.runner import get_runner
 from tests.fixtures.overrides import override_get_runner
 
 

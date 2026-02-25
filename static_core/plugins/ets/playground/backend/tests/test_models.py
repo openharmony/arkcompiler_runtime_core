@@ -17,8 +17,8 @@
 import pytest
 from pydantic import ValidationError
 
-from src.arkts_playground.models.common import VerificationMode
-from src.arkts_playground.models.compile import CompileRequestModel
+from arkts_playground.models.common import VerificationMode
+from arkts_playground.models.compile import CompileRequestModel
 
 
 class TestVerificationMode:

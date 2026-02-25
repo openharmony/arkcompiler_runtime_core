@@ -18,7 +18,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from .common import DisasmResponse, IrDumpOptions, IrDumpResponse, ResponseLog, VerificationMode
+from arkts_playground.models.common import DisasmResponse, IrDumpOptions, IrDumpResponse, ResponseLog, VerificationMode
 
 
 class CompileRequestModel(BaseModel):

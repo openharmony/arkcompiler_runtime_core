@@ -16,13 +16,13 @@
 
 import pytest
 
-from src.arkts_playground.models.options import OptionsResponseModel
+from arkts_playground.models.options import OptionsResponseModel
 from tests.fixtures.overrides import FakeRunner, override_get_options
 
 
 def test_formatting_api(playground_client, monkeypatch):
     expected = {"keywords": [], "typeKeywords": [], "builtins": [], "tokenizer": {"root": []}}
-    monkeypatch.setattr("src.arkts_playground.routers.formatting.get_syntax", lambda: expected)
+    monkeypatch.setattr("arkts_playground.routers.formatting.get_syntax", lambda: expected)
     resp = playground_client.get("/syntax")
     data = resp.json()
 
@@ -31,7 +31,7 @@ def test_formatting_api(playground_client, monkeypatch):
 
 
 def test_options_api(playground_client, conf_data, monkeypatch):
-    monkeypatch.setattr("src.arkts_playground.routers.options.get_options", override_get_options)
+    monkeypatch.setattr("arkts_playground.routers.options.get_options", override_get_options)
     resp = playground_client.get("/options")
     assert resp.json() == OptionsResponseModel(compileOptions=conf_data["options"]).model_dump(by_alias=True)
 
@@ -142,7 +142,7 @@ def test_ast_api_respects_mode(playground_client, monkeypatch, ast_mode, manual_
             self.features = _Features(mode)
 
     monkeypatch.setattr(
-        "src.arkts_playground.routers.compile_run.get_settings",
+        "arkts_playground.routers.compile_run.get_settings",
         lambda: _Settings(ast_mode),
         raising=True,
     )
@@ -179,7 +179,7 @@ def test_features_api(playground_client, monkeypatch):
             self.features = _Features(mode)
 
     monkeypatch.setattr(
-        "src.arkts_playground.routers.compile_run.get_settings",
+        "arkts_playground.routers.compile_run.get_settings",
         lambda: _Settings("manual"),
         raising=True,
     )

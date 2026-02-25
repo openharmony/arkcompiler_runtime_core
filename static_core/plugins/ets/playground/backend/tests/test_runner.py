@@ -22,8 +22,8 @@ import pytest
 from structlog.testing import capture_logs
 from structlog.typing import EventDict
 
-from src.arkts_playground.deps.runner import Runner
-from src.arkts_playground.models.common import VerificationMode
+from arkts_playground.deps.runner import Runner
+from arkts_playground.models.common import VerificationMode
 from tests.fixtures.mock_subprocess import FakeCommand, MockAsyncSubprocess
 
 
@@ -408,7 +408,7 @@ async def test_get_versions(monkeypatch, ark_build):
         ]
     )
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
-    monkeypatch.setattr("src.arkts_playground.deps.runner.version", lambda _: "1.2.3")
+    monkeypatch.setattr("arkts_playground.deps.runner.version", lambda _: "1.2.3")
 
     r = Runner(ark_build[0])
     res = await r.get_versions()
@@ -578,7 +578,7 @@ async def test_disassembly_opens_file_with_errors_replace(monkeypatch, ark_build
         captured["errors"] = errors
         return _DummyCtx()
 
-    monkeypatch.setattr("src.arkts_playground.deps.runner.aiofiles.open", open_spy)
+    monkeypatch.setattr("arkts_playground.deps.runner.aiofiles.open", open_spy)
 
     r = Runner(ark_build[0])
     res = await r.disassembly("in.abc", out_pa_file)
@@ -953,7 +953,7 @@ async def test_playground_version_not_installed(monkeypatch, ark_build):
     def raise_not_found(_):
         raise PackageNotFoundError()
 
-    monkeypatch.setattr("src.arkts_playground.deps.runner.version", raise_not_found)
+    monkeypatch.setattr("arkts_playground.deps.runner.version", raise_not_found)
 
     mocker = MockAsyncSubprocess(
         [
