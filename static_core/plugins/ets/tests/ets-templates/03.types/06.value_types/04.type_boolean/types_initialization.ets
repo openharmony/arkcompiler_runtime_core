@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,13 +16,14 @@ limitations under the License.
 {% for i in default_value %}
 
 /*---
-desc: Integer type {{i.type}} initialization.
+desc: Boolean type {{i.type}} initialization.
 params: {{i.type}}, {{i.value}}
 ---*/
 
-let x: {{i.type}} = {{i.value}};
+const x: {{i.type}} = {{i.init}};
+
 function main(): void {
-  let y: {{i.type}} = {{i.value}};
+  let y: {{i.type}} = {{i.init}};
 
   arktest.assertTrue(x == {{i.value}})
   arktest.assertTrue( y == {{i.value}})

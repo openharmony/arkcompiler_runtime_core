@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,22 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
 /*---
 desc: check addition of two doubles
 ---*/
 
-function main(): void {
-    const a: double = {{v.left}}
-    const b: double = {{v.right}}
-    const v: double = {{v.result}}
-    const r: double = a + b
-    if (Double.isNaN(v)) {
-        arktest.assertTrue(Double.isNaN(r))
-    } else {
-        arktest.assertEQ(r, v)
-    }
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Addition_doubles");
+
+    {% for v in values %}
+        testSuite.addTest("add_double_{{loop.index}}", () => {
+            const a: double = {{v.left}}
+            const b: double = {{v.right}}
+            const v: double = {{v.result}}
+            const r: double = a + b
+            if (Double.isNaN(v)) {
+                arktest.assertTrue(Double.isNaN(r))
+            } else {
+                arktest.assertEQ(r, v)
+            }   
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-
-
-{% endfor %}

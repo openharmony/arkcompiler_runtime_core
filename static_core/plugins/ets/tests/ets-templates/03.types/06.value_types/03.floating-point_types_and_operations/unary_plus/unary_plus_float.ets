@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,19 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
 /*---
 desc: check unary plus operation for float operand
 ---*/
 
-function main(): void {
-  const v: float = ({{v.value}}).toFloat()
-  const r: float = ({{v.result}}).toFloat()
-    if (Float.isNaN(v)) {
-      arktest.assertTrue(Float.isNaN(r))
-    } else {
-      arktest.assertEQ(+(v), r)
-    }
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Unary_plus_floats");
+
+    {% for v in values %}
+        testSuite.addTest("Unary_plus_float_{{loop.index}}", () => {
+            const v: float = ({{v.value}}).toFloat()
+            const r: float = ({{v.result}}).toFloat()
+            if (Float.isNaN(v)) {
+                arktest.assertTrue(Float.isNaN(r))
+            } else {
+                arktest.assertEQ(+(v), r)
+            }
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}
