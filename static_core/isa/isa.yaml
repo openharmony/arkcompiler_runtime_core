@@ -105,7 +105,7 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.6
-version: 0.0.0.6
+version: 0.0.0.7
 
 properties:
   - tag: type_id

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ struct Program {
     using FunctionSynonymsT = std::unordered_map<std::string, std::vector<std::string>>;
     using LiteralArrayTableT = std::map<std::string, LiteralArray>;
     using ArrayTypesT = std::set<Type>;
+    using MetadataT = std::vector<uint8_t>;
 
     panda_file::SourceLang lang {panda_file::SourceLang::PANDA_ASSEMBLY};
     RecordTableT recordTable;
@@ -42,6 +43,7 @@ struct Program {
     FunctionSynonymsT functionSynonyms;  // we might keep unordered, since we don't iterate over it
     LiteralArrayTableT literalarrayTable;
     StringT strings;
+    MetadataT metadata;
     ArrayTypesT arrayTypes;
 
     /*

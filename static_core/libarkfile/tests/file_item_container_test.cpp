@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,13 +244,13 @@ TEST(ItemContainer, TestClasses)
 
     ASSERT_NE(pandaFile, nullptr);
 
-    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 6));
+    EXPECT_THAT(pandaFile->GetHeader()->version, ::testing::ElementsAre(0, 0, 0, 7));
     EXPECT_EQ(pandaFile->GetHeader()->fileSize, memWriter.GetData().size());
     EXPECT_EQ(pandaFile->GetHeader()->foreignOff, 0U);
     EXPECT_EQ(pandaFile->GetHeader()->foreignSize, 0U);
     EXPECT_EQ(pandaFile->GetHeader()->numClasses, 3U);
     EXPECT_EQ(pandaFile->GetHeader()->classIdxOff, sizeof(File::Header));
-    EXPECT_EQ(pandaFile->GetHeader()->numExportTable, 0U);
+    EXPECT_EQ(pandaFile->GetHeader()->numExportTable, 4U);
     EXPECT_EQ(pandaFile->GetHeader()->exportTableOff,
               sizeof(File::Header) + (pandaFile->GetHeader()->numClasses * File::EntityId::GetSize()));
 

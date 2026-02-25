@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,7 +120,8 @@ enum class ItemTypes {
     REGION_SECTION,
     STRING_ITEM,
     TRY_BLOCK_ITEM,
-    VALUE_ITEM
+    VALUE_ITEM,
+    METADATA_ITEM
 };
 
 std::string ItemTypeToString(ItemTypes type);
@@ -1678,6 +1679,55 @@ private:
 
 class ScalarValueItem;
 class ArrayValueItem;
+
+class MetadataItem : public BaseItem {
+public:
+    MetadataItem(std::vector<uint8_t> metadata) : metadata_(metadata) {}
+
+    ~MetadataItem() override = default;
+
+    DEFAULT_MOVE_SEMANTIC(MetadataItem);
+    DEFAULT_COPY_SEMANTIC(MetadataItem);
+
+    ItemTypes GetItemType() const override
+    {
+        return ItemTypes::METADATA_ITEM;
+    }
+
+    size_t CalculateSize() const override
+    {
+        return metadata_.size();
+    }
+
+    bool Write(Writer *writer) override
+    {
+        writer->WriteBytes(metadata_);
+        return true;
+    }
+
+    std::vector<uint8_t> GetValue() const
+    {
+        return metadata_;
+    }
+
+    bool IsEmpty() const
+    {
+        return metadata_.empty();
+    }
+
+    size_t Size() const
+    {
+        return metadata_.size();
+    }
+
+    static bool IsNullOrEmpty(const std::unique_ptr<MetadataItem> &item)
+    {
+        return item == nullptr || item->IsEmpty();
+    }
+
+private:
+    std::vector<uint8_t> metadata_;
+};
 
 class ValueItem : public BaseItem {
 public:

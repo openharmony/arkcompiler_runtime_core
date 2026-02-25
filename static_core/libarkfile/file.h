@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,7 @@ public:
 
     static constexpr size_t MAGIC_SIZE = 8;
     static constexpr size_t VERSION_SIZE = 4;
+    static constexpr size_t METADATA_FLAG_SIZE = 4;
     static const std::array<uint8_t, MAGIC_SIZE> MAGIC;
 
     struct Header {
@@ -200,8 +201,51 @@ public:
     {
         const Header *header = GetHeader();
         Span file(GetBase(), header->fileSize);
-        Span exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable * sizeof(uint32_t));
-        return Span(reinterpret_cast<const uint32_t *>(exportedIdxData.data()), header->numExportTable);
+
+        if (header->version < METADATA_SINCE_VERSION) {  // for early versions, interpret export data section in the old
+                                                         // way (there is no metadata, only export table)
+            Span exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable * sizeof(uint32_t));
+            return Span(reinterpret_cast<const uint32_t *>(exportedIdxData.data()), header->numExportTable);
+        }
+
+        auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
+        // for newer versions, the first byte is a flag of whether metadata was recorded
+        auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
+        ark::Span<const uint8_t> exportedTableSpan;
+
+        if (isMetadataRecorded) {
+            auto metadataSize = reinterpret_cast<const uint32_t *>(
+                exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
+            exportedTableSpan =
+                exportedIdxData.SubSpan(METADATA_FLAG_SIZE + sizeof(uint32_t), header->numExportTable - metadataSize);
+        } else {  // if not recorded, the remaining data is export table
+            exportedTableSpan = exportedIdxData.SubSpan(METADATA_FLAG_SIZE);
+        }
+
+        return Span(reinterpret_cast<const uint32_t *>(exportedTableSpan.data()),
+                    exportedTableSpan.size() / sizeof(uint32_t));
+    }
+
+    Span<const uint8_t> GetMetadata() const
+    {
+        const Header *header = GetHeader();
+        Span file(GetBase(), header->fileSize);
+
+        if (header->version < METADATA_SINCE_VERSION) {  // for early versions, interpret export data section in the old
+                                                         // way (there is no metadata, only export table)
+            return Span<const uint8_t>();
+        }
+
+        auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
+        // for newer versions, the first byte is a flag of whether metadata was recorded
+        auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
+        if (!isMetadataRecorded) {  // if not recorded, the remaining data is export table so there is no metadata
+            return Span<const uint8_t>();
+        }
+
+        auto metadataSize =
+            reinterpret_cast<const uint32_t *>(exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
+        return exportedIdxData.SubSpan(header->numExportTable - metadataSize);
     }
 
     Span<const uint32_t> GetLiteralArrays() const
@@ -432,6 +476,8 @@ private:
     std::unique_ptr<PandaCache> pandaCache_;
     const uint32_t uniqId_;
     mutable ark::Span<const ark::panda_file::EntityPairHeader> classHashTable_;
+
+    static inline const std::array<uint8_t, VERSION_SIZE> METADATA_SINCE_VERSION = {0, 0, 0, 7};
 };
 
 static_assert(File::GetFileBaseOffset() == 0);
