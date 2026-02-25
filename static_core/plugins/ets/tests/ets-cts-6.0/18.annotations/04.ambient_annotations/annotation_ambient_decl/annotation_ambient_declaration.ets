@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ desc: If an annotation is applied to an ambient declaration in the .d.ets file
 tags: [not-a-test, compile-only]
 ---*/
 
-enum MyEnum { EnumField1, EnumField2 }
+export enum MyEnum { EnumField1, EnumField2 }
 
 {% for case in cases %}
 

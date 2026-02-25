@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,30 +62,30 @@ export class C4<T extends CC4> {}
 export class C5 extends CC5 implements IP4 {}
 
 
-class CC1 {}
-class CC2 {}
-class CC3 {}
+export class CC1 {}
+export class CC2 {}
+export class CC3 {}
 class CC4 {}
 class CC5 {}
 class CC7 implements IP3{}
-class CP1 {}
-class CP2 {}
-class CP3 {}
-class CP4 {}
-class CP5 {}
-class CP6 {}
-class CP7 {}
-class CP8 {}
-class CP9 {}
-class CP10 {}
-class CI1 {}
-class CI2 {}
-class CI3 {}
-interface IP1 {}
-interface IP2 {}
-interface IP3 {}
+export class CP1 {}
+export class CP2 {}
+export class CP3 {}
+export class CP4 {}
+export class CP5 {}
+export class CP6 {}
+export class CP7 {}
+export class CP8 {}
+export class CP9 {}
+export class CP10 {}
+export class CI1 {}
+export class CI2 {}
+export class CI3 {}
+export interface IP1 {}
+export interface IP2 {}
+export interface IP3 {}
 interface IP4 {}
-interface IP5 {}
+export interface IP5 {}
 enum E1 {
   A
 }
@@ -118,16 +118,16 @@ export function foo3(a: E6): E7 {
   return E7.A;
 }
 export let p12: Promise<E8>;
-enum E5 {
+export enum E5 {
   A
 }
-enum E6 {
+export enum E6 {
   A
 }
-enum E7 {
+export enum E7 {
   A
 }
-enum E8 {
+export enum E8 {
   A
 }
 
@@ -138,15 +138,15 @@ type PropertyType<T> = SubType<T> | ((item: T, index: number) => string);
 type InterfacePropertyType = string;
 type InterfaceFunctionParamType = number;
 type InterfaceFunctionReturnType = boolean;
-interface InterfacePropertyInterface {}
-interface InterfaceFunctionParamInterface {}
-interface InterfaceFunctionReturnInterface {}
-class InterfacePropertyClass {}
-class InterfaceFunctionParamClass {}
-class InterfaceFunctionReturnClass {}
-interface BaseInterface {}
-interface SubInterface extends BaseInterface {}
-interface PropertyInterface extends SubInterface {
+export interface InterfacePropertyInterface {}
+export interface InterfaceFunctionParamInterface {}
+export interface InterfaceFunctionReturnInterface {}
+export class InterfacePropertyClass {}
+export class InterfaceFunctionParamClass {}
+export class InterfaceFunctionReturnClass {}
+export interface BaseInterface {}
+export interface SubInterface extends BaseInterface {}
+export interface PropertyInterface extends SubInterface {
   t: InterfacePropertyType;
   i: InterfacePropertyInterface;
   c: InterfacePropertyClass;
@@ -166,19 +166,19 @@ class PropertyInterfaceImplementation implements PropertyInterface {
 type ClassPropertyType = string;
 type ClassFunctionParamType = number;
 type ClassFunctionReturnType = boolean;
-interface ClassPropertyInteface {}
-interface ClassFunctionParamInterface {}
-interface ClassFunctionReturnInterface {}
-class ClassPropertyClass {}
-class ClassFunctionParamClass {}
-class ClassFunctionReturnClass {}
-interface ImplementedByBase1 {}
-interface ImplementedByBase2 {}
-interface ImplementedBySub {}
-interface ImplementedByProperty {}
-class BaseClass implements ImplementedByBase1, ImplementedByBase2 {}
-class SubClass extends BaseClass implements ImplementedBySub {}
-class PropertyClass extends SubClass implements ImplementedByProperty {
+export interface ClassPropertyInteface {}
+export interface ClassFunctionParamInterface {}
+export interface ClassFunctionReturnInterface {}
+export class ClassPropertyClass {}
+export class ClassFunctionParamClass {}
+export class ClassFunctionReturnClass {}
+export interface ImplementedByBase1 {}
+export interface ImplementedByBase2 {}
+export interface ImplementedBySub {}
+export interface ImplementedByProperty {}
+export class BaseClass implements ImplementedByBase1, ImplementedByBase2 {}
+export class SubClass extends BaseClass implements ImplementedBySub {}
+export class PropertyClass extends SubClass implements ImplementedByProperty {
   t: ClassPropertyType = "default";
   i: ClassPropertyInteface = {};
   c: ClassPropertyClass = {};

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ function checkArray(a: Array<Int>): boolean {
     return a[0] == 10 && a[1] == 20 && a[2] == 30 && a[3] == 40 && a[4] == 50
 }
 
-class ArrayWithThrowingLength<T> extends Array<T> {
+export class ArrayWithThrowingLength<T> extends Array<T> {
     public override get length(): int {
         throw new Error("length was called")
     }

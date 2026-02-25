@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,11 +77,11 @@ export interface Literal_Function_handler_Object_error {
 
 interface I03 {
 }
-enum E01  {
+export enum E01  {
     a = 1,
     b = 2
 }
-enum E02 {
+export enum E02 {
     a = 1,
     b = 2
 }

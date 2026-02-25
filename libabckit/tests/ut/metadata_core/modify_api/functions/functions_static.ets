@@ -29,7 +29,7 @@ let subArr: FixedArray<B|string|null> = [new B]
 let sup: FixedArray<C|string|null>|null|string|undefined = supArr
 let sub: FixedArray<B|string|null>|null|string|undefined = subArr
 
-class MyClass {
+export class MyClass {
     public prop: string;
     constructor() {
         this.prop = 'class prop';

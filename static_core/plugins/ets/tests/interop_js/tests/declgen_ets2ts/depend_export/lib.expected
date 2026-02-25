@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,13 +58,13 @@ export declare class C4<T extends CC4> {
 export declare class C5 extends CC5 implements IP4 {
     constructor();
 }
-declare class CC1 {
+export declare class CC1 {
     constructor();
 }
-declare class CC2 {
+export declare class CC2 {
     constructor();
 }
-declare class CC3 {
+export declare class CC3 {
     constructor();
 }
 declare class CC4 {
@@ -73,69 +73,69 @@ declare class CC4 {
 declare class CC5 {
     constructor();
 }
-declare class CP1 {
+export declare class CP1 {
     constructor();
 }
-declare class CP2 {
+export declare class CP2 {
     constructor();
 }
-declare class CP3 {
+export declare class CP3 {
     constructor();
 }
-declare class CP4 {
+export declare class CP4 {
     constructor();
 }
-declare class CP5 {
+export declare class CP5 {
     constructor();
 }
-declare class CP6 {
+export declare class CP6 {
     constructor();
 }
-declare class CP7 {
+export declare class CP7 {
     constructor();
 }
-declare class CP8 {
+export declare class CP8 {
     constructor();
 }
-declare class CP9 {
+export declare class CP9 {
     constructor();
 }
-declare class CP10 {
+export declare class CP10 {
     constructor();
 }
-declare class CI1 {
+export declare class CI1 {
     constructor();
 }
-declare class CI2 {
+export declare class CI2 {
     constructor();
 }
-declare class CI3 {
+export declare class CI3 {
     constructor();
 }
-declare interface IP1 {
+export declare interface IP1 {
 }
-declare interface IP2 {
+export declare interface IP2 {
 }
-declare interface IP3 {
+export declare interface IP3 {
 }
 declare interface IP4 {
 }
-declare interface IP5 {
+export declare interface IP5 {
 }
 declare class Want {
     constructor();
 }
 export type ValueType = number | string | boolean | image.PixelMap | Want | ArrayBuffer | object | null | undefined;
-declare enum E5 {
+export declare enum E5 {
     A = 0,
 }
-declare enum E6 {
+export declare enum E6 {
     A = 0,
 }
-declare enum E7 {
+export declare enum E7 {
     A = 0,
 }
-declare enum E8 {
+export declare enum E8 {
     A = 0,
 }
 type BaseType = string;
@@ -144,26 +144,26 @@ type PropertyType<T> = SubType<T> | ((item: T, index: number) => string);
 type InterfacePropertyType = string;
 type InterfaceFunctionParamType = number;
 type InterfaceFunctionReturnType = boolean;
-declare interface InterfacePropertyInterface {
+export declare interface InterfacePropertyInterface {
 }
-declare interface InterfaceFunctionParamInterface {
+export declare interface InterfaceFunctionParamInterface {
 }
-declare interface InterfaceFunctionReturnInterface {
+export declare interface InterfaceFunctionReturnInterface {
 }
-declare class InterfacePropertyClass {
+export declare class InterfacePropertyClass {
     constructor();
 }
-declare class InterfaceFunctionParamClass {
+export declare class InterfaceFunctionParamClass {
     constructor();
 }
-declare class InterfaceFunctionReturnClass {
+export declare class InterfaceFunctionReturnClass {
     constructor();
 }
-declare interface BaseInterface {
+export declare interface BaseInterface {
 }
-declare interface SubInterface extends BaseInterface {
+export declare interface SubInterface extends BaseInterface {
 }
-declare interface PropertyInterface extends SubInterface {
+export declare interface PropertyInterface extends SubInterface {
     t: InterfacePropertyType;
     i: InterfacePropertyInterface;
     c: InterfacePropertyClass;
@@ -186,36 +186,36 @@ declare class PropertyInterfaceImplementation implements PropertyInterface {
 type ClassPropertyType = string;
 type ClassFunctionParamType = number;
 type ClassFunctionReturnType = boolean;
-declare interface ClassPropertyInteface {
+export declare interface ClassPropertyInteface {
 }
-declare interface ClassFunctionParamInterface {
+export declare interface ClassFunctionParamInterface {
 }
-declare interface ClassFunctionReturnInterface {
+export declare interface ClassFunctionReturnInterface {
 }
-declare class ClassPropertyClass {
+export declare class ClassPropertyClass {
     constructor();
 }
-declare class ClassFunctionParamClass {
+export declare class ClassFunctionParamClass {
     constructor();
 }
-declare class ClassFunctionReturnClass {
+export declare class ClassFunctionReturnClass {
     constructor();
 }
-declare interface ImplementedByBase1 {
+export declare interface ImplementedByBase1 {
 }
-declare interface ImplementedByBase2 {
+export declare interface ImplementedByBase2 {
 }
-declare interface ImplementedBySub {
+export declare interface ImplementedBySub {
 }
-declare interface ImplementedByProperty {
+export declare interface ImplementedByProperty {
 }
-declare class BaseClass implements ImplementedByBase1, ImplementedByBase2 {
+export declare class BaseClass implements ImplementedByBase1, ImplementedByBase2 {
     constructor();
 }
-declare class SubClass extends BaseClass implements ImplementedBySub {
+export declare class SubClass extends BaseClass implements ImplementedBySub {
     constructor();
 }
-declare class PropertyClass extends SubClass implements ImplementedByProperty {
+export declare class PropertyClass extends SubClass implements ImplementedByProperty {
     public get t(): ClassPropertyType;
     public set t(value: ClassPropertyType);
     public get i(): ClassPropertyInteface;
