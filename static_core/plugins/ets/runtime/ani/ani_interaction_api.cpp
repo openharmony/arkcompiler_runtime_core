@@ -71,28 +71,31 @@ static inline bool IsUndefined(ani_ref ref)
     return ManagedCodeAccessor::IsUndefined(ref);
 }
 
-static void CheckStaticMethodReturnType(ani_static_method method, EtsType type)
+static ani_status CheckStaticMethodReturnType(ani_static_method method, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(method);
     if (UNLIKELY(m->GetReturnValueType() != type)) {
-        LOG(FATAL, ANI) << "Return type mismatch";
+        return ANI_INVALID_TYPE;
     }
+    return ANI_OK;
 }
 
-static void CheckMethodReturnType(ani_method method, EtsType type)
+static ani_status CheckMethodReturnType(ani_method method, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(method);
     if (UNLIKELY(m->GetReturnValueType() != type)) {
-        LOG(FATAL, ANI) << "Return type mismatch";
+        return ANI_INVALID_TYPE;
     }
+    return ANI_OK;
 }
 
-static void CheckFunctionReturnType(ani_function fn, EtsType type)
+static ani_status CheckFunctionReturnType(ani_function fn, EtsType type)
 {
     EtsMethod *m = ToInternalMethod(fn);
     if (UNLIKELY(m->GetReturnValueType() != type)) {
-        LOG(FATAL, ANI) << "Return type mismatch";
+        return ANI_INVALID_TYPE;
     }
+    return ANI_OK;
 }
 
 static ClassLinkerContext *GetClassLinkerContext(EtsExecutionContext *executionCtx)
@@ -546,7 +549,8 @@ static ani_status ObjectCallMethodByName(ani_env *env, ani_object object, const 
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_method aniMethod = ToAniMethod(method);
-    CheckMethodReturnType(aniMethod, EXPECT_TYPE);
+    status = CheckMethodReturnType(aniMethod, EXPECT_TYPE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return DoGeneralMethodCall<ReturnType>(s, object, aniMethod, result, args);
 }
 
@@ -581,7 +585,8 @@ static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char 
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ASSERT(method != nullptr);
     ani_static_method staticMethod = ToAniStaticMethod(method);
-    CheckStaticMethodReturnType(staticMethod, EXPECT_TYPE);
+    status = CheckStaticMethodReturnType(staticMethod, EXPECT_TYPE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<ReturnType>(env, nullptr, staticMethod, result, args);
 }
 
@@ -2125,7 +2130,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_V(ani_env *env, 
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::BOOLEAN);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsBoolean>(env, nullptr, method, result, args);
 }
 
@@ -2153,7 +2159,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Boolean_A(ani_env *env, 
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::BOOLEAN);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsBoolean>(env, nullptr, method, result, args);
 }
 
@@ -2167,7 +2174,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_V(ani_env *env, ani
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::CHAR);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsChar>(env, nullptr, method, result, args);
 }
 
@@ -2195,7 +2203,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Char_A(ani_env *env, ani
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::CHAR);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsChar>(env, nullptr, method, result, args);
 }
 
@@ -2209,7 +2218,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_V(ani_env *env, ani
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::BYTE);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsByte>(env, nullptr, method, result, args);
 }
 
@@ -2237,7 +2247,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Byte_A(ani_env *env, ani
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::BYTE);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsByte>(env, nullptr, method, result, args);
 }
 
@@ -2251,7 +2262,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_V(ani_env *env, an
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::SHORT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsShort>(env, nullptr, method, result, args);
 }
 
@@ -2279,7 +2291,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Short_A(ani_env *env, an
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::SHORT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsShort>(env, nullptr, method, result, args);
 }
 
@@ -2293,7 +2306,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_V(ani_env *env, ani_
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::INT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsInt>(env, nullptr, method, result, args);
 }
 
@@ -2321,7 +2335,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Int_A(ani_env *env, ani_
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::INT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsInt>(env, nullptr, method, result, args);
 }
 
@@ -2335,7 +2350,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_V(ani_env *env, ani
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::LONG);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsLong>(env, nullptr, method, result, args);
 }
 
@@ -2363,7 +2379,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Long_A(ani_env *env, ani
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::LONG);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsLong>(env, nullptr, method, result, args);
 }
 
@@ -2377,7 +2394,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_V(ani_env *env, an
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::FLOAT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsFloat>(env, nullptr, method, result, args);
 }
 
@@ -2405,7 +2423,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Float_A(ani_env *env, an
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::FLOAT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsFloat>(env, nullptr, method, result, args);
 }
 
@@ -2419,7 +2438,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_V(ani_env *env, a
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::DOUBLE);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsDouble>(env, nullptr, method, result, args);
 }
 
@@ -2447,7 +2467,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Double_A(ani_env *env, a
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::DOUBLE);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsDouble>(env, nullptr, method, result, args);
 }
 
@@ -3499,7 +3520,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_V(ani_env *env, ani_
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<ani_ref>(env, nullptr, method, result, args);
 }
 
@@ -3527,7 +3549,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Ref_A(ani_env *env, ani_
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<ani_ref>(env, nullptr, method, result, args);
 }
 
@@ -3540,7 +3563,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_V(ani_env *env, ani
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(method);
 
-    CheckStaticMethodReturnType(method, EtsType::VOID);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralMethodCall<EtsBoolean>(env, nullptr, method, &result, args);
@@ -3568,7 +3592,8 @@ NO_UB_SANITIZE static ani_status Class_CallStaticMethod_Void_A(ani_env *env, ani
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(args);
 
-    CheckStaticMethodReturnType(method, EtsType::VOID);
+    ani_status status = CheckStaticMethodReturnType(method, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralMethodCall<EtsBoolean>(env, nullptr, method, &result, args);
@@ -4076,7 +4101,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_V(ani_env *env, ani_o
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::BOOLEAN);
+    ani_status status = CheckMethodReturnType(method, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsBoolean>(env, object, method, result, args);
 }
 
@@ -4104,7 +4130,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Boolean_A(ani_env *env, ani_o
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::BOOLEAN);
+    ani_status status = CheckMethodReturnType(method, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsBoolean>(env, object, method, result, args);
 }
 
@@ -4118,7 +4145,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_V(ani_env *env, ani_obje
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::CHAR);
+    ani_status status = CheckMethodReturnType(method, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsChar>(env, object, method, result, args);
 }
 
@@ -4146,7 +4174,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Char_A(ani_env *env, ani_obje
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::CHAR);
+    ani_status status = CheckMethodReturnType(method, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsChar>(env, object, method, result, args);
 }
 
@@ -4160,7 +4189,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_V(ani_env *env, ani_obje
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::BYTE);
+    ani_status status = CheckMethodReturnType(method, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsByte>(env, object, method, result, args);
 }
 
@@ -4188,7 +4218,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Byte_A(ani_env *env, ani_obje
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::BYTE);
+    ani_status status = CheckMethodReturnType(method, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsByte>(env, object, method, result, args);
 }
 
@@ -4202,7 +4233,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_V(ani_env *env, ani_obj
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::SHORT);
+    ani_status status = CheckMethodReturnType(method, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsShort>(env, object, method, result, args);
 }
 
@@ -4230,7 +4262,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Short_A(ani_env *env, ani_obj
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::SHORT);
+    ani_status status = CheckMethodReturnType(method, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsShort>(env, object, method, result, args);
 }
 
@@ -4244,7 +4277,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_V(ani_env *env, ani_objec
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::INT);
+    ani_status status = CheckMethodReturnType(method, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsInt>(env, object, method, result, args);
 }
 
@@ -4272,7 +4306,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Int_A(ani_env *env, ani_objec
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::INT);
+    ani_status status = CheckMethodReturnType(method, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsInt>(env, object, method, result, args);
 }
 
@@ -4287,7 +4322,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_A(ani_env *env, ani_obje
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::LONG);
+    ani_status status = CheckMethodReturnType(method, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsLong>(env, object, method, result, args);
 }
 
@@ -4301,7 +4337,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Long_V(ani_env *env, ani_obje
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::LONG);
+    ani_status status = CheckMethodReturnType(method, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsLong>(env, object, method, result, args);
 }
 
@@ -4328,7 +4365,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_V(ani_env *env, ani_obj
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::FLOAT);
+    ani_status status = CheckMethodReturnType(method, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsFloat>(env, object, method, result, args);
 }
 
@@ -4356,7 +4394,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Float_A(ani_env *env, ani_obj
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::FLOAT);
+    ani_status status = CheckMethodReturnType(method, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsFloat>(env, object, method, result, args);
 }
 
@@ -4370,7 +4409,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_V(ani_env *env, ani_ob
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::DOUBLE);
+    ani_status status = CheckMethodReturnType(method, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsDouble>(env, object, method, result, args);
 }
 
@@ -4398,7 +4438,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Double_A(ani_env *env, ani_ob
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::DOUBLE);
+    ani_status status = CheckMethodReturnType(method, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<EtsDouble>(env, object, method, result, args);
 }
 
@@ -4412,7 +4453,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_V(ani_env *env, ani_objec
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(result);
 
-    CheckMethodReturnType(method, EtsType::OBJECT);
+    ani_status status = CheckMethodReturnType(method, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<ani_ref>(env, object, method, result, args);
 }
 
@@ -4440,7 +4482,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Ref_A(ani_env *env, ani_objec
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::OBJECT);
+    ani_status status = CheckMethodReturnType(method, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralMethodCall<ani_ref>(env, object, method, result, args);
 }
 
@@ -4454,7 +4497,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_A(ani_env *env, ani_obje
     CHECK_PTR_ARG(method);
     CHECK_PTR_ARG(args);
 
-    CheckMethodReturnType(method, EtsType::VOID);
+    ani_status status = CheckMethodReturnType(method, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralMethodCall<EtsBoolean>(env, object, method, &result, args);
@@ -4469,7 +4513,8 @@ NO_UB_SANITIZE static ani_status Object_CallMethod_Void_V(ani_env *env, ani_obje
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(method);
 
-    CheckMethodReturnType(method, EtsType::VOID);
+    ani_status status = CheckMethodReturnType(method, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralMethodCall<EtsBoolean>(env, object, method, &result, args);
@@ -5187,7 +5232,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_A(ani_env *env, ani_functio
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::SHORT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_short>(env, fn, result, args);
 }
 
@@ -5199,7 +5245,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Short_V(ani_env *env, ani_functio
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::SHORT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::SHORT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_short>(env, fn, result, args);
 }
 
@@ -5225,7 +5272,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_A(ani_env *env, ani_function 
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::INT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_int>(env, fn, result, args);
 }
 
@@ -5237,7 +5285,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Int_V(ani_env *env, ani_function 
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::INT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::INT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_int>(env, fn, result, args);
 }
 
@@ -5263,7 +5312,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_A(ani_env *env, ani_function
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::LONG);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_long>(env, fn, result, args);
 }
 
@@ -5275,7 +5325,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Long_V(ani_env *env, ani_function
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::LONG);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::LONG);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_long>(env, fn, result, args);
 }
 
@@ -5301,7 +5352,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_A(ani_env *env, ani_functio
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::FLOAT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsFloat>(env, fn, result, args);
 }
 
@@ -5313,7 +5365,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Float_V(ani_env *env, ani_functio
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::FLOAT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::FLOAT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsFloat>(env, fn, result, args);
 }
 
@@ -5339,7 +5392,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_A(ani_env *env, ani_funct
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsBoolean>(env, fn, result, args);
 }
 
@@ -5352,7 +5406,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Boolean_V(ani_env *env, ani_funct
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::BOOLEAN);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsBoolean>(env, fn, result, args);
 }
 
@@ -5378,7 +5433,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_A(ani_env *env, ani_function
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::CHAR);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsChar>(env, fn, result, args);
 }
 
@@ -5390,7 +5446,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Char_V(ani_env *env, ani_function
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::CHAR);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::CHAR);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsChar>(env, fn, result, args);
 }
 
@@ -5416,7 +5473,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_A(ani_env *env, ani_function
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::BYTE);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsByte>(env, fn, result, args);
 }
 
@@ -5428,7 +5486,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Byte_V(ani_env *env, ani_function
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::BYTE);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::BYTE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsByte>(env, fn, result, args);
 }
 
@@ -5454,7 +5513,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_A(ani_env *env, ani_functi
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsDouble>(env, fn, result, args);
 }
 
@@ -5466,7 +5526,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Double_V(ani_env *env, ani_functi
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::DOUBLE);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<EtsDouble>(env, fn, result, args);
 }
 
@@ -5492,7 +5553,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_A(ani_env *env, ani_function 
     CHECK_PTR_ARG(result);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::OBJECT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_ref>(env, fn, result, args);
 }
 
@@ -5504,7 +5566,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Ref_V(ani_env *env, ani_function 
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(result);
 
-    CheckFunctionReturnType(fn, EtsType::OBJECT);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::OBJECT);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     return GeneralFunctionCall<ani_ref>(env, fn, result, args);
 }
 
@@ -5528,7 +5591,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_A(ani_env *env, ani_function
     CHECK_PTR_ARG(fn);
     CHECK_PTR_ARG(args);
 
-    CheckFunctionReturnType(fn, EtsType::VOID);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralFunctionCall<EtsBoolean>(env, fn, &result, args);
@@ -5541,7 +5605,8 @@ NO_UB_SANITIZE static ani_status Function_Call_Void_V(ani_env *env, ani_function
     CHECK_ENV(env);
     CHECK_PTR_ARG(fn);
 
-    CheckFunctionReturnType(fn, EtsType::VOID);
+    ani_status status = CheckFunctionReturnType(fn, EtsType::VOID);
+    ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
     ani_boolean result;
     // Use any primitive type as template parameter and just ignore the result
     return GeneralFunctionCall<EtsBoolean>(env, fn, &result, args);
