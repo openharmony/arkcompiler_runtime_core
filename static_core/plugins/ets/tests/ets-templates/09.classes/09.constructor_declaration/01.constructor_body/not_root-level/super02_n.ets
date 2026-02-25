@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,11 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    Mandatory call to a superconstructor if a class has an extension clause.
+    A compile-time error occurs if: The call is not a root-level statement within a constructor.
+expected_out: |-
+    Semantic error ESE2077: 'super' call must be a root-level statement in constructor
+tags: [compile-only, negative]
 ---*/
 
 class A {
@@ -32,28 +35,10 @@ class B extends A {
         if (a == '') {
             throw new Error('empty')
         }
-        switch (a) {
-            case '1':
-                super(a)
-                break
-            case '2':
-                super(a + a)
-                break
-            default:
-                throw new Error('wrong arg = ' + a)
+        if (a == '1') {
+            super('1')
+            return
         }
+        super('2')
     }
-}
-
-function main() {
-    let b: B
-    arktest.expectError(() => { b = new B('') }, 'empty')
-
-    b = new B('1')
-    arktest.assertEQ(b.fldA, '1')
-
-    b = new B('2')
-    arktest.assertEQ(b.fldA, '22')
-
-    arktest.expectError(() => { b = new B('3') }, 'wrong arg = 3')
 }

@@ -16,37 +16,29 @@
 /*---
 desc: >-
     Mandatory call to a superconstructor if a class has an extension clause.
+    A compile-time error occurs if: The call is not a root-level statement within a constructor.
+expected_out: |-
+    Semantic error ESE2077: 'super' call must be a root-level statement in constructor
+tags: [compile-only, negative]
 ---*/
 
-let res = ''
-
 class A {
-    x: Object
-    constructor() {
-        this.x = 'a'
-        this.assert()
-    }
+    fldA: int
 
-    assert() {
-        arktest.assertTrue(false, 'this method should not be called')
+    constructor(a: int) {
+        this.fldA = a
     }
 }
 
 class B extends A {
-    y: Object
-    constructor() {
-        super()
-        this.y = 'xyz'
+    constructor(a: int) {
+        try {
+            if (a == 0) {
+                throw new Error('Error thrown')
+            }
+            super(a)
+        } catch (e) {
+            super(-1)
+        }
     }
-
-    assert() {
-        arktest.expectThrow(() => { res = this.y.toString() })
-    }
-}
-
-function main() {
-    let b: B = { y: 'b' }
-    arktest.assertEQ(b.x, 'a')
-    arktest.assertEQ(b.y, 'b')
-    arktest.assertEQ(res, '')
 }

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -25,13 +25,13 @@ class A {
         return a.s.length
     }
 
-    public constructor() {
-        this.s = 'abcd'
+    public constructor(s: string) {
+        this.s = s
         this.n = this.foo(this)
     }
 }
 
 function main() {
-    arktest.assertEQ(new A().n, 4)
-    arktest.assertEQ(new A().s, 'abcd')
+    arktest.assertEQ(new A('abcdef').n, 6)
+    arktest.assertEQ(new A('abc').s, 'abc')
 }
