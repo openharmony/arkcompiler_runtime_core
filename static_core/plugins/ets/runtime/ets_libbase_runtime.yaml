@@ -1952,6 +1952,16 @@ intrinsics:
     codegen_func: CreateSameValueZero
     llvm_codegen_func: EmitSameValueZero
 
+  - name: StdMapIsSameReference
+    space: ets
+    class_name: std.core.Map
+    method_name: isSameReference
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeIsSameReference
+
 ##########################
 # std.containers.WeakMap #
 ##########################
@@ -6960,16 +6970,6 @@ intrinsics:
       args: [  ]
     impl: ark::ets::intrinsics::StdCoreRuntimeIsLittleEndianPlatform
     clear_flags: [ ]
-
-  - name: StdCoreRuntimeIsSameReference
-    space: ets
-    class_name: std.core.Runtime
-    method_name: isSameReference
-    static: true
-    signature:
-      ret: u1
-      args: [ std.core.Object, std.core.Object ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeIsSameReference
 
   - name: StdRuntimeGetHashCode
     space: ets

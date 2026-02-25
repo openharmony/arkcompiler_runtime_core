@@ -579,6 +579,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
     private static native sameValueZero(o1: Any, o2: Any): boolean
 
+    // NOTE (magikarp777, #30548): Remove isSameReference
+    private static native isSameReference(o1: Any, o2: Any): boolean
+
     /**
      * Puts a pair of key and value into the Map
      *
@@ -805,7 +808,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
             callbackfn(getValueAt<V>(this.data, curAt), getKeyAt<K>(this.data, curAt), this)
 
-            while (!Runtime.isSameReference(curData, this.data)) {
+            // NOTE (magikarp777, #30548): Replace isSameReference with !==
+            while (!Map.isSameReference(curData, this.data)) {
                 let curBuckets = curData.getBucketsFromData()
                 curAt -= pairs(curBuckets!.getNumOfDeletedAt(curAt))
                 curData = getNestedData(curData) as DataArrType
