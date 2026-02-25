@@ -45,17 +45,6 @@ export final class Runtime {
      */
     public native static isLittleEndianPlatform(): boolean;
 
-    /**
-     * Checks if two references point to a same object/value.
-     *
-     * @param o1 first object to compare
-     *
-     * @param o2 second object to compare
-     *
-     * @returns true if Objects are equal
-     */
-    public static native isSameReference(o1: Any, o2: Any): boolean;
-
     // Deprecated.
     native static __getTypeInfo(o: Any): Class|undefined;
 
