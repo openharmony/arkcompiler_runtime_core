@@ -77,9 +77,6 @@ void StackfulCoroutineWorker::AddCreatedCoroutineAndSwitchToIt(Coroutine *newCor
     Coroutine::SetCurrent(newCoro);
 
     SwitchCoroutineContext(currentCtx, nextCtx);
-
-    // process finalization queue once this coro gets scheduled again
-    FinalizeTerminatedCoros();
 }
 
 void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
@@ -421,12 +418,6 @@ void StackfulCoroutineWorker::BlockCurrentCoroAndScheduleNext()
     BlockCurrentCoro();
     // will transfer control to another coro... Can change current coroutine's host worker!
     ScheduleNextCoroUnlockRunnablesWaiters();
-    // ...this coro has been scheduled again: process finalization queue
-    if (!IsCrossWorkerCall()) {
-        FinalizeTerminatedCoros();
-    } else {
-        // migration happened!
-    }
 }
 
 void StackfulCoroutineWorker::SuspendCurrentCoroAndScheduleNext()
@@ -435,12 +426,6 @@ void StackfulCoroutineWorker::SuspendCurrentCoroAndScheduleNext()
     SuspendCurrentCoro();
     // will transfer control to another coro...
     ScheduleNextCoroUnlockRunnables();
-    // ...this coro has been scheduled again: process finalization queue
-    if (!IsCrossWorkerCall()) {
-        FinalizeTerminatedCoros();
-    } else {
-        // migration happened!
-    }
 }
 
 template <bool SUSPEND_AS_BLOCKED>
@@ -531,6 +516,7 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     stats_.StartInterval(CoroutineTimeStats::CTX_SWITCH);
     // performs the fiber switch!
     from->SwitchTo(to);
+    FinalizeTerminatedCoros();
     if (IsCrossWorkerCall()) {
         ASSERT(Coroutine::GetCurrent()->GetType() == Coroutine::Type::MUTATOR);
         // Here this != current coroutine's worker. The rest of this function will be executed CONCURRENTLY!
