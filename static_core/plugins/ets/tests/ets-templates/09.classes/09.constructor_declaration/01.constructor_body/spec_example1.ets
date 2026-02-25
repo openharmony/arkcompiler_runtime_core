@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,49 +15,43 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    Mandatory call to a superconstructor if a class has an extension clause.
+    The manner new expressions work together with a constructor body execution
+    sequence is represented by the example below.
 ---*/
 
-class Point {
-    x: number;
-    y: number;
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+let res = ''
+
+function trace(msg: string) {
+    res += msg + ','
+    return res
+}
+
+class C {
+    C_field = trace("C1")
+    constructor() {
+        trace("C2")
     }
 }
 
-class ColoredPoint extends Point {
-    static readonly WHITE = 0;
-    static readonly BLACK = 1;
-    color: number;
-    constructor(x: number, y: number, color: number) {
-        super(x, y); // calls base class constructor
-        this.color = color
+class B extends C {
+    B_field = trace("B1")
+    constructor() {
+        super ()
+        trace ("B2")
     }
 }
 
-class BWPoint extends ColoredPoint {
-    constructor(x: number, y: number, black: boolean) {
-        if (black) {
-            super(x, y, ColoredPoint.BLACK);
-        } else {
-            super(x, y, ColoredPoint.WHITE);
-        }
+class A extends B {
+    A_field = trace("A1")
+    constructor() {
+        super()
+        trace ("A2")
     }
 }
 
 function main() {
-    let black = new BWPoint(1.0, 11.0, true)
-    arktest.assertTrue(black instanceof BWPoint)
-    arktest.assertEQ(black.color, 1)
-    arktest.assertEQ(black.x, 1.0)
-    arktest.assertEQ(black.y, 11.0)
-
-    let white = new BWPoint(2.0, 22.0, false)
-    arktest.assertTrue(white instanceof BWPoint)
-    arktest.assertEQ(white.color, 0)
-    arktest.assertEQ(white.x, 2.0)
-    arktest.assertEQ(white.y, 22.0)
+    res = ''
+    let a = new A ()
+    arktest.assertEQ(res, 'C1,C2,B1,B2,A1,A2,')
 }

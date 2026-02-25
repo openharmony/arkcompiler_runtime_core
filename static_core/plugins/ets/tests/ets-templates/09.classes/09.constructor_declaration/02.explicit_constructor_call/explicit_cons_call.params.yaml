@@ -62,12 +62,11 @@ cases:
               constructor(p: int) {
                   this(p + 1.0)
               }
-              constructor(p?: number) {
-                  if (p == undefined) {
-                      super(false)
-                  } else {
-                      super(p)
-                  }
+              constructor() {
+                  super(false)
+              }
+              constructor(p: number) {
+                  super(p)
               }
           }
       use: |-
@@ -79,40 +78,28 @@ cases:
           // call constructors in superclasses
           abstract class A {
               fld: string
-              constructor(p: string) {
-                  this.fld = p
-              }
-              constructor(p: number) {
-                  this('' + p)
+              constructor(p: string|number) {
+                  this.fld = '' + p
               }
           }
           abstract class B extends A {
-              constructor(p?: string|number) {
-                  if (p == undefined) {
-                      super('')
-                      return
-                  } else if (p instanceof number) {
-                      super(++p)
-                      return
-                  }
-                  super(p)
+              constructor(p: string|number) {
+                  super(p instanceof string ? p : ++p)
+              }
+              constructor() {
+                  super('')
               }
           }
           class C extends B {
-              constructor(p: Any) {
-                  if (p instanceof string) {
-                      super(p)
-                  } else if (p instanceof number) {
-                      super(p)
-                  } else {
-                      super()
-                  }
+              constructor(p: string|number) {
+                  super(p)
+              }
+              constructor() {
+                  super()
               }
           }
       use: |-
-          arktest.assertEQ(new C(null).fld, '')
-          arktest.assertEQ(new C(undefined).fld, '')
-          arktest.assertEQ(new C(true).fld, '')
+          arktest.assertEQ(new C().fld, '')
           arktest.assertEQ(new C('abc').fld, 'abc')
           arktest.assertEQ(new C(42.0).fld, '43')
 

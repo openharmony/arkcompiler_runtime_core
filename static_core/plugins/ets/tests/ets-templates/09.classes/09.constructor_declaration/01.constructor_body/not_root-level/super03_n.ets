@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,11 @@
 
 /*---
 desc: >-
-    Mandatory call to a superconstructor if a class has an extension clause
-    on all execution paths of the constructor body.
+    Mandatory call to a superconstructor if a class has an extension clause.
+    A compile-time error occurs if: The call is not a root-level statement within a constructor.
+expected_out: |-
+    Semantic error ESE2077: 'super' call must be a root-level statement in constructor
+tags: [compile-only, negative]
 ---*/
 
 class A {
@@ -30,43 +33,17 @@ class A {
 class B extends A {
     constructor(a: int) {
         if (a == 1) {
-            res = 1
             super(a)
         } else {
             if (a <= 2) {
-                res = 2
                 super(a * 2)
             } else {
                 if (a == 3) {
-                    res = 3
                     super(a * 3)
                 } else {
-                    res = 4
                     super(a * 4)
                 }
             }
         }
     }
-}
-
-let res: int
-
-function main() {
-    res = 0
-
-    let b = new B(1)
-    arktest.assertEQ(res, 1)
-    arktest.assertEQ(b.fldA, 1)
-
-    b = new B(2)
-    arktest.assertEQ(res, 2)
-    arktest.assertEQ(b.fldA, 4)
-
-    b = new B(3)
-    arktest.assertEQ(res, 3)
-    arktest.assertEQ(b.fldA, 9)
-
-    b = new B(4)
-    arktest.assertEQ(res, 4)
-    arktest.assertEQ(b.fldA, 16)
 }
