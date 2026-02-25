@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,5 +252,43 @@ HWTEST_F_L0(MutatorTest, TransitionToGCPhaseExclusive_TestIdle)
 
     GCPhase phase = GCPhase::GC_PHASE_IDLE;
     EXPECT_NO_FATAL_FAILURE(mutatorBase.TransitionToGCPhaseExclusive(phase));
+}
+HWTEST_F_L0(MutatorTest, VisitAllThreadsTest)
+{
+    Mutator *mutator = Mutator::CreateAndRegisterNewMutator(nullptr);
+    ASSERT_TRUE(mutator != nullptr);
+    Mutator::SetCurrent(mutator);
+
+    mutator->WaitSuspension();
+
+    CommonRootVisitor visitor = nullptr;
+    mutator->VisitAllThreads(visitor);
+
+    Mutator *result = Mutator::GetCurrent();
+    EXPECT_EQ(result, mutator);
+}
+
+HWTEST_F_L0(MutatorTest, DestroyMutatorTest)
+{
+    Mutator *mutator = Mutator::CreateAndRegisterNewMutator(nullptr);
+    ASSERT_TRUE(mutator != nullptr);
+
+    auto &mutatorManager = MutatorManager::Instance();
+    auto &list = mutatorManager.allMutatorList_;
+    list.clear();
+
+    Mutator::DestroyMutator(mutator);
+    EXPECT_EQ(mutator->PopRawObject(), nullptr);
+}
+
+HWTEST_F_L0(MutatorTest, TryBindMutatorScopeTest)
+{
+    Mutator *mutator = Mutator::CreateAndRegisterNewMutator(nullptr);
+    ASSERT_TRUE(mutator != nullptr);
+    Mutator::SetCurrent(mutator);
+
+    ThreadLocal::SetProcessorFlag(true);
+    Mutator::TryBindMutatorScope scope(mutator);
+    EXPECT_EQ(ThreadLocal::GetAllocBuffer(), nullptr);
 }
 }  // namespace common::test

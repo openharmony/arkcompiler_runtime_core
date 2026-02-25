@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,18 @@
 #ifndef COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 #define COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 
-#include "common_interfaces/thread/thread_holder-inl.h"
-#include "common_interfaces/thread/thread_holder_manager.h"
-#include "common_interfaces/base_runtime.h"
+#include "common_interfaces/thread/mutator-inl.h"
+#include "common_interfaces/thread/thread_state.h"
+#include "common_components/mutator/mutator_manager.h"
 
 namespace common {
 
-// Fixme: T is a temporary mock impl to adapt the current JSThread callback when transfer to RUNNING,
-// actually it should always be ThreadHolder, and need to be removed later.
 template <typename T, ThreadState newState>
-class ThreadStateTransitionScope final {
-    static_assert(std::is_base_of_v<ThreadHolder, T>);
+class MutatorStateTransitionScope final {
+    static_assert(std::is_base_of_v<Mutator, T>);
 
 public:
-    explicit ThreadStateTransitionScope(T *self) : self_(self)
+    explicit MutatorStateTransitionScope(T *self) : self_(self)
     {
         DCHECK_CC(self_ != nullptr);
         if constexpr (newState == ThreadState::RUNNING) {
@@ -39,7 +37,7 @@ public:
         }
     }
 
-    ~ThreadStateTransitionScope()
+    ~MutatorStateTransitionScope()
     {
         if (hasSwitchState_) {
             if constexpr (newState == ThreadState::RUNNING) {
@@ -54,58 +52,54 @@ private:
     T *self_;
     ThreadState oldState_;
     bool hasSwitchState_ {false};
-    NO_COPY_SEMANTIC_CC(ThreadStateTransitionScope);
+    NO_COPY_SEMANTIC_CC(MutatorStateTransitionScope);
 };
 
-class ThreadSuspensionScope final {
+class MutatorSuspensionScope final {
 public:
-    explicit ThreadSuspensionScope(ThreadHolder *self) : scope_(self)
+    explicit MutatorSuspensionScope(Mutator *self) : scope_(self)
     {
         DCHECK_CC(!self->IsInRunningState());
     }
 
-    ~ThreadSuspensionScope() = default;
+    ~MutatorSuspensionScope() = default;
 
 private:
-    ThreadStateTransitionScope<ThreadHolder, ThreadState::IS_SUSPENDED> scope_;
-    NO_COPY_SEMANTIC_CC(ThreadSuspensionScope);
+    MutatorStateTransitionScope<Mutator, ThreadState::IS_SUSPENDED> scope_;
+    NO_COPY_SEMANTIC_CC(MutatorSuspensionScope);
 };
 
-class ThreadNativeScope final {
+class MutatorNativeScope final {
 public:
-    explicit ThreadNativeScope(ThreadHolder *self) : scope_(self)
+    explicit MutatorNativeScope(Mutator *self) : scope_(self)
     {
         DCHECK_CC(!self->IsInRunningState());
     }
 
-    ~ThreadNativeScope() = default;
+    ~MutatorNativeScope() = default;
 
 private:
-    ThreadStateTransitionScope<ThreadHolder, ThreadState::NATIVE> scope_;
-    NO_COPY_SEMANTIC_CC(ThreadNativeScope);
+    MutatorStateTransitionScope<Mutator, ThreadState::NATIVE> scope_;
+    NO_COPY_SEMANTIC_CC(MutatorNativeScope);
 };
 
-// Fixme: T is a temporary mock impl to adapt the current JSThread callback when transfer to RUNNING,
-// actually it should always be ThreadHolder, and need to be removed later.
 template <typename T>
-class ThreadManagedScope final {
-    static_assert(std::is_base_of_v<ThreadHolder, T>);
+class MutatorManagedScope final {
+    static_assert(std::is_base_of_v<Mutator, T>);
 
 public:
-    explicit ThreadManagedScope(T *self) : scope_(self) {}
+    explicit MutatorManagedScope(T *self) : scope_(self) {}
 
-    ~ThreadManagedScope() = default;
+    ~MutatorManagedScope() = default;
 
 private:
-    ThreadStateTransitionScope<T, ThreadState::RUNNING> scope_;
-    NO_COPY_SEMANTIC_CC(ThreadManagedScope);
+    MutatorStateTransitionScope<T, ThreadState::RUNNING> scope_;
+    NO_COPY_SEMANTIC_CC(MutatorManagedScope);
 };
 
-// Fixme: T is a temporary mock impl to adapt the current JSThread callback when transfer to RUNNING,
-// actually it should always be ThreadHolder, and need to be removed later.
 template <typename T>
 class SuspendAllScope final {
-    static_assert(std::is_base_of_v<ThreadHolder, T>);
+    static_assert(std::is_base_of_v<Mutator, T>);
 
 public:
     explicit SuspendAllScope(T *self) : self_(self), scope_(self)
@@ -114,7 +108,9 @@ public:
         TRACE_GC(GCStats::Scope::ScopeId::SuspendAll, SharedHeap::GetInstance()->GetEcmaGCStats());
         ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "SuspendAll", "");
 #endif
-        BaseRuntime::GetInstance()->GetThreadHolderManager().SuspendAll(self_);
+        DCHECK_CC(self_ != nullptr);
+        DCHECK_CC(!self_->IsInRunningState());
+        MutatorManager::Instance().StopTheWorld(false, GCPhase::GC_PHASE_IDLE);
     }
 
     ~SuspendAllScope()
@@ -123,12 +119,12 @@ public:
         TRACE_GC(GCStats::Scope::ScopeId::ResumeAll, SharedHeap::GetInstance()->GetEcmaGCStats());
         ECMA_BYTRACE_NAME(HITRACE_LEVEL_COMMERCIAL, HITRACE_TAG_ARK, "ResumeAll", "");
 #endif
-        BaseRuntime::GetInstance()->GetThreadHolderManager().ResumeAll(self_);
+        MutatorManager::Instance().StartTheWorld();
     }
 
 private:
     T *self_;
-    ThreadStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
+    MutatorStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
     NO_COPY_SEMANTIC_CC(SuspendAllScope);
 };
 }  // namespace common

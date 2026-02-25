@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,9 @@
 namespace common {
 // Expand to get oldEntry and newEntry, with hash conflicts from 32 bits up to
 // hashShift and Generate a subtree of indirect nodes to hold two new entries.
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <bool IsLock>
-typename HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Node* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Expand(
+typename HashTrieMap<Mutex, MutatorType, SlotBarrier>::Node* HashTrieMap<Mutex, MutatorType, SlotBarrier>::Expand(
     Entry* oldEntry, Entry* newEntry, uint32_t oldHash, uint32_t newHash, uint32_t hashShift, Indirect* parent)
 {
     // Check for hash conflicts.
@@ -43,6 +43,7 @@ typename HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Node* HashTrieMap<Mutex,
     Indirect* newIndirect = new Indirect();
     Indirect* top = newIndirect;
 
+    // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
 #ifndef NDEBUG
         if (hashShift == TrieMapConfig::TOTAL_HASH_BITS) {
@@ -72,10 +73,10 @@ typename HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Node* HashTrieMap<Mutex,
 }
 
 // Load returns the value of the key stored in the mapping, or nullptr value if not
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <bool IsCheck, typename ReadBarrier>
-BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBarrier&& readBarrier, const uint32_t key,
-                                                                BaseString* value)
+BaseString* HashTrieMap<Mutex, MutatorType, SlotBarrier>::Load(ReadBarrier&& readBarrier, const uint32_t key,
+                                                               BaseString* value)
 {
     uint32_t hash = key;
     Indirect* current = GetRootAndProcessHash(hash);
@@ -122,11 +123,12 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBarrier&& re
 // LoadOrStore returns the existing value of the key, if it exists.
 // Otherwise, call the callback function to create a value,
 // store the value, and return the value
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <bool IsLock, typename LoaderCallback, typename EqualsCallback>
-BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStore(ThreadHolder* holder, const uint32_t key,
-                                                                       LoaderCallback loaderCallback,
-                                                                       EqualsCallback equalsCallback)
+// CC-OFFNXT(G.FUD.05) solid logic
+BaseString* HashTrieMap<Mutex, MutatorType, SlotBarrier>::LoadOrStore(MutatorType* mutator, const uint32_t key,
+                                                                      LoaderCallback loaderCallback,
+                                                                      EqualsCallback equalsCallback)
 {
     HashTrieMapInUseScope mapInUse(this);
     uint32_t hash = key;
@@ -137,6 +139,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStore(ThreadHol
     ReadOnlyHandle<BaseString> str;
     bool isStrCreated = false; // Flag to track whether an object has been created
     Indirect* current = GetRootAndProcessHash(hash);
+    // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         haveInsertPoint = false;
         // find the key or insert the candidate position.
@@ -183,7 +186,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStore(ThreadHol
         }
         // lock and double-check
         if constexpr (IsLock) {
-            GetMutex().LockWithThreadState(holder);
+            GetMutex().LockWithThreadState(mutator);
         }
 
         DCHECK_CC(slot != nullptr);
@@ -247,15 +250,16 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStore(ThreadHol
     return value;
 }
 
-// LoadOrStorForJit need to lock the object before creating the object.
+// LoadOrStorForJit need to lock the: object before creating the object.
 // returns the existing value of the key, if it exists.
 // Otherwise, call the callback function to create a value,
 // store the value, and return the value
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <typename LoaderCallback, typename EqualsCallback>
-BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStoreForJit(ThreadHolder* holder, const uint32_t key,
-                                                                             LoaderCallback loaderCallback,
-                                                                             EqualsCallback equalsCallback)
+// CC-OFFNXT(G.FUD.05) solid logic
+BaseString* HashTrieMap<Mutex, MutatorType, SlotBarrier>::LoadOrStoreForJit(MutatorType* mutator, const uint32_t key,
+                                                                            LoaderCallback loaderCallback,
+                                                                            EqualsCallback equalsCallback)
 {
     HashTrieMapInUseScope mapInUse(this);
     uint32_t hash = key;
@@ -265,6 +269,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStoreForJit(Thr
     [[maybe_unused]] bool haveInsertPoint = false;
     BaseString* value = nullptr;
     Indirect* current = GetRootAndProcessHash(hash);
+    // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
         haveInsertPoint = false;
         // find the key or insert the candidate position.
@@ -302,7 +307,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStoreForJit(Thr
         }
 #endif
         // Jit need to lock the object before creating the object
-        GetMutex().LockWithThreadState(holder);
+        GetMutex().LockWithThreadState(mutator);
         // invoke the callback to create str
         value = std::invoke(std::forward<LoaderCallback>(loaderCallback));
         DCHECK_CC(slot != nullptr);
@@ -359,12 +364,13 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::LoadOrStoreForJit(Thr
 
 // Based on the loadResult, try the store first
 // StoreOrLoad returns the existing value of the key, store the value, and return the value
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <typename LoaderCallback, typename EqualsCallback>
-BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHolder* holder, const uint32_t key,
-                                                                       HashTrieMapLoadResult loadResult,
-                                                                       LoaderCallback loaderCallback,
-                                                                       EqualsCallback equalsCallback)
+// CC-OFFNXT(G.FUD.05) solid logic
+BaseString* HashTrieMap<Mutex, MutatorType, SlotBarrier>::StoreOrLoad(MutatorType* mutator, const uint32_t key,
+                                                                      HashTrieMapLoadResult loadResult,
+                                                                      LoaderCallback loaderCallback,
+                                                                      EqualsCallback equalsCallback)
 {
     HashTrieMapInUseScope mapInUse(this);
     uint32_t hash = key;
@@ -376,12 +382,13 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
     Indirect* current = loadResult.current;
     ReadOnlyHandle<BaseString> str = std::invoke(std::forward<LoaderCallback>(loaderCallback));
     // lock and double-check
-    GetMutex().LockWithThreadState(holder);
+    GetMutex().LockWithThreadState(mutator);
     node = slot->load(std::memory_order_acquire);
     if (node != nullptr && !node->IsEntry()) {
         GetMutex().Unlock();
         current = node->AsIndirect();
         hashShift += TrieMapConfig::N_CHILDREN_LOG2;
+        // CC-OFFNXT(G.CTL.03): false positive
         while (true) {
             haveInsertPoint = false;
             // find the key or insert the candidate position.
@@ -416,7 +423,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
             }
 #endif
             // lock and double-check
-            GetMutex().LockWithThreadState(holder);
+            GetMutex().LockWithThreadState(mutator);
             node = slot->load(std::memory_order_acquire);
             if (node == nullptr || node->IsEntry()) {
                 // see is still real, so can continue to insert.
@@ -470,10 +477,10 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
 }
 
 // Load returns the value of the key stored in the mapping, or HashTrieMapLoadResult for StoreOrLoad
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <typename ReadBarrier>
-HashTrieMapLoadResult HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBarrier&& readBarrier,
-                                                                          const uint32_t key, BaseString* value)
+HashTrieMapLoadResult HashTrieMap<Mutex, MutatorType, SlotBarrier>::Load(ReadBarrier&& readBarrier,
+                                                                         const uint32_t key, BaseString* value)
 {
     uint32_t hash = key;
     Indirect* current = GetRootAndProcessHash(hash);
@@ -507,11 +514,11 @@ HashTrieMapLoadResult HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBa
 }
 
 // Load returns the value of the key stored in the mapping, or HashTrieMapLoadResult for StoreOrLoad
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <typename ReadBarrier>
-HashTrieMapLoadResult HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBarrier&& readBarrier, const uint32_t key,
-                                                                          const ReadOnlyHandle<BaseString>& string,
-                                                                          uint32_t offset, uint32_t utf8Len)
+HashTrieMapLoadResult HashTrieMap<Mutex, MutatorType, SlotBarrier>::Load(ReadBarrier&& readBarrier, const uint32_t key,
+                                                                         const ReadOnlyHandle<BaseString>& string,
+                                                                         uint32_t offset, uint32_t utf8Len)
 {
     uint32_t hash = key;
     Indirect* current = GetRootAndProcessHash(hash);
@@ -549,12 +556,13 @@ HashTrieMapLoadResult HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Load(ReadBa
 
 // Based on the loadResult, try the store first
 // StoreOrLoad returns the existing value of the key, store the value, and return the value
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <bool threadState, typename ReadBarrier, typename HandleType>
-BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHolder* holder, ReadBarrier&& readBarrier,
-                                                                       const uint32_t key,
-                                                                       HashTrieMapLoadResult loadResult,
-                                                                       HandleType str)
+// CC-OFFNXT(G.FUD.05) solid logic
+BaseString* HashTrieMap<Mutex, MutatorType, SlotBarrier>::StoreOrLoad(MutatorType* mutator, ReadBarrier&& readBarrier,
+                                                                      const uint32_t key,
+                                                                      HashTrieMapLoadResult loadResult,
+                                                                      HandleType str)
 {
     HashTrieMapInUseScope mapInUse(this);
     uint32_t hash = key;
@@ -565,7 +573,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
     [[maybe_unused]] bool haveInsertPoint = true;
     Indirect* current = loadResult.current;
     if constexpr (threadState) {
-        GetMutex().LockWithThreadState(holder);
+        GetMutex().LockWithThreadState(mutator);
     } else {
         GetMutex().Lock();
     }
@@ -574,6 +582,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
         GetMutex().Unlock();
         current = node->AsIndirect();
         hashShift += TrieMapConfig::N_CHILDREN_LOG2;
+        // CC-OFFNXT(G.CTL.03): false positive
         while (true) {
             haveInsertPoint = false;
             for (; hashShift < TrieMapConfig::TOTAL_HASH_BITS; hashShift += TrieMapConfig::N_CHILDREN_LOG2) {
@@ -611,7 +620,7 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
 #endif
             // lock and double-check
             if constexpr (threadState) {
-                GetMutex().LockWithThreadState(holder);
+                GetMutex().LockWithThreadState(mutator);
             } else {
                 GetMutex().Lock();
             }
@@ -668,8 +677,8 @@ BaseString* HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::StoreOrLoad(ThreadHol
 }
 
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckWeakRef(const WeakRootVisitor& visitor, Entry* entry)
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::CheckWeakRef(const WeakRootVisitor& visitor, Entry* entry)
 {
     panda::ecmascript::TaggedObject* object = reinterpret_cast<panda::ecmascript::TaggedObject*>(entry->Value<
         SlotBarrier>());
@@ -684,10 +693,10 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckWeakRef(const WeakRootV
     return false;
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <typename ReadBarrier>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckValidity(ReadBarrier&& readBarrier, BaseString* value,
-                                                                  bool& isValid)
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::CheckValidity(ReadBarrier&& readBarrier, BaseString* value,
+                                                                 bool& isValid)
 {
     if (value->IsTreeString()) {
         isValid = false;
@@ -701,8 +710,8 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckValidity(ReadBarrier&& 
     return true;
 }
 
-template<typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Iter(Indirect *node, std::function<bool(Node *)> &iter)
+template<typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::Iter(Indirect *node, std::function<bool(Node *)> &iter)
 {
     if (node == nullptr) {
         return true;
@@ -731,9 +740,9 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::Iter(Indirect *node, std::fu
     return true;
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckWeakRef(const WeakRefFieldVisitor& visitor,
-                                                                 HashTrieMap::Entry* entry)
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::CheckWeakRef(const WeakRefFieldVisitor& visitor,
+                                                                HashTrieMap::Entry* entry)
 {
     // RefField only support 64-bit value, so could not cirectly pass `Entry::Value` to WeakRefFieldVisitor
     // int 32-bit machine
@@ -752,11 +761,11 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::CheckWeakRef(const WeakRefFi
     return false;
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <TrieMapConfig::SlotBarrier Barrier, std::enable_if_t<Barrier == TrieMapConfig::NeedSlotBarrier, int>>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
-                                                                    const WeakRefFieldVisitor& visitor,
-                                                                    std::vector<Entry*>& waitDeleteEntries)
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
+                                                                   const WeakRefFieldVisitor& visitor,
+                                                                   std::vector<Entry*>& waitDeleteEntries)
 {
     // load sub-nodes
     Node* child = parent->GetChild(index).load(std::memory_order_relaxed);
@@ -788,10 +797,10 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::ClearNodeFromGC(Indirect* pa
     }
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <TrieMapConfig::SlotBarrier Barrier, std::enable_if_t<Barrier == TrieMapConfig::NoSlotBarrier, int>>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
-                                                                    const WeakRefFieldVisitor& visitor)
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
+                                                                   const WeakRefFieldVisitor& visitor)
 {
     // load sub-nodes
     Node* child = parent->GetChild(index).load(std::memory_order_relaxed);
@@ -851,10 +860,10 @@ bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::ClearNodeFromGC(Indirect* pa
     }
 }
 
-template <typename Mutex, typename ThreadHolder, TrieMapConfig::SlotBarrier SlotBarrier>
+template <typename Mutex, typename MutatorType, TrieMapConfig::SlotBarrier SlotBarrier>
 template <TrieMapConfig::SlotBarrier Barrier, std::enable_if_t<Barrier == TrieMapConfig::NoSlotBarrier, int>>
-bool HashTrieMap<Mutex, ThreadHolder, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
-                                                                    const WeakRootVisitor& visitor)
+bool HashTrieMap<Mutex, MutatorType, SlotBarrier>::ClearNodeFromGC(Indirect* parent, int index,
+                                                                   const WeakRootVisitor& visitor)
 {
     // load sub-nodes
     Node* child = parent->GetChild(index).load(std::memory_order_relaxed);

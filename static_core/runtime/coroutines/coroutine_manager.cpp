@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,8 +34,8 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
     Coroutine::SetCurrent(main);
     main->InitBuffers();
 #ifdef ARK_HYBRID
-    auto hasJsRuntime = common::ThreadHolder::GetCurrent() != nullptr;
-    main->LinkToExternalHolder(true);
+    auto hasJsRuntime = common::Mutator::GetCurrent() != nullptr;
+    main->LinkToExternalMutator(true);
     // We need to unbind mutator before binding in the RequestResume,
     // as it was bound during JS runtime creation/execution
     if (hasJsRuntime) {
@@ -79,7 +79,7 @@ Coroutine *CoroutineManager::CreateEntrypointlessCoroutine(Runtime *runtime, Pan
     co->InitBuffers();
     if (makeCurrent) {
         Coroutine::SetCurrent(co);
-        co->LinkToExternalHolder(true);
+        co->LinkToExternalMutator(true);
         co->RequestResume();
         co->NativeCodeBegin();
     }
