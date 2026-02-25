@@ -41,63 +41,6 @@ export interface ErrorOptions {
 }
 
 /**
- * Defines ErrorOptionsImpl class
- *
- * @implements { ErrorOptions }
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- * @since 24
- */
-export class ErrorOptionsImpl implements ErrorOptions {
-    /**
-     * Specifies cause of an Error
-     *
-     * @type { Object | undefined }
-     * @default undefined
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    cause_?: Object
-
-    /**
-     * Getter for Error cause
-     *
-     * @returns { Object | undefined } - A cause of the Error
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    override get cause(): Object | undefined {
-        return this.cause_
-    }
-
-    /**
-     * Setter for Error cause
-     *
-     * @param { Object | undefined } cause - A cause of the Error
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    set cause(cause: Object | undefined) {
-        this.cause_ = cause
-    }
-
-    /**
-     * Constructor for ErrorOptionsImpl
-     *
-     * @param { Object } [cause] - A cause of the Error
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    constructor(cause?: Object) {
-        this.cause_ = cause
-    }
-}
-
-/**
  * Defines Error class
  *
  * @syscap SystemCapability.Utils.Lang
