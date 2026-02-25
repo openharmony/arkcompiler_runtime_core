@@ -515,7 +515,8 @@ public:
     {
         aliasCalls_++;
         auto aliasType = aa_.CheckInstAlias<true>(first, second);
-        COMPILER_LOG(DEBUG, LSE_OPT) << "Alias type: " << aliasType;
+        COMPILER_LOG(DEBUG, LSE_OPT) << "Alias type of heap " << LogInst(second) << ": "
+                                     << AliasAnalysis::AliasTypeToStr(aliasType);
         if (aliasType != ALIAS_IF_BASE_EQUALS) {
             return aliasType == MUST_ALIAS;
         }
@@ -1206,6 +1207,7 @@ void Lse::ProcessAllBBs(HeapEqClasses *heaps, Marker phiFixupMrk)
 
         for (auto inst : block->Insts()) {
             if (IsHeapReadingInst(inst)) {
+                COMPILER_LOG(DEBUG, LSE_OPT) << LogInst(inst) << " reads heap";
                 visitor_->SetHeapAsRead(block);
             }
             if (IsHeapInvalidatingInst(inst)) {
