@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -19,16 +19,19 @@ tags: [compile-only]
 ---*/
 
 class Point {
-  public x: double;
-  public y: double;
-  public length(): double {
-    return (this.x * this.x + this.y * this.y);
-  }
+    public x: number
+    public y: number
+    public constructor(x : number, y : number) {
+        this.x = x
+        this.y = y
+    }
 
-  constructor(x: int, y: int) {
-    this.x = x;
-    this.y = y;
-  }
+    public distanceBetween(other: Point): number {
+        return Math.sqrt (
+            (this.x - other.x) * (this.x - other.x) +
+            (this.y - other.y) * (this.y - other.y)
+        )
+    }
 
-  static origin = new Point(0, 0);
+    static origin = new Point(0, 0)
 }

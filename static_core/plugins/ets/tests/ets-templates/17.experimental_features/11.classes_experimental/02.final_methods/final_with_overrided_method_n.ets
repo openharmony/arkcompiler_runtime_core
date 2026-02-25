@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,15 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for test in tests %}
 /*---
-desc: Check members with private access modifier in abstract class.
-assert: >-
-      Member or constructor with private modifier can be accessed only within their declaring abstract class.
-      {{test.doc}}
+desc: Final overrided method version
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0141: method(): void in C cannot override method(): void in B because overridden method is final."
 ---*/
 
-{{test.decl}}
+class A {
+    method(): void {}
+}
 
-{% endfor %}
+class B extends A {
+    final override method(): void {}
+}
+
+class C extends B {
+    override method(): void {}
+}

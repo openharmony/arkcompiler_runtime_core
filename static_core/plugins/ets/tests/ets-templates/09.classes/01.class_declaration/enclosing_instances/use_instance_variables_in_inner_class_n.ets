@@ -13,17 +13,28 @@
  * limitations under the License.
  */
 
+{% for member in class_members %}
+
 /*---
 desc: >-
-    Overriding abstract method.
-    An abstract method declaration provided by an abstract subclass can override another abstract method.
-tags: [compile-only]
+    Use variables that not declare in an inner class, and don't have readonly modifier.
+    Any local variable, formal parameter, or exception and panic parameter used but not declared in an inner class
+    must be declared readonly, or a compile-time error occurs where the use is attempted.
+tags: [compile-only, negative]
 ---*/
 
-abstract class A {
-    abstract run(): void;
+class A {
+    {{member.decl}};
+
+    public class B {
+        public foo(): void {
+            {{member.call}};
+        }
+
+        public foo(y: int): void {
+            let b: int = y;
+        }
+    }
 }
 
-abstract class B extends A {
-    abstract run(): void;
-}
+{% endfor %}

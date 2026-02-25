@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,16 +16,16 @@ limitations under the License.
 {% for mod in modifiers %}
 {% for member in members %}
 /*---
-desc: Access modifiers.
-assert: >-
+desc: >- 
+    Access modifiers.
     Members and constructors may have either private, internal, internal protected, protected or public modifier to
     explicitly specify the desired accessibility.
-params: "{{mod}} {{member}}"
+    "{{mod}} {{member}}"
 tags: [compile-only]
 ---*/
 
 class A {
-  {{mod}} {{member.body}}
+    {{mod}} {{member.body}}
 }
 
 {% endfor %}

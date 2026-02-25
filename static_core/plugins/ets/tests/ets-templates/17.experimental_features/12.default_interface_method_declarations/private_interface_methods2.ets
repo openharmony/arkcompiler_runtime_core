@@ -15,7 +15,6 @@
 
 /*---
 desc: A default method can be explicitly declared private in an interface body.
-tags: [compile-only, negative]
 ---*/
 interface Vehicle {
     private getHorsePower3(rpm: int, torque: int): int {
@@ -32,3 +31,8 @@ class Car implements Vehicle {
         return (rpm * torque) / 2626;
     }
 }
+
+function main(): void {
+    arktest.assertEQ( new Car().getPwrIndex(1), 1 )
+}
+

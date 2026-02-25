@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,9 +15,9 @@ limitations under the License.
 
 {% for test in tests %}
 /*---
-desc: Check members with private access modifier in abstract class.
-assert: >-
-      Member or constructor with private modifier can be accessed only within their declaring abstract class.
+desc: >-
+    Check members with private access modifier in abstract class. 
+    Member or constructor with private modifier can be accessed only within their declaring abstract class.
       {{test.doc}}
 ---*/
 

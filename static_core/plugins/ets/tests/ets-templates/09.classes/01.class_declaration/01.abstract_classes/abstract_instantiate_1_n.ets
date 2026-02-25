@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-{% for mod in modifiers %}
-
 /*---
-desc: Abstract method declaration with '{{mod}}' keyword.
-assert: >-
-  A compile-time error occurs if
-  - An abstract method is declared private
-  - The method declaration contains another modifier (static, final, native, or async) along
-  with the modifier abstract.
-params: {{mod}}
-tags: [compile-only, negative]
+desc: A compile-time error occurs if an attempt is made to create an instance of an abstract class
+tags: [negative, compile-only]
 ---*/
 
-abstract class A {
-  {{mod}} abstract run(): void;
-}
+abstract class A {}
+abstract class B extends A {}
 
-{% endfor %}
+function main(): void {
+    let a = new B();
+}

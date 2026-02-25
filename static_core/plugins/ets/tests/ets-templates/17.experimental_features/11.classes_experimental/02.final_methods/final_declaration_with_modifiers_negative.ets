@@ -16,8 +16,9 @@ limitations under the License.
 {% for mod in modifiers %}
 
 /*---
-desc: Final method declaraion with '{{mod.keyword}}' keyword. CTE occurs if a method declaration contains keyword abstract or static along with the keyword final.
-params: {{mod.keyword}}
+desc: >-
+    Final method declaraion with '{{mod.keyword}}' keyword.
+    A compile-time error occurs if a method declaration contains keyword abstract or static along with the keyword final.
 tags: [compile-only, negative]
 expected_out: "{{mod.expected_out}}"
 ---*/

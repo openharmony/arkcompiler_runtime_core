@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,20 @@
  * limitations under the License.
  */
 
-{% for member in class_members %}
+{% for mod in modifiers %}
 
 /*---
-desc: Use variables that not declare in an inner class, and don't have readonly modifier.
-assert: >-
-    Any local variable, formal parameter, or exception and panic parameter used but not declared in an inner class
-    must be declared readonly, or a compile-time error occurs where the use is attempted.
+desc: >-
+    Abstract method declaration with '{{mod}}' keyword.
+    A compile-time error occurs if
+    - An abstract method is declared private
+    - The method declaration contains another modifier (static, final, native, or async) along
+    with the modifier abstract.
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  {{member.decl}};
-
-  public class B {
-    public foo(): void {
-      {{member.call}};
-    }
-
-    public foo(y: int): void {
-      let b: int = y;
-    }
-  }
+abstract class A {
+    {{mod}} abstract run(): void;
 }
 
 {% endfor %}

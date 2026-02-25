@@ -14,15 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Final method cannot be hidden
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0141: method(): void in B cannot override method(): void in A because overridden method is final."
+desc: >-
+    Abstract method declaration with private access modifier.
+    It is compile-time error if an abstract method is marked as private.
+tags: [negative, compile-only]
 ---*/
 
 class A {
-  final method(): void {}
-}
-
-class B extends A {
-  method(): void {}
+    private abstract run(): void;
 }

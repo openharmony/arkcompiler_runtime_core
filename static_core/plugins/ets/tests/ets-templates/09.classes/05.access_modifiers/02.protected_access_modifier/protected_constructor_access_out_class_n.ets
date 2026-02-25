@@ -14,15 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Final method cannot be overridden
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0141: method(): void in B cannot override method(): void in A because overridden method is final."
+desc: >-
+    Check constructor with protected access modifier out class.
+    Member or constructor with protected modifier can be accessed only within their declaring class
+    and classes derived from their declaring class.
+tags: [negative, compile-only]
 ---*/
 
 class A {
-  final method(): void {}
+    x: int;
+    y: int;
+
+    protected constructor(x: int, y: int) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
-class B extends A {
-  override method(): void {}
+function main(): void {
+    let instance: A = new A(2, 3);
 }

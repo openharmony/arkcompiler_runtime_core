@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,23 +15,22 @@ limitations under the License.
 
 /*---
 desc: Checks that final method can be called from another method inside the same class.
-tags: [compile-only]
 ---*/
 
 class A {
-  res: int = 0;
+    res: int = 0;
   
-  public final method1(): void {
-    this.res = 1;
-  }
+    public final method1(): void {
+        this.res = 1;
+    }
 
-  public method2(): void {
-    this.method1();
-  }
+    public method2(): void {
+        this.method1();
+    }
 }
 
 function main(): void {
-  let a: A = new A();
-  a.method2();
-  arktest.assertTrue( a.res == 1 );
+    let a: A = new A();
+    a.method2();
+    arktest.assertEQ( a.res , 1 );
 }

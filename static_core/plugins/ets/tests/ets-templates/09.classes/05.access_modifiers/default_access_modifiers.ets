@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,16 +15,17 @@ limitations under the License.
 
 {% for member in members %}
 /*---
-desc: Default access modifiers.
-assert: If no modifier is explicitly provided, iy is implicitly declared public dy default.
-params: {{member}}
+desc: >-
+    Default access modifiers.
+    If no modifier is explicitly provided, iy is implicitly declared public dy default.
+    {{member}}
 ---*/
 
 class A {
-  y: int;
-  constructor() {}
+    y: int;
+    constructor() {}
 
-  {{member.body}}
+    {{member.body}}
 }
 
 function main(): void {
