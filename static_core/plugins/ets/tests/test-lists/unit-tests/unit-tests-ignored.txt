@@ -4,12 +4,6 @@ ets-common-tests/taskpool/common_tasks.ets
 #33350
 ets-common-tests/taskpool/concurrent_container_set_tasks.ets
 
-#33011
-ets-common-tests/taskpool/common_tasks_new.ets
-
-#33161
-ets-common-tests/taskpool/seqrunner_tasks.ets
-
 # 28002
 ets-common-tests/imported_modules_TL_exec_2/a.ets
 ets-common-tests/imported_modules_TL_exec_1/a.ets
@@ -28,8 +22,6 @@ ets-common-tests/annotation_import_export_test/AmbientImportAl.ets
 #32560
 ets-common-tests/atomics/base_operation_compare_exchange.ets
 
-#33176
-ets-common-tests/atomics/concurrent_compare_exchange.ets
 #32837
 ets-common-tests/taskpool/asyncrunner_tasks.ets
 
