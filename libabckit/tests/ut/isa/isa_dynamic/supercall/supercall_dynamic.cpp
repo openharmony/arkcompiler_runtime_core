@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,10 +160,30 @@ static void VerifySuperCallThisRangeIr(AbckitGraph *graph, bool isWideMode)
              {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {2}},
              {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
              {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {6, 3}},
-             {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {4}},
-             {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {4}},
          }},
-        {{1}, {}, {}}};
+        {{1},
+         {3, 5},
+         {
+             {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY, {}},
+         }},
+        {{2},
+         {4},
+         {
+             {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {4}},
+         }},
+        {{3}, {6, 5}, {}},
+        {{2, 4},
+         {7},
+         {
+             {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI, {}},
+             {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, {10}},
+         }},
+        {{4},
+         {7},
+         {
+             {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {4}},
+         }},
+        {{5, 6}, {}, {}}};
 
     helpers::VerifyGraph(graph, bbSchema);
 }
@@ -279,10 +299,30 @@ static void VerifySuperCallSpreadIr(AbckitGraph *graph)
              {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {2}},
              {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
              {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {9, 3}},
-             {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {7}},
-             {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {7}},
          }},
-        {{1}, {}, {}}};
+        {{1},
+         {3, 5},
+         {
+             {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY, {}},
+         }},
+        {{2},
+         {4},
+         {
+             {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {7}},
+         }},
+        {{3}, {6, 5}, {}},
+        {{2, 4},
+         {7},
+         {
+             {13, ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI, {}},
+             {14, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, {13}},
+         }},
+        {{4},
+         {7},
+         {
+             {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {7}},
+         }},
+        {{5, 6}, {}, {}}};
 
     helpers::VerifyGraph(graph, bbSchema);
 }
@@ -324,10 +364,30 @@ static void VerifySuperCallArrowRangeIr(AbckitGraph *graph, bool isWideMode)
              {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
              {4, superCall, {0, 3}},
              {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {2}},
-             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {4}},
-             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {4}},
          }},
-        {{1}, {}, {}}};
+        {{1},
+         {3, 5},
+         {
+             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY, {}},
+         }},
+        {{2},
+         {4},
+         {
+             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {4}},
+         }},
+        {{3}, {6, 5}, {}},
+        {{2, 4},
+         {7},
+         {
+             {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI, {}},
+             {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, {8}},
+         }},
+        {{4},
+         {7},
+         {
+             {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {4}},
+         }},
+        {{5, 6}, {}, {}}};
 
     helpers::VerifyGraph(graph, bbSchema);
 }
