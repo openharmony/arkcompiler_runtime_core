@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -446,6 +446,13 @@ function testParseErrorHandling(): void {
     checkCorrectError((): void => {
         JSON.parseJsonElement("{")
     });
+
+    // Test invalid JSON strings 2 case from xts
+    arktest.expectThrow(
+        (): void => {JSON.parseJsonElement("[{\"a\":1}")}, 
+        (e: Error): boolean =>
+            (e instanceof SyntaxError) && (e.message == 'Expected \',\' or \']\' at 8 at 8..8')
+    );
 
     checkCorrectError((): void => {
         JSON.parseJsonElement("}")
