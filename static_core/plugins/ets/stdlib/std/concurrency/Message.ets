@@ -21,6 +21,11 @@ type CB = () => void;
 
 export namespace concurrency {
 
+    enum MessageInnerStatus {
+        PENDING = 0,
+        SENT = 1,
+    }
+
     /**
      * Message class for inter-thread communication
      * Supports different types of message construction and sending
@@ -31,7 +36,7 @@ export namespace concurrency {
         private what: int = Message.defaultMessagewhat;
         private callback: CB | undefined = undefined;
         private obj: Object | undefined = undefined;
-        private isSent: AtomicFlag = new AtomicFlag(false);
+        private status: AtomicInt = new AtomicInt(MessageInnerStatus.PENDING.valueOf());
         private isProcessed: AtomicFlag = new AtomicFlag(false);
 
         /**
@@ -116,10 +121,10 @@ export namespace concurrency {
          * Send the message to the target
          */
         public sendToTarget(): void {
-            if (this.isSent.get()) {
+            const previousStatus = this.status.compareAndSwap(MessageInnerStatus.PENDING.valueOf(), MessageInnerStatus.SENT.valueOf());
+            if (previousStatus != MessageInnerStatus.PENDING.valueOf()) {
                 throw new Error('Message:: Message already sent');
             }
-            this.isSent.set(true);
             this.handler.sendMessage(this);
         }
 

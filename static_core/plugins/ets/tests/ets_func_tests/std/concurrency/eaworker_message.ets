@@ -321,6 +321,51 @@ function testRunAfterQuit() {
     });
 }
 
+function messageSendToTargetConcurrentTest() {
+    let eaw = new EAWorker();
+    eaw.start();
+    let messageCount = 0;
+    let event = new Event();
+    let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
+        messageCount++;
+        event.fire();
+    }, eaw);
+    let emptyMessage = 1;
+    let successCount: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
+    let failCount: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
+
+    let message = new concurrency.Message(emptyMessage, handler);
+    const numCoroutines = 10;
+    let allJobs: Array<Job<void>> = new Array<Job<void>>();
+
+    for (let i = 0; i < numCoroutines; i++) {
+        let index = i;
+        let job = launch<void>(() => {
+            try {
+                message.sendToTarget();
+                successCount.push(index);
+            } catch (e) {
+                if (e.message == 'Message:: Message already sent') {
+                    failCount.push(index);
+                } else {
+                    throw e;
+                }
+            }
+        });
+        allJobs.push(job);
+    }
+
+    for (let i = 0; i < allJobs.length; i++) {
+        allJobs[i].Await();
+    }
+
+    event.wait();
+    arktest.assertEQ(successCount.size, 1);
+    arktest.assertEQ(failCount.size, numCoroutines - 1);
+    arktest.assertEQ(messageCount, 1);
+    eaw.join();
+}
+
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);
@@ -337,5 +382,6 @@ function main() {
     suite.addTest('testQuitBeforeStart', testQuitBeforeStart);
     suite.addTest('testStartafterJoin', testStartafterJoin);
     suite.addTest('testRunAfterQuit', testRunAfterQuit);
+    suite.addTest('messageSendToTargetConcurrentTest', messageSendToTargetConcurrentTest);
     return suite.run();
 }
