@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ describe('LogsView Filters', () => {
         renderWithStore();
 
         const checkboxes = screen.getAllByRole('checkbox');
-        expect(checkboxes).toHaveLength(2);
+        expect(checkboxes).toHaveLength(6);
 
         const outCheckbox = checkboxes.find((cb) => cb.getAttribute('label') === 'Out');
         const errCheckbox = checkboxes.find((cb) => cb.getAttribute('label') === 'Err');
@@ -159,7 +159,87 @@ describe('LogsView Filters', () => {
 
         expect(screen.getByText('Compile output message')).toBeInTheDocument();
         expect(screen.queryByText('Compile error message')).not.toBeInTheDocument();
-        expect(screen.queryByText('Runtime output message')).not.toBeInTheDocument();
-        expect(screen.queryByText('Runtime error message')).not.toBeInTheDocument();
+    });
+});
+
+describe('LogsView Runtime Tag Filters', () => {
+    const runtimeLogs = [
+        {
+            message: [{ message: 'Run output message', source: 'output' as const }],
+            isRead: false,
+            from: ELogType.RUN_OUT,
+            exit_code: 0
+        },
+        {
+            message: [{ message: 'Run error message', source: 'error' as const }],
+            isRead: false,
+            from: ELogType.RUN_ERR,
+            exit_code: 1
+        },
+        {
+            message: [{ message: 'AOT output message', source: 'output' as const }],
+            isRead: false,
+            from: ELogType.AOT_RUN_OUT,
+            exit_code: 0
+        },
+        {
+            message: [{ message: 'AOT error message', source: 'error' as const }],
+            isRead: false,
+            from: ELogType.AOT_RUN_ERR,
+            exit_code: 1
+        }
+    ];
+
+    const renderRuntime = (logs = runtimeLogs): ReturnType<typeof render> => {
+        const store = createMockStore();
+        return render(
+            <Provider store={store}>
+                <LogsView
+                    logArr={logs}
+                    clearFilters={jest.fn()}
+                    logType='runtime'
+                />
+            </Provider>
+        );
+    };
+
+    it('shows Run and AOT tag checkboxes for runtime tab', () => {
+        renderRuntime();
+        const checkboxes = screen.getAllByRole('checkbox');
+        expect(checkboxes).toHaveLength(6);
+    });
+
+    it('displays all runtime logs by default', () => {
+        renderRuntime();
+        expect(screen.getByText('Run output message')).toBeInTheDocument();
+        expect(screen.getByText('Run error message')).toBeInTheDocument();
+        expect(screen.getByText('AOT output message')).toBeInTheDocument();
+        expect(screen.getByText('AOT error message')).toBeInTheDocument();
+    });
+
+    it('hides AOT logs when AOT tag is unchecked', () => {
+        renderRuntime();
+        const checkboxes = screen.getAllByRole('checkbox');
+        const aotCheckbox = checkboxes.find((cb) => cb.getAttribute('label') === 'AOT');
+        if (aotCheckbox) {
+            fireEvent.click(aotCheckbox);
+        }
+        expect(screen.getByText('Run output message')).toBeInTheDocument();
+        expect(screen.getByText('Run error message')).toBeInTheDocument();
+        expect(screen.queryByText('AOT output message')).not.toBeInTheDocument();
+        expect(screen.queryByText('AOT error message')).not.toBeInTheDocument();
+    });
+
+    it('hides Run logs when Run tag is unchecked', () => {
+        renderRuntime();
+        const checkboxes = screen.getAllByRole('checkbox');
+        const runCheckbox = checkboxes.find((cb) => cb.getAttribute('label') === 'Compile');
+        if (runCheckbox) {
+            fireEvent.click(runCheckbox);
+        }
+        expect(screen.queryByText('Run output message')).not.toBeInTheDocument();
+        expect(screen.queryByText('Run error message')).not.toBeInTheDocument();
+        expect(screen.getByText('AOT output message')).toBeInTheDocument();
+        expect(screen.getByText('AOT error message')).toBeInTheDocument();
     });
 });

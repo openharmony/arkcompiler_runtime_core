@@ -27,60 +27,20 @@ import {
     setVersionsLoading,
     setIrDumpCompilerDump,
     setIrDumpDisasmDump,
-    Theme
 } from '../slices/appState';
 import { versionService } from '../../services/versions';
-import { VerificationMode } from '../../models/code';
 
-export const setThemeAction = createAsyncThunk(
-    '@theme/change',
-    (data: Theme, thunkAPI) => {
-        thunkAPI.dispatch(setTheme(data));
-    },
-);
-export const setClearLogsAction = createAsyncThunk(
-    '@clearLogs/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setClearLogsEachRun(data));
-    },
-);
-export const setPrimaryColorAction = createAsyncThunk(
-    '@theme/changeColor',
-    (data: string, thunkAPI) => {
-        thunkAPI.dispatch(setPrimaryColor(data));
-    },
-);
-export const setDisasmAction = createAsyncThunk(
-    '@disasm/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setDisasm(data));
-    },
-);
-export const setVerifAction = createAsyncThunk(
-    '@verifier/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setVerifier(data));
-    },
-);
-export const setAstViewAction = createAsyncThunk(
-    '@astView/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setAstView(data));
-    },
-);
-export const setVerificationModeAction = createAsyncThunk(
-    '@verificationMode/change',
-    (data: VerificationMode, thunkAPI) => {
-        thunkAPI.dispatch(setVerificationMode(data));
-    },
-);
-
-export const setAotModeAction = createAsyncThunk(
-    '@aotMode/change',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setAotMode(data));
-    },
-);
+export const setThemeAction = setTheme;
+export const setClearLogsAction = setClearLogsEachRun;
+export const setPrimaryColorAction = setPrimaryColor;
+export const setDisasmAction = setDisasm;
+export const setVerifAction = setVerifier;
+export const setAstViewAction = setAstView;
+export const setVerificationModeAction = setVerificationMode;
+export const setAotModeAction = setAotMode;
+export const setVersionAction = setVersions;
+export const setIrDumpCompilerDumpAction = setIrDumpCompilerDump;
+export const setIrDumpDisasmDumpAction = setIrDumpDisasmDump;
 
 export const fetchVersions = createAsyncThunk(
     '@versions/fetchVersions',
@@ -99,26 +59,5 @@ export const fetchVersions = createAsyncThunk(
         } finally {
             thunkAPI.dispatch(setVersionsLoading(false));
         }
-    }
-);
-
-export const setVersionAction = createAsyncThunk(
-    '@versions/setVersion',
-    (data: { frontend: string; backend: string; arkts: string; es2panda: string }, thunkAPI) => {
-        thunkAPI.dispatch(setVersions(data));
-    }
-);
-
-export const setIrDumpCompilerDumpAction = createAsyncThunk(
-    '@irDump/compilerDump',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setIrDumpCompilerDump(data));
-    }
-);
-
-export const setIrDumpDisasmDumpAction = createAsyncThunk(
-    '@irDump/disasmDump',
-    (data: boolean, thunkAPI) => {
-        thunkAPI.dispatch(setIrDumpDisasmDump(data));
     }
 );
