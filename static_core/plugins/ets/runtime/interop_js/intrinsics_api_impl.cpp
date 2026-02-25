@@ -951,7 +951,7 @@ EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
     std::vector<VMHandle<ObjectHeader>> argsVec;
     if (argc > 0) {
         argsVec.reserve(argc);
-        for (size_t i = 0; i < args->GetLength(); i++) {
+        for (size_t i = 0; i < argc; i++) {
             auto objHeader = args->GetCoreType()->Get<ObjectHeader *>(i);
             argsVec.emplace_back(VMHandle<ObjectHeader>(coro, objHeader));
         }
@@ -973,7 +973,7 @@ EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
     std::vector<VMHandle<ObjectHeader>> argsVec;
     if (argc > 0) {
         argsVec.reserve(argc);
-        for (size_t i = 0; i < args->GetLength(); i++) {
+        for (size_t i = 0; i < argc; i++) {
             auto objHeader = args->GetCoreType()->Get<ObjectHeader *>(i);
             argsVec.emplace_back(VMHandle<ObjectHeader>(coro, objHeader));
         }
@@ -1851,11 +1851,11 @@ EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectAr
     INTEROP_CODE_SCOPE_ETS_TO_JS(coro);
 
     HandleScope<ObjectHeader *> scope(coro);
-    auto staticArgs = args;
+    size_t argc = args->GetLength();
     PandaVector<VMHandle<ObjectHeader>> argsVec;
-    argsVec.reserve(staticArgs->GetLength());
-    for (size_t idx = 0; idx != staticArgs->GetLength(); idx++) {
-        ObjectHeader *argHeader = staticArgs->Get(idx)->GetCoreType();
+    argsVec.reserve(argc);
+    for (size_t idx = 0; idx != argc; idx++) {
+        ObjectHeader *argHeader = args->Get(idx)->GetCoreType();
         argsVec.emplace_back(VMHandle<ObjectHeader>(coro, argHeader));
     }
 
