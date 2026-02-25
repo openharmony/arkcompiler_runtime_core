@@ -31,6 +31,20 @@ The stdlib is organized into several layers:
 - Files in `std/` provide ArkTS-specific enhancements
 - **Import syntax**: `import { HashMap } from 'std.containers'` or `import * as escompat from 'escompat'`
 
+## ArkTS Type System
+
+**CRITICAL**: ArkTS has **no primitive types**. All types are reference types (classes).
+
+- `int`, `long`, `double`, `float`, `boolean`, `byte`, `short`, `char` are **classes**, not primitives
+- `Int`, `Long`, `Double`, `Float`, `Boolean`, `Byte`, `Short`, `Char` are boxed wrappers
+- `int` and `Int` are the same type
+- Lowercase type names (e.g., `double`) are type aliases to their boxed equivalents (e.g., `Double`)
+
+**Implications for coding:**
+- `new Double(value.value)` is redundant if `value.value` is already a `Double` - just use `value.value`
+- `new BigInt(bigintValue.toString())` is redundant if `bigintValue` is already a `BigInt` - just use `bigintValue`
+- Method calls on "primitive-like" values (e.g., `5.toInt()`) work because they're objects
+
 ## Build System
 
 This project uses **dual build systems**:
@@ -46,6 +60,12 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release -GNinja \
     -DPANDA_ETS_INTEROP_JS=ON
 cmake --build build --target panda_bins etssdk
 ```
+
+**IMPORTANT**: After any changes to stdlib files (*.ets), you MUST rebuild before running tests:
+```bash
+cmake --build build --target panda_bins etssdk
+```
+Then run tests to verify changes.
 
 ### GN Build 
 ```bash

@@ -495,9 +495,32 @@ function jsonParseClass(): void {
     arktest.assertEQ(tc!.addr.age, 5)
 }
 
+// cases from xts
+function jsonParseInvalid(): void {
+    arktest.expectThrow(
+        (): void => {JSON.parse<String>('{key name: 1}', Class.of(new String()))},
+        (e: Error): boolean => {
+            return (e instanceof SyntaxError) && (e.message == 'Unterminated string at 13 at 2..13')
+        }
+    )
+    arktest.expectThrow(
+        (): void => {JSON.parse<String>('{"num": a123}', Class.of(new String()))},
+        (e: Error): boolean => {
+            return (e instanceof SyntaxError) && (e.message == 'Unexpected character \'a\' at 8 at 8..8')
+        }
+    )
+    arktest.expectThrow(
+        (): void => {JSON.parse<String>('{"valid": TRUE}', Class.of(new String()))},
+        (e: Error): boolean => {
+            return (e instanceof SyntaxError) && (e.message == 'Unexpected character \'T\' at 10 at 10..10')
+        }
+    )
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('JSON.parse tests');
 
+    suite.addTest('JSON.parse() for invalid string', jsonParseInvalid)
     suite.addTest('JSON.parse() using undefined "reviver"', jsonParseUsingUndefinedReviver)
     suite.addTest('JSON.parse() using "reviver" which returns "undefined"', jsonParseUsingRevivierWhichReturnsUndefined)
     // #21831: ArrayStoreError: nullvalue cannot be stored in an array of type [Lstd/core/String;
