@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,8 @@ public:
         Mangle::ConvertSignatureToProto(methodSignature, signature);
         ASSERT_TRUE(methodSignature.has_value()) << "Signature \"" << signature << "\" should be valid";
         EXPECT_EQ(methodSignature.value().GetProto(), expectedProto)
-            << "Signature \"" << signature << "\" was parsed incorrectly";
+            << "Signature \"" << signature
+            << "\" was parsed incorrectly: " << DumpProto(methodSignature.value().GetProto());
     }
 
     void CheckInvalidSignatureParsing(const std::string_view signature)
@@ -37,6 +38,33 @@ public:
         std::optional<EtsMethodSignature> methodSignature;
         Mangle::ConvertSignatureToProto(methodSignature, signature);
         EXPECT_FALSE(methodSignature.has_value()) << "Signature \"" << signature << "\" should be invalid";
+    }
+
+private:
+    std::string DumpProto(const Method::Proto &proto)
+    {
+        std::stringstream ss;
+
+        ss << "Shorty: {";
+        const auto &shorty = proto.GetShorty();
+        if (!shorty.empty()) {
+            ss << shorty[0];
+        }
+        for (size_t i = 1; i < shorty.size(); ++i) {
+            ss << ", " << shorty[i];
+        }
+
+        ss << "}; References: {";
+        const auto &ref = proto.GetRefTypes();
+        if (!ref.empty()) {
+            ss << ref[0];
+        }
+        for (size_t i = 1; i < ref.size(); ++i) {
+            ss << ", " << ref[i];
+        }
+        ss << "}";
+
+        return ss.str();
     }
 };
 
@@ -160,6 +188,119 @@ TEST_F(MangleSignatureToProtoTest, InvalidSignature)
     CheckInvalidSignatureParsing(":V");
     CheckInvalidSignatureParsing("::");
     CheckInvalidSignatureParsing("i:i:z");
+}
+
+TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators)
+{
+    CheckSignatureParsing("C{std:core.Object}:",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::VOID},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+
+    CheckSignatureParsing(":C{std:core.Object}",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+
+    CheckSignatureParsing("A{C{std:core.String}}:",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::VOID},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {std::string_view {"[Lstd/core/String;"}}));
+
+    CheckSignatureParsing("iC{std:core.String}:z",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::U1},
+                                  panda_file::Type {panda_file::Type::TypeId::I32},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/String;"}}));
+
+    CheckSignatureParsing("C{std.core.Object}:",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::VOID},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {std::string_view {"Lstd/core/Object;"}}));
+}
+
+TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_Invalid)
+{
+    CheckInvalidSignatureParsing("C{a/b}:");
+    CheckInvalidSignatureParsing("C{a:b");
+    CheckInvalidSignatureParsing("C{a:b:");
+    CheckInvalidSignatureParsing("C{std:core:Object}:");
+    CheckInvalidSignatureParsing("E{a:b:c.Color}:");
+    CheckInvalidSignatureParsing("P{a:b:c.X}:");
+    CheckInvalidSignatureParsing("E{a:b:c:d.Color}:");
+    CheckInvalidSignatureParsing("P{std:foo:bar:X}:");
+    CheckInvalidSignatureParsing("{:}:");
+    CheckInvalidSignatureParsing("C{std:core:Object}C{a:b:c}:");
+    CheckInvalidSignatureParsing("C{a:b:c}C{d:e:f}:");
+    CheckInvalidSignatureParsing("A{C{a:b:c:d}}:");
+}
+
+TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_MultipleObjects)
+{
+    CheckSignatureParsing("C{std:core.Object}C{std:core.String}C{std:core.Double}:",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::VOID},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {
+                                  std::string_view {"Lstd/core/Object;"},
+                                  std::string_view {"Lstd/core/String;"},
+                                  std::string_view {"Lstd/core/Double;"},
+                              }));
+
+    CheckSignatureParsing("C{a:b.C}C{d:e.F}C{g:h.I}C{j:k.L}C{m:n.M}:i",
+                          Method::Proto(
+                              Method::Proto::ShortyVector {
+                                  panda_file::Type {panda_file::Type::TypeId::I32},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                                  panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                              },
+                              Method::Proto::RefTypeVector {
+                                  std::string_view {"La/b/C;"},
+                                  std::string_view {"Ld/e/F;"},
+                                  std::string_view {"Lg/h/I;"},
+                                  std::string_view {"Lj/k/L;"},
+                                  std::string_view {"Lm/n/M;"},
+                              }));
+}
+
+TEST_F(MangleSignatureToProtoTest, NormalizePackageSeparators_MultipleObjectsWithUnion)
+{
+    CheckSignatureParsing(
+        "C{std:core.Object}C{std:core.String}C{std:core.Double}:X{A{i}C{std:core.Double}C{std:core.String}}",
+        Method::Proto(
+            Method::Proto::ShortyVector {
+                panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+                panda_file::Type {panda_file::Type::TypeId::REFERENCE},
+            },
+            Method::Proto::RefTypeVector {
+                std::string_view {"{U[ILstd/core/Double;Lstd/core/String;}"},
+                std::string_view {"Lstd/core/Object;"},
+                std::string_view {"Lstd/core/String;"},
+                std::string_view {"Lstd/core/Double;"},
+            }));
 }
 
 }  // namespace ark::ets::ani::testing

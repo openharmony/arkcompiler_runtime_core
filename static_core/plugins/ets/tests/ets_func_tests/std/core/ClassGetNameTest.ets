@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ function main() {
     suite.addTest('Class.getName with RuntimeLinker', testClassGetNameWithRuntimeLinker)
     suite.addTest('Class.getName Lambda', testClassGetNameLambda)
     suite.addTest('Class.getName primitives', testGetNamePrimitives)
+    suite.addTest('Class.getName colon separator normalization', testClassGetNameColonSeparator)
     return suite.run()
 }
 
@@ -173,4 +174,49 @@ function testGetNamePrimitives() {
     arktest.assertEQ(Class.PRIMITIVE_LONG.getName(), "i64")
     arktest.assertEQ(Class.PRIMITIVE_FLOAT.getName(), "f32")
     arktest.assertEQ(Class.PRIMITIVE_DOUBLE.getName(), "f64")
+}
+
+function testClassGetNameColonSeparator() {
+    let rl = getBootRuntimeLinker()
+    const class1 = rl.loadClass("std:core.Object", true)
+    const class2 = rl.loadClass("std.core.Object", true)
+    arktest.assertEQ(class1, class2)
+
+    arktest.assertEQ(rl.findLoadedClass("std:core:sub:Object"), undefined)
+
+    let abcLinker = new AbcRuntimeLinker(undefined, [])
+
+    const abcClass1 = abcLinker.loadClass("std.core:Object", true)
+    const abcClass2 = abcLinker.loadClass("std.core.Object", true)
+    arktest.assertEQ(abcClass1, abcClass2)
+
+    const className1 = abcClass1!.getName()
+    arktest.assertEQ(className1, "std.core.Object")
+
+    const className2 = abcLinker.loadClass("std.core:Byte", true)!.getName()
+    arktest.assertEQ(className2, "std.core.Byte")
+
+    const className3 = abcLinker.loadClass("std.core:Short", true)!.getName()
+    arktest.assertEQ(className3, "std.core.Short")
+
+    const className4 = abcLinker.loadClass("std:core.Int", true)!.getName()
+    arktest.assertEQ(className4, "std.core.Int")
+
+    const className5 = abcLinker.loadClass("std:core.Long", true)!.getName()
+    arktest.assertEQ(className5, "std.core.Long")
+
+    const className6 = abcLinker.loadClass("std:core.Float", true)!.getName()
+    arktest.assertEQ(className6, "std.core.Float")
+
+    const className7 = abcLinker.loadClass("std:core.Double", true)!.getName()
+    arktest.assertEQ(className7, "std.core.Double")
+
+    const className8 = abcLinker.loadClass("std.core:Char", true)!.getName()
+    arktest.assertEQ(className8, "std.core.Char")
+
+    const className9 = abcLinker.loadClass("std.core:Boolean", true)!.getName()
+    arktest.assertEQ(className9, "std.core.Boolean")
+
+    const className10 = abcLinker.loadClass("std.core:String", true)!.getName()
+    arktest.assertEQ(className10, "std.core.String")
 }

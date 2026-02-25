@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -976,19 +976,19 @@ TEST_F(EtsClassTest, NameFromDescriptor)
 TEST_F(EtsClassTest, NameToDescriptor)
 {
     ark::ets::ClassPublicNameParser tdParser("std.core.Object[]");
-    ASSERT_EQ(tdParser.Resolve(), "[Lstd/core/Object;");
+    ASSERT_EQ(tdParser.Resolve().value(), "[Lstd/core/Object;");
 
     tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}");
-    ASSERT_EQ(tdParser.Resolve(), "{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(tdParser.Resolve().value(), "{U[I[J[Lstd/core/String;}");
 
     tdParser = ClassPublicNameParser("{ULLL.L,LLL.N}");
-    ASSERT_EQ(tdParser.Resolve(), "{ULLLL/L;LLLL/N;}");
+    ASSERT_EQ(tdParser.Resolve().value(), "{ULLLL/L;LLLL/N;}");
 
     tdParser = ClassPublicNameParser("{Ui32[],i64[],std.core.String[]}[][]");
-    ASSERT_EQ(tdParser.Resolve(), "[[{U[I[J[Lstd/core/String;}");
+    ASSERT_EQ(tdParser.Resolve().value(), "[[{U[I[J[Lstd/core/String;}");
 
     tdParser = ClassPublicNameParser("{Ustd.core.String,{Ustd.core.String,std.core.String[]}[]}");
-    ASSERT_EQ(tdParser.Resolve(), "{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
+    ASSERT_EQ(tdParser.Resolve().value(), "{ULstd/core/String;[{ULstd/core/String;[Lstd/core/String;}}");
 }
 
 }  // namespace ark::ets::test

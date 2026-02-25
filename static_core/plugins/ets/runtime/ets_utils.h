@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/signature_utils.h"
 
 #include <string>
 #include <map>
@@ -195,19 +196,23 @@ private:
         return res;
     }
 
-    PandaString ResolveUnion()
+    std::optional<PandaString> ResolveUnion()
     {
         PandaString res = "";
         PandaString unionContent = name.substr(left, right - left + 1);
         PandaVector<PandaString> typesArr = SplitUnion(unionContent);
 
         for (const PandaString &typeName : typesArr) {
-            res += ClassPublicNameParser(typeName).Resolve();
+            auto resolvedTypeNameOpt = ClassPublicNameParser(typeName).Resolve();
+            if (UNLIKELY(!resolvedTypeNameOpt)) {
+                return std::nullopt;
+            }
+            res += std::move(resolvedTypeNameOpt.value());
         }
         return res;
     }
 
-    PandaString ResolveFixedArray()
+    std::optional<PandaString> ResolveFixedArray()
     {
         size_t i = 0;
         const size_t step = 2;
@@ -223,7 +228,11 @@ private:
             if (left <= right && name[left] == 'U' && name[right] == '}') {
                 left += 1;
                 right -= 1;
-                return brackets + "{U" + ResolveUnion() + "}";
+                auto resolvedUnionOpt = ResolveUnion();
+                if (UNLIKELY(!resolvedUnionOpt)) {
+                    return std::nullopt;
+                }
+                return brackets + "{U" + std::move(resolvedUnionOpt.value()) + "}";
             } else {
                 // Not a recognized union format
                 return "{}";
@@ -250,10 +259,15 @@ private:
 public:
     ClassPublicNameParser(const PandaString &inputStr) : left(0), right(inputStr.length() - 1), name(inputStr) {}
 
-    PandaString Resolve()
+    std::optional<PandaString> Resolve()
     {
+        auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name, 0, name.size());
+        if (UNLIKELY(!normNameOpt.has_value())) {
+            return std::nullopt;
+        }
+        name = std::move(normNameOpt.value());
         if (std::find(name.begin(), name.end(), '/') != name.end()) {
-            return "";
+            return std::nullopt;
         }
         return ResolveFixedArray();
     }
