@@ -13,7 +13,7 @@
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME ets_internal_objects_mock_tests
+    NAME ets_internal_objects_mock_runtime_tests
     SOURCES
         get_test_class.cpp
         ets_method_signature_test.cpp
@@ -40,7 +40,7 @@ panda_ets_add_gtest(
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME ets_internal_objects_tests
+    NAME ets_internal_objects_runtime_tests
     SOURCES
         get_test_class.cpp
         ets_async_context_test.cpp
@@ -87,5 +87,5 @@ panda_ets_add_gtest(
 )
 
 add_dependencies(ets_tests_runtime_gtests
-    ets_internal_objects_tests_gtests
-    ets_internal_objects_mock_tests_gtests)
+    ets_internal_objects_runtime_tests_gtests
+    ets_internal_objects_mock_runtime_tests_gtests)

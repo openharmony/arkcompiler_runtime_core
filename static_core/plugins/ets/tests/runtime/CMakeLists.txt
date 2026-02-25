@@ -12,11 +12,11 @@
 # limitations under the License.
 
 add_custom_target(ets_tests_runtime_gtests)
-add_dependencies(ets_tests is_assignable_from_union_test_gtests)
+add_dependencies(ets_tests is_assignable_from_union_runtime_test_gtests)
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME ets_vm_test
+    NAME ets_vm_runtime_test
     SOURCES ets_vm_test.cpp
     LIBRARIES arkbase arkfile arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -27,7 +27,7 @@ panda_ets_add_gtest(
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME static_object_accessor_test
+    NAME static_object_accessor_runtime_test
     SOURCES static_object_accessor_test.cpp
     LIBRARIES arkbase arkfile arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -38,7 +38,7 @@ panda_ets_add_gtest(
 
 # NOTE(@srokashevich, #29164): enable with tsan after fix
 if (NOT PANDA_ENABLE_THREAD_SANITIZER)
-    panda_add_gtest_with_ani(ets_vm_init_prealloc_test
+    panda_add_gtest_with_ani(ets_vm_init_prealloc_runtime_test
         CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/prealloc_test/ets_vm_init_prealloc_test.cpp
         ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/prealloc_test/ets_vm_init_prealloc_test.ets
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -47,7 +47,7 @@ if (NOT PANDA_ENABLE_THREAD_SANITIZER)
     )
 endif()
 
-panda_add_gtest_with_ani(entrypoint_return_test
+panda_add_gtest_with_ani(entrypoint_return_runtime_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -55,7 +55,7 @@ panda_add_gtest_with_ani(entrypoint_return_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
-panda_add_gtest_with_ani(ets_vm_oom_test
+panda_add_gtest_with_ani(ets_vm_oom_runtime_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_outofmemory_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_outofmemory_test.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -64,7 +64,7 @@ panda_add_gtest_with_ani(ets_vm_oom_test
 )
 
 if (NOT PANDA_QEMU_BUILD)
-    panda_add_gtest_with_ani(ets_vm_postfork_aot_load_test
+    panda_add_gtest_with_ani(ets_vm_postfork_aot_load_runtime_test
         CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.cpp
         ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/ets_vm_postfork_aot_load_test.ets
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -75,7 +75,7 @@ endif()
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME static_type_converter_test
+    NAME static_type_converter_runtime_test
     SOURCES static_type_converter_test.cpp
     LIBRARIES arkbase arkfile arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -87,7 +87,7 @@ panda_ets_add_gtest(
 # Test checks IterCounter overflow. Cpp part set pre-overflowed value 
 # to IterCounter, then ets part check overflow. It requires cpp part,
 # because it takes a long time to overflow IterCouner without hacking.
-panda_add_gtest_with_ani(map_iter_overflow_test
+panda_add_gtest_with_ani(map_iter_overflow_runtime_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/map_iter_overflow_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/map_iter_overflow_test.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -95,7 +95,7 @@ panda_add_gtest_with_ani(map_iter_overflow_test
     TEST_GROUP ets_tests_runtime_gtests
 )
 
-panda_add_gtest_with_ani(is_assignable_from_union_test
+panda_add_gtest_with_ani(is_assignable_from_union_runtime_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/is_assignable_from_union_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/is_assignable_from_union_test.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -106,7 +106,7 @@ panda_add_gtest_with_ani(is_assignable_from_union_test
 if (NOT PANDA_TARGET_ARM32 AND NOT PANDA_PRODUCT_BUILD)
     panda_ets_add_gtest(
         NO_CORES
-        NAME codegen_typeid_test
+        NAME codegen_typeid_runtime_test
         SOURCES codegen_typeid_test.cpp
         LIBRARIES arkbase arkfile arkruntime
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -118,7 +118,7 @@ endif()
 
 panda_ets_add_gtest(
     NO_CORES
-    NAME ets_runtime_name_converters_test
+    NAME name_converters_ets_runtime_test
     SOURCES ets_runtime_name_converters_test.cpp
     LIBRARIES arkruntime
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
@@ -139,10 +139,10 @@ panda_ets_add_gtest(
 )
 
 add_dependencies(ets_tests_runtime_gtests
-    ets_vm_test_gtests
-    static_object_accessor_test_gtests
-    static_type_converter_test_gtests
-    ets_runtime_name_converters_test_gtests)
+    ets_vm_runtime_test_gtests
+    static_object_accessor_runtime_test_gtests
+    static_type_converter_runtime_test_gtests
+    name_converters_ets_runtime_test_gtests)
 
 add_subdirectory(types)
 add_subdirectory(tooling)

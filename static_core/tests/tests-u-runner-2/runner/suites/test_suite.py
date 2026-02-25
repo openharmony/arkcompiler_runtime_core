@@ -23,7 +23,6 @@ from collections import Counter
 from dataclasses import replace
 from functools import cached_property
 from glob import glob
-from os import path
 from pathlib import Path
 from typing import ClassVar, cast
 from zipfile import ZipFile
@@ -32,7 +31,6 @@ from runner.chapters import Chapters
 from runner.common_exceptions import (
     FileNotFoundException,
     InvalidConfiguration,
-    InvalidGTestNameException,
     TestNotExistException,
 )
 from runner.enum_types.qemu import QemuKind
@@ -45,6 +43,7 @@ from runner.options.options_collections import CollectionsOptions
 from runner.options.options_step import StepKind
 from runner.options.root_dir import RootDir
 from runner.runner_types.test_env import TestEnv
+from runner.suites.gtest_file import GTestFile
 from runner.suites.preparation_step import CopyStep, CustomGeneratorTestPreparationStep, JitStep, TestPreparationStep
 from runner.suites.step_utils import StepUtils
 from runner.suites.test_lists import TestLists
@@ -55,6 +54,7 @@ from runner.utils import (
     get_test_id,
     is_executable_file,
     make_gtest_name,
+    pretty_divider,
 )
 
 _LOGGER = Log.get_logger(__file__)
@@ -100,6 +100,10 @@ class TestSuite(ITestSuite):
     @property
     def extension(self) -> str:
         return cast(str, self.config.test_suite.get_parameter("extension", DEFAULT_EXTENSION))
+
+    @property
+    def explicit_list(self) -> Path | None:
+        return self._explicit_list
 
     @staticmethod
     def __load_list(test_root: Path, test_list_path: Path, prefixes: list[str]) -> tuple[list[Path], list[Path]]:
@@ -189,20 +193,16 @@ class TestSuite(ITestSuite):
         return ""
 
     @cached_property
-    def name(self) -> str:
-        return self.__suite_name
+    def explicit_file(self) -> Path | None:
+        return self._explicit_file
 
     @cached_property
     def list_roots(self) -> list[RootDir]:
         return self._list_roots
 
-    @property
-    def explicit_list(self) -> Path | None:
-        return self._explicit_list
-
     @cached_property
-    def explicit_file(self) -> Path | None:
-        return self._explicit_file
+    def name(self) -> str:
+        return self.__suite_name
 
     def process(self, force_generate: bool) -> list[ITestFlow]:
         """
@@ -265,7 +265,7 @@ class TestSuite(ITestSuite):
         """
         for root in self.list_roots:
             file_path = correct_path(root.root_dir, self.config.test_suite.groups.chapters_file)
-            if path.isfile(file_path):
+            if Path(file_path).is_file():
                 return file_path
         raise FileNotFoundException(
             f"Not found '{self.config.test_suite.groups.chapters_file}' in any list root "
@@ -359,11 +359,11 @@ class TestSuite(ITestSuite):
         Collections are taken into account.
         :return: list of unique found files
         """
-        tests = []
+        tests: list[Path] = []
         for collection in self.config.test_suite.collections:
             extension = self.config.test_suite.extension(collection)
-            glob_expression = path.join(self.test_root, collection.name, f"**/*.{extension}")
-            tests.extend(glob(glob_expression, recursive=True))
+            glob_expression = (self.test_root / collection.name).rglob(f"**/*.{extension}")
+            tests.extend(glob_expression)
         return [Path(test) for test in set(tests)]
 
     def __get_explicit_test_path(self, test_id: str) -> Path | None:
@@ -373,7 +373,7 @@ class TestSuite(ITestSuite):
                 if test_path.exists():
                     return test_path
                 break
-            new_test_id = str(os.path.join(collection.name, test_id))
+            new_test_id = f"{collection.name}/{test_id}"
             test_path = correct_path(self.test_root, new_test_id)
             if test_path and test_path.exists():
                 return test_path
@@ -565,7 +565,7 @@ class TestSuite(ITestSuite):
 
     def __get_chapters(self) -> Chapters:
         chapters_file = self.config.test_suite.groups.chapters_file \
-            if path.isfile(self.config.test_suite.groups.chapters_file) \
+            if Path(self.config.test_suite.groups.chapters_file).is_file() \
             else self._locate_chapters_file()
         return Chapters(chapters_file)
 
@@ -695,10 +695,6 @@ class TestSuite(ITestSuite):
 
 
 class GTestSuite(TestSuite):
-    TEST_FILE = "file_name"
-    TEST_CLASS_NAME = "cls_name"
-    TEST_NAME = "test_name"
-
     def __init__(self, test_env: TestEnv) -> None:
         super().__init__(test_env)
         self.__test_root = Path(self.config.test_suite.test_root)
@@ -724,101 +720,138 @@ class GTestSuite(TestSuite):
         return self.test_root.parent / "intermediate"
 
     @staticmethod
-    def get_class_and_tests(test_file: str, qemu_prefix: list, file_path: Path | None = None,
-                            raw_files_from_dir: bool = True) -> dict[str, list[str]]:
-        # test_file name may be:
-        # - test_file
-        # - test_file/test_class - in this case we need additional filter arg to get test names
-        cmd: list[str | Path]
-        if not raw_files_from_dir and file_path:
-            test_file_name, _, class_name = test_file.partition("/")
-            cmd = [(file_path / test_file_name).as_posix(), "--gtest_list_tests"]
-            if class_name:
-                cmd.append(f"--gtest_filter={class_name}.*")
-        else:
-            cmd = [test_file, "--gtest_list_tests"]
-
+    def get_tests_from_gtest_cmd(
+        file_path: Path,
+        qemu_prefix: list[str],
+        gtest_filter: str | None = None
+    ) -> list[Path]:
+        cmd = [file_path.as_posix(), "--gtest_list_tests"]
         if qemu_prefix:
             cmd = [*qemu_prefix, *cmd]
-
+        if gtest_filter is not None:
+            cmd.append(f"--gtest_filter={gtest_filter}")
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            check=False
+            check=False,
         )
-
-        class_test_names = GTestSuite.parse_test_string_regex(result.stdout)
-        return class_test_names
+        return GTestSuite.parse_gtest_list_tests_command(file_path.as_posix(), result.stdout)
 
     @staticmethod
-    def parse_test_string_regex(gtest_list_tests: str) -> dict[str, list[str]]:
-        pattern = r'([A-Za-z0-9_]+)\.\s*\n((?:(?!^[A-Za-z]+\.).)*)'
-        matches = re.findall(pattern, gtest_list_tests, re.MULTILINE | re.DOTALL)
-
-        result = {}
-        for test_class, test_names_str in matches:
-            test_names = [m.strip() for m in test_names_str.split('\n') if m.strip()]
-            result[test_class] = test_names
-
-        return result
+    def parse_gtest_list_tests_command(binary_name: str, gtest_list_tests: str) -> list[Path]:
+        tests: list[Path] = []
+        current_suite = None
+        for line in gtest_list_tests.splitlines():
+            line = line.rstrip()
+            if not line:
+                continue
+            if not line.startswith((' ', '\t')):
+                current_suite = line.rstrip('.')
+                continue
+            if current_suite and line.strip():
+                test_name = line.strip().split('#')[0].strip()
+                if not test_name:
+                    continue
+                suite_name = f"{binary_name}/{current_suite}"
+                tests.append(Path(f'{suite_name}.{test_name}'))
+        return tests
 
     @staticmethod
-    def _load_gtests(test_lists: list[Path]) -> list[str]:
+    def load_gtest_names_from_file(test_lists: list[Path]) -> list[Path]:
         tests = []
         for test_list in test_lists:
             with open(test_list, encoding="utf-8") as t_file:
                 lines = t_file.readlines()
-                tests.extend([test.rstrip() for test in lines if test.rstrip('\n') and not test.startswith("#")])
-
+                tests.extend([Path(test.rstrip()) for test in lines if test.rstrip('\n') and not test.startswith("#")])
         return tests
 
-    @staticmethod
-    def _define_file_kind(test_name: str) -> tuple[str, str]:
-        """
-        Possible explicit file names variants:
-        - ani_test_any_call/AnyCallTest.AnyCall_Valid
-        - ani_test_any_call/AnyCallTest
-        - ani_test_any_call
-        """
-        test_file_re = re.compile(
-            r'^(?P<file_name>[a-z0-9_]+)'  # ani_test_any_call
-            r'(?:/(?P<cls_name>[A-Z][A-Za-z0-9]*))?'  # /AnyCallTest
-            r'(?:\.(?P<test_name>[A-Za-z0-9_]+))?$'  # .AnyCall_Valid
-        )
-        name_match = test_file_re.fullmatch(test_name)
-        if not name_match:
-            raise InvalidGTestNameException(f"Invalid test name: {test_name}")
-        file_name_groups = name_match.groupdict()
-        if file_name_groups[GTestSuite.TEST_NAME]:
-            kind = GTestSuite.TEST_NAME
-        elif file_name_groups[GTestSuite.TEST_FILE] and file_name_groups[GTestSuite.TEST_CLASS_NAME]:
-            kind = GTestSuite.TEST_CLASS_NAME
+    def load_tests_from_test_path(self, test_path: Path, root_path: Path) -> list[Path]:
+        qemu_prefix = self._test_env.cmd_prefix if self.config.general.qemu != QemuKind.NONE else []
+        gtest = GTestFile.parse_from_path(test_path.as_posix())
+        if gtest is None:
+            _LOGGER.error(f"\n{pretty_divider()}\n"
+                          f"ERROR: Invalid gtest binary at path '{test_path}'\n"
+                          f"Failed to parse gtest file structure.\n"
+                          f"Please verify that the file exists and is a valid gtest executable.\n"
+                          f"{pretty_divider()}\n")
+            return []
+        gtest_binary_full_path = correct_path(root_path, gtest.test_file_name)
+
+        if gtest.test_name is not None or gtest.test_param is not None:
+            return [correct_path(root_path, test_path)]
+
+        if gtest.case_name and gtest.suite_name:
+            gtest_filter = f'{gtest.suite_name}/{gtest.case_name}.*'
+        elif gtest.suite_name:
+            gtest_filter = f'{gtest.suite_name}/*'
+        elif gtest.case_name:
+            gtest_filter = f'{gtest.case_name}.*'
         else:
-            kind = GTestSuite.TEST_FILE
+            return self.get_tests_from_gtest_cmd(gtest_binary_full_path, qemu_prefix)
 
-        return kind, test_name
+        return self.get_tests_from_gtest_cmd(gtest_binary_full_path, qemu_prefix, gtest_filter)
 
-    @staticmethod
-    def _load_line(line: str, test_root: Path) -> Path | None:
-        test, _ = TestSuite._get_test_and_comment_from_line(line.strip(" \n"))
-        if test is None:
-            return None
-        test_path = test_root / test
-        return test_path
-
-    @staticmethod
-    def _load_list(test_root: Path, test_list_path: Path) -> list[Path]:
-        result: list[Path] = []
-        if not test_list_path.exists():
-            return result
-
-        with os.fdopen(os.open(test_list_path, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_handler:
-            for line in file_handler:
-                test_path = GTestSuite._load_line(line, test_root)
-                if test_path is not None:
-                    result.append(test_path)
+    def load_tests_from_directory(self, pattern: Path, filter_path: Path) -> list[Path]:
+        tests_paths = fnmatch.filter(glob(pattern.as_posix(), recursive=True), filter_path.as_posix())
+        result = []
+        for file_path in tests_paths:
+            path = Path(file_path)
+            if path.is_file() and is_executable_file(path):
+                test_path = path.relative_to(self.gtest_root)
+                result.extend(self.load_tests_from_test_path(test_path, self.gtest_root))
         return result
+
+    def process(self, force_generate: bool) -> list[ITestFlow]:
+        """
+        Overrides parent process method to handle gtest-specific workflow.
+
+        This method adapts the standard test suite processing for gtest binaries:
+        1. Prepares test files through preparation steps
+        2. Archives ETS test files into zip packages
+        3. Loads tests from gtest binaries using --gtest_list_tests
+        4. Applies filtering based on excluded/ignored lists
+
+        :param force_generate: if True, forces regeneration of test files
+        :return: list of ITestFlow objects ready for execution
+        """
+        test_paths: list[Path] = []
+        ets_raw_set: set[Path] = set()
+
+        self._explicit_file = self._set_explicit_file()
+        self._explicit_list = self._test_lists.resolve_explicit_list()
+
+        for step in self._preparation_steps:
+            ets_raw_set.update(step.transform(force_generate))
+
+        compiled_ets_set: set[Path] = set(self.intermediate.rglob("**/*"))
+
+        self._disable_es2panda_step()
+
+        self._archive_ets_files(compiled_ets_set)
+
+        if self._explicit_file is not None:
+            # check exist _explicit_file
+            test_paths = self.load_tests_from_test_path(self._explicit_file, self.gtest_root)
+        elif self._explicit_list is not None:
+            test_paths = self._load_tests_from_lists([self._explicit_list])
+        else:
+            pattern = self.gtest_root / '**' / '*'
+            filter_path = self.gtest_root / self.config.test_suite.filter
+            test_paths = self.load_tests_from_directory(pattern, filter_path)
+
+        if not self.config.test_suite.test_lists.skip_test_lists:
+            test_paths = self._resolve_test_files(test_paths)
+
+        self._search_both_excluded_and_ignored_tests()
+
+        # to-do
+        # test_paths = self._filter_by_group(test_paths)
+
+        tests = self._create_tests(test_paths)
+        _LOGGER.default(f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
+                        f"Excluded {self.excluded} tests are not loaded.")
+        return tests
 
     def _archive_ets_files(self, ets_test_parts: set[Path]) -> None:
         """
@@ -839,69 +872,28 @@ class GTestSuite(TestSuite):
             test_file.unlink()
 
     def _disable_es2panda_step(self) -> None:
-
         steps = self.config.workflow.steps
         for i, step in enumerate(steps):
             if step.step_kind == StepKind.COMPILER:
                 steps[i] = replace(step, enabled=False)
-
         _LOGGER.short(f"es2panda step for workflow {self.config.workflow.name} is disabled")
 
-    def process(self, force_generate: bool) -> list[ITestFlow]:
-        raw_set: list[Path] = []
-        ets_raw_set: set[Path] = set()
-
-        self._explicit_file = self._set_explicit_file()
-        self._explicit_list = self._test_lists.resolve_explicit_list()
-
-        for step in self._preparation_steps:
-            ets_raw_set.update(step.transform(force_generate))
-
-        compiled_ets_set: set[Path] = set(self.intermediate.rglob("**/*"))
-
-        self._disable_es2panda_step()
-
-        self._archive_ets_files(compiled_ets_set)
-
-        if self._explicit_file is not None:
-            self._process_tests(raw_set, force_generate, str(self._explicit_file), update_explicit=True)
-        elif self.explicit_list is not None:
-            tests_from_lists = GTestSuite._load_gtests([self.explicit_list])
-            for test_name in tests_from_lists:
-                self._process_tests(raw_set, force_generate, test_name, update_explicit=False)
-        else:
-            raw_set = self._get_raw_set(force_generate)
-
-        executed_set = list(set(self._resolve_test_files(raw_set)))
-        self._search_both_excluded_and_ignored_tests()
-        executed_set = self._filter_by_group(executed_set)
-        tests = self._create_tests(executed_set)
-        _LOGGER.default(f"Loaded {len(tests)} valid tests from the folder '{self.gtest_root}'. "
-                        f"Excluded {self.excluded} tests are not loaded.")
-        return tests
-
-    def _process_tests(self, raw_set: list[Path], force_generate: bool, name: str, update_explicit: bool) -> None:
-        kind, explicit_name = GTestSuite._define_file_kind(name)
-        match kind:
-            case GTestSuite.TEST_FILE | GTestSuite.TEST_CLASS_NAME:
-                raw_set.extend(self._get_raw_set(force_generate, explicit_name))
-                if update_explicit:
-                    self._explicit_file = None
-            case GTestSuite.TEST_NAME:
-                path_to_test = correct_path(self.gtest_root, explicit_name)
-                if update_explicit:
-                    self._explicit_file = path_to_test
-                else:
-                    raw_set.append(path_to_test)
-
     def _create_test(self, test_file: Path, is_ignored: bool) -> ITestFlow:
+        """
+        Overrides parent _create_test to use gtest_root instead of test_root for test ID resolution.
 
+        This adaptation is necessary because gtest tests are located in the gtest binaries directory,
+        not in the generated test directory.
+
+        :param test_file: path to the gtest binary file
+        :param is_ignored: flag indicating if the test is in the ignored list
+        :return: ITestFlow object configured for gtest execution
+        """
         test_id = get_test_id(test_file, self.gtest_root)
-
         coll_name = self._get_coll_name(test_id)
         params = self._collections_parameters.get(coll_name, {}) if coll_name is not None else {}
 
-        test = workflow_registry.create(self.workflow_kind, test_env=self._test_env, test_path=test_file,
+        test = workflow_registry.create(self.workflow_kind, test_env=self._test_env, test_path=self.gtest_root,
                                         params=IOptions(params), test_id=test_id)
         test.ignored = is_ignored
         if is_ignored and test.path in self.ignored_tests_with_failures:
@@ -909,75 +901,47 @@ class GTestSuite(TestSuite):
 
         return test
 
-    def _get_raw_set(self, _: bool, file_name: str | None = None) -> list[Path]:
-        return self.__load_precompiled_files(file_name)
-
-    def _get_test_root_pattern(self, mask: str) -> re.Pattern:
-        return re.compile(f"{self.gtest_root / mask}")
-
     def _set_explicit_file(self) -> Path | None:
         test_id = self.config.test_suite.test_lists.explicit_file
         if test_id is not None and self.list_roots is not None:
             return Path(test_id)
         return None
 
+    def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:
+        """
+        Overrides parent method to handle gtest-specific test name loading.
+
+        Instead of loading file paths directly, this method:
+        1. Reads gtest test names from list files
+        2. Resolves each gtest binary to its individual test cases
+           using --gtest_list_tests command
+
+        :param lists: list of paths to gtest test list files
+        :return: expanded list of gtest test paths (including individual test cases)
+        """
+        tests_from_lists = self.load_gtest_names_from_file(lists)
+        result = []
+        for test_path in tests_from_lists:
+            result.extend(self.load_tests_from_test_path(test_path, self.gtest_root))
+        return result
+
     def _resolve_test_files(self, original_test_files: list[Path]) -> list[Path]:
         """
-        Browse the directory, search for files with the specified extension
+        Overrides parent method to resolve gtest test files with exclusion filtering.
+
+        This method:
+        1. Loads excluded and ignored test lists
+        2. Filters out excluded tests from the original test files
+        3. Handles ignored tests with expected failures
+
+        :param original_test_files: list of gtest test paths to filter
+        :return: filtered list of test files excluding excluded tests
         """
         _LOGGER.short(f"Loading tests from the directory {self.test_root}")
-        test_files: list[Path] = []
-        if self.explicit_file is not None:
-            test_files.append(self.explicit_file)
-        else:
-            if not self.config.test_suite.test_lists.skip_test_lists:
-                self.excluded_tests = self._load_excluded_tests()
-                self.ignored_tests = self._load_ignored_tests()
-                self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
-                    self._test_lists.ignored_lists)
-            test_files.extend([test_file for test_file in original_test_files if test_file not in self.excluded_tests])
-        return test_files
-
-    def _load_tests_from_lists(self, lists: list[Path]) -> list[Path]:
-        tests = []
-
-        for list_path in lists:
-            _LOGGER.default(f"Loading tests from the list {list_path}")
-            loaded = self._load_list(self.gtest_root, list_path)
-            tests.extend(loaded)
-
-        return tests
-
-    def __load_precompiled_files(self, file_name: str | None) -> list[Path]:
-        """
-        Load precompiled test files from work dir
-        """
-        tests = []
-        test_dir = self.gtest_root
-        use_qemu: QemuKind = self.config.general.qemu
-        if not use_qemu.value == 'none':
-            cmd_prefix = self._test_env.cmd_prefix
-        else:
-            cmd_prefix = []
-
-        if file_name is None:
-            # file name is not set, get all files from tests dir, then get all tests from these files
-            pattern = os.path.join(test_dir, '**', '*')
-            tests_paths = fnmatch.filter(glob(pattern, recursive=True),
-                                         path.join(self.gtest_root, self.config.test_suite.filter))
-            for file_path in tests_paths:
-                if os.path.isfile(file_path) and is_executable_file(Path(file_path)):
-                    test_class_names = GTestSuite.get_class_and_tests(file_path, cmd_prefix)
-                    for test_class, test_names in test_class_names.items():
-                        tests.extend([f"{file_path}/{test_class}.{test_name}" for test_name in test_names])
-            return [Path(test) for test in set(tests)]
-
-        # file name is set -> get all tests from this file
-        test_class_names = GTestSuite.get_class_and_tests(file_name, cmd_prefix, test_dir, raw_files_from_dir=False)
-        for test_class, test_names in test_class_names.items():
-            if test_class in file_name:
-                path_to_test = f"{test_dir}/{file_name}"
-            else:
-                path_to_test = f"{test_dir}/{file_name}/{test_class}"
-            tests.extend([f"{path_to_test}.{test_name}" for test_name in test_names])
-        return [Path(test) for test in set(tests)]
+        _test_paths = []
+        self.excluded_tests = self._load_excluded_tests()
+        self.ignored_tests = self._load_ignored_tests()
+        self.ignored_tests_with_failures = self._get_tests_from_ignore_with_failures(
+            self._test_lists.ignored_lists)
+        _test_paths.extend([test_file for test_file in original_test_files if test_file not in self.excluded_tests])
+        return _test_paths
