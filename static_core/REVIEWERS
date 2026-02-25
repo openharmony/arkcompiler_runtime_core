@@ -17,17 +17,17 @@
 .gitattributes       @dmitriitr @Prof @igelhaus @ipetrov
 .gitignore           @dmitriitr @Prof @igelhaus @ipetrov
 CODEOWNERS           @dmitriitr @Prof @igelhaus
-bundle.json          @dmitriitr @Prof @igelhaus @ipetrov @jokerxd-liu
+bundle.json          @dmitriitr @Prof @igelhaus @ipetrov @jokerxd-liu @huyunhui1
 static_vm_config.gni @dmitriitr @Prof @igelhaus @ipetrov
 
-arkplatform/ @dmitriitr @udav @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu
+arkplatform/ @dmitriitr @udav @ipetrov @molotkovmikhail @Prof @igelhaus @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 
 common_runtime/ @ipetrov @xucheng46 @Prof ^dmitriitr ^igelhaus ^weng-changcheng ^artemu ^yingguofeng
 
 static_core/ @dmitriitr @Prof @igelhaus @Nojpg
 
 static_core/abc2program/              @nazarovkonstantin @oatuwwutao ^igelhaus ^seeuiceland
-static_core/assembler/                @nazarovkonstantin ^igelhaus
+static_core/assembler/                @nazarovkonstantin ^igelhaus @tension16
 static_core/bytecode_optimizer/       @mbolshov @chernykhsergey ^igelhaus  @oatuwwutao ^seeuiceland
 static_core/cmake/                    @igelhaus
 static_core/compiler/                 @Prof @dingding5 @chernykhsergey ^oatuwwutao	^seeuiceland ^asidorov
@@ -77,7 +77,7 @@ static_core/libarkbase/tests/*mem*                       @udav ^ipetrov
 static_core/platforms/**/*mem*                           ^dmitriitr @udav ^ipetrov
 static_core/plugins/ets/abc2program	                     @nazarovkonstantin @oatuwwutao	^seeuiceland
 static_core/plugins/ets/disassembler                     @nazarovkonstantin @oatuwwutao ^seeuiceland
-static_core/plugins/ets/playground                       @anton-sysoev @Nojpg ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
+static_core/plugins/ets/playground                       @anton-sysoev @Nojpg ^cy917474985 ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
 static_core/runtime/arch/                                @Prof @xucheng46 ^gitee-dakeQI @asidorov ^chernykhsergey
 static_core/runtime/bridge/                              @Prof @dingding5 @asidorov @xucheng46 ^gitee-dakeQI ^chernykhsergey
 static_core/runtime/coroutines/                          ^dmitriitr @konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
@@ -109,7 +109,7 @@ static_core/libarkbase/tests/taskmanager/                @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov @oatuwwutao	^seeuiceland @chernykhsergey
 static_core/plugins/ets/compiler/                        @Prof @dingding5 @chernykhsergey ^asidorov
 static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr
+static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin @mbolshov @akmaevaleksey @anedoria @qyhuo32 @klooer @godmiaozi @wanzixuan330 @zsw_zhushiwei @wuzhefengh @mengbierr @davidwulanxi @huanghuijin @egavrin @igelhaus @vpukhov @dmitriitr @fanglou @dumbledore
 static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^dingding5 @xucheng46 ^gitee-dakeQI ^chernykhsergey
 static_core/plugins/ets/isa/                             @mbolshov @xucheng46 @gitee-dakeQI
 static_core/plugins/ets/libllvmbackend/                  ^Prof @urandon ^asidorov @xucheng46 ^gitee-dakeQI
@@ -171,7 +171,7 @@ static_core/plugins/ets/runtime/types/ets_method*                             @v
 static_core/plugins/ets/runtime/types/ets_promise.h                           ^tanglu100 @MofengMa ^weixin_41079876 ^dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/ets_runtime_linker.h                    ^nazarovkonstantin @slynkodenis @shilei123 @vpukhov
 static_core/plugins/ets/stdlib/escompat/Atomics.ets                           ^dmitriitr @konstanting
-static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan ^Wangyuzhong11
+static_core/plugins/ets/stdlib/escompat/taskpool.ets                          ^dmitriitr @konstanting @zhuangkudecha ^tanglu10 ^yuesiyuan
 static_core/plugins/ets/templates/stdlib/                                     ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/benchmarks/ani                                  @ignatenkooleg @v-cherkashin @Prof @asidorov
 static_core/plugins/ets/tests/benchmarks/interop_js                           @igelhaus ^nazarovkonstantin @ignatenkooleg @Prof @slynkodenis @benzunfu ^chernykhsergey
@@ -185,8 +185,8 @@ static_core/plugins/ets/tests/interop_js/                                     @i
 static_core/plugins/ets/tests/libani_helpers/                                 @wanzixuan330 @v-cherkashin ^slynkodenis
 static_core/plugins/ets/tests/stdlib-templates/                               ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/tests/test-lists/                                     ^amate ^sergeyandreev @Prof @kuchkovairina
-static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg ^luobohua ^luchenxu ^Wangyuzhong11
-static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin @luobohua @luchenxu ^Wangyuzhong11
+static_core/plugins/ets/tests/test-lists/declgenets2ts                        ^amate ^sergeyandreev @Prof @kuchkovairina @shimenkovmikhail ^v-cherkashin ^Nojpg ^luobohua @luchenxu ^Wangyuzhong11
+static_core/plugins/ets/tools/declgen_ts2sts/                                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya @nazarovkonstantin ^luobohua ^luchenxu @Wangyuzhong11
 static_core/tests/tests-u-runner/runner/plugins/declgenets2ts                 ^Nojpg @shimenkovmikhail ^v-cherkashin @trubachevilya ^amate @sergeyandreev @anton-sysoev
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 static_core/plugins/ets/runtime/interop_js/ets_proxy/shared_reference*        ^dmitriitr @udav ^ipetrov
@@ -238,45 +238,45 @@ static_core/plugins/ets/stdlib/std/debug/concurrency/                         @k
 static_core/plugins/ets/tests/ets_ts_subset/std/core/Promise*                 ^anton-sysoev @magikarp777 ^ivan-tyulyandin ^dmitriitr @konstanting ^udav ^Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/interop_js/tests/checked/                       ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof ^kurnevichstanislav @dingding5
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      ^igelhaus ^nazarovkonstantin @ignatenkooleg ^rokashevichsvetlana @Prof @dingding5
-static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof @luobohua @luchenxu ^Wangyuzhong11
+static_core/plugins/ets/tests/interop_js/tests/declgen_ets2ts/                ^Nojpg ^igelhaus @shimenkovmikhail ^v-cherkashin @trubachevilya ^Prof ^luobohua @luchenxu @Wangyuzhong11
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 static_core/tests/tests-u-runner-2/runner/extensions/generators/ets_es_checked/generate-es-checked ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg
 
 /AUTHORS @jokerxd-liu @dmitriitr @Prof @igelhaus
-/BUILD.gn @jokerxd-liu
-/CMakeLists.txt	@jokerxd-liu
-/LICENSE @jokerxd-liu
-/OAT.xml @jokerxd-liu
-/README.md	@jokerxd-liu
-/README_zh.md @jokerxd-liu
-/ark_config.gni	@jokerxd-liu
+/BUILD.gn @jokerxd-liu @huyunhui1
+/CMakeLists.txt	@jokerxd-liu @huyunhui1
+/LICENSE @jokerxd-liu @huyunhui1
+/OAT.xml @jokerxd-liu @huyunhui1
+/README.md	@jokerxd-liu @huyunhui1
+/README_zh.md @jokerxd-liu @huyunhui1
+/ark_config.gni	@jokerxd-liu @huyunhui1
 /ark_guard	@oatuwwutao	^seeuiceland
-/ark_root.gni	@jokerxd-liu
+/ark_root.gni	@jokerxd-liu @huyunhui1
 /abc2program/	@oatuwwutao
-/assembler/	@jokerxd-liu
-/bytecode_optimizer/ @jokerxd-liu @oatuwwutao ^seeuiceland
-/cmake/	@jokerxd-liu
+/assembler/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/bytecode_optimizer/ @oatuwwutao ^seeuiceland
+/cmake/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /common_interfaces/	@wuzhefengh	@weng-changcheng @igelhaus @dmitriitr ^yingguofeng ^Prof
-/compiler/	@jokerxd-liu @oatuwwutao ^seeuiceland
+/compiler/	@oatuwwutao ^seeuiceland
 /disassembler/	@oatuwwutao
-/docs/ @jokerxd-liu
-/gn/ @jokerxd-liu
+/docs/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/gn/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /isa/ @oatuwwutao
-/ldscripts/	@gitee-dakeQI @jokerxd-liu
+/ldscripts/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /libabckit/	@nazarovkonstantin	@oatuwwutao	@oatuwwutao	^seeuiceland
 /libark_defect_scan_aux/ @gitee-dakeQI @oatuwwutao ^seeuiceland
-/libpandabase/	@gitee-dakeQI @jokerxd-liu
-/libpandafile/	@jokerxd-liu @gitee-dakeQI @oatuwwutao ^seeuiceland
-/libziparchive/	@gitee-dakeQI @jokerxd-liu
-/panda/	@gitee-dakeQI	@jokerxd-liu
+/libpandabase/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/libpandafile/	@jokerxd-liu @gitee-dakeQI @oatuwwutao ^seeuiceland @huyunhui1 ^zmw1 ^ElevenDuan
+/libziparchive/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/panda/	@gitee-dakeQI	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /panda_guard/	@oatuwwutao	^seeuiceland
-/pandastdlib/	@jokerxd-liu
-/platforms/	@gitee-dakeQI @jokerxd-liu
-/plugins/ @jokerxd-liu
-/scripts/ @jokerxd-liu
+/pandastdlib/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/platforms/	@gitee-dakeQI @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/plugins/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/scripts/ @jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /taihe/ @wanzixuan330
-/templates/	@jokerxd-liu
-/tests/	@jokerxd-liu
+/templates/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
+/tests/	@jokerxd-liu @huyunhui1 ^zmw1 ^ElevenDuan
 /verifier/	@oatuwwutao	^seeuiceland
 
 /common_interfaces/heap/    @wuzhefengh @weng-changcheng @dmitriitr @udav @ipetrov ^yingguofeng
