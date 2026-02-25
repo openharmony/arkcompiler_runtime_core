@@ -1798,10 +1798,11 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
 }
 
 class EscapeStringBuilder {
-    static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
-    static controlCharsRange: int = 32
-
-    static createEscapeTable(): FixedArray<string> {
+    private static escapeTable: FixedArray<string> = EscapeStringBuilder.createEscapeTable()
+    private static controlCharsRange: int = 32
+    private static delCode: int = 127
+    
+    private static createEscapeTable(): FixedArray<string> {
         const asciiRange: int = 128
         const table: FixedArray<string> = new FixedArray<string>(asciiRange)
         for (let code = 0; code < asciiRange; code++) {
@@ -1828,8 +1829,8 @@ class EscapeStringBuilder {
                     table[code] = "\\t"
                     break
                 default:
-                    if (code < EscapeStringBuilder.controlCharsRange) {
-                        table[code] = "\\u".concat(code.toString(16).padStart(4, "0"))
+                    if (code < EscapeStringBuilder.controlCharsRange || code == EscapeStringBuilder.delCode) {
+                        table[code] = '\\u'.concat(code.toString(16).padStart(4, '0'))
                     }
                     break
             }
@@ -1843,7 +1844,8 @@ class EscapeStringBuilder {
         for (let i = 0; i < str.length; i++) {
             const ch = str.charAt(i)
             const code = ch.toInt()
-            if (code >= EscapeStringBuilder.controlCharsRange && ch != c'\"' && ch != c'\\') {
+            if (code >= EscapeStringBuilder.controlCharsRange && ch != c'"' && ch != c'\\' &&
+                code != EscapeStringBuilder.delCode) {
                 continue
             }
             if (begin < i) {
