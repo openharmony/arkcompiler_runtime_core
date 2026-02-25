@@ -874,8 +874,9 @@ EtsObject *EtsCall([[maybe_unused]] EtsCoroutine *coro, EtsObject *funcObj,
         constexpr size_t UNSAFE_CALL_PARAM_COUNT = 2;
         auto method = funcObj->GetClass()->GetInstanceMethod("unsafeCall", nullptr);
         EtsHandle<EtsObject> funcObjHandle(coro, funcObj);
-        auto restParam = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, args.size());
-        for (size_t i = 0; i < args.size(); i++) {
+        size_t argc = args.size();
+        auto restParam = EtsObjectArray::Create(PlatformTypes(coro)->coreObject, argc);
+        for (size_t i = 0; i < argc; i++) {
             restParam->Set(i, EtsObject::FromCoreType(args[i].GetPtr()));
         }
         std::array<ark::Value, UNSAFE_CALL_PARAM_COUNT> realArgs {Value(funcObjHandle.GetPtr()->GetCoreType()),
