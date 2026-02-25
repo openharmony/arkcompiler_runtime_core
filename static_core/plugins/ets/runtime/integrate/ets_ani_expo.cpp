@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,19 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napie
 
 PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_option> &options, bool postZygoteFork)
 {
-    bool loadAppAotFile = false;
-    std::string appAotFileName;
+    PandaSmallVector<std::string> appAnFiles;
     for (auto &opt : options) {
         std::string option(opt.option);
-        if (option.rfind(AOT_FILE_OPTION_PREFIX, 0) == 0) {
-            loadAppAotFile = true;
-            appAotFileName = option.substr(AOT_FILE_OPTION_PREFIX.size());
+        if (option.rfind(AOT_FILES_OPTION_PREFIX, 0) == 0) {
+            std::string aotFilesRawInput = option.substr(AOT_FILES_OPTION_PREFIX.size());
+            size_t start = 0;
+            size_t end = aotFilesRawInput.find(":");
+            while (end != std::string::npos) {
+                appAnFiles.push_back(aotFilesRawInput.substr(start, end - start));
+                start = end + 1;
+                end = aotFilesRawInput.find(":", start);
+            }
+            appAnFiles.push_back(aotFilesRawInput.substr(start));
         } else if (option == ENABLE_AN_OPTION) {
             TryLoadAotFileForBoot();
         } else {
@@ -56,8 +62,10 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
         vm->GetRuntime()->GetClassLinker()->GetAotManager()->VerifyClassHierarchy();
     }
 
-    if (loadAppAotFile) {
-        LoadAotFileForApp(appAotFileName);
+    if (!appAnFiles.empty()) {
+        for (const auto &path : appAnFiles) {
+            LoadAotFileForApp(path);
+        }
     }
 
     if (postZygoteFork) {
