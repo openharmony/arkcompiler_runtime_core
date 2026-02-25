@@ -191,7 +191,7 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *srcData = GetNativeData(srcArray);
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(srcData == nullptr || srcArray->GetLengthInt() == 0)) {
+    if (UNLIKELY(srcData == nullptr)) {
         return;
     }
 
@@ -206,6 +206,10 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt
     if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        return;
+    }
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    if (UNLIKELY(srcArray->GetLengthInt() == 0)) {
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
