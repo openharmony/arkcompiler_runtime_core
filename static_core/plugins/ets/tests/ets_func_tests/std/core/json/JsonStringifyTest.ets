@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,6 +148,9 @@ function testStringifyControlCharacters(): void {
 
     const formfeedStr = jsonx.JsonElement.createString("form\ffeed");
     arktest.assertEQ(JSON.stringifyJsonElement(formfeedStr), '"form\\ffeed"', "Form feed should be escaped");
+
+    const delStr = jsonx.JsonElement.createString("DEL\u007fDEL");
+    arktest.assertEQ(JSON.stringifyJsonElement(delStr), '"DEL\\u007fDEL"', "DEL should be escaped");
 }
 
 function testStringifyUnicodeEscaping(): void {
