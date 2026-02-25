@@ -6229,6 +6229,166 @@ NO_UB_SANITIZE static ani_status Any_New(ani_env *env, ani_ref ctor, ani_size ar
     return s.AddLocalRef(newObj, result);
 }
 
+template <typename T>
+static ani_status DoBoxPrimitive(ani_env *env, T value, ani_object *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    auto *coroutine = s.GetCoroutine();
+    auto internalObject = EtsBoxPrimitive<T>::Create(coroutine, value);
+    if (UNLIKELY(internalObject == nullptr)) {
+        return ANI_OUT_OF_MEMORY;
+    }
+    return s.AddLocalRef(internalObject->AsObject(), reinterpret_cast<ani_ref *>(result));
+}
+
+template <typename T>
+static ani_status DoUnboxPrimitive(ani_env *env, ani_object obj, T *result)
+{
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(obj);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsObject *etsObject = s.ToInternalType(obj);
+    auto *klass = etsObject->GetClass();
+    if (UNLIKELY(!klass->IsBoxed())) {
+        return ANI_INVALID_TYPE;
+    }
+    *result = EtsBoxPrimitive<T>::Unbox(etsObject);
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Boolean(ani_env *env, ani_boolean value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Boolean(ani_env *env, ani_object obj, ani_boolean *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Byte(ani_env *env, ani_byte value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Byte(ani_env *env, ani_object obj, ani_byte *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Char(ani_env *env, ani_char value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Char(ani_env *env, ani_object obj, ani_char *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Short(ani_env *env, ani_short value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Short(ani_env *env, ani_object obj, ani_short *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Int(ani_env *env, ani_int value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Int(ani_env *env, ani_object obj, ani_int *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Long(ani_env *env, ani_long value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Long(ani_env *env, ani_object obj, ani_long *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Float(ani_env *env, ani_float value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Float(ani_env *env, ani_object obj, ani_float *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Box_Double(ani_env *env, ani_double value, ani_object *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoBoxPrimitive(env, value, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status Primitive_Unbox_Double(ani_env *env, ani_object obj, ani_double *result)
+{
+    ANI_DEBUG_TRACE(env);
+
+    return DoUnboxPrimitive(env, obj, result);
+}
+
 // clang-format off
 const __ani_interaction_api INTERACTION_API = {
     nullptr,
@@ -6631,6 +6791,22 @@ const __ani_interaction_api INTERACTION_API = {
     Any_CallMethod,
     Any_New,
     Class_BindStaticNativeMethods,
+    Primitive_Box_Boolean,
+    Primitive_Unbox_Boolean,
+    Primitive_Box_Byte,
+    Primitive_Unbox_Byte,
+    Primitive_Box_Char,
+    Primitive_Unbox_Char,
+    Primitive_Box_Short,
+    Primitive_Unbox_Short,
+    Primitive_Box_Int,
+    Primitive_Unbox_Int,
+    Primitive_Box_Long,
+    Primitive_Unbox_Long,
+    Primitive_Box_Float,
+    Primitive_Unbox_Float,
+    Primitive_Box_Double,
+    Primitive_Unbox_Double,
 };
 // clang-format on
 
