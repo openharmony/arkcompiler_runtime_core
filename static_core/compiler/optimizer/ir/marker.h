@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ public:
     }
 
     // returns true if the marker was set before, otherwise false
-    bool IsMarked(Marker mrk)
+    bool IsMarked(Marker mrk) const
     {
         uint32_t index = mrk & MARKERS_MASK;
         uint32_t value = mrk >> MARKERS_SHIFT;

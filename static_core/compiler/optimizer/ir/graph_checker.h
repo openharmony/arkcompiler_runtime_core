@@ -112,7 +112,9 @@ private:
     void CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users);
     void CheckSaveStateSuspendInputs();
     void CheckSaveStateSuspendInputsForInstruction(SaveStateInst *ss);
-    bool SaveStateSuspendDominatesAnyUser(SaveStateInst *ss, const Inst *otherInst);
+    static bool SaveStateSuspendDominatesAnyUser(SaveStateInst *ss, const Inst *otherInst);
+    void CheckLoadGCEntrypointBarrierTypes();
+    void CheckLoadGCEntrypointToUserPaths();
     void ValidateInstructionInSaveStateSuspend(SaveStateInst *ss, const Inst *otherInst);
 #endif  // COMPILER_DEBUG_CHECKS
     void CheckSaveStateInputs();
@@ -172,6 +174,7 @@ private:
     static PANDA_PUBLIC_API void VisitAnd([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitOr([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitXor([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitLoad([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadArray([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadArrayI([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadArrayPair([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -276,6 +279,8 @@ private:
     static PANDA_PUBLIC_API void VisitLoadUnresolvedType(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadFromConstantPool(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static PANDA_PUBLIC_API void VisitLoadGCEntrypoint(GraphVisitor *v, Inst *inst);
+
     static PANDA_PUBLIC_API void VisitCallNative(GraphVisitor *v, Inst *inst);
     static PANDA_PUBLIC_API void VisitStringFlatCheck(GraphVisitor *v, Inst *inst);
 
@@ -396,8 +401,10 @@ private:
 
     static void CheckGCBarrierEntrypointInputsCount([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
                                                     [[maybe_unused]] size_t count);
-    static void CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
-                                              [[maybe_unused]] bool needBarrier);
+    static void CheckGCBarrierEntrypointInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void CheckNeedGCBarrier([[maybe_unused]] GraphVisitor *v, Inst *inst, const Inst *gcBarrierEntrypoint,
+                                   bool needGCBarrier);
+
     static void CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
                                        [[maybe_unused]] bool needBarrier);
 

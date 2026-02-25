@@ -370,6 +370,8 @@ protected:
 
     static void VisitResolveByName(GraphVisitor *visitor, Inst *inst);
 
+    static void VisitLoadGCEntrypoint(GraphVisitor *visitor, Inst *inst);
+
     // Dyn inst.
     static void VisitCompareAnyType(GraphVisitor *visitor, Inst *inst);
     static void VisitGetAnyTypeName(GraphVisitor *visitor, Inst *inst);

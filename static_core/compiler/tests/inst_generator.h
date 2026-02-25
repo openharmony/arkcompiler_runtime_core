@@ -186,7 +186,7 @@ private:
         insts_.push_back(inst);
     }
 
-    void SetFlagsNoCseNoHoistIfReference(Inst *inst, DataType::Type dstType);
+    static void SetFlagsNoCseNoHoistIfReference(Inst *inst, DataType::Type dstType);
 
     std::vector<DataType::Type> integerTypes_ {DataType::UINT8,  DataType::INT8,  DataType::UINT16, DataType::INT16,
                                                DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64};

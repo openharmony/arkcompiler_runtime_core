@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,8 @@ public:
     void CheckCmp(bool isFcmpg = false);
 
     template <typename T>
-    void CheckReturnValue(Graph *graph, T expectedValue);
+    void CheckReturnValue(Graph *graph, T expectedValue,
+                          VixlExecModule::ManagedThreadData::value_type *managedThreadData = nullptr);
 
     template <typename T>
     void CheckBounds(uint64_t count);
@@ -87,13 +88,63 @@ private:
     VixlExecModule execModule_;
 };
 
+class ThreadAwareCodegenTest : public CodegenTest {
+public:
+    ThreadAwareCodegenTest()
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        new (GetManagedThreadData() + cross_values::GetManagedThreadPreWrbEntrypointOffset(Arch::AARCH64))
+            std::atomic<void *>(reinterpret_cast<void *>(PRE_WRB_ENTRYPOINT));
+    }
+
+    ~ThreadAwareCodegenTest() override = default;
+
+    NO_COPY_SEMANTIC(ThreadAwareCodegenTest);
+    NO_MOVE_SEMANTIC(ThreadAwareCodegenTest);
+
+protected:
+    const void *GetCurrentPreWrbEntrypoint() const
+    {
+        return reinterpret_cast<std::atomic<void *> *>(
+                   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                   reinterpret_cast<uintptr_t>(GetManagedThreadData() +
+                                               cross_values::GetManagedThreadPreWrbEntrypointOffset(Arch::AARCH64)))
+            // Atomic with relaxed order reason: only atomicity and modification order consistency needed
+            ->load(std::memory_order_relaxed);
+    }
+
+    VixlExecModule::ManagedThreadData::value_type *GetManagedThreadData()
+    {
+        return threadData_.data();
+    }
+
+    const VixlExecModule::ManagedThreadData::value_type *GetManagedThreadData() const
+    {
+        return threadData_.data();
+    }
+
+    template <typename T>
+    void CheckReturnValue(Graph *graph, T expectedValue)
+    {
+        CodegenTest::CheckReturnValue(graph, expectedValue, GetManagedThreadData());
+    }
+
+private:
+    // A buffer on the stack to "represent" a ManagedThread instance.
+    VixlExecModule::ManagedThreadData threadData_ {};
+    static constexpr uintptr_t PRE_WRB_ENTRYPOINT = 0xbeef;  // CC-OFF(G.NAM.03-CPP) project code style
+};
+
+using UncheckedThreadAwareCodegenTest = UncheckedGraphTestMixin<ThreadAwareCodegenTest>;
+
 inline bool RunCodegen(Graph *graph)
 {
     return graph->RunPass<Codegen>();
 }
 
 template <typename T>
-void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValue)
+void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValue,
+                                   VixlExecModule::ManagedThreadData::value_type *managedThreadData)
 {
     SetNumVirtRegs(0U);
     RegAlloc(graph);
@@ -109,7 +160,11 @@ void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValu
     GetExecModule().SetInstructions(codeEntry, codeExit);
     GetExecModule().SetDump(false);
 
-    GetExecModule().Execute();
+    if (managedThreadData == nullptr) {
+        GetExecModule().Execute();
+    } else {
+        GetExecModule().Execute(managedThreadData);
+    }
     auto rv = GetExecModule().GetRetValue<T>();
     EXPECT_EQ(rv, expectedValue);
 }

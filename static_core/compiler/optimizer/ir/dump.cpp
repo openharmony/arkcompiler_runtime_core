@@ -1078,6 +1078,36 @@ bool LoadArrayPairInstI::DumpInputs(std::ostream *out) const
     return true;
 }
 
+void LoadGCEntrypointInst::DumpOpcode(std::ostream *out) const
+{
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    const auto &adapter = allocator->Adapter();
+    ArenaString space(" ", adapter);
+    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
+    ArenaString barrier(GetBarrierTypeString(GetBarrierType()), adapter);
+    (*out) << std::setw(INDENT_OPCODE) << opcode + space + barrier;
+}
+
+bool LoadGCEntrypointInst::DumpInputs([[maybe_unused]] std::ostream *out) const
+{
+    // LoadGCEntrypointInst has no inputs.
+    return false;
+}
+
+/* static */
+const char *LoadGCEntrypointInst::GetBarrierTypeString(BarrierType type)
+{
+    switch (type) {
+        case BarrierType::READ:
+            return "Rb";
+        case BarrierType::PRE_WRITE:
+            return "PreWrb";
+        default:
+            UNREACHABLE();
+            return nullptr;  // Dummy
+    }
+}
+
 bool StoreArrayPairInst::DumpInputs(std::ostream *out) const
 {
     Inst::DumpInputs(out);

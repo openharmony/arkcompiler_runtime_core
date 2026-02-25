@@ -222,13 +222,13 @@ void SetInstGCBarrierEntrypoint(Inst *inst, Inst *entrypoint)
     });
 }
 
-Inst *GetInstGCBarrierEntrypoint(Inst *inst)
+Inst *GetInstGCBarrierEntrypoint(const Inst *inst)
 {
     return SwitchOverOpcodes(inst, [](auto traits, auto *typedInst) ALWAYS_INLINE -> std::optional<Inst *> {
         if constexpr (InstHasGCBarrierEntrypointInput(traits.GetOpcode())) {
             return typedInst->GetGCBarrierEntrypoint();
         }
-        return {};
+        return nullptr;
     });
 }
 

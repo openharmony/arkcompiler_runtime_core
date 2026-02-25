@@ -148,7 +148,7 @@ void Scheduler::ProcessInst(Inst *inst, uint32_t *numInst, uint32_t *numBetween,
         }
     }
 
-    if (inst->IsMemory() || inst->IsRefSpecial()) {
+    if (inst->IsMemory() || inst->IsRefPtrSpecial()) {
         ProcessMemory(inst, &prio, *lastBarrier);
         (*numSpecial)++;
     }
@@ -167,7 +167,7 @@ void Scheduler::ProcessInst(Inst *inst, uint32_t *numInst, uint32_t *numBetween,
 // Memory
 void Scheduler::ProcessMemory(Inst *inst, uint32_t *prio, Inst *lastBarrier)
 {
-    if (inst->IsRefSpecial()) {
+    if (inst->IsRefPtrSpecial()) {
         loads_.push_back(inst);
         return;
     }

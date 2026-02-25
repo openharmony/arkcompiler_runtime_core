@@ -53,21 +53,20 @@ public:
         return NAME;
     }
 
-    const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override;
-
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
 private:
-    bool SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2);
+    const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override;
+    bool SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2) const;
     void InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t stringFlatCheckArgMask);
-    Inst *GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst);
-    bool MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic);
-    Inst *InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst);
+    Inst *GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst) const;
+    bool MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic) const;
+    Inst *InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst) const;
     void ReplaceUsers(Inst *inputInst, Inst *flatCheck);
-    bool CanUpdateInput(Inst *userInst, Inst *flatCheck);
-    void InsertStringFlatCheckSaveState(Inst *flatCheck, SaveStateInst *saveState);
-    void FixSaveStates();
+    bool CanUpdateInput(Inst *userInst, Inst *flatCheck) const;
+    void InsertStringFlatCheckSaveState(Inst *flatCheck, SaveStateInst *saveState) const;
+    void FixSaveStates() const;
     ArenaVector<std::pair<size_t, Inst *>> users_;
     bool applied_ {false};
 };

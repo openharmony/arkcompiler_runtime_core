@@ -43,6 +43,7 @@ TEST_F(OptionalInputsTest, TestAccessorsPresent)
         }
     };
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define HANDLE_INST(OPCODE, ...)                 \
     {                                            \
         checkInst(CreateInst<Opcode::OPCODE>()); \
@@ -54,10 +55,10 @@ TEST_F(OptionalInputsTest, TestAccessorsPresent)
 TEST_F(OptionalInputsTest, TestAccessorsAbsent)
 {
     // Death tests are very slow, check one random instruction
-    auto *parameter = CreateInst<Opcode::Parameter>();
+    auto *gcentrypoint = CreateInst<Opcode::LoadGCEntrypoint>();
     auto *inst = CreateInst<Opcode::NullCheck>();
-    EXPECT_DEATH(GetInstGCBarrierEntrypoint(inst), "");
-    EXPECT_DEATH(SetInstGCBarrierEntrypoint(inst, parameter), "");
+    EXPECT_EQ(GetInstGCBarrierEntrypoint(inst), nullptr);
+    EXPECT_DEATH(SetInstGCBarrierEntrypoint(inst, gcentrypoint), "");
     EXPECT_DEATH(ResetInstGCBarrierEntrypoint(inst), "");
 }
 // NOLINTEND(readability-magic-numbers)

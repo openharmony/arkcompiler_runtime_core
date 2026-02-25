@@ -26,6 +26,7 @@ using ark::compiler::Opcode;
 namespace ark::llvmbackend {
 template <typename GraphGeneratorT>
 class LLVMCodegenTest : public ark::compiler::GraphTest {
+public:
     GraphGeneratorT CreateGraphGenerator(ArenaAllocator &allocator, ArenaAllocator &localAllocator)
     {
         return GraphGeneratorT(allocator, localAllocator);
@@ -72,7 +73,8 @@ public:
                 graph->SetAotData(aotData);
             }
             auto res = llvm.TryAddGraph(graph);
-            ASSERT(res.HasValue() && !llvm.IsIrFailed());
+            ASSERT_DO(res.HasValue() && !llvm.IsIrFailed(),
+                      std::cerr << "Error while code generation with LLVM: " << res.Error() << std::endl);
             bool status = res.Value();
 
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
@@ -164,8 +166,7 @@ TYPED_TEST_P(LLVMCodegenTest, AllInstTest)
 
     ArenaAllocator localAlloc {SpaceType::SPACE_TYPE_COMPILER};
     ArenaAllocator graphAlloc {SpaceType::SPACE_TYPE_COMPILER};
-    ark::compiler::GraphCreator graphCreator {graphAlloc, localAlloc};
-
+    auto graphCreator = this->CreateGraphGenerator(graphAlloc, localAlloc);
     // ARM64
     LLVMCodegenStatisticGenerator statGenArm64(instGen, graphCreator);
     statGenArm64.Generate();
