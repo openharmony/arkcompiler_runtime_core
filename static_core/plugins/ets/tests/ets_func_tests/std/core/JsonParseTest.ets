@@ -344,6 +344,156 @@ function jsonParseString(): void {
     arktest.assertEQ(JSON.parse<string>(str, type), '你test好')
 }
 
+class Address {
+    public country: string
+    @JSONRename('newCity')
+    public city?: string
+    @JSONRename('newStreet')
+    public street: string | undefined
+    public code: int
+    public detail?: string
+    public remark: string | undefined
+    private house_: string
+    private time_: int | null = null
+    private age_: int | undefined
+
+    public get house(): string {
+        return this.house_
+    }
+
+    public set house(house: string) {
+        this.house_ = house
+    }
+
+    public get time(): int | null {
+        return this.time_
+    }
+
+    public set time(time: int) {
+        this.time_ = time
+    }
+
+    public get age(): int | undefined {
+        return this.age_
+    }
+
+    public set age(age: int | undefined) {
+        this.age_ = age
+    }
+
+    public constructor() {
+        this.country = ''
+        this.code = 0
+        this.house_ = ''
+    }
+}
+
+class TestClass {
+    public a: byte = 1
+    public c: short = 3
+    public d: int = 4
+    public e: long = 5
+    public f: float = 6
+    public g: double = 7
+    public h: boolean = true
+    public addr: Address = new Address()
+}
+
+function jsonParseEmptyObjectString(): void {
+    let str = '{}'
+    let addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.country, '')
+    arktest.assertEQ(addr!.city, undefined)
+    arktest.assertEQ(addr!.street, undefined)
+    arktest.assertEQ(addr!.code, 0)
+    arktest.assertEQ(addr!.detail, undefined)
+    arktest.assertEQ(addr!.remark, undefined)
+    arktest.assertEQ(addr!.house, '')
+    arktest.assertEQ(addr!.time, null)
+    arktest.assertEQ(addr!.age, undefined)
+
+    let tc = JSON.parse<TestClass>(str, Class.from<TestClass>())
+    arktest.assertEQ(tc!.a, 1)
+    arktest.assertEQ(tc!.c, 3)
+    arktest.assertEQ(tc!.d, 4)
+    arktest.assertEQ(tc!.e, 5)
+    arktest.assertEQ(tc!.f, 6)
+    arktest.assertEQ(tc!.g, 7)
+    arktest.assertTrue(tc!.h)
+    arktest.assertEQ(tc!.addr.country, '')
+    arktest.assertEQ(tc!.addr.city, undefined)
+    arktest.assertEQ(tc!.addr.street, undefined)
+    arktest.assertEQ(tc!.addr.code, 0)
+    arktest.assertEQ(tc!.addr.detail, undefined)
+    arktest.assertEQ(tc!.addr.remark, undefined)
+    arktest.assertEQ(tc!.addr.house, '')
+    arktest.assertEQ(tc!.addr.time, null)
+    arktest.assertEQ(addr!.age, undefined)
+}
+
+function jsonParseSingleField(): void {
+    let str = '{"country":"country"}'
+    let addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.country, 'country')
+    str = '{"city":"city"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.city, 'city')
+    str = '{"newCity":"new city"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.city, 'new city')
+    str = '{"city":"city","newCity":"new city"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.city, 'city')
+    str = '{"street":"street"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.street, 'street')
+    str = '{"newStreet":"new street"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.street, 'new street')
+    str = '{"street":"street","newStreet":"new street"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.street, 'street')
+    str = '{"code":5}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.code, 5)
+    str = '{"detail":"detail"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.detail, 'detail')
+    str = '{"remark":"remark"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.remark, 'remark')
+    str = '{"house":"house"}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.house, 'house')
+    str = '{"time":1990}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.time, 1990)
+    str = '{"age":30}'
+    addr = JSON.parse<Address>(str, Class.from<Address>())
+    arktest.assertEQ(addr!.age, 30)
+}
+
+function jsonParseClass(): void {
+    let str = '{"a":11,"c":12,"d":13,"e":14,"f":15,"g":16,"h":false,"addr":{"country":"country","newCity":"city",' +
+              '"newStreet":"street","code":5,"detail":"detail","remark":"remark","house":"house","time":2000,"age":5}}'
+    let tc = JSON.parse<TestClass>(str, Class.from<TestClass>())
+    arktest.assertEQ(tc!.a, 11)
+    arktest.assertEQ(tc!.c, 12)
+    arktest.assertEQ(tc!.d, 13)
+    arktest.assertEQ(tc!.e, 14)
+    arktest.assertEQ(tc!.f, 15)
+    arktest.assertEQ(tc!.g, 16)
+    arktest.assertFalse(tc!.h)
+    arktest.assertEQ(tc!.addr.country, 'country')
+    arktest.assertEQ(tc!.addr.city, 'city')
+    arktest.assertEQ(tc!.addr.street, 'street')
+    arktest.assertEQ(tc!.addr.code, 5)
+    arktest.assertEQ(tc!.addr.detail, 'detail')
+    arktest.assertEQ(tc!.addr.remark, 'remark')
+    arktest.assertEQ(tc!.addr.house, 'house')
+    arktest.assertEQ(tc!.addr.time, 2000)
+    arktest.assertEQ(tc!.addr.age, 5)
+}
 
 function main(): int {
     const suite = new arktest.ArkTestsuite('JSON.parse tests');
@@ -364,6 +514,9 @@ function main(): int {
     suite.addTest('JSON.parse end 1', jsonParseEnd1)
     suite.addTest('JSON.parse end 2', jsonParseEnd2)
     suite.addTest('JSON.parse string', jsonParseString)
+    suite.addTest('JSON.parse empty object string', jsonParseEmptyObjectString)
+    suite.addTest('JSON.parse single field', jsonParseSingleField)
+    suite.addTest('JSON.parse class', jsonParseClass)
 
     return suite.run();
 }
