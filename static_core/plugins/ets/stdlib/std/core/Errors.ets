@@ -332,26 +332,6 @@ export class InternalError extends Error {
 }
 
 /**
- * Represents an error that is thrown when attempting to wait, notify or notifyAll on object, that hasn't been synchronised
- * @extends Error
- * @syscap SystemCapability.Utils.Lang
- * @since 24
- */
-export class IllegalMonitorStateError extends Error {
-    /**
-     * Constructs a new IllegalMonitorStateError instance with provided message and error specific information
-     *
-     * @param { String | undefined } message - Error text
-     * @param { ErrorOptions | undefined } options - Error options
-     * @syscap SystemCapability.Utils.Lang
-     * @since 24
-     */
-    constructor(message?: String, options?: ErrorOptions) {
-        super("IllegalMonitorStateError", message, options)
-    }
-}
-
-/**
  * Represents error that is thrown when provided collection index is out of bounds
  * @extends RangeError
  * @syscap SystemCapability.Utils.Lang
