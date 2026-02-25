@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "libarkbase/os/thread.h"
 
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
+#include "plugins/ets/runtime/signature_utils.h"
 
 namespace ark::ets::interop::js {
 
@@ -106,7 +107,12 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, &jsClassDescriptor, nullptr, nullptr));
 
     std::string classDescriptor = GetString(env, jsClassDescriptor);
-    return ets_proxy::GetETSClass(env, classDescriptor);
+    auto normDescrOpt =
+        signature::NormalizePackageSeparators<std::string, '/'>(classDescriptor, 0, classDescriptor.size());
+    if (UNLIKELY(!normDescrOpt.has_value())) {
+        return nullptr;
+    }
+    return ets_proxy::GetETSClass(env, normDescrOpt.value());
 }
 
 static napi_value GetEtsInstance(napi_env env, napi_callback_info info)
