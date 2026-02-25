@@ -37,6 +37,7 @@ asmjit,https://github.com/asmjit/asmjit,commit,8474400e82c3ea65bd828761539e5d9b2
 elfio,https://gitee.com/openharmony/third_party_elfio,branch,OpenHarmony_feature_20250328,no_patches,no_submodules
 vixl,https://gitee.com/openharmony/third_party_vixl.git,commit,62c46148189503cc1f220185ab753338211d03f2,with_patches,no_submodules
 zydis,https://github.com/zyantific/zydis,tag,v3.2.1,with_patches,no_submodules
+flatbuffers,https://gitcode.com/openharmony/third_party_flatbuffers,tag,OpenHarmony-v6.0-Release,no_patches,no_submodules
 
 # ARK bytecode verifier:
 rapidcheck,https://github.com/emil-e/rapidcheck,commit,8fafda42e732164db58003e542196e94a28481f9,with_patches,with_submodules:extras/gtest
