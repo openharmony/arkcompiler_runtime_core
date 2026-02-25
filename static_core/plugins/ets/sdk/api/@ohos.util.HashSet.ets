@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import HashMap from '@ohos.util.HashMap';
 
 export type HashSetCbFn<T> = (value: T, key: T, set: HashSet<T>) => void;
 
-interface ReadonlyHashSet<T> extends Iterable<T> {
+export interface ReadonlyHashSet<T> extends Iterable<T> {
     /**
      * Returns number of unique elements in the HashSet
      *

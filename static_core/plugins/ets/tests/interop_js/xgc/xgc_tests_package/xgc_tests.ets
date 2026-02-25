@@ -19,7 +19,7 @@ export function xgc(): void {
     JSRuntime.xgc();
 }
 
-class Result {
+export class Result {
     constructor(p: Promise<Object>) {
         this.p = p;
     }
@@ -55,7 +55,7 @@ export function js2stsDeep(): Object {
     return new Result(Promise.resolve<Object>(new Object()));
 }
 
-class TestObject {
+export class TestObject {
     ref: Object | null = null;
     p: Promise<Object> | null = null;
     num: number = 0;

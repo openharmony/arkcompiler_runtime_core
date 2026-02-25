@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,15 +21,15 @@ export function testBasicUnion(value: basicUnion) {
   return value;
 }
 
-class UnionClass {
+export class UnionClass {
   name: string = 'John';
 }
 
-class Child1 extends UnionClass {
+export class Child1 extends UnionClass {
   sex: string = 'male';
 }
 
-class Child2 extends UnionClass {
+export class Child2 extends UnionClass {
   language: string = 'English';
 }
 

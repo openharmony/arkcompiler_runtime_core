@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,19 +64,7 @@ namespace NameSpace {
         }
     }
 
-    interface HiddenInterface {
-
-    }
-
-    class HiddenClass implements HiddenInterface {
-
-    }
-
-    export function returnHiddenClassObject(): HiddenClass {
-        return new HiddenClass()
-    }
-
-    enum G {
+    export enum G {
         enumValue1,
         enumValue2
     }
@@ -89,7 +77,7 @@ namespace NameSpace {
 
     }
 
-    final class HiddenFinalClass {
+    export final class HiddenFinalClass {
 
     }
 
@@ -102,8 +90,8 @@ namespace NameSpace {
 
     }
 
-    abstract class HiddenAbstractClass {}
-    class HiddenClassExtendingAbstractClass extends HiddenAbstractClass {
+    export abstract class HiddenAbstractClass {}
+    export class HiddenClassExtendingAbstractClass extends HiddenAbstractClass {
 
     }
 
@@ -198,7 +186,7 @@ export class ClassExtendingAbstract extends AbstractClass {
 
 
 function checkClassIsNotEnumAndNotInterface() {
-    for (let obj of [new NameSpace.classImplingInterface(), new NameSpace.NormalClass(), new classImplingInterface(), new NormalClass(), NameSpace.returnHiddenClassObject()]) {
+    for (let obj of [new NameSpace.classImplingInterface(), new NameSpace.NormalClass(), new classImplingInterface(), new NormalClass()]) {
         arktest.assertFalse(Class.of(obj).isEnum())
         arktest.assertFalse(Class.of(obj).isInterface())
     }
@@ -218,9 +206,7 @@ function checkInterfaceIsInterfaceAndNotEnum() {
     let inf1 = cls1.getInterfaces()[0]
     let cls2 = Class.of(new classImplingInterface())
     let inf2 = cls2.getInterfaces()[0]
-    let cls3 = Class.of(NameSpace.returnHiddenClassObject())
-    let inf3 = cls3.getInterfaces()[0]
-    for (let inf of [inf1, inf2, inf3]) {
+    for (let inf of [inf1, inf2]) {
         arktest.assertFalse(inf.isEnum())
         arktest.assertTrue(inf.isInterface())
     }
@@ -412,7 +398,6 @@ function checkFinal() {
     arktest.assertFalse(Class.of(new NameSpace.NormalClass()).isFinal())
     arktest.assertTrue(Class.of(new NameSpace.FinalClass()).isFinal())
     arktest.assertFalse(Class.of(new NameSpace.ClassExtendingAbstract()).getSuper()!.isFinal())
-    arktest.assertFalse(Class.of(NameSpace.returnHiddenClassObject()).isFinal())
     arktest.assertTrue(Class.of(NameSpace.returnHiddenFinalClassObject()).isFinal())
     arktest.assertFalse(Class.of(NameSpace.returnHiddenClassExtendingAbstractClassObject()).getSuper()!.isFinal())
 
@@ -476,7 +461,6 @@ function checkAbstract() {
     arktest.assertFalse(Class.of(new NameSpace.NormalClass()).isAbstract())
     arktest.assertFalse(Class.of(new NameSpace.FinalClass()).isAbstract())
     arktest.assertTrue(Class.of(new NameSpace.ClassExtendingAbstract()).getSuper()!.isAbstract())
-    arktest.assertFalse(Class.of(NameSpace.returnHiddenClassObject()).isAbstract())
     arktest.assertFalse(Class.of(NameSpace.returnHiddenFinalClassObject()).isAbstract())
     arktest.assertTrue(Class.of(NameSpace.returnHiddenClassExtendingAbstractClassObject()).getSuper()!.isAbstract())
 

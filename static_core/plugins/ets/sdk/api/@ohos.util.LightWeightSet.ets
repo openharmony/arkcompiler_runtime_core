@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ const outOfBoundsErrorCodeId: int = 10200001;
 
 export type LightWeightSetForEachCb<T> = (value: T, key: T, set: LightWeightSet<T>) => void;
 
-interface ReadonlyLightWeightSet<T> extends Iterable<T> {
+export interface ReadonlyLightWeightSet<T> extends Iterable<T> {
     /**
      * Checks if a value is in the LightWeightSet
      *
