@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025 Huawei Device Co., Ltd.
+Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,19 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for v in values %}
 /*---
 desc: check unary plus operation for double operand
 ---*/
 
-function main(): void {
-  const v: double = {{v.value}}
-  const r: double = {{v.result}}
-    if (Double.isNaN(v)) {
-      arktest.assertTrue(Double.isNaN(r))
-    } else {
-      arktest.assertEQ(+(v), r)
-    }
-}
+function main(): int {
 
-{% endfor %}
+    let testSuite = new arktest.ArkTestsuite("Unary_plus_doubles");
+
+    {% for v in values %}
+        testSuite.addTest("Unary_plus_double_{{loop.index}}", () => {
+            const v: double = {{v.value}}
+            const r: double = {{v.result}}
+            if (Double.isNaN(v)) {
+                arktest.assertTrue(Double.isNaN(r))
+            } else {
+                arktest.assertEQ(+(v), r)
+            }
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
+}

@@ -14,26 +14,31 @@ limitations under the License.
 ---*/
 
 /*---
-desc: check addition of two floats
+desc: The conditional operator (? :) with boolean type.
 ---*/
 
 function main(): int {
 
-    let testSuite = new arktest.ArkTestsuite("Addition_floats");
+    let testSuite = new arktest.ArkTestsuite("Conditional_operator_with_boolean");
+  
+    testSuite.addTest("TrueConditionalCheck", () => {
+        let a: boolean = true;
+        let x = a ? 3 : 5;
+        arktest.assertEQ( x, 3 )
+    });
 
-    {% for v in values %}
-        testSuite.addTest("add_float_{{loop.index}}", () => {
-            const a: float = ( {{v.left}} ).toFloat()
-            const b: float = ( {{v.right}} ).toFloat()
-            const v: float = ( {{v.result}} ).toFloat()
-            const r: float = a + b
-            if (Float.isNaN(v)) {
-                arktest.assertTrue(Float.isNaN(r))
-            } else {
-                arktest.assertEQ(r, v)
-            }  
-        }); 
-    {%- endfor %}
+    testSuite.addTest("FalseConditionalCheck", () => {
+        let a: boolean = false;
+        let x = a ? 3 : 5;
+        arktest.assertEQ( x, 5 )
+    });
+
+    testSuite.addTest("1_0_ConditionalCheck", () => {
+        let x = 1 ? 3 : 5;
+        arktest.assertEQ(x, 3)
+        x = 0 ? 3 : 5;
+        arktest.assertEQ(x, 5)
+    });
 
     return testSuite.run(); 
 }

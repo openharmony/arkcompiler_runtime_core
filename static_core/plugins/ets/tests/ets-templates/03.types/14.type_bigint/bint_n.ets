@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     Values of type bigint can be created from Numeric types, by using
@@ -21,9 +20,17 @@ desc: >-
 ---*/
 let b: bigint
 
-function main() {
-    let s: {{c.from_type}} = {{c.expr|safe}}
-    let checkException = (e: Error): boolean => { return (e instanceof RangeError) }
-    arktest.expectThrow(() => { b = new BigInt(s) }, checkException)
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("RangeErr_with_bigint");
+
+    {% for c in cases %}
+        testSuite.addTest("bigint_err_{{loop.index}}", () => {
+            let s: {{c.from_type}} = {{c.expr|safe}}
+            let checkException = (e: Error): boolean => { return (e instanceof RangeError) }
+            arktest.expectThrow(() => { b = new BigInt(s) }, checkException)
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}

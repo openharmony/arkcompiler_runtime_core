@@ -13,19 +13,27 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
 desc: >-
     Numeric type values, by using a call to the standard library
     (see Standard Library) class BigInt methods or constructors.
 ---*/
 
-function main() {
-    let u: never|bigint|{{c.from_type}}|boolean
-{%- for t in c['values'] %}
-    u = {{t.expr|safe}}
-    u = new BigInt(u as {{c.from_type}})
-    arktest.assertTrue( u as bigint == {{t.val}})
-{%- endfor %}
+function main(): int {
+    
+    let testSuite = new arktest.ArkTestsuite("Union_with_bigintParam");
+
+    {% for c in cases %}
+        testSuite.addTest("bigint_union_{{loop.index}}", () => {
+            let u: never|bigint|{{c.from_type}}|boolean
+            {%- for t in c['values'] %}
+            u = {{t.expr|safe}}
+            u = new BigInt(u as {{c.from_type}})
+            arktest.assertTrue( u as bigint == {{t.val}})
+            {%- endfor %}
+        }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}
+

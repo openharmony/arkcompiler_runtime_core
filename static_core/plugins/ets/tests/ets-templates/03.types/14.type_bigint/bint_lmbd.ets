@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
+
 /*---
 desc: >-
     Numeric type values, by using a call to the standard library
     (see Standard Library) class BigInt methods or constructors.
 ---*/
 
-function main() {
-{%- for t in c['values'] %}
-    let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
-    arktest.assertTrue( ((p: bigint): bigint => { return p + 1n })(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
-{%- endfor %}
+function main(): int {
+
+    let testSuite = new arktest.ArkTestsuite("Lambda_with_bigint");
+
+    {% for c in cases %}
+        testSuite.addTest("bigint_lambda_{{loop.index}}", () => {
+        {%- for t in c['values'] %}
+        let prim{{loop.index}}: {{c.from_type}} = {{t.expr|safe}}
+        arktest.assertTrue( ((p: bigint): bigint => { return p + 1n })(new BigInt(prim{{loop.index}})) == {{t.val}} + 1n)
+        {%- endfor %}
+    }); 
+    {%- endfor %}
+
+    return testSuite.run();
 }
-{%- endfor %}
