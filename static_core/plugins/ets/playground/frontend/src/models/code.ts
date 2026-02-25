@@ -15,7 +15,7 @@
 
 import { IObj } from '../store/slices/options';
 
-export type VerificationMode = 'disabled' | 'ahead-of-time' | 'on-the-fly';
+export type VerificationMode = 'disabled' | 'ahead-of-time';
 
 export interface IIrDumpOptions {
     compiler_dump: boolean;
@@ -38,9 +38,13 @@ export interface ICodeShare {
 export interface IShareReq {
     uuid: string
 }
+export interface IIrDumpFile {
+    name: string;
+    content: string;
+}
 export interface IIrDumpResponse {
     output: string,
-    compiler_dump: string | null,
+    compiler_dump: IIrDumpFile[] | null,
     disasm_dump: string | null,
     error: string,
     exit_code?: number
@@ -59,6 +63,11 @@ export interface ICodeReq {
         exit_code?: number
     },
     verifier: {
+        output: string,
+        error: string,
+        exit_code?: number
+    },
+    aot_compile?: {
         output: string,
         error: string,
         exit_code?: number
@@ -82,7 +91,12 @@ export interface IRunReq {
         error: string,
         exit_code?: number
     },
-    run_aot?: {
+    aot_compile?: {
+        output: string,
+        error: string,
+        exit_code?: number
+    },
+    aot_run?: {
         output: string,
         error: string,
         exit_code?: number
@@ -117,13 +131,15 @@ export const codeModel = {
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
         verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
+        aot_compile: data.aot_compile ? codeModel.fillDefaults(data.aot_compile, { output: '', error: '' }) : undefined,
         ir_dump: data.ir_dump ? codeModel.fillIrDumpDefaults(data.ir_dump) : undefined,
     }),
     fromApiRun: (data: IRunReq): IRunReq => ({
         compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '' }),
         disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '' }),
         run: codeModel.fillDefaults(data.run || {}, { output: '', error: '' }),
-        run_aot: data.run_aot ? codeModel.fillDefaults(data.run_aot, { output: '', error: '' }) : undefined,
+        aot_compile: data.aot_compile ? codeModel.fillDefaults(data.aot_compile, { output: '', error: '' }) : undefined,
+        aot_run: data.aot_run ? codeModel.fillDefaults(data.aot_run, { output: '', error: '' }) : undefined,
         verifier: codeModel.fillDefaults(data.verifier || {}, { output: '', error: '' }),
         ir_dump: data.ir_dump ? codeModel.fillIrDumpDefaults(data.ir_dump) : undefined,
     }),
