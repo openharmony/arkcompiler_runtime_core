@@ -304,6 +304,16 @@
 #32603
 07.expressions/14.chaining_operator/condition_compile_time.ets
 
+# 33235
+07.expressions/14.chaining_operator/expression_not_nullish_0.ets
+07.expressions/14.chaining_operator/expression_not_nullish_1.ets
+07.expressions/14.chaining_operator/expression_not_nullish_2.ets
+07.expressions/14.chaining_operator/expression_not_nullish_3.ets
+07.expressions/14.chaining_operator/expression_not_nullish_4.ets
+07.expressions/14.chaining_operator/expression_not_nullish_5.ets
+07.expressions/14.chaining_operator/expression_not_nullish_6.ets
+07.expressions/14.chaining_operator/expression_not_nullish_7.ets
+
 #30939
 07.expressions/15.new_expressions/constructor_param_array_custom_2.ets
 
