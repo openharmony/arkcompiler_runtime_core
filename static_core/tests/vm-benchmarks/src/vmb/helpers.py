@@ -167,6 +167,8 @@ class Timer:
 
     tz = datetime.now(timezone.utc).astimezone().tzinfo
     ns2ts = 1e9
+    base_perf = perf_counter_ns()
+    base_real = datetime.now()
 
     def __init__(self) -> None:
         self._begin = perf_counter_ns()
@@ -180,11 +182,13 @@ class Timer:
 
     @property
     def begin(self) -> str:
-        return self.format(datetime.fromtimestamp(self._begin / Timer.ns2ts))
+        dt_sec = (self._begin - Timer.base_perf) / Timer.ns2ts
+        return self.format(Timer.base_real + timedelta(seconds=dt_sec))
 
     @property
     def end(self) -> str:
-        return self.format(datetime.fromtimestamp(self._end / Timer.ns2ts))
+        dt_sec = (self._end - Timer.base_perf) / Timer.ns2ts
+        return self.format(Timer.base_real + timedelta(seconds=dt_sec))
 
     def start(self) -> None:
         self._begin = perf_counter_ns()
