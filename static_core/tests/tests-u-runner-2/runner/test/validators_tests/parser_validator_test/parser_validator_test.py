@@ -141,3 +141,94 @@ class ParserValidatorTest(TestCase):
             _2=actual_error,
             return_code=actual_return_code)
         self.assertFalse(actual.passed)
+
+    def test_normalize_build_system_path_unix(self) -> None:
+        """
+        Test normalize_build_system_path with Unix-style paths
+        """
+        input_str = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: /home/user/project/ets-warnings-tests/gen/"
+            "diagnostic_format_custom_tests/diagnostic_format_custom_1.ets:21:21"
+        )
+        expected = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: diagnostic_format_custom_1.ets:21:21"
+        )
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
+
+    def test_normalize_build_system_path_windows(self) -> None:
+        """
+        Test normalize_build_system_path with Windows-style paths
+        """
+        input_str = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: C:\\Users\\user\\project\\ets-warnings-tests\\gen\\"
+            "diagnostic_format_custom_tests\\diagnostic_format_custom_1.ets:21:21"
+        )
+        expected = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: diagnostic_format_custom_1.ets:21:21"
+        )
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
+
+    def test_normalize_build_system_path_windows_forward_slash(self) -> None:
+        """
+        Test normalize_build_system_path with Windows-style paths using forward slashes
+        """
+        input_str = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: D:/workspace/project/ets-warnings-tests/gen/"
+            "diagnostic_format_custom_tests/diagnostic_format_custom_1.ets:21:21"
+        )
+        expected = (
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: diagnostic_format_custom_1.ets:21:21"
+        )
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
+
+    def test_normalize_build_system_path_short_path(self) -> None:
+        """
+        Test normalize_build_system_path with short path
+        """
+        input_str = "Error Message: Type '\"string\"' cannot be assigned to type 'Double' At File: /tmp/test.ets:10:5"
+        expected = "Error Message: Type '\"string\"' cannot be assigned to type 'Double' At File: test.ets:10:5"
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
+
+    def test_normalize_build_system_path_no_match(self) -> None:
+        """
+        Test normalize_build_system_path with string that doesn't contain At File pattern
+        """
+        input_str = "Error Message: Type '\"string\"' cannot be assigned to type 'Double'"
+        expected = "Error Message: Type '\"string\"' cannot be assigned to type 'Double'"
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
+
+    def test_normalize_build_system_path_multiline(self) -> None:
+        """
+        Test normalize_build_system_path with multiline output
+        """
+        input_str = (
+            "1 ERROR: Semantic error ESE0318\n"
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: /home/user/project/ets-warnings-tests/gen/"
+            "diagnostic_format_custom_tests/diagnostic_format_custom_1.ets:21:21\n"
+            "2 ERROR: Semantic error ESE0344\n"
+            "Error Message: Invalid destination type for floating-point constant value "
+            "At File: /home/user/project/ets-warnings-tests/gen/"
+            "diagnostic_format_custom_tests/diagnostic_format_custom_1.ets:25:12"
+        )
+        expected = (
+            "1 ERROR: Semantic error ESE0318\n"
+            "Error Message: Type '\"string\"' cannot be assigned to type 'Double' "
+            "At File: diagnostic_format_custom_1.ets:21:21\n"
+            "2 ERROR: Semantic error ESE0344\n"
+            "Error Message: Invalid destination type for floating-point constant value "
+            "At File: diagnostic_format_custom_1.ets:25:12"
+        )
+        result = ParserValidator.normalize_build_system_path(input_str)
+        self.assertEqual(result, expected)
