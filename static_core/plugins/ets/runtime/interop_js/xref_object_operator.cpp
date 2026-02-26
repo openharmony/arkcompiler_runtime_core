@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -556,12 +556,13 @@ napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsCoroutine *coro, 
     }
 
     // if it a XRefObject, then we can just return its napi value
-    if (object->GetClass()->GetRuntimeClass()->IsXRefClass()) {
+    auto klass = object->GetClass()->GetRuntimeClass();
+    if (klass->IsXRefClass()) {
         auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(object);
         return xRefObjectOperator.GetNapiValue(coro);
     }
 
-    auto converter = JSRefConvertResolve(ctx, object->GetClass()->GetRuntimeClass());
+    auto converter = JSRefConvertResolve(ctx, klass);
     if (converter == nullptr) {
         return interop::js::GetUndefined(ctx->GetJSEnv());
     }
