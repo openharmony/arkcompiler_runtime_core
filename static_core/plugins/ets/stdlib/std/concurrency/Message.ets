@@ -27,7 +27,8 @@ export namespace concurrency {
      */
     export class Message {
         private handler: concurrency.MessageHandler;
-        private what: int;
+        private static readonly defaultMessagewhat : int = -1000000;
+        private what: int = Message.defaultMessagewhat;
         private callback: CB | undefined = undefined;
         private obj: Object | undefined = undefined;
         private isSent: AtomicFlag = new AtomicFlag(false);
