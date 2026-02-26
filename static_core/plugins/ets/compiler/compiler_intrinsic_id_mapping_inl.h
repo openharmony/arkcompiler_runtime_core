@@ -15,45 +15,44 @@
 #ifndef PANDA_PLUGINS_ETS_COMPILER_INTRINSIC_ID_MAPPING_INL_H
 #define PANDA_PLUGINS_ETS_COMPILER_INTRINSIC_ID_MAPPING_INL_H
 
-using ark::compiler::RuntimeInterface;
-
-RuntimeInterface::EntrypointId GetEntrypointByIntrinsicId(RuntimeInterface::IntrinsicId id)
+inline ark::compiler::RuntimeInterface::EntrypointId GetEntrypointByIntrinsicId(
+    ark::compiler::RuntimeInterface::IntrinsicId id)
 {
-    RuntimeInterface::EntrypointId entrypoint;
+    ark::compiler::RuntimeInterface::EntrypointId entrypoint;
     switch (id) {
-        case RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_INT8_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_INT8_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_INT8_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_INT16_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_INT16_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_INT16_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_INT16_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_INT32_ARRAY_COPY_WITHIN_IMPL:
-        case RuntimeInterface::IntrinsicId::INTRINSIC_FLOAT32_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_INT32_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_INT32_ARRAY_COPY_WITHIN_IMPL:
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_FLOAT32_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_INT32_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_INT64_ARRAY_COPY_WITHIN_IMPL:
-        case RuntimeInterface::IntrinsicId::INTRINSIC_FLOAT64_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_BIG_INT64_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_BIG_INT64_ARRAY_COPY_WITHIN_IMPL:
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_FLOAT64_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_BIG_INT64_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_ARRAY_COPY_WITHIN_IMPL:
-        case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_CLAMPED_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_U_INT8_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_ARRAY_COPY_WITHIN_IMPL:
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_U_INT8_CLAMPED_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_U_INT8_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT16_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_U_INT16_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_U_INT16_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_U_INT16_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_U_INT32_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_U_INT32_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_U_INT32_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_U_INT32_COPY_WITHIN;
             break;
 
-        case RuntimeInterface::IntrinsicId::INTRINSIC_BIG_U_INT64_ARRAY_COPY_WITHIN_IMPL:
-            entrypoint = RuntimeInterface::EntrypointId::ARRAY_BIG_U_INT64_COPY_WITHIN;
+        case ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_BIG_U_INT64_ARRAY_COPY_WITHIN_IMPL:
+            entrypoint = ark::compiler::RuntimeInterface::EntrypointId::ARRAY_BIG_U_INT64_COPY_WITHIN;
             break;
 
         default:

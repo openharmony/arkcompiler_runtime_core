@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,12 +49,14 @@
 
 namespace ark::ets::interop::js {
 
-static const std::unordered_set<char> singleChars = {'c', 'b', 's', 'i', 'l', 'f', 'd', 'N', 'U', 'z'};
-static const std::unordered_set<char> bracketPrefixes = {'C', 'A', 'E', 'P', 'X'};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static const std::unordered_set<char> SINGLE_CHARS = {'c', 'b', 's', 'i', 'l', 'f', 'd', 'N', 'U', 'z'};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static const std::unordered_set<char> BRACKET_PREFIXES = {'C', 'A', 'E', 'P', 'X'};
 
 static bool ParseBracketed(const std::string &s, size_t &pos, size_t end)
 {
-    if (bracketPrefixes.count(s[pos]) == 0 || pos + 1 >= end || s[pos + 1] != '{') {
+    if (BRACKET_PREFIXES.count(s[pos]) == 0 || pos + 1 >= end || s[pos + 1] != '{') {
         return false;
     }
 
@@ -83,7 +85,7 @@ static size_t CountArgsNum(const std::string &signature)
     while (i < signature.length()) {
         if (ParseBracketed(signature, i, signature.length())) {
             total++;
-        } else if (singleChars.count(signature[i]) > 0) {
+        } else if (SINGLE_CHARS.count(signature[i]) > 0) {
             total++;
             i++;
         } else {
@@ -166,8 +168,8 @@ bool CheckArgsAndGetReturnType(napi_env env, const std::string &signature, size_
         return true;
     }
 
-    constexpr size_t colonPositionFromEnd = 2;
-    if (colonPos != signature.length() - colonPositionFromEnd) {
+    constexpr size_t COLON_POSITION_FROM_END = 2;
+    if (colonPos != signature.length() - COLON_POSITION_FROM_END) {
         type = SType::REFERENCE;
         return true;
     }

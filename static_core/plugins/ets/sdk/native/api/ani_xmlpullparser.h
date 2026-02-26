@@ -85,10 +85,10 @@ private:
         };
 
         explicit ParseInfoClassCache(ani_env *env);
-        ~ParseInfoClassCache();
+        ~ParseInfoClassCache() = default;
         ani_object New() const;
         void InitFieldCache();
-        ani_class GetCachedClass_();
+        ani_class GetCachedClass();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FIELD_SETTER(_cache, func, _item, type, _typeName) \

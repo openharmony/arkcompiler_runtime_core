@@ -169,8 +169,8 @@ static auto GetCopy([[maybe_unused]] const void *srcAddr)
 namespace {
 template <typename T>
 struct ObjectArrayHandle final {
-    EtsHandle<EtsCharArray> &array;
-    int32_t start;
+    EtsHandle<EtsCharArray> &array;  // NOLINT(misc-non-private-member-variables-in-classes)
+    int32_t start;                   // NOLINT(misc-non-private-member-variables-in-classes)
 
     void *GetBasePtr()
     {

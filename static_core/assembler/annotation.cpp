@@ -251,12 +251,12 @@ std::string AnnotationElement::TypeToString(Value::Type type)
 
 void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annotationElemName)
 {
-    auto annotation_elem_iter =
-        std::find_if(elements_.begin(), elements_.end(), [&](pandasm::AnnotationElement &annotation_element) -> bool {
-            return annotation_element.GetName() == annotationElemName;
+    auto annotationElemIter =
+        std::find_if(elements_.begin(), elements_.end(), [&](pandasm::AnnotationElement &annotationElement) -> bool {
+            return annotationElement.GetName() == annotationElemName;
         });
-    if (annotation_elem_iter != elements_.end()) {
-        (void)elements_.erase(annotation_elem_iter);
+    if (annotationElemIter != elements_.end()) {
+        (void)elements_.erase(annotationElemIter);
     }
 }
 

@@ -46,7 +46,7 @@ public:
         options_.SetRunGcInPlace(true);
     }
 
-    void SetPandaFile(const ark::arg_list_t abcPaths)
+    void SetPandaFile(const ark::arg_list_t &abcPaths)
     {
         options_.SetPandaFiles(abcPaths);
     }

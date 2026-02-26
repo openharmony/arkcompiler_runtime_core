@@ -51,8 +51,8 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 bool LLVMIrConstructor::EmitArrayCopyWithin(Inst *inst)
 {
     auto eid = GetEntrypointByIntrinsicId(inst->CastToIntrinsic()->GetIntrinsicId());
-    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1),
-                                   GetInputValue(inst, 2), GetInputValue(inst, 3)});
+    auto call = CreateFastPathCall(
+        inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1), GetInputValue(inst, 2), GetInputValue(inst, 3)});
     // Fastpath doesn't return anything, but result is in 'dst' arg, which is second
     ValueMapAdd(inst, call);
     return true;
@@ -124,28 +124,25 @@ bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
 RuntimeInterface::EntrypointId GetAppendStringsEntrypoint(uint32_t numArgs, mem::BarrierType barrierType)
 {
     using EntrypointId = RuntimeInterface::EntrypointId;
-    switch (barrierType) {
-        case mem::BarrierType::POST_INTERREGION_BARRIER: {  // G1 GC
-            std::array<EntrypointId, 5U> entrypoints {
-                EntrypointId::INVALID,  // numArgs = 0
-                EntrypointId::INVALID,  // numArgs = 1
-                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC,
-                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC,
-                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC,
-            };
-            return entrypoints[numArgs];
-        }
-        default: {  // STW GC
-            std::array<EntrypointId, 5U> entrypoints {
-                EntrypointId::INVALID,  // numArgs = 0
-                EntrypointId::INVALID,  // numArgs = 1
-                EntrypointId::STRING_BUILDER_APPEND_STRING2_SYNC,
-                EntrypointId::STRING_BUILDER_APPEND_STRING3_SYNC,
-                EntrypointId::STRING_BUILDER_APPEND_STRING4_SYNC,
-            };
-            return entrypoints[numArgs];
-        }
+    if (barrierType == mem::BarrierType::POST_INTERREGION_BARRIER) {  // G1 GC
+        std::array<EntrypointId, 5U> entrypoints {
+            EntrypointId::INVALID,  // numArgs = 0
+            EntrypointId::INVALID,  // numArgs = 1
+            EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC,
+            EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC,
+            EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC,
+        };
+        return entrypoints[numArgs];
     }
+    // STW GC
+    std::array<EntrypointId, 5U> entrypoints {
+        EntrypointId::INVALID,  // numArgs = 0
+        EntrypointId::INVALID,  // numArgs = 1
+        EntrypointId::STRING_BUILDER_APPEND_STRING2_SYNC,
+        EntrypointId::STRING_BUILDER_APPEND_STRING3_SYNC,
+        EntrypointId::STRING_BUILDER_APPEND_STRING4_SYNC,
+    };
+    return entrypoints[numArgs];
 }
 
 bool LLVMIrConstructor::EmitStringBuilderAppendStrings(Inst *inst)
@@ -497,12 +494,12 @@ bool LLVMIrConstructor::EmitStringFromCharCodeSingle(Inst *inst)
 {
     ASSERT(inst->GetInputsCount() == 3U && inst->RequireState());
     ASSERT(GetGraph()->GetRuntime()->IsStringCachesUsed());
-    constexpr auto eid = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
+    constexpr auto EID = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB;
     auto cache = GetInputValue(inst, 0);
     auto number = GetInputValue(inst, 1);
     auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
-    auto call = CreateFastPathCall(inst, eid, {cache, number, klass});
+    auto call = CreateFastPathCall(inst, EID, {cache, number, klass});
     MarkAsAllocation(call);
     ValueMapAdd(inst, call);
     return true;
@@ -582,8 +579,8 @@ bool LLVMIrConstructor::EmitArrayFastCopyToRef(Inst *inst)
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(slowPathBb);
-    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
-    CreateEntrypointCall(slowPathEntrypointId, inst, callArgs);
+    constexpr auto SLOW_PATH_ENTYPOINT_ID = RuntimeInterface::EntrypointId::ARRAY_FAST_COPY_TO_REF_ENTRYPOINT;
+    CreateEntrypointCall(SLOW_PATH_ENTYPOINT_ID, inst, callArgs);
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(returnBb);
@@ -630,8 +627,8 @@ bool LLVMIrConstructor::EmitEscompatArrayReverse(Inst *inst)
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(slowPathBb);
-    constexpr auto slowPathEntrypointId = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
-    CreateEntrypointCall(slowPathEntrypointId, inst, {GetInputValue(inst, 0), arrLength});
+    constexpr auto SLOW_PATH_ENTYPOINT_ID = RuntimeInterface::EntrypointId::ESCOMPAT_ARRAY_REVERSE;
+    CreateEntrypointCall(SLOW_PATH_ENTYPOINT_ID, inst, {GetInputValue(inst, 0), arrLength});
     builder_.CreateBr(returnBb);
 
     SetCurrentBasicBlock(returnBb);
@@ -642,9 +639,8 @@ bool LLVMIrConstructor::EmitStringConcat2(Inst *inst)
 {
     if (GetGraph()->GetRuntime()->IsUseAllStrings()) {
         return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB_ALL_STRINGS, 2U);
-    } else {
-        return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
     }
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
 }
 
 bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)

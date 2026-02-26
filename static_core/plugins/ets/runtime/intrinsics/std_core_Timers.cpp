@@ -18,7 +18,6 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -29,7 +28,7 @@ namespace ark::ets::intrinsics {
 
 using TimerId = int32_t;
 
-class TimerInfo {
+class TimerInfo final {
 public:
     TimerInfo(mem::Reference *callback, int delay, bool isPeriodic, TimerId id)
         : callback_(callback), delay_(delay), isPeriodic_(isPeriodic), id_(id)
@@ -38,6 +37,8 @@ public:
 
     NO_COPY_SEMANTIC(TimerInfo);
     NO_MOVE_SEMANTIC(TimerInfo);
+
+    ~TimerInfo() = default;
 
     mem::Reference *GetCallback() const
     {
@@ -79,16 +80,17 @@ public:
     bool IsTimerDisarmed(TimerId timerId);
 
 private:
-    static constexpr TimerEvent *disarmedTimer_ = nullptr;
+    static constexpr TimerEvent *DISARMED_TIMER = nullptr;
     static inline TimerEvent *retiredTimer_ = reinterpret_cast<TimerEvent *>(std::numeric_limits<uintptr_t>::max());
 
     os::memory::Mutex lock_;
     std::unordered_map<TimerId, TimerEvent *> timers_;
 };
 
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static TimerTable g_timerTable = {};
-static std::atomic<TimerId> nextTimerId_ = 1;
-static std::atomic<TimerId> internalEventId_ = 0;
+static std::atomic<TimerId> g_nextTimerId = 1;
+static std::atomic<TimerId> g_internalEventId = 0;
 
 static void InvokeCallback(mem::Reference *callback)
 {
@@ -117,7 +119,7 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         return 0;
     }
     // Atomic with relaxed order reason: sync is not needed here
-    auto timerId = nextTimerId_.fetch_add(1, std::memory_order_relaxed);
+    auto timerId = g_nextTimerId.fetch_add(1, std::memory_order_relaxed);
     auto *coro = Coroutine::GetCurrent();
     auto *refStorage = coro->GetVM()->GetGlobalObjectStorage();
     auto *callbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
@@ -128,11 +130,12 @@ TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodi
         auto *timer = static_cast<TimerInfo *>(param);
         auto *timerCoro = Coroutine::GetCurrent();
         auto *coroMan = timerCoro->GetManager();
+        // NOLINTNEXTLINE(readability-magic-numbers)
         auto usDelay = timer->GetDelay() * 1000U;
 
         while (true) {
             // Atomic with relaxed order reason: sync is not needed here
-            TimerEvent timerEvent(coroMan, internalEventId_.fetch_add(1, std::memory_order_relaxed));
+            TimerEvent timerEvent(coroMan, g_internalEventId.fetch_add(1, std::memory_order_relaxed));
 
             if (!g_timerTable.RegisterTimer(timer->GetId(), &timerEvent)) {
                 break;
@@ -179,7 +182,7 @@ void StdCoreClearTimer(TimerId timerId)
 
 bool TimerTable::RegisterTimer(TimerId timerId, TimerEvent *event)
 {
-    ASSERT(event != disarmedTimer_);
+    ASSERT(event != DISARMED_TIMER);
     ASSERT(event != retiredTimer_);
     os::memory::LockHolder lh(lock_);
     auto [timerIter, inserted] = timers_.insert({timerId, event});
@@ -198,7 +201,7 @@ void TimerTable::RetireTimer(TimerId timerId)
     os::memory::LockHolder lh(lock_);
     auto timerIter = timers_.find(timerId);
     ASSERT(timerIter != timers_.end());
-    if (timerIter->second != disarmedTimer_) {
+    if (timerIter->second != DISARMED_TIMER) {
         timerIter->second = retiredTimer_;
     }
 }
@@ -209,11 +212,11 @@ void TimerTable::DisarmTimer(TimerId timerId)
     auto timerIter = timers_.find(timerId);
     if (timerIter != timers_.end()) {
         auto &timerEvent = timerIter->second;
-        if (timerEvent != disarmedTimer_ && timerEvent != retiredTimer_) {
+        if (timerEvent != DISARMED_TIMER && timerEvent != retiredTimer_) {
             timerEvent->SetExpired();
             timerEvent->Happen();
         }
-        timerEvent = disarmedTimer_;
+        timerEvent = DISARMED_TIMER;
     }
 }
 
@@ -231,7 +234,7 @@ bool TimerTable::IsTimerDisarmed(TimerId timerId)
     os::memory::LockHolder lh(lock_);
     auto timerIter = timers_.find(timerId);
     ASSERT(timerIter != timers_.end());
-    return timerIter->second == disarmedTimer_;
+    return timerIter->second == DISARMED_TIMER;
 }
 
 }  // namespace ark::ets::intrinsics

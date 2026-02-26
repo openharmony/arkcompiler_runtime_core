@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -861,9 +861,8 @@ void Parser::ParseResetRecordTable()
                       record.fileLocation.boundLeft, record.fileLocation.boundRight, record.fileLocation.WholeLine());
             SetError();
             return;
-        } else {
-            ParseResetRecords(record);
         }
+        ParseResetRecords(record);
     }
 }
 
@@ -1889,7 +1888,7 @@ bool Parser::ParseOperandId()
     return true;
 }
 
-void Parser::ParseComponentOperandTypeIfNeeded(Type type)
+void Parser::ParseComponentOperandTypeIfNeeded(const Type &type)
 {
     if (type.IsArray()) {
         auto componentType = Type::FromName(type.GetComponentName());
@@ -2040,10 +2039,7 @@ bool Parser::ParseOperandNone()
     }
 
     if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
-        if (context_.Mask()) {
-            return true;
-        }
-        return false;
+        return context_.Mask();
     }
 
     if (!context_.Mask()) {

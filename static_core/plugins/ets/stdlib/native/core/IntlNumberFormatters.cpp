@@ -381,7 +381,7 @@ static std::string GetFieldStrById(ani_env *env, ani_object obj, ani_field field
     if (allowUndefined) {
         ani_boolean isUndefined = ANI_FALSE;
         ANI_FATAL_IF_ERROR(env->Reference_IsUndefined(ref, &isUndefined));
-        if (isUndefined) {
+        if (isUndefined == ANI_TRUE) {
             return std::string();
         }
     }

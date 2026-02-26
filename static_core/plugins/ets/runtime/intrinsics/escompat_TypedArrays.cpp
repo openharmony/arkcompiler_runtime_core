@@ -1082,12 +1082,12 @@ static ALWAYS_INLINE inline void TypedArrayReverseCopyBuffer(EtsEscompatArrayBuf
     ASSERT(byteOffset >= 0);
     ASSERT(static_cast<unsigned long>(byteOffset) <= (srcLength * sizeof(ElementType)));
     const void *src = srcBuf->GetData();
-    ElementType *dest = dstBuf->GetData<ElementType *>();
+    auto *dest = dstBuf->GetData<ElementType *>();
     ASSERT(src != nullptr);
     ASSERT(dest != nullptr);
     const ElementType *start = reinterpret_cast<ElementType *>(ToUintPtr(src) + byteOffset);
-    std::reverse_copy(start, start + srcLength, dest);
-    ASSERT(*dest == *(start + srcLength - 1));
+    std::reverse_copy(start, start + srcLength, dest);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT(*dest == *(start + srcLength - 1));          // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -1659,9 +1659,10 @@ static ark::ets::EtsString *TypedArrayJoinUtf16(Span<T> &data, ark::ets::EtsStri
     auto n = data.Size() - 1;
     if (sepSize == 1) {
         PandaVector<uint16_t> tree16Buf;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto sep =
             separator->IsTreeString() ? separator->GetTreeStringDataUtf16(tree16Buf)[0] : separator->GetDataUtf16()[0];
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (auto i = 0U; i < n; i++) {
             strSize += NumberToU16Chars(buf, strSize, static_cast<T>(data[i]));
             buf[strSize] = sep;
@@ -1703,9 +1704,10 @@ static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data, ark::ets::EtsStrin
     auto n = data.Size() - 1;
     if (sepSize == 1) {
         PandaVector<uint8_t> tree8Buf;
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto sep =
             separator->IsTreeString() ? separator->GetTreeStringDataUtf8(tree8Buf)[0] : separator->GetDataUtf8()[0];
+        // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (auto i = 0U; i < n; i++) {
             strSize += NumberToU8Chars(buf, strSize, data[i]);
             buf[strSize] = sep;

@@ -115,13 +115,13 @@ extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, Et
     EtsHandle<EtsObject> valueHandle(coro, value);
 
     auto count = actualLength - fromIndex;
-    constexpr std::size_t chunkSize = 1U << 9;
-    auto iterCount = count / chunkSize;
-    auto remainder = count % chunkSize;
+    static constexpr std::size_t CHUNK_SIZE = 1U << 9U;
+    auto iterCount = count / CHUNK_SIZE;
+    auto remainder = count % CHUNK_SIZE;
 
     auto processChunk = [fromIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
                                                                        std::size_t size) -> std::optional<EtsInt> {
-        auto startOffset = iter * chunkSize;
+        auto startOffset = iter * CHUNK_SIZE;
         auto endOffset = startOffset + size;
         for (size_t j = startOffset; j < endOffset; ++j) {
             auto currentIndex = fromIndex + j;
@@ -134,7 +134,7 @@ extern "C" EtsInt EtsEscompatArrayInternalIndexOf(ObjectHeader *bufferObject, Et
     };
 
     for (size_t i = 0; i < iterCount; ++i) {
-        if (auto result = processChunk(i, chunkSize); result.has_value()) {
+        if (auto result = processChunk(i, CHUNK_SIZE); result.has_value()) {
             return result.value();
         }
         ark::interpreter::RuntimeInterface::Safepoint();
@@ -174,13 +174,13 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
     EtsHandle<EtsObject> valueHandle(coro, value);
 
     auto count = startIndex + 1;
-    constexpr std::size_t chunkSize = 1U << 9;
-    auto iterCount = count / chunkSize;
-    auto remainder = count % chunkSize;
+    constexpr std::size_t CHUNK_SIZE = 1U << 9U;
+    auto iterCount = count / CHUNK_SIZE;
+    auto remainder = count % CHUNK_SIZE;
 
     auto processChunk = [startIndex, &bufferHandle, &valueHandle, coro](std::size_t iter,
                                                                         std::size_t size) -> std::optional<EtsInt> {
-        auto startOffset = iter * chunkSize;
+        auto startOffset = iter * CHUNK_SIZE;
         for (size_t j = 0; j < size; ++j) {
             auto currentIndex = startIndex - (startOffset + j);
             auto element = bufferHandle.GetPtr()->Get(currentIndex);
@@ -192,7 +192,7 @@ extern "C" EtsInt EtsEscompatArrayInternalLastIndexOf(ObjectHeader *bufferObject
     };
 
     for (size_t i = 0; i < iterCount; ++i) {
-        if (auto result = processChunk(i, chunkSize); result.has_value()) {
+        if (auto result = processChunk(i, CHUNK_SIZE); result.has_value()) {
             return result.value();
         }
         ark::interpreter::RuntimeInterface::Safepoint();
@@ -230,18 +230,18 @@ extern "C" void EtsEscompatArrayFillImpl(ObjectHeader *bufferHeader, int32_t len
     }
 
     auto count = endInd - startInd;
-    constexpr std::size_t chunkSize = 1U << 12;
-    auto iterCount = count / chunkSize;
-    auto remainder = count % chunkSize;
+    static constexpr std::size_t CHUNK_SIZE = 1U << 12U;
+    auto iterCount = count / CHUNK_SIZE;
+    auto remainder = count % CHUNK_SIZE;
 
     auto processChunk = [&bufferHandle, &valueHandle, startInd](std::size_t iter, std::size_t size) {
-        auto startOffset = iter * chunkSize + startInd;
+        auto startOffset = iter * CHUNK_SIZE + startInd;
         auto endOffset = startOffset + size;
         bufferHandle->Fill(valueHandle.GetPtr(), startOffset, endOffset);
     };
 
     for (std::uint32_t i = 0; i < iterCount; ++i) {
-        processChunk(i, chunkSize);
+        processChunk(i, CHUNK_SIZE);
         ark::interpreter::RuntimeInterface::Safepoint();
     }
     if (remainder > 0) {
@@ -331,10 +331,10 @@ static void RefReverse(ManagedThread *thread, EtsHandle<EtsObjectArray> &buffer,
     };
     auto putSafepoint = [&usePreBarrier, barrierSet, &arr, thread](size_t dstStart, size_t dstEndMirror, size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
-            constexpr uint32_t offset = ark::coretypes::Array::GetDataOffset();
+            static constexpr uint32_t OFFSET = ark::coretypes::Array::GetDataOffset();
             const uint32_t size = count * sizeof(T);
-            barrierSet->PostBarrier(arr, offset + dstStart * sizeof(T), size);
-            barrierSet->PostBarrier(arr, offset + dstEndMirror * sizeof(T) - size, size);
+            barrierSet->PostBarrier(arr, OFFSET + dstStart * sizeof(T), size);
+            barrierSet->PostBarrier(arr, OFFSET + dstEndMirror * sizeof(T) - size, size);
         }
         ark::interpreter::RuntimeInterface::Safepoint(thread);
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
@@ -376,6 +376,7 @@ struct ElementComputeResult {
     DEFAULT_MOVE_SEMANTIC(ElementComputeResult);
     ~ElementComputeResult() = default;
 
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     EtsCoroutine *coro {};
     const EtsPlatformTypes *ptypes {};
     size_t intCount = 0;
@@ -385,6 +386,7 @@ struct ElementComputeResult {
     size_t utf16Size = 0;
     size_t toStringIndex = 0;
     PandaVector<EtsHandle<EtsString>> toStringResults;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
 static constexpr std::string_view TRUE_STRING = "true";

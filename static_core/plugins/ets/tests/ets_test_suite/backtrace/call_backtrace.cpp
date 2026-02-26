@@ -70,7 +70,7 @@ static ani_int CallBacktrace([[maybe_unused]] ani_env *env, [[maybe_unused]] ani
     std::vector<ark::tooling::Function> frames;
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     while (fp != 0 &&
-           ark::tooling::Backtrace::StepArkByManagedFrame(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode)) {
+           ark::tooling::Backtrace::StepArkByManagedFrame(nullptr, &ReadMemTestFunc, &fp, &sp, &pc, &bcCode) != 0) {
         ark::tooling::Function function;
         if (ark::tooling::Backtrace::SymbolizeByManagedFrame(pc, fileHeader, bcCode, abcBuffer.data(), abcSize,
                                                              &function) == 1) {

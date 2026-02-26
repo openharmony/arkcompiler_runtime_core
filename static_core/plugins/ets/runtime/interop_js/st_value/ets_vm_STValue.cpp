@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,10 @@ napi_status __attribute__((weak)) napi_define_properties(napi_env env, napi_valu
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 
 namespace ark::ets::interop::js {
+
+const char *g_stvalueDataPtrLow = "_STValueDataPtrLow";
+const char *g_stvalueDataPtrHigh = "_STValueDataPtrHigh";
+
 void AniExpectOK(ani_status status)
 {
     if (status != ANI_OK) {
@@ -71,6 +75,7 @@ static std::string GetErrorMessage(ani_env *aniEnv, ani_error aniError)
     AniExpectOK(aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod));
 
     ani_ref aniRef = nullptr;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     AniExpectOK(aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef));
 
     auto aniString = reinterpret_cast<ani_string>(aniRef);
@@ -91,8 +96,10 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status)
     }
 
     ani_env *aniEnv = GetAniEnv();
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     ani_boolean hasError = false;
     AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!hasError) {
         STValueThrowJSError(env, "Unknown ANI error occurred, status: " + std::to_string(status));
         return false;
@@ -115,8 +122,10 @@ bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::strin
     }
 
     ani_env *aniEnv = GetAniEnv();
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     ani_boolean hasError = false;
     AniExpectOK(aniEnv->ExistUnhandledError(&hasError));
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!hasError) {
         STValueThrowJSError(env, errorMsg);
         return false;
@@ -138,47 +147,47 @@ STValueData::STValueData([[maybe_unused]] napi_env env, ani_ref refData)
     ani_ref globalRef {nullptr};
     AniCheckAndThrowToDynamic(env, aniEnv->GlobalReference_Create(refData, &globalRef));
 
-    this->dataRef = globalRef;
+    this->dataRef_ = globalRef;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_boolean booleanData)
 {
-    dataRef = booleanData;
+    dataRef_ = booleanData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_char charData)
 {
-    dataRef = charData;
+    dataRef_ = charData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_byte byteData)
 {
-    dataRef = byteData;
+    dataRef_ = byteData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_short shortData)
 {
-    dataRef = shortData;
+    dataRef_ = shortData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_int intData)
 {
-    dataRef = intData;
+    dataRef_ = intData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_long longData)
 {
-    dataRef = longData;
+    dataRef_ = longData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_float floatData)
 {
-    dataRef = floatData;
+    dataRef_ = floatData;
 }
 
 STValueData::STValueData([[maybe_unused]] napi_env env, ani_double doubleData)
 {
-    dataRef = doubleData;
+    dataRef_ = doubleData;
 }
 
 STValueData::~STValueData()
@@ -205,13 +214,14 @@ bool STValueData::IsAniNullOrUndefined(napi_env env) const
 uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue)
 {
     if (!IsSTValueInstance(env, jsSTValue)) {
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         return false;
     }
 
     napi_value stvalueDataPtrLow {};
     napi_value stvalueDataPtrHigh {};
-    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, STVALUE_DATA_PTR_LOW, &stvalueDataPtrLow));
-    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, STVALUE_DATA_PTR_HIGH, &stvalueDataPtrHigh));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, g_stvalueDataPtrLow, &stvalueDataPtrLow));
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsSTValue, g_stvalueDataPtrHigh, &stvalueDataPtrHigh));
 
     uint32_t low = 0;
     uint32_t high = 0;
@@ -225,7 +235,7 @@ uintptr_t GetSTValueDataPtr(napi_env env, napi_value jsSTValue)
 
 bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value)
 {
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, element));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, element));
     if (data == nullptr) {
         return false;
     }
@@ -293,18 +303,19 @@ static napi_value STValueCtorImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value argv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, argv, &jsThis, nullptr));
 
-    napi_value STValueDataPtrLow = argv[0];
-    napi_value STValueDataPtrHigh = argv[1];
+    napi_value stValueDataPtrLow = argv[0];
+    napi_value stValueDataPtrHigh = argv[1];
 
     // set property to the instance
-    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, STVALUE_DATA_PTR_LOW, STValueDataPtrLow));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, STVALUE_DATA_PTR_HIGH, STValueDataPtrHigh));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, g_stvalueDataPtrLow, stValueDataPtrLow));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, jsThis, g_stvalueDataPtrHigh, stValueDataPtrHigh));
 
     // unwrap the native object and set finalizer
-    STValueData *dataPtr = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *dataPtr = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     NAPI_CHECK_FATAL(napi_wrap(env, jsThis, dataPtr, STValueDataFinilizer, nullptr, nullptr));
 
     return jsThis;
@@ -322,8 +333,8 @@ bool IsSTValueInstance(napi_env env, napi_value value)
     napi_value ptrHighKey;
     bool hasLowKey;
     bool hasHighKey;
-    NAPI_CHECK_FATAL(napi_create_string_utf8(env, STVALUE_DATA_PTR_LOW, NAPI_AUTO_LENGTH, &ptrLowKey));
-    NAPI_CHECK_FATAL(napi_create_string_utf8(env, STVALUE_DATA_PTR_HIGH, NAPI_AUTO_LENGTH, &ptrHighKey));
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, g_stvalueDataPtrLow, NAPI_AUTO_LENGTH, &ptrLowKey));
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, g_stvalueDataPtrHigh, NAPI_AUTO_LENGTH, &ptrHighKey));
 
     NAPI_CHECK_FATAL(napi_has_property(env, value, ptrLowKey, &hasLowKey));
     NAPI_CHECK_FATAL(napi_has_property(env, value, ptrHighKey, &hasHighKey));
@@ -333,50 +344,50 @@ bool IsSTValueInstance(napi_env env, napi_value value)
 
 napi_value CreateSTypeObject(napi_env env)
 {
-    napi_value stype_obj;
-    NAPI_CHECK_FATAL(napi_create_object(env, &stype_obj));
+    napi_value stypeObj;
+    NAPI_CHECK_FATAL(napi_create_object(env, &stypeObj));
 
     napi_value value;
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::BOOLEAN), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "BOOLEAN", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "BOOLEAN", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::BYTE), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "BYTE", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "BYTE", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::CHAR), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "CHAR", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "CHAR", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::SHORT), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "SHORT", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "SHORT", value));
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::INT), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "INT", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "INT", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::LONG), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "LONG", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "LONG", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::FLOAT), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "FLOAT", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "FLOAT", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::DOUBLE), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "DOUBLE", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "DOUBLE", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::REFERENCE), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "REFERENCE", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "REFERENCE", value));
 
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ark::ets::interop::js::SType::VOID), &value));
-    NAPI_CHECK_FATAL(napi_set_named_property(env, stype_obj, "VOID", value));
+    NAPI_CHECK_FATAL(napi_set_named_property(env, stypeObj, "VOID", value));
 
-    return stype_obj;
+    return stypeObj;
 }
 
 napi_value GetSTValueClass(napi_env env)
 {
-    napi_value STValueCtor {};
+    napi_value stValueCtor {};
     thread_local napi_ref stvalueCtorRef {};
     if (stvalueCtorRef != nullptr) {
-        NAPI_CHECK_FATAL(napi_get_reference_value(env, stvalueCtorRef, &STValueCtor));
-        return STValueCtor;
+        NAPI_CHECK_FATAL(napi_get_reference_value(env, stvalueCtorRef, &stValueCtor));
+        return stValueCtor;
     }
 
     const std::array instanceProperties = {
@@ -428,7 +439,7 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"arrayPop", 0, ArrayPopImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_class(env, "STValue", NAPI_AUTO_LENGTH, STValueCtorImpl, nullptr,
-                                       instanceProperties.size(), instanceProperties.data(), &STValueCtor));
+                                       instanceProperties.size(), instanceProperties.data(), &stValueCtor));
 
     const std::array staticProperties = {
         napi_property_descriptor {"findClass", 0, STValueFindClassImpl, 0, 0, 0, napi_default, 0},
@@ -454,11 +465,11 @@ napi_value GetSTValueClass(napi_env env)
                                   0},
         napi_property_descriptor {"newArray", 0, STValueNewArrayImpl, 0, 0, 0, napi_default, 0},
     };
-    NAPI_CHECK_FATAL(napi_define_properties(env, STValueCtor, staticProperties.size(), staticProperties.data()));
+    NAPI_CHECK_FATAL(napi_define_properties(env, stValueCtor, staticProperties.size(), staticProperties.data()));
 
-    NAPI_CHECK_FATAL(napi_create_reference(env, STValueCtor, 1, &stvalueCtorRef));
+    NAPI_CHECK_FATAL(napi_create_reference(env, stValueCtor, 1, &stvalueCtorRef));
 
-    return STValueCtor;
+    return stValueCtor;
 }
 
 void ThrowJSBadArgCountError(napi_env env, size_t jsArgc, size_t expectedArgc)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@ namespace ark::ets::intrinsics {
 using RegExpParser = ark::RegExpParser;
 
 // Helper function to check for duplicate flags and set the flag
-static void CheckAndSetFlag(char flagChar, uint32_t flagMask, int &nativeFlags)
+static void CheckAndSetFlag(char flagChar, uint32_t flagMask, uint32_t &nativeFlags)
 {
     if ((nativeFlags & flagMask) != 0) {
-        PandaString error_msg = "SyntaxError: Duplicate RegExp flag '";
-        error_msg += flagChar;
-        error_msg += "'";
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, error_msg);
+        PandaString errorMsg = "SyntaxError: Duplicate RegExp flag '";
+        errorMsg += flagChar;
+        errorMsg += "'";
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR, errorMsg);
     }
     nativeFlags |= flagMask;
 }
@@ -36,14 +36,14 @@ static void CheckAndSetFlag(char flagChar, uint32_t flagMask, int &nativeFlags)
 extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
 {
     RegExpParser parse = RegExpParser();
-    auto flags_str = ark::PandaStringToStd(flags->GetUtf8());
+    auto flagsStr = ark::PandaStringToStd(flags->GetUtf8());
     auto patternStr = pattern->GetUtf8();
     size_t patternLen = patternStr.length();
     const char *patternData = patternStr.data();
 
     // Parse string flag into integer bit mask
-    int nativeFlags = 0;
-    for (char c : flags_str) {
+    uint32_t nativeFlags = 0;
+    for (char c : flagsStr) {
         switch (c) {
             case 'g':
                 CheckAndSetFlag('g', ark::RegExpParser::FLAG_GLOBAL, nativeFlags);
@@ -67,11 +67,11 @@ extern "C" void StdCoreRegExpParse(EtsString *pattern, EtsString *flags)
                 CheckAndSetFlag('d', ark::RegExpParser::FLAG_HASINDICES, nativeFlags);
                 break;
             default:
-                PandaString error_msg = "SyntaxError: Invalid RegExp flag '";
-                error_msg += c;
-                error_msg += "'";
+                PandaString errorMsg = "SyntaxError: Invalid RegExp flag '";
+                errorMsg += c;
+                errorMsg += "'";
                 ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::SYNTAX_ERROR,
-                                  error_msg);
+                                  errorMsg);
         }
     }
 

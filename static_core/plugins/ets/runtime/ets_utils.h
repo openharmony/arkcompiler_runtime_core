@@ -16,7 +16,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_UTILS_H
 
-#include "libarkbase/macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/signature_utils.h"
@@ -73,34 +72,34 @@ private:
 PANDA_PUBLIC_API bool GetExportedClassDescriptorsFromModule(EtsClass *etsGlobalClass,
                                                             std::vector<std::string> &outDescriptors);
 
-class RuntimeDescriptorParser {
+class RuntimeDescriptorParser final {
 private:
-    PandaString name;
-    size_t pos;
-    static const std::map<char, PandaString> primitiveNameMapping;
+    PandaString name_;
+    size_t pos_ {0};
+    static const std::map<char, PandaString> PRIMITIVE_NAME_MAPPING;
 
     PandaString ResolveRef()
     {
         PandaString res;
-        while (name[pos] != ';') {
-            char curSym = name[pos];
+        while (name_[pos_] != ';') {
+            char curSym = name_[pos_];
             res += (curSym != '/') ? curSym : '.';
-            pos += 1;
+            pos_ += 1;
         }
-        pos += 1;
+        pos_ += 1;
         return res;
     }
 
     PandaString ResolveUnion()
     {
         PandaString res = "{U";
-        while (name[pos] != '}') {
+        while (name_[pos_] != '}') {
             res += ResolveFixedArray();
-            if (name[pos] != '}') {
+            if (name_[pos_] != '}') {
                 res += ',';
             }
         }
-        pos++;
+        pos_++;
         res += '}';
         return res;
     }
@@ -109,73 +108,77 @@ private:
     {
         size_t i = 0;
 
-        while (pos + i < name.length() && name[pos + i] == '[') {
+        while (pos_ + i < name_.length() && name_[pos_ + i] == '[') {
             i++;
         }
 
         size_t rank = i;
-        pos += i;
+        pos_ += i;
         PandaString brackets;
         for (size_t k = 0; k < rank; ++k) {
             brackets += "[]";
         }
 
-        ASSERT(pos < name.length());
+        ASSERT(pos_ < name_.length());
 
-        char typeChar = name[pos];
+        char typeChar = name_[pos_];
         if (typeChar == 'L') {
-            pos++;
+            pos_++;
             return ResolveRef() + brackets;
-        } else if (typeChar == '{') {
-            pos++;
-            if (pos < name.length() && name[pos] == 'U') {
-                pos++;
-                return ResolveUnion() + brackets;
-            } else {
-                UNREACHABLE();
-            }
-        } else {
-            auto it = RuntimeDescriptorParser::primitiveNameMapping.find(typeChar);
-            ASSERT(it != RuntimeDescriptorParser::primitiveNameMapping.end());
-            PandaString primName = it->second;
-            pos++;
-            return primName + brackets;
         }
+        if (typeChar == '{') {
+            pos_++;
+            if (pos_ < name_.length() && name_[pos_] == 'U') {
+                pos_++;
+                return ResolveUnion() + brackets;
+            }
+            UNREACHABLE();
+        }
+        auto it = RuntimeDescriptorParser::PRIMITIVE_NAME_MAPPING.find(typeChar);
+        ASSERT(it != RuntimeDescriptorParser::PRIMITIVE_NAME_MAPPING.end());
+        PandaString primName = it->second;
+        pos_++;
+        return primName + brackets;
     }
 
 public:
-    RuntimeDescriptorParser(const PandaString &inputStr) : name(inputStr), pos(0) {}
+    explicit RuntimeDescriptorParser(PandaString inputStr) : name_(std::move(inputStr)) {}
+
+    DEFAULT_COPY_SEMANTIC(RuntimeDescriptorParser);
+    DEFAULT_MOVE_SEMANTIC(RuntimeDescriptorParser);
+
+    ~RuntimeDescriptorParser() = default;
 
     PandaString Resolve()
     {
-        PandaString res = "";
-        if (name.empty()) {
+        PandaString res;
+        if (name_.empty()) {
             return "";
         }
-        if (!(name[0] == '{' || name[0] == '[')) {
-            return name;
+        if (!(name_[0] == '{' || name_[0] == '[')) {
+            return name_;
         }
 
-        while (pos < name.length()) {
+        while (pos_ < name_.length()) {
             res += ResolveFixedArray();
         }
         return res;
     }
 };
 
-class ClassPublicNameParser {
+class ClassPublicNameParser final {
 private:
-    size_t left;
-    size_t right;
-    PandaString name;
-    static const std::map<PandaString, char> primitiveNameMapping;
+    size_t left_ {0};
+    size_t right_ {0};
+    PandaString name_;
+    static const std::map<PandaString, char> PRIMITIVE_NAME_MAPPING;
 
     static PandaVector<PandaString> SplitUnion(const PandaString &unionName)
     {
         size_t deep = 0;
         PandaVector<PandaString> res;
         for (size_t i = 0; i < unionName.length(); i++) {
-            PandaString temp = "";
+            PandaString temp;
             bool start = true;
             while (i < unionName.length() && (unionName[i] != ',' || deep != 0)) {
                 char sym = unionName[i];
@@ -198,8 +201,8 @@ private:
 
     std::optional<PandaString> ResolveUnion()
     {
-        PandaString res = "";
-        PandaString unionContent = name.substr(left, right - left + 1);
+        PandaString res;
+        PandaString unionContent = name_.substr(left_, right_ - left_ + 1);
         PandaVector<PandaString> typesArr = SplitUnion(unionContent);
 
         for (const PandaString &typeName : typesArr) {
@@ -207,7 +210,7 @@ private:
             if (UNLIKELY(!resolvedTypeNameOpt)) {
                 return std::nullopt;
             }
-            res += std::move(resolvedTypeNameOpt.value());
+            res += resolvedTypeNameOpt.value();
         }
         return res;
     }
@@ -216,57 +219,60 @@ private:
     {
         size_t i = 0;
         const size_t step = 2;
-        while (right - i > left && name[right - i] == ']' && name[right - i - 1] == '[') {
+        while (right_ - i > left_ && name_[right_ - i] == ']' && name_[right_ - i - 1] == '[') {
             i += step;
         }
 
-        right -= i;
+        right_ -= i;
 
         PandaString brackets = PandaString(i / step, '[');
-        if (left <= right && name[left] == '{') {
-            left += 1;
-            if (left <= right && name[left] == 'U' && name[right] == '}') {
-                left += 1;
-                right -= 1;
+        if (left_ <= right_ && name_[left_] == '{') {
+            left_ += 1;
+            if (left_ <= right_ && name_[left_] == 'U' && name_[right_] == '}') {
+                left_ += 1;
+                right_ -= 1;
                 auto resolvedUnionOpt = ResolveUnion();
                 if (UNLIKELY(!resolvedUnionOpt)) {
                     return std::nullopt;
                 }
                 return brackets + "{U" + std::move(resolvedUnionOpt.value()) + "}";
-            } else {
-                // Not a recognized union format
-                return "{}";
             }
+            // Not a recognized union format
+            return "{}";
         }
 
         PandaString typeName;
-        if (left <= right) {
-            typeName = name.substr(left, right - left + 1);
+        if (left_ <= right_) {
+            typeName = name_.substr(left_, right_ - left_ + 1);
         } else {
             return brackets;
         }
 
-        auto it = ClassPublicNameParser::primitiveNameMapping.find(typeName);
-        if (it != ClassPublicNameParser::primitiveNameMapping.end()) {
+        auto it = ClassPublicNameParser::PRIMITIVE_NAME_MAPPING.find(typeName);
+        if (it != ClassPublicNameParser::PRIMITIVE_NAME_MAPPING.end()) {
             return brackets + PandaString(1, it->second);
-        } else {
-            PandaString refName = typeName;
-            std::replace(refName.begin(), refName.end(), '.', '/');
-            return brackets + 'L' + refName + ';';
         }
+        PandaString refName = typeName;
+        std::replace(refName.begin(), refName.end(), '.', '/');
+        return brackets + 'L' + refName + ';';
     }
 
 public:
-    ClassPublicNameParser(const PandaString &inputStr) : left(0), right(inputStr.length() - 1), name(inputStr) {}
+    explicit ClassPublicNameParser(const PandaString &inputStr) : right_(inputStr.length() - 1), name_(inputStr) {}
+
+    DEFAULT_COPY_SEMANTIC(ClassPublicNameParser);
+    DEFAULT_MOVE_SEMANTIC(ClassPublicNameParser);
+
+    ~ClassPublicNameParser() = default;
 
     std::optional<PandaString> Resolve()
     {
-        auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name, 0, name.size());
+        auto normNameOpt = signature::NormalizePackageSeparators<PandaString, '.'>(name_, 0, name_.size());
         if (UNLIKELY(!normNameOpt.has_value())) {
             return std::nullopt;
         }
-        name = std::move(normNameOpt.value());
-        if (std::find(name.begin(), name.end(), '/') != name.end()) {
+        name_ = std::move(normNameOpt.value());
+        if (std::find(name_.begin(), name_.end(), '/') != name_.end()) {
             return std::nullopt;
         }
         return ResolveFixedArray();

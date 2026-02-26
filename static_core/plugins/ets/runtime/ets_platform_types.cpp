@@ -118,6 +118,7 @@ static EtsClass *GetTypeEntryClass(EtsPlatformTypes *ptypes, std::string_view de
     if (entry == nullptr) {
         return nullptr;
     }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     return *(reinterpret_cast<EtsClass **>(ptypes) + entry->slotIndex);
 }
 

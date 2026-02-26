@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,8 +69,8 @@ napi_value STValueUnwrapToNumberImpl(napi_env env, napi_callback_info info)
 
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
-    napi_value js_number {};
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    napi_value jsNumber {};
     ani_double value = 0.0;
 
     if (data->IsAniBoolean()) {
@@ -94,8 +94,8 @@ napi_value STValueUnwrapToNumberImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    NAPI_CHECK_FATAL(napi_create_double(env, value, &js_number));
-    return js_number;
+    NAPI_CHECK_FATAL(napi_create_double(env, value, &jsNumber));
+    return jsNumber;
 }
 
 napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
@@ -116,7 +116,7 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
 
     auto aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef()) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
@@ -127,7 +127,7 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
         return nullptr;
     }
 
-    ani_object aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
+    auto aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
     ani_class stringClass;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringClass));
@@ -140,7 +140,7 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
         return nullptr;
     }
 
-    ani_string aniString = static_cast<ani_string>(data->GetAniRef());
+    auto aniString = static_cast<ani_string>(data->GetAniRef());
 
     ani_size size {};
     aniEnv->String_GetUTF8Size(aniString, &size);
@@ -149,9 +149,9 @@ napi_value STValueUnwrapToStringImpl(napi_env env, [[maybe_unused]] napi_callbac
     aniEnv->String_GetUTF8(aniString, stdString.data(), stdString.size(), &size);
     stdString.resize(size);
 
-    napi_value js_string {};
-    NAPI_CHECK_FATAL(napi_create_string_utf8(env, stdString.data(), stdString.size(), &js_string));
-    return js_string;
+    napi_value jsString {};
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, stdString.data(), stdString.size(), &jsString));
+    return jsString;
 }
 
 napi_value STValueUnwrapToBooleanImpl(napi_env env, [[maybe_unused]] napi_callback_info info)
@@ -170,33 +170,33 @@ napi_value STValueUnwrapToBooleanImpl(napi_env env, [[maybe_unused]] napi_callba
 
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
-    ani_boolean value_t = ANI_FALSE;
+    ani_boolean valueT = ANI_FALSE;
 
     if (data->IsAniBoolean()) {
-        value_t = data->GetAniBoolean();
+        valueT = data->GetAniBoolean();
     } else if (data->IsAniChar()) {
-        value_t = static_cast<ani_boolean>(data->GetAniChar());
+        valueT = static_cast<ani_boolean>(data->GetAniChar());
     } else if (data->IsAniByte()) {
-        value_t = static_cast<ani_boolean>(data->GetAniByte());
+        valueT = static_cast<ani_boolean>(data->GetAniByte());
     } else if (data->IsAniShort()) {
-        value_t = static_cast<ani_boolean>(data->GetAniShort());
+        valueT = static_cast<ani_boolean>(data->GetAniShort());
     } else if (data->IsAniInt()) {
-        value_t = static_cast<ani_boolean>(data->GetAniInt());
+        valueT = static_cast<ani_boolean>(data->GetAniInt());
     } else if (data->IsAniLong()) {
-        value_t = static_cast<ani_boolean>(data->GetAniLong());
+        valueT = static_cast<ani_boolean>(data->GetAniLong());
     } else if (data->IsAniFloat()) {
-        value_t = static_cast<ani_boolean>(data->GetAniFloat());
+        valueT = static_cast<ani_boolean>(data->GetAniFloat());
     } else if (data->IsAniDouble()) {
-        value_t = static_cast<ani_boolean>(data->GetAniDouble());
+        valueT = static_cast<ani_boolean>(data->GetAniDouble());
     } else {
         ThrowTypeCheckError(env, "\'this\'", "primitive");
         return nullptr;
     }
-    napi_value js_boolean {};
-    NAPI_CHECK_FATAL(napi_get_boolean(env, value_t, &js_boolean));
-    return js_boolean;
+    napi_value jsBoolean {};
+    NAPI_CHECK_FATAL(napi_get_boolean(env, valueT, &jsBoolean));
+    return jsBoolean;
 }
 
 napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
@@ -215,7 +215,7 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
     auto aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef()) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
@@ -224,7 +224,7 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
         STValueThrowJSError(env, "Expected BigInt object, but got different type.");
         return nullptr;
     }
-    ani_object aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
+    auto aniObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
     ani_class bigIntClass;
     AniCheckAndThrowToDynamic(env, aniEnv->FindClass("std.core.BigInt", &bigIntClass));
@@ -236,12 +236,13 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
     }
 
     ani_ref stringRef;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     if (aniEnv->Object_CallMethodByName_Ref(aniObject, "toString", ":C{std.core.String}", &stringRef) != ANI_OK) {
         STValueThrowJSError(env, "Failed to call toString on BigInt object.");
         return nullptr;
     }
 
-    ani_string aniString = static_cast<ani_string>(stringRef);
+    auto aniString = static_cast<ani_string>(stringRef);
     ani_size strSize;
     aniEnv->String_GetUTF8Size(aniString, &strSize);
 
@@ -258,6 +259,7 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
     napi_value stringArg;
     NAPI_CHECK_FATAL(napi_create_string_utf8(env, cppStr.c_str(), cppStr.size(), &stringArg));
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value args[1] = {stringArg};
     napi_value jsBigInt;
     NAPI_CHECK_FATAL(napi_call_function(env, global, bigIntConstructor, 1, args, &jsBigInt));

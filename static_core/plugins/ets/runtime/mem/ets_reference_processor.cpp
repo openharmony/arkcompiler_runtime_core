@@ -116,6 +116,7 @@ void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const Object
         auto *refStart = reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *refEnd = refStart + refNum;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (auto *ref = refStart; ref < refEnd; ++ref) {
             auto o = ObjectAccessor::Load(ref);
             if (o == 0) {

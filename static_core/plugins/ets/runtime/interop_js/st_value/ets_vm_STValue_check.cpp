@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ napi_value STValueTemplateCheck(napi_env env, napi_callback_info info,
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
     // 1. extract this pointer
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     // 2. check result
     napi_value result {};
     ani_boolean checkResult;
@@ -82,11 +82,13 @@ napi_value STValueIsStringImpl(napi_env env, napi_callback_info info)
         ani_boolean isNull = ANI_FALSE;
         ani_boolean isUndefined = ANI_FALSE;
         AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsNull(ref, &isNull));
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         if (isNull) {
             return isString;
         }
 
         AniCheckAndThrowToDynamic(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         if (isUndefined) {
             return isString;
         }
@@ -110,11 +112,13 @@ napi_value STValueIsBigIntImpl(napi_env env, napi_callback_info info)
         ani_boolean isNull = ANI_FALSE;
         ani_boolean isUndefined = ANI_FALSE;
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsNull(ref, &isNull));
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         if (isNull) {
             return isBigint;
         }
 
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_IsUndefined(ref, &isUndefined));
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
         if (isUndefined) {
             return isBigint;
         }
@@ -172,16 +176,17 @@ napi_value IsEqualToImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef()) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    STValueData *otherData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
+    auto *otherData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
     if (!otherData->IsAniRef()) {
         ThrowJSOtherNonObjectError(env);
         return nullptr;
@@ -210,16 +215,18 @@ napi_value IsStrictlyEqualToImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     auto aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef()) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    STValueData *otherData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
+    auto *otherData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
     if (!otherData->IsAniRef()) {
         ThrowJSOtherNonObjectError(env);
         return nullptr;
@@ -228,10 +235,10 @@ napi_value IsStrictlyEqualToImpl(napi_env env, napi_callback_info info)
     ani_boolean isEqual = ANI_FALSE;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Reference_StrictEquals(data->GetAniRef(), otherData->GetAniRef(), &isEqual));
 
-    napi_value js_bool {};
-    NAPI_CHECK_FATAL(napi_get_boolean(env, (isEqual == ANI_TRUE), &js_bool));
+    napi_value jsBool {};
+    NAPI_CHECK_FATAL(napi_get_boolean(env, (isEqual == ANI_TRUE), &jsBool));
 
-    return js_bool;
+    return jsBool;
 }
 
 napi_value STValueIsBooleanImpl(napi_env env, napi_callback_info info)
@@ -250,7 +257,7 @@ napi_value STValueIsBooleanImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniBoolean(), &jsBool));
@@ -274,7 +281,7 @@ napi_value STValueIsByteImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniByte(), &jsBool));
@@ -298,7 +305,7 @@ napi_value STValueIsCharImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniChar(), &jsBool));
@@ -322,7 +329,7 @@ napi_value STValueIsShortImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniShort(), &jsBool));
@@ -346,7 +353,7 @@ napi_value STValueIsIntImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool;
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniInt(), &jsBool));
@@ -370,7 +377,7 @@ napi_value STValueIsLongImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniLong(), &jsBool));
@@ -393,7 +400,7 @@ napi_value STValueIsFloatImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniFloat(), &jsBool));
@@ -416,7 +423,7 @@ napi_value STValueIsNumberImpl(napi_env env, napi_callback_info info)
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr));
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
 
     napi_value jsBool {};
     NAPI_CHECK_FATAL(napi_get_boolean(env, data->IsAniDouble(), &jsBool));
@@ -436,21 +443,23 @@ napi_value STValueTypeIsAssignableFromImpl(napi_env env, napi_callback_info info
         ThrowJSBadArgCountError(env, jsArgc, 2U);
         return nullptr;
     }
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
+
     napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr);
 
-    STValueData *fromData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
+    auto *fromData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
     if (fromData == nullptr || !fromData->IsAniRef() || fromData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "fromType");
         return nullptr;
     }
-    STValueData *toData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
+    auto *toData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[1]));
     if (toData == nullptr || !toData->IsAniRef() || toData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "toType");
         return nullptr;
     }
-    ani_type fromType = static_cast<ani_type>(fromData->GetAniRef());
-    ani_type toType = static_cast<ani_type>(toData->GetAniRef());
+    auto fromType = static_cast<ani_type>(fromData->GetAniRef());
+    auto toType = static_cast<ani_type>(toData->GetAniRef());
 
     ani_boolean resBoolean {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Type_IsAssignableFrom(fromType, toType, &resBoolean));
@@ -473,21 +482,23 @@ napi_value STValueObjectInstanceOfImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
     napi_value jsThis {};
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
+
     napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr);
 
-    STValueData *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (objectData == nullptr || !objectData->IsAniRef() || objectData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    STValueData *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
+    auto *typeData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsArgv[0]));
     if (typeData == nullptr || !typeData->IsAniRef() || typeData->IsAniNullOrUndefined(env)) {
         ThrowJSNonObjectError(env, "type");
         return nullptr;
     }
-    ani_object objObject = static_cast<ani_object>(objectData->GetAniRef());
-    ani_type typeObject = static_cast<ani_type>(typeData->GetAniRef());
+    auto objObject = static_cast<ani_object>(objectData->GetAniRef());
+    auto typeObject = static_cast<ani_type>(typeData->GetAniRef());
     ani_boolean resBoolean {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_InstanceOf(objObject, typeObject, &resBoolean));
 

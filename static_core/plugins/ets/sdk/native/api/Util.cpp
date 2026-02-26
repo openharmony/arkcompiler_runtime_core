@@ -47,6 +47,7 @@ constexpr uint8_t UUID_RESERVED_MARK = 0x80;
 
 #ifndef PANDA_TARGET_OHOS
 extern "C" {
+// NOLINTNEXTLINE(readability-identifier-naming)
 __attribute__((weak)) const char *uv_strerror([[maybe_unused]] int err)
 {
     return "unknown error";
@@ -230,8 +231,11 @@ void ThrowBusinessError(ani_env *env, int code, const std::string &message)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STR_IMPL(x) #x
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STR(x) STR_IMPL(x)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define MAKE_TOTYPE_METHOD(x) STR(to##x)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define FUN_TOTYPE_METHOD(aniType, typeName, signature)                                                            \
     aniType To##typeName(ani_env *env, ani_object value)                                                           \
     {                                                                                                              \

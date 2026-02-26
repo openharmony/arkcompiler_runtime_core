@@ -30,15 +30,16 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     ani_module md;
     const char *foundName = nullptr;
-    static const std::array testModuleNames = {
+    static const std::array TEST_MODULE_NAMES = {
         "string_tlab_allocations",  //
         "string_tlab_repeat",       //
         "esvalue_load_rte",         //
         "import_type"               //
     };
-    for (auto moduleName : testModuleNames) {
-        if (ANI_OK != env->FindModule(moduleName, &md))
+    for (auto moduleName : TEST_MODULE_NAMES) {
+        if (ANI_OK != env->FindModule(moduleName, &md)) {
             continue;
+        }
         if (foundName != nullptr) {
             auto msg = std::string("Found two suitable test modules: \"") + moduleName + std::string("\" and \"") +
                        foundName + std::string("\".");

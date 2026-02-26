@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,10 +32,10 @@ extern "C" EtsBoolean EtsWeakMapValidateKey(EtsObject *key)
     auto *klass = key->GetClass();
     // Reject value types that don't have stable object identity
     if (klass->IsNullValue() || klass->IsBoxed() || klass->IsStringClass() || klass->IsBigInt()) {
-        return false;
+        return ToEtsBoolean(false);
     }
     // Only regular reference types are valid WeakMap keys
-    return true;
+    return ToEtsBoolean(true);
 }
 
 }  // namespace ark::ets::intrinsics

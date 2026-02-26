@@ -81,9 +81,10 @@ extern "C" ani_status CreateExternalArrayBuffer(ani_env *env, void *externalData
     }
 
     ani_object result;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
     auto status =
         env->Object_New(cls, ctor, &result, reinterpret_cast<ani_long>(externalData), static_cast<ani_int>(length));
+    // NOLINTEND(cppcoreguidelines-pro-type-vararg)
     if (status != ANI_OK) {
         return status;
     }

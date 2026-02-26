@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,12 +72,12 @@ napi_value ClassGetSuperClassImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_type currentType = reinterpret_cast<ani_type>(data->GetAniRef());
+    auto currentType = reinterpret_cast<ani_type>(data->GetAniRef());
 
     ani_class superClass = nullptr;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Type_GetSuperClass(currentType, &superClass));
@@ -109,12 +109,12 @@ napi_value FixedArrayGetLengthImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_fixedarray currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
 
     ani_size length = 0;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_GetLength(currentArray, &length));
@@ -143,12 +143,12 @@ napi_value ArrayGetLengthImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
 
     ani_size length = 0;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Array_GetLength(currentArray, &length));
@@ -175,6 +175,7 @@ napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -184,12 +185,12 @@ napi_value EnumGetIndexByNameImpl(napi_env env, napi_callback_info info)
     }
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_enum currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
+    auto currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
 
     ani_enum_item enumItem = nullptr;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem));
@@ -218,6 +219,7 @@ napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -227,15 +229,15 @@ napi_value EnumGetValueByNameImpl(napi_env env, napi_callback_info info)
     }
     uint32_t valueTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &valueTypeInt));
-    SType valueType = static_cast<SType>(valueTypeInt);
+    auto valueType = static_cast<SType>(valueTypeInt);
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_enum currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
+    auto currentEnum = reinterpret_cast<ani_enum>(data->GetAniRef());
 
     ani_enum_item enumItem = nullptr;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Enum_GetEnumItemByName(currentEnum, memberName.c_str(), &enumItem));
@@ -273,6 +275,7 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     napi_value jsThis;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
@@ -283,16 +286,16 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
     }
     uint32_t fieldTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &fieldTypeInt));
-    SType fieldType = static_cast<SType>(fieldTypeInt);
+    auto fieldType = static_cast<SType>(fieldTypeInt);
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_class currentClass = reinterpret_cast<ani_class>(data->GetAniRef());
+    auto currentClass = reinterpret_cast<ani_class>(data->GetAniRef());
 
     switch (fieldType) {
         case SType::BOOLEAN: {
@@ -333,7 +336,7 @@ napi_value ClassGetStaticFieldImpl(napi_env env, napi_callback_info info)
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
-            ani_float value = 0.0f;
+            ani_float value = 0.0F;
             auto status = aniEnv->Class_GetStaticFieldByName_Float(currentClass, fieldName.c_str(), &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
@@ -378,6 +381,7 @@ napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -389,17 +393,17 @@ napi_value ClassSetStaticFieldImpl(napi_env env, napi_callback_info info)
 
     uint32_t fieldTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &fieldTypeInt));
-    SType fieldType = static_cast<SType>(fieldTypeInt);
+    auto fieldType = static_cast<SType>(fieldTypeInt);
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_class currentClass = reinterpret_cast<ani_class>(data->GetAniRef());
+    auto currentClass = reinterpret_cast<ani_class>(data->GetAniRef());
 
-    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsValue));
+    auto *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsValue));
     ani_status status = ANI_OK;
     auto *name = fieldName.c_str();
 
@@ -504,6 +508,7 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -515,15 +520,15 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
 
     uint32_t propTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &propTypeInt));
-    SType propType = static_cast<SType>(propTypeInt);
+    auto propType = static_cast<SType>(propTypeInt);
 
     auto aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_object currentObject = reinterpret_cast<ani_object>(data->GetAniRef());
+    auto currentObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
     switch (propType) {
         case SType::BOOLEAN: {
@@ -557,7 +562,7 @@ napi_value ObjectGetPropertyImpl(napi_env env, napi_callback_info info)
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
-            ani_float value = 0.0f;
+            ani_float value = 0.0F;
             ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetPropertyByName_Float(currentObject, propName, &value));
             return CreateSTValueInstance(env, value);
         }
@@ -599,6 +604,7 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -611,17 +617,17 @@ napi_value ObjectSetPropertyImpl(napi_env env, napi_callback_info info)
     napi_value jsValue = jsArgv[1];
     uint32_t propTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &propTypeInt));
-    SType propType = static_cast<SType>(propTypeInt);
+    auto propType = static_cast<SType>(propTypeInt);
 
     auto aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_object currentObject = reinterpret_cast<ani_object>(data->GetAniRef());
+    auto currentObject = reinterpret_cast<ani_object>(data->GetAniRef());
 
-    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsValue));
+    auto *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsValue));
     ani_status status = ANI_OK;
 
     switch (propType) {
@@ -726,6 +732,7 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -733,16 +740,16 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
     uint32_t elemTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &elemTypeInt));
-    SType elemType = static_cast<SType>(elemTypeInt);
+    auto elemType = static_cast<SType>(elemTypeInt);
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
 
-    ani_fixedarray currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
 
     ani_status status = ANI_OK;
 
@@ -830,6 +837,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -839,18 +847,18 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
 
     uint32_t elementTypeInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &elementTypeInt));
-    SType elementType = static_cast<SType>(elementTypeInt);
+    auto elementType = static_cast<SType>(elementTypeInt);
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_fixedarray currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_fixedarray>(data->GetAniRef());
 
-    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    auto *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
     ani_status status = ANI_OK;
 
     switch (elementType) {
@@ -951,6 +959,7 @@ napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -958,12 +967,12 @@ napi_value ArrayGetImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[0], &index));
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
 
     ani_ref value {};
     ani_status status = aniEnv->Array_Get(currentArray, index, &value);
@@ -992,6 +1001,7 @@ napi_value ArraySetImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
@@ -1001,14 +1011,14 @@ napi_value ArraySetImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
 
-    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    auto *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
     if (!valueData->IsAniRef()) {
         ThrowJSNonObjectError(env, "value");
         return nullptr;
@@ -1037,21 +1047,23 @@ napi_value ArrayPushImpl(napi_env env, napi_callback_info info)
     }
 
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
 
     napi_value jsElement = jsArgv[0];
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
 
-    STValueData *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
+    auto *valueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsElement));
     if (!valueData->IsAniRef()) {
         ThrowJSNonObjectError(env, "value");
         return nullptr;
@@ -1084,12 +1096,12 @@ napi_value ArrayPopImpl(napi_env env, napi_callback_info info)
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_array currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
+    auto currentArray = reinterpret_cast<ani_array>(data->GetAniRef());
 
     ani_ref value;
     ani_status status = aniEnv->Array_Pop(currentArray, &value);
@@ -1111,6 +1123,7 @@ napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info
 
     size_t jsArgc = 0;
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[2];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
@@ -1123,16 +1136,16 @@ napi_value STValueNamespaceGetVariableImpl(napi_env env, napi_callback_info info
 
     uint32_t variableInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[1], &variableInt));
-    SType variableType = static_cast<SType>(variableInt);
+    auto variableType = static_cast<SType>(variableInt);
 
     auto *aniEnv = GetAniEnv();
 
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_namespace aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
+    auto aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
     std::string variableName;
@@ -1210,6 +1223,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
 
     size_t jsArgc = 0;
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[3];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
@@ -1222,15 +1236,15 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
 
     uint32_t variableInt = 0;
     NAPI_CHECK_FATAL(napi_get_value_uint32(env, jsArgv[2U], &variableInt));
-    SType variableType = static_cast<SType>(variableInt);
+    auto variableType = static_cast<SType>(variableInt);
 
     auto *aniEnv = GetAniEnv();
-    STValueData *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *data = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (!data->IsAniRef() || data->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_namespace aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
+    auto aniNamespace = reinterpret_cast<ani_namespace>(data->GetAniRef());
 
     napi_value variableNameNapiValue = jsArgv[0];
     std::string variableName;
@@ -1239,7 +1253,7 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
     }
 
     napi_value newValue = jsArgv[1];
-    STValueData *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
+    auto *newValueData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, newValue));
 
     ani_variable getVariable {nullptr};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Namespace_FindVariable(aniNamespace, variableName.c_str(), &getVariable));
@@ -1286,8 +1300,8 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
                 ThrowJSNonIntError(env, "value");
                 return nullptr;
             }
-            ani_int IntValue = newValueData->GetAniInt();
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Int(getVariable, IntValue));
+            ani_int intValue = newValueData->GetAniInt();
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->Variable_SetValue_Int(getVariable, intValue));
             break;
         }
         case SType::LONG: {
@@ -1332,9 +1346,9 @@ napi_value STValueNamespcaeSetVariableImpl(napi_env env, napi_callback_info info
         }
     }
 
-    napi_value js_undefined;
-    NAPI_CHECK_FATAL(napi_get_undefined(env, &js_undefined));
-    return js_undefined;
+    napi_value jsUndefined;
+    NAPI_CHECK_FATAL(napi_get_undefined(env, &jsUndefined));
+    return jsUndefined;
 }
 
 // objectGetType(): STValue
@@ -1354,12 +1368,12 @@ napi_value STValueObjectGetTypeImpl(napi_env env, napi_callback_info info)
     napi_value jsThis {};
     napi_get_cb_info(env, info, &jsArgc, nullptr, &jsThis, nullptr);
 
-    STValueData *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
+    auto *objectData = reinterpret_cast<STValueData *>(GetSTValueDataPtr(env, jsThis));
     if (objectData == nullptr || !objectData->IsAniRef() || objectData->IsAniNullOrUndefined(env)) {
         ThrowJSThisNonObjectError(env);
         return nullptr;
     }
-    ani_object objObject = static_cast<ani_object>(objectData->GetAniRef());
+    auto objObject = static_cast<ani_object>(objectData->GetAniRef());
 
     ani_type resType {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_GetType(objObject, &resType));
@@ -1396,17 +1410,19 @@ static napi_value STValueTemplateFindElement(napi_env env, napi_callback_info in
     }
 
     // 3. return result
+    // NOLINTNEXTLINE(performance-move-const-arg)
     return CreateSTValueInstance<ani_ref>(env, std::move(aniElement));
 }
 
 ani_object CreateBoolean(ani_env *env, ani_boolean boo)
 {
-    static constexpr const char *booleanClassName = "std.core.Boolean";
+    static constexpr const char *BOOLEAN_CLASS_NAME = "std.core.Boolean";
     ani_class booleanCls {};
-    AniExpectOK(env->FindClass(booleanClassName, &booleanCls));
+    AniExpectOK(env->FindClass(BOOLEAN_CLASS_NAME, &booleanCls));
     ani_method ctor {};
     AniExpectOK(env->Class_FindMethod(booleanCls, "<ctor>", "z:", &ctor));
     ani_object obj {};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     AniExpectOK(env->Object_New(booleanCls, ctor, &obj, boo));
     return obj;
 }
@@ -1431,12 +1447,14 @@ ani_status GetClassFromInteropDefaultLinker([[maybe_unused]] napi_env napiEnv, a
     if (linkerRef == nullptr) {
         ani_class contextCls {};
         AniExpectOK(env->FindClass("std.interop.InteropContext", &contextCls));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         AniExpectOK(env->Class_CallStaticMethodByName_Ref(contextCls, "getInteropRuntimeLinker",
                                                           ":C{std.core.RuntimeLinker}", &linkerRef));
     }
     static ani_object boolObj = CreateBoolean(env, ANI_FALSE);
     ani_ref clsRef = nullptr;
     ani_status status =
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         env->Object_CallMethod_Ref(static_cast<ani_object>(linkerRef), loadMethod, &clsRef, elementStr, boolObj);
     if (status != ani_status::ANI_OK) {
         return status;

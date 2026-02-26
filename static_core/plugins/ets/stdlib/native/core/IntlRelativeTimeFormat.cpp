@@ -20,22 +20,17 @@
 #include <unicode/localematcher.h>
 #include <unicode/numfmt.h>
 #include <unicode/utypes.h>
-#include <set>
 #include <algorithm>
 #include <array>
-#include "libarkbase/macros.h"
 #include "plugins/ets/stdlib/native/core/IntlRelativeTimeFormat.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
-#include "plugins/ets/stdlib/native/core/IntlCommon.h"
-#include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
 #include "ani/ani_checkers.h"
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "plugins/ets/stdlib/native/core/IntlRelativeTimeFormatCache.h"
 
 namespace ark::ets::stdlib::intl {
 
-typedef enum { AUTO, ALWAYS } NumericOption;
+enum NumericOption { AUTO, ALWAYS };
 
 static bool IsUndefined(ani_env *env, ani_ref ref)
 {
@@ -188,13 +183,13 @@ static UDateRelativeDateTimeFormatterStyle ToRelativeTimeFormatStyle(ani_env *en
         return UDAT_STYLE_LONG;
     }
     ani_ref styleRef = nullptr;
-    ani_object optionObject = static_cast<ani_object>(optionRef);
+    auto optionObject = static_cast<ani_object>(optionRef);
     ani_status aniStyle = env->Object_GetFieldByName_Ref(optionObject, "_style", &styleRef);
     UDateRelativeDateTimeFormatterStyle uStyle;
     if (aniStyle != ANI_OK || IsUndefined(env, styleRef)) {
         uStyle = UDAT_STYLE_LONG;
     } else {
-        ani_string styleStr = static_cast<ani_string>(styleRef);
+        auto styleStr = static_cast<ani_string>(styleRef);
         ani_size styleSize = 0;
         env->String_GetUTF8Size(styleStr, &styleSize);
         std::vector<char> styleBuf(styleSize + 1);
@@ -223,12 +218,12 @@ static NumericOption GetNumericOption(ani_env *env, ani_object self)
         return NumericOption::ALWAYS;
     }
     ani_ref numericRef = nullptr;
-    ani_object optionObject = static_cast<ani_object>(optionRef);
+    auto optionObject = static_cast<ani_object>(optionRef);
     ani_status aniNumeric = env->Object_GetFieldByName_Ref(optionObject, "_numeric", &numericRef);
     if (aniNumeric != ANI_OK || IsUndefined(env, numericRef)) {
         return NumericOption::ALWAYS;
     }
-    ani_string str = static_cast<ani_string>(numericRef);
+    auto str = static_cast<ani_string>(numericRef);
     ani_size strSize = 0;
     env->String_GetUTF8Size(str, &strSize);
     std::vector<char> buf(strSize + 1);
@@ -238,13 +233,13 @@ static NumericOption GetNumericOption(ani_env *env, ani_object self)
     std::transform(numericOptionStr.begin(), numericOptionStr.end(), numericOptionStr.begin(), ::tolower);
     if (numericOptionStr == "auto") {
         return NumericOption::AUTO;
-    } else if (numericOptionStr == "always") {
-        return NumericOption::ALWAYS;
-    } else {
-        // throw RangeError for invalid numeric option
-        ThrowRangeError(env, "Invalid numeric option: " + numericOptionStr);
-        return static_cast<NumericOption>(-1);
     }
+    if (numericOptionStr == "always") {
+        return NumericOption::ALWAYS;
+    }
+    // throw RangeError for invalid numeric option
+    ThrowRangeError(env, "Invalid numeric option: " + numericOptionStr);
+    return static_cast<NumericOption>(-1);
 }
 
 static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_object self, ani_double value,
@@ -288,13 +283,13 @@ static ani_string StdCoreIntlRelativeTimeFormatFormatImpl(ani_env *env, ani_obje
         formatted = formatter->formatNumericToValue(value, icuUnit, status);
     }
 
-    if (U_FAILURE(status)) {
+    if (U_FAILURE(status) != 0) {
         ThrowRangeError(env, "RelativeDateTimeFormatter format failed");
         return nullptr;
     }
 
     icu::UnicodeString result = formatted.toString(status);
-    if (U_FAILURE(status)) {
+    if (U_FAILURE(status) != 0) {
         ThrowRangeError(env, "FormattedRelativeDateTime toString failed");
         return nullptr;
     }

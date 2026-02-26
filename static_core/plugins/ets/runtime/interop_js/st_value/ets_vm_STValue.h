@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,6 @@
 
 namespace ark::ets::interop::js {
 
-#define STVALUE_DATA_PTR_LOW "_STValueDataPtrLow"
-#define STVALUE_DATA_PTR_HIGH "_STValueDataPtrHigh"
-
 constexpr uint32_t UINT32_BIT_SHIFT = 32;
 
 class STValueData {
@@ -44,104 +41,109 @@ public:
     STValueData([[maybe_unused]] napi_env env, ani_double doubleData);
     ~STValueData();
 
+    NO_COPY_SEMANTIC(STValueData);
+    NO_MOVE_SEMANTIC(STValueData);
+
     ani_ref GetAniRef() const
     {
         ASSERT(IsAniRef());
-        return std::get<ani_ref>(dataRef);
+        return std::get<ani_ref>(dataRef_);
     }
 
     ani_boolean GetAniBoolean() const
     {
         ASSERT(IsAniBoolean());
-        return std::get<ani_boolean>(dataRef);
+        return std::get<ani_boolean>(dataRef_);
     }
 
     ani_char GetAniChar() const
     {
         ASSERT(IsAniChar());
-        return std::get<ani_char>(dataRef);
+        return std::get<ani_char>(dataRef_);
     }
 
     ani_byte GetAniByte() const
     {
         ASSERT(IsAniByte());
-        return std::get<ani_byte>(dataRef);
+        return std::get<ani_byte>(dataRef_);
     }
 
     ani_short GetAniShort() const
     {
         ASSERT(IsAniShort());
-        return std::get<ani_short>(dataRef);
+        return std::get<ani_short>(dataRef_);
     }
 
     ani_int GetAniInt() const
     {
         ASSERT(IsAniInt());
-        return std::get<ani_int>(dataRef);
+        return std::get<ani_int>(dataRef_);
     }
 
     ani_long GetAniLong() const
     {
         ASSERT(IsAniLong());
-        return std::get<ani_long>(dataRef);
+        return std::get<ani_long>(dataRef_);
     }
 
     ani_float GetAniFloat() const
     {
         ASSERT(IsAniFloat());
-        return std::get<ani_float>(dataRef);
+        return std::get<ani_float>(dataRef_);
     }
 
     ani_double GetAniDouble() const
     {
         ASSERT(IsAniDouble());
-        return std::get<ani_double>(dataRef);
+        return std::get<ani_double>(dataRef_);
     }
 
     bool IsAniRef() const
     {
-        return std::holds_alternative<ani_ref>(dataRef);
+        return std::holds_alternative<ani_ref>(dataRef_);
     }
     bool IsAniBoolean() const
     {
-        return std::holds_alternative<ani_boolean>(dataRef);
+        return std::holds_alternative<ani_boolean>(dataRef_);
     }
     bool IsAniChar() const
     {
-        return std::holds_alternative<ani_char>(dataRef);
+        return std::holds_alternative<ani_char>(dataRef_);
     }
     bool IsAniByte() const
     {
-        return std::holds_alternative<ani_byte>(dataRef);
+        return std::holds_alternative<ani_byte>(dataRef_);
     }
     bool IsAniShort() const
     {
-        return std::holds_alternative<ani_short>(dataRef);
+        return std::holds_alternative<ani_short>(dataRef_);
     }
     bool IsAniInt() const
     {
-        return std::holds_alternative<ani_int>(dataRef);
+        return std::holds_alternative<ani_int>(dataRef_);
     }
     bool IsAniLong() const
     {
-        return std::holds_alternative<ani_long>(dataRef);
+        return std::holds_alternative<ani_long>(dataRef_);
     }
     bool IsAniFloat() const
     {
-        return std::holds_alternative<ani_float>(dataRef);
+        return std::holds_alternative<ani_float>(dataRef_);
     }
     bool IsAniDouble() const
     {
-        return std::holds_alternative<ani_double>(dataRef);
+        return std::holds_alternative<ani_double>(dataRef_);
     }
 
     bool IsAniNullOrUndefined(napi_env env) const;
 
+    // NOLINTBEGIN(readability-else-after-return)
     double ToDouble() const
     {
         ASSERT(!IsAniRef());
 
         if (IsAniBoolean()) {
+            // NOLINTNEXTLINE(readability-implicit-bool-conversion)
             return GetAniBoolean() ? 1.0 : 0.0;
         } else if (IsAniChar()) {
             return static_cast<double>(GetAniChar());
@@ -162,9 +164,11 @@ public:
         UNREACHABLE();
         return 0;
     }
+    // NOLINTEND(readability-else-after-return)
 
 private:
-    std::variant<ani_ref, ani_boolean, ani_char, ani_byte, ani_short, ani_int, ani_long, ani_float, ani_double> dataRef;
+    std::variant<ani_ref, ani_boolean, ani_char, ani_byte, ani_short, ani_int, ani_long, ani_float, ani_double>
+        dataRef_;
 };
 
 enum class SType : int32_t { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, REFERENCE, VOID };
@@ -238,6 +242,7 @@ ani_env *GetAniEnv()
     } while (0);                                                \
     INTEROP_CODE_SCOPE_JS_TO_ETS(EtsCoroutine::GetCurrent())
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ANI_CHECK_ERROR_RETURN(env, status)                     \
     do {                                                        \
         auto hasError = AniCheckAndThrowToDynamic(env, status); \
@@ -250,9 +255,9 @@ template <typename T>
 napi_value CreateSTValueInstance(napi_env env, T &&arg)
 {
     INTEROP_TRACE();
-    STValueData *data = new STValueData(env, std::forward<T>(arg));
+    auto *data = new STValueData(env, std::forward<T>(arg));
     napi_value stvalueCtor = GetSTValueClass(env);
-    uint64_t ptr = reinterpret_cast<uintptr_t>(data);
+    auto ptr = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
     napi_value ptrLow;
     napi_value ptrHigh;
     NAPI_CHECK_FATAL(napi_create_uint32(env, static_cast<uint32_t>(ptr & 0xFFFFFFFF), &ptrLow));

@@ -218,16 +218,16 @@ TEST(Utf, ConvertRegionUtf16ToMUtf8_3b)
 
 TEST(Utf, ConvertUtf16ToUtf8IsolatedHighSurrogate)
 {
-    uint16_t lead = 0xD834U;
-    uint16_t nonTrail = 0x0041U;  // 'A', not a trail surrogate
+    static constexpr uint16_t LEAD = 0xD834U;
+    static constexpr uint16_t NON_TRAIL = 0x0041U;  // 'A', not a trail surrogate
 
-    auto res = ConvertUtf16ToUtf8(lead, nonTrail, false);
+    auto res = ConvertUtf16ToUtf8(LEAD, NON_TRAIL, false);
     EXPECT_EQ(res.n, UtfLength::THREE);
     EXPECT_EQ(res.ch[0], 0xEFU);
     EXPECT_EQ(res.ch[1], 0xBFU);
     EXPECT_EQ(res.ch[2], 0xBDU);
 
-    auto mutfRes = ConvertUtf16ToUtf8(lead, nonTrail, true);
+    auto mutfRes = ConvertUtf16ToUtf8(LEAD, NON_TRAIL, true);
     EXPECT_EQ(mutfRes.n, UtfLength::THREE);
     EXPECT_EQ(mutfRes.ch[0], 0xEFU);
     EXPECT_EQ(mutfRes.ch[1], 0xBFU);

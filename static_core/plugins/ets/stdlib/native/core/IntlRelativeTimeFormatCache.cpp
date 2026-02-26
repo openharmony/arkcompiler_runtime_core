@@ -44,13 +44,13 @@ icu::RelativeDateTimeFormatter *IntlRelativeTimeFormatCache::GetOrCreateFormatte
 
     UErrorCode status = U_ZERO_ERROR;
     icu::NumberFormat *icuNumberFormat = icu::NumberFormat::createInstance(locale, UNUM_DECIMAL, status);
-    if (U_FAILURE(status)) {
+    if (U_FAILURE(status) != 0) {
         return nullptr;
     }
 
     auto newFormatter = std::make_unique<icu::RelativeDateTimeFormatter>(locale, icuNumberFormat, style,
                                                                          UDISPCTX_CAPITALIZATION_NONE, status);
-    if (U_FAILURE(status)) {
+    if (U_FAILURE(status) != 0) {
         return nullptr;
     }
 
@@ -62,6 +62,7 @@ icu::RelativeDateTimeFormatter *IntlRelativeTimeFormatCache::GetOrCreateFormatte
 void IntlRelativeTimeFormatCache::EraseRandFmtsGroupByEraseRatio()
 {
     if (cache_.size() >= MAX_SIZE_CACHE) {
+        // NOLINTNEXTLINE(cert-msc51-cpp)
         static std::minstd_rand simpleRand(std::time(nullptr));
         auto numToErase = ERASE_AMOUNT;
         if (cache_.size() < MAX_SIZE_CACHE - 1 + numToErase) {

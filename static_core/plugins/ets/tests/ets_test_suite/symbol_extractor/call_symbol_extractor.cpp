@@ -64,7 +64,7 @@ static bool InitSymbolExtractor(ark::tooling::ArkSymbolExtractor *extractor, uin
 {
     extractor->CreateArkFileData(data, dataSize, loadOffset);
     const ark::panda_file::File *file = extractor->GetArkPandaFile();
-    if (!file) {
+    if (file == nullptr) {
         LOG(ERROR, TOOLING) << "Get panda file from extractor failed.";
         return false;
     }
@@ -88,6 +88,7 @@ static ani_int CheckSymbolExtractor([[maybe_unused]] ani_env *env, [[maybe_unuse
     std::unique_ptr<const ark::panda_file::File> pf = ark::panda_file::OpenPandaFileOrZip(zipPath);
     uint64_t abcSize = pf->GetHeader()->fileSize;
     std::vector<uint8_t> abcBuffer(abcSize);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::copy(pf->GetBase(), pf->GetBase() + abcSize, abcBuffer.begin());
     pf.reset();
 
@@ -110,24 +111,33 @@ static ani_int CheckSymbolExtractor([[maybe_unused]] ani_env *env, [[maybe_unuse
     }
 
     const ark::panda_file::File *file = extractor->GetArkPandaFile();
-    std::vector<ark::tooling::MethodInfo> methodInfos = extractor->GetMethodInfos();
-    std::vector<std::string> expectName = {"call_symbol_extractor.ETSGLOBAL.<cctor>",
-                                           "call_symbol_extractor.ETSGLOBAL.main"};
-    for (int i = 0; i < (int)methodInfos.size(); i++) {
+    if (file == nullptr) {
+        return 0;
+    }
+
+    static constexpr auto EXPECT_NAME =
+        std::array {"call_symbol_extractor.ETSGLOBAL.<cctor>", "call_symbol_extractor.ETSGLOBAL.main"};
+    auto methodInfos = extractor->GetMethodInfos();
+    if (methodInfos.size() != EXPECT_NAME.size()) {
+        return 0;
+    }
+
+    for (size_t i = 0; i < methodInfos.size(); i++) {
         ark::panda_file::File::EntityId id(methodInfos[i].methodId);
         ark::panda_file::MethodDataAccessor mda(*file, id);
         ark::panda_file::ClassDataAccessor cda(*file, mda.GetClassId());
-        constexpr int nameMaxLength = 1024;
-        char functionName[nameMaxLength];
+        static constexpr int NAME_MAX_LENGTH = 1024;
+        std::array<char, NAME_MAX_LENGTH> functionName {};
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        int size = snprintf_s(functionName, sizeof(functionName), sizeof(functionName) - 1, "%s.%s",
+        int size = snprintf_s(functionName.data(), functionName.size(), functionName.size() - 1, "%s.%s",
                               ark::ClassHelper::GetName(cda.GetDescriptor()).c_str(), mda.GetName().data);
         if (size < 0) {
             LOG(ERROR, TOOLING) << "copy funtionname failed!";
             return 0;
         }
-        std::string nameString = functionName;
-        if (functionName != expectName[i]) {
+        functionName[functionName.size() - 1] = '\0';
+        std::string nameString = functionName.data();
+        if (nameString != EXPECT_NAME[i]) {
             return 0;
         }
     }

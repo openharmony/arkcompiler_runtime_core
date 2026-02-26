@@ -393,7 +393,7 @@ extern "C" EtsBoolean StdSystemIsExternalTimerEnabled()
 {
     auto *coro = EtsCoroutine::GetCurrent();
     auto extTimerOption = ark::ets::ToEtsBoolean(coro->GetManager()->GetConfig().enableExternalTimer);
-    return extTimerOption && coro->GetWorker()->IsExternalSchedulingEnabled();
+    return ToEtsBoolean(FromEtsBoolean(extTimerOption) && coro->GetWorker()->IsExternalSchedulingEnabled());
 }
 
 extern "C" void StdSystemDumpUhandledFailedJobs()

@@ -65,6 +65,7 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
@@ -108,7 +109,8 @@ napi_value WrapNumberImplIner(napi_env env, napi_callback_info info)
         NAPI_CHECK_FATAL(napi_get_value_double(env, jsArgv[0], &input));
         static constexpr int64_t BASE = 2;
         static constexpr int64_t EXPONENT = 52;
-        static constexpr double MAX_SAFE_INTEGER = static_cast<double>(BASE << EXPONENT) - 1;
+        static constexpr double MAX_SAFE_INTEGER =
+            static_cast<double>(BASE << EXPONENT) - 1;  // NOLINT(hicpp-signed-bitwise)
         static constexpr double MIN_SAFE_INTEGER = -MAX_SAFE_INTEGER;
         if (input < MIN_SAFE_INTEGER || input > MAX_SAFE_INTEGER) {
             STValueThrowJSError(env, "Value is out of range for safe long type.");
@@ -190,32 +192,35 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, nullptr, nullptr));
 
     napi_value input = jsArgv[0];
-    napi_valuetype value_type;
-    napi_typeof(env, input, &value_type);
+    napi_valuetype valueType;
+    napi_typeof(env, input, &valueType);
     ani_long res = 0;
-    if (value_type == napi_number) {
+    if (valueType == napi_number) {
         double result;
         NAPI_CHECK_FATAL(napi_get_value_double(env, input, &result));
         static constexpr int64_t BASE = 2;
         static constexpr int64_t EXPONENT = 52;
-        static constexpr double MAX_SAFE_INTEGER = static_cast<double>(BASE << EXPONENT) - 1;
+        static constexpr double MAX_SAFE_INTEGER =
+            static_cast<double>(BASE << EXPONENT) - 1;  // NOLINT(hicpp-signed-bitwise)
         static constexpr double MIN_SAFE_INTEGER = -MAX_SAFE_INTEGER;
         if (result < MIN_SAFE_INTEGER || result > MAX_SAFE_INTEGER) {
             STValueThrowJSError(env, "Value is out of range for safe long type.");
             return nullptr;
         }
         res = static_cast<ani_long>(result);
-    } else if (value_type == napi_bigint) {
+    } else if (valueType == napi_bigint) {
         std::string bigIntString = BigIntToStringJS(env, input);
-        static constexpr const char *className = "std.core.BigInt";
+        static constexpr const char *CLASS_NAME = "std.core.BigInt";
         ani_class bigIntClass;
         auto aniEnv = GetAniEnv();
 
-        ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(className, &bigIntClass));
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(CLASS_NAME, &bigIntClass));
         ani_method bigIntCtor {};
         ANI_CHECK_ERROR_RETURN(env,
                                aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
@@ -224,39 +229,42 @@ napi_value WrapLongImpl(napi_env env, napi_callback_info info)
         ani_string aniBigIntString;
         ANI_CHECK_ERROR_RETURN(env,
                                aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
 
-        std::string INT64_MAX_STR = "9223372036854775807";
-        ani_string INT64_MAX_STR_ANI {};
-        ani_object INT64_MAX_ANI_OBJ {};
-        ANI_CHECK_ERROR_RETURN(
-            env, aniEnv->String_NewUTF8(INT64_MAX_STR.c_str(), INT64_MAX_STR.length(), &INT64_MAX_STR_ANI));
-        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MAX_ANI_OBJ, INT64_MAX_STR_ANI));
+        std::string int64MaxStr = "9223372036854775807";
+        ani_string int64MaxStrAni {};
+        ani_object int64MaxAniObj {};
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(int64MaxStr.c_str(), int64MaxStr.length(), &int64MaxStrAni));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &int64MaxAniObj, int64MaxStrAni));
         ani_boolean isGreaterThanInt64Max = ANI_FALSE;
-        auto status =
-            aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorGreaterThan", "C{std.core.BigInt}:z",
-                                                    &isGreaterThanInt64Max, INT64_MAX_ANI_OBJ);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        auto status = aniEnv->Object_CallMethodByName_Boolean(
+            staticBigIntObject, "operatorGreaterThan", "C{std.core.BigInt}:z", &isGreaterThanInt64Max, int64MaxAniObj);
         ANI_CHECK_ERROR_RETURN(env, status);
         if (isGreaterThanInt64Max == ANI_TRUE) {
             STValueThrowJSError(env, "Value is out of range for long type.");
             return nullptr;
         }
 
-        std::string INT64_MIN_STR = "-9223372036854775808";
-        ani_string INT64_MIN_STR_ANI {};
-        ani_object INT64_MIN_ANI_OBJ {};
-        ANI_CHECK_ERROR_RETURN(
-            env, aniEnv->String_NewUTF8(INT64_MIN_STR.c_str(), INT64_MIN_STR.length(), &INT64_MIN_STR_ANI));
-        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &INT64_MIN_ANI_OBJ, INT64_MIN_STR_ANI));
+        std::string int64MinStr = "-9223372036854775808";
+        ani_string int64MinStrAni {};
+        ani_object int64MinObjAni {};
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(int64MinStr.c_str(), int64MinStr.length(), &int64MinStrAni));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &int64MinObjAni, int64MinStrAni));
         ani_boolean isLessThanInt64Min = ANI_FALSE;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         AniCheckAndThrowToDynamic(env, aniEnv->Object_CallMethodByName_Boolean(staticBigIntObject, "operatorLessThan",
                                                                                "C{std.core.BigInt}:z",
-                                                                               &isLessThanInt64Min, INT64_MIN_ANI_OBJ));
+                                                                               &isLessThanInt64Min, int64MinObjAni));
         if (isLessThanInt64Min == ANI_TRUE) {
             STValueThrowJSError(env, "Value is out of range for long type.");
             return nullptr;
         }
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_CallMethodByName_Long(staticBigIntObject, "getLong", ":l", &res));
     } else {
         STValueThrowJSError(env, "input is neither a number or a bigint.");
@@ -286,7 +294,9 @@ napi_value WrapStringImpl(napi_env env, napi_callback_info info)
 
     size_t jsArgc = 0;
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
+
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
     if (jsArgc != 1) {
@@ -319,6 +329,7 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
 
     size_t jsArgc = 0;
     napi_value jsThis;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     napi_value jsArgv[1];
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
 
@@ -331,17 +342,18 @@ napi_value WrapBigIntImpl(napi_env env, napi_callback_info info)
 
     napi_value dynBigInt = jsArgv[0];
     std::string bigIntString = BigIntToStringJS(env, dynBigInt);
-    static constexpr const char *className = "std.core.BigInt";
+    static constexpr const char *CLASS_NAME = "std.core.BigInt";
     ani_class bigIntClass;
     auto aniEnv = GetAniEnv();
 
-    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(className, &bigIntClass));
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass(CLASS_NAME, &bigIntClass));
     ani_method bigIntCtor {};
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_FindMethod(bigIntClass, "<ctor>", "C{std.core.String}:", &bigIntCtor));
     ani_object staticBigIntObject;
 
     ani_string aniBigIntString;
     ANI_CHECK_ERROR_RETURN(env, aniEnv->String_NewUTF8(bigIntString.c_str(), bigIntString.length(), &aniBigIntString));
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     ANI_CHECK_ERROR_RETURN(env, aniEnv->Object_New(bigIntClass, bigIntCtor, &staticBigIntObject, aniBigIntString));
 
     return CreateSTValueInstance(env, staticBigIntObject);

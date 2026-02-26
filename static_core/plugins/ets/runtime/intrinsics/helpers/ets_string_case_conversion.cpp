@@ -41,28 +41,30 @@ std::string_view LanguageTagToStringView(EtsString *langTag, EtsCoroutine *corou
 
 // The Lithuanian locale (lt) does not require any adjustment for the case conversion of characters from the Basic Latin
 // block. Greek (el) does not require any adjustment for all the Latin symbols.
-constexpr std::string_view localeDisallowsFastLatinConversionString = "az|tr";
+constexpr std::string_view LOCALE_DISALLOWS_FAST_LATIN_CONVERSION_STRING = "az|tr";
 
 bool LocaleAllowsFastLatinConversion(const icu::Locale &locale)
 {
-    return localeDisallowsFastLatinConversionString.find(locale.getLanguage()) == std::string_view::npos;
+    return LOCALE_DISALLOWS_FAST_LATIN_CONVERSION_STRING.find(locale.getLanguage()) == std::string_view::npos;
 }
 
 template <typename CharCnvt>
 EtsString *FastConvertUtf8StringCase(const uint8_t *data, uint32_t length, CharCnvt cnvt)
 {
     EtsString *res = EtsString::AllocateNonInitializedString(length, true);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     std::transform(data, data + length, res->GetDataMUtf8(), cnvt);
     return res;
 }
 
-constexpr uint8_t charCaseChangeBit = 1U << 5U;
+constexpr uint8_t CHAR_CASE_CHANGE_BIT = 1U << 5U;
 
 EtsString *ToLowerCaseFast(const uint8_t *data, uint32_t length)
 {
     return FastConvertUtf8StringCase(data, length, [](uint8_t ch) {
+        // NOLINTNEXTLINE(readability-magic-numbers)
         if (ch >= 0x41 && ch <= 0x5a) {
-            return static_cast<uint8_t>(ch ^ charCaseChangeBit);
+            return static_cast<uint8_t>(ch ^ CHAR_CASE_CHANGE_BIT);
         }
         return ch;
     });
@@ -71,8 +73,9 @@ EtsString *ToLowerCaseFast(const uint8_t *data, uint32_t length)
 EtsString *ToUpperCaseFast(const uint8_t *data, uint32_t length)
 {
     return FastConvertUtf8StringCase(data, length, [](uint8_t ch) {
+        // NOLINTNEXTLINE(readability-magic-numbers)
         if (ch >= 0x61 && ch <= 0x7a) {
-            return static_cast<uint8_t>(ch ^ charCaseChangeBit);
+            return static_cast<uint8_t>(ch ^ CHAR_CASE_CHANGE_BIT);
         }
         return ch;
     });

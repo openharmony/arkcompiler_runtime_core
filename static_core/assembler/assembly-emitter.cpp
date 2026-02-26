@@ -1452,14 +1452,14 @@ bool AsmEmitter::MakeFunctionItems(
 /*static*/
 void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities)
 {
-    static std::vector<std::pair<std::string, std::vector<std::string>>> UNUSED_ITEM_KEYS_TO_EMIT = {
+    static std::vector<std::pair<std::string, std::vector<std::string>>> unusedItemKeysToEmit = {
         {
             "std.core.String.%%get-length:i32;",
             {"std.core.StringBuilder.%%get-stringLength:i32;"},
         },
     };
 
-    for (auto &[key, values] : UNUSED_ITEM_KEYS_TO_EMIT) {
+    for (auto &[key, values] : unusedItemKeysToEmit) {
         auto dependant = entities.methodItems.find(key);
         if (dependant == entities.methodItems.end()) {
             continue;

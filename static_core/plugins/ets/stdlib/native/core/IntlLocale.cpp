@@ -52,7 +52,8 @@ static LocaleCheckInfo &GetLocaleCheckInfo()
     return gCheckInfo;
 }
 
-static os::memory::Mutex localeCheckInfoMutex;
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static os::memory::Mutex g_localeCheckInfoMutex;
 
 static std::vector<std::string> &GetLocaleInfo()
 {
@@ -125,7 +126,7 @@ void StdCoreIntlLocaleFillCheckInfo()
     }
 
     // Lock mutex to prevent race conditions in multithreaded environments
-    os::memory::LockHolder lock(localeCheckInfoMutex);
+    os::memory::LockHolder lock(g_localeCheckInfoMutex);
 
     // Second check: Verify again after acquiring lock - prevents multiple initializations
     if (checkInfo.isPopulated) {

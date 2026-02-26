@@ -31,7 +31,7 @@ struct MethodInfo {
     }
 };
 
-class ArkSymbolExtractor {
+class ArkSymbolExtractor final {
 public:
     static ArkSymbolExtractor *Create();
     static bool Destroy(ArkSymbolExtractor *extractor);
@@ -47,14 +47,19 @@ public:
 
 private:
     ArkSymbolExtractor() = default;
-    ~ArkSymbolExtractor();
+
+    NO_COPY_SEMANTIC(ArkSymbolExtractor);
+    NO_MOVE_SEMANTIC(ArkSymbolExtractor);
+
+    ~ArkSymbolExtractor() = default;
+
     void CreateArkPandaFile();
 
     std::vector<MethodInfo> methodInfos_;
     uintptr_t loadOffset_ {0};
     uintptr_t dataSize_ {0};
     uint8_t *data_ {nullptr};
-    std::shared_ptr<const panda_file::File> arkPandaFile_ {nullptr};
+    std::unique_ptr<const panda_file::File> arkPandaFile_ {nullptr};
 };
 
 }  // namespace ark::tooling

@@ -84,19 +84,18 @@ struct AddonData {
 
 void AddExecuteCB([[maybe_unused]] ani_env *env, void *data)
 {
-    AddonData *addonData = (AddonData *)data;
+    auto *addonData = reinterpret_cast<AddonData *>(data);
     addonData->result = addonData->args;
 }
 
 void AddCompleteCB(ani_env *env, [[maybe_unused]] WorkStatus status, void *data)
 {
-    AddonData *addonData = (AddonData *)data;
+    auto *addonData = reinterpret_cast<AddonData *>(data);
 
     WorkStatus deleteStatus = DeleteAsyncWork(env, addonData->asyncWork);
     ASSERT_EQ(deleteStatus, WorkStatus::OK);
 
-    free(addonData);
-    addonData = nullptr;
+    delete addonData;
 }
 }  // namespace
 
@@ -294,11 +293,11 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkBasic)
     struct AsyncWorkContext {
         AsyncWork *work = nullptr;
     };
-    AsyncWorkContext *asyncWorkContext = new AsyncWorkContext();
+    auto *asyncWorkContext = new AsyncWorkContext();
     WorkStatus status = CreateAsyncWork(
         env_, OnExecStub,
         [](ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
-            AsyncWorkContext *context = (AsyncWorkContext *)data;
+            auto *context = reinterpret_cast<AsyncWorkContext *>(data);
             WorkStatus deleteStatus = DeleteAsyncWork(env, context->work);
             ASSERT_EQ(deleteStatus, WorkStatus::OK);
             delete context;
@@ -317,15 +316,15 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkWithExecutionFlag)
         AsyncWork *work = nullptr;
         bool executed = false;
     };
-    AsyncWorkContext *asyncWorkContext = new AsyncWorkContext();
+    auto *asyncWorkContext = new AsyncWorkContext();
     WorkStatus status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
-            AsyncWorkContext *asyncWorkContext = (AsyncWorkContext *)data;
+            auto *asyncWorkContext = reinterpret_cast<AsyncWorkContext *>(data);
             asyncWorkContext->executed = true;
         },
         [](ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
-            AsyncWorkContext *context = (AsyncWorkContext *)data;
+            auto *context = reinterpret_cast<AsyncWorkContext *>(data);
             WorkStatus deleteStatus = DeleteAsyncWork(env, context->work);
             ASSERT_EQ(deleteStatus, WorkStatus::OK);
             bool executed = context->executed;
@@ -373,21 +372,14 @@ TEST_F(AsyncWorkTest, DeleteAsyncWorkImmediately)
     struct AsyncWorkContext {
         AsyncWork *work = nullptr;
     };
-    AsyncWorkContext *asyncWorkContext = new AsyncWorkContext();
+    auto asyncWorkContext = std::make_unique<AsyncWorkContext>();
     WorkStatus status = CreateAsyncWork(
-        env_, OnExecStub,
-        []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
-            AsyncWorkContext *context = (AsyncWorkContext *)data;
-            ASSERT_NE(context, nullptr);
-            delete context;
-        },
-        asyncWorkContext, &asyncWorkContext->work);
+        env_, OnExecStub, [](auto, auto, auto) {}, asyncWorkContext.get(), &asyncWorkContext->work);
     ASSERT_EQ(status, WorkStatus::OK);
     ASSERT_NE(asyncWorkContext->work, nullptr);
 
     WorkStatus deleteStatus = DeleteAsyncWork(env_, asyncWorkContext->work);
     ASSERT_EQ(deleteStatus, WorkStatus::OK);
-    delete asyncWorkContext;
 }
 
 TEST_F(AsyncWorkTest, QueueAsyncWorkNullPointerCheck)
@@ -395,11 +387,11 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkNullPointerCheck)
     struct AsyncWorkContext {
         AsyncWork *work = nullptr;
     };
-    AsyncWorkContext *asyncWorkContext = new AsyncWorkContext();
+    auto *asyncWorkContext = new AsyncWorkContext();
     WorkStatus status = CreateAsyncWork(
         env_, OnExecStub,
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
-            AsyncWorkContext *context = (AsyncWorkContext *)data;
+            auto *context = reinterpret_cast<AsyncWorkContext *>(data);
             ASSERT_NE(context, nullptr);
             WorkStatus deleteStatus = DeleteAsyncWork(env, context->work);
             ASSERT_EQ(deleteStatus, WorkStatus::OK);
@@ -417,13 +409,10 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkNullPointerCheck)
 
 TEST_F(AsyncWorkTest, AsyncWorkWithAddonData)
 {
-    AddonData *addonData = reinterpret_cast<AddonData *>(malloc(sizeof(AddonData)));
-    if (addonData == nullptr) {
-        return;
-    }
+    auto *addonData = new AddonData();
     addonData->args = 1;
 
-    WorkStatus status = CreateAsyncWork(env_, AddExecuteCB, AddCompleteCB, (void *)addonData, &addonData->asyncWork);
+    WorkStatus status = CreateAsyncWork(env_, AddExecuteCB, AddCompleteCB, addonData, &addonData->asyncWork);
     ASSERT_EQ(status, WorkStatus::OK);
     ASSERT_NE(addonData->asyncWork, nullptr);
 
@@ -507,11 +496,12 @@ TEST_F(AsyncWorkTest, AsyncWorkWithConditionData)
 
     auto event = AsyncWorkEvent();
     AsyncWork *work = nullptr;
+    // NOLINTNEXTLINE(readability-magic-numbers)
     ConditionData conditionData {42, true, 0};
     using TestData = std::tuple<AsyncWorkEvent *, ConditionData *>;
     auto testData = TestData {&event, &conditionData};
 
-    int expected = 84;
+    static constexpr int EXPECTED = 84;
     auto status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
@@ -534,7 +524,7 @@ TEST_F(AsyncWorkTest, AsyncWorkWithConditionData)
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
 
-    ASSERT_EQ(conditionData.result, expected);
+    ASSERT_EQ(conditionData.result, EXPECTED);
 }
 
 TEST_F(AsyncWorkTest, AsyncWorkCallbackCalledCheck)
@@ -578,11 +568,12 @@ TEST_F(AsyncWorkTest, AsyncWorkWithSharedState)
     using TestData = std::tuple<AsyncWorkEvent *, SharedState *>;
     auto testData = TestData {&event, &sharedState};
 
-    int expected = 100;
+    static constexpr int EXPECTED = 100;
     auto status = CreateAsyncWork(
         env_, []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {},
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
             auto &[e, state] = *reinterpret_cast<TestData *>(data);
+            // NOLINTNEXTLINE(readability-magic-numbers)
             state->value = 100;
             state->completed = true;
             e->Fire();
@@ -596,7 +587,7 @@ TEST_F(AsyncWorkTest, AsyncWorkWithSharedState)
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
 
-    ASSERT_EQ(sharedState.value, expected);
+    ASSERT_EQ(sharedState.value, EXPECTED);
     ASSERT_TRUE(sharedState.completed);
 }
 
@@ -641,7 +632,8 @@ TEST_F(AsyncWorkTest, AsyncWorkWithNestedStructData)
 
     auto event = AsyncWorkEvent();
     AsyncWork *work = nullptr;
-    Employee employee {"John Doe", 123, {50000.0f, "Engineering"}};
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    Employee employee {"John Doe", 123, {50000.0F, "Engineering"}};
     using TestData = std::tuple<AsyncWorkEvent *, Employee *>;
     auto testData = TestData {&event, &employee};
 
@@ -649,13 +641,15 @@ TEST_F(AsyncWorkTest, AsyncWorkWithNestedStructData)
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
             auto &[e, emp] = *reinterpret_cast<TestData *>(data);
-            emp->details.salary *= 1.1f;
+            // NOLINTNEXTLINE(readability-magic-numbers)
+            emp->details.salary *= 1.1F;
             emp->name += " Jr.";
         },
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
             auto &[e, emp] = *reinterpret_cast<TestData *>(data);
             ASSERT_EQ(emp->name, "John Doe Jr.");
-            ASSERT_FLOAT_EQ(emp->details.salary, 55000.0f);
+            // NOLINTNEXTLINE(readability-magic-numbers)
+            ASSERT_FLOAT_EQ(emp->details.salary, 55000.0F);
             e->Fire();
         },
         &testData, &work);
@@ -668,27 +662,27 @@ TEST_F(AsyncWorkTest, AsyncWorkWithNestedStructData)
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
 
     ASSERT_EQ(employee.name, "John Doe Jr.");
-    ASSERT_FLOAT_EQ(employee.details.salary, 55000.0f);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    ASSERT_FLOAT_EQ(employee.details.salary, 55000.0F);
 }
 
 TEST_F(AsyncWorkTest, MultipleAsyncWorksInLoop)
 {
     std::vector<AsyncWork *> works;
 
-    constexpr int loopCount = 3;
-    for (int i = 0; i < loopCount; i++) {
+    static constexpr int LOOP_COUNT = 3;
+    for (int i = 0; i < LOOP_COUNT; i++) {
         auto event = AsyncWorkEvent();
         AsyncWork *work = nullptr;
-        int *index = new int(i);
+        std::vector<int> index(i);
         using TestData = std::tuple<AsyncWorkEvent *, int *>;
-        auto testData = TestData {&event, index};
+        auto testData = TestData {&event, index.data()};
 
         auto status = CreateAsyncWork(
             env_, []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {},
             []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
                 auto &[e, idx] = *reinterpret_cast<TestData *>(data);
                 ASSERT_EQ(s, WorkStatus::OK);
-                delete idx;
                 e->Fire();
             },
             &testData, &work);
@@ -717,6 +711,7 @@ TEST_F(AsyncWorkTest, AsyncWorkWithStaticWorkPointer)
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
             auto &[e, value] = *reinterpret_cast<TestData *>(data);
+            // NOLINTNEXTLINE(readability-magic-numbers)
             *value = 100;
         },
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
@@ -771,16 +766,16 @@ TEST_F(AsyncWorkTest, AsyncWorkWithArrayData)
 {
     auto event = AsyncWorkEvent();
     AsyncWork *work = nullptr;
-    constexpr static int arrSize = 5;
-    int numbers[arrSize] = {1, 2, 3, 4, 5};
+    static constexpr int ARR_SIZE = 5;
+    std::array<int, ARR_SIZE> numbers = {1, 2, 3, 4, 5};
     using TestData = std::tuple<AsyncWorkEvent *, int *>;
-    auto testData = TestData {&event, numbers};
+    auto testData = TestData {&event, numbers.data()};
 
     auto status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
             auto &[e, arr] = *reinterpret_cast<TestData *>(data);
-            for (int i = 0; i < arrSize; i++) {
+            for (int i = 0; i < ARR_SIZE; i++) {
                 arr[i] *= arr[i];
             }
         },
@@ -843,20 +838,19 @@ TEST_F(AsyncWorkTest, MultipleAsyncWorksWithMap)
 {
     std::map<int, AsyncWork *> workMap;
 
-    const static int loopCount = 5;
-    for (int i = 0; i < loopCount; i++) {
+    static constexpr int LOOP_COUNT = 5;
+    for (int i = 0; i < LOOP_COUNT; i++) {
         auto event = AsyncWorkEvent();
         AsyncWork *work = nullptr;
-        int *workId = new int(i);
+        std::vector<int> workId(i);
         using TestData = std::tuple<AsyncWorkEvent *, int *>;
-        auto testData = TestData {&event, workId};
+        auto testData = TestData {&event, workId.data()};
 
         auto status = CreateAsyncWork(
             env_, []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {},
             []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
                 auto &[e, id] = *reinterpret_cast<TestData *>(data);
                 ASSERT_EQ(s, WorkStatus::OK);
-                delete id;
                 e->Fire();
             },
             &testData, &work);
@@ -913,7 +907,7 @@ TEST_F(AsyncWorkTest, AsyncWorkLifecycleTracking)
     using TestData = std::tuple<AsyncWorkEvent *, LifecycleData *>;
     auto testData = TestData {&event, &lifecycleData};
 
-    int expected = 2;
+    static constexpr int EXPECTED = 2;
     auto status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] void *data) {
@@ -938,7 +932,7 @@ TEST_F(AsyncWorkTest, AsyncWorkLifecycleTracking)
     event.Wait();
 
     ASSERT_EQ(lifecycleData.state, "completed");
-    ASSERT_EQ(lifecycleData.step, expected);
+    ASSERT_EQ(lifecycleData.step, EXPECTED);
 }
 
 TEST_F(AsyncWorkTest, AsyncWorkWithNullPointerCheck)
@@ -991,7 +985,7 @@ TEST_F(AsyncWorkTest, MultipleAsyncWorksSharedCounter)
     auto status1 = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
-            SharedData *sd = static_cast<SharedData *>(data);
+            auto *sd = static_cast<SharedData *>(data);
             sd->counter++;
         },
         []([[maybe_unused]] ani_env *env, WorkStatus s, [[maybe_unused]] void *data) { ASSERT_EQ(s, WorkStatus::OK); },
@@ -1000,11 +994,11 @@ TEST_F(AsyncWorkTest, MultipleAsyncWorksSharedCounter)
     auto status2 = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
-            SharedData *sd = static_cast<SharedData *>(data);
+            auto *sd = static_cast<SharedData *>(data);
             sd->counter++;
         },
         []([[maybe_unused]] ani_env *env, WorkStatus s, void *data) {
-            SharedData *sd = static_cast<SharedData *>(data);
+            auto *sd = static_cast<SharedData *>(data);
             ASSERT_EQ(s, WorkStatus::OK);
             ASSERT_EQ(sd->counter, 2);
             sd->event->Fire();
@@ -1028,19 +1022,20 @@ TEST_F(AsyncWorkTest, AsyncWorkWithClassManager)
 {
     class WorkManager {
     public:
-        AsyncWork *work = nullptr;
-        int processedData = 0;
+        AsyncWork *work = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
+        int processedData = 0;      // NOLINT(misc-non-private-member-variables-in-classes)
 
-        void createWork(ani_env *env)
+        void CreateWork(ani_env *env)
         {
             auto status = CreateAsyncWork(
                 env,
                 []([[maybe_unused]] ani_env *e, void *data) {
-                    WorkManager *wm = reinterpret_cast<WorkManager *>(data);
+                    auto *wm = reinterpret_cast<WorkManager *>(data);
+                    // NOLINTNEXTLINE(readability-magic-numbers)
                     wm->processedData = 100;
                 },
                 []([[maybe_unused]] ani_env *e, WorkStatus s, void *data) {
-                    WorkManager *wm = reinterpret_cast<WorkManager *>(data);
+                    auto *wm = reinterpret_cast<WorkManager *>(data);
                     ASSERT_EQ(s, WorkStatus::OK);
                     ASSERT_EQ(DeleteAsyncWork(e, wm->work), WorkStatus::OK);
                     wm->work = nullptr;
@@ -1052,8 +1047,8 @@ TEST_F(AsyncWorkTest, AsyncWorkWithClassManager)
         }
     };
 
-    WorkManager *manager = new WorkManager();
-    manager->createWork(env_);
+    auto *manager = new WorkManager();
+    manager->CreateWork(env_);
     ASSERT_NE(manager->work, nullptr);
 
     ASSERT_EQ(QueueAsyncWork(env_, manager->work), WorkStatus::OK);
@@ -1136,8 +1131,8 @@ TEST_F(AsyncWorkTest, DeleteMultipleWorksInCallback)
     ASSERT_EQ(status, WorkStatus::OK);
     ASSERT_NE(work2, nullptr);
 
-    constexpr int idx = 2;
-    std::get<idx>(testData) = work2;
+    static constexpr int IDX = 2;
+    std::get<IDX>(testData) = work2;
 
     ASSERT_EQ(QueueAsyncWork(env_, work2), WorkStatus::OK);
     event.Wait();
@@ -1197,15 +1192,15 @@ TEST_F(AsyncWorkTest, AsyncWorksExecutionOrder)
 
     DependencyData depData {&executionOrder, &event2};
 
-    int expected = 2;
+    static constexpr int EXPECTED = 2;
     auto status2 = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
-            DependencyData *dd = reinterpret_cast<DependencyData *>(data);
+            auto *dd = reinterpret_cast<DependencyData *>(data);
             *(dd->order) = 2;
         },
         []([[maybe_unused]] ani_env *env, [[maybe_unused]] WorkStatus s, void *data) {
-            DependencyData *dd = reinterpret_cast<DependencyData *>(data);
+            auto *dd = reinterpret_cast<DependencyData *>(data);
             ASSERT_EQ(*(dd->order), 2);
             dd->event->Fire();
         },
@@ -1222,7 +1217,7 @@ TEST_F(AsyncWorkTest, AsyncWorksExecutionOrder)
     ASSERT_EQ(QueueAsyncWork(env_, work2), WorkStatus::OK);
     event2.Wait();
 
-    ASSERT_EQ(executionOrder, expected);
+    ASSERT_EQ(executionOrder, EXPECTED);
 
     ASSERT_EQ(DeleteAsyncWork(env_, work1), WorkStatus::OK);
     ASSERT_EQ(DeleteAsyncWork(env_, work2), WorkStatus::OK);
@@ -1242,11 +1237,12 @@ TEST_F(AsyncWorkTest, AsyncWorkWithFunctionPointer)
     auto event = AsyncWorkEvent();
     AsyncWork *work = nullptr;
     auto doubleValue = [](int x) -> int { return x * 2; };
+    // NOLINTNEXTLINE(readability-magic-numbers)
     FunctionData functionData {doubleValue, 21, 42, 0};
     using TestData = std::tuple<AsyncWorkEvent *, FunctionData *>;
     auto testData = TestData {&event, &functionData};
 
-    int expected = 42;
+    static constexpr int EXPECTED = 42;
     auto status = CreateAsyncWork(
         env_,
         []([[maybe_unused]] ani_env *env, void *data) {
@@ -1266,7 +1262,7 @@ TEST_F(AsyncWorkTest, AsyncWorkWithFunctionPointer)
     event.Wait();
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
-    ASSERT_EQ(functionData.result, expected);
+    ASSERT_EQ(functionData.result, EXPECTED);
 }
 
 TEST_F(AsyncWorkTest, QueueAsyncWorkInCompleteCB)
@@ -1318,20 +1314,20 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkInCompleteCB)
 
     ASSERT_EQ(QueueAsyncWork(env_, outerWork), WorkStatus::OK);
     outerEvent.Wait();
-    constexpr int expected = 4;
-    ASSERT_EQ(testCounter, expected);
+    static constexpr int EXPECTED = 4;
+    ASSERT_EQ(testCounter, EXPECTED);
 }
 
 TEST_F(AsyncWorkTest, QueueAsyncWorkAfterCompleted)
 {
     auto firstDone = AsyncWorkEvent();
     auto secondDone = AsyncWorkEvent();
-    constexpr int kExpectedExecutions = 2;
+    static constexpr int EXPECTED_EXECUTIONS = 2;
 
     AsyncWork *work = nullptr;
     struct TestData {
-        AsyncWorkEvent *first;
-        AsyncWorkEvent *second;
+        AsyncWorkEvent *first = nullptr;
+        AsyncWorkEvent *second = nullptr;
         int executed {0};
         int completed {0};
     };
@@ -1364,19 +1360,19 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkAfterCompleted)
     secondDone.Wait();
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
-    ASSERT_EQ(data.executed, kExpectedExecutions);
-    ASSERT_EQ(data.completed, kExpectedExecutions);
+    ASSERT_EQ(data.executed, EXPECTED_EXECUTIONS);
+    ASSERT_EQ(data.completed, EXPECTED_EXECUTIONS);
 }
 
 TEST_F(AsyncWorkTest, QueueAsyncWorkInComplete)
 {
     auto done = AsyncWorkEvent();
     AsyncWork *work = nullptr;
-    constexpr int kExpectedExecutions = 2;
+    static constexpr int EXPECTED_EXECUTIONS = 2;
 
     struct TestData {
-        AsyncWorkEvent *done;
-        AsyncWork **workPtr;
+        AsyncWorkEvent *done = nullptr;
+        AsyncWork **workPtr = nullptr;
         int executed {0};
         int completed {0};
         int requeueAttempted {0};
@@ -1418,9 +1414,9 @@ TEST_F(AsyncWorkTest, QueueAsyncWorkInComplete)
 
     ASSERT_EQ(DeleteAsyncWork(env_, work), WorkStatus::OK);
 
-    EXPECT_EQ(data.executed, kExpectedExecutions);
+    EXPECT_EQ(data.executed, EXPECTED_EXECUTIONS);
     EXPECT_EQ(data.requeueAttempted, 1);
     EXPECT_EQ(data.requeueSucceeded, 1);
-    EXPECT_EQ(data.completed, kExpectedExecutions);
+    EXPECT_EQ(data.completed, EXPECTED_EXECUTIONS);
 }
 }  // namespace ark::ets::ani_helpers::testing

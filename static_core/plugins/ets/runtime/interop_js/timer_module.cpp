@@ -276,6 +276,7 @@ void TimerModule::TimerInfo::InvokeCallback(ani_env *env)
         return;
     }
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ark::Value arg[2] = {ark::Value(invokeObject->GetCoreType()), ark::Value(argArray->GetCoreType())};
 
     call->GetPandaMethod()->Invoke(s.GetCoroutine(), arg);

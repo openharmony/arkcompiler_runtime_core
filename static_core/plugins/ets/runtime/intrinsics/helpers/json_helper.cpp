@@ -122,7 +122,7 @@ bool JSONStringifier::SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsOb
     ASSERT(value.GetPtr() != nullptr);
     auto *cls = value->GetClass();
     bool isSuccessful = true;
-    if (IsLiteralInitializedInterface(value.GetPtr())) {
+    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr()))) {
         return true;
     }
 
@@ -200,7 +200,7 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
 
     // The code below mirrors managed `writeClassValue`. Ideally we'd like a single implementation
     // of `JSON.stringify`, but native code must exist to satisfy performance requirements
-    if (IsLiteralInitializedInterface(value.GetPtr()) && !SerializeGetters(coro, value, hasContent)) {
+    if (FromEtsBoolean(IsLiteralInitializedInterface(value.GetPtr())) && !SerializeGetters(coro, value, hasContent)) {
         return false;
     }
 

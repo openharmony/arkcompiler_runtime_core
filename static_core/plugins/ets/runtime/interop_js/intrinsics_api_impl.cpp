@@ -88,7 +88,8 @@ using common::TaggedType;
             return nullptr;
         }
     }
-    if (IsUndefined<true>(env, result) || !result) {
+    if (IsUndefined<true>(env, result) || result == nullptr) {
+        // NOLINTNEXTLINE(readability-redundant-string-cstr)
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to Undefined result";
         INTEROP_LOG(ERROR) << exp;
         InteropCtx::ThrowETSError(coro, exp.c_str());
@@ -519,6 +520,7 @@ static bool CheckModuleLoadStatus(EtsCoroutine *coro, napi_status status, const 
         return false;
     }
     if (IsNullOrUndefined(env, loadedObj)) {
+        // NOLINTNEXTLINE(readability-redundant-string-cstr)
         PandaString exp = PandaString("Unable to load module ") + moduleName.c_str() + " due to null result";
         INTEROP_LOG(ERROR) << exp;
         InteropCtx::ThrowETSError(coro, exp.c_str());

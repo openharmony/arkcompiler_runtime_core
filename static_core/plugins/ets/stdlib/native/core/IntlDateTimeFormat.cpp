@@ -615,7 +615,7 @@ static ani_string FormatImpl(ani_env *env, ani_object self, ani_double timestamp
 {
     std::string cacheKey = ConvertFromAniString(env, aniCacheKey);
     icu::DateFormat *icuDateFormat = g_intlState->dateTimeFormatCache.GetOrCreateDateFormat(env, self, cacheKey);
-    if (!icuDateFormat) {
+    if (icuDateFormat == nullptr) {
         return nullptr;
     }
 
@@ -630,7 +630,7 @@ static ani_array FormatToPartsImpl(ani_env *env, ani_object self, ani_double tim
 {
     std::string cacheKey = ConvertFromAniString(env, aniCacheKey);
     icu::DateFormat *dateFormat = g_intlState->dateTimeFormatCache.GetOrCreateDateFormat(env, self, cacheKey);
-    if (!dateFormat) {
+    if (dateFormat == nullptr) {
         // DateFormat creation failed ( check for pending error )
         return nullptr;
     }
@@ -703,7 +703,7 @@ static ani_object FormatResolvedOptionsImpl(ani_env *env, ani_object self, ani_s
 {
     std::string cacheKey = ConvertFromAniString(env, aniCacheKey);
     icu::DateFormat *dateFormat = g_intlState->dateTimeFormatCache.GetOrCreateDateFormat(env, self, cacheKey);
-    if (!dateFormat) {
+    if (dateFormat == nullptr) {
         return nullptr;
     }
 
@@ -822,7 +822,7 @@ static std::unique_ptr<icu::FormattedDateInterval> FormatDateInterval(ani_env *e
                                                                       ani_double end, const std::string &cacheKey)
 {
     icu::DateFormat *dateFmt = g_intlState->dateTimeFormatCache.GetOrCreateDateFormat(env, self, cacheKey);
-    if (!dateFmt) {
+    if (dateFmt == nullptr) {
         return nullptr;
     }
 

@@ -447,6 +447,7 @@ Utf8Char ConvertUtf16ToUtf8(uint16_t d0, uint16_t d1, bool modify)
     }
     if (d1 < DECODE_TRAIL_LOW || d1 > DECODE_TRAIL_HIGH) {
         // Isolated high surrogate: malformed, replace with U+FFFD
+        // NOLINTNEXTLINE(readability-magic-numbers)
         return {UtfLength::THREE, {0xEFU, 0xBFU, 0xBDU}};
     }
 
@@ -618,22 +619,26 @@ void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, boo
     constexpr uint64_t POW10_1 = 10U;
     constexpr uint64_t POW10_2 = 100U;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto *bufEnd = outUtf16Buf + nDigits;
-    constexpr uint64_t endShift = 2;  // uint32_t = 2 * uint16_t
+    static constexpr uint64_t END_SHIFT = 2;  // uint32_t = 2 * uint16_t
     while (v >= POW10_2) {
-        bufEnd -= endShift;
-        if (memcpy_s(bufEnd, endShift * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v % POW10_2], sizeof(uint32_t))) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        bufEnd -= END_SHIFT;
+        if (memcpy_s(bufEnd, END_SHIFT * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v % POW10_2], sizeof(uint32_t)) != 0) {
             UNREACHABLE();
         }
         v /= POW10_2;
     }
     if (v >= POW10_1) {
-        bufEnd -= endShift;
-        if (memcpy_s(bufEnd, endShift * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v], sizeof(uint32_t))) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        bufEnd -= END_SHIFT;
+        if (memcpy_s(bufEnd, END_SHIFT * sizeof(uint16_t), &BIDIGITS_CODE_TAB[v], sizeof(uint32_t)) != 0) {
             UNREACHABLE();
         }
     } else {
-        *(outUtf16Buf + negative) = v + '0';
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        *(outUtf16Buf + static_cast<int>(negative)) = v + '0';
     }
     if (negative) {
         *outUtf16Buf = '-';

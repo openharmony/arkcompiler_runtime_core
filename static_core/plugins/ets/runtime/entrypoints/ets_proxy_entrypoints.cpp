@@ -23,14 +23,14 @@
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
 // Explicitly instantiation for arm.
-template class ark::ets::EtsBoxPrimitive<double>;
-template class ark::ets::EtsBoxPrimitive<long>;
-template class ark::ets::EtsBoxPrimitive<unsigned short>;
-template class ark::ets::EtsBoxPrimitive<unsigned char>;
-template class ark::ets::EtsBoxPrimitive<float>;
-template class ark::ets::EtsBoxPrimitive<short>;
-template class ark::ets::EtsBoxPrimitive<signed char>;
-template class ark::ets::EtsBoxPrimitive<int>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsShort>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsChar>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsFloat>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsByte>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>;
+template class ark::ets::EtsBoxPrimitive<ark::ets::EtsInt>;
 
 namespace ark::ets::entrypoints {
 
@@ -54,13 +54,16 @@ const void *GetEtsProxyEntryPoint()
 class BoxerBase {
 public:
     virtual std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() = 0;
+    BoxerBase() = default;
+    NO_COPY_SEMANTIC(BoxerBase);
+    NO_MOVE_SEMANTIC(BoxerBase);
     virtual ~BoxerBase() = default;
 };
 
 template <typename T>
 class Boxer final : public BoxerBase {
 public:
-    explicit Boxer(T other, EtsCoroutine *coroutine) : coroutine_(coroutine)
+    explicit Boxer(T other, EtsCoroutine *coroutine) : BoxerBase(), coroutine_(coroutine)
     {
         static_assert(!std::is_same_v<std::remove_cv_t<std::remove_reference_t<T>>, ObjectHeader **>);
         value_ = other;
@@ -86,14 +89,13 @@ private:
 template <>
 class Boxer<ObjectHeader **> final : public BoxerBase {
 public:
-    explicit Boxer(ObjectHeader **other, EtsCoroutine *coroutine)
+    explicit Boxer(ObjectHeader **other, EtsCoroutine *coroutine) : value_(coroutine, EtsObject::FromCoreType(*other))
     {
-        value_ = EtsHandle<EtsObject>(coroutine, EtsObject::FromCoreType(*other));
     }
 
     std::optional<EtsHandle<EtsObject>> BoxIfNeededAndCreateHandle() override
     {
-        return std::move(value_);
+        return value_;
     }
 
 private:
@@ -223,7 +225,7 @@ Value PrepareArgumentsAndInvoke(const EtsHandle<EtsObject> &thisH, EtsMethod *if
         invokeArgs.push_back(Value(reflectMethodH->AsObject()->GetCoreType()));
         // nullptr in case of arg = `undefined`.
         Value arg = (handledArgs[0].GetPtr() == nullptr) ? Value(nullptr) : Value(handledArgs[0]->GetCoreType());
-        invokeArgs.push_back(std::move(arg));
+        invokeArgs.emplace_back(arg);
         methodToInvoke = platformTypes->coreReflectProxyInvokeSet;
     } else if (ifaceMethod->IsGetter()) {
         ASSERT(handledArgs.empty());
@@ -329,7 +331,7 @@ extern "C" int64_t EtsProxyMethodInvoke(Method *method, uint8_t *args, uint8_t *
             ASSERT(coroutine->HasPendingException());
             return 0;
         }
-        handledArgs.push_back(std::move(*obj));
+        handledArgs.emplace_back(*obj);
     }
 
     // After all handles are created we can do allocations.

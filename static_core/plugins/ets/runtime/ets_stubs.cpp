@@ -466,7 +466,8 @@ bool EtsGetIstrue(EtsCoroutine *coro, EtsObject *obj)
     auto ptypes = PlatformTypes(coro);
     if (cls == ptypes->coreBoolean) {
         return EtsBoxPrimitive<EtsBoolean>::FromCoreType(obj)->GetValue() != 0;
-    } else if (cls == ptypes->coreChar) {
+    }
+    if (cls == ptypes->coreChar) {
         return EtsBoxPrimitive<EtsChar>::FromCoreType(obj)->GetValue() != 0;
     }
 
@@ -491,6 +492,7 @@ bool EtsHasPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thisOb
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
+            // NOLINTNEXTLINE(readability-redundant-string-cstr)
             return xRefObjectOperator.HasProperty(coro, str.c_str());
         })
     } else {
@@ -540,6 +542,7 @@ bool EtsHasOwnPropertyByName([[maybe_unused]] EtsCoroutine *coro, EtsObject *thi
             [[maybe_unused]] EtsHandleScope s(coro);
             EtsHandle<EtsObject> thisObjHandle(coro, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
+            // NOLINTNEXTLINE(readability-redundant-string-cstr)
             return xRefObjectOperator.HasProperty(coro, str.c_str(), true);
         });
     } else {
@@ -743,10 +746,9 @@ EtsObject *EtsLdbyval(EtsCoroutine *coro, EtsObject *thisObj, EtsObject *valObj)
                 auto nameView = valObjStr->ConvertToStringView(&tree8Buf);
                 PandaString str(nameView);
                 return xRefObjectThis.GetProperty(coro, str);
-            } else {
-                EtsHandle<EtsObject> valObjHandle(coro, valObj);
-                return xRefObjectThis.GetProperty(coro, valObjHandle);
             }
+            EtsHandle<EtsObject> valObjHandle(coro, valObj);
+            return xRefObjectThis.GetProperty(coro, valObjHandle);
         });
     } else {
         // ASSERTION. LHS is not a JSValue

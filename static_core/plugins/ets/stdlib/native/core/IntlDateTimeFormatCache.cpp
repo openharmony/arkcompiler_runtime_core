@@ -16,6 +16,7 @@
 #include "plugins/ets/stdlib/native/core/IntlDateTimeFormatCache.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 #include <ctime>
+#include <random>
 #include <sstream>
 
 namespace ark::ets::stdlib::intl {
@@ -42,15 +43,15 @@ icu::DateFormat *IntlDateTimeFormatCache::GetOrCreateDateFormat(ani_env *env, an
     // --- Cache Miss ---
     EraseRandFmtsGroupByEraseRatio();
     // Create the formatter by calling the factory function.
-    std::unique_ptr<icu::DateFormat> new_format = CreateICUDateFormat(env, self);
-    if (new_format == nullptr) {
+    std::unique_ptr<icu::DateFormat> newFormat = CreateICUDateFormat(env, self);
+    if (newFormat == nullptr) {
         return nullptr;
     }
 
-    auto *format_ptr = new_format.get();
-    cache_.emplace(cacheKey, std::move(new_format));
+    auto *formatPtr = newFormat.get();
+    cache_.emplace(cacheKey, std::move(newFormat));
 
-    return format_ptr;
+    return formatPtr;
 }
 
 void IntlDateTimeFormatCache::EraseRandFmtsGroupByEraseRatio()

@@ -50,7 +50,7 @@ private:
     void AppendJSONPrimitive(const PandaString &value, bool hasContent);
 
     bool SerializeFields(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent);
-    bool SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent);
+    bool SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> &obj, bool &hasContent);
     bool SerializeInterfaceList(EtsCoroutine *coro, EtsHandle<EtsObject> &value, bool &hasContent);
 
     // handling of types

@@ -16,14 +16,12 @@
 #ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLDATETIMEFORMATCACHE_H
 #define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLDATETIMEFORMATCACHE_H
 
-#include "libarkbase/macros.h"
 #include "libarkbase/os/mutex.h"
 #include <ani.h>
 #include <unicode/datefmt.h>
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <random>
 
 namespace ark::ets::stdlib::intl {
 
