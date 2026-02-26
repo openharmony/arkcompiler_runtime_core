@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ using namespace ark::panda_file;
 using namespace ark::pandasm;
 class RuntimeAdapterStaticTest : public testing::Test {
 public:
-    RuntimeAdapterStaticTest() {}
+    RuntimeAdapterStaticTest() = default;
     ~RuntimeAdapterStaticTest() override {}
 
     NO_COPY_SEMANTIC(RuntimeAdapterStaticTest);
@@ -62,18 +62,18 @@ static void MainTestFunc(const std::string &source, compiler::RuntimeInterface::
 TEST_F(RuntimeAdapterStaticTest, RuntimeAdapterStaticTestNormal)
 {
     std::string source = R"(
-        .record IO {}
-        .function void IO.printI64(i64 a0) <native>
-    )";
+            .record IO {}
+            .function void IO.printI64(i64 a0) <native>
+        )";
     MainTestFunc(source, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_IO_PRINT_I64);
 }
 
 TEST_F(RuntimeAdapterStaticTest, RuntimeAdapterStaticTestInvalid)
 {
     std::string source = R"(
-        .record IO {}
-        .function i32 IO.printU32(i32 a0) <native>
-    )";
+            .record IO {}
+            .function i32 IO.printU32(i32 a0) <native>
+        )";
     MainTestFunc(source, compiler::RuntimeInterface::IntrinsicId::INVALID);
 }
 }  // namespace libabckit::test::adapter_static

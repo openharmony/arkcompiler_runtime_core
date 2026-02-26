@@ -258,6 +258,19 @@ private:
 // CC-OFFNXT(G.DCL.01) public API
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#ifdef ABCKIT_WITH_COVERAGE
+// Coverage build: no branch at call site to avoid inflating branch coverage with log-level checks.
+// GetLoggerStream() returns &g_nullStream when level is disabled, so output is discarded.
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_LOG_(level)                                             \
+    libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
+    *libabckit::Logger::GetLoggerStream(#level) << libabckit::Logger::msgPrefix_ << "[" << LIBABCKIT_FUNC_NAME << "] "
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_LOG_NO_FUNC_(level)                                     \
+    libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
+    *libabckit::Logger::GetLoggerStream(#level) << libabckit::Logger::msgPrefix_
+#else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_LOG_(level)                                             \
     libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
     if (libabckit::Logger::CheckPermission(#level))                       \
@@ -270,6 +283,7 @@ private:
     libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
     if (libabckit::Logger::CheckPermission(#level))                       \
     *libabckit::Logger::GetLoggerStream(#level) << libabckit::Logger::msgPrefix_
+#endif
 
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -45,8 +45,12 @@ template("create_merge_file") {
 abckit_gtests_sources = [
   "adapter_dynamic/convert_test.cpp",
   "adapter_static/ir_static_test.cpp",
+  # "adapter_static/ir_static_coverage_test.cpp",
+  # "adapter_static/ir_static_instr_1_coverage_test.cpp",
+  # "adapter_static/helpers_static_coverage_test.cpp",
+  # "adapter_static/metadata_modify_static_coverage_test.cpp",
 
-  #"adapter_static/runtime_adapter_static_test.cpp",
+  "adapter_static/runtime_adapter_static_test.cpp",
   "clean_scenarios/c_api/dynamic/add_log/add_log_dynamic_test.cpp",
   "clean_scenarios/c_api/dynamic/add_try_catch/add_try_catch_test.cpp",
   "clean_scenarios/c_api/dynamic/api_scanner/api_scanner_test.cpp",
@@ -121,7 +125,8 @@ abckit_gtests_sources = [
   "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
   "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
 
-  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test.cpp",
+  "ut/extensions/arkts/inspect_api/helpers/opcodes_static_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_static_modify_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
   "ut/extensions/arkts/modify_api/annotations/annotations_test_static.cpp",
@@ -268,7 +273,7 @@ abckit_gtests_sources = [
   "ut/metadata_core/modify_api/values/values_test.cpp",
 
   # "wrong_ctx_tests/wrong_ctx_tests_ArktsInspectApiImpl_0.cpp",
-  # "wrong_ctx_tests/wrong_ctx_tests_ArktsModifyApiImpl_0.cpp",
+  "wrong_ctx_tests/wrong_ctx_tests_ArktsModifyApiImpl_0.cpp",
   "wrong_ctx_tests/wrong_ctx_tests_GraphApiImpl_0.cpp",
   "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_0.cpp",
   "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_1.cpp",
@@ -562,7 +567,8 @@ test_ets_files = [
   "ut/extensions/arkts/modify_api/namespaces/namespace_static_modify",
   "ut/extensions/arkts/modify_api/modules/module_static_modify2",
 
-  #"ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
+  "ut/extensions/arkts/inspect_api/helpers/helpers_static_test",
+  "ut/extensions/arkts/inspect_api/helpers/opcodes_static_test",
   "ut/extensions/arkts/modify_api/class/class_add_method_static",
   "ut/extensions/arkts/modify_api/class/class_add_method_static_extral",
   "ut/extensions/arkts/modify_api/class/class_interface",

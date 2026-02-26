@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,8 +26,19 @@ set -exu
 
 FILE_NAME="${1}"
 
-CLANG_FORMAT_BIN="clang-format-14"
 SCRIPT_DIR="$(dirname $(realpath "${0}"))"
+# Prefer clang-format-14 if in PATH (CI); else use project prebuilts clang-format.
+if command -v clang-format-14 &>/dev/null; then
+    CLANG_FORMAT_BIN="clang-format-14"
+else
+    REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+    PREBUILTS_CF="${REPO_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/bin/clang-format"
+    if [ -x "${PREBUILTS_CF}" ]; then
+        CLANG_FORMAT_BIN="${PREBUILTS_CF}"
+    else
+        CLANG_FORMAT_BIN="clang-format-14"
+    fi
+fi
 
 if [ ! -f "${FILE_NAME}" ]; then
     echo "FATAL: Input file '${FILE_NAME}' is not found"

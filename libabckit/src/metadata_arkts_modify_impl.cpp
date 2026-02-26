@@ -147,6 +147,7 @@ extern "C" AbckitArktsImportDescriptor *ModuleAddImportFromArktsV1ToArktsV1(
     }
 
     LIBABCKIT_CHECK_SAME_TARGET(importing->core->target, imported->core->target);
+    LIBABCKIT_WRONG_CTX(importing->core->file, imported->core->file, nullptr);
 
     return ModuleAddImportFromDynamicModuleDynamic(importing->core, imported->core, params);
 }
@@ -263,6 +264,7 @@ extern "C" AbckitArktsExportDescriptor *ModuleAddExportFromArktsV1ToArktsV1(
     }
 
     LIBABCKIT_CHECK_SAME_TARGET(exporting->core->target, exported->core->target);
+    LIBABCKIT_WRONG_CTX(exporting->core->file, exported->core->file, nullptr);
 
     return DynamicModuleAddExportDynamic(exporting->core, exported->core, params);
 }

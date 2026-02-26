@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libabckit/c/abckit.h"
 #include "libabckit/c/isa/isa_static.h"
 #include "libabckit/c/metadata_core.h"
+#include "libabckit/c/extensions/arkts/metadata_arkts.h"
 #include "libabckit/c/ir_core.h"
 #include "metadata_inspect_impl.h"
 #include "ir_impl.h"
@@ -654,6 +655,55 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inpu
 
     instr = apiToCheck(g_dummyGrapH1, g_dummyInsT1, g_dummyString, g_dummyInsT2, ABCKIT_TYPE_ID_INVALID);
     ASSERT_EQ(instr, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
+}
+
+void TestWrongCtx(
+    AbckitArktsImportDescriptor *(*apiToCheck)(AbckitArktsModule *importing, AbckitArktsModule *imported,
+                                               const struct AbckitArktsImportFromDynamicModuleCreateParams *))
+{
+    g_dummyModulE1->file = g_dummyFilE1;
+    g_dummyModulE2->file = g_dummyFilE2;
+    g_dummyModulE1->target = ABCKIT_TARGET_ARK_TS_V1;
+    g_dummyModulE2->target = ABCKIT_TARGET_ARK_TS_V1;
+
+    AbckitArktsModule arktsMod1;
+    arktsMod1.core = g_dummyModulE1;
+    AbckitArktsModule arktsMod2;
+    arktsMod2.core = g_dummyModulE2;
+
+    static const char kName[] = "x";
+    static const char kAlias[] = "y";
+    AbckitArktsImportFromDynamicModuleCreateParams params = {};
+    params.name = kName;
+    params.alias = kAlias;
+
+    auto *result = apiToCheck(&arktsMod1, &arktsMod2, &params);
+    ASSERT_EQ(result, nullptr);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
+}
+
+void TestWrongCtx(AbckitArktsExportDescriptor *(*apiToCheck)(AbckitArktsModule *exporting, AbckitArktsModule *exported,
+                                                             const struct AbckitArktsDynamicModuleExportCreateParams *))
+{
+    g_dummyModulE1->file = g_dummyFilE1;
+    g_dummyModulE2->file = g_dummyFilE2;
+    g_dummyModulE1->target = ABCKIT_TARGET_ARK_TS_V1;
+    g_dummyModulE2->target = ABCKIT_TARGET_ARK_TS_V1;
+
+    AbckitArktsModule arktsMod1;
+    arktsMod1.core = g_dummyModulE1;
+    AbckitArktsModule arktsMod2;
+    arktsMod2.core = g_dummyModulE2;
+
+    static const char kName[] = "x";
+    static const char kAlias[] = "y";
+    AbckitArktsDynamicModuleExportCreateParams params = {};
+    params.name = kName;
+    params.alias = kAlias;
+
+    auto *result = apiToCheck(&arktsMod1, &arktsMod2, &params);
+    ASSERT_EQ(result, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
 }
 
