@@ -279,6 +279,14 @@ if (NOT PANDA_TARGET_ARM32)
                                 WORKERS "AUTO"
                                 MODE "INT"
         )
+
+      add_ets_coroutines_test(FILE coroutine_counter.ets
+                                SKIP_ARM32_COMPILER
+                                IMPL "STACKFUL"
+                                OPTION_SETS_STACKFUL "DEFAULT"
+                                WORKERS "AUTO"
+                                MODE "INT"
+        )
     endif()
 
     # NOTE(30627) Temporarily disabled due failures under TSan

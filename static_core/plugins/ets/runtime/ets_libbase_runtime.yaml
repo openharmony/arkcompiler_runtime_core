@@ -6932,6 +6932,16 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemDumpUhandledFailedJobs
 
+  - name: stdCoroutineGetCount
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getCoroutineCount
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::GetCoroutineCount
+ 
 ####################################
 # std.debug.concurrency.AtomicFlag #
 ####################################

@@ -139,6 +139,7 @@ public:
 
     CoroutineWorkerGroup::Id GenerateWorkerGroupId(CoroutineWorkerDomain domain,
                                                    const PandaVector<CoroutineWorker::Id> &hint) override;
+    size_t GetCoroutineCount() override;
 
 protected:
     static constexpr CoroutineWorker::Id MAIN_WORKER_ID = 0U;
@@ -154,7 +155,6 @@ protected:
     CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) override;
     void DeleteCoroutineContext(CoroutineContext *ctx) override;
 
-    size_t GetCoroutineCount() override;
     size_t GetCoroutineCountLimit() override;
 
     StackfulCoroutineContext *GetCurrentContext();
