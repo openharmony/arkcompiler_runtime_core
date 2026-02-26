@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,17 +25,6 @@ cases:
       doc: Class/Interface type
       params: override-incompatible parameter
 
-    - base: |-
-          foo(i: Base): void {
-              res = 1;
-          }
-      derived: |-
-          foo(i: Derived): void {  // overriding assumed
-              res = 2;
-          }
-      doc: Class/Interface type
-      params: override-incompatible parameter
-
     # CLASS, METHOD RETURN TYPE
     - base: |-
           foo(): Derived {
@@ -44,19 +33,6 @@ cases:
           }
       derived: |-
           override foo(): Base {
-              res = 2;
-              return new Base();
-          }
-      doc: Class/Interface type
-      params: override-incompatible return type
-
-    - base: |-
-          foo(): Derived {
-              res = 1;
-              return new Derived();
-          }
-      derived: |-
-          foo(): Base {
               res = 2;
               return new Base();
           }

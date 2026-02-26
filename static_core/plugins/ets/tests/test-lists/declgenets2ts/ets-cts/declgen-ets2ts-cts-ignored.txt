@@ -2400,3 +2400,21 @@
 
 #FailKind.DECLGEN_ETS2TS_FAIL:
 15.semantic_rules/10.overloading/main_overload_neg.ets
+#FailKind.TSC_FAIL
+14.ambient_declarations/04.class_declarations/class_decl_23.ets
+14.ambient_declarations/04.class_declarations/class_decl_25.ets
+14.ambient_declarations/04.class_declarations/class_decl_26.ets
+14.ambient_declarations/04.class_declarations/class_decl_27.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_23.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_24.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_25.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_26.d.ets
+14.ambient_declarations/04.class_declarations/class_decl_d/class_decl_27.d.ets
+14.ambient_declarations/05.interface_declarations/interface_decl/interface_declarations.d.ets
+14.ambient_declarations/05.interface_declarations/interface_decl_n/interface_declarations.ets
+09.classes/03.class_implementation_clause/03.implementing_optional_interface_properties/override_optional_property_ef_neg_3.ets
+10.interfaces/06.interface_inheritance/method_inheritance/inherited_abstract_method/inherited_abstract_method_26.ets
+10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_9.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
+15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_neg_1.ets

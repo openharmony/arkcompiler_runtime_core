@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,16 +26,20 @@ class Base {}
 class Derived extends Base {}
 
 interface IBase {
-  foo(i: Derived) { res = 1 }
+    foo(i: Derived) { res = 1 }
 }
 interface IDerived {
-  foo(i: Base) { res = 2 }
+    foo(i: Base) { res = 2 }
 }
 
-class C implements IBase, IDerived {}
+class C implements IBase, IDerived {
+    foo(i: Base) { res = 3 }
+}
 
 function main() {
-  res = 0
-  new C().foo(new Base)
-  arktest.assertEQ(res, 2)
+    res = 0
+    new C().foo(new Base)
+    arktest.assertEQ(res, 3)
+    new C().foo(new Derived)
+    arktest.assertEQ(res, 3)
 }

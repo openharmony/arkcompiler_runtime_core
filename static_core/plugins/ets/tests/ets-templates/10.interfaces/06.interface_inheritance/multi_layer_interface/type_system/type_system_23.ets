@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,53 +14,41 @@
  */
 
 /*---
-desc: Multiple inheritance conflict resolving.
+desc: Multiple methods overriding
 ---*/
 
-let a: number = 10;
-let res: string = ""
-
 interface A {
-    draw(): void;
+    draw(x?: string): object;
 }
 
 interface B {
-    draw(): string;
+    draw(x?: number): string;
 }
 
 interface C {
-    draw(x: number): void;
+    draw(x: boolean): object;
 }
 
-interface D {
-    draw(x: string): void;
-}
-
-class E implements A, B, C, D {
-    draw(...p: Any[]): Any {
-        if (p.length == 0) {
-            if (a == 10)
-                return "B"
-            res = "B"
-        else if (p[0] instanceof number)
-            res = "C"
-        else if (p[0] instanceof number)
-            res = "D"
-        }
-        return
+/* more specific return type (covariance)
+*  wider parameter type (contravariance)
+*  same parameters quantity
+*/
+class D implements A, B, C {
+    draw(x: Any): string {
+        if (x === undefined) return 'A'
+        else if (x instanceof number) return 'B'
+             else if (x instanceof boolean) return 'C'
+        
+        return 'unknown'
     }
 }
 
 function main() {
-    res = ""
-    a = 10
-    let c: E = new E()
-    arktest.assertEQ(c.draw(), "B")
-    a++
-    c.draw()
-    arktest.assertEQ(res, "A")
-    c.draw(1)
-    arktest.assertEQ(res, "C")
-    c.draw("str")
-    arktest.assertEQ(res, "D")
+    let c: D = new D()
+    //draw signatures from interfaces
+    arktest.assertEQ(c.draw(), "A")
+    arktest.assertEQ(c.draw(1.0), "B")
+    arktest.assertEQ(c.draw(true), "C")
+    //wider parameters range from class D
+    arktest.assertEQ(c.draw(1), "unknown")
 }

@@ -18,22 +18,24 @@ desc: The forms using the keyword super are valid in instance methods, construct
 ---*/
 
 class A {
-  private _x: int;
+    private _x: int;
 
-  get x(): int{
-    return this._x;
-  }
+    get x(): int{
+        return this._x;
+    }
 
-  public bar(): int
+    public bar(): int {
+        return 1;
+    }
 }
 
 final class B extends A {
-  public bar(...args: Any[]): Any {
-    return super.x;
-  }
+    public override bar(): int {
+        return super.x;
+    }
 }
 
 function main(): void {
-  let instance = new B
-  arktest.assertEQ( instance.bar(), 0 )
+    let instance = new B
+    arktest.assertEQ( instance.bar(), 0 )
 }

@@ -34,3 +34,16 @@ cases:
       use: |-
           let f: F<I> = new F<I>()
           arktest.assertTrue( f instanceof F )
+    
+    - decl: |-
+          final class FC <out T> {
+              readonly r: T
+              static st: string = 'test'
+    
+              constructor (t: T) {
+                  this.r = t
+              }
+          }
+      use: |-
+          arktest.assertEQ( new FC<int>(1).r, 1 )
+          arktest.assertEQ( FC.st, 'test' )

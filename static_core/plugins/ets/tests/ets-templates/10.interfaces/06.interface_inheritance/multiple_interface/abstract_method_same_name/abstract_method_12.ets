@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,30 +16,34 @@
 /*---
 desc: >-
     The method with the same name has the different parameters parameter type
-    but same return types, valid overloading.
+    but same return types
 ---*/
 
 interface Parent1 {
-  combine(a: string, b: number): string;
+    combine(a: string, b: number): string;
 }
 
 interface Parent2 {
-  combine(b: number, a: string): string;
+    combine(b: number, a: string): string;
 }
 
 // Parent1 and Parent2 combine methods with different parameter orders
 interface Child extends Parent1, Parent2 {}
 
 class ChildClass implements Child {
-  combine(...p: Any[]): Any {
-    if (typeof p[0] === "string")
-      return "str1"
-    return "str2"
-  }
+    //one method to override both interface methods
+    combine(p: Object, s: Object): string {
+        if (p instanceof string && s instanceof number)
+            return "str1"
+        else if (p instanceof number && s instanceof string )
+            return "str2"
+        
+        return 'undefined'
+    }
 }
 
 function main() {
-  let c: ChildClass = new ChildClass()
-  arktest.assertEQ(c.combine("str", 1),"str1")
-  arktest.assertEQ(c.combine(2, "str"),"str2")
+    let c: ChildClass = new ChildClass()
+    arktest.assertEQ(c.combine("str", 1.0),"str1")
+    arktest.assertEQ(c.combine(2.1, "str"),"str2")
 }

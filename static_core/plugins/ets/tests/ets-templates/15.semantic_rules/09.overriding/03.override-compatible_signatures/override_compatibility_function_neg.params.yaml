@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,7 @@
 ---
 cases:
     # FUNCTION, PARAMETER
+#0
     - base: |-
           foo(i: (j: Base) => Base): void {
               res = 1
@@ -23,17 +24,7 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Base) => Base): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Base) => Derived): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#1
     - base: |-
           foo(i: (j: Base) => Base): void {
               res = 1
@@ -43,17 +34,7 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Base) => Base): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Derived) => Derived): void {  // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#2
     - base: |-
           foo(i: (j: Derived) => Base): void {
               res = 1
@@ -63,17 +44,7 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Derived) => Base): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Base) => Base): void {  // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#3
     - base: |-
           foo(i: (j: Derived) => Base): void {
               res = 1
@@ -83,17 +54,7 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Derived) => Base): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Base) => Derived): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#4
     - base: |-
           foo(i: (j: Derived) => Base): void {
               res = 1
@@ -103,17 +64,7 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Derived) => Base): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Derived) => Derived): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#5
     - base: |-
           foo(i: (j: Derived) => Derived): void {
               res = 1
@@ -123,38 +74,19 @@ cases:
               res = 2
           }
       params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Derived) => Derived): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Base) => Base): void { // override assumed
-              res = 2
-          }
-      params: override-incompatible parameter
-
+#6
     - base: |-
           foo(i: (j: Derived) => Derived): void {
               res = 1
           }
       derived: |-
           override foo(i: (j: Base) => Derived): void {
-              res = 2
-          }
-      params: override-incompatible parameter
-
-    - base: |-
-          foo(i: (j: Derived) => Derived): void {
-              res = 1
-          }
-      derived: |-
-          foo(i: (j: Base) => Derived): void { // override assumed
               res = 2
           }
       params: override-incompatible parameter
 
     # FUNCTION, RETURN TYPE
+#7
     - base: |-
           foo(): (i: Base) => Base {
               res = 1
@@ -166,19 +98,7 @@ cases:
               return (i: Derived): Base => new Base
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Base) => Base {
-              res = 1
-              return (i: Base): Base => new Base
-          }
-      derived: |-
-          foo(): (i: Derived) => Base { // override assumed
-              res = 2
-              return (i: Derived): Base => new Base
-          }
-      params: override-incompatible return type
-
+#8
     - base: |-
           foo(): (i: Base) => Base {
               res = 1
@@ -190,19 +110,7 @@ cases:
               return (i: Derived): Derived => new Derived
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Base) => Base {
-              res = 1
-              return (i: Base): Base => new Base
-          }
-      derived: |-
-          foo(): (i: Derived) => Derived { // override assumed
-              res = 2
-              return (i: Derived): Derived => new Derived
-          }
-      params: override-incompatible return type
-
+#9
     - base: |-
           foo(): (i: Base) => Derived {
               res = 1
@@ -214,19 +122,7 @@ cases:
               return (i: Base): Base => new Base
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Base) => Derived {
-              res = 1
-              return (i: Base): Derived => new Derived
-          }
-      derived: |-
-          foo(): (i: Base) => Base { // override assumed
-              res = 2
-              return (i: Base): Base => new Base
-          }
-      params: override-incompatible return type
-
+#10
     - base: |-
           foo(): (i: Base) => Derived {
               res = 1
@@ -238,19 +134,7 @@ cases:
               return (i: Derived): Base => new Base
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Base) => Derived {
-              res = 1
-              return (i: Base): Derived => new Derived
-          }
-      derived: |-
-          foo(): (i: Derived) => Base { // override assumed
-              res = 2
-              return (i: Derived): Base => new Base
-          }
-      params: override-incompatible return type
-
+#11
     - base: |-
           foo(): (i: Base) => Derived {
               res = 1
@@ -262,19 +146,7 @@ cases:
               return (i: Derived): Derived => new Derived
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Base) => Derived {
-              res = 1
-              return (i: Base): Derived => new Derived
-          }
-      derived: |-
-          foo(): (i: Derived) => Derived { // override assumed
-              res = 2
-              return (i: Derived): Derived => new Derived
-          }
-      params: override-incompatible return type
-
+#12
     - base: |-
           foo(): (i: Derived) => Derived {
               res = 1
@@ -286,19 +158,7 @@ cases:
               return (i: Base): Base => new Base
           }
       params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Derived) => Derived {
-              res = 1
-              return (i: Derived): Derived => new Derived
-          }
-      derived: |-
-          foo(): (i: Base) => Base { // override assumed
-              res = 2
-              return (i: Base): Base => new Base
-          }
-      params: override-incompatible return type
-
+#13
     - base: |-
           foo(): (i: Derived) => Derived {
               res = 1
@@ -306,18 +166,6 @@ cases:
           }
       derived: |-
           override foo(): (i: Derived) => Base {
-              res = 2
-              return (i: Derived): Base => new Base
-          }
-      params: override-incompatible return type
-
-    - base: |-
-          foo(): (i: Derived) => Derived {
-              res = 1
-              return (i: Derived): Derived => new Derived
-          }
-      derived: |-
-          foo(): (i: Derived) => Base { // override assumed
               res = 2
               return (i: Derived): Base => new Base
           }

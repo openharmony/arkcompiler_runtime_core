@@ -230,6 +230,8 @@
 
 #33086
 07.expressions/06.object_literal/02.object_literal_of_interface_type/interface_literals_negative_0.ets
+#28484 Interface has methods
+07.expressions/06.object_literal/spec_ex6.ets
 
 #25990
 07.expressions/06.object_literal/03.object_literal_of_record_type/re_14.ets
@@ -269,12 +271,6 @@
 
 #32641
 07.expressions/09.this_expression/this_in_object_literal.ets
-
-#26730
-07.expressions/10.field_access_expressions/03.accessing_superclass_properties/access_by_super_from_method_3.ets
-
-#26730
-07.expressions/11.method_call_expression/02.step_2_selection_of_entity_to_call/step2_22.ets
 
 #32421 Support Parametrized FixedArray in class method return type
 07.expressions/11.method_call_expression/03.step_3_checking_modifiers/fixed_array_support_0.ets
@@ -504,12 +500,6 @@
 #33182
 09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 
-#26730
-09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call.ets
-09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_call_2.ets
-09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n.ets
-09.classes/03.class_implementation_clause/01.implementing_interface_methods/class_overrides_interface_methods_n3.ets
-
 #311
 09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_3.ets
 09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_8.ets
@@ -717,12 +707,6 @@
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_26.ets
 09.classes/07.method_declarations/08.methods_returning_this/met_ret_this_27.ets
 
-#26730
-09.classes/09.constructor_declaration/constructor_declaration_overload1.ets
-09.classes/09.constructor_declaration/constructor_declaration_overload2.ets
-09.classes/09.constructor_declaration/constructor_declaration_anonymous_overloading1.ets
-09.classes/09.constructor_declaration/constructor_declaration_anonymous_overloading2.ets
-
 #28235
 09.classes/09.constructor_declaration/constructor_declaration_private3.ets
 09.classes/09.constructor_declaration/constructor_declaration_protected3.ets
@@ -771,21 +755,6 @@
 
 #16840
 10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
-
-#26730 implement override/overload
-10.interfaces/05.interface_method_declarations/overriding_by_instance_methods/overriding_private_method_n.ets
-10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature_any.ets
-10.interfaces/06.interface_inheritance/inheritance_method_with_declared_signature.ets
-10.interfaces/06.interface_inheritance/inheritance_private_method_with_declared_signature2_n.ets
-10.interfaces/06.interface_inheritance/method_inheritance/inherited_abstract_method/inherited_abstract_method_26.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_conflict/conflict_07.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_02.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_11.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_12.ets
-10.interfaces/06.interface_inheritance/multiple_interface/abstract_method_same_name/abstract_method_20.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_17.ets
-10.interfaces/06.interface_inheritance/multiple_interface/child_specifies_parent_use_case/child_specifies_parent_use_case_18.ets
-10.interfaces/06.interface_inheritance/multi_layer_interface/type_system/type_system_23.ets
 
 #30565 no CTE on getter override
 10.interfaces/06.interface_inheritance/multi_layer_interface/complex_inheritance/complex_inheritance_37_n.ets
@@ -1561,48 +1530,6 @@
 
 #31018 override protected method in superclass by protected one with the same public in superinterface
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_5.ets
-
-#26730 implement override/overload
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_25.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_28.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/static_method_over_29.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_0.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_1.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_3.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_4.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_5.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_8.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_9.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/instance_method_over_neg_11.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_0.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_2.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_4.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_5.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/interface_override_with_object_example_neg_6.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_array_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_class_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_fixed_array_neg_0.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_5.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_7.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_9.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_11.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_function_neg_13.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_intf_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_compatibility_primitive_neg_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_1.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_13.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_17.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_19.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_21.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_23.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_25.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_3.ets
-15.semantic_rules/09.overriding/03.override-compatible_signatures/override_with_object_n_5.ets
 
 #28235 Constructor Names not yet work
 15.semantic_rules/09.overriding/constructor_no_override_1.ets

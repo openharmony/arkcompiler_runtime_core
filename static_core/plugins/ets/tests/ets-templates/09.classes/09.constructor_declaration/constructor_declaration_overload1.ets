@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,39 +20,57 @@ desc: >-
 
 abstract class A {
     public p1: int|string|boolean = 0;
-    public q1: number|number[]|undefined;
+    public q1: number|undefined;
     public w1: number[]|undefined;
 
-    protected constructor(p: int)
-    protected constructor(p: int|string, q?: number, w?: number[])
-    protected constructor(p: boolean, q?: number[])
-    protected constructor(...p: Any[]) {
+    constructor(p: int) {
+        this.p1 = p
+    }
+    constructor(p: int|string, q: number, w?: number[]) {
+        if (p instanceof int)
+            this.p1 = p as int
+        else if (p instanceof string)
+            this.p1 = p as string
+
+        this.q1 = q
+
+        this.w1 = w
+
+    }
+    constructor(p: boolean, q?: number[]) {}
+    constructor(...p: Any[]) {
         if (p.length > 0) {
-            this.p1 = p[0]
+            if (p[0] instanceof int)
+                this.p1 = p[0] as int
+            else if (p[0] instanceof string)
+                this.p1 = p[0] as string
+            else this.p1 = p[0] as boolean
         }
         if (p.length > 1) {
-            this.q1 = p[1]
+            this.q1 = p[1] as number
         }
         if (p.length > 2) {
-            this.w1 = p[2]
+            this.w1 = undefined
         }
     }
 }
+
 
 class B extends A {
     constructor fromInt(p: int) {
         super(p)
     }
 
-    constructor fromString(p: string) {
-        super(p)
+    constructor fromString(p: string, j: number) {
+        super(p , j)
     }
 
-    constructor fromArray(p: int, q?: number, w?: number[]) {
-        super(p, q, w)
+    constructor fromArray(p: boolean, w?: number[]) {
+        super(p, w)
     }
 
     overload constructor { fromInt, fromString, fromArray }
+
 }
 
 function main() {
@@ -61,16 +79,14 @@ function main() {
     arktest.assertEQ(v.q1, undefined)
     arktest.assertEQ(v.w1, undefined)
 
-    let x = new B("hello")
+    let x = new B("hello", 1.0)
     arktest.assertEQ(x.p1, "hello")
-    arktest.assertEQ(x.q1, undefined)
+    arktest.assertEQ(x.q1, 1.0)
     arktest.assertEQ(x.w1, undefined)
-
-    let y = new B(33, 3.14, [1.0, 2.0, 3.0])
-    arktest.assertEQ(y.p1, 33)
-    arktest.assertEQ(y.q1, 3.14)
-    let arr = y.w1 as number[]
-    arktest.assertEQ(arr[0], 1.0)
-    arktest.assertEQ(arr[1], 2.0)
-    arktest.assertEQ(arr[2], 3.0)
+    
+    //empty super constructor
+    let y = new B(true, [1.0, 2.0, 3.0])
+    arktest.assertEQ(y.p1, 0)
+    arktest.assertEQ(y.q1, undefined)
+    arktest.assertEQ(y.w1, undefined)
 }
