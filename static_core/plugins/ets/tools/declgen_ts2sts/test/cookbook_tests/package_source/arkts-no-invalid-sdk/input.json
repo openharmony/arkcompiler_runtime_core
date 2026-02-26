@@ -3,5 +3,6 @@
     "./bridge1.ts",
     "./bridge2.d.ts",
     "./@ohos.base.d.ts",
+    "./@ohos.arkui.stateManagement.d.ts",
     "./main.ts"
 ]
