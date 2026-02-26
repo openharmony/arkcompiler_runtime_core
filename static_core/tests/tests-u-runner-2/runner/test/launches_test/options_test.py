@@ -171,7 +171,7 @@ class OptionsTest(TestCase):
         for step in test_env.config.workflow.steps:
             match step.step_kind:
                 case StepKind.RUNTIME:
-                    expanded_step = test.expand_last_call_macros(step)
+                    expanded_step = test.configure_step_last_call(step)
                     self.assertListEqual(expanded_step.args, expected_args)
 
         # clear up

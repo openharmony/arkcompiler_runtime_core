@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import replace
 from pathlib import Path
 
 from typing_extensions import Self
 
-from runner.enum_types.params import BinaryParams, TestEnv, TestReport
+from runner.enum_types.params import TestEnv, TestReport
 from runner.extensions.flows.test_flow_registry import ITestFlow
 from runner.extensions.validators.base_validator import BaseValidator
 from runner.logger import Log
@@ -66,7 +67,7 @@ class GTestFlow(ITestFlow, GTest):
             self.fail_kind = 'None'
 
         for step in steps:
-            passed, report, fail_kind = self._do_run_one_step(step)
+            passed, report, fail_kind = self._run_step(step)
             self.passed = passed
             self.report = report
             self.fail_kind = fail_kind
@@ -76,26 +77,21 @@ class GTestFlow(ITestFlow, GTest):
 
         return self
 
-    def _do_run_one_step(self, step: Step) -> tuple[bool, TestReport | None, str | None]:
-        passed, report, fail_kind = self.__run_step(step)
-        return passed, report, fail_kind
-
-    def _make_params(self, step: Step, cmd_env: dict[str, str]) -> BinaryParams:
+    def _configure_step(self, step: Step) -> Step:
+        cmd_env = self.flow_utils.get_step_env(step)
         if self.gtest_abc is not None:
             path_to_abc = Path(self.gtest_abc)
             test_vars = self._set_env_zip_for_test(cmd_env, path_to_abc)
         else:
             test_vars = cmd_env
 
-        params = BinaryParams(
-            executor=self.path,
-            flags=[f"--gtest_filter={self.gtest_class}.{self.gtest_name}"],
-            env=test_vars,
-            timeout=step.timeout,
-            use_qemu=not step.skip_qemu
-        )
+        # Note: overriding args from step.args is intentional
+        # We do not care about parameters from step.args, and we only need to pass gtest_filter
+        if step.args:
+            _LOGGER.short(f"GTest step '{step.name}': ignoring step.args {step.args}, using gtest_filter only")
+        args = [f"--gtest_filter={self.gtest_class}.{self.gtest_name}"]
 
-        return params
+        return replace(step, executable_path=self.path, env=test_vars, args=args)
 
     def _set_env_zip_for_test(self, step_env: dict[str, str], path_to_abc: Path) -> dict[str, str]:
         test_env_zip = path_to_abc / f"{self.path.stem}_gtest_package.zip"
@@ -107,15 +103,12 @@ class GTestFlow(ITestFlow, GTest):
     # NOTE: duplicate with TestStandardFlow._run_step — intentional.
     # They may diverge later (different flow-specific logic).
     # pylint: disable=duplicate-code
-    def __run_step(self, step: Step) -> tuple[bool, TestReport, str | None]:
-        cmd_env = self.flow_utils.get_step_env(step)
-        params = self._make_params(step, cmd_env)
+    def _run_step(self, orig_step: Step) -> tuple[bool, TestReport, str | None]:
+        step = self._configure_step(orig_step)
 
         test_runner = OneTestRunner(self.test_env)
         passed, report, fail_kind = test_runner.run_with_coverage(
-            name=step.name,
-            step_kind=step.step_kind,
-            params=params,
+            step=step,
             result_validator=BaseValidator.gtest_result_validator)
         self.reproduce += test_runner.reproduce
         return passed, report, fail_kind

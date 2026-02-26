@@ -465,12 +465,6 @@ def get_test_id(file: Path, start_directory: Path) -> str:
     return str(relpath)
 
 
-def prepend_list(pre_list: list, post_list: list) -> list:
-    result = pre_list[:]
-    result.extend(post_list)
-    return result
-
-
 def detect_architecture(qemu_kind: QemuKind) -> ArchitectureKind:
     if qemu_kind != QemuKind.NONE:
         return ArchitectureKind(qemu_kind.name)

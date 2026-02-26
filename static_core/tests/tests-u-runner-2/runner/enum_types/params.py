@@ -16,7 +16,6 @@
 #
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from runner.code_coverage.coverage_manager import CoverageManager
 from runner.options.config import Config
@@ -36,22 +35,6 @@ class TestEnv:
     work_dir: WorkDir
 
     coverage: CoverageManager
-
-
-@dataclass(frozen=True)
-class BinaryParams:
-    timeout: int
-    executor: Path
-    flags: list[str]
-    env: dict[str, str]
-    step_filter: str = "*"
-    use_qemu: bool = False
-    stdout: Path | None = None
-    stderr: Path | None = None
-
-    @property
-    def component_name(self) -> str:
-        return self.executor.stem
 
 
 @dataclass

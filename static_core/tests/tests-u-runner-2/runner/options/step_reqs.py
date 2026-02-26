@@ -35,21 +35,23 @@ AllowedPreReqs: frozenset[ReqKind] = frozenset([ReqKind.FILE_EXIST, ReqKind.FOLD
 AllowedPostReqs: frozenset[ReqKind] = frozenset([ReqKind.FILE_EXIST, ReqKind.FOLDER_EXIST])
 
 
-@dataclass
+@dataclass(frozen=True)
 class StepRequirements:
-
-    def __init__(self, req: str, value: str):
-        if (req_parsed := ReqKind.from_str(req)) is None:
-            raise MalformedStepConfigurationException(f"Incorrect value `{req}` in step requirements. "
-                                                      f"Expected one of {ReqKind.values()}")
-        self.req: ReqKind = req_parsed
-        self.value: str = value
+    req: ReqKind
+    value: str
 
     def __str__(self) -> str:
         return f"{self.req.value}: {self.value}"
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    @staticmethod
+    def create(req: str, value: str) -> 'StepRequirements':
+        if (req_parsed := ReqKind.from_str(req)) is None:
+            raise MalformedStepConfigurationException(f"Incorrect value `{req}` in step requirements. "
+                                                      f"Expected one of {ReqKind.values()}")
+        return StepRequirements(req_parsed, value)
 
     def check(self, real_value: Path) -> ReqCheck:
         if self.req == ReqKind.FILE_EXIST:
