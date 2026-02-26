@@ -509,18 +509,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -1065,39 +1053,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in Int8Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in Int8Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -1184,16 +1143,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in Int8Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
@@ -2304,18 +2253,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -2860,39 +2797,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in Int16Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in Int16Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -2979,16 +2887,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in Int16Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
@@ -4100,18 +3998,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -4623,39 +4509,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in Int32Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in Int32Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -4742,16 +4599,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in Int32Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
@@ -5866,18 +5713,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -6420,39 +6255,10 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             return this.indexOfImpl(searchElement.getLong(), fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in BigInt64Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in BigInt64Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -6539,16 +6345,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
             return this.lastIndexOfImpl(searchElement.getLong(), fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in BigInt64Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
@@ -7648,18 +7444,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -8189,39 +7973,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in Float32Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in Float32Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -8308,16 +8063,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in Float32Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**
@@ -9416,18 +9161,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         return this
     }
 
-    /**
-     * Makes a copy of internal elements to targetPos from startPos to endPos.
-     * See rules of parameters normalization on
-     * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     *
-     * @param { int } target - insert index to place copied elements
-     * @param { int } start - start index to begin copy from
-     * @param { int } end - last index to end copy from, excluded
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private native copyWithinImpl(target: int, start: int, end: int): void
 
     /**
@@ -9849,39 +9582,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             return this.indexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the first occurrence of a value in Float64Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns {int} - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: long, fromIndex: int): int
 
-    /**
-     * Returns the index of the first occurrence of a value in Float64Array.
-     *
-     * @param { number } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - index of element if it presents, -1 otherwise
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native indexOfImpl(searchElement: number, fromIndex: int): int
 
-    /**
-     * Converts all elements of an array to strings and joins them using the specified separator.
-     *
-     * @param { String } separator - separates one element of an array from the next in the resulting String.
-     * @returns { string } - joined representation
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native joinInternal(separator: String): string;
 
     /**
@@ -9968,16 +9672,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             return this.lastIndexOfImpl(searchElement, fromIndex ?? 0)
     }
 
-    /**
-     * Returns the index of the last occurrence of a value in Float64Array.
-     *
-     * @param { long } searchElement - The value to locate in the array.
-     * @param { int } fromIndex - The array index at which to begin the search.
-     * @returns { int } - right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private final native lastIndexOfImpl(searchElement: long, fromIndex: int): int
 
     /**

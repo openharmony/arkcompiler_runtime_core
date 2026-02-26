@@ -550,18 +550,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return false
     }
 
-    /**
-     * Default comparison function for sort algorithm.
-     * Objects are compared as string. Both objects are converted to string
-     * using `toString()` method and compared using `compareTo()` method of `String` class.
-     *
-     * @param { Any } a Object to be compared.
-     * @param { Any } b Object to be compared.
-     * @returns { int } One of -1 (less), 0 (equal), or 1 (greater).
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private static defaultComparator(a: Any, b: Any): int {
         if (a instanceof Number && b instanceof Number) {
             const x = a
@@ -615,14 +603,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return a.compareTo(b)
     }
 
-    /**
-     * Helper function preparing copy of `this` instance of `Array` class' data array.
-     *
-     * @returns { FixedArray<Any> } Copy of this Array's primitive buffer.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private copyArray(): FixedArray<Any> {
         let len: int = this.actualLength
         let res : FixedArray<Any> = new FixedArray<Any>(len)
@@ -1018,27 +998,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return ret
     }
 
-    /**
-     * Determines whether obj is exactly an instance of the std.core.Array class.
-     *
-     * @param { Object } obj The object to check.
-     * @returns { boolean } True if obj is an instance of std.core.Array; otherwise, false.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private static native isPlatformArray(obj: Object): boolean
 
-    /**
-     * Returns the buffer from an instance of the std.core.Array class.
-     * The caller must ensure obj is an instance of std.core.Array (e.g. via isPlatformArray).
-     *
-     * @param { Object } obj An instance of std.core.Array.
-     * @returns { FixedArray<Any> } A reference to the (obj as Array<T>).buffer field.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
     private static native getBuffer(obj: Object): FixedArray<Any>;
 
     /**
