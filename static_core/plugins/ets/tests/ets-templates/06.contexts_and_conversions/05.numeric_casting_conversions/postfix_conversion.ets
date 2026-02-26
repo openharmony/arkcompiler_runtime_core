@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-{% for t in types %}
 /*---
 desc: Casting conversion implicitly in the following arithmetic operations - Postfix Increment
 ---*/
 
-function main(): void {
-  let p{{loop.index}}: {{t.ptype}} = {{t.expr|safe}};
-  let r{{loop.index}}: {{t.ptype}} = p{{loop.index}}{{t.postfix}};
-  arktest.assertEQ(p{{loop.index}}, {{t.result}})
-}
+function main(): int {
+    let tests = new arktest.ArkTestsuite("postfix_conversion")
+{% for t in types %}
+    tests.addTest("test_{{loop.index}}", () => {
+        let p: {{t.ptype}} = {{t.expr|safe}};
+        let r: {{t.ptype}} = (() => p{{t.postfix}})();
+        arktest.assertEQ(p, {{t.result}})
+        arktest.assertEQ(r, {{t.expr|safe}})
+    })
 {% endfor %}
+    return tests.run()
+}
