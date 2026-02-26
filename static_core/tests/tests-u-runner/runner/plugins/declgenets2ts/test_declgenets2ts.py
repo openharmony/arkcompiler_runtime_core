@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,26 +17,17 @@
 
 from __future__ import annotations
 
-from enum import Enum
-from os import path, makedirs, O_WRONLY, O_CREAT, open as os_open, fdopen as os_fdopen
-from typing import Tuple, Optional, List
+from os import fdopen as os_fdopen, makedirs, O_CREAT, O_WRONLY, open as os_open, path
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 from runner.enum_types.fail_kind import FailKind
-from runner.enum_types.params import TestEnv, TestReport, Params
-from runner.test_base import Test
+from runner.enum_types.params import Params, TestEnv, TestReport
+from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 from runner.test_file_based import TestFileBased
 
 
-class DeclgenEts2tsStage(Enum):
-    DECLGEN = 1
-    TSC = 2
-
-
 class TestDeclgenETS2TS(TestFileBased):
-
-    state: DeclgenEts2tsStage = DeclgenEts2tsStage.DECLGEN
-    results: List[Test] = []
-
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
                  build_dir: str, suite_name: str) -> None:
         super().__init__(test_env, test_path, flags, test_id)
@@ -44,6 +35,7 @@ class TestDeclgenETS2TS(TestFileBased):
             build_dir, "bin", "declgen_ets2ts")
         self.tsc_executor = path.join(
             self.test_env.config.general.static_core_root, "third_party", "typescript", "bin", "tsc")
+        self.metadata: TestMetadata = get_metadata(Path(test_path))
         self.declgen_ets2ts_timeout = 120
         self.tsc_timeout = 120
         self.decl_path = test_env.work_dir.intermediate
@@ -55,21 +47,30 @@ class TestDeclgenETS2TS(TestFileBased):
         makedirs(path.dirname(self.test_ets), exist_ok=True)
         self.suite_name = suite_name
 
-    def do_run(self) -> TestDeclgenETS2TS:
-        if TestDeclgenETS2TS.state == DeclgenEts2tsStage.DECLGEN:
-            self.passed, self.report, self.fail_kind = self._run_declgen_ets2ts(
-                self.test_dets, self.test_ets)
-        elif TestDeclgenETS2TS.state == DeclgenEts2tsStage.TSC:
-            self.passed, self.report, self.fail_kind = self._run_tsc(
-                self.test_dets)
-        return self
+    @property
+    def is_compile_only_negative(self) -> bool:
+        """ True if a test is marked as negative and compile-only at the same time """
+        return self.metadata.tags.negative and self.metadata.tags.compile_only
 
-    def _run_declgen_ets2ts(self, test_dets: str, test_ets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
-        declgen_flags = []
-        declgen_flags.append(f"--output-dets={test_dets}")
-        declgen_flags.append(f"--output-ets={test_ets}")
-        declgen_flags.append("--export-all")
-        declgen_flags.append(self.path)
+    @property
+    def is_valid_test(self) -> bool:
+        """ True if a test is valid """
+        return not self.metadata.tags.not_a_test
+
+    @staticmethod
+    def _validate_declgen_ets2ts(return_code: int, output_path: str) -> bool:
+        return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
+
+    @staticmethod
+    def _validate_tsc(return_code: int) -> bool:
+        return return_code == 0
+
+    def run_declgen_ets2ts(self, test_dets: str, test_ets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+        declgen_flags = [
+            f"--output-dets={test_dets}",
+            f"--output-ets={test_ets}",
+            "--export-all",
+            self.path]
 
         params = Params(
             executor=self.declgen_ets2ts_executor,
@@ -89,15 +90,14 @@ class TestDeclgenETS2TS(TestFileBased):
         )
         return passed, report, fail_kind
 
-    def _run_tsc(self, test_dets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
+    def run_tsc(self, test_dets: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
 
-        tsc_flags = []
-        tsc_flags.append("--lib")
-        tsc_flags.append("es2020")
+        tsc_flags = ["--lib", "es2020"]
+        cwd = path.dirname(test_dets)
 
         if self.suite_name == "declgen-ets2ts-sdk":
             tsconfig_file = path.join(path.dirname(test_dets), path.basename(test_dets) + "_tsconfig.json")
-            with os_fdopen(os_open(tsconfig_file, O_WRONLY|O_CREAT, 0o644), "w", encoding="utf-8") as handler:
+            with os_fdopen(os_open(tsconfig_file, O_WRONLY | O_CREAT, 0o644), "w", encoding="utf-8") as handler:
                 tsconfig = f"""\
                 {{
                     "compilerOptions": {{
@@ -123,6 +123,7 @@ class TestDeclgenETS2TS(TestFileBased):
             flags=tsc_flags,
             env=self.test_env.cmd_env,
             timeout=self.tsc_timeout,
+            cwd=cwd,
             gdb_timeout=self.test_env.config.general.gdb_timeout,
             fail_kind_fail=FailKind.TSC_FAIL,
             fail_kind_timeout=FailKind.TSC_TIMEOUT,
@@ -135,9 +136,3 @@ class TestDeclgenETS2TS(TestFileBased):
             result_validator=lambda _, _2, rc: self._validate_tsc(rc)
         )
         return passed, report, fail_kind
-
-    def _validate_declgen_ets2ts(self, return_code: int, output_path: str) -> bool:
-        return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
-
-    def _validate_tsc(self, return_code: int) -> bool:
-        return return_code == 0

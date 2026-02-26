@@ -15,33 +15,34 @@
 # limitations under the License.
 #
 
+import argparse
 import fnmatch
 import logging
 import multiprocessing
 import re
-import argparse
 import sys
-from unittest import TestCase
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from collections import Counter
+from collections.abc import Sequence
 from datetime import datetime
 from glob import glob
 from os import path
 from pathlib import Path
-from typing import List, Set, Tuple, Optional
+from typing import List, Optional, Set, Tuple
+from unittest import TestCase
 
 import pytz
 from tqdm import tqdm
 
 from runner.chapters import Chapters
 from runner.enum_types.configuration_kind import ConfigurationKind
-from runner.options.cli_args_wrapper import CliArgsWrapper
-from runner.plugins.ets.test_ets import TestETS
+from runner.enum_types.test_directory import TestDirectory
 from runner.logger import Log
+from runner.options.cli_args_wrapper import CliArgsWrapper
 from runner.options.config import Config
+from runner.plugins.ets.test_ets import TestETS
 from runner.test_base import Test
 from runner.utils import get_group_number
-from runner.enum_types.test_directory import TestDirectory
 
 CONST_COMMENT = ["#"]
 TEST_COMMENT_EXPR = re.compile(r"^\s*(?P<test>[^# ]+)?(\s*#\s*(?P<comment>.+))?", re.MULTILINE)
@@ -158,7 +159,7 @@ class Runner(ABC):
         # So, it can contain ignored tests, but cannot contain excluded tests
         self.tests: Set[Test] = set([])
         # list of results of every executed test
-        self.results: List[Test] = []
+        self.results: Sequence[Test] = []
         # name of file with a list of only tests what should be executed
         # if it's specified other tests are not executed
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
@@ -257,7 +258,7 @@ class Runner(ABC):
 
     # Read excluded_lists and load list of excluded tests
     def load_excluded_tests(self) -> None:
-        excluded_tests = self.load_tests_from_lists(self.excluded_lists)
+        excluded_tests: List[str] = self.load_tests_from_lists(self.excluded_lists)
 
         if self.config.test_lists.groups.quantity > 1:
             groups = self.config.test_lists.groups.quantity
@@ -275,7 +276,7 @@ class Runner(ABC):
 
     # Read ignored_lists and load list of ignored tests
     def load_ignored_tests(self) -> None:
-        ignored_tests = self.load_tests_from_lists(self.ignored_lists)
+        ignored_tests: List[str] = self.load_tests_from_lists(self.ignored_lists)
         self.ignored_tests.update(ignored_tests)
         self._search_duplicates(ignored_tests, "ignored")
 

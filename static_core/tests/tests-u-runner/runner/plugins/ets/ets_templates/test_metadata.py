@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -104,7 +104,8 @@ def get_metadata(path: Path) -> TestMetadata:
     data = Path.read_text(path)
     yaml_text = "\n".join(re.findall(METADATA_PATTERN, data))
     metadata = yaml.safe_load(yaml_text)
-    if metadata is None:
+    # In several tests copyright is read as metadata. We need to cut off them.
+    if metadata is None or not isinstance(metadata, dict):
         metadata = {}
     metadata['tags'] = Tags(metadata.get('tags'))
     metadata['assertion'] = metadata.get('assert')

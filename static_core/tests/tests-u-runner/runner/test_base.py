@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,11 +20,12 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import pytz
+
 from runner.enum_types.params import TestEnv, TestReport
-from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
+from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.logger import Log
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
@@ -79,6 +80,38 @@ class Test:
             raise TypeError("expected a bool, got something else:", b)
         return b
 
+    @staticmethod
+    def output_status_and_log(result: Test) -> None:
+        if result.is_output_status():
+            Test.output_status(result)
+        if result.is_output_log():
+            Test.output_log(result)
+
+    @staticmethod
+    def output_status(result: Test) -> None:
+        if result.time is None:
+            Log.default(_LOGGER, f"Finished {result.test_id} - not executed - {result.status().value}")
+        else:
+            message = f"Finished {result.test_id} - {round(result.time, 2)} sec - {result.status().value}"
+            Log.default(_LOGGER, message)
+
+    @staticmethod
+    def output_log(result: Test) -> None:
+        result.reproduce.append(f"\nTo reproduce with URunner run:\n{result.get_command_line()}")
+        Log.default(_LOGGER, f"{result.test_id}: steps: {result.steps_to_reproduce()}")
+        if result.report:
+            Log.default(_LOGGER, f"{result.test_id}: expected output: {result.expected}")
+            Log.default(_LOGGER, f"{result.test_id}: actual output: {result.report.output}")
+            Log.default(_LOGGER, f"{result.test_id}: actual error: {result.report.error}")
+            Log.default(_LOGGER, f"{result.test_id}: actual return code: {result.report.return_code}")
+        else:
+            Log.default(_LOGGER, f"{result.test_id}: no information about test running neither output nor error")
+
+    @staticmethod
+    def create_report(result: Test) -> None:
+        report_generator = ReportGenerator(result.test_id, result.test_env)
+        result.reports = report_generator.generate_fail_reports(result)
+
     def steps_to_reproduce(self) -> str:
         return unlines(iter(self.reproduce))
 
@@ -99,23 +132,10 @@ class Test:
         if result.passed is None:
             return result
 
-        if self.is_output_status():
-            Log.default(_LOGGER, f"Finished {self.test_id} - {round(self.time, 2)} sec - {self.status().value}")
-        if self.is_output_log():
-            self.reproduce.append(f"\nTo reproduce with URunner run:\n{self.get_command_line()}")
-            Log.default(_LOGGER, f"{self.test_id}: steps: {self.steps_to_reproduce()}")
-            if self.report:
-                Log.default(_LOGGER, f"{self.test_id}: expected output: {self.expected}")
-                Log.default(_LOGGER, f"{self.test_id}: actual output: {self.report.output}")
-                Log.default(_LOGGER, f"{self.test_id}: actual error: {self.report.error}")
-                Log.default(_LOGGER, f"{self.test_id}: actual return code: {self.report.return_code}")
-            else:
-                Log.default(_LOGGER, f"{self.test_id}: no information about test running neither output nor error")
+        self.output_status_and_log(result)
+        self.create_report(result)
 
-        report_generator = ReportGenerator(self.test_id, self.test_env)
-        self.reports = report_generator.generate_fail_reports(result)
-
-        return result
+        return self
 
     def do_run(self) -> Test:
         return self
