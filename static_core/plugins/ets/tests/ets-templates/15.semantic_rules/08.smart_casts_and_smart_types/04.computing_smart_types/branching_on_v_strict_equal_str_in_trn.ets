@@ -58,7 +58,7 @@ namespace testNS{{c_id}} {
   function check_as_type_A_diff_StrLit1(v: A_diff_StrLit1,
                                         v_type: VarType,
                                         v_id: int): void {
-    arktest.assertEQ(v, check_values[v_id][0])
+    arktest.assertEQ(v, check_values[v_id][0]);
     (v !== {{c.StrLit2}}) ?
       {{c.check_value_by_expression_on_the_negative_branch_StrLit1_StrLit2}} : {{c.check_value_by_expression_on_the_positive_branch_StrLit2}};
     (v !== {{c.StrLit2}}) ?

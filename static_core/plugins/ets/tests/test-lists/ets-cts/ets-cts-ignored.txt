@@ -53,6 +53,9 @@
 03.types/19.union_types/union_type_assignment_66.ets
 03.types/19.union_types/union_type_assignment_77.ets
 
+#31037
+03.types/19.union_types/union_of_gen_in_lambda_func_params.ets
+
 #30677
 03.types/18.function_types/01.type_function/optional_type_params_0.ets
 03.types/18.function_types/01.type_function/optional_type_params_2.ets
@@ -932,6 +935,9 @@
 15.semantic_rules/02.subtyping/08.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_8.ets
 15.semantic_rules/02.subtyping/08.subtyping_for_intersection_types/inter_type_is_sub_of_type_t_on_gen_11.ets
 
+#31036
+15.semantic_rules/02.subtyping/08.subtyping_for_intersection_types/inter_type_is_sub_of_type_any_on_non_gen.ets
+
 #30709
 15.semantic_rules/02.subtyping/09.subtyping_for_difference_types/type_t_is_sub_of_diff_on_predefined_2.ets
 
@@ -1202,6 +1208,9 @@
 15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/values_of_inter_type_on_user_defined_in_trn.ets
 15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/values_of_inter_type_on_user_defined_in_wl.ets
 
+#31226
+15.semantic_rules/08.smart_casts_and_smart_types/02.intersection_types/values_of_inter_type_on_str_lit_wcoen.ets
+
 #31224
 15.semantic_rules/08.smart_casts_and_smart_types/03.difference_types/values_of_diff_type_on_predefined_in_fn.ets
 15.semantic_rules/08.smart_casts_and_smart_types/03.difference_types/values_of_diff_type_on_predefined_in_fnn.ets
@@ -1369,10 +1378,6 @@
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_strict_equal_str_in_wcoe.ets
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_strict_equal_str_in_wl.ets
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_strict_equal_str_in_wln.ets
-
-#31035
-15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_strict_equal_str_in_tr.ets
-15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_strict_equal_str_in_trn.ets
 
 #31595
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_v_equal_null_in_fr.ets
@@ -1551,6 +1556,9 @@
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_typeof_v_strict_equal_undefined_in_trn.ets
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_typeof_v_strict_equal_undefined_in_wl.ets
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/branching_on_typeof_v_strict_equal_undefined_in_wln.ets
+
+#33237
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/compound_assignment.ets
 
 #31017 override method in superinterface with the same private in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/access_modifier_over_private_public_0.ets
