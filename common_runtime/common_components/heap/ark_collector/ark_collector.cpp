@@ -118,21 +118,19 @@ bool ArkCollector::TryUntagRefField(BaseObject* obj, RefField<>& field, BaseObje
 {
     for (;;) { //LCOV_EXCL_BR_LINE
         RefField<> oldRef(field);
-        if (oldRef.IsTagged()) { //LCOV_EXCL_BR_LINE
-            target = oldRef.GetTargetObject();
-            RefField<> newRef(target);
-            if (field.CompareExchange(oldRef.GetFieldValue(), newRef.GetFieldValue())) { //LCOV_EXCL_BR_LINE
-                if (obj != nullptr) { //LCOV_EXCL_BR_LINE
-                    DLOG(FIX, "untag obj %p<%p>(%zu) ref-field@%p: %#zx -> %#zx", obj, obj->GetTypeInfo(),
-                         obj->GetSize(), &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
-                } else { //LCOV_EXCL_BR_LINE
-                    DLOG(FIX, "untag ref@%p: %#zx -> %#zx", &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
-                }
-
-                return true;
-            }
-        } else { //LCOV_EXCL_BR_LINE
+        if (!oldRef.IsTagged()) { //LCOV_EXCL_BR_LINE
             return false;
+        }
+        target = oldRef.GetTargetObject();
+        RefField<> newRef(target);
+        if (field.CompareExchange(oldRef.GetFieldValue(), newRef.GetFieldValue())) { //LCOV_EXCL_BR_LINE
+            if (obj != nullptr) { //LCOV_EXCL_BR_LINE
+                DLOG(FIX, "untag obj %p<%p>(%zu) ref-field@%p: %#zx -> %#zx", obj, obj->GetTypeInfo(),
+                     obj->GetSize(), &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
+            } else { //LCOV_EXCL_BR_LINE
+                DLOG(FIX, "untag ref@%p: %#zx -> %#zx", &field, oldRef.GetFieldValue(), newRef.GetFieldValue());
+            }
+            return true;
         }
     }
 
@@ -380,9 +378,8 @@ private:
     void MarkToObject(BaseObject *oldVersion, BaseObject *toVersion)
     {
         // We've checked oldVersion is in fromSpace, no need to check markingLine
-        if (!collector_->MarkObject(oldVersion)) {
-            // No need to count oldVersion object size, as it has been copied.
-            collector_->MarkObject(toVersion);
+        collector_->MarkObject(oldVersion);
+        if (!collector_->MarkObject(toVersion)) {
             // oldVersion don't have valid type info, cannot push it
             collectStack_.Push(toVersion);
         }
