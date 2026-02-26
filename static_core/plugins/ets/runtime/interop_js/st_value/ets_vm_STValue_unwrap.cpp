@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,8 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/js_convert.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -263,5 +265,61 @@ napi_value STValueUnwrapToBigIntImpl(napi_env env, napi_callback_info info)
     NAPI_CHECK_FATAL(napi_call_function(env, global, bigIntConstructor, 1, args, &jsBigInt));
 
     return jsBigInt;
+}
+
+napi_value DynamicToJSONImpl([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
+{
+    ASSERT_SCOPED_NATIVE_CODE();
+    INTEROP_CODE_SCOPE_JS_TO_ETS(EtsCoroutine::GetCurrent());
+
+    auto *aniEnv = GetAniEnv();
+    auto coro = InteropCtx::Current();
+
+    size_t jsArgc = 0;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
+    if (jsArgc != 1) {
+        ThrowJSBadArgCountError(env, jsArgc, 1);
+        return nullptr;
+    }
+    napi_value jsThis {};
+    napi_value jsArgv[1];
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv, &jsThis, nullptr));
+
+    ani_ref argRef {};
+    {
+        ani::ScopedManagedCodeFix s(aniEnv);
+        auto optAnyRef = JSConvertEtsObject::UnwrapWithNullCheck(coro, env, jsArgv[0]);
+        if (UNLIKELY(!optAnyRef)) {
+            ThrowJSNonObjectError(env, "arg0");
+            return nullptr;
+        }
+        EtsObject *etsArg = optAnyRef.value();
+        s.AddLocalRef(etsArg, &argRef);
+    }
+
+    ani_value parseArg[1];
+    parseArg[0].r = argRef;
+    ani_class jsonClass {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.JSON", &jsonClass));
+    ani_ref jsonRes {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->Class_CallStaticMethodByName_Ref_A(jsonClass, "stringify",
+                                                                           "C{std.core.Object}:C{std.core.String}",
+                                                                           &jsonRes, parseArg));
+
+    ani_class stringClass;
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FindClass("std.core.String", &stringClass));
+
+    ani_string aniString = static_cast<ani_string>(jsonRes);
+
+    ani_size size {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->String_GetUTF8Size(aniString, &size));
+
+    std::string stdString(size + 1, 0);
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->String_GetUTF8(aniString, stdString.data(), stdString.size(), &size));
+    stdString.resize(size);
+
+    napi_value js_string {};
+    NAPI_CHECK_FATAL(napi_create_string_utf8(env, stdString.data(), stdString.size(), &js_string));
+    return js_string;
 }
 }  // namespace ark::ets::interop::js

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -453,6 +453,7 @@ napi_value GetSTValueClass(napi_env env)
         napi_property_descriptor {"newFixedArrayReference", 0, STValueNewFixedArrayReferenceImpl, 0, 0, 0, napi_default,
                                   0},
         napi_property_descriptor {"newArray", 0, STValueNewArrayImpl, 0, 0, 0, napi_default, 0},
+        napi_property_descriptor {"toJSON", 0, DynamicToJSONImpl, 0, 0, 0, napi_default, 0},
     };
     NAPI_CHECK_FATAL(napi_define_properties(env, STValueCtor, staticProperties.size(), staticProperties.data()));
 
