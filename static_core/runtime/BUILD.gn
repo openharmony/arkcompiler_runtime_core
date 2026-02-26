@@ -474,11 +474,11 @@ _libarkruntime_calculated_defines = []
 _libarkruntime_calculated_include_dirs = []
 
 if (!(ark_standalone_build || ark_static_standalone_build)) {
-  _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static" ]
+  _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static_8" ]
   _libarkruntime_calculated_external_deps += [ "pcre2:libpcre2_static_16" ]
 } else if (ark_standalone_build) {
   _libarkruntime_calculated_deps += [
-    "//third_party/pcre2:libpcre2_static",
+    "//third_party/pcre2:libpcre2_static_8",
     "//third_party/pcre2:libpcre2_static_16",
   ]
 } else if (ark_static_standalone_build) {
@@ -642,7 +642,7 @@ ohos_shared_library("libarkruntime") {
   if (!is_mac) {
     # MacOS linker has no --exclude-libs flag
     ldflags += [
-      "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a",
+      "-Wl,--exclude-libs,libpcre2_static_8.a:libpcre2_static_16.a",
     ]
   }
 
@@ -663,12 +663,12 @@ ohos_shared_library("libarkruntime") {
 
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     external_deps += [
-      "pcre2:libpcre2_static",
+      "pcre2:libpcre2_static_8",
       "pcre2:libpcre2_static_16"
     ]
   } else if (ark_standalone_build) {
     deps += [
-      "//third_party/pcre2:libpcre2_static",
+      "//third_party/pcre2:libpcre2_static_8",
       "//third_party/pcre2:libpcre2_static_16",
     ]
   } else if (ark_static_standalone_build) {
@@ -696,7 +696,7 @@ ohos_shared_library("libarkruntime") {
 ohos_shared_library("libarkruntime_host") {
   public_configs = [ ":ark_integrate_public_config" ]
   ldflags = []
-  ldflags += [ "-Wl,--exclude-libs,libpcre2_static.a:libpcre2_static_16.a" ]
+  ldflags += [ "-Wl,--exclude-libs,libpcre2_static_8.a:libpcre2_static_16.a" ]
 
   deps = []
 
@@ -711,12 +711,12 @@ ohos_shared_library("libarkruntime_host") {
 
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     external_deps += [
-      "pcre2:libpcre2_static",
+      "pcre2:libpcre2_static_8",
       "pcre2:libpcre2_static_16"
     ]
   } else if (ark_standalone_build) {
     deps += [
-      "//third_party/pcre2:libpcre2_static",
+      "//third_party/pcre2:libpcre2_static_8",
       "//third_party/pcre2:libpcre2_static_16",
     ]
   } else if (ark_static_standalone_build) {
