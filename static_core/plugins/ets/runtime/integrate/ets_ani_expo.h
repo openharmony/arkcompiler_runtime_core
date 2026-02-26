@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@
 namespace ark::ets {
 class PANDA_ETS_ANI_EXPO_PUBLIC_API ETSAni {
 public:
-    static constexpr std::string_view AOT_FILE_OPTION_PREFIX = "--ext:--aot-file=";
+    static constexpr std::string_view AOT_FILES_OPTION_PREFIX = "--ext:--aot-files=";
     static constexpr std::string_view INTEROP_OPTION_PREFIX = "--ext:interop";
     static constexpr std::string_view ENABLE_AN_OPTION = "--ext:--enable-an";
     static constexpr std::string_view ETSSTDLIB_ABC = "/system/framework/etsstdlib_bootabc.abc";
