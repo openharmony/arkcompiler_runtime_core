@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,8 +132,9 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
     }
 }
 
-void PrevFrameDeopt(FrameKind prevFrameKind, ManagedThread *thread, StackWalker *stack, const uint8_t *pc,
-                    Frame *lastIframe, Frame *iframe, CFrame &cframe)
+// This function is called in the body of the function marked NO_ADDRESS_SANITIZE
+void NO_ADDRESS_SANITIZE PrevFrameDeopt(FrameKind prevFrameKind, ManagedThread *thread, StackWalker *stack,
+                                        const uint8_t *pc, Frame *lastIframe, Frame *iframe, CFrame &cframe)
 {
     switch (prevFrameKind) {
         case FrameKind::COMPILER:
@@ -241,7 +242,8 @@ NO_ADDRESS_SANITIZE void DestroyMethodWithInvalidatingEP(Method *destroyMethod)
     UNREACHABLE();
 }
 
-[[noreturn]] void DropCompiledFrame(StackWalker *stack)
+// This function is called in the body of the function marked NO_ADDRESS_SANITIZE
+[[noreturn]] NO_ADDRESS_SANITIZE void DropCompiledFrame(StackWalker *stack)
 {
     LOG(DEBUG, INTEROP) << "Drop compiled frame: " << stack->GetMethod()->GetFullName();
     auto cframeFp = stack->GetCFrame().GetFrameOrigin();
