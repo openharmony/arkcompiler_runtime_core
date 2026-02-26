@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef PANDA_USE_FFRT
+#include "c/ffrt_ipc.h"
+#endif
 #include "ani.h"
 #include "ani_options_parser.h"
 #include "ani_options.h"
@@ -151,6 +154,16 @@ NO_UB_SANITIZE static ani_status GetEnv(ani_vm *vm, uint32_t version, ani_env **
     return ANI_OK;
 }
 
+/**
+ * This function attaches the current OS thread to the VM, thus allowing for ArkTS-Sta bytecode execution
+ * in the arbitrary thread created by an ANI user.
+ *
+ * For a real OS thread, no additional environment setup is performed (except JS runtime creation in the interop mode).
+ *
+ * For a FFRT "thread", this function disables the FFRT task migration between threads by turning on the
+ * legacy task mode to ensure correct operation.
+ */
+
 static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, uint32_t version, ani_env **result)
 {
     ANI_DEBUG_TRACE(vm);
@@ -197,9 +210,23 @@ static ani_status AttachCurrentThread(ani_vm *vm, const ani_options *options, ui
         ifaceTable->CreateInteropCtx(exclusiveCoro, jsEnv);
     }
     *result = EtsCoroutine::CastFromThread(exclusiveCoro)->GetPandaAniEnv();
+
+#ifdef PANDA_USE_FFRT
+    ffrt_this_task_set_legacy_mode(true);
+#endif
+
     return ANI_OK;
 }
 
+/**
+ * This function detaches the current OS thread from the VM, thus revoking the ability to execute
+ * ArkTS-Sta bytecode in this thread.
+ *
+ * For a real OS thread, no additional environment cleanup is performed (except JSEnv cleanup in the interop mode).
+ *
+ * For a FFRT "thread", this function re-enables FFRT task migration between threads by turning off
+ * the legacy task mode that was turned on by AttachCurrentThread.
+ */
 static ani_status DetachCurrentThread(ani_vm *vm)
 {
     ANI_DEBUG_TRACE(vm);
@@ -223,6 +250,11 @@ static ani_status DetachCurrentThread(ani_vm *vm)
         return ANI_ERROR;
     }
     ASSERT(Thread::GetCurrent() == nullptr);
+
+#ifdef PANDA_USE_FFRT
+    ffrt_this_task_set_legacy_mode(false);
+#endif
+
     return ANI_OK;
 }
 

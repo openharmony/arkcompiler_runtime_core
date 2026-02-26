@@ -83,10 +83,6 @@ if (is_gcov_tools) {
 }
 
 declare_args() {
-  runtime_core_enable_ffrt = true
-}
-
-declare_args() {
   ark_enabled_plugins = default_ark_enabled_plugins
   extras = []
   if (!defined(is_ohos)) {
@@ -102,6 +98,12 @@ declare_args() {
 
   if (!defined(is_safepoint_checkers_build)) {
     is_safepoint_checkers_build = false
+  }
+
+  runtime_core_enable_ffrt = false
+  if (is_ohos && is_standard_system &&
+    (current_cpu == "arm" || current_cpu == "arm64")) {
+    runtime_core_enable_ffrt = true
   }
 
   if ((is_ohos && is_standard_system) || ark_ets_hybrid) {
