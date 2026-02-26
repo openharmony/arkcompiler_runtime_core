@@ -14,26 +14,33 @@
  */
 
 /*---
-desc: Bigint with negative exponent throws runtime error
+desc: >-
+  Bigint with computed negative exponent throws runtime error.
+  If the second operand of type bigint is negative,
+  then a runtime error is thrown during execution.
 ---*/
 
 function main(): int {
   let suite = new arktest.ArkTestsuite("BigIntNegativeExponent");
 
-  suite.addTest("Positive base negative exponent", () => {
-    arktest.expectError(() => { let x = 2n ** -1n; }, 'Exponent must be non-negative');
+  suite.addTest("Positive base computed negative exponent", () => {
+    let neg: bigint = 0n - 1n
+    arktest.expectError(() => { let x = 2n ** neg; }, 'Exponent must be non-negative');
   });
 
-  suite.addTest("Negative base negative exponent", () => {
-    arktest.expectError(() => { let x = (-2n) ** -1n; }, 'Exponent must be non-negative');
+  suite.addTest("Negative base computed negative exponent", () => {
+    let neg: bigint = 0n - 1n
+    arktest.expectError(() => { let x = (-2n) ** neg; }, 'Exponent must be non-negative');
   });
 
-  suite.addTest("Large base negative exponent", () => {
-    arktest.expectError(() => { let x = 100n ** -5n; }, 'Exponent must be non-negative');
+  suite.addTest("Large base computed negative exponent", () => {
+    let neg: bigint = 0n - 5n
+    arktest.expectError(() => { let x = 100n ** neg; }, 'Exponent must be non-negative');
   });
 
-  suite.addTest("Zero base negative exponent", () => {
-    arktest.expectError(() => { let x = 0n ** -1n; }, 'Exponent must be non-negative');
+  suite.addTest("Zero base computed negative exponent", () => {
+    let neg: bigint = 0n - 1n
+    arktest.expectError(() => { let x = 0n ** neg; }, 'Exponent must be non-negative');
   });
 
   return suite.run();

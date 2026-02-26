@@ -14,26 +14,33 @@
  */
 
 /*---
-desc: Bigint division by 0n throws runtime error
+desc: >-
+  Bigint division by computed zero throws runtime error.
+  If the divisor value of the bigint division operator is 0n,
+  then a runtime error is thrown during execution.
 ---*/
 
 function main(): int {
-  let suite = new arktest.ArkTestsuite("BigIntDivisionByZero");
+  let suite = new arktest.ArkTestsuite("BigIntDivisionByComputedZero");
 
-  suite.addTest("Positive bigint / 0n throws", () => {
-    arktest.expectError(() => { let x = 48n / 0n; }, 'BigInt: division by zero');
+  suite.addTest("Positive bigint / computed 0n throws", () => {
+    let zero: bigint = 1n - 1n
+    arktest.expectError(() => { let x = 48n / zero; }, 'BigInt: division by zero');
   });
 
-  suite.addTest("Negative bigint / 0n throws", () => {
-    arktest.expectError(() => { let x = -48n / 0n; }, 'BigInt: division by zero');
+  suite.addTest("Negative bigint / computed 0n throws", () => {
+    let zero: bigint = 3n - 3n
+    arktest.expectError(() => { let x = -48n / zero; }, 'BigInt: division by zero');
   });
 
-  suite.addTest("Zero bigint / 0n throws", () => {
-    arktest.expectError(() => { let x = 0n / 0n; }, 'BigInt: division by zero');
+  suite.addTest("Zero bigint / computed 0n throws", () => {
+    let zero: bigint = 10n - 10n
+    arktest.expectError(() => { let x = 0n / zero; }, 'BigInt: division by zero');
   });
 
-  suite.addTest("Large bigint / 0n throws", () => {
-    arktest.expectError(() => { let x = 999999999999999999n / 0n; }, 'BigInt: division by zero');
+  suite.addTest("Large bigint / computed 0n throws", () => {
+    let zero: bigint = 5n - 5n
+    arktest.expectError(() => { let x = 999999999999999999n / zero; }, 'BigInt: division by zero');
   });
 
   return suite.run();
