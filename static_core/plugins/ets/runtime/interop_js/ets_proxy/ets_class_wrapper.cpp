@@ -151,8 +151,6 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
 
     napi_env env = ctx->GetJSEnv();
 
-    ASSERT(!IsNullOrUndefined<true>(env, jsValue));
-
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     if (LIKELY(sharedRef != nullptr)) {
@@ -167,6 +165,9 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
             return nullptr;
         }
         return etsObject;
+    }
+    if (UNLIKELY(IsNullOrUndefined<true>(env, jsValue))) {
+        ctx->ThrowJSTypeError(env, "ets this in instance method cannot be null or undefined");
     }
     return nullptr;
 }
