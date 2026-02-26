@@ -155,6 +155,7 @@ export class Autofixer {
         this[FaultID.AddDeclareToClass].bind(this),
         this[FaultID.NoETSKeyword].bind(this),
         this[FaultID.RemoveLimitDecorator].bind(this),
+        this[FaultID.FixAbstractMethodOverride].bind(this),
         this[FaultID.NoOptionalMemberFunction].bind(this)
       ]
     ],
@@ -1936,6 +1937,32 @@ export class Autofixer {
     }
     return node;
   }
+
+  /**
+   * Rule: `arkts-fix-abstract-method-override`
+   */
+  private [FaultID.FixAbstractMethodOverride](node: ts.Node): ts.VisitResult<ts.Node> {
+    /*
+     * If a class extends an abstract class, ensure every abstract method/property
+     * from the parent is overridden in the subclass.  For each abstract member
+     * that is missing or has a different signature, a concrete declaration with 
+     * the same signature is added.
+     */
+    if (!ts.isClassDeclaration(node)) {
+      return node;
+    }
+    
+    const missingMembers = getMissingAbstractMembers(node, this.typeChecker, this.context);
+
+    return this.context.factory.updateClassDeclaration(
+      node,
+      node.modifiers,
+      node.name,
+      node.typeParameters,
+      node.heritageClauses,
+      this.context.factory.createNodeArray([...node.members, ...missingMembers])
+    );
+  }
 }
 
 /**
@@ -3428,4 +3455,109 @@ function filterExportAssignmentFromInvalidSDK(
     return undefined;
   }
   return stmt;
+}
+
+function getParentSymbol(node: ts.ClassDeclaration, checker: ts.TypeChecker): ts.Symbol | undefined {
+  const extendsClause = node.heritageClauses?.find(
+    (hc) => hc.token === ts.SyntaxKind.ExtendsKeyword
+  );
+  if (!extendsClause || extendsClause.types.length === 0) {
+    return undefined;
+  }
+
+  const parentTypeExpr = extendsClause.types[0];
+  const parentType = checker.getTypeAtLocation(parentTypeExpr.expression);
+  const parentSymbol = parentType.getSymbol();
+  return parentSymbol;
+}
+
+// Collect abstract methods from the parent.
+function getParentAbstractMethods(node: ts.ClassDeclaration, checker: ts.TypeChecker): ts.MethodDeclaration[] {
+  const parentSymbol = getParentSymbol(node, checker);
+  if (!parentSymbol) {
+    return [];
+  }
+
+  const parentDecls = parentSymbol.getDeclarations() ?? [];
+  const parentClassDecl = parentDecls.find(
+    (decl): decl is ts.ClassDeclaration =>
+      ts.isClassDeclaration(decl) && (decl.modifiers?.some((m) => m.kind === ts.SyntaxKind.AbstractKeyword) ?? false)
+  );
+  if (!parentClassDecl) {
+    return [];
+  }
+
+  const abstractMethods = parentClassDecl.members.filter(
+    (member): member is ts.MethodDeclaration =>
+      ts.isMethodDeclaration(member) &&
+      (member.modifiers?.some((m) => m.kind === ts.SyntaxKind.AbstractKeyword) ?? false)
+  );
+  return abstractMethods;
+}
+
+function isSameMethodDeclaration(member1: ts.MethodDeclaration, member2: ts.MethodDeclaration): boolean {
+  if (!compareParameters(member1.parameters, member2.parameters)) {
+    return false;
+  }
+  if (member1.type && member2.type) {
+    if (!typesAreEqual(member1.type, member2.type)) {
+      return false;
+    }
+  }
+  else if (!!member1.type !== !!member2.type) {
+    return false;
+  }
+  if (!compareTypeParameters(member1.typeParameters, member2.typeParameters)) {
+    return false;
+  }
+  return true;
+}
+
+function getMissingAbstractMembers(
+  node: ts.ClassDeclaration,
+  checker: ts.TypeChecker,
+  context: ts.TransformationContext
+): ts.ClassElement[] {
+  const abstractMethods = getParentAbstractMethods(node, checker);
+  if (abstractMethods.length === 0) {
+    return [];
+  }
+  const existingMethods = new Map<string, ts.MethodDeclaration>();
+  for (const member of node.members) {
+    if (ts.isMethodDeclaration(member) && ts.isIdentifier(member.name)) {
+      existingMethods.set(member.name.text, member);
+    }
+  }
+
+  const missingMembers: ts.ClassElement[] = [];
+  for (const abstractMember of abstractMethods) {
+    if (!ts.isIdentifier(abstractMember.name)) {
+      continue;
+    }
+    if (existingMethods.has(abstractMember.name.text)) {
+      const existingMember = existingMethods.get(abstractMember.name.text)!;
+      if (isSameMethodDeclaration(existingMember, abstractMember)) {
+        continue;
+      }
+    }
+
+    // Strip the `abstract` modifier when synthesising the override.
+    const newModifiers = (abstractMember.modifiers ?? []).filter(
+      (m) => m.kind !== ts.SyntaxKind.AbstractKeyword
+    ) as ts.Modifier[];
+
+    missingMembers.push(
+      context.factory.createMethodDeclaration(
+        newModifiers,
+        abstractMember.asteriskToken,
+        abstractMember.name,
+        abstractMember.questionToken,
+        abstractMember.typeParameters,
+        abstractMember.parameters,
+        abstractMember.type,
+        undefined
+      )
+    );
+  }
+  return missingMembers;
 }
