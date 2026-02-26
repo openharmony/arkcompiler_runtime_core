@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -497,6 +497,8 @@ bool BreakStringBuilderAppendChains(BasicBlock *block)
     // Replace all users of append-call with instance itself to support chain calls
     // like: sb.append(s0).append(s1)...
     bool isApplied = false;
+    MarkerHolder processedMarker(block->GetGraph());
+    auto processed = processedMarker.GetMarker();
     for (auto inst : block->Insts()) {
         if (!IsStringBuilderAppend(inst) && !IsStringBuilderToString(inst)) {
             continue;
@@ -505,8 +507,9 @@ bool BreakStringBuilderAppendChains(BasicBlock *block)
         auto instance = inst->GetDataFlowInput(0);
         for (auto &user : instance->GetUsers()) {
             auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-            if (IsStringBuilderAppend(userInst)) {
+            if (IsStringBuilderAppend(userInst) && !userInst->IsMarked(processed)) {
                 userInst->ReplaceUsers(instance);
+                userInst->SetMarker(processed);
                 isApplied = true;
             }
         }
