@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,7 +53,8 @@ bool ark::guard::MemberPreProcessor::Visit(abckit_wrapper::Member *member)
     }
     const auto descriptor = MemberDescriptorUtil::GetOrCreateNewMemberDescriptor(member->GetDescriptor());
     const auto nameMapping = nameMappingManager_.GetNameMapping(descriptor);
-    ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR, "get object nameMapping failed, descriptor:" + descriptor);
+    ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR,
+                     "get nameMapping of object '" + member->GetName() + "' failed, descriptor:" + descriptor);
 
     auto lastMember = MemberLinker::LastMember(member);
     const auto lastMemberRawName = lastMember->GetRawName();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,6 +42,15 @@ public:
      * @return the read word.
      */
     std::string NextWord();
+
+    /**
+     * @brief Gets the current line being processed.
+     * @return the current line string.
+     */
+    const std::string &GetCurrentLine() const
+    {
+        return currentLine_;
+    }
 
 private:
     void SkipWhitespace();

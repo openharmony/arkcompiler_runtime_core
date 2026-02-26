@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,8 @@ abckit_wrapper::Member *ark::guard::MemberLinker::LastMember(abckit_wrapper::Mem
     std::unordered_set<size_t> visited;
     while (const auto nextMember = NextMember(lastMember)) {
         ARK_GUARD_ASSERT(visited.find(reinterpret_cast<size_t>(nextMember)) != visited.end(), ErrorCode::GENERIC_ERROR,
-                         "Detected cycle in members chain, stopping traversal");
+                         "Detected cycle in members chain. Cycle member: '" + nextMember->GetFullyQualifiedName() +
+                             "', previous member: '" + lastMember->GetFullyQualifiedName() + "'.");
 
         visited.insert(reinterpret_cast<size_t>(nextMember));
         lastMember = nextMember;
@@ -118,7 +119,7 @@ ark::guard::ErrorCode ark::guard::MemberLinker::Link()
     if (!fileView_.ModulesAccept(visitor->Wrap<abckit_wrapper::LeafClassVisitor>()
                                      .Wrap<abckit_wrapper::ModuleClassVisitor>()
                                      .Wrap<abckit_wrapper::LocalModuleFilter>())) {  // CC-OFF(G.FMT.02)
-        LOG_E << "Failed to link members";
+        LOG_E << "Failed to link members, please check the input abc file.";
         return ErrorCode::GENERIC_ERROR;
     }
 

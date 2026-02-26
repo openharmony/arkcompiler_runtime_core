@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,7 +107,8 @@ bool ark::guard::ElementObfuscator::VisitMember(abckit_wrapper::Member *member)
         const auto descriptor = MemberDescriptorUtil::GetOrCreateNewMemberDescriptor(member->GetDescriptor());
         const auto key = packageName + descriptor;
         const auto nameMapping = nameMappingManager_.GetNameMapping(key);
-        ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR, "get member nameMapping failed, key:" + key);
+        ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR,
+                         "get nameMapping of member '" + rawName + "' failed, key: " + key);
         obfName = nameMapping->GetName(rawName);
     }
 
@@ -149,7 +150,8 @@ bool ark::guard::ElementObfuscator::VisitObject(abckit_wrapper::Object *object, 
     if (obfName.empty()) {
         const auto key = object->GetPackageName();
         const auto nameMapping = nameMappingManager_.GetNameMapping(key);
-        ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR, "get object nameMapping failed, key:" + key);
+        ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR,
+                         "get nameMapping of object '" + rawName + "' failed, key: " + key);
         obfName = nameMapping->GetName(rawName);
     }
 
@@ -164,14 +166,17 @@ bool ark::guard::ElementObfuscator::VisitObject(abckit_wrapper::Object *object, 
 
 bool ark::guard::ElementObfuscator::ObfModuleWithKeptPath(abckit_wrapper::Object *module, const std::string &path)
 {
-    const auto nameMapping = nameMappingManager_.GetNameMapping(path);
-    ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR, "get module nameMapping failed, key:" + path);
-
     const auto rawName = module->GetName();
+    const auto nameMapping = nameMappingManager_.GetNameMapping(path);
+    ARK_GUARD_ASSERT(!nameMapping, ErrorCode::GENERIC_ERROR,
+                     "get nameMapping of module '" + rawName + "' failed, key:" + path);
+
     const auto oriPartName = StringUtil::RemovePrefixIfMatches(rawName, path);
-    ARK_GUARD_ASSERT(rawName == oriPartName, ErrorCode::GENERIC_ERROR, "keptPath not match with module: " + rawName);
+    ARK_GUARD_ASSERT(rawName == oriPartName, ErrorCode::GENERIC_ERROR,
+                     "KeptPath '" + path + "' does not match with module '" + rawName +
+                         "'. Check keptPath configuration.");
     ARK_GUARD_ASSERT(oriPartName.empty(), ErrorCode::GENERIC_ERROR,
-                     "needToObf path is empty, check KeepPath: " + rawName);
+                     "No module needs obfuscation in path '" + path + "'. Check keptPath configuration.");
 
     const auto obfPartName = nameMapping->GetName(oriPartName);
     std::string obfName = path + obfPartName;
