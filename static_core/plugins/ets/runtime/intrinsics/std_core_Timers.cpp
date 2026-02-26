@@ -21,6 +21,7 @@
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/refstorage/reference_storage.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
@@ -97,8 +98,24 @@ static void InvokeCallback(mem::Reference *callback)
     LambdaUtils::InvokeVoid(coro, EtsObject::FromCoreType(lambda));
 }
 
+static bool CheckCoroutineSwitchEnabled(EtsCoroutine *etsCoro)
+{
+    ASSERT(etsCoro != nullptr);
+    if (etsCoro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
+        ThrowEtsException(etsCoro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+                          "setTimeout/setInterval is not allowed in global scope or during static initialization "
+                          "(<cctor>). Move the call into a function invoked after initialization.");
+        return false;
+    }
+    return true;
+}
+
 TimerId StdCoreRegisterTimer(EtsObject *callback, int32_t delay, uint8_t periodic)
 {
+    auto *etsCoro = EtsCoroutine::GetCurrent();
+    if (!CheckCoroutineSwitchEnabled(etsCoro)) {
+        return 0;
+    }
     // Atomic with relaxed order reason: sync is not needed here
     auto timerId = nextTimerId_.fetch_add(1, std::memory_order_relaxed);
     auto *coro = Coroutine::GetCurrent();
