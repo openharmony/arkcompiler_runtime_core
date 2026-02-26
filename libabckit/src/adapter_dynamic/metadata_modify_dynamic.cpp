@@ -80,10 +80,22 @@ void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *grap
     LIBABCKIT_LOG_FUNC;
 
     auto func = GetDynFunction(function);
+    auto oldLocalVariableDebug = func->local_variable_debug;
     LIBABCKIT_LOG(DEBUG) << "============================================ BEFORE CODEGEN: " << func->name << '\n';
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
 
-    auto res = GraphWrapper::BuildCodeDynamic(graph, func->name);
+    std::unordered_map<size_t, GraphWrapper::LineColumnPair> pcToLineColumn;
+    if (graph->irInterface != nullptr && !func->ins.empty()) {
+        std::vector<GraphWrapper::LineColumnPair> lineColumnPerIns;
+        lineColumnPerIns.reserve(func->ins.size());
+        for (const auto &ins : func->ins) {
+            const auto &dbg = ins->ins_debug;
+            lineColumnPerIns.emplace_back(dbg.line_number, dbg.column_number);
+        }
+        GraphWrapper::BuildPcToLineColumnMap(graph, lineColumnPerIns, pcToLineColumn);
+    }
+
+    auto res = GraphWrapper::BuildCodeDynamic(graph, func->name, &pcToLineColumn);
     auto status = statuses::GetLastError();
     if (status != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
         return;
@@ -98,6 +110,21 @@ void FunctionSetGraphDynamicSync(AbckitCoreFunction *function, AbckitGraph *grap
     func->ins = std::move(newFunc->ins);
     func->catch_blocks = newFunc->catch_blocks;
     func->regs_num = newFunc->regs_num;
+    func->local_variable_debug.clear();
+    for (auto var : oldLocalVariableDebug) {
+        if (var.start >= func->ins.size()) {
+            continue;
+        }
+        auto end = static_cast<size_t>(var.start) + static_cast<size_t>(var.length);
+        if (end > func->ins.size()) {
+            end = func->ins.size();
+        }
+        if (end <= var.start) {
+            continue;
+        }
+        var.length = static_cast<uint32_t>(end - static_cast<size_t>(var.start));
+        func->local_variable_debug.emplace_back(std::move(var));
+    }
 
     // update IC slot number info in annotation
     func->slots_num = newFunc->slots_num;

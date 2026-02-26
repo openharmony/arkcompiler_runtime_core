@@ -22,6 +22,7 @@
 #include "libabckit/src/adapter_dynamic/convert.h"
 #include "libabckit/src/adapter_static/helpers_static.h"
 #include "libabckit/src/codegen/codegen_dynamic.h"
+#include "libabckit/src/irbuilder_dynamic/pbc_iterator_dyn.h"
 #include "libabckit/src/codegen/ic_slot_allocator.h"
 #include "libabckit/src/helpers_common.h"
 
@@ -152,7 +153,34 @@ static bool RunPreliminaryPasses(ark::compiler::Graph *graphImpl, uint16_t *icSl
     return true;
 }
 
-void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
+void GraphWrapper::BuildPcToLineColumnMap(AbckitGraph *graph, const std::vector<LineColumnPair> &lineColumnPerIns,
+                                          std::unordered_map<size_t, LineColumnPair> &outMap)
+{
+    outMap.clear();
+    if (graph == nullptr || graph->impl == nullptr || lineColumnPerIns.empty()) {
+        return;
+    }
+
+    auto *graphImpl = graph->impl;
+    auto *codeBuf = graphImpl->GetRuntime()->GetMethodCode(graphImpl->GetMethod());
+    auto codeSize = graphImpl->GetRuntime()->GetMethodCodeSize(graphImpl->GetMethod());
+    if (codeBuf == nullptr || codeSize == 0) {
+        return;
+    }
+
+    BytecodeInstructions pbcInstructions(codeBuf, codeSize);
+    size_t idx = 0;
+    for (auto insn : pbcInstructions) {
+        if (idx >= lineColumnPerIns.size()) {
+            break;
+        }
+        outMap.emplace(pbcInstructions.GetPc(insn), lineColumnPerIns[idx]);
+        ++idx;
+    }
+}
+
+void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName,
+                                     std::unordered_map<size_t, LineColumnPair> *pcToLineColumn)
 {
     LIBABCKIT_LOG(DEBUG) << "Building code for function " << funcName << "\n";
 
@@ -174,6 +202,10 @@ void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &func
     LIBABCKIT_LOG(DEBUG) << "AFTER=======================================\n";
     LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
+
+    if (pcToLineColumn != nullptr && graph->irInterface != nullptr) {
+        graph->irInterface->SetPcToLineColumnForCurrentMethod(std::move(*pcToLineColumn));
+    }
 
     const auto lang = convert::ToSourceLang(graph->function->owningModule->target);
     FunctionWrapper *wrFunc = PandasmWrapper::CreateWrappedFunction(lang);

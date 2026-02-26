@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,4 +54,42 @@ std::string AbckitIrInterface::GetFieldIdByOffset(uint32_t offset) const
     ASSERT(it != fields.cend());
 
     return std::string(it->second);
+}
+
+void AbckitIrInterface::SetPcToLineColumnForCurrentMethod(std::unordered_map<size_t, std::pair<size_t, uint32_t>> &&map)
+{
+    pcToLineColumn_ = std::move(map);
+}
+
+size_t AbckitIrInterface::GetLineNumberByPc(size_t pc) const
+{
+    auto it = pcToLineColumn_.find(pc);
+    if (it == pcToLineColumn_.end()) {
+        return 0;
+    }
+    return it->second.first;
+}
+
+uint32_t AbckitIrInterface::GetColumnNumberByPc(size_t pc) const
+{
+    auto it = pcToLineColumn_.find(pc);
+    if (it == pcToLineColumn_.end()) {
+        return 0;
+    }
+    return it->second.second;
+}
+
+bool AbckitIrInterface::TryGetLineColumnByPc(size_t pc, size_t *line, uint32_t *column) const
+{
+    auto it = pcToLineColumn_.find(pc);
+    if (it == pcToLineColumn_.end()) {
+        return false;
+    }
+    if (line != nullptr) {
+        *line = it->second.first;
+    }
+    if (column != nullptr) {
+        *column = it->second.second;
+    }
+    return true;
 }

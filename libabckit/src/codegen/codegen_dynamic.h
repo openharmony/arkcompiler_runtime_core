@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,7 @@ public:
     void EncodeSta(ark::compiler::Register reg, ark::compiler::DataType::Type type);
     void AddLineNumber(const Inst *inst, const size_t idx);
     void AddColumnNumber(const Inst *inst, const uint32_t idx);
+    std::pair<size_t, uint32_t> ResolveDebugPosition(const Inst *inst, size_t idx) const;
 
     const ark::ArenaVector<BasicBlock *> &GetBlocksToVisit() const override
     {

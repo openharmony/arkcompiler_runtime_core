@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,12 +48,17 @@ struct AbckitIrInterface final {
     std::string GetLiteralArrayIdByOffset(uint32_t offset) const;
     std::string GetTypeIdByOffset(uint32_t offset) const;
     std::string GetFieldIdByOffset(uint32_t offset) const;
+    void SetPcToLineColumnForCurrentMethod(std::unordered_map<size_t, std::pair<size_t, uint32_t>> &&map);
+    size_t GetLineNumberByPc(size_t pc) const;
+    uint32_t GetColumnNumberByPc(size_t pc) const;
+    bool TryGetLineColumnByPc(size_t pc, size_t *line, uint32_t *column) const;
 
     std::unordered_map<uint32_t, std::string> methods;
     std::unordered_map<uint32_t, std::string> fields;
     std::unordered_map<uint32_t, std::string> classes;
     std::unordered_map<uint32_t, std::string> strings;
     std::unordered_map<uint32_t, std::string> literalarrays;
+    std::unordered_map<size_t, std::pair<size_t, uint32_t>> pcToLineColumn_;
 };
 
 struct AbckitInst {
