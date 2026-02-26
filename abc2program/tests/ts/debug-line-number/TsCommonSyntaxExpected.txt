@@ -3,29 +3,29 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_2084 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_2063 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_2060 { 8 [ tag_value:5, string:"EnumTestWithoutInit", tag_value:5, string:"Index", tag_value:5, string:"EnumTestWithNumber", tag_value:5, string:"EnumTestWithString", ]}
+_ESScopeNamesRecord_2039 { 8 [ tag_value:5, string:"EnumTestWithoutInit", tag_value:5, string:"Index", tag_value:5, string:"EnumTestWithNumber", tag_value:5, string:"EnumTestWithString", ]}
 
-_GLOBAL_2112 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@2>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2091 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@2>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2134 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@3>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2113 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@3>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2156 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2135 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2165 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2144 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2174 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2153 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2183 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2162 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2192 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2171 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2201 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~F>#add, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_2180 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~F>#add, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_2223 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~G>#add, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2202 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~G>#add, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2224 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
 
 
@@ -39,13 +39,13 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESModuleRecord_2084
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESModuleRecord_2063
 }
 .record.source_file
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESScopeNamesRecord_2060
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESScopeNamesRecord_2039
 }
 .record.source_file
 
@@ -70,14 +70,14 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 2
 .language ECMAScript
 .function any .#~@0=#EnumTestWithoutInit(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	lda v2                                   # line: 53           # column: 20
 	sta v4                                   # line: 53           # column: 20
 	ldai 0x0                                 # line: 53           # column: 33
 	stobjbyname 0x0, value, v4               # line: 53           # column: 20
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 53           # column: 37
 
 # LOCAL_VARIABLE_TABLE:
@@ -92,11 +92,11 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 9
 .language ECMAScript
 .function any .#~@0>#Index(any a0, any a1, any a2, any a3, any a4) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
-	mov v4, a4                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
+	mov v4, a4                               # line: 4294967295           # column: 4294967295
 	ldundefined                              # line: 55           # column: 8
 	sta v5                                   # line: 55           # column: 8
 	definefunc 0x0, .#~@0>@1%#Sys, 0x1       # line: 55           # column: 8
@@ -140,10 +140,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 18
 .language ECMAScript
 .function any .#~@0>@1%#Sys(any a0, any a1, any a2, any a3) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
 	lda v3                                   # line: 56           # column: 12
 	sta v5                                   # line: 56           # column: 12
 	lda v3                                   # line: 56           # column: 12
@@ -189,7 +189,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v6                                   # line: 58           # column: 12
 	lda.str Callee                           # line: 58           # column: 12
 	stobjbyvalue 0x10, v5, v6                # line: 58           # column: 12
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
 	returnundefined                          # line: 59           # column: 9
 
 # LOCAL_VARIABLE_TABLE:
@@ -207,14 +207,14 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 2
 .language ECMAScript
 .function any .#~@2=#EnumTestWithNumber(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	lda v2                                   # line: 67           # column: 20
 	sta v4                                   # line: 67           # column: 20
 	ldai 0x0                                 # line: 67           # column: 33
 	stobjbyname 0x0, value, v4               # line: 67           # column: 20
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 67           # column: 37
 
 # LOCAL_VARIABLE_TABLE:
@@ -229,11 +229,11 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 9
 .language ECMAScript
 .function any .#~@2>#Index(any a0, any a1, any a2, any a3, any a4) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
-	mov v4, a4                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
+	mov v4, a4                               # line: 4294967295           # column: 4294967295
 	ldundefined                              # line: 69           # column: 8
 	sta v5                                   # line: 69           # column: 8
 	definefunc 0x0, .#~@2>@1%#Sys, 0x1       # line: 69           # column: 8
@@ -277,10 +277,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 12
 .language ECMAScript
 .function any .#~@2>@1%#Sys(any a0, any a1, any a2, any a3) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
 	lda v3                                   # line: 70           # column: 12
 	sta v5                                   # line: 70           # column: 12
 	lda v3                                   # line: 70           # column: 12
@@ -314,7 +314,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v6                                   # line: 72           # column: 12
 	lda.str Callee                           # line: 72           # column: 12
 	stobjbyvalue 0xa, v5, v6                 # line: 72           # column: 12
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
 	returnundefined                          # line: 73           # column: 9
 
 # LOCAL_VARIABLE_TABLE:
@@ -332,14 +332,14 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 2
 .language ECMAScript
 .function any .#~@3=#EnumTestWithString(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	lda v2                                   # line: 81           # column: 20
 	sta v4                                   # line: 81           # column: 20
 	ldai 0x0                                 # line: 81           # column: 33
 	stobjbyname 0x0, value, v4               # line: 81           # column: 20
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 81           # column: 37
 
 # LOCAL_VARIABLE_TABLE:
@@ -354,11 +354,11 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 9
 .language ECMAScript
 .function any .#~@3>#Index(any a0, any a1, any a2, any a3, any a4) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
-	mov v4, a4                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
+	mov v4, a4                               # line: 4294967295           # column: 4294967295
 	ldundefined                              # line: 83           # column: 8
 	sta v5                                   # line: 83           # column: 8
 	definefunc 0x0, .#~@3>@1%#Sys, 0x1       # line: 83           # column: 8
@@ -402,10 +402,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 6
 .language ECMAScript
 .function any .#~@3>@1%#Sys(any a0, any a1, any a2, any a3) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
 	lda v3                                   # line: 84           # column: 12
 	sta v5                                   # line: 84           # column: 12
 	lda.str Index                            # line: 84           # column: 12
@@ -424,7 +424,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v6                                   # line: 86           # column: 12
 	lda.str Callee                           # line: 86           # column: 12
 	stobjbyvalue 0x4, v5, v6                 # line: 86           # column: 12
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
 	returnundefined                          # line: 87           # column: 9
 
 # LOCAL_VARIABLE_TABLE:
@@ -440,10 +440,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~A=#A(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 15           # column: 0
 
 # LOCAL_VARIABLE_TABLE:
@@ -460,14 +460,14 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 2
 .language ECMAScript
 .function any .#~B=#B(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	lda v2                                   # line: 19           # column: 2
 	sta v4                                   # line: 19           # column: 2
 	ldai 0x1                                 # line: 19           # column: 6
 	stobjbyname 0x0, x, v4                   # line: 19           # column: 2
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 20           # column: 1
 
 # LOCAL_VARIABLE_TABLE:
@@ -482,10 +482,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~C=#C(any a0, any a1, any a2, any a3) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
 	lda v0                                   # line: 22           # column: 0
 	sta v5                                   # line: 22           # column: 0
 	callruntime.supercallforwardallargs v5   # line: 22           # column: 0
@@ -494,9 +494,9 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	throw.ifsupernotcorrectcall 0x1          # line: 22           # column: 0
 	lda v5                                   # line: 22           # column: 0
 	sta v2                                   # line: 22           # column: 0
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	label@13:                                # line: 0           # column: 0
-	throw.ifsupernotcorrectcall 0x0          # line: 18446744073709551615           # column: 4294967295
+	throw.ifsupernotcorrectcall 0x0          # line: 4294967295           # column: 4294967295
 	label@14:                                # line: 0           # column: 0
 	return                                   # line: 22           # column: 0
 	label@15:                                # line: 0           # column: 0
@@ -521,10 +521,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~D=#D(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 25           # column: 0
 
 # LOCAL_VARIABLE_TABLE:
@@ -539,9 +539,9 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~D>#value(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	ldai 0x2a                                # line: 27           # column: 11
 	return                                   # line: 28           # column: 3
 
@@ -557,11 +557,11 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~D>#value^1(any a0, any a1, any a2, any a3) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
 	returnundefined                          # line: 30           # column: 3
 
 # LOCAL_VARIABLE_TABLE:
@@ -577,10 +577,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~E=#E(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 33           # column: 0
 
 # LOCAL_VARIABLE_TABLE:
@@ -595,15 +595,15 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 2
 .language ECMAScript
 .function any .#~E>#static_initializer(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
-	sta v4                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
+	sta v4                                   # line: 4294967295           # column: 4294967295
 	ldai 0x1                                 # line: 34           # column: 13
 	definepropertybyname 0x0, x, v4          # line: 34           # column: 2
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
-	returnundefined                          # line: 18446744073709551615           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
+	returnundefined                          # line: 4294967295           # column: 4294967295
 
 # LOCAL_VARIABLE_TABLE:
 #	 Start   Length  Register           Name   Signature
@@ -617,10 +617,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~F=#F(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 37           # column: 0
 
 # LOCAL_VARIABLE_TABLE:
@@ -635,9 +635,9 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~F>#add(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	ldai 0x0                                 # line: 39           # column: 11
 	return                                   # line: 40           # column: 3
 
@@ -653,10 +653,10 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 0
 .language ECMAScript
 .function any .#~G=#G(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	lda v2                                   # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	lda v2                                   # line: 4294967295           # column: 4294967295
 	return                                   # line: 43           # column: 0
 
 # LOCAL_VARIABLE_TABLE:
@@ -671,11 +671,11 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 1
 .language ECMAScript
 .function any .#~G>#add(any a0, any a1, any a2, any a3, any a4) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
-	mov v3, a3                               # line: 18446744073709551615           # column: 4294967295
-	mov v4, a4                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
+	mov v3, a3                               # line: 4294967295           # column: 4294967295
+	mov v4, a4                               # line: 4294967295           # column: 4294967295
 	lda v3                                   # line: 46           # column: 11
 	sta v6                                   # line: 46           # column: 15
 	lda v4                                   # line: 46           # column: 15
@@ -696,12 +696,12 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
  SlotNumber 55
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
-	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
-	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
+	mov v0, a0                               # line: 4294967295           # column: 4294967295
+	mov v1, a1                               # line: 4294967295           # column: 4294967295
+	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	ldhole                                   # line: 15           # column: 8
 	sta v18                                  # line: 15           # column: 8
-	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_2156, 0x0, v18 # line: 15           # column: 8
+	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_2135, 0x0, v18 # line: 15           # column: 8
 	sta v16                                  # line: 15           # column: 8
 	sta v17                                  # line: 15           # column: 6
 	lda v16                                  # line: 15           # column: 8
@@ -711,7 +711,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v5                                   # line: 15           # column: 6
 	ldhole                                   # line: 18           # column: 8
 	sta v18                                  # line: 18           # column: 8
-	defineclasswithbuffer 0x3, .#~B=#B, _GLOBAL_2165, 0x0, v18 # line: 18           # column: 8
+	defineclasswithbuffer 0x3, .#~B=#B, _GLOBAL_2144, 0x0, v18 # line: 18           # column: 8
 	sta v16                                  # line: 18           # column: 8
 	sta v17                                  # line: 18           # column: 6
 	lda v16                                  # line: 18           # column: 8
@@ -721,7 +721,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v6                                   # line: 18           # column: 6
 	lda v5                                   # line: 22           # column: 16
 	sta v18                                  # line: 22           # column: 18
-	defineclasswithbuffer 0x6, .#~C=#C, _GLOBAL_2174, 0x0, v18 # line: 22           # column: 18
+	defineclasswithbuffer 0x6, .#~C=#C, _GLOBAL_2153, 0x0, v18 # line: 22           # column: 18
 	sta v16                                  # line: 22           # column: 18
 	sta v17                                  # line: 22           # column: 6
 	lda v16                                  # line: 22           # column: 18
@@ -731,7 +731,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v7                                   # line: 22           # column: 6
 	ldhole                                   # line: 25           # column: 8
 	sta v18                                  # line: 25           # column: 8
-	defineclasswithbuffer 0x9, .#~D=#D, _GLOBAL_2183, 0x0, v18 # line: 25           # column: 8
+	defineclasswithbuffer 0x9, .#~D=#D, _GLOBAL_2162, 0x0, v18 # line: 25           # column: 8
 	sta v16                                  # line: 25           # column: 8
 	sta v17                                  # line: 25           # column: 6
 	lda v16                                  # line: 25           # column: 8
@@ -759,7 +759,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v8                                   # line: 25           # column: 6
 	ldhole                                   # line: 33           # column: 8
 	sta v18                                  # line: 33           # column: 8
-	defineclasswithbuffer 0xe, .#~E=#E, _GLOBAL_2192, 0x0, v18 # line: 33           # column: 8
+	defineclasswithbuffer 0xe, .#~E=#E, _GLOBAL_2171, 0x0, v18 # line: 33           # column: 8
 	sta v16                                  # line: 33           # column: 8
 	sta v17                                  # line: 33           # column: 6
 	lda v16                                  # line: 33           # column: 8
@@ -775,7 +775,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v9                                   # line: 33           # column: 6
 	ldhole                                   # line: 37           # column: 8
 	sta v18                                  # line: 37           # column: 8
-	defineclasswithbuffer 0x14, .#~F=#F, _GLOBAL_2201, 0x0, v18 # line: 37           # column: 8
+	defineclasswithbuffer 0x14, .#~F=#F, _GLOBAL_2180, 0x0, v18 # line: 37           # column: 8
 	sta v16                                  # line: 37           # column: 8
 	sta v17                                  # line: 37           # column: 6
 	lda v16                                  # line: 37           # column: 8
@@ -785,7 +785,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v13                                  # line: 37           # column: 6
 	ldhole                                   # line: 43           # column: 8
 	sta v18                                  # line: 43           # column: 8
-	defineclasswithbuffer 0x17, .#~G=#G, _GLOBAL_2223, 0x0, v18 # line: 43           # column: 8
+	defineclasswithbuffer 0x17, .#~G=#G, _GLOBAL_2202, 0x0, v18 # line: 43           # column: 8
 	sta v16                                  # line: 43           # column: 8
 	sta v17                                  # line: 43           # column: 6
 	lda v16                                  # line: 43           # column: 8
@@ -848,7 +848,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	callthis3 0x2c, v17, v18, v19, v20       # line: 0           # column: 0
 	ldhole                                   # line: 51           # column: 25
 	sta v18                                  # line: 51           # column: 25
-	defineclasswithbuffer 0x2e, .#~@0=#EnumTestWithoutInit, _GLOBAL_2245, 0x0, v18 # line: 51           # column: 25
+	defineclasswithbuffer 0x2e, .#~@0=#EnumTestWithoutInit, _GLOBAL_2224, 0x0, v18 # line: 51           # column: 25
 	sta v16                                  # line: 51           # column: 25
 	sta v17                                  # line: 51           # column: 6
 	lda v16                                  # line: 51           # column: 25
@@ -858,7 +858,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v12                                  # line: 51           # column: 6
 	ldhole                                   # line: 65           # column: 24
 	sta v18                                  # line: 65           # column: 24
-	defineclasswithbuffer 0x31, .#~@2=#EnumTestWithNumber, _GLOBAL_2112, 0x0, v18 # line: 65           # column: 24
+	defineclasswithbuffer 0x31, .#~@2=#EnumTestWithNumber, _GLOBAL_2091, 0x0, v18 # line: 65           # column: 24
 	sta v16                                  # line: 65           # column: 24
 	sta v17                                  # line: 65           # column: 6
 	lda v16                                  # line: 65           # column: 24
@@ -868,7 +868,7 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v10                                  # line: 65           # column: 6
 	ldhole                                   # line: 79           # column: 24
 	sta v18                                  # line: 79           # column: 24
-	defineclasswithbuffer 0x34, .#~@3=#EnumTestWithString, _GLOBAL_2134, 0x0, v18 # line: 79           # column: 24
+	defineclasswithbuffer 0x34, .#~@3=#EnumTestWithString, _GLOBAL_2113, 0x0, v18 # line: 79           # column: 24
 	sta v16                                  # line: 79           # column: 24
 	sta v17                                  # line: 79           # column: 6
 	lda v16                                  # line: 79           # column: 24
@@ -876,8 +876,8 @@ _GLOBAL_2245 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v19                                  # line: 79           # column: 24
 	lda v16                                  # line: 79           # column: 24
 	sta v11                                  # line: 79           # column: 6
-	ldundefined                              # line: 18446744073709551615           # column: 4294967295
-	returnundefined                          # line: 18446744073709551615           # column: 4294967295
+	ldundefined                              # line: 4294967295           # column: 4294967295
+	returnundefined                          # line: 4294967295           # column: 4294967295
 
 # LOCAL_VARIABLE_TABLE:
 #	 Start   Length  Register           Name   Signature

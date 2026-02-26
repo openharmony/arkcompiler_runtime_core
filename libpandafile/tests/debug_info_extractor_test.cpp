@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ void PreparePandaFile(ItemContainer *container)
     // 16   return.void
     // 17 }
 
-    container->ComputeLayout();
+    container->ComputeLayoutForReferencedItems();
 
     // foo line number program
     auto *constant_pool = debug_info_item->GetConstantPool();
@@ -170,6 +170,7 @@ void PreparePandaFile(ItemContainer *container)
     debug_info_item->AddParameter(param_string_item);
 
     method_item->SetDebugInfo(debug_info_item);
+    container->ComputeLayoutForReferencedItems();
 
     // bar line number program
     auto *constant_pool_bar = debug_info_item_bar->GetConstantPool();

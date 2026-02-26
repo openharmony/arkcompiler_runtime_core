@@ -390,7 +390,7 @@ HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
     AnnotationItem *runtime_annotation_item =
         container.CreateItem<AnnotationItem>(class_item, runtime_elems, runtime_tags);
 
-    class_item->AddRuntimeAnnotation(runtime_annotation_item);
+    class_item->AddAnnotation(runtime_annotation_item);
 
     // Add annotation
 
@@ -653,7 +653,7 @@ HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
 
     // Add debug info
 
-    container.ComputeLayout();
+    container.ComputeLayoutForReferencedItems();
 
     std::vector<uint8_t> opcodes {
         static_cast<uint8_t>(LineNumberProgramItem::Opcode::SET_SOURCE_CODE),
@@ -679,7 +679,9 @@ HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)
 
     method_item->SetDebugInfo(debug_info_item);
 
+    container.ComputelayoutForRest();
     MemoryWriter mem_writer;
+    container.InvalidateComputeLayout();
 
     ASSERT_TRUE(container.Write(&mem_writer));
 
@@ -1191,17 +1193,15 @@ HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)
 
     // Create foreign class
     ForeignClassItem *foreign_class_item = container.GetOrCreateForeignClassItem("foreign_class");
-    EXPECT_EQ(foreign_class_item->GetIndexedItemCount(), 0U);
     // BaseClassItem will initialize one StringItem member, which will increase the count by 1.
-    EXPECT_EQ(container.GetIndexedItemCount(), foreign_class_item->GetIndexedItemCount() + 2);
+    EXPECT_EQ(container.GetIndexedItemCount(), 2);
 
     // Create foreign field
     StringItem *foreign_field_name = container.GetOrCreateStringItem("foreign_field");
     PrimitiveTypeItem *foreign_field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
-    ForeignFieldItem *foreign_field_item = container.CreateItem<ForeignFieldItem>(foreign_class_item,
-        foreign_field_name, foreign_field_type);
-    EXPECT_EQ(foreign_field_item->GetIndexedItemCount(), 4U);
-    EXPECT_EQ(container.GetIndexedItemCount(), foreign_field_item->GetIndexedItemCount() + 1);
+    ForeignFieldItem *foreign_field_item =
+        container.CreateItem<ForeignFieldItem>(foreign_class_item, foreign_field_name, foreign_field_type);
+    EXPECT_EQ(container.GetIndexedItemCount(), 5);
 
     // Create foreign method
     StringItem *foreign_method_name = container.GetOrCreateStringItem("foreign_method");
@@ -1209,15 +1209,13 @@ HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)
     std::vector<MethodParamItem> foreign_params;
     foreign_params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I64));
     ProtoItem *foreign_proto_item = container.GetOrCreateProtoItem(foreign_ret_type, foreign_params);
-    ForeignMethodItem *foreign_method_item = container.CreateItem<ForeignMethodItem>(foreign_class_item,
-        foreign_method_name, foreign_proto_item, 0);
-    EXPECT_EQ(foreign_method_item->GetIndexedItemCount(), 9U);
-    EXPECT_EQ(container.GetIndexedItemCount(), foreign_method_item->GetIndexedItemCount() + 1);
+    ForeignMethodItem *foreign_method_item =
+        container.CreateItem<ForeignMethodItem>(foreign_class_item, foreign_method_name, foreign_proto_item, 0);
+    EXPECT_EQ(container.GetIndexedItemCount(), 10);
 
     // Create class
     ClassItem *class_item = container.GetOrCreateClassItem("classA");
-    EXPECT_EQ(class_item->GetIndexedItemCount(), 10U);
-    EXPECT_EQ(container.GetIndexedItemCount(), class_item->GetIndexedItemCount() + 2);
+    EXPECT_EQ(container.GetIndexedItemCount(), 12);
 
     // Create method
     StringItem *method_name = container.GetOrCreateStringItem("a");
@@ -1226,31 +1224,37 @@ HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)
     std::vector<MethodParamItem> params;
     ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
     MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
-    EXPECT_EQ(method_item->GetIndexedItemCount(), 14U);
-    EXPECT_EQ(container.GetIndexedItemCount(), method_item->GetIndexedItemCount() + 1);
+    EXPECT_EQ(container.GetIndexedItemCount(), 15);
 
     // Create field
     StringItem *field_name = container.GetOrCreateStringItem("field");
     PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
     FieldItem *field_item = class_item->AddField(field_name, field_type, ACC_PUBLIC);
-    EXPECT_EQ(field_item->GetIndexedItemCount(), 16U);
-    EXPECT_EQ(container.GetIndexedItemCount(), field_item->GetIndexedItemCount() + 1);
+    EXPECT_EQ(container.GetIndexedItemCount(), 17);
 
     // Create code, item count is not expected to increase
     std::vector<uint8_t> instructions {1, 2, 3, 4};
     CodeItem *code_item = container.CreateItem<CodeItem>(0, 2, instructions);
     method_item->SetCode(code_item);
-    EXPECT_EQ(container.GetIndexedItemCount(), field_item->GetIndexedItemCount() + 1);
+    EXPECT_EQ(container.GetIndexedItemCount(), 17);
 
     // Create line number program
     LineNumberProgramItem *line_number_program_item = container.CreateLineNumberProgramItem();
-    EXPECT_EQ(line_number_program_item->GetIndexedItemCount(), 17U);
-    EXPECT_EQ(container.GetIndexedItemCount(), line_number_program_item->GetIndexedItemCount() + 1);
+    EXPECT_EQ(container.GetIndexedItemCount(), 18);
 
     // Create value items
     ScalarValueItem *scalarValueItem = container.CreateItem<ScalarValueItem>(1.0);
-    EXPECT_EQ(scalarValueItem->GetIndexedItemCount(), 18U);
-    EXPECT_EQ(container.GetIndexedItemCount(), scalarValueItem->GetIndexedItemCount() + 1);
+    EXPECT_EQ(container.GetIndexedItemCount(), 18);
+
+    container.ComputeLayout();
+    EXPECT_EQ(foreign_class_item->GetOrderIndex(), 0U);
+    EXPECT_EQ(foreign_field_item->GetOrderIndex(), 1U);
+    EXPECT_EQ(foreign_method_item->GetOrderIndex(), 2U);
+    EXPECT_EQ(class_item->GetOrderIndex(), 9U);
+    EXPECT_EQ(method_item->GetOrderIndex(), 11U);
+    EXPECT_EQ(field_item->GetOrderIndex(), 10U);
+    EXPECT_EQ(line_number_program_item->GetOrderIndex(), 19U);
+    EXPECT_EQ(scalarValueItem->GetOrderIndex(), 15U);
 }
 
 void GenerateModifiedAbc(const std::vector<unsigned char> &buffer, const std::string &filename)

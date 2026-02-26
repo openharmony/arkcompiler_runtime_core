@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,7 @@ panda::guard::UiDecoratorType GetFuncMain0UiDecoratorType(const std::string &nam
 
 bool IsParamUiDecoratorValid(const panda::guard::InstructionInfo &info)
 {
-    if (info.ins_->opcode != panda::pandasm::Opcode::CALLTHIS2) {
+    if (info.ins_->GetOpcode() != panda::pandasm::Opcode::CALLTHIS2) {
         return false;
     }
 
@@ -142,7 +142,7 @@ bool panda::guard::UiDecorator::IsUiDecoratorIns(const InstructionInfo &info, Sc
     const auto &uiDecoratorInsList =
         (scope == TOP_LEVEL) ? UI_DECORATOR_LIST_IN_FUNC_MAIN0 : UI_DECORATOR_LIST_IN_FUNCTION;
     return std::any_of(uiDecoratorInsList.begin(), uiDecoratorInsList.end(),
-                       [&](const panda::pandasm::Opcode opcode) -> bool { return info.ins_->opcode == opcode; });
+                       [&](const panda::pandasm::Opcode opcode) -> bool { return info.ins_->GetOpcode() == opcode; });
 }
 
 void panda::guard::UiDecorator::ExtractNames(std::set<std::string> &strings) const
@@ -228,7 +228,7 @@ void panda::guard::UiDecorator::HandleInstInFuncMain0()
 
 void panda::guard::UiDecorator::HandleInstInFunction()
 {
-    switch (baseInst_.ins_->opcode) {
+    switch (baseInst_.ins_->GetOpcode()) {
         case pandasm::Opcode::STOBJBYNAME:
             HandleStObjByNameIns();
             break;
@@ -266,7 +266,7 @@ void panda::guard::UiDecorator::HandleStObjByNameIns()
     if (!input.IsValid()) {
         return;
     }
-    switch (input.ins_->opcode) {
+    switch (input.ins_->GetOpcode()) {
         case pandasm::Opcode::NEWOBJRANGE:
             HandleNewObjRangeIns(input);
             break;
@@ -329,7 +329,7 @@ void panda::guard::UiDecorator::BuildCreatedByMemberMethodDecorator(const Instru
 void panda::guard::UiDecorator::BuildMonitorDecorator()
 {
     uint32_t maxParamCnt = baseInst_.ins_->Regs().size();
-    if (baseInst_.ins_->opcode == pandasm::Opcode::CALLRANGE) {
+    if (baseInst_.ins_->GetOpcode() == pandasm::Opcode::CALLRANGE) {
         maxParamCnt = std::get<int64_t>(baseInst_.ins_->GetImm(INDEX_1));
     }
     for (uint32_t index = 0; index < maxParamCnt; index++) {

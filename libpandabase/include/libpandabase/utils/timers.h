@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,23 @@ constexpr std::string_view EVENT_PARSE = "Parse (async)";
 constexpr std::string_view EVENT_COMPILE_TO_PROGRAM = "Compile to program (async)";
 constexpr std::string_view EVENT_EMIT_SINGLE_PROGRAM = "Emit single program";
 constexpr std::string_view EVENT_EMIT_MERGED_PROGRAM = "Emit merged program";
+constexpr std::string_view EVENT_MAKE_ITEMS_FOR_SINGLE_PROGRAM = "Make items for single program";
+constexpr std::string_view EVENT_MAKE_FUNC_DEBUGINFO_AND_ANNOTATIONS = "Make function debugInfo and annotations";
+constexpr std::string_view EVENT_RELAYOUT = "ReLayout";
+constexpr std::string_view EVENT_COMPUTE_LAYOUT_FOR_REFERENCED_ITEMS = "Compute layout for referenced items";
+constexpr std::string_view EVENT_EMITFUNCTIONS = "Emit functions";
+constexpr std::string_view EVENT_DEDUPLICATE_ITEMS = "DeduplicateItems";
+constexpr std::string_view EVENT_ITEM_WRITE = "Item write";
+constexpr std::string_view EVENT_WRITE_HEADER = "WriteHeader";
+constexpr std::string_view EVENT_GET_FILE_SIZE = "get file size";
+constexpr std::string_view EVENT_COMPUTE_LAYOUT_FOR_REST = "Compute layout for rest";
+constexpr std::string_view EVENT_COMPUTE_LAYOUT = "Compute layout";
+constexpr std::string_view EVENT_WRITE_CLASS_IDX = "Write class idx";
+constexpr std::string_view EVENT_WRITE_LITERALARRAY_IDX = "Write literalArray idx";
+constexpr std::string_view EVENT_WRITE_INDEX_SECTION = "Write index section";
+constexpr std::string_view EVENT_WRITE_ITEMS = "Write Items";
+constexpr std::string_view EVENT_WRITE_LINE_NUMBER_PROGRAM_IDX = "Write line number program idx";
+constexpr std::string_view EVENT_COUNT_AND_REWRITE_CHECKSUM = "Count and rewrite checksum";
 constexpr std::string_view EVENT_EMIT_CACHE_FILE = "Emit cache file";
 
 // Event level, indicating the level of an event, where each event is a sub-event of the nearest preceding level event.
@@ -69,29 +86,63 @@ const std::unordered_map<std::string_view, EventLevel> eventMap = {
     {EVENT_EMIT_ABC, EventLevel::FIRST},
     {EVENT_EMIT_SINGLE_PROGRAM, EventLevel::SECOND},
     {EVENT_EMIT_MERGED_PROGRAM, EventLevel::SECOND},
+    {EVENT_MAKE_ITEMS_FOR_SINGLE_PROGRAM, EventLevel::THIRD},
+    {EVENT_MAKE_FUNC_DEBUGINFO_AND_ANNOTATIONS, EventLevel::THIRD},
+    {EVENT_RELAYOUT, EventLevel::THIRD},
+    {EVENT_COMPUTE_LAYOUT_FOR_REFERENCED_ITEMS, EventLevel::THIRD},
+    {EVENT_EMITFUNCTIONS, EventLevel::THIRD},
+    {EVENT_DEDUPLICATE_ITEMS, EventLevel::THIRD},
+    {EVENT_ITEM_WRITE, EventLevel::THIRD},
+    {EVENT_WRITE_HEADER, EventLevel::FORTH},
+    {EVENT_GET_FILE_SIZE, EventLevel::FIFTH},
+    {EVENT_COMPUTE_LAYOUT_FOR_REST, EventLevel::SIXTH},
+    {EVENT_COMPUTE_LAYOUT, EventLevel::SIXTH},
+    {EVENT_WRITE_CLASS_IDX, EventLevel::FORTH},
+    {EVENT_WRITE_LITERALARRAY_IDX, EventLevel::FORTH},
+    {EVENT_WRITE_INDEX_SECTION, EventLevel::FORTH},
+    {EVENT_WRITE_ITEMS, EventLevel::FORTH},
+    {EVENT_WRITE_LINE_NUMBER_PROGRAM_IDX, EventLevel::FORTH},
+    {EVENT_COUNT_AND_REWRITE_CHECKSUM, EventLevel::FORTH},
     {EVENT_EMIT_CACHE_FILE, EventLevel::SECOND},
     {EVENT_REPLACE_ABC_FILE_RECORD, EventLevel::THIRD},
 };
 
 const std::unordered_map<std::string_view, std::string_view> eventParent = {
-    { EVENT_TOTAL, EVENT_GENERATE_ABC },
-    { EVENT_COMPILE, EVENT_TOTAL },
-    { EVENT_READ_INPUT_AND_CACHE, EVENT_COMPILE },
-    { EVENT_COMPILE_ABC_FILE, EVENT_COMPILE },
-    { EVENT_COMPILE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE },
-    { EVENT_REPLACE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE },
-    { EVENT_UPDATE_ABC_PKG_VERSION, EVENT_COMPILE_ABC_FILE },
-    { EVENT_UPDATE_ABC_PROGRAM_STRING, EVENT_COMPILE_ABC_FILE },
-    { EVENT_UPDATE_ABC_PROG_CACHE, EVENT_COMPILE_ABC_FILE },
-    { EVENT_COMPILE_FILE, EVENT_COMPILE },
-    { EVENT_PARSE, EVENT_COMPILE_FILE },
-    { EVENT_COMPILE_TO_PROGRAM, EVENT_COMPILE_FILE },
-    { EVENT_OPTIMIZE_PROGRAM, EVENT_COMPILE },
-    { EVENT_RESOLVE_DEPS, EVENT_TOTAL },
-    { EVENT_EMIT_ABC, EVENT_TOTAL },
-    { EVENT_EMIT_SINGLE_PROGRAM, EVENT_EMIT_ABC },
-    { EVENT_EMIT_MERGED_PROGRAM, EVENT_EMIT_ABC },
-    { EVENT_EMIT_CACHE_FILE, EVENT_EMIT_ABC },
+    {EVENT_TOTAL, EVENT_GENERATE_ABC},
+    {EVENT_COMPILE, EVENT_TOTAL},
+    {EVENT_READ_INPUT_AND_CACHE, EVENT_COMPILE},
+    {EVENT_COMPILE_ABC_FILE, EVENT_COMPILE},
+    {EVENT_COMPILE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE},
+    {EVENT_REPLACE_ABC_FILE_RECORD, EVENT_COMPILE_ABC_FILE},
+    {EVENT_UPDATE_ABC_PKG_VERSION, EVENT_COMPILE_ABC_FILE},
+    {EVENT_UPDATE_ABC_PROGRAM_STRING, EVENT_COMPILE_ABC_FILE},
+    {EVENT_UPDATE_ABC_PROG_CACHE, EVENT_COMPILE_ABC_FILE},
+    {EVENT_COMPILE_FILE, EVENT_COMPILE},
+    {EVENT_PARSE, EVENT_COMPILE_FILE},
+    {EVENT_COMPILE_TO_PROGRAM, EVENT_COMPILE_FILE},
+    {EVENT_OPTIMIZE_PROGRAM, EVENT_COMPILE},
+    {EVENT_RESOLVE_DEPS, EVENT_TOTAL},
+    {EVENT_EMIT_ABC, EVENT_TOTAL},
+    {EVENT_EMIT_SINGLE_PROGRAM, EVENT_EMIT_ABC},
+    {EVENT_EMIT_MERGED_PROGRAM, EVENT_EMIT_ABC},
+    {EVENT_MAKE_ITEMS_FOR_SINGLE_PROGRAM, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_MAKE_FUNC_DEBUGINFO_AND_ANNOTATIONS, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_RELAYOUT, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_COMPUTE_LAYOUT_FOR_REFERENCED_ITEMS, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_EMITFUNCTIONS, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_DEDUPLICATE_ITEMS, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_ITEM_WRITE, EVENT_EMIT_MERGED_PROGRAM},
+    {EVENT_WRITE_HEADER, EVENT_ITEM_WRITE},
+    {EVENT_GET_FILE_SIZE, EVENT_WRITE_HEADER},
+    {EVENT_COMPUTE_LAYOUT_FOR_REST, EVENT_GET_FILE_SIZE},
+    {EVENT_COMPUTE_LAYOUT, EVENT_GET_FILE_SIZE},
+    {EVENT_WRITE_CLASS_IDX, EVENT_ITEM_WRITE},
+    {EVENT_WRITE_LITERALARRAY_IDX, EVENT_ITEM_WRITE},
+    {EVENT_WRITE_INDEX_SECTION, EVENT_ITEM_WRITE},
+    {EVENT_WRITE_ITEMS, EVENT_ITEM_WRITE},
+    {EVENT_WRITE_LINE_NUMBER_PROGRAM_IDX, EVENT_ITEM_WRITE},
+    {EVENT_COUNT_AND_REWRITE_CHECKSUM, EVENT_ITEM_WRITE},
+    {EVENT_EMIT_CACHE_FILE, EVENT_EMIT_ABC},
 };
 
 typedef void (*TimeStartFunc)(const std::string_view event, std::string fileName);
@@ -116,6 +167,28 @@ public:
 
     PANDA_PUBLIC_API static TimeStartFunc timerStart;
     PANDA_PUBLIC_API static TimeEndFunc timerEnd;
+
+    class ScopeTimer {
+    public:
+        ScopeTimer(const std::string_view &event, std::string extra = "") : event_(event), extra_(std::move(extra))
+        {
+            Timer::timerStart(event_, extra_);
+        }
+
+        ~ScopeTimer()
+        {
+            Timer::timerEnd(event_, extra_);
+        }
+
+        ScopeTimer(const ScopeTimer &) = delete;
+        ScopeTimer &operator=(const ScopeTimer &) = delete;
+        ScopeTimer(ScopeTimer &&) = delete;
+        ScopeTimer &operator=(ScopeTimer &&) = delete;
+
+    private:
+        std::string_view event_;
+        std::string extra_;
+    };
 
 private:
     static void TimerStartImpl(const std::string_view event, std::string fileName = "");

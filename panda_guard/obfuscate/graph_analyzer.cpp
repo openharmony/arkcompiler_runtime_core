@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,7 +342,7 @@ void FindDefineInst(const panda::compiler::Inst *prevInst, const panda::compiler
 
 void GraphAnalyzer::GetLdaStr(const InstructionInfo &inIns, InstructionInfo &outIns, int index /* = -1 */)
 {
-    const auto it = LDA_STA_INST_PARAM_MAP.find(inIns.ins_->opcode);
+    const auto it = LDA_STA_INST_PARAM_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == LDA_STA_INST_PARAM_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported lda.str scene: " << inIns.ins_->ToString());
 
@@ -398,7 +398,7 @@ void GraphAnalyzer::HandleDefineProperty(const InstructionInfo &inIns, Instructi
 
 bool GraphAnalyzer::IsComponentClass(const InstructionInfo &inIns)
 {
-    if (inIns.ins_->opcode != pandasm::Opcode::DEFINECLASSWITHBUFFER) {
+    if (inIns.ins_->GetOpcode() != pandasm::Opcode::DEFINECLASSWITHBUFFER) {
         return false;
     }
 
@@ -425,7 +425,8 @@ bool GraphAnalyzer::IsComponentClass(const InstructionInfo &inIns)
 
 void GraphAnalyzer::GetStModuleVarDefineIns(const InstructionInfo &inIns, InstructionInfo &defineIns)
 {
-    if (inIns.ins_->opcode != pandasm::Opcode::STMODULEVAR && inIns.ins_->opcode != pandasm::Opcode::WIDE_STMODULEVAR) {
+    if (inIns.ins_->GetOpcode() != pandasm::Opcode::STMODULEVAR &&
+        inIns.ins_->GetOpcode() != pandasm::Opcode::WIDE_STMODULEVAR) {
         return;
     }
 
@@ -491,7 +492,7 @@ void GraphAnalyzer::GetNewObjRangeInfo(const InstructionInfo &inIns, std::string
 
 std::string GraphAnalyzer::GetCallName(const InstructionInfo &inIns)
 {
-    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    const auto it = CALL_INST_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported call name scene: " << inIns.ins_->ToString());
 
@@ -520,7 +521,7 @@ std::string GraphAnalyzer::GetCallName(const InstructionInfo &inIns)
 
 void GraphAnalyzer::GetCallLdaStrParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out)
 {
-    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    const auto it = CALL_INST_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported get call lda str param scene: " << inIns.ins_->ToString());
 
@@ -532,7 +533,7 @@ void GraphAnalyzer::GetCallLdaStrParam(const InstructionInfo &inIns, uint32_t pa
 void GraphAnalyzer::GetCallTryLdGlobalByNameParam(const InstructionInfo &inIns, uint32_t paramIndex,
                                                   InstructionInfo &out)
 {
-    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    const auto it = CALL_INST_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported get call tryldblobalbyname param scene: " << inIns.ins_->ToString());
 
@@ -548,7 +549,7 @@ void GraphAnalyzer::GetCallTryLdGlobalByNameParam(const InstructionInfo &inIns, 
 
 void GraphAnalyzer::GetCallLdObjByNameParam(const InstructionInfo &inIns, uint32_t paramIndex, InstructionInfo &out)
 {
-    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    const auto it = CALL_INST_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported get call ldobjbyname param scene: " << inIns.ins_->ToString());
 
@@ -620,7 +621,7 @@ void GraphAnalyzer::GetIsInInfo(const InstructionInfo &inIns, std::vector<Instru
 void GraphAnalyzer::GetCallCreateObjectWithBufferParam(const InstructionInfo &inIns, uint32_t paramIndex,
                                                        InstructionInfo &out)
 {
-    const auto it = CALL_INST_MAP.find(inIns.ins_->opcode);
+    const auto it = CALL_INST_MAP.find(inIns.ins_->GetOpcode());
     PANDA_GUARD_ASSERT_PRINT(it == CALL_INST_MAP.end(), TAG, ErrorCode::GENERIC_ERROR,
                              "unsupported get call createobjectwithbuffer param scene: " << inIns.ins_->ToString());
 

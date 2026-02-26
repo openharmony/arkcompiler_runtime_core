@@ -28,11 +28,10 @@
 #include "assembly-function.h"
 #include "bytecode_emitter.h"
 #include "file_item_container.h"
-#include "pgo.h"
 
 namespace panda::pandasm {
 
-constexpr size_t DEFAULT_ITEM_THREAD_COUNT = 8;;
+constexpr size_t DEFAULT_ITEM_THREAD_COUNT = 8;
 struct EmitterConfig {
     uint8_t api = 0;
     std::string subApi = panda_file::DEFAULT_SUB_API_VERSION;
@@ -53,11 +52,7 @@ public:
     struct AsmEntityCollections {
         std::unordered_map<std::string, panda_file::BaseMethodItem *> method_items;
         std::unordered_map<std::string, panda_file::BaseFieldItem *> field_items;
-        std::unordered_map<std::string, panda_file::BaseClassItem *> class_items;
-        std::unordered_map<std::string, panda_file::StringItem *> string_items;
-        std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarray_items;
     };
-
     PANDA_PUBLIC_API static bool Emit(panda_file::ItemContainer *items, const Program &program,
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool emit_debug_info = true,
                                       panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr);
@@ -73,7 +68,6 @@ public:
                                       PandaFileToPandaAsmMaps *maps = nullptr, bool debug_info = true,
                                       panda::panda_file::pgo::ProfileOptimizer *profile_opt = nullptr, uint8_t api = 0,
                                       std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);
-
     // The function releases the data in progs in advance for the sake of the peak memory at compiler time.
     static bool EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                              const EmitterConfig &emitterConfig = EmitterConfig {},
@@ -98,12 +92,10 @@ private:
                            const panda::pandasm::Record &record, const AsmEmitter::AsmEntityCollections &entities);
     static bool CheckDuplicateField(panda_file::ValueItem &value_item, panda_file::FieldItem &field_item,
                                     std::string &field_name);
-    static void MakeStringItems(panda_file::ItemContainer *items, const Program &program,
-                                AsmEntityCollections &entities);
+    static void MakeStringItems(panda_file::ItemContainer *items, const Program &program);
     static void MakeLiteralItems(panda_file::ItemContainer *items, const Program &program,
                                  AsmEmitter::AsmEntityCollections &entities);
-    static void MakeArrayTypeItems(panda_file::ItemContainer *items, const Program &program,
-                                   AsmEntityCollections &entities);
+    static void MakeArrayTypeItems(panda_file::ItemContainer *items, const Program &program);
     static bool HandleRecordAsForeign(
         panda_file::ItemContainer *items, const Program &program, AsmEntityCollections &entities,
         const std::unordered_map<panda_file::Type::TypeId, panda_file::PrimitiveTypeItem *> &primitive_types,
@@ -156,7 +148,8 @@ private:
                                               panda_file::MethodItem *method, const Function &func);
     static bool MakeFunctionDebugInfoAndAnnotations(panda_file::ItemContainer *items, const Program &program,
                                                     const AsmEntityCollections &entities, bool emit_debug_info);
-    static void FillMap(PandaFileToPandaAsmMaps *maps, AsmEntityCollections &entities);
+    static void FillMap(PandaFileToPandaAsmMaps *maps, AsmEntityCollections &entities,
+                        panda_file::ItemContainer *items);
     static void EmitDebugInfo(panda_file::ItemContainer *items, const Program &program,
                               const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method,
                               const Function &func, const std::string &name, bool emit_debug_info);
@@ -186,7 +179,11 @@ private:
         static_assert(std::is_arithmetic<PrimType>::value);
         auto v = value->GetAsScalar()->GetValue<PrimType>();
         if (out != nullptr) {
-            out->emplace_back(v, container);
+            out->emplace_back(v);
+            // IMPORTANT: Returned pointer is valid only under these conditions:
+            // 1. The out vector is not modified (push_back, emplace_back, resize may cause reallocation)
+            // 2. The out vector is not moved or destroyed
+            // 3. Caller does not store this pointer long-term
             return &out->back();
         }
 
@@ -210,6 +207,9 @@ private:
     static panda_file::ScalarValueItem *CreateScalarRecordValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes);
+    static panda_file::ScalarValueItem *CreateScalarRecordValueItem(
+        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
+        const std::map<std::string, panda_file::BaseClassItem *> &classes);
     static panda_file::ScalarValueItem *CreateScalarMethodValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const Program &program, const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);

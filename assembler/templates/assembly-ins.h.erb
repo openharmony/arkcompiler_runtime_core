@@ -213,10 +213,10 @@ public:
 
     bool HasFlag(InstFlags flag) const
     {
-        if (opcode == Opcode::INVALID) {  // TODO(mbolshov): introduce 'label' opcode for labels
+        if (GetOpcode() == Opcode::INVALID) {  // TODO(mbolshov): introduce 'label' opcode for labels
             return false;
         }
-        return (INST_FLAGS_TABLE[static_cast<size_t>(opcode)] & flag) != 0;
+        return (INST_FLAGS_TABLE[static_cast<size_t>(GetOpcode())] & flag) != 0;
     }
 
     bool CanThrow() const
@@ -257,10 +257,10 @@ public:
 
     size_t MaxRegEncodingWidth() const
     {
-        if (opcode == Opcode::INVALID) {
+        if (GetOpcode() == Opcode::INVALID) {
             return 0;
         }
-        return INST_WIDTH_TABLE[static_cast<size_t>(opcode)];
+        return INST_WIDTH_TABLE[static_cast<size_t>(GetOpcode())];
     }
 
     size_t OperandListLength() const
@@ -406,7 +406,7 @@ public:
     static bool Emit(BytecodeEmitter &emitter, const InsPtr &ins, panda_file::MethodItem *method,
                      const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
                      const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-                     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
+                     const std::map<std::string, panda_file::BaseClassItem *> &classes,
                      const std::unordered_map<std::string, panda_file::StringItem *> &strings,
                      const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays,
                      const std::unordered_map<std::string_view, panda::Label>& labels);
@@ -414,7 +414,7 @@ public:
     Ins *DeepCopy()
     {
         ASSERT(!IsLabel());
-        auto res = Ins::CreateIns(opcode, Regs(), Imms(), Ids());
+        auto res = Ins::CreateIns(GetOpcode(), Regs(), Imms(), Ids());
         res->ins_debug = ins_debug;
         return res;
     }
@@ -424,11 +424,12 @@ public:
 
     virtual ~Ins() = default;
 
+    virtual Opcode GetOpcode() const = 0;
+
     debuginfo::Ins ins_debug;
-    Opcode opcode;
 
 protected:
-    explicit Ins(Opcode opcode) : opcode(opcode) {}
+    explicit Ins() {}
 
 private:
 % max_reg_cnt.times do |i|
@@ -486,7 +487,12 @@ private:
 
 class LabelIns : public Ins {
 public:
-    LabelIns(std::string label) : Ins(Opcode::INVALID), label_(label) {}
+    LabelIns(std::string label) : Ins(), label_(label) {}
+
+    Opcode GetOpcode() const override
+    {
+        return Opcode::INVALID;
+    }
 
     bool IsLabel() const override
     {
@@ -532,20 +538,25 @@ private:
 % ops = (ops_list.length == 0 ? "" : ", ") + ops_list.map { |op| "#{op}_(#{op})"}.join(", ")
 class <%= class_name %> : public <%= base_class %> {
 public:
-    <%= class_name %>(<%= ctor_args %>) : <%= base_class %>(Opcode::<%= insn.asm_token %>)<%= ops %> {}
-    <%= class_name %>(std::vector<std::uint16_t> &regs, std::vector<IType> &imms, std::vector<std::string> &ids) : <%= base_class %>(Opcode::<%= insn.asm_token %>)
+    <%= class_name %>(<%= ctor_args %>) : <%= base_class %>()<%= ops %> {}
+    <%= class_name %>(std::vector<std::uint16_t> &regs, std::vector<IType> &imms, std::vector<std::string> &ids) : <%= base_class %>()
     {
         ASSERT(regs.size() >= <%= reg_index + 1 %>);
         ASSERT(ids.size() >= <%= id_index + 1 %>);
         ASSERT(imms.size() >= <%= imm_index + 1 %>);
         <%= init %>
     }
-    <%= class_name %>(std::vector<std::uint16_t> &&regs, std::vector<IType> &&imms, std::vector<std::string> &&ids) : <%= base_class %>(Opcode::<%= insn.asm_token %>)
+    <%= class_name %>(std::vector<std::uint16_t> &&regs, std::vector<IType> &&imms, std::vector<std::string> &&ids) : <%= base_class %>()
     {
         ASSERT(regs.size() >= <%= reg_index + 1 %>);
         ASSERT(ids.size() >= <%= id_index + 1 %>);
         ASSERT(imms.size() >= <%= imm_index + 1 %>);
         <%= init %>
+    }
+
+    Opcode GetOpcode() const override
+    {
+        return Opcode::<%= insn.asm_token %>;
     }
 
     std::string OpcodeToString() const override

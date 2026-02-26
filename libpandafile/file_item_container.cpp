@@ -14,6 +14,7 @@
  */
 
 #include "file_item_container.h"
+#include "libpandabase/utils/timers.h"
 
 namespace panda::panda_file {
 
@@ -140,25 +141,15 @@ private:
 };
 
 template <class T, class C, class I, class P, class E, class... Args>
-static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_foreign, Args &&... args)
+static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_foreign, Args &&...args)
 {
-    auto it = map.find(key);
-    if (it != map.cend()) {
-        auto *item = it->second;
-        if (item->IsForeign() == is_foreign) {
-            return static_cast<T *>(item);
-        }
-
-        UNREACHABLE();
-        return nullptr;
+    auto res = map.try_emplace(key, nullptr /* placeholder */);
+    if (res.second) {
+        auto ii = items.emplace(pos, std::make_unique<T>(std::forward<Args>(args)...));
+        res.first->second = static_cast<T *>(ii->get());
     }
-
-    auto ii = items.insert(pos, std::make_unique<T>(std::forward<Args>(args)...));
-    auto *item = static_cast<T *>(ii->get());
-
-    [[maybe_unused]] auto res = map.insert({key, item});
-    ASSERT(res.second);
-    return item;
+    ASSERT(res.first->second->IsForeign() == is_foreign);
+    return static_cast<T *>(res.first->second);
 }
 
 /*static*/
@@ -178,9 +169,19 @@ ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
     return GetOrInsert<ClassItem>(class_map_, items_, items_end_, str, false, str, this);
 }
 
+ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &key, const std::string &value)
+{
+    return GetOrInsert<ClassItem>(class_map_, items_, items_end_, key, false, value, this);
+}
+
 ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &str)
 {
     return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), str, true, str, this);
+}
+
+ForeignClassItem *ItemContainer::GetOrCreateForeignClassItem(const std::string &key, const std::string &value)
+{
+    return GetOrInsert<ForeignClassItem>(class_map_, foreign_items_, foreign_items_.end(), key, true, value, this);
 }
 
 StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
@@ -190,18 +191,9 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
 
 StringItem *ItemContainer::GetStringItem(const std::string &str) const
 {
-    auto it1 = string_map_.find(str);
-    if (it1 != string_map_.cend()) {
-        auto *item = it1->second;
-        if (item->IsForeign() == false) {
-            return static_cast<StringItem *>(item);
-        }
-
-        UNREACHABLE();
-        return nullptr;
-    }
-    UNREACHABLE();
-    return nullptr;
+    auto iter = string_map_.find(str);
+    ASSERT(iter != string_map_.cend() && !iter->second->IsForeign());
+    return static_cast<StringItem *>(iter->second);
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
@@ -211,27 +203,27 @@ LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &
 
 ScalarValueItem *ItemContainer::GetOrCreateIntegerValueItem(uint32_t v)
 {
-    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v, this);
+    return GetOrInsert<ScalarValueItem>(int_value_map_, items_, items_end_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateLongValueItem(uint64_t v)
 {
-    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v, this);
+    return GetOrInsert<ScalarValueItem>(long_value_map_, items_, items_end_, v, false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateFloatValueItem(float v)
 {
-    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v, this);
+    return GetOrInsert<ScalarValueItem>(float_value_map_, items_, items_end_, bit_cast<uint32_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateDoubleValueItem(double v)
 {
-    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v, this);
+    return GetOrInsert<ScalarValueItem>(double_value_map_, items_, items_end_, bit_cast<uint64_t>(v), false, v);
 }
 
 ScalarValueItem *ItemContainer::GetOrCreateIdValueItem(BaseItem *v)
 {
-    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v, this);
+    return GetOrInsert<ScalarValueItem>(id_value_map_, items_, items_end_, v, false, v);
 }
 
 ProtoItem *ItemContainer::GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params)
@@ -254,8 +246,6 @@ LineNumberProgramItem *ItemContainer::CreateLineNumberProgramItem()
 {
     auto it = items_.insert(debug_items_end_, std::make_unique<LineNumberProgramItem>(this));
     auto *item = static_cast<LineNumberProgramItem *>(it->get());
-    [[maybe_unused]] auto res = line_number_program_index_item_.Add(item);
-    ASSERT(res);
     return item;
 }
 
@@ -375,31 +365,17 @@ void ItemContainer::DeduplicateAnnotations()
 
         auto *class_item = static_cast<ClassItem *>(item);
 
-        panda_file::DeduplicateAnnotations(class_item->GetRuntimeAnnotations(), &annotation_deduper, &value_deduper);
         panda_file::DeduplicateAnnotations(class_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-        panda_file::DeduplicateAnnotations(class_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                           &value_deduper);
-        panda_file::DeduplicateAnnotations(class_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
 
         class_item->VisitMethods([&annotation_deduper, &value_deduper](BaseItem *param_item) {
             auto *method_item = static_cast<MethodItem *>(param_item);
-            panda_file::DeduplicateAnnotations(method_item->GetRuntimeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
             panda_file::DeduplicateAnnotations(method_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-            panda_file::DeduplicateAnnotations(method_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(method_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
             return true;
         });
 
         class_item->VisitFields([&annotation_deduper, &value_deduper](BaseItem *param_item) {
             auto *field_item = static_cast<FieldItem *>(param_item);
-            panda_file::DeduplicateAnnotations(field_item->GetRuntimeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
             panda_file::DeduplicateAnnotations(field_item->GetAnnotations(), &annotation_deduper, &value_deduper);
-            panda_file::DeduplicateAnnotations(field_item->GetRuntimeTypeAnnotations(), &annotation_deduper,
-                                               &value_deduper);
-            panda_file::DeduplicateAnnotations(field_item->GetTypeAnnotations(), &annotation_deduper, &value_deduper);
             return true;
         });
     }
@@ -412,6 +388,7 @@ void ItemContainer::DeduplicateItems(bool computeLayout)
     }
     DeduplicateCodeAndDebugInfo();
     DeduplicateAnnotations();
+    InvalidateComputeLayout();
 }
 
 static bool Compare(const std::unique_ptr<BaseItem> &item1, const std::unique_ptr<BaseItem> &item2)
@@ -448,70 +425,102 @@ void ItemContainer::ReLayout()
     items_.sort(Compare);
 }
 
-uint32_t ItemContainer::ComputeLayout()
+void ItemContainer::ComputeLayoutForReferencedItems()
 {
     const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
     uint32_t original_offset = 0;
     uint32_t num_classes = class_map_.size();
     uint32_t num_literalarrays = literalarray_map_.size();
     uint32_t class_idx_offset = sizeof(File::Header);
-    uint32_t cur_offset = 0;
     if (ContainsLiteralArrayInHeader(bc_version.value())) {
-        cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
+        cur_offset_ = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
     } else {
-        cur_offset = class_idx_offset + (num_classes * ID_SIZE);
+        cur_offset_ = class_idx_offset + (num_classes * ID_SIZE);
     }
     items_round_up_size_.clear();
     foreign_item_roundup_size_ = 0;
-
     UpdateOrderIndexes();
-
     RebuildIndexSection();
     RebuildLineNumberProgramIndex();
 
-    index_section_item_.SetOffset(cur_offset);
+    index_section_item_.SetOffset(cur_offset_);
     index_section_item_.ComputeLayout();
-    cur_offset += index_section_item_.GetSize();
+    cur_offset_ += index_section_item_.GetSize();
 
     for (auto &item : foreign_items_) {
-        original_offset = cur_offset;
-        cur_offset = RoundUp(cur_offset, item->Alignment());
-        foreign_item_roundup_size_ += CalculateRoundUpSize(original_offset, cur_offset);
-        item->SetOffset(cur_offset);
+        original_offset = cur_offset_;
+        cur_offset_ = RoundUp(cur_offset_, item->Alignment());
+        foreign_item_roundup_size_ += CalculateRoundUpSize(original_offset, cur_offset_);
+        item->SetOffset(cur_offset_);
         item->ComputeLayout();
-        cur_offset += item->GetSize();
+        cur_offset_ += item->GetSize();
     }
-
-    for (auto &item : items_) {
+    // calculate all string items' offset which will be used in line number program
+    for (auto iter = items_.begin(); iter != items_end_; iter++) {
+        auto &item = *iter;
         const auto &name = item->GetName();
 
         if (!item->NeedsEmit()) {
             continue;
         }
 
-        original_offset = cur_offset;
-        cur_offset = RoundUp(cur_offset, item->Alignment());
-        items_round_up_size_[name] += CalculateRoundUpSize(original_offset, cur_offset);
-        item->SetOffset(cur_offset);
+        original_offset = cur_offset_;
+        cur_offset_ = RoundUp(cur_offset_, item->Alignment());
+        items_round_up_size_[name] += CalculateRoundUpSize(original_offset, cur_offset_);
+        item->SetOffset(cur_offset_);
         item->ComputeLayout();
-        cur_offset += item->GetSize();
+        cur_offset_ += item->GetSize();
+    }
+}
+
+uint32_t ItemContainer::ComputelayoutForRest()
+{
+    uint32_t original_offset = 0;
+    for (auto iter = items_end_; iter != items_.end(); iter++) {
+        auto &item = *iter;
+        const auto &name = item->GetName();
+
+        if (!item->NeedsEmit()) {
+            continue;
+        }
+
+        original_offset = cur_offset_;
+        cur_offset_ = RoundUp(cur_offset_, item->Alignment());
+        items_round_up_size_[name] += CalculateRoundUpSize(original_offset, cur_offset_);
+        item->SetOffset(cur_offset_);
+        item->ComputeLayout();
+        cur_offset_ += item->GetSize();
     }
 
     // Line number program should be last because it's size is known only after deduplication
-    original_offset = cur_offset;
-    cur_offset = RoundUp(cur_offset, line_number_program_index_item_.Alignment());
-    line_number_item_roundup_size_ = CalculateRoundUpSize(original_offset, cur_offset);
-    line_number_program_index_item_.SetOffset(cur_offset);
+    original_offset = cur_offset_;
+    cur_offset_ = RoundUp(cur_offset_, line_number_program_index_item_.Alignment());
+    line_number_item_roundup_size_ = CalculateRoundUpSize(original_offset, cur_offset_);
+    line_number_program_index_item_.SetOffset(cur_offset_);
     line_number_program_index_item_.ComputeLayout();
-    cur_offset += line_number_program_index_item_.GetSize();
+    cur_offset_ += line_number_program_index_item_.GetSize();
 
-    end_->SetOffset(cur_offset);
+    end_->SetOffset(cur_offset_);
 
-    return cur_offset;
+    return cur_offset_;
+}
+
+uint32_t ItemContainer::ComputeLayout()
+{
+    cur_offset_ = 0;
+    ComputeLayoutForReferencedItems();
+    return ComputelayoutForRest();
 }
 
 void ItemContainer::RebuildLineNumberProgramIndex()
 {
+    for (auto &item : items_) {
+        if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM &&
+            !line_number_program_index_item_.Has(static_cast<LineNumberProgramItem *>(item.get()))) {
+            line_number_program_index_item_.Add(static_cast<LineNumberProgramItem *>(item.get()));
+        }
+    }
+
     line_number_program_index_item_.Reset();
     line_number_program_index_item_.UpdateItems(nullptr, nullptr);
 }
@@ -552,10 +561,6 @@ void ItemContainer::UpdateOrderIndexes()
     }
 
     for (auto &item : items_) {
-        if (!item->NeedsEmit()) {
-            continue;
-        }
-
         item->SetOrderIndex(idx++);
         item->Visit([&idx](BaseItem *param_item) {
             param_item->SetOrderIndex(idx++);
@@ -568,7 +573,9 @@ void ItemContainer::UpdateOrderIndexes()
 
 void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
+#ifndef ETS_FRONTEND_USE
     profile_opt->ProfileGuidedRelayout(items_);
+#endif
 }
 
 void ItemContainer::AddIndexDependecies(BaseItem *item)
@@ -577,6 +584,11 @@ void ItemContainer::AddIndexDependecies(BaseItem *item)
         index_section_item_.AddHeader();
         index_section_item_.GetCurrentHeader()->SetStart(item);
     }
+
+    if (!item->HasDepsList()) {
+        return;
+    }
+
     const auto &item_deps = item->GetIndexDependencies();
     if (!index_section_item_.GetCurrentHeader()->Add(item_deps)) {
         index_section_item_.GetCurrentHeader()->SetEnd(item);
@@ -647,9 +659,29 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
     return writer->Write<uint32_t>(index_section_off);
 }
 
+size_t ItemContainer::GetFileSize()
+{
+    if (IsComputeLayoutFinished()) {
+        return cur_offset_;
+    }
+
+    if (IsComputeLayoutForReferencedItemsFinished()) {
+        panda::Timer::ScopeTimer timer(panda::EVENT_COMPUTE_LAYOUT_FOR_REST);
+        return ComputelayoutForRest();
+    }
+
+    panda::Timer::ScopeTimer timer(panda::EVENT_COMPUTE_LAYOUT);
+    return ComputeLayout();
+}
+
 bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
 {
-    uint32_t file_size = ComputeLayout();
+    panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_HEADER);
+    uint32_t file_size;
+    {
+        panda::Timer::ScopeTimer timer(panda::EVENT_GET_FILE_SIZE);
+        file_size = GetFileSize();
+    }
     writer->ReserveBufferCapacity(file_size);
 
     std::vector<uint8_t> magic;
@@ -718,6 +750,13 @@ bool ItemContainer::WriteItems(Writer *writer)
     return true;
 }
 
+static void CountAndRewriteChecksum(Writer *writer, ssize_t checksum_offset)
+{
+    panda::Timer::ScopeTimer timer(panda::EVENT_COUNT_AND_REWRITE_CHECKSUM);
+    writer->CountChecksum(false);
+    writer->RewriteChecksum(checksum_offset);
+}
+
 bool ItemContainer::Write(Writer *writer)
 {
     ssize_t checksum_offset = -1;
@@ -726,47 +765,52 @@ bool ItemContainer::Write(Writer *writer)
     }
     ASSERT(checksum_offset != -1);
 
-    // Write class idx
-
-    for (auto &entry : class_map_) {
-        if (!writer->Write(entry.second->GetOffset())) {
-            return false;
-        }
-    }
-
-    // Write literalArray idx
-
-    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
-    if (ContainsLiteralArrayInHeader(bc_version.value())) {
-        for (auto &entry : literalarray_map_) {
+    {
+        // Write class idx
+        panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_CLASS_IDX);
+        for (auto &entry : class_map_) {
             if (!writer->Write(entry.second->GetOffset())) {
                 return false;
             }
         }
     }
-
-    // Write index section
-
-    if (!index_section_item_.Write(writer)) {
-        return false;
+    {
+        // Write literalArray idx
+        panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_LITERALARRAY_IDX);
+        const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
+        if (ContainsLiteralArrayInHeader(bc_version.value())) {
+            for (auto &entry : literalarray_map_) {
+                if (!writer->Write(entry.second->GetOffset())) {
+                    return false;
+                }
+            }
+        }
     }
-
-    if (!WriteItems(writer)) {
-        return false;
+    {
+        // Write index section
+        panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_INDEX_SECTION);
+        if (!index_section_item_.Write(writer)) {
+            return false;
+        }
     }
+    {
+        panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_ITEMS);
+        if (!WriteItems(writer)) {
+            return false;
+        }
 
-    if (!writer->Align(line_number_program_index_item_.Alignment())) {
-        return false;
+        if (!writer->Align(line_number_program_index_item_.Alignment())) {
+            return false;
+        }
     }
-
-    // Write line number program idx
-
-    if (!line_number_program_index_item_.Write(writer)) {
-        return false;
+    {
+        // Write line number program idx
+        panda::Timer::ScopeTimer timer(panda::EVENT_WRITE_LINE_NUMBER_PROGRAM_IDX);
+        if (!line_number_program_index_item_.Write(writer)) {
+            return false;
+        }
     }
-
-    writer->CountChecksum(false);
-    writer->RewriteChecksum(checksum_offset);
+    CountAndRewriteChecksum(writer, checksum_offset);
 
     return writer->FinishWrite();
 }
@@ -920,9 +964,9 @@ bool ItemContainer::IndexHeaderItem::Write(Writer *writer)
     return true;
 }
 
-bool ItemContainer::IndexHeaderItem::Add(const std::list<IndexedItem *> &items)
+bool ItemContainer::IndexHeaderItem::Add(const std::vector<IndexedItem *> &items)
 {
-    std::list<IndexedItem *> added_items;
+    std::vector<IndexedItem *> added_items;
 
     for (auto *item : items) {
         auto type = item->GetIndexType();
@@ -945,7 +989,7 @@ bool ItemContainer::IndexHeaderItem::Add(const std::list<IndexedItem *> &items)
     return true;
 }
 
-void ItemContainer::IndexHeaderItem::Remove(const std::list<IndexedItem *> &items)
+void ItemContainer::IndexHeaderItem::Remove(const std::vector<IndexedItem *> &items)
 {
     for (auto *item : items) {
         auto type = item->GetIndexType();

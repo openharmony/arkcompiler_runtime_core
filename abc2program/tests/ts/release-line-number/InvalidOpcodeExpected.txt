@@ -3,9 +3,9 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_613 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_595 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_609 
+_ESScopeNamesRecord_591 
 
 
 
@@ -232,8 +232,8 @@ _ESScopeNamesRecord_609
  SlotNumber 1
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	definefunc 0x0, .#*#testRelease, 0x0     # line: 18446744073709551615           # column: 0
-	returnundefined                          # line: 18446744073709551615           # column: 0
+	definefunc 0x0, .#*#testRelease, 0x0     # line: 4294967295           # column: 0
+	returnundefined                          # line: 4294967295           # column: 0
 }
 
 # ====================

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,10 @@
 namespace panda::pandasm::debuginfo {
 
 struct Ins {
-    size_t line_number = 0;
+    uint32_t line_number = 0;
     uint32_t column_number = 0;
 
-    void SetLineNumber(size_t ln)
+    void SetLineNumber(uint32_t ln)
     {
         line_number = ln;
     }
@@ -37,7 +37,7 @@ struct Ins {
     }
 
     Ins() = default;
-    Ins(size_t l_n)
+    explicit Ins(uint32_t l_n)
         : line_number(l_n)
     {
     }
@@ -45,8 +45,6 @@ struct Ins {
 
 struct LocalVariable {
     std::string name;
-    std::string signature;
-    std::string signature_type;
     int32_t reg = 0;
     uint32_t start = 0;
     uint32_t length = 0;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,13 +84,13 @@ bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::InsPtr> &insLis
     size_t i = 0;
     while (i < insList.size()) {
         auto &ins = insList[i];
-        if (ins->opcode == panda::pandasm::Opcode::TRYLDGLOBALBYNAME && ins->GetId(0) == CONSOLE_INS_VAR) {
+        if (ins->GetOpcode() == panda::pandasm::Opcode::TRYLDGLOBALBYNAME && ins->GetId(0) == CONSOLE_INS_VAR) {
             size_t nextInsIndex = i + 1;
             PANDA_GUARD_ASSERT_PRINT(nextInsIndex >= insList.size(), TAG, panda::guard::ErrorCode::GENERIC_ERROR,
                                      "get console next ins get bad index:" << nextInsIndex);
 
             auto &nextIns = insList[nextInsIndex];
-            PANDA_GUARD_ASSERT_PRINT(nextIns->opcode != panda::pandasm::Opcode::STA, TAG,
+            PANDA_GUARD_ASSERT_PRINT(nextIns->GetOpcode() != panda::pandasm::Opcode::STA, TAG,
                                      panda::guard::ErrorCode::GENERIC_ERROR, "get console next ins get bad ins type");
 
             reg = nextIns->GetReg(0);
@@ -109,7 +109,7 @@ bool HasMovInstForRange(const std::vector<panda::pandasm::InsPtr> &insList, size
     size_t i = end - 1;
     while (i > start) {
         auto &ins = insList[i];
-        if ((ins->opcode == panda::pandasm::Opcode::MOV) && (ins->GetReg(0) == rangeReg) &&
+        if ((ins->GetOpcode() == panda::pandasm::Opcode::MOV) && (ins->GetReg(0) == rangeReg) &&
             (ins->GetReg(1) == oriReg)) {
             return true;
         }
@@ -123,14 +123,15 @@ int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::InsPtr> &insList, 
     size_t i = start + 1;
     while (i < insList.size()) {
         auto &ins = insList[i];
-        if ((ins->opcode == panda::pandasm::Opcode::CALLTHIS1 || ins->opcode == panda::pandasm::Opcode::CALLTHIS2 ||
-             ins->opcode == panda::pandasm::Opcode::CALLTHIS3) &&
+        if ((ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS1 ||
+             ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS2 ||
+             ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS3) &&
             ins->GetReg(0) == reg) {
             end = i + 1;
             return true;
         }
 
-        if ((ins->opcode == panda::pandasm::Opcode::CALLTHISRANGE) &&
+        if ((ins->GetOpcode() == panda::pandasm::Opcode::CALLTHISRANGE) &&
             HasMovInstForRange(insList, start, i, reg, ins->GetReg(0))) {
             end = i + 1;
             return true;
@@ -455,10 +456,10 @@ void panda::guard::Function::UpdateDefine() const
         }
 
         // definefunc, definemethod for function, defineclasswithbuffer, callruntime.definesendableclass for constructor
-        PANDA_GUARD_ASSERT_PRINT(defineIns.ins_->opcode != pandasm::Opcode::DEFINEFUNC &&
-                                     defineIns.ins_->opcode != pandasm::Opcode::DEFINECLASSWITHBUFFER &&
-                                     defineIns.ins_->opcode != pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS &&
-                                     defineIns.ins_->opcode != pandasm::Opcode::DEFINEMETHOD,
+        PANDA_GUARD_ASSERT_PRINT(defineIns.ins_->GetOpcode() != pandasm::Opcode::DEFINEFUNC &&
+                                     defineIns.ins_->GetOpcode() != pandasm::Opcode::DEFINECLASSWITHBUFFER &&
+                                     defineIns.ins_->GetOpcode() != pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS &&
+                                     defineIns.ins_->GetOpcode() != pandasm::Opcode::DEFINEMETHOD,
                                  TAG, ErrorCode::GENERIC_ERROR, "get bad ins type");
 
         defineIns.ins_->GetId(0) = this->obfIdx_;
@@ -530,7 +531,7 @@ void panda::guard::Function::BuildPcInsMap(const compiler::Graph *graph)
 
     for (size_t idx = 0; idx < this->GetOriginFunction().ins.size(); idx++) {
         auto ins = this->GetOriginFunction().ins[idx].get();
-        if (ins->opcode == pandasm::Opcode::INVALID) {
+        if (ins->GetOpcode() == pandasm::Opcode::INVALID) {
             continue;
         }
         this->pcInstMap_.emplace(instructions.GetPc(*ins_iter), idx);

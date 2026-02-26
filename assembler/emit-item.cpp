@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,11 +45,10 @@ void EmitFunctionsQueue::Schedule()
 
 bool EmitFunctionsJob::Run()
 {
-    return EmitFunctions(entities_, emit_debug_info_);
+    return EmitFunctions();
 }
 
-bool EmitFunctionsJob::EmitFunctions(const panda::pandasm::AsmEmitter::AsmEntityCollections &entities,
-    bool emit_debug_info)
+bool EmitFunctionsJob::EmitFunctions()
 {
     for (const auto &f : program_.function_table) {
         const auto &[name, func] = f;
@@ -59,9 +58,9 @@ bool EmitFunctionsJob::EmitFunctions(const panda::pandasm::AsmEmitter::AsmEntity
         }
 
         auto emitter = BytecodeEmitter {};
-        auto *method = static_cast<MethodItem *>(Find(entities.method_items, name));
-        if (!func.Emit(emitter, method, entities.method_items, entities.field_items, entities.class_items,
-                       entities.string_items, entities.literalarray_items)) {
+        auto *method = static_cast<MethodItem *>(Find(entities_.method_items, name));
+        if (!func.Emit(emitter, method, entities_.method_items, entities_.field_items, *items_.GetClassMap(),
+                       *items_.GetStringMap(), *items_.GetLiteralArrayItemMap())) {
             std::unique_lock<std::mutex> lock(mutex_);
             AsmEmitter::SetLastError("Internal error during emitting function: " + func.name);
             return false;
@@ -71,8 +70,8 @@ bool EmitFunctionsJob::EmitFunctions(const panda::pandasm::AsmEmitter::AsmEntity
         code->SetNumVregs(func.regs_num);
         code->SetNumArgs(func.GetParamsNum());
 
-        auto num_ins = static_cast<size_t>(
-            std::count_if(func.ins.begin(), func.ins.end(), [](auto &it) { return it->opcode != Opcode::INVALID; }));
+        auto num_ins = static_cast<size_t>(std::count_if(func.ins.begin(), func.ins.end(),
+                                                         [](auto &it) { return it->GetOpcode() != Opcode::INVALID; }));
         code->SetNumInstructions(num_ins);
 
         auto *bytes = code->GetInstructions();
@@ -80,21 +79,25 @@ bool EmitFunctionsJob::EmitFunctions(const panda::pandasm::AsmEmitter::AsmEntity
         if (status != BytecodeEmitter::ErrorCode::SUCCESS) {
             std::unique_lock<std::mutex> lock(mutex_);
             AsmEmitter::SetLastError("Internal error during emitting binary code, status=" +
-                std::to_string(static_cast<int>(status)));
+                                     std::to_string(static_cast<int>(status)));
             return false;
         }
-        auto try_blocks = func.BuildTryBlocks(method, entities.class_items, *bytes);
+        auto try_blocks = func.BuildTryBlocks(method, *items_.GetClassMap(), *bytes);
         for (auto &try_block : try_blocks) {
             code->AddTryBlock(try_block);
         }
 
-        EmitDebugInfo(bytes, method, func, name, emit_debug_info);
+        EmitDebugInfo(bytes, method, func, name);
+        const_cast<Function &>(func).local_variable_debug.clear();
+        const_cast<Function &>(func).local_variable_debug.shrink_to_fit();
+        const_cast<Function &>(func).ins.clear();
+        const_cast<Function &>(func).ins.shrink_to_fit();
     }
     return true;
 }
 
 void EmitFunctionsJob::EmitDebugInfo(const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method,
-    const Function &func, const std::string &name, bool emit_debug_info)
+                                     const Function &func, const std::string &name)
 {
     auto *debug_info = method->GetDebugInfo();
     if (debug_info == nullptr) {
@@ -121,6 +124,6 @@ void EmitFunctionsJob::EmitDebugInfo(const std::vector<uint8_t> *bytes, const pa
         ASSERT(source_file_item->GetOffset() != 0);
         line_number_program->EmitSetFile(constant_pool, source_file_item);
     }
-    func.BuildLineNumberProgram(debug_info, *bytes, &items_, constant_pool, emit_debug_info);
+    func.BuildLineNumberProgram(debug_info, *bytes, &items_, constant_pool, emit_debug_info_);
 }
 }

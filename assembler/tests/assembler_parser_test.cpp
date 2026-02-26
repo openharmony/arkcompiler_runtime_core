@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ HWTEST_F(ParserTest, parser_test_002, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->Label(), "label") <<
         "label expected";
     EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->IsLabel(), true) << "true expected";
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->opcode, Opcode::INVALID) << "NONE expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::INVALID) << "NONE expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -209,7 +209,7 @@ HWTEST_F(ParserTest, parser_test_009, TestSize.Level1)
     auto it = program.function_table.find(fun_name);
     EXPECT_NE(it, program.function_table.end());
     auto &func = it->second;
-    EXPECT_NE(func.ins[0]->opcode, Opcode::NOP);
+    EXPECT_NE(func.ins[0]->GetOpcode(), Opcode::NOP);
     EXPECT_EQ(func.ins[3]->GetReg(0), 4U);
     EXPECT_EQ(func.ins[1]->GetReg(0), 1U);
     EXPECT_EQ(func.ins[5]->GetImm(0), IType(int64_t(0x1)));
@@ -313,7 +313,7 @@ HWTEST_F(ParserTest, parser_test_013, TestSize.Level1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->opcode, Opcode::JMP) << "ID expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetOpcode(), Opcode::JMP) << "ID expected";
     EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetId(0), "l123") << "l123 expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE";
 }
@@ -388,7 +388,7 @@ HWTEST_F(ParserTest, parser_test_017, TestSize.Level1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->opcode, Opcode::RETURN) << "NONE expected";
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::RETURN) << "NONE expected";
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -571,8 +571,6 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_m123).GetParamsNum(), num_size);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::I32);
-    EXPECT_EQ(item.Value().function_table.at(sig_m123).return_type.GetId(), panda::panda_file::Type::TypeId::F64);
 
     auto func_m123_table = item.Value().function_table.at(sig_m123).label_table.at("la1").file_location;
     auto func_main_table = item.Value().function_table.at(sig_main).label_table.at("label").file_location;
@@ -581,13 +579,13 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     EXPECT_EQ(func_main_table->is_defined, true);
     EXPECT_EQ(func_m123_table->line_number, 13U);
     EXPECT_EQ(func_m123_table->is_defined, true);
-    EXPECT_EQ(func_main_at[5]->opcode, Opcode::INVALID);
+    EXPECT_EQ(func_main_at[5]->GetOpcode(), Opcode::INVALID);
     EXPECT_EQ(func_main_at[5]->Label(), "label");
     EXPECT_EQ(func_main_at[1]->GetReg(0), 0U);
     EXPECT_EQ(func_main_at[2]->GetReg(0), 0U);
     EXPECT_EQ(func_main_at[3]->IsLabel(), false);
-    EXPECT_EQ(func_m123_at[2]->opcode, Opcode::LDAI);
-    EXPECT_EQ(func_m123_at[0]->opcode, Opcode::INVALID);
+    EXPECT_EQ(func_m123_at[2]->GetOpcode(), Opcode::LDAI);
+    EXPECT_EQ(func_m123_at[0]->GetOpcode(), Opcode::INVALID);
     EXPECT_EQ(func_m123_at[0]->Label(), "la1");
     EXPECT_EQ(func_m123_at[1]->IsLabel(), false);
     EXPECT_EQ(func_m123_at[1]->GetId(0), "la1");
@@ -625,8 +623,7 @@ HWTEST_F(ParserTest, parser_test_023, TestSize.Level1)
     EXPECT_NE(it, item.Value().function_table.end());
     EXPECT_EQ(item.Value().function_table.at(sig_main).name, sig_main);
     EXPECT_EQ(item.Value().function_table.at(sig_main).GetParamsNum(), 0U);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::I32);
-    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->opcode, Opcode::LDAI);
+    EXPECT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetOpcode(), Opcode::LDAI);
     EXPECT_EQ(item.Value().function_table.at(sig_main).ins[3]->IsLabel(), true);
     EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -993,18 +990,18 @@ HWTEST_F(ParserTest, parser_test_032, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_nain10).name, sig_nain10);
     EXPECT_EQ(item.Value().function_table.at(sig_nain11).name, sig_nain11);
 
-    EXPECT_EQ(item.Value().function_table.at(sig_nain1).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain2).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain3).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain4).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain5).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain6).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain7).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain8).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain9).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain10).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain11).ins[0]->opcode, Opcode::MOV);
-    EXPECT_EQ(item.Value().function_table.at(sig_nain12).ins[0]->opcode, Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain1).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain2).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain3).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain4).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain5).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain6).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain7).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain8).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain9).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain10).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain11).ins[0]->GetOpcode(), Opcode::MOV);
+    EXPECT_EQ(item.Value().function_table.at(sig_nain12).ins[0]->GetOpcode(), Opcode::MOV);
 }
 
 /**
@@ -1081,11 +1078,11 @@ HWTEST_F(ParserTest, parser_test_034, TestSize.Level1)
     auto it = item.Value().function_table.find(sig_nain1);
     EXPECT_NE(it, item.Value().function_table.end());
     auto &func_table = item.Value().function_table.at(sig_nain1).ins;
-    EXPECT_EQ(OperandTypePrint(func_table[0]->opcode), "reg");
-    EXPECT_EQ(func_table[1]->opcode, Opcode::INVALID);
-    EXPECT_EQ(OperandTypePrint(func_table[2]->opcode), "reg_reg");
-    EXPECT_EQ(OperandTypePrint(func_table[3]->opcode), "reg");
-    EXPECT_EQ(OperandTypePrint(func_table[4]->opcode), "label");
+    EXPECT_EQ(OperandTypePrint(func_table[0]->GetOpcode()), "reg");
+    EXPECT_EQ(func_table[1]->GetOpcode(), Opcode::INVALID);
+    EXPECT_EQ(OperandTypePrint(func_table[2]->GetOpcode()), "reg_reg");
+    EXPECT_EQ(OperandTypePrint(func_table[3]->GetOpcode()), "reg");
+    EXPECT_EQ(OperandTypePrint(func_table[4]->GetOpcode()), "label");
 }
 
 /**

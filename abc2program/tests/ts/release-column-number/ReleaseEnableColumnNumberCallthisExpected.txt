@@ -3,11 +3,11 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_966 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_951 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_962 
+_ESScopeNamesRecord_947 
 
-_GLOBAL_994 { 38 [ tag_value:5, string:"test", tag_value:6, method:.#~A>#test, tag_value:9, method_affiliate:0, tag_value:5, string:"callthis1", tag_value:6, method:.#~A>#callthis1, tag_value:9, method_affiliate:1, tag_value:5, string:"callthis2", tag_value:6, method:.#~A>#callthis2, tag_value:9, method_affiliate:2, tag_value:5, string:"callthis3", tag_value:6, method:.#~A>#callthis3, tag_value:9, method_affiliate:3, tag_value:5, string:"callthisRange", tag_value:6, method:.#~A>#callthisRange, tag_value:9, method_affiliate:4, tag_value:5, string:"withRestParams", tag_value:6, method:.#~A>#withRestParams, tag_value:9, method_affiliate:0, tag_value:2, i32:6, ]}
+_GLOBAL_979 { 38 [ tag_value:5, string:"test", tag_value:6, method:.#~A>#test, tag_value:9, method_affiliate:0, tag_value:5, string:"callthis1", tag_value:6, method:.#~A>#callthis1, tag_value:9, method_affiliate:1, tag_value:5, string:"callthis2", tag_value:6, method:.#~A>#callthis2, tag_value:9, method_affiliate:2, tag_value:5, string:"callthis3", tag_value:6, method:.#~A>#callthis3, tag_value:9, method_affiliate:3, tag_value:5, string:"callthisRange", tag_value:6, method:.#~A>#callthisRange, tag_value:9, method_affiliate:4, tag_value:5, string:"withRestParams", tag_value:6, method:.#~A>#withRestParams, tag_value:9, method_affiliate:0, tag_value:2, i32:6, ]}
 
 
 
@@ -21,13 +21,13 @@ _GLOBAL_994 { 38 [ tag_value:5, string:"test", tag_value:6, method:.#~A>#test, t
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallthis.ts _ESModuleRecord_966
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallthis.ts _ESModuleRecord_951
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallthis.ts _ESScopeNamesRecord_962
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallthis.ts _ESScopeNamesRecord_947
 }
 .record.source_file 
 
@@ -120,14 +120,14 @@ _GLOBAL_994 { 38 [ tag_value:5, string:"test", tag_value:6, method:.#~A>#test, t
  SlotNumber 31
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 0
-	mov v1, a1                               # line: 18446744073709551615           # column: 0
-	mov v2, a2                               # line: 18446744073709551615           # column: 0
+	mov v0, a0                               # line: 4294967295           # column: 0
+	mov v1, a1                               # line: 4294967295           # column: 0
+	mov v2, a2                               # line: 4294967295           # column: 0
 	newlexenv 0x1                            # line: 15           # column: 0
 	label@4:                                 # line: 0           # column: 0
 	ldhole                                   # line: 15           # column: 0
 	sta v7                                   # line: 15           # column: 0
-	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_994, 0x1, v7 # line: 15           # column: 0
+	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_979, 0x1, v7 # line: 15           # column: 0
 	sta v6                                   # line: 15           # column: 0
 	sta v8                                   # line: 15           # column: 0
 	lda v8                                   # line: 15           # column: 0
@@ -474,8 +474,8 @@ _GLOBAL_994 { 38 [ tag_value:5, string:"test", tag_value:6, method:.#~A>#test, t
 	sta v135                                 # line: 54           # column: 0
 	lda v6                                   # line: 42           # column: 0
 	wide.callthisrange 0x80, v7              # line: 42           # column: 4
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	returnundefined                          # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	returnundefined                          # line: 4294967295           # column: 0
 .catchall :
 	try_begin_label : label@4
 	try_end_label : label@15

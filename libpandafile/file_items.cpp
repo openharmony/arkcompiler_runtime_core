@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,7 +190,6 @@ std::string BaseItem::GetName() const
 IndexedItem::IndexedItem(ItemContainer *container)
 {
     if (container != nullptr) {
-        item_global_index_ = container->GetIndexedItemCount();
         container->IncIndexedItemCount();
     }
 }
@@ -276,10 +275,7 @@ size_t ClassItem::CalculateSizeWithoutFieldsAndMethods() const
         size += TAG_SIZE + sizeof(SourceLang);
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
     size += (TAG_SIZE + ID_SIZE) * annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
 
     if (source_file_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
@@ -350,30 +346,11 @@ bool ClassItem::WriteIfaces(Writer *writer)
 
 bool ClassItem::WriteAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_ANNOTATION, runtime_annotation)) {
-            return false;
-        }
-    }
-
     for (auto annotation : annotations_) {
         if (!WriteIdTaggedValue(writer, ClassTag::ANNOTATION, annotation)) {
             return false;
         }
     }
-
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
-            return false;
-        }
-    }
-
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, ClassTag::TYPE_ANNOTATION, type_annotation)) {
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -447,11 +424,7 @@ bool ClassItem::Write(Writer *writer)
 ParamAnnotationsItem::ParamAnnotationsItem(MethodItem *method, bool is_runtime_annotations)
 {
     for (const auto &param : method->GetParams()) {
-        if (is_runtime_annotations) {
-            annotations_.push_back(param.GetRuntimeAnnotations());
-        } else {
-            annotations_.push_back(param.GetAnnotations());
-        }
+        annotations_.push_back(param.GetAnnotations());
     }
 
     if (is_runtime_annotations) {
@@ -626,8 +599,6 @@ size_t MethodItem::CalculateSize() const
         size += TAG_SIZE + sizeof(SourceLang);
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
-
     if (runtime_param_annotations_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
@@ -637,9 +608,6 @@ size_t MethodItem::CalculateSize() const
     if (param_annotations_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
     }
-
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
 
     if (debug_info_ != nullptr) {
         size += TAG_SIZE + ID_SIZE;
@@ -652,12 +620,6 @@ size_t MethodItem::CalculateSize() const
 
 bool MethodItem::WriteRuntimeAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_ANNOTATION, runtime_annotation)) {
-            return false;
-        }
-    }
-
     if (runtime_param_annotations_ != nullptr) {
         if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_PARAM_ANNOTATION, runtime_param_annotations_)) {
             return false;
@@ -669,18 +631,6 @@ bool MethodItem::WriteRuntimeAnnotations(Writer *writer)
 
 bool MethodItem::WriteTypeAnnotations(Writer *writer)
 {
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
-            return false;
-        }
-    }
-
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, MethodTag::TYPE_ANNOTATION, type_annotation)) {
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -1307,10 +1257,7 @@ size_t FieldItem::CalculateSize() const
         }
     }
 
-    size += (TAG_SIZE + ID_SIZE) * runtime_annotations_.size();
     size += (TAG_SIZE + ID_SIZE) * annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * runtime_type_annotations_.size();
-    size += (TAG_SIZE + ID_SIZE) * type_annotations_.size();
 
     size += TAG_SIZE;  // null tag
 
@@ -1351,26 +1298,8 @@ bool FieldItem::WriteValue(Writer *writer)
 
 bool FieldItem::WriteAnnotations(Writer *writer)
 {
-    for (auto runtime_annotation : runtime_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_ANNOTATION, runtime_annotation)) {
-            return false;
-        }
-    }
-
     for (auto annotation : annotations_) {
         if (!WriteIdTaggedValue(writer, FieldTag::ANNOTATION, annotation)) {
-            return false;
-        }
-    }
-
-    for (auto runtime_type_annotation : runtime_type_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::RUNTIME_TYPE_ANNOTATION, runtime_type_annotation)) {
-            return false;
-        }
-    }
-
-    for (auto type_annotation : type_annotations_) {
-        if (!WriteIdTaggedValue(writer, FieldTag::TYPE_ANNOTATION, type_annotation)) {
             return false;
         }
     }

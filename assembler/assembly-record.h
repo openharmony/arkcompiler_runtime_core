@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,28 +29,27 @@ namespace panda::pandasm {
 
 struct Record {
     std::string name = "";
-    bool conflict = false; /* Name is conflict with panda primitive types. Need special handle. */
-    panda::panda_file::SourceLang language;
     std::unique_ptr<RecordMetadata> metadata;
     std::vector<Field> field_list; /* class fields list */
-    size_t params_num = 0;
-    bool body_presence = false;
     SourceLocation body_location;
     std::string source_file; /* The file in which the record is defined or empty */
     std::optional<FileLocation> file_location;
+    panda::panda_file::SourceLang language;
+    bool body_presence = false;
+    bool conflict = false; /* Name is conflict with panda primitive types. Need special handle. */
 
     Record(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
            size_t l_n)
         : name(std::move(s)),
-          language(lang),
           metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)),
-          file_location({f_c, b_l, b_r, l_n, d})
+          file_location({f_c, b_l, b_r, l_n, d}),
+          language(lang)
     {
         metadata->SetAccessFlags(panda::ACC_PUBLIC);
     }
 
     Record(std::string s, panda::panda_file::SourceLang lang)
-        : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateRecordMetadata(lang))
+        : name(std::move(s)), metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)), language(lang)
     {
         metadata->SetAccessFlags(panda::ACC_PUBLIC);
     }

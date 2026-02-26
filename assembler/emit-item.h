@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,9 +58,10 @@ public:
     ~EmitFunctionsJob() override = default;
 
     bool Run() override;
-    bool EmitFunctions(const AsmEmitter::AsmEntityCollections &entities, bool emit_debug_info);
-    void EmitDebugInfo(const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method,
-        const Function &func, const std::string &name, bool emit_debug_info);
+    bool EmitFunctions();
+    void EmitDebugInfo(const std::vector<uint8_t> *bytes, const panda_file::MethodItem *method, const Function &func,
+                       const std::string &name);
+
 private:
     static std::mutex mutex_;
     panda_file::ItemContainer &items_;

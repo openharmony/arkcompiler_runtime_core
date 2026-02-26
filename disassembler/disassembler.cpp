@@ -753,8 +753,6 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
         return;
     }
 
-    method->return_type = pandasm::Type("any", 0);
-
     for (uint8_t i = 0; i < params_num; i++) {
         method->params.push_back(pandasm::Function::Parameter(pandasm::Type("any", 0), method->language));
     }
@@ -1931,7 +1929,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 {
     SerializeMethodAnnotations(method, os);
     os << ".language " << panda::panda_file::LanguageToString(method.language) << std::endl;
-    os << ".function " << method.return_type.GetPandasmName() << " " << method.name << "(";
+    os << ".function " << method.ReturnType().GetPandasmName() << " " << method.name << "(";
 
     if (method.params.size() > 0) {
         os << method.params[0].type.GetPandasmName() << " a0";

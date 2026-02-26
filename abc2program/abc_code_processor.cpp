@@ -253,8 +253,7 @@ void AbcCodeProcessor::FillLocalVariableTable()
         uint32_t start_idx = GetInstIdxByInstPc(variable.start_offset);
         uint32_t end_idx = GetInstIdxByInstPc(variable.end_offset);
         uint32_t length = end_idx - start_idx;
-        panda::pandasm::debuginfo::LocalVariable local_var = {
-            variable.name, variable.type, variable.type_signature, variable.reg_number, start_idx, length};
+        panda::pandasm::debuginfo::LocalVariable local_var = {variable.name, variable.reg_number, start_idx, length};
         function_.local_variable_debug.push_back(local_var);
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,8 +70,13 @@ struct Function {
         Parameter(Type t, panda::panda_file::SourceLang lang) : type(std::move(t)) {}
     };
 
+    Type ReturnType() const
+    {
+        static const Type ANY_TYPE("any", 0);
+        return ANY_TYPE;
+    }
+
     std::string name = "";
-    panda::panda_file::SourceLang language;
     std::unique_ptr<FunctionMetadata> metadata;
 
     std::unordered_map<std::string, panda::pandasm::Label> label_table;
@@ -83,14 +88,14 @@ struct Function {
     int64_t value_of_first_param = -1;
     size_t regs_num = 0;
     std::vector<Parameter> params;
-    bool body_presence = false;
-    Type return_type;
     SourceLocation body_location;
     std::optional<FileLocation> file_location;
-    panda::panda_file::FunctionKind function_kind = panda::panda_file::FunctionKind::NONE;
     size_t slots_num = 0;
     std::vector<int> concurrent_module_requests;
-    size_t expected_property_count = 0;
+    panda::panda_file::FunctionKind function_kind = panda::panda_file::FunctionKind::NONE;
+    panda::panda_file::SourceLang language;
+    bool body_presence = false;
+    uint32_t expected_property_count = 0;
 
     void SetSlotsNum(size_t num)
     {
@@ -112,12 +117,12 @@ struct Function {
         return function_kind;
     }
 
-    void SetExpectedPropertyCount(size_t count)
+    void SetExpectedPropertyCount(uint32_t count)
     {
         expected_property_count = count;
     }
 
-    size_t GetExpectedPropertyCount() const
+    uint32_t GetExpectedPropertyCount() const
     {
         return expected_property_count;
     }
@@ -125,14 +130,15 @@ struct Function {
     Function(std::string s, panda::panda_file::SourceLang lang, size_t b_l, size_t b_r, std::string f_c, bool d,
              size_t l_n)
         : name(std::move(s)),
-          language(lang),
           metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
-          file_location({f_c, b_l, b_r, l_n, d})
+          file_location({f_c, b_l, b_r, l_n, d}),
+          language(lang)
     {
     }
 
     Function(std::string s, panda::panda_file::SourceLang lang)
-        : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang))
+        : name(std::move(s)), metadata(extensions::MetadataExtension::CreateFunctionMetadata(lang)),
+          language(lang)
     {
     }
 
@@ -157,7 +163,7 @@ struct Function {
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-              const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
+              const std::map<std::string, panda_file::BaseClassItem *> &classes,
               const std::unordered_map<std::string, panda_file::StringItem *> &strings,
               const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const;
 
@@ -189,7 +195,7 @@ struct Function {
     Function::TryCatchInfo MakeOrderAndOffsets(const std::vector<uint8_t> &bytecode) const;
 
     std::vector<panda_file::CodeItem::TryBlock> BuildTryBlocks(
-        panda_file::MethodItem *method, const std::unordered_map<std::string, panda_file::BaseClassItem *> &class_items,
+        panda_file::MethodItem *method, const std::map<std::string, panda_file::BaseClassItem *> &class_items,
         const std::vector<uint8_t> &bytecode) const;
 
     bool HasImplementation() const
