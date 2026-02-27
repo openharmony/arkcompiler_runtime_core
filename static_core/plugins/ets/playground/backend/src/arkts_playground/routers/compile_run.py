@@ -19,12 +19,12 @@ from typing import Annotated
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from ..config import get_settings
-from ..deps.runner import Runner, get_runner
-from ..models.ast import AstRequestModel, AstResponse
-from ..models.common import IrDumpOptions, VersionsResponse
-from ..models.compile import CompileRequestModel, CompileResponse, RunResponse
-from ..models.features import FeaturesResponse
+from arkts_playground.config import get_settings
+from arkts_playground.deps.runner import Runner, get_runner
+from arkts_playground.models.ast import AstRequestModel, AstResponse
+from arkts_playground.models.common import IrDumpOptions, VersionsResponse
+from arkts_playground.models.compile import CompileRequestModel, CompileResponse, RunResponse
+from arkts_playground.models.features import FeaturesResponse
 
 logger = structlog.stdlib.get_logger(__name__)
 

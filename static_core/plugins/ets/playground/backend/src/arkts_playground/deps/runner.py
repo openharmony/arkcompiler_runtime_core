@@ -26,10 +26,10 @@ import aiofiles
 import structlog
 from typing_extensions import Unpack
 
-from ..config import get_settings
-from ..metrics import (AST_FAILURES, COMPILER_FAILURES, DISASM_FAILURES,
-                       RUNTIME_FAILURES)
-from ..models.common import IrDumpFileItem, VerificationMode
+from arkts_playground.config import get_settings
+from arkts_playground.metrics import (AST_FAILURES, COMPILER_FAILURES, DISASM_FAILURES,
+                                      RUNTIME_FAILURES)
+from arkts_playground.models.common import IrDumpFileItem, VerificationMode
 
 logger = structlog.stdlib.get_logger(__name__)
 

@@ -23,7 +23,7 @@ import yaml
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
-from .models.options import OptionModel
+from arkts_playground.models.options import OptionModel
 
 
 class SyntaxModel(BaseModel):

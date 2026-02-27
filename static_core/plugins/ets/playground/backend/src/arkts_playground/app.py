@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,9 +27,9 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from arkts_playground.logs import configure_logging
 
-from .config import get_settings
-from .routers import compile_run, formatting, options
-from .deps.runner import get_runner
+from arkts_playground.config import get_settings
+from arkts_playground.routers import compile_run, formatting, options
+from arkts_playground.deps.runner import get_runner
 
 access_logger = structlog.stdlib.get_logger("api.access")
 
