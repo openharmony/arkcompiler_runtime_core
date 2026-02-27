@@ -144,15 +144,15 @@ cases:
       let a = new FixedArray<HandlerBInt>(30, handlerAInt)
       arktest.assertEQ(a.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((a[i](new B, 7).v, -20)
+        arktest.assertEQ(a[i](new B, 7).v, -20)
       }
       let b = new FixedArray<HandlerBInt>(30, handlerA)
       arktest.assertEQ(b.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((b[i](new B, 7).v, 13)
+        arktest.assertEQ(b[i](new B, 7).v, 13)
       }
       let c = new FixedArray<HandlerBInt>(30, handlerNothing)
       arktest.assertEQ(c.length, 30)
       for (let i = 0; i < 30; i++) {
-        arktest.assertEQ((c[i](new B, 7).v, -567)
+        arktest.assertEQ(c[i](new B, 7).v, -567)
       }

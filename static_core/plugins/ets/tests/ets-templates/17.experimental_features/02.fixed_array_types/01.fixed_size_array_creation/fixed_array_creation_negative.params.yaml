@@ -67,7 +67,7 @@ cases:
 
    - type: 'Double'
      value: '"abc"'
-     initType: 'String'
+     initType: '\"abc\"'
 
    - type: 'Int'
      value: "5.7"
@@ -79,7 +79,7 @@ cases:
 
    - type: 'Boolean'
      value: '"true"'
-     initType: 'String'
+     initType: '\"true\"'
 
    - type: 'Double'
      value: '(index: int) => undefined'
