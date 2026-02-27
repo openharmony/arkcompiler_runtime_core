@@ -2142,6 +2142,33 @@
 17.experimental_features/11.classes_experimental/03.named_constructors/explicit_cons_call_7.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/explicit_cons_call_8.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/explicit_cons_call_9.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/super01_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/super02_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/super03_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/super04_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/this01_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/this02_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/not_root-level/this03_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/03_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/04_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/05_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/06_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/07_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/super_in_args/08_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/01_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/02_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/03_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/04_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/05_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/06_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/07_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/08_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/09_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/10_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/11_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/12_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/13_n.ets
+17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/14_n.ets
 
 #32096 no CTE class declares method with the same name as that of a private method in superinterface
 17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
