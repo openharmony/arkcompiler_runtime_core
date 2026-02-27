@@ -13,7 +13,7 @@
 
 import("//arkcompiler/ets_runtime/common_components/tests/test_helper.gni")
 
-module_output_path = "ets_runtime"
+module_output_path = "runtime_core/runtime_core"
 
 host_unittest_action("Base_Runtime_Test") {
   module_out_path = module_output_path
