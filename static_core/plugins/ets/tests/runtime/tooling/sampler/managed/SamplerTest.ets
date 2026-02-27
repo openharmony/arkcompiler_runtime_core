@@ -15,6 +15,8 @@
 
 export namespace ns {
 
+const ONE_SECOND_IN_MS: int = 1000
+
 export function main(): int {
     const repetitions: int = 1000000
     return executeTest(repetitions)
@@ -74,7 +76,7 @@ function slowFunction(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
-    for (let i: int = 0; i < repetitions; i++) {
+    for (let i: int = 0; i < repetitions || (Date.now() - startTime < ONE_SECOND_IN_MS); i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
     }
@@ -85,7 +87,7 @@ function slowFunctionCopy1(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
-    for (let i: int = 0; i < repetitions; i++) {
+    for (let i: int = 0; i < repetitions || (Date.now() - startTime < ONE_SECOND_IN_MS); i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
     }
@@ -96,7 +98,7 @@ function slowFunctionCopy2(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
-    for (let i: int = 0; i < repetitions; i++) {
+    for (let i: int = 0; i < repetitions || (Date.now() - startTime < ONE_SECOND_IN_MS); i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
     }
@@ -107,7 +109,7 @@ function slowFunctionCopy3(repetitions: int): double {
     let ret: double = 0.0
     let sign: int = 1
     const startTime = Date.now()
-    for (let i: int = 0; i < repetitions; i++) {
+    for (let i: int = 0; i < repetitions || (Date.now() - startTime < ONE_SECOND_IN_MS); i++) {
         ret += sign / (2.0 * i + 1);
         sign *= -1
     }
