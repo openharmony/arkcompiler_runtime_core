@@ -106,26 +106,21 @@ static Sign ReadSign(uint16_t ch)
     return Sign::NONE;
 }
 
-static bool SkipHexPrefix(const PandaString &str, PandaString::size_type &index)
+static PandaString::size_type TrySkipHexPrefix(const PandaString &str, const PandaString::size_type start)
 {
-    namespace tags = panda_file_items::class_descriptors;
-
+    auto index = start;
     if (str[index] != '0') {
-        return true;
+        return start;
     }
-    auto zeroPos = index;
     ++index;
     if (index >= str.size()) {
-        index = zeroPos;
-        return true;
+        return start;
     }
     auto ch = str[index];
     if (ch != 'x' && ch != 'X') {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Invalid hex prefix");
-        return false;
+        return start;
     }
-    ++index;
-    return true;
+    return ++index;
 }
 
 template <typename T>
@@ -178,8 +173,8 @@ T StringToInt(EtsString *str, uint8_t radix)
         ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
         return 0;
     }
-    if (radix == HEXADECIMAL && !SkipHexPrefix(ps, index)) {
-        return 0;
+    if (radix == HEXADECIMAL) {
+        index = TrySkipHexPrefix(ps, index);
     }
     auto result = StringToInt<T>(ps, index, radix);
     if (sign == Sign::NEG) {
