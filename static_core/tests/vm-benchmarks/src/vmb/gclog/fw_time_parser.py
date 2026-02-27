@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,10 +33,8 @@ class FwTimeParser:
         ret = None
         if m:
             return {
-                # to ns
-                'fw_start_time': int(m.group('fw_start')) * 1000.0 * 1000.0,
-                # to ns
-                'fw_end_time': int(m.group('fw_end')) * 1000.0 * 1000.0,
+                'fw_start_time': int(m.group('fw_start')),
+                'fw_end_time': int(m.group('fw_end')),
                 'vm_start_time': int(m.group('vm_start'))
             }
         return ret
