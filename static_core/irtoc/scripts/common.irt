@@ -378,7 +378,7 @@ macro(:load_class) do |obj|
   # Memory order is not required since memory barrier after class initialization
   # in class linker guarantees initialized class visibility
   # See class_linker.cpp:AvoidLoadedClassPointerLeak
-  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
     klass_with_flags := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
     # Mask for class pointer
     Bitcast(And(klass_with_flags, 0x0000ffffffffffff).u64).ref
@@ -388,7 +388,7 @@ macro(:load_class) do |obj|
 end
 
 macro(:load_base_class) do |klass|
-  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
     base_klass = LoadI(klass).Imm(Constants::CLASS_BASE_OFFSET).Volatile.u64
     Bitcast(And(base_klass, 0x0000ffffffffffff).u64).ref
   else
@@ -408,7 +408,7 @@ macro(:store_class) do |obj, klass|
   # Memory order is not required since memory barrier after class initialization
   # in class linker guarantees initialized class visibility
   # See class_linker.cpp:AvoidLoadedClassPointerLeak
-  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
     StoreI(obj, OrI(Bitcast(klass).u64).Imm("0x1000000000000000UL").u64).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).u64
   else
     StoreI(obj, klass).Imm(Constants::OBJECT_CLASS_OFFSET).Volatile(false).ref
@@ -437,7 +437,7 @@ macro(:get_entrypoint_offset) do |entrypoint_id|
 end
 
 macro(:reftoptr) do |ref_val|
-  if defines.ARK_HYBRID && defines.PANDA_TARGET_64
+  if defines.ARK_USE_COMMON_RUNTIME && defines.PANDA_TARGET_64
     Bitcast(ref_val).ptr
   else
     Cast(ref_val).SrcType("DataType::REFERENCE").ptr

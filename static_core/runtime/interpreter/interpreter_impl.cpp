@@ -59,13 +59,13 @@ InterpreterType GetInterpreterTypeFromRuntimeOptions(Frame *frame)
                 interpreterType = InterpreterType::IRTOC;
             }
 #endif
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
             // CMC GC will be supported with LLVM interpreter with issue27125
-            if (interpreterType == InterpreterType::LLVM) {
-                LOG(INFO, RUNTIME) << "--interpreter-type=LLVM is downgraded into IRTOC in CMC GC if no setting";
-                interpreterType = InterpreterType::IRTOC;
+            if (interpreterType != InterpreterType::CPP) {
+                LOG(INFO, RUNTIME) << "--interpreter-type is downgraded into CPP in CMC GC if no setting";
+                interpreterType = InterpreterType::CPP;
             }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 #ifndef PANDA_WITH_IRTOC
             if (interpreterType == InterpreterType::IRTOC) {
                 interpreterType = InterpreterType::CPP;
@@ -137,7 +137,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
             return;
         }
         auto gcType = thread->GetVM()->GetGC()->GetType();
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
         if (gcType != mem::GCType::CMC_GC) {
             LOG(FATAL, RUNTIME) << "--gc-type=" << mem::GCStringFromType(gcType) << " option is supported only with "
                                 << "--interpreter-type=cpp. Use --gc-type=cmc-gc instead.";
@@ -154,15 +154,15 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
                 LOG(INFO, RUNTIME) << "Dynamic types profiling disabled, use --interpreter-type=cpp to enable";
             }
         }
-#endif  // #ifdef ARK_HYBRID
+#endif
     }
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     // CMC GC will be supported with LLVM interpreter with issue27125
     if (interpreterType == InterpreterType::LLVM) {
         LOG(FATAL, RUNTIME) << "CMC GC is only supported to be set with --interpreter-type=cpp or irtoc";
         return;
     }
-#endif  // #ifdef ARK_HYBRID
+#endif  // ARK_USE_COMMON_RUNTIME
 #endif  // #if !defined(PANDA_TARGET_ARM32)
     ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }

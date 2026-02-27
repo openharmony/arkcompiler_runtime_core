@@ -254,7 +254,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlLanguageTag.cpp",
 ]
 
-if (ark_hybrid) {
+if (ark_use_common_runtime) {
   srcs_runtime += [
     "runtime/hybrid/mem/external-gc.cpp",
     "runtime/hybrid/mem/static_object_operator.cpp",

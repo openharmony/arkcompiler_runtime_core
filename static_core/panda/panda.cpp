@@ -41,10 +41,6 @@
 #include <ctime>
 #include <csignal>
 
-#ifdef ARK_HYBRID
-#include <node_api.h>
-#endif
-
 namespace ark {
 const panda_file::File *GetPandaFile(const ClassLinker &classLinker, std::string_view fileName)
 {
@@ -219,15 +215,6 @@ int Main(int argc, const char **argv)
 
     SetPandaFiles(runtimeOptions, file);
 
-#ifdef ARK_HYBRID
-    // This workaround is needed to define weak symbols of napi in hybrid libarkruntime.so
-    // It will be removed after #26269 fix
-    volatile bool initNapi = false;
-    if (initNapi) {
-        napi_module_register(nullptr);
-    }
-#endif
-
     if (!Runtime::Create(runtimeOptions)) {
         std::cerr << "Error: cannot create runtime" << std::endl;
         return -1;
@@ -253,13 +240,6 @@ int Main(int argc, const char **argv)
 
 int main(int argc, const char **argv)
 {
-#ifdef ARK_HYBRID
-    common::BaseRuntime::GetInstance()->Init();
-#endif
     int res = ark::Main(argc, argv);
-#ifdef ARK_HYBRID
-    common::BaseRuntime::GetInstance()->Fini();
-    common::BaseRuntime::DestroyInstance();
-#endif
     return res;
 }

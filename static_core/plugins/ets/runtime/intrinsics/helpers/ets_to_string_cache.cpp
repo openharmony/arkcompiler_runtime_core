@@ -72,7 +72,7 @@ public:
     };
     static_assert(sizeof(Data) == sizeof(ObjectPointerType) * 2U);
     // NOTE(ipetrov): hack for 128 bit ObjectHeader
-#if !defined(ARK_HYBRID) && defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
+#if !defined(ARK_USE_COMMON_RUNTIME) && defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     static_assert(std::atomic<Data>::is_always_lock_free);
 #endif
 

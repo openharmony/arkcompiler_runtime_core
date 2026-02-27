@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,8 +109,8 @@ else()
         # using a separate .cpp file with weak symbols.
         panda_target_compile_definitions(arkruntime_obj PRIVATE PANDA_JS_ETS_HYBRID_MODE_NEED_WEAK_SYMBOLS)
     endif()
-    if (ARK_HYBRID)
-        panda_target_compile_definitions(arkruntime_obj PRIVATE ARK_HYBRID)
+    if (ARK_USE_COMMON_RUNTIME)
+        panda_target_compile_definitions(arkruntime_obj PRIVATE ARK_USE_COMMON_RUNTIME)
     endif()
     if (USE_CMC_GC)
         panda_target_compile_definitions(arkruntime_obj PRIVATE USE_CMC_GC)

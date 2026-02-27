@@ -160,9 +160,9 @@ void StackfulCoroutineWorker::RequestFinalization(Coroutine *finalizee)
 
     ProcessTimerEvents();
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     finalizee->UnbindMutator();
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     finalizationQueue_.push(finalizee);
     // finalizee will never be scheduled again
     ScheduleNextCoroUnlockNone();

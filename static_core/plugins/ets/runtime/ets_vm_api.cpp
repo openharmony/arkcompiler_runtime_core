@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,12 +97,6 @@ bool CreateRuntime(std::function<bool(logger::Options *, RuntimeOptions *)> cons
 
     LOG(DEBUG, RUNTIME) << "CreateRuntime";
 
-#ifdef ARK_HYBRID
-    if (!runtimeOptions.WasSetGcType("ets")) {
-        runtimeOptions.SetGcType("cmc-gc");
-        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
-    }
-#endif
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     if ((runtimeOptions.GetXgcTriggerType() != "never") &&
         (runtimeOptions.GetGcType("ets") != "g1-gc" || runtimeOptions.IsNoAsyncJit())) {

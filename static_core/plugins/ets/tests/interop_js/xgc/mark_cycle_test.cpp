@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ public:
         ASSERT(values_ != nullptr);
     }
 
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     void MarkFromObject(napi_ref obj, const common::RefFieldVisitor &visitor) override
     {
         values_->markFromObjectCalled = true;

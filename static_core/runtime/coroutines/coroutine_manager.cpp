@@ -33,7 +33,7 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
 
     Coroutine::SetCurrent(main);
     main->InitBuffers();
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     auto hasJsRuntime = common::Mutator::GetCurrent() != nullptr;
     main->LinkToExternalMutator(true);
     // We need to unbind mutator before binding in the RequestResume,
@@ -41,7 +41,7 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
     if (hasJsRuntime) {
         main->UnbindMutator();
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     main->RequestResume();
     main->NativeCodeBegin();
 

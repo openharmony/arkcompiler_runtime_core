@@ -38,11 +38,13 @@ template("ark_runtime_unittest") {
       ld_lib_paths = []
     }
     ld_lib_paths += [ "thirdparty/icu" ]
+    if (ark_use_common_runtime || ark_ets_hybrid) {
+      ld_lib_paths += [ "thirdparty/bounds_checking_function" ]
+    }
     if (ark_ets_hybrid) {
       ld_lib_paths += [
         "arkcompiler/ets_runtime",
         "arkui/napi",
-        "thirdparty/bounds_checking_function",
         "thirdparty/libuv",
       ]
     }

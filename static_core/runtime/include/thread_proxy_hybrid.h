@@ -15,7 +15,7 @@
 #ifndef PANDA_RUNTIME_THREAD_PROXY_HYBRID_H
 #define PANDA_RUNTIME_THREAD_PROXY_HYBRID_H
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 
 #include "runtime/include/thread_interface.h"
 
@@ -87,6 +87,6 @@ private:
 
 }  // namespace ark
 
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 #endif  // PANDA_RUNTIME_THREAD_PROXY_HYBRID_H

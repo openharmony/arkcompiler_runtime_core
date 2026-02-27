@@ -16,7 +16,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/cmc-gc-adapter/cmc-allocator-adapter.h"
 #include "runtime/mem/runslots_allocator-inl.h"
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/heap/heap_allocator.h"
 #include "common_interfaces/objects/base_object.h"
@@ -37,7 +37,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
                                                    [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit,
                                                    [[maybe_unused]] bool pinned)
 {
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<void *>(common::HeapAllocator::AllocateInYoungOrHuge(size, common::LanguageType::STATIC));
 #else
     return nullptr;
@@ -50,7 +50,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
     [[maybe_unused]] ark::ManagedThread *thread,                     // CC-OFF(G.FMT.06) project code style
     [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit)  // CC-OFF(G.FMT.06) project code style
 {
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<ObjectHeader *>(
         common::HeapAllocator::AllocateInNonmoveOrHuge(size, common::LanguageType::STATIC));
 #else
@@ -61,14 +61,14 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
 template <MTModeT MT_MODE>
 void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
 {
-#if defined(ARK_HYBRID)
+#if defined(ARK_USE_COMMON_RUNTIME)
     auto visitor = [&](common::BaseObject *obj) {
         if (obj->IsStatic()) {
             objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
         }
     };
     common::BaseRuntime::ForEachObj(visitor, true);
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 template class CMCObjectAllocatorAdapter<MT_MODE_SINGLE>;

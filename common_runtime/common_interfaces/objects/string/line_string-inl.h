@@ -87,22 +87,10 @@ inline void LineString::Trim(uint32_t newLength)
         return;
     }
     bool isUtf8 = IsUtf8();
-    size_t sizeNew = isUtf8 ?
-        LineString::ComputeSizeUtf8(newLength): LineString::ComputeSizeUtf16(newLength);
-    size_t sizeOld = isUtf8 ?
-        LineString::ComputeSizeUtf8(oldLength): LineString::ComputeSizeUtf16(oldLength);
-    sizeNew = AlignmentUp(sizeNew, ALIGNMENT_8_BYTES);
-    sizeOld = AlignmentUp(sizeOld, ALIGNMENT_8_BYTES);
-    size_t trimBytes = sizeOld - sizeNew;
-    if (trimBytes > 0) {
-        uintptr_t newEndAddr = ToUintPtr(this) + sizeNew;
-        DCHECK_CC((newEndAddr % ALIGNMENT_8_BYTES) == 0);
-        BaseRuntime::FillFreeObject(reinterpret_cast<void*>(newEndAddr), trimBytes);
-    }
     InitLengthAndFlags(newLength, isUtf8);
 }
 
-template<typename ReadBarrier>
+template <typename ReadBarrier>
 void LineString::WriteData(ReadBarrier &&readBarrier, BaseString *src, uint32_t start, uint32_t destSize,
                            uint32_t length)
 {

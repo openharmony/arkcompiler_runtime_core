@@ -332,8 +332,8 @@ config("ark_common_config") {
     configs += [ sdk_libc_secshared_config ]
   }
 
-  if (ark_hybrid) {
-    defines += [ "ARK_HYBRID" ]
+  if (ark_use_common_runtime) {
+    defines += [ "ARK_USE_COMMON_RUNTIME" ]
   } else if (!(defined(use_hwasan) && use_hwasan && current_cpu == "arm64") &&
              !ark_static_use_64_bit_managed_pointer) {
     defines += [ "PANDA_32_BIT_MANAGED_POINTER" ]

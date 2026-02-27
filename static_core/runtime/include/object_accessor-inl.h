@@ -29,14 +29,14 @@ namespace ark {
 template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
 inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {
             return reinterpret_cast<ObjectHeader *>(barrierSet->PreReadBarrier(obj, offset));
         }
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     // We don't have GC with read barriers now
     if (!IS_DYN) {
         return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType, IS_VOLATILE>(obj, offset));
@@ -80,14 +80,14 @@ template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, b
 inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThread *thread, const void *obj,
                                                size_t offset)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {
             return reinterpret_cast<ObjectHeader *>(barrierSet->PreReadBarrier(obj, offset));
         }
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     // We don't have GC with read barriers now
     if (!IS_DYN) {
         return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType, IS_VOLATILE>(obj, offset));
@@ -260,14 +260,14 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value,
 template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memoryOrder)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     if (NEED_READ_BARRIER) {
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreReadBarrierEnabled()) {
             return reinterpret_cast<ObjectHeader *>(barrierSet->PreReadBarrier(obj, offset));
         }
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     if (!IS_DYN) {
         return reinterpret_cast<ObjectHeader *>(Get<ObjectPointerType>(obj, offset, memoryOrder));
     }

@@ -657,7 +657,7 @@ ohos_shared_library("libarkruntime") {
     ldflags += coverage_ldflags
   }
 
-  if (ark_hybrid) {
+  if (ark_use_common_runtime) {
     deps += [ "$common_runtime_root:libcommon_runtime" ]
   }
 
@@ -705,7 +705,7 @@ ohos_shared_library("libarkruntime_host") {
     deps += [ ":libarkruntime_set_static_host" ]
   }
 
-  if (ark_hybrid) {
+  if (ark_use_common_runtime) {
     deps += [ "$common_runtime_root:libcommon_runtime" ]
   }
 

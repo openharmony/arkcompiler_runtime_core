@@ -217,7 +217,7 @@ void ThreadProxyStatic::MakeTSANHappyForThreadState()
     TSAN_ANNOTATE_HAPPENS_AFTER(&fts_);
 }
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 
 using namespace common;
 
@@ -353,6 +353,6 @@ Mutator *ThreadProxyHybrid::GetSharedExternalMutator()
     return g_SharedExternalMutator;
 }
 
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 }  // namespace ark

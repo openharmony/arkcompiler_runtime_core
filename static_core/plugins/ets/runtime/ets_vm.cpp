@@ -88,7 +88,7 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
 
     auto gcType = Runtime::GetGCType(options, panda_file::SourceLang::ETS);
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     ark::mem::ets::RegisterCmcGcCallbacks();
 #endif
 

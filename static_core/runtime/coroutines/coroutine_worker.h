@@ -52,9 +52,9 @@ public:
     CoroutineWorker(Runtime *runtime, PandaVM *vm, PandaString name, Id id, bool isMainWorker)
         : runtime_(runtime), vm_(vm), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
     {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
         mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
     }
     virtual ~CoroutineWorker()
     {
@@ -136,18 +136,17 @@ public:
         return false;
     }
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     common::Mutator *GetMutator()
     {
         return mutator_;
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 private:
     void CreateWorkerLocalObjects();
     virtual void CacheLocalObjectsInCoroutines() {}
 
-private:
     Runtime *runtime_ = nullptr;
     PandaVM *vm_ = nullptr;
     PandaString name_;
@@ -157,9 +156,9 @@ private:
     // event loop poster
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> extSchedulingPoster_;
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     common::Mutator *mutator_ = nullptr;
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 };
 
 }  // namespace ark

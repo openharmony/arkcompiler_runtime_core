@@ -31,12 +31,12 @@ declare_args() {
   is_llvmbackend = true
   is_ccache = false
   is_ohos = false
-  if (!defined(ark_hybrid)) {
-    ark_hybrid = false
+  if (!defined(ark_use_common_runtime)) {
+    ark_use_common_runtime = false
   }
 }
 
-if (ark_hybrid) {
+if (ark_use_common_runtime) {
   is_llvmbackend = false
 }
 

@@ -46,9 +46,9 @@
 #include "runtime/include/coretypes/string_flatten.h"
 #include "runtime/include/safepoint_timer.h"
 
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 #include "common_interfaces/base_runtime.h"
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
 
@@ -429,7 +429,7 @@ extern "C" ObjectHeader *CloneObjectEntrypoint(ObjectHeader *obj)
 extern "C" void CmcPostWriteBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset,
                                     [[maybe_unused]] ark::ObjectHeader *ref)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     common::BaseRuntime::WriteBarrier(obj, field, ref);
 #else
@@ -441,7 +441,7 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
                                         [[maybe_unused]] ark::ObjectHeader *ref1,
                                         [[maybe_unused]] ark::ObjectHeader *ref2)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     common::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset), ref1);
     common::BaseRuntime::WriteBarrier(obj, ToVoidPtr(ToUintPtr(obj) + offset + OBJECT_POINTER_SIZE), ref2);
 #else
@@ -451,7 +451,7 @@ extern "C" void CmcPostWritePairBarrier([[maybe_unused]] ark::ObjectHeader *obj,
 
 extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     return common::BaseRuntime::ReadBarrier(obj, field);
 #else
@@ -462,7 +462,7 @@ extern "C" void *CmcReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[ma
 
 extern "C" void *CmcAtomicReadViaBarrier([[maybe_unused]] ark::ObjectHeader *obj, [[maybe_unused]] int32_t offset)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     void *field = ToVoidPtr(ToUintPtr(obj) + offset);
     return common::BaseRuntime::AtomicReadBarrier(obj, field, std::memory_order_acquire);
 #else

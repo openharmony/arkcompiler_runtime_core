@@ -37,7 +37,7 @@ class BaseStringTableImpl;
 template <typename Impl>
 class BaseStringTableInterface;
 using StringTableCleanUpCallback = std::function<void(void)>;
-using StringTableProcessCallback = std::function<void(const WeakRefFieldVisitor&)>;
+using StringTableProcessCallback = std::function<void(const WeakRefFieldVisitor &)>;
 class BaseObject;
 class HeapManager;
 class Mutator;
@@ -69,24 +69,12 @@ enum GCReason : uint32_t {
     GC_REASON_INVALID = std::numeric_limits<uint32_t>::max(),
 };
 
-inline const char* GCREASON_STRING[] = {
-    "user",
-    "oom",
-    "backup",
-    "heuristic",
-    "young",
-    "native_alloc",
-    "heuristic_sync",
-    "native_alloc_sync",
-    "force",
-    "appspawn",
-    "xref",
-    "backgound",
-    "hint",
-    "idle",
+constexpr inline const char *GCREASON_STRING[] = {
+    "user",  "oom",      "backup", "heuristic", "young", "native_alloc", "heuristic_sync", "native_alloc_sync",
+    "force", "appspawn", "xref",   "backgound", "hint",  "idle",
 };
 
-inline const char* GCReasonToString(GCReason reason)
+constexpr const char *GCReasonToString(GCReason reason)
 {
     if (reason >= GC_REASON_BEGIN && reason <= GC_REASON_END) {
         return GCREASON_STRING[reason];
@@ -102,13 +90,13 @@ enum GCType : uint32_t {
     GC_TYPE_END = GC_TYPE_STW,
 };
 
-inline const char* GCTYPE_STRING[] = {
+constexpr inline const char *GCTYPE_STRING[] = {
     "FULL",
     "YOUNG",
     "STW",
 };
 
-inline const char* GCTypeToString(GCType gcType)
+constexpr const char *GCTypeToString(GCType gcType)
 {
     if (gcType >= GC_TYPE_BEGIN && gcType <= GC_TYPE_END) {
         return GCTYPE_STRING[gcType];
@@ -121,7 +109,7 @@ enum class MemoryReduceDegree : uint8_t {
     HIGH,
 };
 
-using HeapVisitor = const std::function<void(BaseObject*)>;
+using HeapVisitor = const std::function<void(BaseObject *)>;
 
 class PUBLIC_API BaseRuntime {
 public:
@@ -135,24 +123,21 @@ public:
     void PostFork(bool enableWarmStartup);
 
     bool HasBeenInitialized();
-    void Init(const RuntimeParam &param);   // Support setting custom parameters
-    void Init();                            // Use default parameters
-    void InitFromDynamic();
-    void InitFromDynamic(const RuntimeParam &param);
+    void Init(const RuntimeParam &param);  // Support setting custom parameters
+    void Init();                           // Use default parameters
     void Fini();
-    void FiniFromDynamic();
 
     // Need refactor, move to other file
-    static void WriteRoot(void* obj);
-    static void WriteBarrier(void* obj, void* field, void* ref, Mutator *mutator = nullptr);
-    static void* ReadBarrier(void* obj, void* field);
-    static void* ReadBarrier(void* field);
-    static void* AtomicReadBarrier(void* obj, void* field, std::memory_order order);
+    static void WriteRoot(void *obj);
+    static void WriteBarrier(void *obj, void *field, void *ref, Mutator *mutator = nullptr);
+    static void *ReadBarrier(void *obj, void *field);
+    static void *ReadBarrier(void *field);
+    static void *AtomicReadBarrier(void *obj, void *field, std::memory_order order);
     static void RequestGC(GCReason reason, bool async, GCType gcType);
     static void WaitForGCFinish();
     static void EnterGCCriticalSection();
     static void ExitGCCriticalSection();
-    static bool ForEachObj(HeapVisitor& visitor, bool safe);
+    static bool ForEachObj(HeapVisitor &visitor, bool safe);
     static void NotifyNativeAllocation(size_t bytes);
     static void NotifyNativeFree(size_t bytes);
     static void NotifyNativeReset(size_t oldBytes, size_t newBytes);
@@ -161,7 +146,6 @@ public:
     static bool CheckAndTriggerHintGC(MemoryReduceDegree degree);
     static void NotifyHighSensitive(bool isStart);
     static void NotifyWarmStart();
-    static void FillFreeObject(void *object, size_t size);
 
     HeapParam &GetHeapParam()
     {
@@ -220,10 +204,10 @@ public:
 private:
     RuntimeParam param_ {};
 
-    HeapManager* heapManager_ = nullptr;
-    MutatorManager* mutatorManager_ = nullptr;
-    BaseClassRoots* baseClassRoots_ = nullptr;
-    BaseStringTableInterface<BaseStringTableImpl>* stringTable_ = nullptr;
+    HeapManager *heapManager_ = nullptr;
+    MutatorManager *mutatorManager_ = nullptr;
+    BaseClassRoots *baseClassRoots_ = nullptr;
+    BaseStringTableInterface<BaseStringTableImpl> *stringTable_ = nullptr;
     StringTableCleanUpCallback stringTableCleanUpCallback_ {};
     StringTableProcessCallback stringTableProcessCallback_ {};
     static std::mutex vmCreationLock_;
@@ -231,7 +215,7 @@ private:
     static bool initialized_;
 };
 }  // namespace common
-#endif // COMMON_INTERFACES_BASE_RUNTIME_H
+#endif  // COMMON_INTERFACES_BASE_RUNTIME_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

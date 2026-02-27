@@ -22,12 +22,12 @@
 #include "runtime/trace.h"
 
 namespace ark {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor)
 {
     reinterpret_cast<Coroutine *>(coroutine)->Visit(visitor);
 }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 
 Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, CoroutineContext *context,
                              std::optional<EntrypointInfo> &&epInfo, Type type, CoroutinePriority priority)
@@ -156,7 +156,7 @@ void Coroutine::IssueTracingEvents(Status oldStatus, Status newStatus)
 
 void Coroutine::LinkToExternalMutator([[maybe_unused]] bool useSharedMutator, [[maybe_unused]] CoroutineWorker *w)
 {
-#ifdef ARK_HYBRID
+#if defined(ARK_USE_COMMON_RUNTIME)
     auto wasCreated = CreateExternalMutatorIfNeeded(useSharedMutator, w ? w->GetMutator() : nullptr);
     if (wasCreated) {
         auto wasInRunning = GetMutator()->TransferToNativeIfInRunning();
@@ -165,7 +165,7 @@ void Coroutine::LinkToExternalMutator([[maybe_unused]] bool useSharedMutator, [[
             GetMutator()->TransferToRunningIfInNative();
         }
     }
-#endif
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void Coroutine::Destroy()

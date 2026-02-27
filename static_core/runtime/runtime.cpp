@@ -82,6 +82,10 @@
 #include "syspara/parameters.h"
 #endif
 
+#if defined(ARK_USE_COMMON_RUNTIME)
+#include "common_interfaces/base_runtime.h"
+#endif  // ARK_USE_COMMON_RUNTIME
+
 namespace ark {
 
 using std::unique_ptr;
@@ -381,6 +385,15 @@ void Runtime::StopCoverageListener()
     instance_->GetTools().DestroyCoverageListener();
 }
 
+static void InitCommonRuntime()
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Init();
+#endif  // ARK_USE_COMMON_RUNTIME
+}
+
 /* static */
 // CC-OFFNXT(huge_method, G.FUN.01) solid logic
 bool Runtime::Create(const RuntimeOptions &options)
@@ -417,7 +430,7 @@ bool Runtime::Create(const RuntimeOptions &options)
         LOG(ERROR, RUNTIME) << "Failed to create runtime instance";
         return false;
     }
-
+    InitCommonRuntime();
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -555,6 +568,16 @@ bool Runtime::DestroyUnderLockHolder()
     return true;
 }
 
+static void FinishCommonRuntime()
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto *baseRuntime = common::BaseRuntime::GetInstance();
+    ASSERT(baseRuntime != nullptr);
+    baseRuntime->Fini();
+    common::BaseRuntime::DestroyInstance();
+#endif  // ARK_USE_COMMON_RUNTIME
+}
+
 /* static */
 bool Runtime::Destroy()
 {
@@ -629,7 +652,7 @@ bool Runtime::Destroy()
 
     DestroyUnderLockHolder();
     RuntimeInternalAllocator::Destroy();
-
+    FinishCommonRuntime();
     os::CpuAffinityManager::Finalize();
 
     return true;
@@ -855,12 +878,6 @@ void Runtime::SetDaemonThreadsCount(uint32_t daemonThreadsCnt)
 
 mem::GCType Runtime::GetGCType(const RuntimeOptions &options, panda_file::SourceLang lang)
 {
-#ifdef ARK_HYBRID
-    if (!options.WasSetGcType(plugins::LangToRuntimeType(lang))) {
-        const_cast<RuntimeOptions &>(options).SetGcType("cmc-gc");
-        LOG(INFO, RUNTIME) << "Not set the GC type, and use cmc-gc by default when Ark hybrid mode is enable";
-    }
-#endif
     auto gcType = ark::mem::GCTypeFromString(options.GetGcType(plugins::LangToRuntimeType(lang)));
     if (options.IsNoAsyncJit()) {
         // With no-async-jit we can force compilation inside of c2i bridge (we have DecrementHotnessCounter there)
