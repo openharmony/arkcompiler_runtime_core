@@ -271,6 +271,10 @@ class TestStandardFlow(ITestFlow, Test):
         """ True if test.expected.err file exists or expected_error is in metadata """
         return super().has_expected_err or self.metadata.expected_error is not None
 
+    @property
+    def continue_if_failed(self) -> bool:
+        return self.test_env.config.general.continue_if_failed
+
     @staticmethod
     def __add_options(options: list[str]) -> list[str]:
         return [opt if opt.startswith("--") else f"--{opt}" for opt in options]
@@ -296,6 +300,15 @@ class TestStandardFlow(ITestFlow, Test):
 
         return '\n'.join(expected[:index_to_delete])
 
+    @staticmethod
+    def _clarify_fail_kind(steps: list[Step]) -> str | None:
+        failed = [step for step in steps if step.passed is False]
+        if len(failed) > 1:
+            return 'MULTIPLE_STEPS_FAILED'
+        if len(failed) == 1:
+            return f'{failed[0].name.upper()}_FAIL'
+        return None
+
     def do_run(self) -> Self:
         if self.is_completed:
             return self
@@ -306,17 +319,20 @@ class TestStandardFlow(ITestFlow, Test):
         self._log_invalid_tags_if_any()
         compile_only_test = self._is_compile_only_test()
         allowed_steps = [StepKind.COMPILER]  # steps to run for compile only or not-a-test tests
-        steps = [step for step in self.test_env.config.workflow.steps
-                 if step.executable_path is not None and
-                 ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
-        for step in steps:
+        steps = self._collect_steps(compile_only_test, allowed_steps)
+        for i, step in enumerate(steps):
             pattern = re.compile(translate(step.step_filter))
             if not pattern.search(str(self.path)):
                 continue
+
             self.passed, self.report, self.fail_kind = self._do_run_one_step(step)
             if step.step_kind in allowed_steps:
                 allowed_steps.remove(step.step_kind)
-            if not self.passed or (compile_only_test and not allowed_steps):
+
+            steps[i] = replace(step, passed=self.passed)
+
+            if ((not self.passed and not self.continue_if_failed)
+                    or (compile_only_test and not allowed_steps)):
                 self.is_completed = True
                 return self
 
@@ -324,6 +340,9 @@ class TestStandardFlow(ITestFlow, Test):
             # no step runs, so nothing bad occurs, and we consider the test is passed
             self.passed = True
             self.fail_kind = 'PASSED'
+
+        if self.continue_if_failed:
+            self._finalize_test_status(steps)
 
         self.is_completed = True
         return self
@@ -527,6 +546,19 @@ class TestStandardFlow(ITestFlow, Test):
         self.test_abc: Path = self.bytecode_path / f"{self.test_id}.abc"
         self.test_an: Path = self.bytecode_path / f"{self.test_id}.an"
         self.test_abc.parent.mkdir(parents=True, exist_ok=True)
+
+    def _collect_steps(self, compile_only_test: bool, allowed_steps: list[StepKind]) -> list[Step]:
+        return [step for step in self.test_env.config.workflow.steps
+                 if step.executable_path is not None and
+                 ((compile_only_test and step.step_kind in allowed_steps) or not compile_only_test)]
+
+    def _finalize_test_status(self, steps: list[Step]) -> None:
+        ran_steps = [step for step in steps if step.passed is not None]
+        self.passed = True if not ran_steps else all(s.passed for s in ran_steps)
+        if not self.passed:
+            clarified_failed_kind = TestStandardFlow._clarify_fail_kind(steps)
+            if clarified_failed_kind is not None:
+                self.fail_kind = clarified_failed_kind
 
     def __fix_entry_point(self, args: list[str]) -> list[str]:
         result: list[str] = args[:]

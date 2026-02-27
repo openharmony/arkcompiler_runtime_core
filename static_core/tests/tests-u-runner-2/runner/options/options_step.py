@@ -81,6 +81,7 @@ class Step(IOptions):
     validator: IValidator | None = None
     stdout: Path | None = None
     stderr: Path | None = None
+    passed: bool | None = None
 
     __DEFAULT_TIMEOUT = 30
     __MIN_ARG_LENGTH = 15

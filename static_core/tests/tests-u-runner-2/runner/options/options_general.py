@@ -49,6 +49,7 @@ class GeneralOptions(IOptions):
     __CFG_RUNNER = "runner"
     __DEFAULT_GN_BUILD = False
     __DEFAULT_RETRIEVE_LOG_TIMEOUT = 20
+    __DEFAULT_CONTINUE_IF_FAILED = False
 
     __VERBOSE = "verbose"
     __VERBOSE_FILTER = "verbose-filter"
@@ -61,6 +62,7 @@ class GeneralOptions(IOptions):
     __REPORT_DIR = "report-dir"
     __GN_BUILD = "gn-build"
     __RETRIEVE_LOG_TIMEOUT = "retrieve-log-timeout"
+    __CONTINUE_IF_FAILED = "continue-if-failed"
 
     def __init__(self, data: dict[str, Any], parent: IOptions):  # type: ignore[explicit-any]
         super().__init__(data)
@@ -91,6 +93,11 @@ class GeneralOptions(IOptions):
             default=GeneralOptions.__DEFAULT_SHOW_PROGRESS,
             dest=f"{dest}{GeneralOptions.__SHOW_PROGRESS}",
             help='Show progress bar')
+        group.add_argument(
+            f'--{GeneralOptions.__CONTINUE_IF_FAILED}', action='store_true',
+            default=GeneralOptions.__DEFAULT_CONTINUE_IF_FAILED,
+            dest=f"{dest}{GeneralOptions.__CONTINUE_IF_FAILED}",
+            help='Continue workflow steps execution if previous step/steps failed')
         group.add_argument(
             f'--{GeneralOptions.__VERBOSE}', '-v', action='store',
             default=GeneralOptions.__DEFAULT_VERBOSE,
@@ -159,6 +166,10 @@ class GeneralOptions(IOptions):
     @cached_property
     def show_progress(self) -> bool:
         return cast(bool, self.__parameters.get(self.__SHOW_PROGRESS, self.__DEFAULT_SHOW_PROGRESS))
+
+    @cached_property
+    def continue_if_failed(self) -> bool:
+        return cast(bool, self.__parameters.get(self.__CONTINUE_IF_FAILED, self.__DEFAULT_CONTINUE_IF_FAILED))
 
     @cached_property
     def report_format(self) -> ReportFormat:

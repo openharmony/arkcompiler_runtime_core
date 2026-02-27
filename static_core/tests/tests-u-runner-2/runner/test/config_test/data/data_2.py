@@ -96,6 +96,7 @@ args = {
     'runner.detailed-report-file': 'my-report',
     'runner.report-dir': 'my-report-dir',
     'runner.show-progress': True,
+    'runner.continue-if-failed': False,
     'runner.verbose': VerboseKind.SHORT,
     'runner.verbose-filter': VerboseFilter.IGNORED,
     'runner.qemu': QemuKind.ARM64,

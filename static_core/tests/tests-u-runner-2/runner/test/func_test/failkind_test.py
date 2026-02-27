@@ -338,3 +338,108 @@ on retrieving partial output after {config.general.retrieve_log_timeout} sec", t
 
                     work_dir = Path(os.environ["WORK_DIR"])
                     shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--continue-if-failed", "--test-file", "test1.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    def test_all_steps_pass(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test1.ets
+        all steps passed
+        status: passed
+        fail_kind: last_wf_step_PASSED
+        """
+
+        mock1 = MagicMock(name="popen1")
+
+        mock1.__enter__.return_value = mock1
+        mock1.communicate.return_value = ("", "")
+        mock1.returncode = 0
+
+        mock_popen.side_effect = [mock1, mock1, mock1, mock1]
+
+        test_result = self.run_test()
+
+        try:
+            self.assertTrue(test_result.passed)
+            self.assertEqual("ECHO-ARK_PASSED", test_result.fail_kind)
+        finally:
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--continue-if-failed", "--test-file", "test1.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    def test_one_step_failure(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test1.ets
+        there are 4 steps in workflow, verifier step failed
+        Expecting:  the following 2 steps were executed
+        status: failed
+        fail_kind: verifier_FAILURE
+        """
+
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+
+        for m, out, rt in ((mock1, ("", ""), 0), (mock2, ("", ""), 1)):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = rt
+
+        mock_popen.side_effect = [mock1, mock2, mock1, mock1]
+
+        test_result = self.run_test()
+
+        try:
+            self.assertFalse(test_result.passed)
+            self.assertEqual(test_result.fail_kind, "ECHO-VERIFIER_FAIL")
+        finally:
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
+
+    @patch('runner.utils.get_config_workflow_folder', data_folder)
+    @patch('runner.utils.get_config_test_suite_folder', data_folder)
+    @patch.dict(os.environ, test_environ, clear=True)
+    @patch('sys.argv', ["runner.sh", "panda", "test_suite1", "--continue-if-failed", "--test-file", "test1.ets"])
+    @patch('runner.suites.test_lists.TestLists.cmake_build_properties', test_utils.test_cmake_build)
+    @patch('runner.suites.test_lists.TestLists.gn_build_properties', test_utils.test_gn_build)
+    @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
+    @patch("runner.suites.one_test_runner.subprocess.Popen")
+    def test_two_steps_failure(self, mock_popen: MagicMock) -> None:
+        """
+        test-file: test1.ets
+        there are 4 steps in workflow, verifier step failed, ark step failed
+        Expecting:  the following 1 step was executed
+        status: failed
+        fail_kind: MULTIPLE_STEPS_FAILURE
+        """
+
+        mock1 = MagicMock(name="popen1")
+        mock2 = MagicMock(name="popen2")
+
+        for m, out, rt in ((mock1, ("", ""), 0), (mock2, ("", ""), 1)):
+            m.__enter__.return_value = m
+            m.communicate.return_value = out
+            m.returncode = rt
+
+        mock_popen.side_effect = [mock1, mock2, mock2, mock1]
+
+        test_result = self.run_test()
+
+        try:
+            self.assertFalse(test_result.passed)
+            self.assertEqual(test_result.fail_kind, "MULTIPLE_STEPS_FAILED")
+        finally:
+            work_dir = Path(os.environ["WORK_DIR"])
+            shutil.rmtree(work_dir, ignore_errors=True)
