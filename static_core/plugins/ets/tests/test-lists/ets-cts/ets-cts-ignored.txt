@@ -15,11 +15,7 @@
 02.lexical_elements/09.literals/08.regex_literal/regex_lookaround_literal.ets
 02.lexical_elements/09.literals/08.regex_literal/regex_quantifier_literal.ets
 
-#31559
-03.types/06.value_types/01.numeric_types/smaller_to_larger_type/int_to_float/int_to_float.lets_const.ets
-03.types/06.value_types/01.numeric_types/smaller_to_larger_type/long_to_float/long_to_float.lets_const.ets
-
-#31742
+#31967
 03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.outside_let_const_selected_values.ets
 
 #31766
@@ -42,16 +38,8 @@
 03.types/11.types_void_or_undefined/void/void_arrow_functions_2.ets
 03.types/11.types_void_or_undefined/void/void_complex_scenarios_1.ets
 
-#31486
-03.types/11.types_void_or_undefined/void/void_generics_neg_3.ets
-
-#31488
-03.types/11.types_void_or_undefined/void/void_override_neg_0.ets
-03.types/11.types_void_or_undefined/void/void_override_neg_1.ets
-03.types/11.types_void_or_undefined/void/void_edge_cases_2.ets
-
 #31489
-03.types/11.types_void_or_undefined/void/void_edge_cases_1.ets
+03.types/11.types_void_or_undefined/void/void_generics_4.ets
 
 #30705 Can't use unsafeCall for Function object with union of FixedArrays param
 03.types/18.function_types/01.type_function/positive_args_15.ets

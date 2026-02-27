@@ -13,20 +13,6 @@
 
 ---
 cases:
-  - description: "Cannot override void-returning method with undefined-returning method"
-    declarations:
-      - "class Base { foo(): void {} }"
-      - "class Derived extends Base { override foo(): undefined { return undefined } }"
-    statements:
-      - "let obj: Base = new Derived()"
-
-  - description: "Cannot override void-returning method with never-returning method"
-    declarations:
-      - "class Base { bar(): void {} }"
-      - "class Derived extends Base { override bar(): never { throw new Error() } }"
-    statements:
-      - "let obj: Base = new Derived()"
-
   - description: "Cannot override non-void method with void method"
     declarations:
       - "class Base { qux(): number { return 1 } }"

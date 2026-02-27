@@ -32,8 +32,3 @@ cases:
       - "foo<void>([1])"
       - "let v = foo<void>([1])"
 
-  - description: "Generic function with void in union type should be OK"
-    declarations:
-      - "function foo<T>(): T | number { return 0 }"
-    statements:
-      - "let v = foo<void>()"

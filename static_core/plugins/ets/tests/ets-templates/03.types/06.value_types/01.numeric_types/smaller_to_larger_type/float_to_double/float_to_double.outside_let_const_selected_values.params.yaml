@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -22,4 +22,3 @@ testData:
   - { initialType: "Float", value: "-0e12", resultType: "double" , result: "0", absError: "0.0000001", desc: "7. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, minus sign) to the double."}
   - { initialType: "Float", value: "+0e0", resultType: "double" , result: "0.0", absError: "0.000001", desc: "8. Conversion of the zero decimal Float (alias) value (E notation, positive exponent, significand equals to 0, plus sign) to the double."}
   - { initialType: "float", value: "+12E10", resultType: "double" , result: "1.2e11", absError: "1e9", desc: "9. Conversion of the positive decimal float value (E notation, positive exponent, plus sign) to the double."}
- 
