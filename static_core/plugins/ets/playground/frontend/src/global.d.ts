@@ -27,8 +27,7 @@ declare module 'qrcode.react';
 
 declare module '*.json';
 
-// eslint-disable-next-line no-var
-declare var MonacoEnvironment: {
+declare const MonacoEnvironment: {
     getWorker(workerId: string, label: string): Worker;
 } | undefined;
 
