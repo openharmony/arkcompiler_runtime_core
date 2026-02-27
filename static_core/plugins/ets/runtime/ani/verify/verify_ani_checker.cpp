@@ -403,8 +403,8 @@ public:
         if (UNLIKELY(venv != venv_)) {
             return "called from incorrect the native scope";
         }
-        PandaEnv *pandaEnv = PandaEnv::FromAniEnv(venv_->GetEnv());
-        ASSERT(pandaEnv == EtsCoroutine::GetCurrent()->GetEtsNapiEnv());
+        auto *pandaEnv = PandaAniEnv::FromAniEnv(venv_->GetEnv());
+        ASSERT(pandaEnv == EtsCoroutine::GetCurrent()->GetPandaAniEnv());
         if (UNLIKELY(checkPendingError && pandaEnv->HasPendingException())) {
             return "has unhandled an error";
         }
@@ -858,7 +858,7 @@ private:
     EnvANIVerifier *GetEnvANIVerifier()
     {
         ASSERT(venv_ != nullptr);
-        return PandaEnv::FromAniEnv(venv_->GetEnv())->GetEnvANIVerifier();
+        return PandaAniEnv::FromAniEnv(venv_->GetEnv())->GetEnvANIVerifier();
     }
 
     VVm *vvm_ {};
@@ -1337,7 +1337,7 @@ static void DoANIArgsAbort(PandaEtsVM *etsVm, std::string_view functionName, con
     DoAbortANI(etsVm, functionName, ss.str());
 }
 
-static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaEnv *pandaEnv, ANIArg::AniMethodArgs *methodArgs)
+static PandaVector<ExtArgInfo> MakeExtArgInfoList(PandaAniEnv *pandaEnv, ANIArg::AniMethodArgs *methodArgs)
 {
     if (methodArgs->method == nullptr || methodArgs->vargs == nullptr) {
         return {};
@@ -1393,7 +1393,7 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
         ArgsInfo argsInfo {};
         if (action == ANIArg::Action::VERIFY_METHOD_V_ARGS || action == ANIArg::Action::VERIFY_METHOD_A_ARGS) {
             auto *methodArgs = lastArgInfo.arg.GetValueMethodArgs();
-            PandaEnv *pandaEnv = PandaEnv::FromAniEnv(venv->GetEnv());
+            auto *pandaEnv = PandaAniEnv::FromAniEnv(venv->GetEnv());
             argsInfo.extArgInfoList = MakeExtArgInfoList(pandaEnv, methodArgs);
         }
         argsInfo.argInfoList = std::move(argInfoList);

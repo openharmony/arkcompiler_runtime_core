@@ -40,7 +40,7 @@
 
 namespace ark::ets {
 namespace {
-enum class EtsNapiType {
+enum class AniMethodType {
     GENERIC,  // - Switches the coroutine to native mode (GC is allowed)
               // - Prepends the argument list with two additional arguments (NAPI environment and this / class object)
 
@@ -56,18 +56,18 @@ enum class EtsNapiType {
 
 extern "C" void EtsAsyncEntryPoint();
 
-static EtsNapiType GetEtsNapiType(Method *method)
+static AniMethodType GetAniMethodType(Method *method)
 {
-    EtsNapiType napiType = EtsNapiType::GENERIC;
+    AniMethodType napiType = AniMethodType::GENERIC;
     const panda_file::File &pf = *method->GetPandaFile();
     panda_file::MethodDataAccessor mda(pf, method->GetFileId());
     mda.EnumerateAnnotations([&pf, &napiType](panda_file::File::EntityId annId) {
         panda_file::AnnotationDataAccessor ada(pf, annId);
         const char *className = utf::Mutf8AsCString(pf.GetStringData(ada.GetClassId()).data);
         if (className == panda_file_items::class_descriptors::ANI_UNSAFE_QUICK) {
-            napiType = EtsNapiType::FAST;
+            napiType = AniMethodType::FAST;
         } else if (className == panda_file_items::class_descriptors::ANI_UNSAFE_DIRECT) {
-            napiType = EtsNapiType::CRITICAL;
+            napiType = AniMethodType::CRITICAL;
         }
     });
     return napiType;
@@ -643,23 +643,23 @@ const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) cons
     }
     auto *coroutine = ets::EtsCoroutine::GetCurrent();
     bool isVerifyEnabled = coroutine->GetPandaVM()->IsVerifyANI();
-    switch (GetEtsNapiType(method)) {
-        case EtsNapiType::GENERIC: {
-            return ani::GetANIEntryPoint(isVerifyEnabled);
+    switch (GetAniMethodType(method)) {
+        case AniMethodType::GENERIC: {
+            return ani::GetAniEntryPoint(isVerifyEnabled);
         }
-        case EtsNapiType::FAST: {
+        case AniMethodType::FAST: {
             auto flags = method->GetAccessFlags();
             flags |= ACC_FAST_NATIVE;
             method->SetAccessFlags(flags);
 
-            return ani::GetANIEntryPoint(isVerifyEnabled);
+            return ani::GetAniEntryPoint(isVerifyEnabled);
         }
-        case EtsNapiType::CRITICAL: {
+        case AniMethodType::CRITICAL: {
             auto flags = method->GetAccessFlags();
             flags |= ACC_CRITICAL_NATIVE;
             method->SetAccessFlags(flags);
 
-            return ani::GetANICriticalEntryPoint();
+            return ani::GetAniCriticalEntryPoint();
         }
     }
 

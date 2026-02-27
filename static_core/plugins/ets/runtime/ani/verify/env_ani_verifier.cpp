@@ -20,10 +20,11 @@
 
 namespace ark::ets::ani::verify {
 
-EnvANIVerifier::EnvANIVerifier(ANIVerifier *verifier, const __ani_interaction_api *interactionAPI)
+EnvANIVerifier::EnvANIVerifier(PandaAniEnv *ownerEnv, ANIVerifier *verifier,
+                               const __ani_interaction_api *interactionAPI)
     : verifier_(verifier), interactionAPI_(interactionAPI)
 {
-    DoPushNativeFrame();
+    DoPushNativeFrame(ownerEnv);
 }
 
 VEnv *EnvANIVerifier::GetEnv()
@@ -38,24 +39,24 @@ VEnv *EnvANIVerifier::AttachThread()
     return frames_.back().venv;
 }
 
-void EnvANIVerifier::DoPushNativeFrame()
+void EnvANIVerifier::DoPushNativeFrame(PandaAniEnv *ownerEnv)
 {
     Frame frame {SubFrameType::NATIVE_FRAME,
                  0,
                  {},
                  MakePandaUnique<ArenaAllocator>(SpaceType::SPACE_TYPE_INTERNAL),
                  nullptr,
-                 VEnv::Create(),
+                 VEnv::Create(ownerEnv),
                  nullptr};
     frame.refsAllocator = frame.refsAllocatorHolder.get();
     frame.venv = frame.venvHolder.get();
     frames_.push_back(std::move(frame));
 }
 
-void EnvANIVerifier::PushNativeFrame()
+void EnvANIVerifier::PushNativeFrame(PandaAniEnv *ownerEnv)
 {
     ASSERT(!frames_.empty());
-    DoPushNativeFrame();
+    DoPushNativeFrame(ownerEnv);
 }
 
 std::optional<PandaString> EnvANIVerifier::PopNativeFrame()

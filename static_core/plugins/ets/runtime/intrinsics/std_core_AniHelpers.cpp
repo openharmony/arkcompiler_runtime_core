@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ namespace ark::ets::intrinsics {
 
 void AsyncWorkNativeInvoke(int64_t nativeCbPtr, int64_t dataPtr, uint8_t needNativeScope)
 {
-    ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+    ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
     auto *nativeCb = reinterpret_cast<void (*)(ani_env *, void *)>(nativeCbPtr);
     if (static_cast<bool>(needNativeScope)) {
         ScopedNativeCodeThread sn(ManagedThread::GetCurrent());

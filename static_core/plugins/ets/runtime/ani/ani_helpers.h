@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
-#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_ANI_HELPERS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ANI_ANI_HELPERS_H
 
 namespace ark::ets::ani {
-const void *GetANIEntryPoint(bool verifyMode);
-const void *GetANICriticalEntryPoint();
+const void *GetAniEntryPoint(bool verifyMode);
+const void *GetAniCriticalEntryPoint();
 }  // namespace ark::ets::ani
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_HELPERS_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ANI_ANI_HELPERS_H

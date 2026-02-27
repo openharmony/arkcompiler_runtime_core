@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ TEST_F(CompatibilityTest, SetShortArrayRegionErrorTests)
 
     // Compare that int[] and FixedArray which is created in FixedArray_New_Int function is the same type
     // It would fail when frontend and spec would begin to match each other
-    ScopedManagedCodeFix s(PandaEnv::FromAniEnv(env_));
+    ScopedManagedCodeFix s(env_);
     const EtsPlatformTypes *platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
     Class *arrayClass = platformTypes->escompatArray->GetRuntimeClass();
     EtsObject *objArray = s.ToInternalType(reinterpret_cast<ani_object>(array));

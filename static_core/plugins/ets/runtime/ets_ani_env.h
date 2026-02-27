@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ANI_ENV_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_ANI_ENV_H
 
 #include "plugins/ets/runtime/ani/ani.h"
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
-#include "plugins/ets/runtime/ani/verify/verify_ani_interaction_api.h"
 #include "plugins/ets/runtime/mem/ets_reference.h"
 
 namespace ark::ets {
@@ -27,14 +26,12 @@ class EtsCoroutine;
 class PandaEtsVM;
 using EtsThrowable = EtsObject;
 
-class PandaEtsNapiEnv : public ani_env {
+class PandaAniEnv : public ani_env {
 public:
-    static Expected<PandaEtsNapiEnv *, const char *> Create(EtsCoroutine *coroutine,
-                                                            mem::InternalAllocatorPtr allocator);
-    PANDA_PUBLIC_API static PandaEtsNapiEnv *GetCurrent();
+    static Expected<PandaAniEnv *, const char *> Create(EtsCoroutine *coroutine, mem::InternalAllocatorPtr allocator);
 
-    PandaEtsNapiEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
-    ~PandaEtsNapiEnv() = default;
+    PandaAniEnv(EtsCoroutine *coroutine, PandaUniquePtr<EtsReferenceStorage> referenceStorage);
+    ~PandaAniEnv() = default;
 
     EtsCoroutine *GetEtsCoroutine() const
     {
@@ -48,13 +45,7 @@ public:
         return referenceStorage_.get();
     }
 
-    static PandaEtsNapiEnv *FromAniEnv(ani_env *env)
-    {
-        // NOTE (#33071): re-implement untill error fixed
-        ASSERT(env != nullptr);
-        ASSERT(env->c_api != ani::verify::GetVerifyInteractionAPI());
-        return static_cast<PandaEtsNapiEnv *>(env);
-    }
+    PANDA_PUBLIC_API static PandaAniEnv *FromAniEnv(ani_env *env);
 
     bool IsVerifyANI() const
     {
@@ -75,8 +66,8 @@ public:
     void CleanUp();
     void ReInitialize();
 
-    NO_COPY_SEMANTIC(PandaEtsNapiEnv);
-    NO_MOVE_SEMANTIC(PandaEtsNapiEnv);
+    NO_COPY_SEMANTIC(PandaAniEnv);
+    NO_MOVE_SEMANTIC(PandaAniEnv);
 
 private:
     EtsCoroutine *coroutine_;
@@ -84,8 +75,6 @@ private:
     PandaUniquePtr<ani::verify::EnvANIVerifier> envANIVerifier_;
 };
 
-using PandaEnv = PandaEtsNapiEnv;
-
 }  // namespace ark::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NAPI_ENV_H
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_ANI_ENV_H

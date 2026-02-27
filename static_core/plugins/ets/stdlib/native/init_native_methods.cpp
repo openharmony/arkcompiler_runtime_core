@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ void InitNativeMethods(ani_env *env)
 {
     RegisterProcessNativeMethods(env);
     RegisterRegExpNativeMethods(env);
-    // NOTE (ikorobkov): EtsNapiOnLoad needs to implement issue #18135
+    // NOTE (ikorobkov): Need to implement issue #18135
     ANI_FATAL_IF_ERROR(intl::InitCoreIntl(env));
 }
 

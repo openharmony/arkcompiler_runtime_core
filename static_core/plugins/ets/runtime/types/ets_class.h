@@ -659,7 +659,7 @@ private:
     {
         EtsMethodSignature methodSignature(signature);
         if (!methodSignature.IsValid()) {
-            LOG(ERROR, ETS_NAPI) << "Wrong method signature:" << signature;
+            LOG(ERROR, ANI) << "Wrong method signature:" << signature;
             return nullptr;
         }
 

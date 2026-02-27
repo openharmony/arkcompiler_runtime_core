@@ -62,7 +62,6 @@
         components:
           - name: ani
           - name: ets
-          - name: ets_napi
           - name: ets_interop_js
 
       Verification:

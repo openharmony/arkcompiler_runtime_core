@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,15 @@
 #include <gtest/gtest.h>
 
 #include "runtime/include/runtime.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
 
 namespace ark::ets::test {
 
 static int64_t GetCoroId([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class cls)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(PandaEtsNapiEnv::FromAniEnv(env)->GetEtsCoroutine() == coro);
+    ASSERT(PandaAniEnv::FromAniEnv(env)->GetEtsCoroutine() == coro);
     return reinterpret_cast<ani_long>(coro);
 }
 
@@ -48,7 +48,7 @@ protected:
 
         Runtime::Create(options);
 
-        ani_env *env = PandaEtsNapiEnv::GetCurrent();
+        ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
         ani_class jsCoroutineClass {};
         ASSERT_EQ(env->FindClass("js_mode_launch.JSCoroutine", &jsCoroutineClass), ANI_OK);
         ani_native_function fn {"getCoroutineId", ":l", reinterpret_cast<void *>(GetCoroId)};

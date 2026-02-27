@@ -37,7 +37,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
     ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
-    ${ETS_EXT_SOURCES}/ets_napi_env.cpp
+    ${ETS_EXT_SOURCES}/ets_ani_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
     ${ETS_EXT_SOURCES}/ets_native_library_provider.cpp
     ${ETS_EXT_SOURCES}/ets_namespace_manager.cpp
@@ -181,25 +181,25 @@ get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPIL
 if (PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
     list (APPEND ETS_RUNTIME_SOURCES
         ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32.S
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_ani_entry_point_arm32.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/arm32/ets_proxy_entry_point_arm32.S
     )
 elseif(PANDA_TARGET_ARM32_ABI_HARD)
     list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_ani_entry_point_arm32hf.S
         ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_async_entry_point_arm32hf.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm32/ets_napi_entry_point_arm32hf.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/arm32/ets_proxy_entry_point_arm32hf.S
     )
 elseif(PANDA_TARGET_ARM64)
     list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_ani_entry_point_aarch64.S
         ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_async_entry_point_aarch64.S
-        ${ETS_EXT_SOURCES}/ani/arch/arm64/ets_napi_entry_point_aarch64.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/arm64/ets_proxy_entry_point_aarch64.S
     )
 elseif (PANDA_TARGET_AMD64)
     list (APPEND ETS_RUNTIME_SOURCES
+        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_ani_entry_point_amd64.S
         ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_async_entry_point_amd64.S
-        ${ETS_EXT_SOURCES}/ani/arch/amd64/ets_napi_entry_point_amd64.S
         ${ETS_EXT_SOURCES}/entrypoints/arch/amd64/ets_proxy_entry_point_amd64.S
     )
 endif()

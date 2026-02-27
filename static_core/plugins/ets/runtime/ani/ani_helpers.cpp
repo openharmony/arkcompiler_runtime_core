@@ -80,25 +80,25 @@ public:
 };
 }  // namespace
 
-extern "C" void EtsNapiEntryPoint();
-extern "C" void EtsNapiVerifyEntryPoint();
+extern "C" void AniEntryPoint();
+extern "C" void AniVerifyEntryPoint();
 
-const void *GetANIEntryPoint(bool verifyMode)
+const void *GetAniEntryPoint(bool verifyMode)
 {
     if (verifyMode) {
-        return reinterpret_cast<const void *>(EtsNapiVerifyEntryPoint);
+        return reinterpret_cast<const void *>(AniVerifyEntryPoint);
     }
-    return reinterpret_cast<const void *>(EtsNapiEntryPoint);
+    return reinterpret_cast<const void *>(AniEntryPoint);
 }
 
-extern "C" void EtsNapiCriticalNativeEntryPoint();
+extern "C" void AniCriticalNativeEntryPoint();
 
-const void *GetANICriticalEntryPoint()
+const void *GetAniCriticalEntryPoint()
 {
-    return reinterpret_cast<const void *>(EtsNapiCriticalNativeEntryPoint);
+    return reinterpret_cast<const void *>(AniCriticalNativeEntryPoint);
 }
 
-extern "C" uint32_t EtsNapiCalcStackArgsSpaceSize(Method *method, bool isCritical)
+extern "C" uint32_t AniCalcStackArgsSpaceSize(Method *method, bool isCritical)
 {
     ASSERT(method != nullptr);
 
@@ -182,8 +182,8 @@ static void ThrowUnresolvedMethodException(Method *method, EtsCoroutine *corouti
 // | arg 0 |                         | stack |
 // +-------+                         | arg N |
 // |  ...  |                         +-------+
-extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outArgs,
-                                     ManagedThread *thread)
+extern "C" void AniBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outArgs,
+                                 ManagedThread *thread)
 {
     ASSERT(method->IsStatic());
     ASSERT(thread == ManagedThread::GetCurrent());
@@ -316,14 +316,14 @@ static uint8_t *PrepareArgsOnStack(Method *method, uint8_t *inRegsArgs, uint8_t 
     return outRegsArgs;
 }
 
-extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
-                                 ManagedThread *thread)
+extern "C" uint8_t *AniBegin(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
+                             ManagedThread *thread)
 {
     ASSERT(!method->IsSynchronized());
     ASSERT(thread == ManagedThread::GetCurrent());
 
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    PandaEnv *pandaEnv = coroutine->GetEtsNapiEnv();
+    auto *coroutine = EtsCoroutine::CastFromThread(thread);
+    auto *pandaEnv = coroutine->GetPandaAniEnv();
     ani_env *argEnv = pandaEnv->IsVerifyANI() ? static_cast<ani_env *>(pandaEnv->GetEnvANIVerifier()->GetEnv())
                                               : static_cast<ani_env *>(pandaEnv);
     uint8_t *outRegsArgs = PrepareArgsOnStack(method, inRegsArgs, inStackArgs, outStackArgs, argEnv);
@@ -353,14 +353,14 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
     return outRegsArgs;
 }
 
-extern "C" uint8_t *EtsNapiBeginVerify(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
-                                       ManagedThread *thread)
+extern "C" uint8_t *AniBeginVerify(Method *method, uint8_t *inRegsArgs, uint8_t *inStackArgs, uint8_t *outStackArgs,
+                                   ManagedThread *thread)
 {
-    EtsCoroutine *coroutine = EtsCoroutine::CastFromThread(thread);
-    PandaEnv *pandaEnv = coroutine->GetEtsNapiEnv();
+    auto *coroutine = EtsCoroutine::CastFromThread(thread);
+    auto *pandaEnv = coroutine->GetPandaAniEnv();
     auto envANIVerifier = pandaEnv->GetEnvANIVerifier();
-    envANIVerifier->PushNativeFrame();
-    return EtsNapiBegin(method, inRegsArgs, inStackArgs, outStackArgs, thread);
+    envANIVerifier->PushNativeFrame(pandaEnv);
+    return AniBegin(method, inRegsArgs, inStackArgs, outStackArgs, thread);
 }
 
 #if defined(__clang__)
@@ -369,7 +369,7 @@ extern "C" uint8_t *EtsNapiBeginVerify(Method *method, uint8_t *inRegsArgs, uint
 #pragma GCC diagnostic pop
 #endif
 
-extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNative)
+extern "C" void AniEnd(Method *method, ManagedThread *thread, bool isFastNative)
 {
     ASSERT(method != nullptr);
     ASSERT(!method->IsSynchronized());
@@ -382,25 +382,25 @@ extern "C" void EtsNapiEnd(Method *method, ManagedThread *thread, bool isFastNat
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
     storage->PopLocalEtsFrame(EtsReference::GetUndefined());
 }
 
-extern "C" void EtsNapiEndVerify(Method *method, ManagedThread *thread, bool isFastNative)
+extern "C" void AniEndVerify(Method *method, ManagedThread *thread, bool isFastNative)
 {
     auto coroutine = EtsCoroutine::CastFromThread(thread);
 
     // Pop native frame verification before ending the native method
-    auto envANIVerifier = coroutine->GetEtsNapiEnv()->GetEnvANIVerifier();
+    auto envANIVerifier = coroutine->GetPandaAniEnv()->GetEnvANIVerifier();
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();
     }
 
-    EtsNapiEnd(method, thread, isFastNative);
+    AniEnd(method, thread, isFastNative);
 }
 
-extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
+extern "C" EtsObject *AniObjEnd(Method *method, EtsReference *etsRef, ManagedThread *thread, bool isFastNative)
 {
     ASSERT(method != nullptr);
     ASSERT(!method->IsSynchronized());
@@ -414,7 +414,7 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, Manage
     Runtime::GetCurrent()->GetNotificationManager()->MethodExitEvent(thread, method);
 
     auto coroutine = EtsCoroutine::CastFromThread(thread);
-    auto storage = coroutine->GetEtsNapiEnv()->GetEtsReferenceStorage();
+    auto storage = coroutine->GetPandaAniEnv()->GetEtsReferenceStorage();
     EtsObject *ret = nullptr;
     if (LIKELY(!coroutine->HasPendingException())) {
         ret = storage->GetEtsObject(etsRef);
@@ -425,15 +425,15 @@ extern "C" EtsObject *EtsNapiObjEnd(Method *method, EtsReference *etsRef, Manage
     return ret;
 }
 
-extern "C" EtsObject *EtsNapiObjEndVerify(Method *method, verify::VRef vref, ManagedThread *thread, bool isFastNative)
+extern "C" EtsObject *AniObjEndVerify(Method *method, verify::VRef vref, ManagedThread *thread, bool isFastNative)
 {
     auto coroutine = EtsCoroutine::CastFromThread(thread);
     ani_ref ref = vref.GetRef();
     auto etsRef = reinterpret_cast<EtsReference *>(ref);
 
-    EtsObject *obj = EtsNapiObjEnd(method, etsRef, thread, isFastNative);
+    EtsObject *obj = AniObjEnd(method, etsRef, thread, isFastNative);
     // Pop native frame verification before ending the native method
-    auto envANIVerifier = coroutine->GetEtsNapiEnv()->GetEnvANIVerifier();
+    auto envANIVerifier = coroutine->GetPandaAniEnv()->GetEnvANIVerifier();
     auto err = envANIVerifier->PopNativeFrame();
     if (err) {
         LOG(FATAL, ANI) << "Error during popping ANI native frame: " << err.value();

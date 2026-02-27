@@ -25,15 +25,28 @@
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
+namespace ark::ets {
+class PandaAniEnv;
+}  // namespace ark::ets
+
 namespace ark::ets::ani::verify {
 
 class EnvANIVerifier;
 
 class VEnv final : public ani_env {
 public:
-    static PandaUniquePtr<VEnv> Create();
-    ani_env *GetEnv();
+    static PandaUniquePtr<VEnv> Create(PandaAniEnv *ownerEnv);
+
     static VEnv *GetCurrent();
+
+    PANDA_PUBLIC_API static bool IsVEnv(ani_env *env);
+
+    PANDA_PUBLIC_API static VEnv *FromAniEnv(ani_env *env);
+
+    ani_env *GetEnv()
+    {
+        return ownerEnv_;
+    }
 
     // Scope
     void CreateLocalScope();
@@ -68,15 +81,22 @@ public:
     bool IsValidGlobalVerifiedResolver(VResolver *vresolver);
 
 private:
-    VEnv() : ani_env()
+    explicit VEnv(ani_env *ownerEnv) : ani_env(), ownerEnv_(ownerEnv)
     {
         c_api = ani::verify::GetVerifyInteractionAPI();
     }
+
     ~VEnv() = default;
-    EnvANIVerifier *GetEnvANIVerifier();
+
     NO_COPY_SEMANTIC(VEnv);
     NO_MOVE_SEMANTIC(VEnv);
+
+    EnvANIVerifier *GetEnvANIVerifier();
+
     friend class ark::mem::Allocator;
+
+private:
+    ani_env *ownerEnv_ {};
 };
 
 }  // namespace ark::ets::ani::verify

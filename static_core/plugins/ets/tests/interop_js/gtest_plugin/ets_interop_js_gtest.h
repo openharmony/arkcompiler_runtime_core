@@ -131,7 +131,7 @@ public:
         // NOLINTNEXTLINE
         status = env->Class_CallStaticMethodByName_Void(contextCls, "setDefaultInteropLinker",
                                                         "C{std.core.RuntimeLinker}:", obj);
-        if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
+        if (status != ANI_OK || ark::ets::PandaAniEnv::FromAniEnv(env)->HasPendingException()) {
             std::cerr << env->DescribeError() << std::endl;
             return false;
         }
@@ -148,7 +148,7 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         status = env->Object_CallMethod_Ref(static_cast<ani_object>(classObjRef_), loadMethodRef_, &clsRef, moduleStr,
                                             CreateBoolean(env, ANI_FALSE));
-        if (status != ANI_OK || ark::ets::PandaEnv::FromAniEnv(env)->HasPendingException()) {
+        if (status != ANI_OK || ark::ets::PandaAniEnv::FromAniEnv(env)->HasPendingException()) {
             std::cerr << env->DescribeError() << std::endl;
             return nullptr;
         }

@@ -23,7 +23,7 @@
 #include "plugins/ets/runtime/ani/verify/types/venv-inl.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 #include "runtime/include/mem/panda_containers.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -57,13 +57,13 @@ namespace ark::ets::ani::verify {
 
 static const __ani_interaction_api *GetInteractionAPI(VEnv *venv)
 {
-    return PandaEnv::FromAniEnv(venv->GetEnv())->GetEnvANIVerifier()->GetInteractionAPI();
+    return PandaAniEnv::FromAniEnv(venv->GetEnv())->GetEnvANIVerifier()->GetInteractionAPI();
 }
 
 static EtsMethod *GetEtsMethodIfPointerValid(impl::VMethod *vmethod)
 {
-    ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
-    EnvANIVerifier *envANIVerifier = PandaEnv::FromAniEnv(env)->GetEnvANIVerifier();
+    ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
+    EnvANIVerifier *envANIVerifier = PandaAniEnv::FromAniEnv(env)->GetEnvANIVerifier();
     if (!envANIVerifier->IsValidMethod(vmethod)) {
         return nullptr;
     }

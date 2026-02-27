@@ -15,8 +15,8 @@
 
 #include <cstdint>
 #include <limits>
-#include "plugins/ets/runtime/ani/ani.h"
-#include "plugins/ets/tests/native/native_test_helper.h"
+
+#include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 #include "plugins/ets/runtime/libani_helpers/external_array_buffer.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
@@ -39,7 +39,15 @@ static void TestFinalizer(void *data, void *expectedData)
     delete[] reinterpret_cast<int64_t *>(data);
 }
 
-class EtsNativeInterfaceArrayBufferTest : public EtsNapiTestBaseClass {};
+class EtsNativeInterfaceArrayBufferTest : public ani::testing::AniTest {
+public:
+    void CheckUnhandledError()
+    {
+        ani_boolean exists = ANI_FALSE;
+        ASSERT_EQ(env_->ExistUnhandledError(&exists), ANI_OK);
+        ASSERT_EQ(exists, ANI_FALSE);
+    }
+};
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateEmpty)
 {
@@ -48,7 +56,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateEmpty)
     auto status = env_->CreateArrayBuffer(0, &data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
     void *resultData;
     size_t resultLength;
@@ -66,7 +74,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateWithLength)
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
     ASSERT_NE(data, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
     data[0] = HUNDRED_TWENTY_THREE;
     data[1] = TWO_HUNDRED_THIRTY_FOUR;
@@ -90,7 +98,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalEmpty)
     auto status = CreateFinalizableArrayBuffer(env_, data, 0, TestFinalizer, data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
     void *resultData;
     size_t resultLength;
@@ -99,8 +107,8 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalEmpty)
     ASSERT_EQ(resultData, data);
     ASSERT_EQ(resultLength, 0);
 
-    ani_boolean bufferIsExpected = ANI_FALSE;
-    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
+    ani_boolean bufferIsExpected =
+        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, 0);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 }
 
@@ -115,7 +123,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     auto status = CreateFinalizableArrayBuffer(env_, data, THREE, TestFinalizer, data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
     int64_t *resultData;
     size_t resultLength;
@@ -127,8 +135,8 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferCreateExternalWithLength)
     ASSERT_EQ(resultData[1], TWO_HUNDRED_THIRTY_FOUR);
     ASSERT_EQ(resultData[TWO], THREE_HUNDRED_FOURTY_FIVE);
 
-    ani_boolean bufferIsExpected = ANI_FALSE;
-    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
+    ani_boolean bufferIsExpected =
+        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 }
 
@@ -139,7 +147,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
     auto status = env_->CreateArrayBuffer(TWENTY_FOUR, &data, &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
     ani_boolean result = ANI_FALSE;
     auto resultStatus = IsDetachedArrayBuffer(env_, arrayBuffer, &result);
@@ -153,8 +161,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachNonDetachable)
     ASSERT_EQ(resultstatus2, ANI_OK);
     ASSERT_EQ(result, ANI_FALSE);
 
-    ani_boolean isDetached = ANI_FALSE;
-    CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
+    ani_boolean isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_FALSE);
 }
 
@@ -167,10 +174,10 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     auto status = CreateFinalizableArrayBuffer(env_, data.get(), THREE, TestFinalizer, data.get(), &arrayBuffer);
     ASSERT_EQ(status, ANI_OK);
     ASSERT_NE(arrayBuffer, nullptr);
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 
-    ani_boolean bufferIsExpected = ANI_FALSE;
-    CallEtsFunction(&bufferIsExpected, "NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
+    ani_boolean bufferIsExpected =
+        CallEtsFunction<ani_boolean>("NativeTest", CHECK_ARRAY_BUFFER_FUNCTION, arrayBuffer, THREE);
     ASSERT_EQ(bufferIsExpected, ANI_TRUE);
 
     ani_boolean result = ANI_FALSE;
@@ -185,14 +192,13 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferDetachDetachable)
     ASSERT_EQ(resultstatus2, ANI_OK);
     ASSERT_EQ(result, ANI_TRUE);
 
-    ani_boolean isDetached = ANI_FALSE;
-    CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
+    ani_boolean isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_TRUE);
 
     auto resultstatus3 = DetachArrayBuffer(env_, arrayBuffer);
     ASSERT_EQ(resultstatus3, ANI_INVALID_ARGS);
 
-    CallEtsFunction(&isDetached, "NativeTest", IS_DETACHED, arrayBuffer);
+    isDetached = CallEtsFunction<ani_boolean>("NativeTest", IS_DETACHED, arrayBuffer);
     ASSERT_EQ(isDetached, ANI_TRUE);
 }
 
@@ -244,7 +250,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs)
     auto status9 = env_->ArrayBuffer_GetInfo(arrayBuffer9, nullptr, &length9);
     ASSERT_EQ(status9, ANI_INVALID_ARGS);
 
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 }
 
 TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs2)
@@ -274,7 +280,7 @@ TEST_F(EtsNativeInterfaceArrayBufferTest, ArrayBufferInvalidArgs2)
     auto status14 = DetachArrayBuffer(env_, nullptr);
     ASSERT_EQ(status14, ANI_INVALID_ARGS);
 
-    CheckUnhandledError(env_);
+    CheckUnhandledError();
 }
 
 }  // namespace ark::ets::test

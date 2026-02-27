@@ -355,7 +355,7 @@ bool PandaEtsVM::Initialize()
     if (Runtime::GetOptions().ShouldInitializeIntrinsics()) {
         // NOTE(ksarychev, #18135): Implement napi module registration via loading a separate
         // library
-        ani_env *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+        ani_env *env = EtsCoroutine::GetCurrent()->GetPandaAniEnv();
         ark::ets::stdlib::InitNativeMethods(env);
 
         stdLibCache_ = CreateStdLibCache(env);
@@ -699,8 +699,8 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
     PandaVM::VisitVmRoots(visitor);
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
         const auto coroutine = EtsCoroutine::CastFromThread(thread);
-        if (auto etsNapiEnv = coroutine->GetEtsNapiEnv()) {
-            auto etsStorage = etsNapiEnv->GetEtsReferenceStorage();
+        if (auto aniEnv = coroutine->GetPandaAniEnv()) {
+            auto etsStorage = aniEnv->GetEtsReferenceStorage();
             etsStorage->GetAsReferenceStorage()->VisitObjects(visitor, mem::RootType::ROOT_NATIVE_LOCAL);
         }
         if (!coroutine->HasManagedEntrypoint()) {

@@ -158,7 +158,6 @@
   "plugins/ets/tests/native/array_buffer": "*",
   "plugins/ets/tests/native/native_methods": "*",
   "plugins/ets/tests/native/promise": "*",
-  "plugins/ets/tests/native/native_test_helper.h": "*",
   "plugins/ets/tests/runtime/CMakeLists.txt": "*",
   "plugins/ets/tests/runtime/ets_vm_init_prealloc_test.cpp": "*",
   "plugins/ets/tests/runtime/ets_vm_test.cpp": "*",

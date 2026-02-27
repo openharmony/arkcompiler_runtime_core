@@ -22,7 +22,7 @@
 #include "plugins/ets/runtime/ani/verify/types/vvm.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_cast_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_checker.h"
-#include "plugins/ets/runtime/ets_napi_env.h"
+#include "plugins/ets/runtime/ets_ani_env.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define VERIFY_ANI_ARGS(...)                                   \
@@ -53,7 +53,7 @@ NO_UB_SANITIZE static ani_status GetEnv(VVm *vvm, uint32_t version, VEnv **vresu
     ani_env *result {};
     ani_status status = g_vmApi->GetEnv(vvm->GetVm(), version, &result);
     if (LIKELY(status == ANI_OK)) {
-        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->GetEnv();
+        *vresult = PandaAniEnv::FromAniEnv(result)->GetEnvANIVerifier()->GetEnv();
     }
     return status;
 }
@@ -72,7 +72,7 @@ NO_UB_SANITIZE static ani_status AttachCurrentThread(VVm *vvm, const ani_options
     ani_env *result {};
     ani_status status = g_vmApi->AttachCurrentThread(vvm->GetVm(), options, version, &result);
     if (LIKELY(status == ANI_OK)) {
-        *vresult = PandaEnv::GetCurrent()->GetEnvANIVerifier()->AttachThread();
+        *vresult = PandaAniEnv::FromAniEnv(result)->GetEnvANIVerifier()->AttachThread();
     }
     return status;
 }

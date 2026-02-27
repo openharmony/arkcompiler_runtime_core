@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,14 +13,14 @@
 
 set(PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
 
-set(GEN_ETSNAPI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib")
-file(MAKE_DIRECTORY ${GEN_ETSNAPI_LIB_DIR})
+set(GEN_ANI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/lib")
+file(MAKE_DIRECTORY ${GEN_ANI_LIB_DIR})
 
 panda_add_library(nativelib SHARED
     lib.cpp
 )
 
-set_target_properties(nativelib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ETSNAPI_LIB_DIR})
+set_target_properties(nativelib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ANI_LIB_DIR})
 panda_add_sanitizers(TARGET nativelib SANITIZERS ${PANDA_SANITIZERS_LIST})
 panda_target_include_directories(nativelib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani)
 
@@ -36,6 +36,6 @@ panda_ets_add_gtest(
     SANITIZERS ${PANDA_SANITIZERS_LIST}
     CUSTOM_PRERUN_ENVIRONMENT
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
-            "ARK_ETS_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR}"
+            "ARK_ETS_LIBRARY_PATH=${GEN_ANI_LIB_DIR}"
     DEPS_TARGETS etsstdlib nativelib
 )

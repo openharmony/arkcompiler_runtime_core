@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,11 @@
 
 # Build rules for example_lib native
 
-set(GEN_ANI_ETSNAPI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(GEN_ANI_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
 panda_add_library(example_lib SHARED example_lib.cpp)
 
-set_target_properties(example_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ANI_ETSNAPI_LIB_DIR})
+set_target_properties(example_lib PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GEN_ANI_LIB_DIR})
 
 panda_target_link_libraries(example_lib arkruntime gtest)
 
@@ -26,11 +26,11 @@ panda_target_include_directories(example_lib
 )
 
 set(PANDA_RUN_PREFIX
-    LD_LIBRARY_PATH=${GEN_ANI_ETSNAPI_LIB_DIR} 
+    LD_LIBRARY_PATH=${GEN_ANI_LIB_DIR} 
     ${PANDA_RUN_PREFIX})
 
 run_int_jit_aot_ets_code("${CMAKE_CURRENT_SOURCE_DIR}/example_lib.ets"
-    "${GEN_ANI_ETSNAPI_LIB_DIR}"
+    "${GEN_ANI_LIB_DIR}"
     ets_test_ani_example_lib)
 
 add_dependencies(ets_test_ani_example_lib example_lib)
