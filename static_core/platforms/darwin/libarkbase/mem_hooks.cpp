@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_MEM_HOOKS_H_
-#define PANDA_LIBPANDABASE_OS_MEM_HOOKS_H_
-
-#ifdef PANDA_TARGET_MACOS
 #include "platforms/darwin/libarkbase/mem_hooks.h"
-#elif PANDA_TARGET_UNIX
-#include "platforms/unix/libarkbase/mem_hooks.h"
-#elif PANDA_TARGET_WINDOWS
-#include "platforms/windows/libarkbase/mem_hooks.h"
-#else
-#error "Unsupported platform"
-#endif  // PANDA_TARGET_MACOS
+#include "libarkbase/utils/logger.h"
 
-#endif  // PANDA_LIBPANDABASE_OS_MEM_HOOKS_H_
+namespace ark::os::darwin::mem_hooks {
+void PandaHooks::Initialize()
+{
+    LOG(FATAL, RUNTIME) << "PandaHooks::Initialize() not implemented for this platform.";
+}
+void PandaHooks::Enable()
+{
+    LOG(FATAL, RUNTIME) << "PandaHooks::Enable() not implemented for this platform.";
+}
+void PandaHooks::Disable()
+{
+    LOG(FATAL, RUNTIME) << "PandaHooks::Disable() not implemented for this platform.";
+}
+}  // namespace ark::os::darwin::mem_hooks

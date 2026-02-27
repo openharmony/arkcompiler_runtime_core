@@ -64,7 +64,7 @@ group("ark_host_linux_tools_packages") {
     "$ark_root/panda:arkts_bin(${host_toolchain})",
     "$ark_root/runtime:libarkruntime(${host_toolchain})",
   ]
-  if (enable_codegen) {
+  if (enable_codegen && host_os != "mac") {
     deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder(${host_toolchain})" ]
   }
 
@@ -106,6 +106,7 @@ group("ark_host_mac_tools_packages") {
         "$ark_root/libarkfile:libarktsfile($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/panda:arkts_bin($build_root/toolchain/mac:clang_arm64)"
       ]
     } else {
       deps += [

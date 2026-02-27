@@ -130,6 +130,8 @@ ohos_shared_library("libarktsassembler") {
 
   if (is_mingw || is_win) {
     output_extension = "dll"
+  } else if (is_mac) {
+    output_extension = "dylib"
   } else {
     output_extension = "so"
   }

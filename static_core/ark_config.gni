@@ -156,9 +156,10 @@ declare_args() {
 enable_irtoc = true
 enable_codegen = true
 if (is_mingw || current_os == "win" || current_os == "mingw" ||
-    current_os == "winuwp" || !runtime_core_enable_codegen) {
+    current_os == "winuwp" || current_os == "mac" || host_os == "mac" || !runtime_core_enable_codegen) {
   # Disable irtoc and codegen for:
   # - mingw and similar configurations
+  # - mac
   # - !runtime_core_enable_codegen in chipset
   enable_irtoc = false
   enable_codegen = false

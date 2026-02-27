@@ -174,57 +174,59 @@ if (enable_irtoc) {
     subsystem_name = "$ark_subsystem_name"
   }
 
-  action("irtoc_generate") {
-    irtoc_root_out_dir =
-        get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})",
-                       "root_out_dir")
-    if (ark_static_standalone_build) {
-      irtoc_root_out_dir += "/bin"
-    } else {
-      irtoc_root_out_dir += "/$ark_subsystem_name/$ark_part_name"
-    }
-    irtoc_cmd = "${irtoc_root_out_dir}/irtoc"
-    outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
+  if (host_os != "mac") {
+    action("irtoc_generate") {
+      irtoc_root_out_dir =
+          get_label_info("$ark_root/irtoc:irtoc(${host_toolchain})",
+                        "root_out_dir")
+      if (ark_static_standalone_build) {
+        irtoc_root_out_dir += "/bin"
+      } else {
+        irtoc_root_out_dir += "/$ark_subsystem_name/$ark_part_name"
+      }
+      irtoc_cmd = "${irtoc_root_out_dir}/irtoc"
+      outputs = [ "$ark_root_gen_dir/generated/irtoc_lib.o" ]
 
-    irtoc_args = [
-      "--irtoc-output",
-      rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
-      "--compiler-cross-arch",
-      current_cpu,
-    ]
-    deps = [ ":irtoc(${host_toolchain})" ]
-
-    if (is_llvm_interpreter || is_llvm_fastpath) {
-      outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
-      irtoc_args += [
-        "--irtoc-output-llvm",
-        rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
+      irtoc_args = [
+        "--irtoc-output",
+        rebase_path("$ark_root_gen_dir/generated/irtoc_lib.o", root_build_dir),
+        "--compiler-cross-arch",
+        current_cpu,
       ]
-      if (is_llvm_interpreter) {
+      deps = [ ":irtoc(${host_toolchain})" ]
+
+      if (is_llvm_interpreter || is_llvm_fastpath) {
+        outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
         irtoc_args += [
-          "--llvm-inline-module",
-          rebase_path(
-              "$target_gen_dir/../libllvmbackend/interpreter_inline.bc"),
+          "--irtoc-output-llvm",
+          rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
+        ]
+        if (is_llvm_interpreter) {
+          irtoc_args += [
+            "--llvm-inline-module",
+            rebase_path(
+                "$target_gen_dir/../libllvmbackend/interpreter_inline.bc"),
+          ]
+        }
+        deps += [ "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module" ]
+      }
+
+      if (ark_static_standalone_build) {
+        script = irtoc_cmd
+        args = irtoc_args
+      } else {
+        script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
+        args = [
+          "--script-file",
+          rebase_path(irtoc_cmd),
+          "--script-args",
+          string_join(" ", irtoc_args),
+          "--env-path",
+          rebase_path(irtoc_root_out_dir),
+          "--expect-output",
+          "0",
         ]
       }
-      deps += [ "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module" ]
-    }
-
-    if (ark_static_standalone_build) {
-      script = irtoc_cmd
-      args = irtoc_args
-    } else {
-      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
-      args = [
-        "--script-file",
-        rebase_path(irtoc_cmd),
-        "--script-args",
-        string_join(" ", irtoc_args),
-        "--env-path",
-        rebase_path(irtoc_root_out_dir),
-        "--expect-output",
-        "0",
-      ]
     }
   }
 }
