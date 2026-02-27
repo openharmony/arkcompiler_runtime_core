@@ -15,7 +15,7 @@
 
 //! CHECKER         Check preheader's `Compare` isn't squashed by VN.
 //! RUN             force_jit: true, entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main",
-//!                 options: "--compiler-enable-events --compiler-events-path=./events.csv \
+//!                 options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv \
 //!                  --compiler-regex='.*::main'"
 //!
 //! METHOD          "loop_unroll_defer_preheader_transform.ETSGLOBAL::main"
@@ -25,8 +25,8 @@
 //! INST_NEXT       /Compare.* -> \(v[0-9]+\)/
 //! INST_NEXT       /Compare.* -> \(v[0-9]+\)/
 //! INST_NEXT       /Compare.* -> \(v[0-9]+\)/
-//! EVENT           /ETSGLOBAL::main,loop-unroll.*unroll_type:without branching/
-//! EVENT           /ETSGLOBAL::main,loop-unroll.*unroll_type:without branching/
+//! EVENT_COMPILER           /ETSGLOBAL::main,loop-unroll.*unroll_type:without branching/
+//! EVENT_COMPILER           /ETSGLOBAL::main,loop-unroll.*unroll_type:without branching/
 
 //! CHECKER         Check preheader's `Compare` is squashed if '--compiler-defer-preheader-transform' is disabled.
 //! RUN             force_jit: true, entry: "loop_unroll_defer_preheader_transform.ETSGLOBAL::main",

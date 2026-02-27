@@ -262,6 +262,8 @@ class Checker
 
     # Events scope for 'events.csv'
     @events_scope = nil
+    # Events scope for 'events_compiler.csv'
+    @events_compiler_scope = nil
     # IR scope for IR dumps files 'ir_dump/*.ir'
     @ir_scope = nil
 
@@ -387,6 +389,7 @@ class Checker
     File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
 
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
+    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events') if File.exist?("#{@cwd}/events_compiler.csv")
   end
 
   def WRITE_FILE(**args)
@@ -478,6 +481,7 @@ class Checker
     File.open("#{@cwd}/console.out", "w") { |file| file.write(output) }
 
     @events_scope = SearchScope.from_file("#{@cwd}/events.csv", 'Events')
+    @events_compiler_scope = SearchScope.from_file("#{@cwd}/events_compiler.csv", 'Events') if File.exist?("#{@cwd}/events_compiler.csv")
   end
 
   def RUN_AOT(**args)
@@ -607,10 +611,22 @@ class Checker
     @events_scope.find(match)
   end
 
+  def EVENT_COMPILER(match)
+    return if @options.release
+
+    @events_compiler_scope.find(match)
+  end
+
   def EVENT_NEXT(match)
     return if @options.release
 
     @events_scope.find_next(match)
+  end
+
+  def EVENT_COMPILER_NEXT(match)
+    return if @options.release
+
+    @events_compiler_scope.find_next(match)
   end
 
   def EVENT_COUNT(match)
@@ -619,10 +635,22 @@ class Checker
     @events_scope.lines.count { |event| contains?(event, match) }
   end
 
+  def EVENT_COMPILER_COUNT(match)
+    return 0 if @options.release
+
+    @events_compiler_scope.lines.count { |event| contains?(event, match) }
+  end
+
   def EVENT_NOT(match)
     return if @options.release
 
     @events_scope.find_not(match)
+  end
+
+  def EVENT_COMPILER_NOT(match)
+    return if @options.release
+
+    @events_compiler_scope.find_not(match)
   end
 
   def EVENT_NEXT_NOT(match)
@@ -631,11 +659,24 @@ class Checker
     @events_scope.find_next_not(match)
   end
 
+  def EVENT_COMPILER_NEXT_NOT(match)
+    return if @options.release
+
+    @events_compiler_scope.find_next_not(match)
+  end
+
   def EVENTS_COUNT(match, count)
     return if @options.release
 
     res = @events_scope.lines.count { |event| contains?(event, match) }
     raise_error "Events count missmatch for #{match}, expected: #{count}, real: #{res}" unless res == count
+  end
+
+  def EVENTS_COMPILER_COUNT(match, count)
+    return if @options.release
+
+    res = @events_compiler_scope.lines.count { |event| contains?(event, match) }
+    raise_error "Events compiler count missmatch for #{match}, expected: #{count}, real: #{res}" unless res == count
   end
 
   def TRUE(condition)
@@ -936,11 +977,13 @@ class Checker
    $current_pass = nil
    if !@options.keep_data
       FileUtils.rm_rf("#{@cwd}/events.csv")
+      FileUtils.rm_rf("#{@cwd}/events_compiler.csv")
       FileUtils.rm_rf("#{@cwd}/disasm.txt")
       FileUtils.rm_rf("#{@cwd}/console.out")
    else
       @run_idx += 1
       FileUtils.mv "#{@cwd}/events.csv", "#{@cwd}/events-#{@run_idx}.csv", force: true
+      FileUtils.mv "#{@cwd}/events_compiler.csv", "#{@cwd}/events_compiler-#{@run_idx}.csv", force: true
       FileUtils.mv "#{@cwd}/disasm.txt", "#{@cwd}/disasm-#{@run_idx}.txt", force: true
       FileUtils.mv "#{@cwd}/console.out", "#{@cwd}/console-#{@run_idx}.out", force: true
    end

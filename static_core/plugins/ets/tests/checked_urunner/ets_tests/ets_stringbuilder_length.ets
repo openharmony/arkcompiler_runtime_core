@@ -95,7 +95,7 @@
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
 //!                         --interpreter-type=irtoc --compiler-enable-events \
-//!                         --compiler-events-path=./events.csv",
+//!                         --compiler-events-path=./events_compiler.csv",
 //!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! CHECKER       INTERP-CPP, StringBuilder length field access BCO optimized
@@ -103,7 +103,7 @@
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-enable-jit=false \
 //!                         --interpreter-type=cpp --compiler-enable-events \
-//!                         --compiler-events-path=./events.csv",
+//!                         --compiler-events-path=./events_compiler.csv",
 //!               entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 function generateFakeRandomInteger(): Int32Array {

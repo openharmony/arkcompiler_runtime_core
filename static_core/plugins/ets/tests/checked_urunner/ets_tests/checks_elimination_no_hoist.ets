@@ -20,7 +20,7 @@ let C1:int = 2;
 //! CHECKER      Verify check's users NO_HOIST if check's input is is hoistable.
 //! RUN          force_jit: true,
 //!              options: "--compiler-regex=.*hoistableInput --compiler-enable-events \
-//!                        --compiler-events-path=./events.csv",
+//!                        --compiler-events-path=./events_compiler.csv",
 //!              entry: "checks_elimination_no_hoist.ETSGLOBAL::hoistableInput"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::hoistableInput"
 //! PASS_AFTER   "IrBuilder"
@@ -54,7 +54,7 @@ function hoistableInput(): int {
 
 //! CHECKER      Verify check's users hoisted if there is a dominating check outside.
 //! RUN          force_jit: true,
-//!              options: "--compiler-enable-events --compiler-events-path=./events.csv",
+//!              options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv",
 //!              entry: "checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::domCheckOutside"
 //! PASS_AFTER   "IrBuilder"
@@ -89,7 +89,7 @@ function domCheckOutside(): int {
 //! CHECKER      Verify check's users NO_HOIST if check's input's bounds are invalid at the outermost preheader.
 //! RUN          force_jit: true,
 //!              options: "--compiler-regex=.*invalidBoundsOutside --compiler-enable-events \
-//!                        --compiler-events-path=./events.csv",
+//!                        --compiler-events-path=./events_compiler.csv",
 //!              entry: "checks_elimination_no_hoist.ETSGLOBAL::invalidBoundsOutside"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::invalidBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
@@ -118,7 +118,7 @@ function invalidBoundsOutside(): int {
 
 //! CHECKER      Verify check's users hoisted if check's input's bounds are valid at the outermost preheader.
 //! RUN          force_jit: true,
-//!              options: "--compiler-enable-events --compiler-events-path=./events.csv",
+//!              options: "--compiler-enable-events --compiler-events-path=./events_compiler.csv",
 //!              entry: "checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside"
 //! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::validBoundsOutside"
 //! PASS_AFTER   "IrBuilder"
@@ -172,13 +172,13 @@ function nullCheck(): int {
 }
 
 // NOTE(compiler): Enable fast CharAt implementation #28221
-// CHECKER      Check NO_HOIST flag for boundsCheck.
-// RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*boundsCheck --compiler-enable-events \
-//!                       --compiler-events-path=./events.csv"
-// METHOD       "checks_elimination_no_hoist.ETSGLOBAL::boundsCheck"
-// PASS_AFTER   "IrBuilder"
-// INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
-// EVENT        /checks_elimination_no_hoist.ETSGLOBAL::boundsCheck,licm,instId:#{lcscId}/
+//! CHECKER      Check NO_HOIST flag for boundsCheck.
+//! RUN_PAOC     options: "--compiler-cross-arch=arm64 --compiler-regex=.*boundsCheck --compiler-enable-events \
+//!                       --compiler-events-path=./events_compiler.csv"
+//! METHOD       "checks_elimination_no_hoist.ETSGLOBAL::boundsCheck"
+//! PASS_AFTER   "IrBuilder"
+//! INST         "LoadCompressedStringChar"; lcscId = /([0-9]+)\./.match(@ir_scope.lines[@ir_scope.current_index - 1])[1]
+//! EVENT        /checks_elimination_no_hoist.ETSGLOBAL::boundsCheck,licm,instId:#{lcscId}/
 function __noinline__getstr(): string {
     return "x";
 }
