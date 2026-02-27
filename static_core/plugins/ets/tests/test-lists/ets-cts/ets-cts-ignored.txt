@@ -498,7 +498,7 @@
 #33182
 09.classes/02.class_extension_clause/initialize_members/initialize_members_19.ets
 
-#311
+#32724
 09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_3.ets
 09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_8.ets
 09.classes/06.field_declarations/reference_to_field_by_simple_name_neg_12.ets
@@ -682,7 +682,7 @@
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_11.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_pos_obcf_12.ets
 
-#189
+#32625
 09.classes/06.field_declarations/06.override_fields/implementing_property_neg_simple_wrong_type_n.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n1.ets
 09.classes/06.field_declarations/06.override_fields/implementing_property_neg_obcf_wrong_type_n2.ets
