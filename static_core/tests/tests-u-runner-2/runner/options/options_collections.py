@@ -23,6 +23,7 @@ from runner.logger import Log
 from runner.options.macros import Macros, ParameterNotFound
 from runner.options.options import IOptions
 from runner.options.root_dir import RootDir
+from runner.utils import convert_minus
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -95,7 +96,12 @@ class CollectionsOptions(IOptions):
         return self.__parameters.get(key, default)
 
     def __get_from_args(self, key: str, default_value: Any | None = None) -> Any | None:  # type: ignore[explicit-any]
-        return self.__args[key] if self.__args and key in self.__args else default_value
+        if self.__args and key in self.__args:
+            return self.__args[key]
+        parent_value = getattr(self._parent, convert_minus(key), None)
+        if parent_value is not None:
+            return parent_value
+        return default_value
 
     def __expand_macros_in_parameters(self) -> None:
         for param_name, param_value in self.__parameters.items():

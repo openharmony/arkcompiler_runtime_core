@@ -187,6 +187,15 @@ class TestSuiteOptions(IOptions):
     def skip_compile_only_neg(self) -> bool:
         return cast(bool, self.get_parameter(self.__SKIP_COMPILE_ONLY_NEG, self.__DEFAULT_SKIP_COMPILE_ONLY))
 
+    @cached_property
+    def generator_class(self) -> str | None:
+        gen_class = self.__data.get("generator-class", None)
+        if gen_class is None:
+            return None
+        if not isinstance(gen_class, str):
+            raise InvalidConfiguration("Generator class should be a string")
+        return gen_class
+
     def init_root(self) -> None:
         self.__test_root = RootDir.get_test_root(self.__data, options=self)
         self.__list_roots.clear()
