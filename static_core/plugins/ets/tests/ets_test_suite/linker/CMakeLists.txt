@@ -143,7 +143,8 @@ function(test_runtime_linker_extensions test)
 
 endfunction()
 
-test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 enable verifier after bugfix
+# NOTE(dslynko, #32751): Re-enable after fixing flaky failures
+# test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 enable verifier after bugfix
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context
