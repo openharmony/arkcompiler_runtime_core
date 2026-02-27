@@ -1989,10 +1989,6 @@
 #33241
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/multiple_overrides_same_method_n.ets
 
-#24525 bridges for overrides for formerly primitive types
-15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_4.ets
-15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_5.ets
-
 #33447 Verifier error on 2 methods in subclass override same method in superclass
 15.semantic_rules/09.overriding/01.overriding_in_classes/several_methods_override_negative.ets
 
