@@ -173,7 +173,9 @@ async function onFailCallbackExceptionTest(){
         callbackCalled = true;
         throw new Error('Callback Error');
     });
-    arktest.expectError(()=>{await taskpool.execute(task);}, new Error('Original Error'));
+    arktest.expectError(()=>{waitForCompletion(async () => {
+        await taskpool.execute(task);
+    })}, new Error('Original Error'));
     arktest.assertEQ(callbackCalled, true);
 }
 
@@ -197,8 +199,12 @@ async function multipleFailCallbackExceptionTest(){
         throw new Error('Callback Error 2');
     });
 
-    arktest.expectError(()=>{await taskpool.execute(task1);}, new Error('Error'));
-    arktest.expectError(()=>{await taskpool.execute(task2);}, new Error('Error'));
+    arktest.expectError(()=>{
+        waitForCompletion(async () => {await taskpool.execute(task1);})
+    }, new Error('Error'));
+    arktest.expectError(()=>{
+        waitForCompletion(async () => {await taskpool.execute(task2);})
+    }, new Error('Error'));
     arktest.assertEQ(callbacksCalled, 2);
 }
 

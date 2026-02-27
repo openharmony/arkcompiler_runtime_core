@@ -78,7 +78,7 @@ async function testReadableErrorOnUnimplementedDoRead() {
     }));
     readable.on('close', mustCall());
     readable.read();
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableread001

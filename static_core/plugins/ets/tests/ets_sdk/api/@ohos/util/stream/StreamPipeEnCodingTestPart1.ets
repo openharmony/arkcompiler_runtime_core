@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,7 +113,7 @@ async function testPipeDataTransferValidation() {
     let writable = new MyWrite1();
     writable.on('finish', mustCallNoArgs());
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite2 = 0;
@@ -151,7 +151,7 @@ async function testPipeReadableAndWritableStreams() {
     let readable = new MyRead2();
     let writable = new MyWrite2();
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWrite3 = 0;
@@ -218,7 +218,7 @@ async function testPipeLargeDataTransferValidation() {
     readable.pipe(writable);
     readable.unpipe(writable);
     readable.pipe(writable);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class TestReadable extends stream.Readable {

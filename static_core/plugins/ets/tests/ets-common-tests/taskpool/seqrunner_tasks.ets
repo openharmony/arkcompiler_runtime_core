@@ -230,8 +230,10 @@ async function cancelExecutedTaskTest() {
     let task = new taskpool.Task(returnAbc);
     let runner = new taskpool.SequenceRunner();
     arktest.expectError(() => {
-        await runner.execute(task);
-        taskpool.cancel(task);
+        waitForCompletion(async () => {
+            await runner.execute(task);
+            taskpool.cancel(task);
+        })
     }, new Error('taskpool:: sequenceRunner task has been executed'));
     // tasks with params
     let t1 = new taskpool.Task(sum, 10, 20);
@@ -316,7 +318,7 @@ async function testSequenceRunnerexecuteorder(){
     let result : int[] = [];
     let isRunning = new Event();
     for(let i : int = 0; i < 10; i++){
-        let task = new taskpool.Task(`task_${i}`, () => {
+        let task = new taskpool.Task(`task_${i}`, async () => {
             await delay(30);
             result.push(i);
             count++;

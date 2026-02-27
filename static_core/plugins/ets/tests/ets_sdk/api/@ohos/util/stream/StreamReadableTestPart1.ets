@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,7 +119,7 @@ async function testReadableResumeAndPause() {
         }, 20);
     });
     arktest.assertTrue(dataCalled);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause002
@@ -141,7 +141,7 @@ async function testReadableResumeTriggersEvent() {
         readable.push('test');
     }, 0);
     arktest.assertTrue(readable.readable, "readable should be true");
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableResumePause004
@@ -194,7 +194,7 @@ async function testReadableErrorHandling() {
     readable.on('error', mustCall((): void => {
         arktest.assertFalse(readable.readable, "readable should be false");
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamReadableProperties004
@@ -388,7 +388,7 @@ async function testReadableEndedAfterFinish() {
     readable.on('finished', mustCall((): void => {
         arktest.assertTrue(readable.readableEnded, "readableEnded should be true");
     }, 0));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyRead12 extends stream.Readable {

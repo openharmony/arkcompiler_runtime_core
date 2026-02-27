@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ async function addAndPoll() {
     }
 
     // Test body
-    let addAndPollStressTest = (testBQ: containers.BlockingQueue<number>) => {
+    let addAndPollStressTest = async (testBQ: containers.BlockingQueue<number>) => {
         let arrPromise = new Array<Promise<Any>>(20)
         for (let i = 0; i < 10; i++) {
             arrPromise[i] = taskpool.execute(addSome, testBQ, i * 1000)
@@ -56,8 +56,8 @@ async function addAndPoll() {
     }
 
     // Run test with ArrayBlockingQueue
-    addAndPollStressTest(queueTestIntA)
+    await addAndPollStressTest(queueTestIntA)
 
     // Run test with LinkedBlockingQueue
-    addAndPollStressTest(queueTestIntL)
+    await addAndPollStressTest(queueTestIntL)
 }

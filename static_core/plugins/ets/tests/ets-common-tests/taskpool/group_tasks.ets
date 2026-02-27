@@ -427,7 +427,9 @@ async function groupTaskFailedNoSuccessCallbackTest() {
     taskGroup.addTask(task2);
 
     arktest.expectError(() => {
-        await taskpool.execute(taskGroup);
+        waitForCompletion(async () => {
+            await taskpool.execute(taskGroup);
+        })
     }, new Error('task error'));
 
     arktest.assertFalse(successCallbackFlag1);

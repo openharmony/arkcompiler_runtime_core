@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,7 +130,7 @@ async function testWritableAttributeState() {
     writableStream.on('error', mustCall());
     writableStream.write('test');
     arktest.assertEQ(writableStream.writable, false);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable2 extends stream.Writable {
@@ -153,7 +153,7 @@ async function testWritableWriteData() {
             arktest.assertEQ(error, null);
         }
     });
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyWritable3 = 0;
@@ -179,7 +179,7 @@ async function testWritableDoWriteNotCalled() {
     arktest.assertEQ(writableStream.writable, true);
     writableStream.end();
     arktest.assertEQ(writableStream.writable, false);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable4 extends stream.Writable {
@@ -202,7 +202,7 @@ async function testWritableWriteDataFailed() {
     writable.write('hello', 'utf8', mustCallNoArgs((): void => {
         callbackCalled = true;
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyWritable5 extends stream.Writable {

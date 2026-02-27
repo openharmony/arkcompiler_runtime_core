@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,7 +134,7 @@ async function testDuplexDoWritevConcatenatesChunks() {
     })
     duplex.write('Hello ');
     duplex.write('World', 'utf8', func);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class CustomDuplex2 extends stream.Duplex {
@@ -153,7 +153,7 @@ async function testDuplexDoWritevErrorHandling() {
         arktest.assertEQ(err.message, 'dowritev error');
     }));
     duplex.write('Hello ');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_CustomDuplex3 = 0;
@@ -183,7 +183,7 @@ async function testDuplexDoWritevCallbackMultipleCalls() {
         arktest.assertEQ(error.message, 'Callback called multiple times');
     }));
     duplex.write('test', 'utf8', mustCallNoArgs());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 function testDuplexWriteUndefined() {

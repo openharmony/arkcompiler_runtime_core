@@ -146,7 +146,7 @@ async function testDuplexWritableFinishedState() {
     duplex.end('testing finished state', 'utf8', mustCall((err: Error | undefined | null): void => {
         arktest.assertTrue(duplex.writableFinished, "writableFinished should be true");
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex3 extends stream.Duplex {
@@ -220,7 +220,7 @@ async function testDuplexReadWithValidSize() {
             arktest.assertEQ(chunk.toString(), 'duplex test');
         }
     }));
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex5 extends stream.Duplex {
@@ -241,7 +241,7 @@ async function testDuplexErrorHandlingOnWrite() {
     }
     duplex.on('error', mustCall(func));
     duplex.write('test');
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class MyDuplex6 extends stream.Duplex {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ async function testDuplexStreamEndEncodingGb18030() {
 
     let duplex = new MyDuplex1();
     duplex.end('测试', 'gb18030', mustCall());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex2 = 0;
@@ -123,7 +123,7 @@ async function testDuplexStreamEndEncodingGbk() {
 
     let duplex = new MyDuplex2();
     duplex.end('测试', 'gbk', mustCall());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex3 = 0;
@@ -149,7 +149,7 @@ async function testDuplexStreamEndEncodingGb2312() {
 
     let duplex = new MyDuplex3();
     duplex.end('测试', 'gb2312', mustCall());
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex4 = 0;
@@ -176,5 +176,5 @@ async function testDuplexStreamSetDefaultEncodingGb18030() {
     let result = duplex.setDefaultEncoding('gb18030');
     duplex.write('你好');
     arktest.assertTrue(result);
-    arktest.expectNoThrow(() => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
