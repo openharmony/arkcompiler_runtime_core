@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 add_custom_target(ani_tests COMMENT "Common target to run ANI ETS tests")
 add_custom_target(ani_tests_without_bridges COMMENT "Common target to run ANI ETS tests exclude bridges tests")
+add_custom_target(ani_tests_cpp_compile_only COMMENT "Common target to compile all CPP sources of all ANI tests")
 
 add_dependencies(ani_tests ani_tests_without_bridges)
 
@@ -72,6 +73,7 @@ function(ani_add_gtest TARGET)
         INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani
         VERIFY_SOURCES ${VERIFY_SOURCES}
         TEST_GROUP ani_tests_without_bridges
+        COMPILE_GTEST_GROUP ani_tests_cpp_compile_only
     )
 
 endfunction(ani_add_gtest)

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,8 @@ function(common_add_gtest)
 
     set(prefix ARG)
     set(noValues CONTAINS_MAIN NO_CORES RAPIDCHECK_ON NO_EXECUTABLE NO_WARNING_FILTER)
-    set(singleValues NAME OUTPUT_DIRECTORY TSAN_EXTRA_OPTIONS PANDA_STD_LIB ARK_BOOTCLASSPATH TEST_RUN_DIR TEST_GROUP STASH_LIST)
+    set(singleValues NAME OUTPUT_DIRECTORY TSAN_EXTRA_OPTIONS PANDA_STD_LIB ARK_BOOTCLASSPATH TEST_RUN_DIR TEST_GROUP
+                     STASH_LIST COMPILE_GTEST_GROUP)
     set(multiValues SOURCES INCLUDE_DIRS LIBRARIES SANITIZERS DEPS_TARGETS CUSTOM_PRERUN_ENVIRONMENT LAUNCHER)
     set(TIMEOUT_SIGNAL USR1)
 
@@ -204,5 +205,9 @@ function(common_add_gtest)
             set(ARG_TEST_GROUP ${DEFAULT_TEST_GROUP})
         endif()
         add_dependencies(${ARG_TEST_GROUP} ${ARG_NAME}_gtests)
+
+        if (DEFINED ARG_COMPILE_GTEST_GROUP)
+            add_dependencies(${ARG_COMPILE_GTEST_GROUP} ${ARG_NAME})
+        endif()
     endif()
 endfunction()
