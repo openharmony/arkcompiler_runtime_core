@@ -799,6 +799,7 @@ bool ItemContainer::WriteExportData(Writer *writer)
     // Write export class idx and metadata
     auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(
         metadataItem_);  // If metadata emitting is disabled (e.g. by compilation option), it'd be empty
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!writer->Write<uint32_t>(!isMetadataSkipped)) {
         return false;
     }
@@ -811,11 +812,7 @@ bool ItemContainer::WriteExportData(Writer *writer)
         }
     }
 
-    if (!isMetadataSkipped && !metadataItem_->Write(writer)) {
-        return false;
-    }
-
-    return true;
+    return isMetadataSkipped || metadataItem_->Write(writer);
 }
 
 bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLayout)

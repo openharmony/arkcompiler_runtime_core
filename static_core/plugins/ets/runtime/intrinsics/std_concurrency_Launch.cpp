@@ -18,7 +18,6 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
-#include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/runtime.h"
 #include <libarkfile/include/source_lang_enum.h>
 #include "types/ets_array.h"

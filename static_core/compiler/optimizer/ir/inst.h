@@ -7571,9 +7571,11 @@ inline std::ostream &operator<<(std::ostream &os, const Inst &inst)
 }
 
 template <typename Callback>
+// NOLINTNEXTLINE(readability-function-size)
 auto SwitchOverOpcodes(Inst *inst, Callback &&callback)
 {
     switch (inst->GetOpcode()) {
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define HANDLE_INST(OPCODE, BASE, ...)                                                  \
     case Opcode::OPCODE: {                                                              \
         auto value = callback(OpcodeTraits<Opcode::OPCODE> {}, inst->CastTo##OPCODE()); \

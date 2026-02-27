@@ -25,7 +25,6 @@
 #include "plugins/ets/runtime/intrinsics/helpers/ets_string_helpers.h"
 #include <climits>
 
-// NOLINTBEGIN(readability-magic-numbers)
 namespace ark::ets::test {
 class BasicEtsStringFromCharCodeTest : public testing::Test {
 public:
@@ -116,6 +115,7 @@ private:
 
 class EtsStringFromCharCodeTest : public BasicEtsStringFromCharCodeTest {};
 
+// NOLINTBEGIN(readability-magic-numbers)
 TEST_F(EtsStringFromCharCodeTest, CreateNewCompressedStringFromCharCodes)
 {
     EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("Helloff\n");
@@ -125,6 +125,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewCompressedStringFromCharCodes)
     EXPECT_TRUE(coretypes::String::StringsAreEqual(expectedCompressedString->GetCoreType(),
                                                    stringFromCompressedCharCodes->GetCoreType()));
 }
+// NOLINTEND(readability-magic-numbers)
 
 TEST_F(EtsStringFromCharCodeTest, CreateNewEmptyStringFromCharCode)
 {
@@ -151,6 +152,7 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMaxAvailableCharCode)
 
 TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromMinAvailableCharCode)
 {
+    // NOLINTNEXTLINE(readability-identifier-naming)
     constexpr int min = -0xffffffff;
     EtsString *expectedCompressedString = EtsString::CreateFromMUtf8("\x01");
     EtsString *stringFromMaxCharCodes1 = CreateNewStringFromCharCodes({int(min)});
@@ -209,5 +211,3 @@ TEST_F(EtsStringFromCharCodeTest, CreateNewStringFromHugeCharCodes)
 }
 
 }  // namespace ark::ets::test
-
-// NOLINTEND(readability-magic-numbers)

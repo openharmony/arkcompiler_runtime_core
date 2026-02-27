@@ -19,6 +19,7 @@
 namespace ark::ets::intrinsics {
 
 // CC-OFFNXT(G.PRE.06): code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_DEFAULT_ATOMIC_OPERATIONS(typeName)                                                               \
     extern "C" Ets##typeName EtsAtomic##typeName##LoadValue(EtsObject *atomic)                                   \
     {                                                                                                            \
@@ -52,6 +53,7 @@ namespace ark::ets::intrinsics {
     }
 
 // CC-OFFNXT(G.PRE.06): code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFILE_FETCH_ADD_FETCH_SUB(typeName)                                                            \
     extern "C" Ets##typeName EtsAtomic##typeName##FetchAddValue(EtsObject *atomic, Ets##typeName value) \
     {                                                                                                   \
@@ -66,6 +68,7 @@ namespace ark::ets::intrinsics {
     }
 
 // CC-OFFNXT(G.PRE.06): code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFILE_FETCH_AND_FETCH_OR_FETCH_XOR(typeName)                                                   \
     extern "C" Ets##typeName EtsAtomic##typeName##FetchAndValue(EtsObject *atomic, Ets##typeName value) \
     {                                                                                                   \
@@ -86,12 +89,14 @@ namespace ark::ets::intrinsics {
     }
 
 // CC-OFFNXT(G.PRE.02-CPP) code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_ATOMIC_METHODS_FOR_INTEGRAL_TYPE(type) \
     DEFINE_DEFAULT_ATOMIC_OPERATIONS(type)            \
     DEFILE_FETCH_ADD_FETCH_SUB(type)                  \
     DEFILE_FETCH_AND_FETCH_OR_FETCH_XOR(type)
 
 // CC-OFFNXT(G.PRE.02-CPP) code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_ATOMIC_METHODS_FOR_NON_INTEGRAL_TYPE(type) DEFINE_DEFAULT_ATOMIC_OPERATIONS(type)
 
 using EtsReference = EtsObject *;

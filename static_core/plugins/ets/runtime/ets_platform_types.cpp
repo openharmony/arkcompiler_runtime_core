@@ -70,12 +70,12 @@ static EtsClass *FindType(EtsClassLinker *classLinker, std::string_view descript
     auto klass = classLinker->GetClass(descriptor.data(), false, bootCtx, &handler);
     if (klass == nullptr) {
         // NOTE(vpukhov): #33302 - some types are missing in the stdlib
-        static std::unordered_set<std::string_view> MISSING_TYPES_WHITELIST = {
+        static std::unordered_set<std::string_view> missingTypesWhitelist = {
             "Lets/annotation/Module;",
             "Lets/annotation/FunctionalReference;",
             "Lets/coroutine/Async;",
         };
-        if (MISSING_TYPES_WHITELIST.find(descriptor) != MISSING_TYPES_WHITELIST.end()) {
+        if (missingTypesWhitelist.find(descriptor) != missingTypesWhitelist.end()) {
             LOG(INFO, RUNTIME) << "Cannot find a platform class " << descriptor;
         } else {
             // In some cases (i.e. unit-tests) we allow platform classes to be not found,

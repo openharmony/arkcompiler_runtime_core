@@ -24,20 +24,20 @@ namespace ark::ets {
 
 namespace {
 
-static constexpr std::string_view FIELDS_ACTUAL_LENGTH = "actualLength";
-static constexpr std::string_view FIELDS_BOOLEAN_FALSE = "FALSE";
-static constexpr std::string_view FIELDS_BOOLEAN_TRUE = "TRUE";
-static constexpr std::string_view FIELDS_BUF = "buf";
-static constexpr std::string_view FIELDS_BUFFER = "buffer";
-static constexpr std::string_view FIELDS_BYTE_OFFSET = "byteOffset";
-static constexpr std::string_view FIELDS_BYTE_OFFSET_INT = "byteOffsetInt";
-static constexpr std::string_view FIELDS_COMPRESS = "compress";
-static constexpr std::string_view FIELDS_DATA = "data";
-static constexpr std::string_view FIELDS_DATA_ADDRESS = "dataAddress";
-static constexpr std::string_view FIELDS_INDEX = "index";
-static constexpr std::string_view FIELDS_LENGTH = "length";
-static constexpr std::string_view FIELDS_LENGTH_INT = "lengthInt";
-static constexpr std::string_view FIELDS_VALUE = "value";
+constexpr std::string_view FIELDS_ACTUAL_LENGTH = "actualLength";
+constexpr std::string_view FIELDS_BOOLEAN_FALSE = "FALSE";
+constexpr std::string_view FIELDS_BOOLEAN_TRUE = "TRUE";
+constexpr std::string_view FIELDS_BUF = "buf";
+constexpr std::string_view FIELDS_BUFFER = "buffer";
+constexpr std::string_view FIELDS_BYTE_OFFSET = "byteOffset";
+constexpr std::string_view FIELDS_BYTE_OFFSET_INT = "byteOffsetInt";
+constexpr std::string_view FIELDS_COMPRESS = "compress";
+constexpr std::string_view FIELDS_DATA = "data";
+constexpr std::string_view FIELDS_DATA_ADDRESS = "dataAddress";
+constexpr std::string_view FIELDS_INDEX = "index";
+constexpr std::string_view FIELDS_LENGTH = "length";
+constexpr std::string_view FIELDS_LENGTH_INT = "lengthInt";
+constexpr std::string_view FIELDS_VALUE = "value";
 
 }  // namespace
 

@@ -41,8 +41,10 @@ inline std::string StringDataToString(File::StringData sd)
     const char *data = utf::Mutf8AsCString(sd.data);
     std::string result;
     // * 1.2 because of character replacement in the below loop
-    result.reserve(sd.utf16Length * 1.2);
+    static constexpr double RESERVE_FACTOR = 1.2;
+    result.reserve(static_cast<size_t>(sd.utf16Length * RESERVE_FACTOR));
 
+    // NOLINTNEXTLINE(readability-implicit-bool-conversion,cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (const char *p = data; *p; ++p) {
         char c = *p;
         switch (c) {

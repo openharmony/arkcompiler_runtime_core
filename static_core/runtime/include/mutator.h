@@ -60,7 +60,7 @@ public:
     NO_COPY_SEMANTIC(Mutator);
     NO_MOVE_SEMANTIC(Mutator);
 
-    virtual ~Mutator() {}
+    virtual ~Mutator() = default;
 
     /// @returns The mutator from the current thread (TLS)
     PANDA_PUBLIC_API static Mutator *GetCurrent();
