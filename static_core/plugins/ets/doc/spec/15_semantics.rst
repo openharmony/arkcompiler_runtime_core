@@ -135,7 +135,7 @@ necessarily known in the context as follows:
    :linenos:
 
     function foo(x: string, y: string) {
-        x = y // ok, assignability is checked
+        x = y // OK, assignability is checked
     }
 
 -  Otherwise, an attempt is made to apply the type of the left-hand-side
@@ -146,8 +146,8 @@ necessarily known in the context as follows:
    :linenos:
 
     function foo(x: int, y: double[]) {
-        x = 1 // ok, type of '1' is inferred from type of 'x'
-        y = [1, 2] // ok, array literal is evaluated as [1.0, 2.0]
+        x = 1 // OK, type of '1' is inferred from type of 'x'
+        y = [1, 2] // OK, array literal is evaluated as [1.0, 2.0]
     }
 
 .. index::
@@ -412,8 +412,8 @@ other, except where they are identical (see :ref:`Type Identity`).
        ab: Array<Base>, ad: Array<Derived>,
        tb: [Base, Base], td: [Derived, Derived],
     ) {
-       ab = ad // Compile-time error
-       tb = td // Compile-time error
+       ab = ad // compile-time error
+       tb = td // compile-time error
     }
 
 
@@ -609,7 +609,7 @@ true:
       // OK, assigning to direct superclass
       t =  new C<int, boolean>
 
-      // Compile-time error, cannot assign to subclass
+      // compile-time error, cannot assign to subclass
       c =  new T<int, boolean>
 
 -  ``T`` is one of direct superinterfaces of ``C``
@@ -665,7 +665,7 @@ true:
       // OK, assigning subinterface (J<:I)
       i = j
 
-      // Compile-time error, cannot assign superinterface (I>:JJ
+      // compile-time error, cannot assign superinterface (I>:JJ
       j = i
 
 -  ``T`` is type ``Object`` (C<:Object) if
@@ -732,14 +732,14 @@ It is represented by the following code:
    // Generic with contravariant parameter
    class E<in T> {}
 
-   let e0: E<U0> = new E<U1> // Compile-time error, E<U0> is subtype of E<U1>
+   let e0: E<U0> = new E<U1> // compile-time error, E<U0> is subtype of E<U1>
    let e1: E<U1> = new E<U0> // OK, E<U1> is supertype for E<U0>
 
    // Generic with covariant parameter
    class F<out T> {}
 
    let f0: F<U0> = new F<U1> // OK, F<U0> is supertype for F<U1>
-   let f1: F<U1> = new F<U0> // Compile-time error, F<U1> is subtype of F<U0>
+   let f1: F<U1> = new F<U0> // compile-time error, F<U1> is subtype of F<U0>
 
 
 .. index::
@@ -833,14 +833,14 @@ constituent types  (:ref:`Type Identity`).
    :linenos:
 
     function foo(t1: [number], t2: [string, number]) {
-        let a: [] = t1       // ok
-        let b: [string] = t2 // ok
+        let a: [] = t1       // OK
+        let b: [string] = t2 // OK
 
         t1 = t2 // compile-time error
         t2 = t1 // compile-time error
 
         let d: [string, number, boolean] = ["a", 1, true]
-        let t2 = d // ok
+        let t2 = d // OK
         let d = t2 // compile-time error
     }
 
@@ -864,7 +864,7 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
    :linenos:
 
     let s1: "1" | "2" = "1"
-    let s2: string = s1 // ok
+    let s2: string = s1 // OK
 
     let a: string | number | boolean = "abc"
     let b: string | number = 42
@@ -901,9 +901,9 @@ type ``T`` if each ``U``:sub:`i` is a subtype of ``T``.
 .. code-block:: typescript
    :linenos:
 
-    let u: number | string = 1 // ok
-    u = "aa" // ok
-    u = 1.0  // ok, 1.0 is of type 'number' (double)
+    let u: number | string = 1 // OK
+    u = "aa" // OK
+    u = 1.0  // OK, 1.0 is of type 'number' (double)
     u = 1    // compile-time error, type 'int' is not a subtype of 'number'
     u = true // compile-time error
 
@@ -1012,7 +1012,7 @@ following conditions are met:
        bb = bd
        /* OK: identical parameter types, and covariant return type */
        bb = dd
-       /* Compile-time error: parameter type are not contravariant */
+       /* compile-time error, parameter types are not contravariant */
        db = bd
        /* OK: contravariant parameter types, and covariant  return type */
 
@@ -1020,16 +1020,16 @@ following conditions are met:
        /* OK: subtype has less parameters */
 
        let g: () => Base = bb
-       /* Compile-time error: less parameters than expected */
+       /* compile-time error, less parameters than expected */
     }
 
     let foo: (x?: number, y?: string) => void = (): void => {} // OK: ``m <= n``
     foo = (p?: number): void => {}                             // OK:  ``m <= n``
     foo = (p1?: number, p2?: string): void => {}               // OK: Identical types
     foo = (p: number): void => {}
-          // Compile-time error: 1st parameter in type is optional but mandatory in lambda
+          // compile-time error, 1st parameter in type is optional but mandatory in lambda
     foo = (p1: number, p2?: string): void => {}
-          // Compile-time error:  1st parameter in type is optional but mandatory in lambda
+          // compile-time error,  1st parameter in type is optional but mandatory in lambda
 
 .. index::
    type
@@ -1061,7 +1061,7 @@ The situation is represented in the following example:
    :linenos:
 
     let x: FixedArray<string> = ["aa", "bb", "cc"]
-    let y: FixedArray<Object> = x // ok, as string <: Object
+    let y: FixedArray<Object> = x // OK, as string <: Object
     x = y // compile-time error
 
 The subtyping allows array assignments that can cause an ``ArrayStoreError``
@@ -1382,7 +1382,7 @@ lambda call:
 **Step 1**: All arguments in the form of a spread expression (see
 :ref:`Spread Expression`) that spreads an array literal (see
 :ref:`Array Literal`) are to be linearized recursively to ensure
-that no spread expression of that form remains at the call site. 
+that no spread expression of that form remains at the call site.
 
 **Step 2**: The following checks are performed on all arguments from left to
 right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
@@ -1396,7 +1396,7 @@ right, starting from ``arg_pos`` = 1 and ``par_pos`` = 1:
 
       if parameter is of rest_array_form then
 
-         if argument is a spread expression of an array of some type `U` and 
+         if argument is a spread expression of an array of some type `U` and
          'U' <: `T`:sub:`rest_array_type` then increment ``arg_pos``
          else if `T`:sub:`arg_pos` <: `T`:sub:`rest_array_type` then increment ``arg_pos``
          else increment ``par_pos``
@@ -1595,13 +1595,10 @@ Type inference is used only where the *target type* is one of the following two:
 Where a *target type* is numeric, the type of a literal is inferred from the
 *target type* if one of following conditions is met:
 
-#. *Target type* is equal to or larger than the literal default type;
+#. *Target type* is equal to or larger than the literal default type; or
 
 #. Literal is an *integer literal* with the value that fitting into the range
-   of the *target type*; or
-
-#. Literal is a *floating-point literal* without a *floating point suffix* but
-   with a value that fits into the range of the *target type* that is ``float``.
+   of the *target type*.
 
 .. note::
    A *floating-point suffix* if present declares a ``floating-point literal``,
@@ -1618,25 +1615,14 @@ Type inference for a numeric *target type* is represented in the examples below:
 .. code-block:: typescript
    :linenos:
 
-    let l: long = 1     // ok, target type is larger than literal default type
-    let b: byte = 127   // ok, integer literal value fits type 'byte'
-    let f: float = 3.14 // ok, floating-point value fits type 'float'
-    let g: float = 123f // ok, literal type set explicitly to 'float'
+    let l: long = 1     // OK, target type is larger than literal default type
+    let b: byte = 127   // OK, integer literal value fits type 'byte'
+    let f: float = 123f // OK, target type is the same as literal default type
+    let g: double = 11  // OK, target type is larger than literal default type
 
     l = 1.0    // compile-time error, 'double' cannot be assigned to 'long'
     b = 128    // compile-time error, value is out of range
-    f = 3.4e39 // compile-time error, value is out of range
-
-If *target type* is a union type that contains no numeric type, then the
-default type of the literal is used. The following code is valid as 'Object',
-i.e., a supertype of a numeric type:
-
-.. code-block:: typescript
-   :linenos:
-
-    let x: Object | string = 1 // ok, instance of type 'int' is assigned to 'x'
-
-    x = 1.0 // ok, instance of type 'double' is assigned to 'x'
+    f = 3.14   // compile-time error, 'double' cannot be assigned to 'float'
 
 **Case 2: Target type is a union type containing at least one numeric type**
 
@@ -1654,12 +1640,7 @@ literal type is determined as follows:
    performed:
 
    - If the literal is an *integer literal*, and only one suitable *integer*
-     ``N``:sub:`i` is present, then this ``N``:sub:`i` is the inferred type;
-
-   - If the literal is of a *floating-point literal*, and only one suitable
-     *floating-point* ``N``:sub:`i` is present, then this ``N``:sub:`i` is the
-     inferred type;
-
+     ``N``:sub:`i` is present, then this ``N``:sub:`i` is the inferred type.
 
 Otherwise, a :index:`compile-time error` occurs due to type inference ambiguity.
 
@@ -1685,12 +1666,11 @@ Type inference for a union target type is represented in the examples below:
     let e: byte | long = 128 // inferred type for 128 is 'long'
     e = 127 // compile-time error, type inference ambiguity for 127
 
-    let f: float | double = 3.4e39 // inferred type for3.4e39 is 'double'
-    f = 1.0 // compile-time error,  type inference ambiguity for 1.0
+    let f: float | double = 3.14 // inferred type is 'double'
+    f = 2f                       // inferred type is 'float'
 
     let g: float | double = 3.4e39 // inferred type is 'double'
     g = 1 // compile-time error, type inference ambiguity for 1
-
 
 .. index::
    numeric type
@@ -1701,6 +1681,19 @@ Type inference for a union target type is represented in the examples below:
    type
    union type
    value
+
+.. note::
+
+    If *target type* is a union type that contains no numeric type, then the
+    default type of the literal is used. The following code is valid as
+    numeric types are subtypes of 'Object':
+
+    .. code-block:: typescript
+        :linenos:
+
+        let x: Object | string = 1 // OK, instance of type 'int' is assigned to 'x'
+
+        x = 1.0 // OK, instance of type 'double' is assigned to 'x'
 
 |
 
@@ -1810,7 +1803,7 @@ that cannot be expressed in |LANG|:
     class D extends C implements I {}
 
     function foo(c: C) {
-        return c instanceof I ? c : new D() // compile-time error: inferred type is C & I
+        return c instanceof I ? c : new D() // compile-time error, inferred type is C & I
     }
 
 .. index::
@@ -1886,7 +1879,7 @@ The usage and benefits of a *smart type* are represented in the example below:
 
     function bar(c: C) {
         if (c instanceof D) {
-            c.foo() // ok, here smart type of 'c' is 'D', 'foo' is safely called
+            c.foo() // OK, here smart type of 'c' is 'D', 'foo' is safely called
         }
         c.foo() // compile-time error, 'c' does not have method 'foo'
         (c as D).foo() // no compile-time error, can throw runtime error
@@ -1980,7 +1973,7 @@ an :ref:`Object Literal`:
     function foo(x: Object|C) {}
     function bar(x: Object) {}
 
-    foo({num: 42}} // ok, object literal is of type 'C'
+    foo({num: 42}} // OK, object literal is of type 'C'
     bar({num: 42}} // compile-time error, Object does not have field 'num'
 
 .. index::
@@ -2065,8 +2058,8 @@ represented below:
         if (i instanceof C) {
             // smart type of 'i' here is of some subtype of 'C' that implements 'I'
             // type expression for this type is I & subtype of C
-            i.foo() // ok
-            i.bar() // ok
+            i.foo() // OK
+            i.bar() // OK
         }
     }
 
@@ -2530,8 +2523,7 @@ allows operations that are specific to the subtype:
    type safety
    interface type
 
-Other examples are explicit calls to ``instanceof``
-(see :ref:`instanceof Expression`) or checks against ``null``
+Other examples are explicit calls to ``instanceof`` or checks against ``undefined``
 (see :ref:`Equality Expressions`) as parts of ``if`` statements
 (see :ref:`if Statements`) or ternary conditional expressions
 (see :ref:`Ternary Conditional Expressions`):
@@ -2539,14 +2531,30 @@ Other examples are explicit calls to ``instanceof``
 .. code-block:: typescript
    :linenos:
 
-    function foo (b: Base, d: Derived|null) {
-        if (b instanceof Derived) {
-            b.method()
-        }
-        if (d != null) {
-            d.method()
-        }
-    }
+   class Base { method() { console.log("Base")}; }
+   class Derived extends Base { method() { console.log("Derived")};  }
+
+   function foo (b: Base|null, d: Derived|undefined) {
+      if (b instanceof Base) {
+         b.method()
+      }
+      if (d != undefined) {
+         d.method()
+      }
+   }
+
+   console.log('call with (Base, Derived)')
+   foo( new Base(), new Derived())
+   console.log('call with (null, undefined)')
+   foo(null, undefined)
+   /* Output is:
+      call with (Base, Derived)
+      Base
+      Derived
+      call with (null, undefined)
+   */
+
+|
 
 .. index::
    call
@@ -2791,9 +2799,6 @@ Overriding in Interfaces
 If a method is defined in a subinterface with the same name as the method in
 the superinterface, then the following semantic rules apply:
 
-- If a method is ``private`` in  superinterface but ``public`` in subinterface,
-  then a :index:`compile-time error` occurs;
-
 - If signatures are not *override-compatible* (see
   :ref:`Override-Compatible Signatures`) and signatures formed by using
   *effective signature types* of original signatures are *override-compatible*, then a
@@ -2803,18 +2808,18 @@ the superinterface, then the following semantic rules apply:
   :ref:`Override-Compatible Signatures`), then the method of subinterface overrides
   the method of superinterface *in* the subinterface.
 
-- Otherwise, if the superinterface is direct, the superinterface method is
-  inherited by the subinterface
+- Otherwise, the superinterface method is inherited by the subinterface and
+  overloading (see :ref:`Overloading`) occurs.
 
 .. code-block:: typescript
    :linenos:
 
    interface Base {
-      m(p: string): void  // overridden method
-      m(p: number): void  // inherited method
+      m(p: string): void
+      m(p: number): void
    }
    interface Derived extends Base {
-      m(p: object): void  // overriding method
+      m(p: object): void  // m overrides both Base.m(string) and Base.m(number)
    }
 
 .. note::
@@ -2846,10 +2851,10 @@ the superinterface, then the following semantic rules apply:
    }
    interface Derived extends Base {
       method_1()           // overriding
-      method_2(p: string)  // compile-time error: non-compatible signature
-      foo(p: number): void // compile-time error: the same name as private method
+      method_2(p: string)  // overloading
+      foo(p: number): void // it is just a new method declaration
+                           // Base.foo() is not accessible here at all
    }
-
 
 
 If more than one method of the subinterface overrides the same method of the
@@ -2966,7 +2971,7 @@ The following rule applies to generics:
 
    class A2 <ContravariantTypeParameter extends Derived> {}
    class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
-       // Compile-time error, derived class cannot have non-compatible constraints of type parameters
+       // compile-time error, derived class cannot have non-compatible constraints of type parameters
 
 The semantics is represented in the examples below:
 
@@ -3552,7 +3557,7 @@ by *overload resolution*:
     bar(1) // fooX is called
 
     foo()  // foo#1 is called
-    bar()  // fooN is called
+    bar()  // fooX is called
 
     foo(true) // foo#2 is called
     bar(true) // foo#2 is called
@@ -3807,7 +3812,7 @@ the example below:
     }
     class D extends C {
         foo(s: string) {}   // #3
-        foo(x: A | null) {} // overrides #2
+        foo(x: A | undefined) {} // overrides #2
         /* The overload set is {foo#3, foo#2, foo#1}
            Formed as: set(D)={foo#3, foo#2} append set(C)={foo#2, foo#1}
            Second occurrence of foo#2 from set(C) is skipped.
@@ -4093,7 +4098,7 @@ determined method *M* defined in the type *C* (where *T* is necessarily a subtyp
   - Otherwise, *Ms* is the result of the resolution.
 
 - Otherwise, the set of the *superinterfaces* of *T* is searched for a matching method:
-  
+
   - Each considered method should be declared in the superinterface of *T*
     and should override the method *M* in *C*.
 
@@ -4205,17 +4210,24 @@ member is excluded in the right-hand-side column for brevity):
    * - :ref:`Fixed-Size Array Types` (``FixedArray<T>``)
      - Instantiations of ``FixedArray<T>`` (i.e., the effective type of type
        argument ``T`` is preserved).
-   * - :ref:`Function Types` in the form ``(P1, P2 ..., Pn) => R``
-     - Instantiation of an internal generic function type with respect to the
+   * - :ref:`Function Types` in the form ``(P1, P2, Pn) => R``
+     - Instantiation of an internal generic *function* type with respect to the
        number of parameter types *n*. Parameter
        types ``P1, P2 ... Pn`` are instantiated with ``Any``. Return type ``R``
        is instantiated with type ``never``.
+   * - :ref:`Function Types` in the form ``(P1, P2, Pn, ...PR) => R``
+     - Instantiation of an internal generic *rest-parametrized function* type
+       with respect to the number of parameter types *n*.
+       Internal generic *rest-parametrized function* of *n* parameters is a supertype
+       of the internal generic *function* type of *n* parameters. Parameter
+       types ``P1, P2 ... Pn`` and rest parameter type ``PR`` are instantiated
+       with ``Any``. Return type ``R`` is instantiated with type ``never``.
    * - :ref:`Tuple Types` in the form ``[T1, T2 ..., Tn]``
      - Instantiation of an internal generic tuple type with respect to the
        number of element types *n*.
    * - :ref:`String Literal Types`
      - ``string``
-   * - :ref:`Const Enumerations`
+   * - :ref:`Constant Enumerations`
      - Enumeration base type
    * - Awaited<T>
      - - If ``T`` is neither a type parameter nor a subtype of ``Promise``, then

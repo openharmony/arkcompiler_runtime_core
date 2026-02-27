@@ -96,7 +96,7 @@ Otherwise, a :index:`compile-time error` occurs.
 
     declare let x: number
     function main() {}
-    // compile-time error: ambient and non-ambient declarations are mixed
+    // compile-time error, ambient and non-ambient declarations are mixed
 
 
 .. index::
@@ -125,7 +125,7 @@ Module Header
 .. meta:
     frontend_status: Done
 
-*Module header* defines optional *export* modifier and a *module name*.
+*Module header* defines optional ``export`` modifier and a *module name*.
 
 The syntax of *module header* is presented below:
 
@@ -263,12 +263,12 @@ The usage of namespaces is represented in the example below:
            export function bar(): void {
                let v: number
                v = b  // OK, no qualification
-               v = NS.b // Compile-time error, `b` not exported
+               v = NS.b // compile-time error, `b` not exported
            }
        }
 
        NS.a = 1 // OK,  `NS.a` exported
-       NS.b = 1 // Compile-time error, `NS.b` not exported
+       NS.b = 1 // compile-time error, `NS.b` not exported
 
 .. note::
    A namespace must be exported to be used in another module:
@@ -457,7 +457,7 @@ The usage of namespaces is represented in the example below:
            export function foo(): void { ... } // #3
        }
 
-       // Declarations of functions #2 and #3 lead to a compile-time error:
+       // Declarations of functions #2 and #3 lead to a compile-time error,
        //   duplicated declaration of function A.B.foo()
 
        // While function foo() in namespace A is a valid declaration
@@ -866,7 +866,7 @@ are represented by the following code:
     import type {Class2} from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // compile-time error in Typescript, OK in ArkTS
+    let c2 = new Class2() // compile-time error in |TS|, OK in |LANG|
 
 Another form of *type import* is used  when ``type`` is attached to a name
 binding. This allows mixing general import and ``type`` import.
@@ -886,7 +886,7 @@ binding. This allows mixing general import and ``type`` import.
     import {Class1, type Class2 } from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // compile-time error in Typescript, OK in ArkTS
+    let c2 = new Class2() // compile-time error in |TS|, OK in |LANG|
 
 .. index::
    import binding
@@ -1231,12 +1231,12 @@ The usage of annotations is discussed in :ref:`Using Annotations`.
 .. _Exported Declarations:
 
 Exported Declarations
-=====================
+*********************
 
 .. meta:
     frontend_status: Done
 
-Top-level declarations can use export modifiers that make the declarations
+Top-level declarations can use ``export`` modifier that make the declarations
 accessible (see :ref:`Accessible`) in other modules by using import
 (see :ref:`Import Directives`). The same result can be achieved by using an
 export directive (see :ref:`Export Directives`) for a top-level declaration.
@@ -1263,6 +1263,36 @@ inside the module they are declared in.
    module
    import directive
    import
+
+A :index:`compile-time error` occurs if a declaration is exported 
+with the name of another exported declaration.
+
+The example below represents the situation where an *export directive* uses
+*selectiveBindings* or *bindingAlias* to give a new name to the declaration,
+and such a new name clashes with the name of another exported declaration:
+
+.. code-block:: typescript
+   :linenos:
+
+    export function foo(): void {}
+    function bar(): void {}
+    export {bar as foo} // compile-time error, entity named 'foo' is already exported
+
+The same error can occurs using :ref:`Re-Export Directive` as represented
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // file1.ets
+    export class A {}
+
+    // file2.ets
+    export class A {}
+
+    // Another file
+    export * from "./file1"
+    export * from "./file2" // compile-time error, entity named 'A' is already exported
 
 In addition, only one top-level declaration can be exported by using the default
 export directive. It allows specifying no declared name when importing (see
@@ -1308,7 +1338,7 @@ constant variable that is exported by using this export directive. Otherwise, a
     a = new A // compile-time error as 'a' is a constant variable
 
     // File3
-    import * as a from "File1" /* compile-time error: such form of import
+    import * as a from "File1" /* compile-time error, such form of import
                                   cannot be used for the default export */
 
 
@@ -1331,7 +1361,7 @@ Otherwise, a :index:`compile-time error` occurs.
    also applied to :ref:`ambient declarations`.
 
 Here is a number of examples which violate the above rules and therefore
-trigger a compile-time error:
+trigger a compile-time error,
 
 -  Exported constants and variables, or non-private fields of exported classes
    do not have explicit types. Exported functions, or methods of exported interfaces,
@@ -1483,9 +1513,9 @@ Here is the series of examples representing that cases:
       interface I {};
 
       // // unexported type in extends/implements
-      // compile-time error: 'C' and 'I' must be exported
+      // compile-time error, 'C' and 'I' must be exported
       export class C1 extends C implements I {}
-      // compile-time error: 'I' must be exported
+      // compile-time error, 'I' must be exported
       export interface I1 extends I {}
 
       // // unexported entity inside a declaration
@@ -1509,7 +1539,7 @@ Here is the series of examples representing that cases:
 
       class C {};
       
-      // compile-time error: 'C' must be exported
+      // compile-time error, 'C' must be exported
       export type A = C
 
    |
@@ -1591,17 +1621,6 @@ The syntax of an *export directive* is presented below:
         | exportTypeDirective
         | reExportDirective
         ;
-
-A :index:`compile-time error` occurs if an *export directive* uses
-*selectiveBindings* or *bindingAlias*, gives a declaration a new name,
-and such a new name clashes with the name of another exported declaration.
-
-.. code-block:: typescript
-   :linenos:
-
-    export function foo(): void {}
-    function bar(): void {}
-    export {bar as foo} // compile-time error: 'foo' is already exported
 
 Limitations on exported declarations are described with examples in
 :ref:`Exported declarations`.
@@ -1883,7 +1902,7 @@ Top-Level Statements
     frontend_status: Done
 
 A module can contain sequences of statements that logically
-comprize one sequence of statements.
+comprise one sequence of statements.
 
 The syntax of *top-level statements* is presented below:
 
@@ -2024,7 +2043,7 @@ the current statement, then a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-      console.log (a, b) // Compile-time error
+      console.log (a, b) // compile-time error
       let a = 1
       const b = a
 
@@ -2050,6 +2069,9 @@ Multifile Module
 
 *Multifile module* is a module that consists of several source files
 which have the same *module header* (see :ref:`Module header`).
+
+If two *module headers* (see :ref:`Module header`) have the same *moduleName*
+but different ``export`` modifiers, then a :index:`compile-time error` occurs.
 
 A *multifile module* combines :ref:`Import Directives`,
 :ref:`Top-Level Declarations`, and :ref:`Export Directives`
@@ -2105,9 +2127,9 @@ An incorrect *multifile module* is represented in the example below:
 
     // file2
     module "y"
-    let b = 4       // Compile-time error, the top-level statements located in several files
+    let b = 4       // compile-time error, the top-level statements located in several files
     namespace NS1 {
-        let b = 6   // Compile-time error, the top-level statements located in several files
+        let b = 6   // compile-time error, the top-level statements located in several files
     }
 
 .. index::
@@ -2136,7 +2158,7 @@ causes a :index:`compile-time error` as discussed in :ref:`Declarations`.
 .. code-block:: typescript
    :linenos:
 
-    console.log("Hello, world!") // ok, 'console' is defined in the standard library
+    console.log("Hello, world!") // OK, 'console' is defined in the standard library
 
     let console = 5 // compile-time error
 
@@ -2245,11 +2267,11 @@ below:
       return 0
     }
 
-    function main(): string { // compile-time error: incorrect main signature
+    function main(): string { // compile-time error, incorrect main signature
       return ""
     }
 
-    function main(p: number) { // compile-time error: incorrect main signature
+    function main(p: number) { // compile-time error, incorrect main signature
     }
 
     // Option 4: top-level statement is the entry point

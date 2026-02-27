@@ -805,9 +805,9 @@ Examples of ``break`` statements with and without a label are presented below:
     frontend_status: Done
     todo: continue with label causes compile time assertion
 
-A ``continue`` statement stops the execution of the current loop iteration,
-and transfers control to the next iteration. Appropriate checks of loop
-exit conditions depend on the kind of the loop.
+A ``continue`` statement terminates the execution of a current loop
+iteration, and transfers control to the next iteration while keeping the
+appropriate checks of the loop exit conditions in place. 
 
 The syntax of *continue statement* is presented below:
 
@@ -896,7 +896,12 @@ Examples of ``continue`` statements with and without a label are presented below
     frontend_status: Done
     todo: return voidExpression
 
-A ``return`` statement can have or not have an expression.
+A ``return`` statement terminates the execution of a current function, method,
+constructor, or lambda, and returns control to the caller. In case of a
+function, method, and lambda call, executing a ``return`` statement implies
+that the call returns a value defined as a result of the *return expression*
+evaluation. 
+
 
 The syntax of *return statement* is presented below:
 
@@ -906,40 +911,55 @@ The syntax of *return statement* is presented below:
         'return' expression?
         ;
 
-A ``return`` statement with *expression* can only occur inside a function, a
-method, or a lambda body with non-``void`` return type.
+If *expression* is not provided then *return statement* is semantically
+equivalent to the form ``return undefined``.
 
-.. index::
-   return statement
-   statement
-   expression
-   syntax
-   return expression
-   function
-   method
-   lambda body
-   return type
-   method body
-   function body
-   constructor
+A *return statement* in the plain form ``return`` (with no *expression*) can occur
+inside one of the following:
 
-A ``return`` statement (with no *expression*) can occur inside one of the
-following:
-
-- Initializer block;
 - Constructor body;
-- Function, method, or lambda body with return type ``void`` (see
-  :ref:`Type void or undefined`);
+- Function, method, or lambda body with return type ``void`` or ``undefined``
+  (see :ref:`Type void or undefined`), or a union type (see :ref:`Union Types`)
+  containing ``void`` or ``undefined``;
 - Asynchronous function, method or lambda body with return type
   ``Promise<void>`` (see :ref:`Asynchronous execution`);
 
-A :index:`compile-time error` occurs if a ``return`` statement is found in:
+Otherwise, a :index:`compile-time error` occurs.
 
--  Top-level statements (see :ref:`Top-Level Statements`);
--  Functions or methods with return type ``void`` (see
-   :ref:`Type void or undefined`) that have an expression;
--  Functions or methods with a non-``void`` return type that have no
-   expression.
+A :index:`compile-time error` also occurs if type of a return expression is not
+assignable (see :ref:`Assignability`) to the surrounding function, method, or
+lambda return type.
+
+The semantics is illustrated in the examples below:
+
+.. code-block:: typescript
+   :linenos:
+
+    return // compile-time error, top-level statements can not contain a return statement
+    namespace NS {
+       return // compile-time error, top-level statements can not contain a return statement
+    }
+    function f1 () {} // OK, no return statement is equal to 'return undefined' form
+    function f2 () { return } // OK. 'return' is equal to 'return undefined'
+    function f3 (): void { return undefined } // Full syntax form
+
+    function f4(cond: boolean): Base {
+         if (cond) {
+              return new Derived // OK, as Derived is assignable to Base
+         } else {
+              return new Object // compile-time error, as Object is not assignable to Base
+         }
+    }
+    
+    class A {
+        constructor () {
+             return  // OK
+        }
+        constructor (p: number) {
+             return undefined  // compile-time error, such syntax form is forbidden
+        }
+    }
+
 
 .. index::
    return statement
@@ -955,37 +975,23 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
    void type
    return type
    class
-   initializer
    constructor
-   initializer block
    constructor body
    return type
-
-The execution of a ``returnStatement`` leads to the termination of the
-surrounding function, method, or initializer. If an *expression* is
-provided, the resultant value is the evaluated *expression*.
-
-In case of constructors, initializer blocks, and top-level statements, the
-control is transferred out of the scope of the construction, but no result is
-required. Other statements of the surrounding function, method body,
-initializer block, or top-level statement are not executed.
-
-.. index::
+   statement
+   syntax
+   return expression
+   function
+   method
+   lambda
    execution
-   return statement
    termination
    surrounding function
    function
    surrounding method
    method
-   initializer
    constructor
-   initializer block
-   top-level statement
-   control transfer
-   expression
    evaluation
-   method body
 
 |
 
@@ -1047,8 +1053,8 @@ control out of a nested ``switch`` or ``loop`` statement (see
    break statement
 
 A ``switch`` expression can be of a numeric type, type ``string``,
-type ``char``, or an enumeration type. Otherwise,
-a :index:`compile-time error` occurs.
+type ``char``, or a ``const enum`` type (see :ref:`Constant Enumerations`).
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1143,7 +1149,7 @@ The syntax of *throw statement* is presented below:
 The expression type must be assignable (see :ref:`Assignability`) to type
 ``Error``. Otherwise, a :index:`compile-time error` occurs.
 
-This implies that the object thrown is never ``null``.
+This implies that ``null`` or ``undefined`` cannot be thrown.
 
 Errors can be thrown at any place in the code.
 

@@ -29,6 +29,12 @@ allows the dependent source code to remain compilable without any *compile-time
 errors*. Certain *source compatible* changes may be not *binary compatible*
 and vice versa.
 
+.. note::
+   Certain *binary incompatible* changes may violate the type system invariants
+   of the execution environment, making the execution of binary code impossible.
+   In that case, the runtime verification system (see :ref:`Verification <RT Verification>`)
+   is responsible for the detection and rejection of such binary code.
+
 This chapter defines the *binary compatible* change of the source code as
 a change that allows all the dependent programs with all the *types* and
 *namespaces* *loadable* and *resolvable* to preserve this property.
@@ -41,7 +47,7 @@ an error.
 
 *Type* or *namespace* is *resolvable* if all of its members, such as
 *namespace* variables and functions or *class* fields and *methods*, can
-be accessed with no *resolution* errors, i.e. errors that do not appear
+be accessed with no *resolution* errors, i.e., errors that do not appear
 within the consistently compiled programs. *Resolvable* type is always
 *loadable*.
 
@@ -185,7 +191,7 @@ Some of the changes that can make some compiled code not *loadable*:
 - Adding a *final* modifier to an existing *exported* class.
 
 
-For *Enum Declarations*:
+For *regular enumeration declarations*:
 
 Changes that do not affect binary compatibility:
 
@@ -194,15 +200,15 @@ Changes that do not affect binary compatibility:
 - Changing the value of enum constants while preserving its type.
 
 
-For *Const Enumeration Declarations*:
+For *constant enumeration declarations*:
 
 Changes that do not affect binary compatibility:
 
-- Adding new enumeration constants.
+- Adding new enumeration members.
 
 Changes that break the binary compatibility:
 
-- Changing a value of an enumeration constants.
+- Changing a value of an enumeration members.
 
 - Changing enumeration base type.
 

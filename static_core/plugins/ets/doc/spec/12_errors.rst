@@ -76,7 +76,7 @@ handling is provided below:
 .. code-block:: typescript
    :linenos:
 
-   class UnknownError extends Error { // User-defined error class 
+   class UnknownError extends Error { // user-defined error class 
       error: Error
       constructor (error: Error) {
          super()
@@ -91,7 +91,7 @@ handling is provided below:
         catch (error) {
           if (error instanceof RangeError) // invalid index detected
              return undefined
-          throw new UnknownError (error) // Unknown error occurred
+          throw new UnknownError (error) // unknown error occurred
         }
     }
 
@@ -132,7 +132,7 @@ Errors are handled by using ``try`` statements (see :ref:`Try Statements`).
       try {
         actions()
       }
-      catch (x) { // Type of x is Error
+      catch (x) { // type of x is Error
           handling_actions()
       }
     }

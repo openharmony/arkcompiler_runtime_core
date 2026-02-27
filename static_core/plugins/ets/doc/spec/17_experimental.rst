@@ -29,7 +29,7 @@ section is moved to the body of the specification as appropriate.
 
 The *array creation* feature introduced in
 :ref:`Resizable Array Creation Expressions` enables programmers to create
-objects of the array type at runmtime by providing the following as arguments:
+objects of the array type at runtime by providing the following as arguments:
 
 - Array size;
 - One element to fill the array with, or a lambda to generate a set of elements
@@ -74,10 +74,6 @@ whereas making a method *final* prevents it from overriding in derived classes.
 Section :ref:`Adding Functionality to Existing Types` discusses the way to
 add new functionality to an already defined type.
 
-Section :ref:`Enumeration Methods` adds methods to declarations of the
-enumeration types. Such methods can help in some kinds of manipulations
-with ``enums``.
-
 .. index::
    native function
    native method
@@ -97,7 +93,6 @@ with ``enums``.
    class interface
    inheritance
    derived class
-   enumeration method
    functionality
 
 The |LANG| language supports writing concurrent applications in the form of
@@ -240,6 +235,11 @@ is ``true``. Otherwise, the result is ``false``.
 The result of ':math:`!=`' and ':math:`!==`' is ``false`` when values are same.
 Otherwise, the result is ``true``.
 
+The *equality operator* checking a value of ``char`` type
+against a value of a non-``char`` type returns ``false``. If the result
+is known at compile time to always evaluate as ``false``, the compile-time
+warning is issued (see :ref:`Equality Expressions`).
+
 Attempting to use type ``char`` as an operand in a relational expression causes
 a :index:`compile-time error` if detected at compile time, or a
 :index:`runtime error` otherwise:
@@ -258,8 +258,8 @@ a :index:`compile-time error` if detected at compile time, or a
 
    let x: number = 1
    // Any relational operator with char causes compile-time error
-   a0 < a1 // Compile-time error
-   a0 < x  // Compile-time error
+   a0 < a1 // compile-time error
+   a0 < x  // compile-time error
 
    // Equality where one operand is char and the other is non-char causes error
    a0 == x  // compile-time error
@@ -270,7 +270,11 @@ a :index:`compile-time error` if detected at compile time, or a
    u = c'x'
    u == a0  // OK, both operands are `char`
    u = 1.0
-   u == a0  // run time error, comparing `char` with `number`
+   x == a0 // compile-time warning,  known at compile time to
+           // always evaluate as 'false'
+   u == a0  // 'false' for any  values of 'a' and any numbers in 'u'
+            // because  types 'number' and 'char' do not overlap
+
 
 .. index::
    character
@@ -296,9 +300,9 @@ Fixed-Size Array Types
 characterized by the following:
 
 -  Any instance of array type contains elements. The number of elements is known
-   as *array length*, and can be accessed by using the ``length`` property.
+   as *array length*, and can be accessed by using the property ``length``.
 -  Array length is a non-negative integer number.
--  Array length is set once at runtime and cannot be changed after that.
+-  Array length is set once at runtime and cannot be changed later.
 -  Array element is accessed by its index. *Index* is an integer number
    starting from *0* to *array length minus 1*.
 -  Accessing an element by its index is a constant-time operation.
@@ -310,6 +314,7 @@ characterized by the following:
 *Fixed-size arrays* differ from *resizable arrays* as follows:
 
 - Fixed-size array length is set once to achieve better performance;
+- Fixed-size arrays preserve the element type during the :ref:`Type Erasure`;
 - Fixed-size arrays have no methods defined;
 - Fixed-size arrays have several constructors (see
   :ref:`Fixed-Size Array Creation`);
@@ -360,10 +365,10 @@ Fixed-Size Array Creation
 
 *Fixed-size array* can be created by using :ref:`Array Literal` or
 constructors defined for type ``FixedArray<T>``, where ``T`` must be a
-concrete type. A :index:`compile time error` occurs if ``T`` is a type parameter.
+type *preserved* by :ref:`Type Erasure`.
 
-The use of an *array literal* to create an array is represented in the following
-example:
+The use of an *array literal* to create an array is represented in following
+examples:
 
 .. code-block:: typescript
    :linenos:
@@ -374,6 +379,14 @@ example:
     let y = a[2] /* get the last element of array 'a' */
     let count = a.length // get the number of array elements
     y = a[3] // Will cause a runtime error - attempt to access non-existing array element
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo<T>(v: T): FixedArray<T | number> {
+      return [v] // compile-time error, T | number is not preserved by type erasure
+    }
+    let arr: FixedArray<string | number> = foo("a")
 
 .. index::
    fixed-size array type
@@ -390,21 +403,6 @@ example:
 
 Several constructors can be called to create a ``FixedArray<T>`` instance as
 follows:
-
-- ``constructor(len: int)``, if type ``T`` has either a default value (see
-  :ref:`Default Values for Types`) or a constructor that can be called with
-  no argument provided:
-
-.. code-block:: typescript
-   :linenos:
-
-    // type ``number`` has a default value:
-    let a = new FixedArray<number>(3) // creates array [0.0, 0.0, 0.0]
-
-    class C {
-        constructor (n?: number) {}
-    }
-    let b = new FixedArray<C>(2) // creates array [new C(), new C()]
 
 - ``constructor(len: int, elem: T)`` for any ``T``. The constructor creates an
   array instance filled with a single value ``elem``:
@@ -436,6 +434,106 @@ follows:
    array instance
    array
    instance
+
+|
+
+.. _Value Array Types:
+
+Value Array Types
+*****************
+
+.. meta:
+    frontend_status: None
+
+*Value array type* is the built-in type written as
+``ValueArray<T>`` and characterized by the following: 
+
+-  Any instance of array type contains elements of type ``T``. ``T`` must be
+   a *value type* (see :ref:`Value Types`).
+-  The number of elements is known as *array length*, and can be accessed
+   by using the property ``length``.
+-  Array length is a non-negative integer number.
+-  Array length is set once at runtime and cannot be changed later.
+-  Array element is accessed by its index. *Index* is an integer number
+   starting from *0* to *array length minus 1*.
+-  Accessing an element by its index is a constant-time operation.
+-  If passed to a non-|LANG| environment, an array is represented as a contiguous
+   memory location, filled by the primitive values (not references).
+-  Type of each array element is equal to the element's type specified
+   in the array declaration.
+-  No subtyping relation holds between two ``ValueArray`` types, except where
+   their type arguments are identical.   
+
+.. note:: 
+
+    - ``ValueArray<T>`` is not a generic type, despite using
+      notation identical to generics.
+    
+    - Limitations imposed by ``ValueArray`` subtyping make it more performant
+      compared to :ref:`Fixed-Size Array Types`.
+
+.. index::
+   value array type
+   built-in type
+   length property
+   array length
+   index
+   runtime
+   access
+   index
+   integer number
+   constant-time operation
+
+*Value array* can be created by using :ref:`Array Literal` or
+constructors defined for type ``ValueArray<T>`` (see below).
+
+The use of an *array literal* to create an array is represented in following
+examples:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a : ValueArray<int> = [1, 2, 3]
+      /* create array with 3 elements of type int */
+    a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
+    let y = a[2] /* get the last element of array 'a' */
+    let count = a.length // get the number of array elements
+    y = a[3] // runtime error, attempt to access non-existing array element
+
+If ``ValueArray`` is used with non-value type argument,
+then a :index:`compile-time error` occurs as follows: 
+
+.. code-block:: typescript
+   :linenos:
+   
+    let x: ValueArray<string> = ["aa"]   // compile-time error
+    type A = ValueArray<int | undefined> // compile-time error
+
+The following constructors can be called to create a ``ValueArray<T>`` instance:
+
+- ``constructor(len: int, elem: T)`` creates an
+  array instance filled with a single value ``elem``:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a = new ValueArray<double>(3, 7.) // creates array [7., 7., 7.]
+
+- ``constructor(len: int, elems: (inx: int) => T)`` creates an array instance
+  where each *i* element is evaluated
+  as a result of the ``elems`` call with argument *i*:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a = new ValueArray<int>(3, (inx: int) => 3 - inx )
+    // creates array [3, 2, 1]
+
+.. index::
+   compile-time error
+   constructor
+   argument
+   array instance
 
 |
 
@@ -577,7 +675,7 @@ parameter:
 
       class A<T> {
          foo(element: T) {
-            new T[2] (element) // compile-time error: cannot create an array of type parameter elements
+            new T[2] (element) // compile-time error, cannot create an array of type parameter elements
          }
       }
 
@@ -683,151 +781,6 @@ as follows:
    initialization
    nested loop
    array of arrays
-
-|
-
-.. _Enumerations Experimental:
-
-Enumerations Experimental
-*************************
-
-Several experimental features described below are available for enumerations.
-
-|
-
-.. _Enumeration with Explicit Type:
-
-Enumeration with Explicit Type
-==============================
-
-.. meta:
-    frontend_status: None
-
-*Enumeration with explicit type* uses the following syntax:
-
-.. code-block:: abnf
-
-    enumDeclaration:
-        'const'? 'enum' identifier ':' type '{' enumConstantList? '}'
-        ;
-
-All enumeration constants of a declared enumeration are of the *explicit type*
-specified in the declaration, i.e., the *explicit type* is the
-*enumeration base type* (see :ref:`Enumerations` and :ref:`Const Enumerations`).
-
-.. index::
-   enumeration base type
-   enumeration with explicit type
-   syntax
-   enumeration constant
-   enumeration
-   declaration
-   explicit type
-
-If *explicit type* is an integer type then omitted values for constants allowed,
-the same rules applied as for enum with non-explicit type (see :ref:`Enumeration Integer Values`).
-
-A :index:`compile-time error` occurs in the following situations:
-
-- *Explicit type* is different from any numeric or string type.
-- Enumeration constant has no value and *Explicit type* is not an integer type.
-- Enumeration constant type is not assignable (see :ref:`Assignability`)
-  to the *explicit type*.
-
-.. index::
-   explicit type
-   enum constant
-   integer type
-   non-explicit type
-   integer value
-   enumeration constant
-   assignability
-   numeric type
-   string type
-   value
-   type
-   syntax
-
-.. code-block:: typescript
-   :linenos:
-
-    enum DoubleEnum: double { A = 0.0, B = 1, C = 3.14159 } // OK
-    enum LongEnum: long { A = 0, B = 1, C = 3 } // OK
-
-    enum Wrong1: double { A, B, C } // compile-time error: must be explicitly initialized
-    enum Wrong2: long { A = 1, B = "abc" } // compile-time error: not assignable to 'long'
-
-|
-
-.. _Enumeration Methods:
-
-Enumeration Methods
-===================
-
-.. meta:
-    frontend_status: Done
-
-Several static methods are available for each enumeration class type as
-follows:
-
--  Method ``static values()`` returns an array of enumeration constants
-   in the order of declaration.
--  Method ``static getValueOf(name: string)`` returns an enumeration constant
-   with the given name, or throws an error if no constant with such name
-   exists.
--  Method ``static fromValue(value: T)``, where ``T`` is the base type
-   of the enumeration, returns an enumeration constant with a given value, or
-   throws an error if no constant has such a value.
-
-.. index::
-   enumeration method
-   static method
-   enumeration type
-   enumeration constant
-   constant
-   value
-
-.. code-block:: typescript
-   :linenos:
-
-      enum Color { Red, Green, Blue = 5 }
-      let colors = Color.values()
-      //colors[0] is the same as Color.Red
-
-      let red = Color.getValueOf("Red")
-
-      Color.fromValue(5) // ok, returns Color.Blue
-      Color.fromValue(6) // throws runtime error
-
-Additional methods for instances of an enumeration type are as follows:
-
--  Method ``valueOf()`` returns a numeric or ``string`` value of an enumeration
-   constant depending on the type of the enumeration constant.
-
--  Method ``getName()`` returns the name of an enumeration constant.
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-      enum Color { Red, Green = 10, Blue }
-      let c: Color = Color.Green
-      console.log(c.valueOf()) // prints 10
-      console.log(c.getName()) // prints Green
-
-.. note::
-   Methods ``c.toString()`` and ``c.valueOf().toString()`` return the same
-   value.
-
-.. index::
-   instance
-   method
-   enumeration type
-   value
-   name
-   enumeration constant
-
 
 |
 
@@ -1091,14 +1044,14 @@ abstract or defined in an interface to be implemented later. A
 .. note::
    To support the code compatible with |TS|, the name of the method
    ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the
-   class ``iterable`` looks as follows:
+   class ``C`` from the example above looks as follows:
 
    .. code-block-meta:
 
    .. code-block:: typescript
       :linenos:
 
-         class C {
+         class C implements Iterable<string>  {
            data: string[] = ['a', 'b', 'c'];
            [Symbol.iterator]() {
              return new CIterator(this)
@@ -1682,7 +1635,7 @@ This situation is represented in the following example:
    :linenos:
 
     function foo(n: number): number {/*body1*/}
-    function fooString(s: number): string {/*body2*/}
+    function fooString(s: string): string {/*body2*/}
 
     overload foo {foo, fooString} // valid overload
 
@@ -1718,7 +1671,7 @@ ambiguity for it is considered at the call site only, i.e., a name of an
    :linenos:
 
     function foo(n: number): number {/*body1*/}
-    function fooString(s: number): string {/*body2*/}
+    function fooString(s: string): string {/*body2*/}
     overload foo {foo, fooString}
 
     let func1 = foo // 'foo' refers to function, not to explicit overload
@@ -1732,7 +1685,7 @@ but an overloaded function is not:
     export function foo1(p: string) {}
     function foo2(p: number) {}
     export overload foo { foo1, foo2 } // compile-time error, 'foo2' is not exported
-    overload bar { foo1, foo2 } // ok, as 'bar' is not exported
+    overload bar { foo1, foo2 } // OK, as 'bar' is not exported
 
 If an *explicit overload* is called like a function with receiver, i.e., syntax
 of method call is used (see :ref:`Functions with Receiver`), then a
@@ -1870,9 +1823,9 @@ Valid and invalid explicit overloads are represented in the example below:
         public foo3(x: boolean) {/*body*/}
         foo4() {/*body*/} // implicitly public
 
-        public overload foo { foo3, foo4 } // ok
-        protected overload bar { foo2, foo3 } // ok
-        private overload goo { foo1, foo2, foo3 } // ok
+        public overload foo { foo3, foo4 } // OK
+        protected overload bar { foo2, foo3 } // OK
+        private overload goo { foo1, foo2, foo3 } // OK
 
         public overload err1 {foo2, foo3} // compile-time error, foo2 is not public
         protected overload err2 {foo2, foo1} // compile-time error, foo1 is private
@@ -2184,8 +2137,8 @@ following example:
     class C {
         foo(n: number): number {/*body*/}
     }
-    class D implements C {
-        fooString(s: number): string {/*body*/}
+    class D extends C {
+        fooString(s: string): string {/*body*/}
 
         overload foo {
             foo, // method 'foo' from C
@@ -2216,9 +2169,9 @@ can be overridden as usual:
     class C {
         foo(n: number): number {/*body*/}
     }
-    class D implements C {
+    class D extends C {
         foo(n: number): number {/*body*/} // method is overridden
-        fooString(s: number): string {/*body*/}
+        fooString(s: string): string {/*body*/}
 
         overload foo { foo, fooString }
     }
@@ -2243,13 +2196,13 @@ implements the interface:
         foo(n: number): number {/*body*/}
     }
     interface J extends I {
-        fooString(s: number): string
+        fooString(s: string): string
         overload foo { foo, fooString }
     }
 
     class K implements I {
         foo(n: number): number {/*body*/}
-        fooString(s: number): string {/*body*/}
+        fooString(s: string): string {/*body*/}
 
         overload foo { foo, fooString }
     }
@@ -2284,8 +2237,8 @@ in the following situations:
         foo(n: number): number {/*body*/}
     }
 
-    class D implements C {
-        fooString(s: number): string {/*body*/}
+    class D extends C {
+        fooString(s: string): string {/*body*/}
 
         overload foo { foo, fooString }
     }
@@ -2305,7 +2258,7 @@ modifier) that is not listed as an overloaded method as follows:
 
     class C {
         foo(n: number) {/*body*/}
-        fooString(s: number) {/*body*/}
+        fooString(s: string) {/*body*/}
         fooBoolean(b: boolean) {/*body*/}
 
         overload foo { // compile-time error
@@ -2596,7 +2549,7 @@ A :index:`compile-time error` occurs if:
    }
    // File2
    import {A, X.A} from "File1"
-   class C extends A {} // Compile-time error: A is final while imported
+   class C extends A {} // compile-time error, A is final while imported
    .. index::
    sealed class
    class
@@ -2670,7 +2623,7 @@ reference (see :ref:`Named Reference`) in any expression.
     class X{
         constructor foo() {}
     }
-    const func = X.foo // Compile-time error
+    const func = X.foo // compile-time error
 
 The feature is also important for :ref:`Explicit Constructor Overload`.
 
@@ -2824,56 +2777,11 @@ All other arguments are handled in an ordinary manner.
    receiver
    function name
 
-.. note::
-   Derived classes or interfaces can be used as receivers.
-
-   .. code-block:: typescript
-      :linenos:
-
-         class C {}
-
-         function foo(this: C) {}
-         function bar(this: C, n: number): void {}
-
-         let c = new C()
-
-         // as a function call:
-         foo(c)
-         bar(c, 1)
-
-         // as a method call:
-         c.foo()
-         c.bar(1)
-
-         interface D {}
-         function foo1(this: D) {}
-         function bar1(this: D, n: number): void {}
-
-         function demo (d: D) {
-            // as a function call:
-            foo1(d)
-            bar1(d, 1)
-
-            // as a method call:
-            d.foo1()
-            d.bar1(1)
-         }
-
-         class E implements D {}
-         const e = new E
-
-         // derived class is used as a receiver for a method call:
-         e.foo1()
-         e.bar1(1)
-
-         // the same as a function call:
-         foo1(e)
-         bar1(e, 1)
-
-
 The keyword ``this`` must be used in the parameter list for the first parameter
 only. If it is used for other parameters, then a :index:`compile-time error`
-occurs. The keyword ``this`` can be used inside a *function with receiver* where
+occurs. 
+
+The keyword ``this`` can be used inside a *function with receiver* where
 it corresponds to the first parameter. The type of parameter ``this`` is called
 *receiver type* (see :ref:`Receiver Type`):
 
@@ -2921,13 +2829,58 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
       }
       function bar(this: A) { ...
          this.foo() // Method foo() is accessible as it is public
-         this.member_1 // Compile-time error as member_1 is not accessible
-         this.member_2 // Compile-time error as member_2 is not accessible
+         this.member_1 // compile-time error as member_1 is not accessible
+         this.member_2 // compile-time error as member_2 is not accessible
          ...
       }
       let a = new A()
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
+
+Derived classes or interfaces can be used as receivers:
+
+.. code-block:: typescript
+   :linenos:
+
+      class C {}
+
+      function foo(this: C) {}
+      function bar(this: C, n: number): void {}
+
+      let c = new C()
+
+      // as a function call:
+      foo(c)
+      bar(c, 1)
+
+      // as a method call:
+      c.foo()
+      c.bar(1)
+
+      interface D {}
+      function foo1(this: D) {}
+      function bar1(this: D, n: number): void {}
+
+      function demo (d: D) {
+         // as a function call:
+         foo1(d)
+         bar1(d, 1)
+
+         // as a method call:
+         d.foo1()
+         d.bar1(1)
+      }
+
+      class E implements D {}
+      const e = new E
+
+      // derived class is used as a receiver for a method call:
+      e.foo1()
+      e.bar1(1)
+
+      // the same as a function call:
+      foo1(e)
+      bar1(e, 1)
 
 *Function with receiver* can be generic as in the following example:
 
@@ -2945,15 +2898,17 @@ body of a *function with receiver*. Only ``public`` members can be accessed:
 .. code-block:: typescript
    :linenos:
 
-     function foo<T>(this: B<T>, p: T) {
-          console.log (p)
-     }
-     function demo (p1: B<SomeClass>, p2: B<BaseClass>) {
-         p1.foo(new SomeClass())
-           // Type inference should determine the instantiating type
-         p2.foo<BaseClass>(new DerivedClass())
-          // Explicit instantiation
-     }
+    class G<T> {}
+
+    function foo<T>(this: G<T>, p: T) {
+        console.log (p)
+    }
+
+    class C {}
+
+    let g = new G<C>
+    g.foo(new C)    // implicit instantiation
+    g.foo<C>(new C) // explicit instantiation
 
 A :index:`compile-time error` occurs if the name of a *function with receiver*
 (including generic functions) and the name of an accessible instance method or
@@ -2967,10 +2922,10 @@ field of the receiver type (see :ref:`Accessible`) are the same:
           bar(): A { return this; }
       }
 
-      // Compile-time error to prevent ambiguity below
+      // compile-time error to prevent ambiguity below
       function foo(this: A) { ... }
 
-      // Compile-time error to prevent ambiguity below
+      // compile-time error to prevent ambiguity below
       function bar<T extends Object>(this : T) : T { return this }
 
       (new A).foo()
@@ -3038,14 +2993,14 @@ This situation is represented in the following example:
     namespace NS {
         export function foo(this: int) {}
         function bar(i: int) {
-            i.foo() // ok, method call is used
+            i.foo() // OK, method call is used
         }
     }
 
     let i = 1
-    NS.foo(i)  // ok, function call is used
-    i.foo()    // compile-time error: 'foo' is not resolved
-    i.NS.foo() // compile-time error: 'NS' is not defined for 'int'
+    NS.foo(i)  // OK, function call is used
+    i.foo()    // compile-time error, 'foo' is not resolved
+    i.NS.foo() // compile-time error, 'NS' is not defined for 'int'
 
 .. note::
     While a function with receiver can be used in an explicit overload list,
@@ -3063,7 +3018,9 @@ Receiver Type
     frontend_status: Done
 
 *Receiver type* is the type of the *receiver parameter* in a function,
-function type, and lambda with receiver.
+function type, and lambda with receiver.  A *receiver type* can be
+an interface type, a class type, or an array type.
+Otherwise, a :index:`compile-time error` occurs.
 
 Using array type as a *receiver type* is presented in the example below:
 
@@ -3076,21 +3033,6 @@ Using array type as a *receiver type* is presented in the example below:
 
       let x: number[] = [1, 2]
       x.addElements(3, 4)
-
-The use of union type as *receiver type* is presented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-      function process_union(this: number | string) {
-          console.log (this)
-      }
-
-      (5).process_union ()
-      ("555").process_union ()
-      process_union (5)
-      process_union ("555")
-
 
 .. index::
    receiver type
@@ -3210,7 +3152,7 @@ The use of getters and setters looks identical to the use of fields:
 
     let c = new Person("John", "Doe")
 
-    // Getter - ok, top=level getter with receiver used
+    // Getter - OK, top=level getter with receiver used
     console.log(c.fullName) // output: 'Doe John'
 
      // compile-time error, as setter is not defined
@@ -3308,12 +3250,12 @@ The usual rule of function type compatibility (see
       function foo(this: A): boolean {}
       function goo(a: A): boolean {}
 
-      let f1: F1 = foo // ok
-      f1 = goo // ok
+      let f1: F1 = foo // OK
+      f1 = goo // OK
 
-      let f2: F2 = goo // ok
-      f2 = foo // ok
-      f1 = f2 // ok
+      let f2: F2 = goo // OK
+      f2 = foo // OK
+      f1 = f2 // OK
 
 The sole difference is that only an entity of *function type with receiver*
 nut not an entity of a compatible *function type* can be used in
@@ -3323,11 +3265,11 @@ nut not an entity of a compatible *function type* can be used in
    :linenos:
 
       let a = new A()
-      a.f1() // ok, function type with receiver
-      f1(a)  // ok
+      a.f1() // OK, function type with receiver
+      f1(a)  // OK
 
       a.f2() // compile-time error
-      f2(a) // ok
+      f2(a) // OK
 
 .. index::
    entity
@@ -3382,8 +3324,8 @@ variable of *function type with receiver*. Attempting to do so causes a
 
    let x = 5
    x.foo(bar<int>) // OK
-   let y = bar<int> // ok
-   x.foo(y) // ok
+   let y = bar<int> // OK
+   x.foo(y) // OK
 
    // compile time error - can not assign entity with method call syntax
    // to a function type
@@ -3566,9 +3508,9 @@ examples:
 
      process(
         (this: C): void => {
-            this.foo()   // ok - normal call
-            foo()        // ok - implicit 'this'
-            name = "Bob" // ok - implicit 'this'
+            this.foo()   // OK, normal call
+            foo()        // OK, implicit 'this'
+            name = "Bob" // OK, implicit 'this'
         }
      )
 
@@ -3580,8 +3522,8 @@ is inferred from the context:
    :linenos:
 
      process() {
-        this.foo() // ok - normal call
-        foo()      // ok - implicit 'this'
+        this.foo() // OK, normal call
+        foo()      // OK, implicit 'this'
      }
 
 The use of an implicit ``this`` when calling a *function with receiver* is
@@ -3603,7 +3545,7 @@ represented in the following example:
      function otherBar(this: OtherClass) {}
 
      process() {
-        bar()      // ok -  implicit 'this'
+        bar()      // OK, implicit 'this'
         otherBar() // compile-time error, wrong type of implicit 'this'
      }
 
@@ -3641,7 +3583,7 @@ function type, and the argument is passed as a lambda using the
 .. code-block:: abnf
 
     trailingLambda:
-        block
+        'async'? block
         ;
 
 .. index::
@@ -3655,6 +3597,8 @@ function type, and the argument is passed as a lambda using the
    parameter
    lambda
    block notation
+
+The modifier ``async`` is used optionally to mark :ref:`Async Lambdas`.
 
 The use of a trailing lambda is represented in the example below:
 
@@ -3889,7 +3833,7 @@ setters that have the same name.
    :linenos:
 
    set hashCode(x: string) {/*body*/}
-   get hashCode(): long {/*body*/} // ok
+   get hashCode(): long {/*body*/} // OK
 
 .. index::
    accessor declaration
@@ -3915,10 +3859,10 @@ A :index:`compile-time error` occurs if:
     get magicNumber(): number { return 42 }
     set randomSeed(a: number) {}
 
-    console.log(magicNumber) // ok, getter is used
+    console.log(magicNumber) // OK, getter is used
     magicNumber = 15 // compile-time error, setter is not defined
 
-    randomSeed = 42 // ok, setter is used
+    randomSeed = 42 // OK, setter is used
     console.log(randomSeed) // compile-time error, getter is not defined
 
 .. index::
@@ -4037,11 +3981,11 @@ Valid and erroneous destructuring is represented in the following example:
     function foo(x: [string, number, string]) {
         let a: string
         let b: number
-        [a] = x; // ok
-        [, b, a] = x; // ok
-        [, b, a,,,,] = x; // ok
+        [a] = x; // OK
+        [, b, a] = x; // OK
+        [, b, a,,,,] = x; // OK
         [b] = x; // compile-type error, x[0] is not assignable to 'b'
-        [, b] = x; // ok
+        [, b] = x; // OK
         [,,,b] = x; // compile-time error, there is no element for variable 'b'
     }
 

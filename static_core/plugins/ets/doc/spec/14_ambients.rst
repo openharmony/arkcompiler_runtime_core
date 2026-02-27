@@ -58,16 +58,13 @@ The syntax of *ambient declaration* is presented below:
         | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
+        | ambientEnumDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
         | ambientAccessorDeclaration
-        | 'const'? enumDeclaration
         | typeAlias
         )
         ;
-
-An ambient enumeration type declaration can be prefixed by the keyword
-``const`` for |TS| compatibility. It has no influence on the declared type.
 
 A :index:`compile-time error` occurs if the modifier ``declare`` is used in a
 context that is already ambient:
@@ -134,11 +131,11 @@ a :index:`compile-time error` occurs:
 .. code-block:: typescript
    :linenos:
 
-    declare let v1: number // ok
-    declare let v2 = 1     // compile-time error: ambient variable must have no initializer
+    declare let v1: number // OK
+    declare let v2 = 1     // compile-time error, ambient variable must have no initializer
 
-    declare const c1: number // ok
-    declare const c2 = 1     // compile-time error: ambient constant must have no initializer
+    declare const c1: number // OK
+    declare const c2 = 1     // compile-time error, ambient constant must have no initializer
 
 |
 
@@ -174,7 +171,7 @@ function declaration is not specified.
 .. code-block:: typescript
    :linenos:
 
-    declare function foo(x: number): void // ok
+    declare function foo(x: number): void // OK
     declare function bar(x: number) // compile-time error
 
 Ambient functions cannot have parameters with default values but can have
@@ -185,7 +182,7 @@ Ambient function declarations cannot specify function bodies.
 .. code-block:: typescript
    :linenos:
 
-    declare function foo(x?: string): void // ok
+    declare function foo(x?: string): void // OK
     declare function bar(y: number = 1): void // compile-time error
 
 .. note::
@@ -638,6 +635,55 @@ as follows:
 
 |
 
+.. _Ambient Enum Declarations:
+
+Ambient Enum Declarations
+*************************
+
+.. meta:
+    frontend_status: None
+
+The syntax of *ambient enum declaration* is presented below:
+
+.. code-block:: abnf
+
+    ambientEnumDeclaration
+        : 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
+        | 'const' 'enum' identifier enumBaseType? '{' ambientConstEnumMemberList? '}'
+        ;
+
+    ambientEnumMemberList:
+        identifier (',' identifier)* ','?
+        ;
+
+    ambientConstEnumMemberList:
+        ambientConstEnumMember (',' ambientConstEnumMember)* ','?
+        ;
+
+    ambientConstEnumMember:
+        identifier '=' constExpression
+        ;
+
+*Ambient enum declarations* must meet the following conditions:
+
+- Members of a non-constant enum declaration cannot have initializers;
+
+- Members of a constant enum declaration must have explicit initializers.
+
+Otherwise, a :index:`compile-time error` occurs as represented
+in the example below: 
+
+.. code-block:: typescript
+   :linenos:
+
+    declare enum RGB {Red, Green, Blue} // OK
+    declare const enum Color: byte {BLACK = 0, WHITE = 0xFF} // OK
+    
+    declare enum Err1 { A = 5 }      // compile-time error, initializer is present
+    declare const enum Err2 { A, B } // compile-time error, initializer is missing
+
+|
+
 .. _Ambient Namespace Declarations:
 
 Ambient Namespace Declarations
@@ -745,7 +791,7 @@ of the namespace.
    :linenos:
 
     export declare namespace A {
-         export {foo} // compile-time error: no 'foo' in namespace 'A'
+         export {foo} // compile-time error, no 'foo' in namespace 'A'
     }
     function foo() {}
 
@@ -817,7 +863,7 @@ declaration is not specified.
 .. code-block:: typescript
    :linenos:
 
-    declare get name(): string // ok
+    declare get name(): string // OK
     declare get age() // compile-time error, return type must be specified
 
 See :ref:`Accessor Declarations` and :ref:`Accessors with Receiver` for details.

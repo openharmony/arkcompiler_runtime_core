@@ -293,15 +293,14 @@ Header Format
      - Offset to the class index. The offset must point at an entity
        in the :ref:`ClassIndex <RT ClassIndex>` format.
 
-   * - ``num_export_table``
+   * - ``export_data_size``
      - ``uint32_t``
-     - Number of exported classes defined in the file, and of elements in
-       the entity pointed at by ``export_table_off``.
+     - Size of the export data region in bytes. The region elements are pointed at by ``export_data_off``.
 
-   * - ``export_table_off``
+   * - ``export_data_off``
      - ``uint32_t``
-     - Offset to the exported class index. The offset must point at
-       an entity in the :ref:`ClassIndex <RT ClassIndex>` format.
+     - Offset to the exported data region. The offset must point at
+       a region in the :ref:`ExportData <RT ExportData>` format.
 
    * - ``num_lnps``
      - ``uint32_t``
@@ -625,6 +624,54 @@ definition by index at runtime.
    * - ``protos``
      - ``uint32_t[]``
      - Array of offsets to a :ref:`Proto <RT Proto>`.
+
+.. _RT ExportData:
+
+ExportData Format
+-----------------
+
+``ExportData`` region provides information about exported declarations,
+to be able to import the binary file from another source file and resolve to its declarations at compile-time.
+This information is mandatory if the binary file is distributed as a library without available sources.
+The information is read by the compiler front-end and used when resolving and checking references to the imported file.
+
+It is organized as two subsections according to two existing mechanisms of import resolution to the binary file.
+
+**Alignment**: None
+
+**Format**:
+
+.. list-table::
+   :width: 100%
+   :align: left
+   :widths: auto
+   :header-rows: 1
+
+   * - Name
+     - Format
+     - Description
+
+   * - ``metadataEnabled``
+     - ``uint32_t``
+     - A flag of whether metadata was emitted for the file.
+       0 means metadata emitting was disabled, any other value means that enabled.
+
+   * - ``metadataSize``
+     - ``uint32_t``
+     - Optional. The size of metadata field in bytes. This field is absent if the ``metadataEnabled`` flag is set to 0.
+
+   * - ``exportTable``
+     - ``ClassIndex``
+     - A class index for the exported classes.
+       If ``metadataEnabled`` is set to 0, the size of ``exportTable`` in bytes
+       equals to ``export_data_size - sizeof(uint32_t)``.
+       Otherwise, the size of ``exportTable`` in bytes is calculated by the formula
+       ``export_data_size - sizeof(uint32_t) * 2 - metadataSize``.
+
+   * - ``metadata``
+     - ``uint8_t[]``
+     - Optional. The encoded binary data of the exported declarations.
+       This field is absent if the ``metadataEnabled`` flag is set to 0.
 
 .. _RT ForeignField:
 

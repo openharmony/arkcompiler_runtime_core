@@ -842,8 +842,8 @@ a :index:`compile-time error` occurs:
 
     function gen<T> (x: T) {}
 
-    let a = gen<string> // ok
-    let b = gen // compile-time error: no explicit type arguments
+    let a = gen<string> // OK
+    let b = gen // compile-time error, no explicit type arguments
 
 .. index::
    function reference
@@ -864,15 +864,15 @@ A :index:`compile-time error` occurs if the name of an *overloaded function*
     function bar(n: number) {}
     function bar(s: string) {}
 
-    let b = bar // Compile-time error: overloaded function name
+    let b = bar // Compile-time error, overloaded function name
 
     function foo1(n: number) {}
     function foo2(s: string) {}
     overload foo { foo1, foo2 }
 
     foo(1)          // OK, overload call
-    let x = foo     // Compile-time error: explicit overload name
-    let y = foo2    // ok, ref to foo2
+    let x = foo     // Compile-time error, explicit overload name
+    let y = foo2    // OK, ref to foo2
 
 |
 
@@ -945,8 +945,8 @@ Otherwise, a :index:`compile-time error` occurs:
         gen<T> (x: T) {}
     }
 
-    let a = new C().gen<string> // ok
-    let b = new C().gen // compile-time error: no explicit type arguments
+    let a = new C().gen<string> // OK
+    let b = new C().gen // compile-time error, no explicit type arguments
 
 A :index:`compile-time error` occurs if the name of an *overloaded method*
 (see :ref:`Implicit Method Overloading`, :ref:`Explicit Class Method Overload`,
@@ -1021,8 +1021,8 @@ expression in an array literal is ignored:
 .. code-block:: typescript
    :linenos:
 
-    let x = [1, 2, 3] // ok
-    let y = [1, 2, 3,] // ok, trailing comma is ignored
+    let x = [1, 2, 3] // OK
+    let y = [1, 2, 3,] // OK, trailing comma is ignored
 
 The number of initializer expressions enclosed in square brackets of the array
 initializer determines the length of the array to be constructed.
@@ -1113,10 +1113,10 @@ Possible variants are represented in the following example:
 .. code-block:: typescript
    :linenos:
 
-    let a: number[] = [1, 2, 3] // ok, variable type in a declaration is used
-    a = [4, 5] // ok, variable type is used
+    let a: number[] = [1, 2, 3] // OK, variable type in a declaration is used
+    a = [4, 5] // OK, variable type is used
 
-    let b = [1, 2, 3] as number[]    // ok, cast target type is used
+    let b = [1, 2, 3] as number[]    // OK, cast target type is used
 
     function min(x: number[]): number {
       let m = x[0]
@@ -1125,12 +1125,12 @@ Possible variants are represented in the following example:
       }
       return m
     }
-    min([1., 3.14, 0.99]); // ok, parameter type is used
+    min([1., 3.14, 0.99]); // OK, parameter type is used
 
     // Array of array initialization
     type Matrix = number[][]
     let m: Matrix = [
-        [1, 2], [3, 4] // ok, element type is used
+        [1, 2], [3, 4] // OK, element type is used
     ]
 
     class aClass {}
@@ -1163,6 +1163,7 @@ is **not** one of the following:
 - ``Object``;
 - Tuple type;
 - Fixed-size array type;
+- Value array type;
 - Resizable array type;
 - Superinterface of a resizable array type;
 - Union type that contains at least one constituent type from the above list.
@@ -1173,7 +1174,7 @@ If type used in a context is ``Any`` or ``Object``, then
 .. code-block:: typescript
    :linenos:
 
-    let a: Object = [1, 2, 3] // ok, array literal is of int[] type
+    let a: Object = [1, 2, 3] // OK, array literal is of int[] type
 
 If type used in a context is a *tuple type* (see :ref:`Tuple Types`),
 then it is inferred as an array literal type on the following conditions:
@@ -1187,7 +1188,7 @@ Otherwise, a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    let tuple: [number, string] = [1, "hello"] // ok
+    let tuple: [number, string] = [1, "hello"] // OK
     let incorrect: [number, string] = ["hello", 1] // compile-time error
 
 If type used in a context is a *fixed-size array type* (see
@@ -1198,9 +1199,21 @@ the specified type. Otherwise, a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    let a: FixedArray<string> = ["hello", "world"] // ok
+    let a: FixedArray<string> = ["hello", "world"] // OK
     let b: FixedArray<string> = [1, 2]             // compile-time error
-    let c: FixedArray<Object> = [1, "hello"]       // ok
+    let c: FixedArray<Object> = [1, "hello"]       // OK
+
+If type used in a context is a *value array type* (see
+:ref:`Value Array Types`), and type of each expression is
+assignable to an array element type, then an array literal is of
+the specified type. Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: ValueArray<int> = [1, 2]    // OK
+    let b: ValueArray<double> = [1, 2] // OK
+    let b: ValueArray<int> = [3.14]    // compile-time error
 
 If type used in a context is a *resizable array type* (see
 :ref:`Resizable Array Types` and including :ref:`Readonly Array Types`),
@@ -1211,13 +1224,13 @@ Otherwise, a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    let a: Array<string> = ["aa", "bb"]     // ok
-    let b: string[] = ["aa", "bb"]          // ok
-    let c: readonly string[] = ["aa", "bb"] // ok
+    let a: Array<string> = ["aa", "bb"]     // OK
+    let b: string[] = ["aa", "bb"]          // OK
+    let c: readonly string[] = ["aa", "bb"] // OK
 
     let d: string[] = ["aa", 2]             // compile-time error
 
-    let o: Object[] = ["aa", 2]             // ok
+    let o: Object[] = ["aa", 2]             // OK
 
 If type used in a context is an interface ``I``, and:
 
@@ -1240,11 +1253,11 @@ This situation is represented in the following example:
    :linenos:
 
     interface SomeI {}
-    let a = [1, 2] as SomeI // compile-time error: SomeI is not a superinterface of Array
+    let a = [1, 2] as SomeI // compile-time error, SomeI is not a superinterface of Array
 
-    let b: ConcatArray<number> = [1, 2]  // ok, instance of Array<number>
-    let c: ConcatArray<string> = [1, 2]  // compile-time error: int is not assignable to string
-    let d: ArrayLike<Object> = [1, "aa"] // ok, instance of Array<Object>
+    let b: ConcatArray<number> = [1, 2]  // OK, instance of Array<number>
+    let c: ConcatArray<string> = [1, 2]  // compile-time error, int is not assignable to string
+    let d: ArrayLike<Object> = [1, "aa"] // OK, instance of Array<Object>
 
 If a type used in a context is a *union type* (see :ref:`Union Types`),
 then the step :ref:`Array Literal Type Inference from Context` is taken
@@ -1324,7 +1337,7 @@ from the initialization expression instead by using the following algorithm:
     - If ``T``:sub:`i` is a literal type, then it is replaced for its
       supertype;
 
-    - If ``T``:sub:`i` is a union type comprized of literal types, then each
+    - If ``T``:sub:`i` is a union type comprised of literal types, then each
       constituent literal type is replaced for its supertype.
 
     - :ref:`Union Types Normalization` is applied to the resultant union type
@@ -1427,7 +1440,7 @@ More details are here :ref:`Object Literal of Class Type` and
       abstract class B {
          abstract m(): void
       }
-      const a: A = { m(): void {} } // compile-time error: no m() in class A
+      const a: A = { m(): void {} } // compile-time error, no m() in class A
       const i: I = { m(): void {} } // OK
       const b: B = { m(): void {} } // OK
 
@@ -1542,9 +1555,9 @@ literal is ``C``:
     }
     function foo(p: Person) { /*some code*/ }
     // ...
-    let p: Person = {name: "Bob", age: 25} /* ok, variable type is
+    let p: Person = {name: "Bob", age: 25} /* OK, variable type is
          used */
-    foo({name: "Alice", age: 18}) // ok, parameter type is used
+    foo({name: "Alice", age: 18}) // OK, parameter type is used
 
 An identifier in each *object literal field* must name a field of class ``C``.
 
@@ -2048,7 +2061,7 @@ occurs:
 
     let map: Record<"aa" | "bb", number> = {
         "aa": 1,
-    } // compile-time error: "bb" key is missing
+    } // compile-time error, "bb" key is missing
 
 |
 
@@ -2263,7 +2276,7 @@ or for the *rest parameter*:
 
    // 'readonly' array in spread expr, can modify target array Elements
    let rw: int[] = [...a]
-   rw[1] = 1 // ok
+   rw[1] = 1 // OK
    function foo(...p_rw: int[]) {
       p_rw[1] = 1 // OK
    }
@@ -3175,7 +3188,7 @@ indexing expression, then:
 
 -  If an object reference expression is not of a nullish type, then the
    chaining operator has no effect.
--  Otherwise, object reference expression must be checked to a nullish
+-  Otherwise, object reference expression must be checked against a nullish
    value. If the value is ``undefined`` or ``null``,
    then the evaluation of the entire surrounding *primary expression* stops.
    The result of the entire primary expression is then ``undefined``.
@@ -3625,7 +3638,7 @@ influence the type of the entire primary expression:
 .. code-block:: typescript
    :linenos:
 
-    function foo(s1: string, s2: string | null) {
+    function foo(s1: string, s2: string | undefined) {
         let a = s1?.[0] // 's' is of non-nullish type, type of 'a' is string
         let b = s2?.[0] // type of 'b' is string | undefined
     }
@@ -3764,33 +3777,25 @@ It optionally lists all actual arguments for the constructor.
 A *class instance creation expression* that refers to classes ``FixedArray``,
 ``Array``, or classes derived from ``Array``, instantiated with an array element
 type of some class type, is a special form of *array creation expression*.
-When defining multiple elements of a created array, such an array creation
-expression must:
 
-- Refer to a class that contains an accessible parameterless constructor
-  or a constructor with all parameters of the second form
-  of optional parameters (see :ref:`Optional Parameters`); or
-
-- Have a default value.
-
-- Type parameter refers to a concrete type
-
-
-Otherwise, a :index:`compile-time error` occurs
-(see :ref:`Fixed-Size Array Creation`,
-:ref:`Resizable Array Creation Expressions` for details):
+Attempting to create a *FixedArray* of elements of which the type is a type parameter
+causes a :index:`compile-time error`. 
 
 .. code-block:: typescript
    :linenos:
 
     class A<T> {
-       foo () {
-          const a1 = new Array<T> (5) // Array with 5 elements of type T
-                                      // cannot be created
-          const a2 = new FixedArray<T> (5) // Array with 5 elements of type T
-                                           // cannot be created
+       foo (element: T) {
+          const a1 = new Array<T> (5, element) // OK: array with 5 elements  
+                                               // will be created
+          const a2 = new FixedArray<T> (5, element) // Compile-time error, array
+                             // with 5 elements of type T cannot be created
        }
     }
+
+
+It is discussed in detail in :ref:`Fixed-Size Array Creation`
+and :ref:`Resizable Array Creation Expressions`.
 
 The execution of a class instance creation expression is performed as follows:
 
@@ -3872,12 +3877,9 @@ If type ``T`` is not *preserved up to undefined* by :ref:`Type Erasure`, then a
 
 *Generic type* (see :ref:`Generics`) in the form of *type name* (see
 :ref:`Type References`) can be used as the operand ``T`` of an ``instanceof``
-expression. In this case, the check is performed against the *type name*, and
-*type parameters* are ignored. *Instantiated generic types* (see
-:ref:`Explicit Generic Instantiations`) cannot be used because the operand ``T``
-of an ``instanceof`` must be retained by :ref:`Type Erasure`. The ``type`` of
-an ``instanceof`` expression is used for *smart cast* (see
-:ref:`Smart Casts and Smart Types`) if applicable.
+expression. In this case, the check is performed against the *erased* type
+(see :ref:`Type Erasure`). The ``type`` of an ``instanceof`` expression
+is used for *smart cast* (see :ref:`Smart Casts and Smart Types`) if applicable.
 
 The approach is represented in the following example:
 
@@ -3891,7 +3893,7 @@ The approach is represented in the following example:
       let c = a as B<T>   // OK
       let x = new B<string> // OK, explicit type parameter
       console.log(x instanceof B)        // OK
-      console.log(x instanceof B<T>)     // compile-time error, T was erased
+      console.log(x instanceof B<T>)     // compile-time error, B<T> is not preserved up to undefined
 
       if(a instanceof B) {  // OK, type of instanceof will be used for smart
                             // cast in `if` clause
@@ -4053,7 +4055,7 @@ example below:
 .. code-block:: typescript
    :linenos:
 
-   let x = 1 as byte // ok
+   let x = 1 as byte // OK
    let y = 128 as byte // compile-time error
 
 .. index::
@@ -4070,10 +4072,10 @@ Casting for array literals is represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-   let a = [1, 2] as double[] // ok, [1.0, 2.0]
+   let a = [1, 2] as double[] // OK, [1.0, 2.0]
    let b = [1, 2] as double // compile-time error, wrong target type
    let c = [1, "cc"] as double[] // compile-time error, wrong element type
-   let d = [1, "cc"] as [double, string] // ok, cast to the tuple type
+   let d = [1, "cc"] as [double, string] // OK, cast to the tuple type
    let e = [1.0, "cc"] as [int, string] // compile-time error, wrong element type
 
 .. note::
@@ -4456,7 +4458,7 @@ following example:
     let x = lhs_expression ?? rhs_expression
 
     let x$ = lhs_expression
-    if (x$ == null) {x = rhs_expression} else x = x$!
+    if (x$ == null || x == undefined) {x = rhs_expression} else x = x$!
 
     // Type of x is NonNullishType(lhs_expression)|Type(rhs_expression)
 
@@ -4468,8 +4470,8 @@ or a conditional-or operator without parentheses, then a
    :linenos:
 
     function  foo(n: boolean | undefined, a: boolean, b: boolean) {
-        n ?? a || b   // error: '??' and '||' operations cannot be mixed without parentheses
-        n ?? (a || b) // ok
+        n ?? a || b   // error, '??' and '||' operations cannot be mixed without parentheses
+        n ?? (a || b) // OK
     }
 
 .. index::
@@ -5147,8 +5149,8 @@ The subgroups of binary expressions are described further in that chapter.
 The possible combinations of types of the *expression 1* and *expression 2*
 as well as the type of the resulting *binaryExpression*  is given in the
 following table. Type combinations not listed in the table issue either a
-compile-time error when it is detected at compile time, or run-time error
-otherwise.
+:index:`compile-time error` when it is detected at compile time, or a
+:index:`runtime error` otherwise.
 
 +----------------+--------------------------------+-------------------------------+-------------------------+
 |                | type of                        | type of                       | type of                 |
@@ -5475,8 +5477,8 @@ Bigint division rounds toward *0*, i.e., the quotient of bigint operands
 satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
 If the divisor value of the ``bigint`` division operator is *0n*, then either
-a compile-time error occurs (when detected at compile time), or a :index:`runtime error`
-is thrown during exection.
+a :index:`compile-time error` occurs if detected at compile time, or a
+:index:`runtime error` is thrown during execution.
 
 Integer division rounds toward *0*, i.e., the quotient of integer operands
 *n* and *d*, after a numeric types conversion on both (see
@@ -5798,9 +5800,9 @@ Any other combination of operand types causes a :index:`compile-time error`.
 
 The result of raising to power `0n`` is always `1n`, including case `0n**0n`.
 
-If the second operand of type ``bigint`` is negative, then either a compile-time
-error occurs (when detected at compile time), or a :index:`runtime error` is
-thrown during exection.
+If the second operand of type ``bigint`` is negative, then either a
+:index:`compile-time error` occurs if detected at compile time, or a
+:index:`runtime error` is thrown during execution.
 
 Both variants of the operator ``'**'`` are represented in example below:
 
@@ -6508,26 +6510,19 @@ Enumeration Relational Operators
 .. meta:
     frontend_status: Done
 
-If both operands are of the same enumeration (see :ref:`Enumerations`) or const
-enumeration (see :ref:`Const Enumerations`) type, then :ref:`Numeric Relational Operators`
-or :ref:`String Relational Operators` are used depending on the kind of enumeration
-constant value ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
-Otherwise, a :index:`compile-time error` occurs.
+If both operands are of the same enumeration type (see :ref:`Enumerations`),
+then :ref:`Numeric Relational Operators`
+or :ref:`String Relational Operators` are used depending on the type of enumeration
+base type. Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    enumeration relational operator
-   enumeration constant
    enumeration type
-   const enumeration type
-   value
+   enumeration base type
    string value
    relational operator
    numeric relational operator
    string relational operator
-   enumeration constant value
-   enumeration integer value
-   enumeration string value
-   constant value
 
 |
 
@@ -6603,9 +6598,9 @@ A comparison that uses the operators ``'=='`` and ``'==='`` is evaluated to
   operands represent the same Unicode code point
   (see :ref:`Character Equality and Relational Operators`);
 
-- Both operands are of the same enumeration (see :ref:`Enumerations`) or const enumeration
-  (see :ref:`Const Enumerations`) type and have the same numeric value or the same string
-  contents, depending on the type of enumeration constant values;
+- Both operands are of the same enumeration (see :ref:`Enumerations`) type and
+  have the same numeric value or the same string
+  contents, depending on the enumeration base type;
 
 - Function references refer to the same functional object (see
   :ref:`Function Type Equality Operators` for detail).
@@ -6700,12 +6695,12 @@ An equality with values of two union types is represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-    function f1(x: number | string, y: boolean | null): boolean {
+    function f1(x: number | string, y: boolean | undefined): boolean {
         return x == y // compile-time warning: always evaluates to false
     }
 
     function f2(x: number | string, y: boolean | "abc"): boolean {
-        // ok, can be evaluated as true
+        // OK, can be evaluated as true
         return x == y
     }
 
@@ -8365,7 +8360,6 @@ following:
    shift operator
    equality operator
    equality expression
-   predefined value type
    literal
    cast expression
    unary operator

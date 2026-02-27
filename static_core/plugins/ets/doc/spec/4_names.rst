@@ -132,7 +132,6 @@ A declaration introduces a named entity in an appropriate *declaration scope*
 - :ref:`Classes`;
 - :ref:`Interfaces`;
 - :ref:`Enumerations`;
-- :ref:`Const Enumerations`;
 - :ref:`Constant Or Variable Declarations`;
 - :ref:`Top-Level Declarations`;
 - :ref:`Explicit Overload Declarations`;
@@ -179,15 +178,15 @@ then a :index:`compile-time error` occurs:
 .. code-block:: typescript
    :linenos:
 
-    // compile-time error: The constant and the function have the same name.
+    // compile-time error, the constant and the function have the same name.
     const PI = 3.14
     function PI() { return 3.14 }
 
-    // compile-time error: The type and the variable have the same name.
+    // compile-time error, the type and the variable have the same name.
     class Person {}
     let Person: Person
 
-    // compile-time error: The field and the method have the same name.
+    // compile-time error, the field and the method have the same name.
     class C {
         counter: number
         counter(): number {
@@ -195,7 +194,7 @@ then a :index:`compile-time error` occurs:
         }
     }
 
-    /* compile-time error: Name of the declaration clashes with the predefined
+    /* compile-time error, name of the declaration clashes with the predefined
         type or standard library entity name. */
     let number: number = 1
     let String = true
@@ -204,7 +203,7 @@ then a :index:`compile-time error` occurs:
     let Array = 42
 
 
-    /* compile-time error: ambient and non-ambient declarations refer to the
+    /* compile-time error, ambient and non-ambient declarations refer to the
        same entity in a single module
     */
     declare function foo()
@@ -249,8 +248,8 @@ declared in different scopes are made accessible in one scope:
 
     import {foo, goo as bar} from "some module"
 
-    function foo() {} // compile-time error: duplicate declaration
-    function bar() {} // compile-time error: duplicate declaration
+    function foo() {} // compile-time error, duplicate declaration
+    function bar() {} // compile-time error, duplicate declaration
 
 Functions distinguishable by signatures are represented in the example below:
 
@@ -570,8 +569,7 @@ Type Declarations
     frontend_status: Done
 
 An interface declaration (see :ref:`Interfaces`), a class declaration (see
-:ref:`Classes`), an enum declaration (see :ref:`Enumerations`), a const enum
-declaration (see :ref:`Const Enumerations`) or a type alias
+:ref:`Classes`), an enum declaration (see :ref:`Enumerations`), or a type alias
 (see :ref:`Type Alias Declaration`) are type declarations.
 
 The syntax of *type declaration* is presented below:
@@ -643,7 +641,7 @@ Meaningful names can be provided for anonymous types as follows:
     type Matrix = number[][]
     type Handler = (s: string, no: number) => string
     type Predicate<T> = (x: T) => boolean
-    type NullableNumber = number | null
+    type NullishNumber = number | undefined
 
 If the existing type name is too long, then a shorter new name can be
 introduced by using type alias (particularly for a generic type).
@@ -691,12 +689,12 @@ if it is one of the following:
 .. code-block:: typescript
    :linenos:
 
-    type A = A[] // ok, used as element type
+    type A = A[] // OK, used as element type
 
     class C<T> { /*body*/}
-    type B = C<B> // ok, used as a type argument
+    type B = C<B> // OK, used as a type argument
 
-    type D = string | Array<D> // ok
+    type D = string | Array<D> // OK
 
 Any other use including unresolvable circular references causes a
 :index:`compile-time error`, because the compiler does not have enough
@@ -730,8 +728,8 @@ The same rules apply to a generic type alias defined as
 .. code-block:: typescript
    :linenos:
 
-    type A<T> = Array<A<T>> // ok, A<T> is used as a type argument
-    type A<T> = string | Array<A<T>> // ok
+    type A<T> = Array<A<T>> // OK, A<T> is used as a type argument
+    type A<T> = string | Array<A<T>> // OK
 
     type A<T> = A<T> // compile-time error
 
@@ -866,11 +864,11 @@ but no *initializer*. Otherwise, a :index:`compile-time error` occurs.
 .. code-block:: typescript
    :linenos:
 
-    let a: number // ok
-    let b = 1 // ok, type 'int' is inferred
-    let c: number = 6, d = 1, e = "hello" // ok
+    let a: number // OK
+    let b = 1 // OK, type 'int' is inferred
+    let c: number = 6, d = 1, e = "hello" // OK
 
-    // ok, type of lambda and type of 'f' can be inferred
+    // OK, type of lambda and type of 'f' can be inferred
     let f = (p: number) => b + p
     let x // compile-time error -- either type or initializer
 
@@ -960,9 +958,9 @@ The type ``T`` of a constant declaration is determined as follows:
 .. code-block:: typescript
    :linenos:
 
-    const a: number = 1 // ok
-    const b = 1 // ok, int type is inferred
-    const c: number = 1, d = 2, e = "hello" // ok
+    const a: number = 1 // OK
+    const b = 1 // OK, int type is inferred
+    const c: number = 1, d = 2, e = "hello" // OK
     const x // compile-time error -- initializer is mandatory
     const y: number // compile-time error -- initializer is mandatory
 
@@ -1099,7 +1097,7 @@ If type of an initializer expression cannot be inferred, then a
 
     const ee = cond() ? 1 : "one" // type of 'ee' is int | "one"
 
-    let f = {name: "aa"} // compile-time error: type of object literal is not inferred
+    let f = {name: "aa"} // compile-time error, type of object literal is not inferred
 
     let   x1 = 1 // type of 'x1' is int
     const x2 = 1 // type of 'x2' is int
@@ -1509,15 +1507,15 @@ that are assignable (see :ref:`Assignability`) to the corresponding
       return numbers[0] + numbers[1] + numbers[2]
     }
 
-    sum()          // compile-time error: wrong number of arguments, 0 instead of 3
-    sum(1)         // compile-time error: wrong number of arguments, 1 instead of 3
-    sum(1, 2, "a") // compile-time error: wrong type of the 3rd argument
+    sum()          // compile-time error, wrong number of arguments, 0 instead of 3
+    sum(1)         // compile-time error, wrong number of arguments, 1 instead of 3
+    sum(1, 2, "a") // compile-time error, wrong type of the 3rd argument
     sum(1, 2, 3)   // returns 6
 
 It is legal though meaningless to declare a function with an optional
 parameter followed by a *rest parameter* of a tuple type.
 However, use of such function without explicitly set optional and
-*rest parameters* will cause compile-time error:
+*rest parameters* will cause compile-time error,
 
 .. code-block:: typescript
    :linenos:
@@ -1711,11 +1709,12 @@ The syntax of *return type* is presented below:
         ':' (type | 'this')
         ;
 
-If a function, a method, or a lambda return type is other than ``void`` or
-``undefined`` (see :ref:`Type void or undefined`) , and the execution path in
-the function, method, or lambda body has neither a ``return`` statement (see
-:ref:`Return Statements`) nor a ``throw`` statement (see
-:ref:`Throw Statements`), then a :index:`compile-time error` occurs.
+If a function, a method, or a lambda return type is other than ``void`` or 
+``undefined`` (see :ref:`Type void or undefined`) or a union type containing
+``void`` or ``undefined``, and the execution path in the function, method, or
+lambda body has neither a ``return`` statement (see :ref:`Return Statements`)
+nor a ``throw`` statement (see :ref:`Throw Statements`), then
+a :index:`compile-time error` occurs. 
 
 If a function, a method, or a lambda return type is ``never`` (see
 :ref:`Type never`), and there is an execution path in which all statements
@@ -1734,14 +1733,14 @@ then the function, method, or lambda return type is ``void`` (see
 .. code-block:: typescript
    :linenos:
 
-    function foo1 (): number {}  // compile-time error: return or throw missing
-    let foo2 =  (): number => {} // compile-time error: return or throw missing
+    function foo1 (): number {}  // compile-time error, return or throw missing
+    let foo2 =  (): number => {} // compile-time error, return or throw missing
 
     function foo3 (): undefined {}  // OK: it returns 'undefined' value
     let foo4 =  (): undefined => {} // OK: it returns 'undefined' value
 
-    function foo5 (): never {}  // compile-time error: no throw or return never type function call
-    let foo6 =  (): never => {} // compile-time error: no throw or return never type function call
+    function foo5 (): never {}  // compile-time error, no throw or return never type function call
+    let foo6 =  (): never => {} // compile-time error, no throw or return never type function call
 
     function foo7 (): void {}  // OK: it returns undefined value
     let foo8 =  (): void => {} // OK: it returns undefined value

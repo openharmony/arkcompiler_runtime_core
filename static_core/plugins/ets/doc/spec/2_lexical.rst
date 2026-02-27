@@ -143,7 +143,7 @@ separators is considered a single separator.
    line separator character
    paragraph separator character
 
-Line separators are often treated as white spaces, except where line
+Line separators are often handled as white spaces, except where line
 separators have special meanings. See :ref:`Semicolons` for more details.
 
 |
@@ -665,7 +665,7 @@ The concept is represented by the examples below:
     0x7FFF_FFFF_1
     9223372036854775807 // max(long)
 
-    // compile-time error as the value is too large:
+    // compile-time error, the value is too large:
     9223372036854775808 // max(long) + 1
     0xFFFF_FFFF_FFFF_FFFF_0
 
@@ -684,26 +684,26 @@ The concept is represented by the examples below:
     .. code-block:: typescript
       :linenos:
 
-       const max_int1 = 0x7FFFFFFF  // ok, type: int, value: max(int)
+       const max_int1 = 0x7FFFFFFF  // OK, type: int, value: max(int)
        const max_int2 = 21474836477  // the same
        
-       const x1 = 0x80000000 // ok, type: long (!), value: 2147483648
-       const x2 = 2147483648  // the same
+       const x1 = 0x80000000 // OK, type: long (!), value: 2147483648
+       const x2 = 2147483648  // same
        
-       const err1: int = 2147483648 // compile-time error, value is out or range for 'int'
+       const err1: int = 2147483648 // compile-time error, the value is out of range for 'int'
        
-       const min_int = - 21474836477 - 1 // ok, type: int, value: min(int)
+       const min_int = - 21474836477 - 1 // OK, type: int, value: min(int)
        
-       const max_long1 = 0x7FFF_FFFF_FFFF_FFFF // ok, type: long, value: max(long)
-       const max_long2 = 9223372036854775807   // the same (decimal literal)
+       const max_long1 = 0x7FFF_FFFF_FFFF_FFFF // OK, type: long, value: max(long)
+       const max_long2 = 9223372036854775807   // same (decimal literal)
        
-       const err2 = 0x8000_0000_0000_0000 // compile-time error, value is too large
-       const err3 = 9223372036854775808   // compile-time error, value is too large
+       const err2 = 0x8000_0000_0000_0000 // compile-time error, the value is too large
+       const err3 = 9223372036854775808   // compile-time error, the value is too large
        
-       // integer negation cannot be applied to value that is too large:
-       const err4 = -9223372036854775808  // compile-time error, value is too large
+       // integer negation cannot be applied to a value that is too large:
+       const err4 = -9223372036854775808  // compile-time error, the value is too large
        
-       const min_long = - max_long - 1  // ok, type: long, value: min(long)
+       const min_long = - max_long - 1  // OK, type: long, value: min(long)
 
 |
 
@@ -762,9 +762,6 @@ Floating-point literals are of floating-point types that match literals as
 follows:
 
 - If *float type suffix* is present, then ``float``;
-- If the context allows inferring type, then
-  :ref:`Type Inference for Numeric Literals` is used to infer type ``float``
-  or ``double``;
 - Otherwise, ``double`` (type ``number`` is an alias to ``double``).
 
 If a floating-point literal is too large for its type, then a
@@ -773,10 +770,10 @@ If a floating-point literal is too large for its type, then a
 .. code-block:: typescript
    :linenos:
 
-    // compile-time error as the value is too large for type float:
+    // compile-time error, the value is too large for type float:
     3.4e39f
 
-    // compile-time error as the value is too large for type double:
+    // compile-time error, the value is too large for type double:
     1.7e309
 
 .. index::
@@ -896,7 +893,7 @@ String Literals
     frontend_status: Done
     todo: "" sample is invalid: SyntaxError: Newline is not allowed in strings
 
-*String literals* comprize zero or more characters enclosed between
+*String literals* comprise zero or more characters enclosed between
 single or double quotes. A *multiline string* literal (see
 :ref:`Multiline String Literal`) is a special form of a string literal.
 
@@ -1020,7 +1017,7 @@ Multiline String Literal
 *Multiline strings* can contain arbitrary text enclosed between backtick
 characters ``'`` \` ``'``. The backlash ``'\'`` is an escape for the next character.
 Multiline strings can contain any character except an unescaped
-backtick. The end of a line is treated as a newline character:
+backtick. The end of a line is handled as a newline character:
 
 .. index::
    string literal
@@ -1052,7 +1049,7 @@ backtick. The end of a line is treated as a newline character:
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
-A *multiline string* is represented in the example below.
+A *multiline string* is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1073,7 +1070,7 @@ A *multiline string* is represented in the example below.
 .. note::
    Leading spaces are neither squeezed nor trimmed.
 
-The example output is
+The output is represented in the example below:
 
 ::
 

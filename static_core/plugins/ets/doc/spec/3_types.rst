@@ -68,12 +68,12 @@ source code in |LANG|.
 
    ``bigint``,               literal types,
 
-   ``Any``, ``Object``,       function types,
+   ``Any``, ``Object``,      function types,
 
-   ``never``, ``void``,      type parameters
+   ``never``, ``void``,      type parameters,
 
    ``undefined``, ``null``,  enumeration types
-   ``Array<T>`` or ``T[]``,  const enumeration types
+   ``Array<T>`` or ``T[]``,  
    ``FixedArray<T>``
    ========================= =========================
 
@@ -187,7 +187,6 @@ User-Defined Types
 -  Class types (see :ref:`Classes`);
 -  Interface types (see :ref:`Interfaces`);
 -  Enumeration types (see :ref:`Enumerations`);
--  Const enumeration types (see :ref:`Const Enumerations`);
 -  :ref:`Function Types`;
 -  :ref:`Tuple Types`;
 -  :ref:`Union Types`;
@@ -310,31 +309,32 @@ by the example below:
 .. code-block:: typescript
    :linenos:
 
-    // a nullable array with elements of type string:
-    let a: string[] | null
+    // a nullish array with elements of type string:
+    let a: string[] |  undefined
     let s: string[] = []
-    a = s    // ok
-    a = null // ok, a is nullable
 
-    // an array with elements whose types are string or null:
-    let b1: (string | null)[]
-    b1 = null // error, b1 is an array and is not nullable
-    b1 = ["aa", null] // ok
+    a = s    // OK
+    a = undefined // OK, a is nullish type
 
-    // string or array of null elements:
-    let b2: string | null[]
-    b2 = null // error, b2 - string or array of nulls - not nullable
-    b2 = [null, null] // ok
+    // an array with elements whose types are string or undefined:
+    let b1: (string | undefined)[]
+    b1 = undefined // error, b1 is an array and is not nullish type
+    b1 = ["aa", undefined] // OK
 
-    // a function type that returns string or null
-    let c: () => string | null
-    c = null // error, c is not nullable
-    c = (): string | null => { return null } // ok
+    // string or array of undefined elements:
+    let b2: string | undefined[]
+    b2 = undefined // error, b2 - string or array of undefined - not nullish
+    b2 = [undefined, undefined] // OK
 
-    // (a function type that returns string) or null
-    let d: (() => string) | null
-    d = null // ok, d is nullable
-    d = (): string => { return "hi" } // ok
+    // a function type that returns string or undefined
+    let c: () => string | undefined
+    c = undefined // error, c is not nullish
+    c = (): string | undefined => { return undefined } // OK
+
+    // (a function type that returns string) or undefined
+    let d: (() => string) | undefined
+    d = undefined // OK, d is nullish
+    d = (): string => { return "hi" } // OK
 
 
 The annotation which is used in front of type always needs parentheses
@@ -345,10 +345,9 @@ between annotation parentheses and parentheses used in a type declaration:
    :linenos:
 
     let var_name1: @my_annotation() (A|B) // OK
-    let var_name2: @my_annotation (A|B)  // Compile-time error
+    let var_name2: @my_annotation (A|B)  // compile-time error
 
 .. index::
-   nullable array
    string
    null
    parentheses
@@ -371,7 +370,6 @@ unless aliased. Respective named types are introduced by the following:
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
 -  Enumeration declarations (see :ref:`Enumerations`),
--  Const enumeration declarations (see :ref:`Const enumerations`),
 -  Type alias declarations (see :ref:`Type Alias Declaration`), and
 -  Type parameter declarations (see :ref:`Type Parameters`).
 
@@ -509,9 +507,9 @@ Value Types
 *Value types* are predefined integer types (see
 :ref:`Integer Types and Operations`), floating-point types (see
 :ref:`Floating-Point Types and Operations`), the boolean type (see
-:ref:`Type boolean`), character types (see
-:ref:`Type char`), user-defined enumeration types (see
-:ref:`Enumerations`) and const enumeration types (see :ref:`Const Enumerations`).
+:ref:`Type boolean`), and the character type (see
+:ref:`Type char`).
+
 The values of such types do *not* share state with other
 values.
 
@@ -617,8 +615,9 @@ Integer Types and Operations
 
 .. note::
 
-   The :ref:`type bigint` is not a numeric type yet it operates with integer values
-   of arbitrary precision. That is the reason, why it is mentioned in that subsection.
+   :ref:`type bigint` is not a numeric type, yet it operates with integer values
+   of arbitrary precision. That is why it is discussed in the appropriate
+   subsection.
 
 |LANG| provides a number of operators to act on integer values as discussed
 below.
@@ -1151,12 +1150,6 @@ supertype of :ref:`Type void or undefined` and :ref:`Type null` in particular.
 
 Type ``Any`` has no methods or fields.
 
-.. Type ``NonNullable<Any>`` provides ability to call ``toString()`` from any
-   non-nullable object returning a string representation of that object. This is
-   used in the examples in this document.
-
-|
-
 .. _Type Object:
 
 Type ``Object``
@@ -1314,13 +1307,13 @@ function, or method as follows:
       m(): T { return this.f }
       constructor (f: T) { this.f = f }
    }
-   let a1 = new A<void>(undefined)      // ok, as undefined and void are the same type
-   let a2 = new A<undefined>(undefined) // ok
+   let a1 = new A<void>(undefined)      // OK, undefined and void are the same type
+   let a2 = new A<undefined>(undefined) // OK
 
    console.log (a1.f, a2.m()) // Output is "undefined" "undefined"
 
    function foo<T>(p: T): T { return p }
-   foo<void>(undefined) // ok, it returns 'undefined' value
+   foo<void>(undefined) // OK, returns 'undefined' value
 
    type F1<T> = () => T
    const f1: F1<void> = (): void => {}
@@ -1356,10 +1349,10 @@ type as follows:
    :linenos:
 
    class A<T> {}
-   let a = new A<undefined>() // ok, type parameter is irrelevant
+   let a = new A<undefined>() // OK, type parameter is irrelevant
    function foo<T>(x: T) {}
 
-   foo<undefined>(undefined) // ok
+   foo<undefined>(undefined) // OK
 
 .. index::
    undefined type
@@ -1389,18 +1382,19 @@ The only value of type ``null`` is the literal ``null`` (see
 
     - Type ``null`` is supported for |TS| compatibility. 
       
-    - Using ``undefined`` instead of ``null`` is considered best practice in 
-      |TS| and |JS|.
+    - Using ``undefined`` instead of ``null`` is considered the best practice
+      in |TS| and |JS|.
 
-    - If not specifically required, using type ``null`` as type annotation
-      or in :ref:`Nullish Types` is not recommended.
-      Use type ``undefined`` instead.
+    - Using type ``null`` as type annotation or in :ref:`Nullish Types` is not
+      recommended if not required specifically. Using type ``undefined`` is
+      recommended instead.
 
-    - Type ``undefined`` provides better performance than type ``null``.
+    - Type ``undefined`` provides a better performance than type ``null``.
 
 .. index::
    null type
    null literal
+   nullish type
 
 |
 
@@ -1423,7 +1417,7 @@ Type ``string`` has dual semantics, i.e.:
 
 -  Type ``string`` behaves like a reference type (see :ref:`Reference Types`)
    if created, assigned, or passed as an argument;
--  Type ``string`` is handled as a value (see :ref:`Value Types`) by all
+-  Type ``string`` is handled as a value type by all
    ``string`` operations (see :ref:`String Concatenation`,
    :ref:`Equality Expressions`, and :ref:`String Relational Operators`).
 
@@ -1536,9 +1530,8 @@ Similarly to ``string``, ``bigint`` type has dual semantics:
 
 - If created, assigned, or passed as an argument, type ``bigint`` behaves
   like a reference type (see :ref:`Reference Types`).
-- All applicable operations handle type ``bigint`` as a value type (see
-  :ref:`Value Types`). The operations are described in
-  :ref:`Integer Types and Operations`.
+- All applicable operations handle type ``bigint`` as a value type, 
+  meaning the values of this type do not share state with other values.
 
 Using ``bigint`` is recommended in all cases, although the name ``BigInt``
 also refers to type ``bigint``. For |TS| compatibility, objects of type
@@ -1663,7 +1656,7 @@ Array Types
 .. meta:
     frontend_status: Partly
 
-*Array type* represents a data structure intended to comprize any non-negative
+*Array type* represents a data structure intended to comprise any non-negative
 number of elements of types that are subtypes of the type specified in the
 array declaration. |LANG| supports the following two predefined array types:
 
@@ -1829,7 +1822,7 @@ Array operations are illustrated below:
     let count = a.length // get the number of array elements
     a.length = 3 // shrink array
     y = a[2] // OK, 2 is the index of the last element now
-    y = a[3] // Will cause a runtime error - attempt to access non-existing array element
+    y = a[3] // runtime error, attempt to access a non-existing array element
 
     let b: Array<number> = a // 'b' points to the same array as 'a'
 
@@ -1889,7 +1882,7 @@ Otherwise, a :index:`compile-time error` occurs.
    :linenos:
 
     let x: readonly number [] = [1, 2, 3]
-    x[0] = 42 // compile-time error as array itself is readonly
+    x[0] = 42 // compile-time error, array itself is readonly
 
 *Readonly array type* with elements of type ``T`` can have the following two
 syntax forms:
@@ -1933,7 +1926,7 @@ The syntax of *tuple type* is presented below:
         '[' (type (',' type)* ','?)? ']'
         ;
 
-The value of a tuple type is a group of values of types that comprize the tuple
+The value of a tuple type is a group of values of types that comprise the tuple
 type. The number of values in the group equals the number of types in a tuple
 type declaration. The order of types in a tuple type declaration specifies the
 type of the corresponding value in the group.
@@ -2008,7 +2001,7 @@ call. Otherwise, a :index:`compile-time error` occurs as follows:
    :linenos:
 
     let x: readonly [number, string] = [1, "abc"]
-    x[0] = 42 // compile-time error as tuple itself is readonly
+    x[0] = 42 // compile-time error, tuple itself is readonly
 
 .. index::
    prefix
@@ -2038,7 +2031,7 @@ of any tuple type.
 
     let pair: [number, string] = [1, "abc"]
 
-    let a: Tuple = pair // ok, subtyping
+    let a: Tuple = pair // OK, subtyping
 
 An empty tuple type is identical to ``Tuple``:
 
@@ -2051,8 +2044,8 @@ Type ``Tuple`` is preserved by :ref:`Type Erasure`, and can be used
 in :ref:`instanceof Expression` and :ref:`Cast Expression`.
 
 An element of a ``Tuple`` value cannot be accessed directly.
-To get an element value, the method ``unsafeGet``
-with the following signature can be used:
+The method ``unsafeGet`` with the signature can be used instead
+to get an element value:
 
 .. code-block:: typescript
    :linenos:
@@ -2079,12 +2072,12 @@ The usage of the method ``unsafeGet`` is illustrated below:
     }
 
     let a: [string, string] = ["aa", "bb"]
-    log_1(a) // ok, output: 2, "bb"
+    log_1(a) // OK, output: 2, "bb"
 
     let b: [string] = ["aa"]
     log_1(b)     // runtime error in ``unsafeGet`` call
 
-No element of a ``Tuple`` value can be changed. |LANG| does not support
+No element of a ``Tuple`` value can be changed. |LANG| supports no
 such change as it can cause a :index:`runtime error` at an unpredictable
 place during execution.
 
@@ -2173,10 +2166,10 @@ default value.
 
     type FuncTypeWithOptionalParameters = (x?: number, y?: string) => void
     let foo: FuncTypeWithOptionalParameters
-        = ():void => {}          // OK: as arguments are just ignored
-    foo = (p: number):void => {} // Compile-time error as call with zero arguments is invalid
-    foo = (p?: number):void => {} // OK: as call with zero or one argument is valid
-    foo = (p1: number, p2?: string):void => {} // Compile-time error: as call with zero arguments is invalid
+        = ():void => {}          // OK, arguments are just ignored
+    foo = (p: number):void => {} // compile-time error, call with zero arguments is invalid
+    foo = (p?: number):void => {} // OK, call with zero or one argument is valid
+    foo = (p1: number, p2?: string):void => {} // compile-time error, call with zero arguments is invalid
     foo = (p1?: number, p2?: string):void => {} // OK
 
     foo()
@@ -2187,7 +2180,7 @@ default value.
     foo(42, "a string")
 
     type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void
-       // compile-time error: no mandatory parameter can follow an optional parameter
+       // compile-time error, no mandatory parameter can follow an optional parameter
 
     function bar (
        p1?: number,
@@ -2239,10 +2232,10 @@ of the arguments are valid.
 
    let f: Function = foo
 
-   f(1) // compile-time error: cannot be called
+   f(1) // compile-time error, cannot be called
 
    f.unsafeCall(3.14) // correct call and execution
-   f.unsafeCall() // runtime error: wrong number of arguments
+   f.unsafeCall() // runtime error, wrong number of arguments
 
 Another important property of type ``Function`` is ``name``.
 It is a string that contains the name associated with the function object
@@ -2379,9 +2372,9 @@ Typical usage examples of *union* types are represented below:
 
     enum StringEnum {One = "One", Two = "Two"}
 
-    type Union1 = string | StringEnum // OK, will be reduced during normalization
+    type Union1 = string | StringEnum // OK, to be reduced during normalization
 
-    type Invalid = string | () => string | number // Compile-time error - function type with no parenthesis around
+    type Invalid = string | () => string | number // compile-time error, function type with no parenthesis around
     type Valid1 = string | (() => string) | number // OK
     type Valid21 = string | (() => string | number) // OK
 
@@ -2480,7 +2473,6 @@ after another:
 .. index::
    union type
    type safety
-   value type
    non-union type
    normalized union type
    normalization
@@ -2609,14 +2601,14 @@ Otherwise, a :index:`compile-time error` occurs as follows:
 
     let u: A | B = new A
 
-    let x = u.n // ok, common field
-    u.foo() // ok, common method
+    let x = u.n // OK, common field
+    u.foo() // OK, common method
 
-    console.log(u.s) // compile-time error as field types differ
-    u.goo() // compile-time error as signatures differ
+    console.log(u.s) // compile-time error, field types differ
+    u.goo() // compile-time error, signatures differ
 
     type AB = A | B
-    AB.foo() // compile-time error as foo() is a static method
+    AB.foo() // compile-time error, foo() is a static method
 
 .. index::
    field
@@ -2640,8 +2632,8 @@ the name ``m`` is overloaded (see :ref:`Overloading`):
     }
 
     function test(x: C | D) {
-        x.foo() // compile-time error, as 'foo' in C is the explicit overload
-        x.foo2("aa") // ok, as 'foo2' in both C and D is a method
+        x.foo() // compile-time error, 'foo' in C is the explicit overload
+        x.foo2("aa") // OK, 'foo2' in both C and D is a method
     }
 
 |
@@ -2693,7 +2685,7 @@ example below:
     type KeysOfA = keyof A // "field" | "method"
     let a_keys: KeysOfA = "field" // OK
     a_keys = "any string different from field or method"
-      // Compile-time error: invalid value for the type KeysOfA
+      // compile-time error, invalid value for the type KeysOfA
 
 If a class or an interface is empty, then its type ``keyof`` is equivalent
 to type ``never``:
@@ -2723,26 +2715,25 @@ Nullish Types
     frontend_status: Done
 
 |LANG| has *nullish types* that are in fact a specific form of union types (see
-:ref:`Union Types`). Unions
+:ref:`Union Types`). The following unions can be used as the type to specify a
+nullish version of type ``T``:
 
-- ``T | undefined``; 
-- ``T | null``;  or 
-- ``T | undefined | null``
+- ``T | undefined``;
+- ``T | null``;  or
+- ``T | undefined | null``.
 
-can be used as the type to specify a nullish version of type ``T``.
 
 .. note::
 
     Using type ``T | undefined`` in *nullish types* is recommended.
-    See :ref:`Type null` for detail.
+    The details are discussed in :ref:`Type null`.
 
 All predefined types except :ref:`Type Any`, and all user-defined types are
 non-nullish types. Non-nullish types cannot have a ``null`` or ``undefined``
 value at runtime.
 
 A variable declared to have type ``T | null`` can hold the values of type ``T``
-and its derived types, or the value ``null``. Such a type is called a *nullable
-type*.
+and its derived types, or the value ``null``.
 
 A variable declared to have type ``T | undefined`` can hold the values of
 type ``T`` and its derived types, or the value ``undefined``.
@@ -2754,7 +2745,7 @@ of type ``T`` and its derived types, and the values ``undefined`` or ``null``.
 A reference that is ``null`` or ``undefined`` is called a *nullish value*.
 
 An operation that is safe with no regard to the presence or absence of
-*nullish values* (e.g., re-assigning one nullable value to another) can
+*nullish values* (e.g., re-assigning one nullish value to another) can
 be used 'as is' for *nullish types*.
 
 .. index::
@@ -2764,7 +2755,6 @@ be used 'as is' for *nullish types*.
    type inference
    array literal
    nullish type
-   nullable type
    non-nullish type
    predefined type declaration
    user-defined type declaration
@@ -2810,13 +2800,13 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
       o: Object, nullish1: null, nullish2: undefined, nullish3: null|undefined,
       nullish4: AnyClassOrInterfaceType|null|undefined
    ) {
-      o = nullish1 /* compile-time error - type 'null' is not compatible with
+      o = nullish1 /* compile-time error, type 'null' is not compatible with
                       Object */
-      o = nullish2 /* compile-time error - type 'undefined' is not compatible
+      o = nullish2 /* compile-time error, type 'undefined' is not compatible
                       with Object */
-      o = nullish3 /* compile-time error - type 'null|undefined' is not
+      o = nullish3 /* compile-time error, type 'null|undefined' is not
                       compatible with Object */
-      o = nullish4 /* compile-time error - type
+      o = nullish4 /* compile-time error, type
                       'AnyClassOrInterfaceType|null|undefined' is not
                       compatible with Object */
    }
@@ -2842,6 +2832,590 @@ The following nullish-safe options exist for dealing with nullish type ``T``:
 
 |
 
+.. _Utility Types:
+
+Utility Types
+*************
+
+.. meta:
+    frontend_status: Done
+
+|LANG| supports several built-in types, called *utility* types. Utility types
+allow constructing new types by adjusting properties of initial types, for
+which purpose notations identical to generics are used. If the initial types
+are class or interface, then the resultant utility types are also handled as
+class or interface types.
+All utility type names are accessible as simple names (see :ref:`Accessible`)
+in any module across all its scopes. Using these names as user-defined entities
+causes a :index:`compile-time error` in accordance with :ref:`Declarations`. An
+alphabetically sorted list of utility types is provided below.
+
+.. index::
+   built-in type
+   class
+   interface
+   accessibility
+   module
+   user-defined entity
+   declaration
+   utility type
+
+|
+
+.. _Awaited Utility Type:
+
+Awaited Utility Type
+====================
+
+.. meta:
+    frontend_status: None
+
+Type ``Awaited<T>`` constructs a type which includes no type ``Promise``. It
+is similar to ``await`` in ``async`` functions, or to the method ``.then()``
+in *Promises*. Any occurrence of type ``Promise`` is recursively removed until
+a generic, a function, an array, or a tuple type is detected. If type ``Promise``
+is not a part of a type ``T`` declaration, then ``Awaited<T>`` leaves ``T``
+intact.
+
+If ``T`` in ``Awaited<T>`` is a type parameter, then subtyping for ``Awaited<T>``
+is based on the subtyping for ``T``. In other words, ``Awaited<T>``
+is a subtype of ``Awaited<U>`` if ``T`` is a subtype of ``U``. The use of type
+``Awaited<T>`` is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    type A = Awaited<Promise<string>>           // type A is string
+
+    type B = Awaited<Promise<Promise<number>>>  // type B is number
+
+    type C = Awaited<boolean | Promise<number>> // type C is boolean | number
+
+    type D = Awaited <Object>                   // type D is Object
+
+    type E = Awaited<Promise<Promise<number>|Promise<string>|Promise<boolean>>>
+                                                // type E is number|string|boolean
+
+    type F = Awaited<Promise<(p: Promise<string>) => Promise<number>>>
+                                                // type F is (p: Promise<string>) => Promise<number>>
+
+    type G = Awaited<Promise<Array<Promise<number>>>>
+                                                // type F is Array<Promise<number>>
+
+    function foo <T extends SuperType> (p: Awaited<T>) {}
+    function bar <T extends SubType> (p: Awaited<T>) {
+        foo (p) // is a valid call as Awaited<T extends SubType> <: Awaited<T extends SuperType>
+    }
+
+
+.. index::
+   utility type
+   awaited
+   promise
+   async function
+   method
+
+|
+
+.. _NonNullable Utility Type:
+
+NonNullable Utility Type
+========================
+
+.. meta:
+    frontend_status: None
+
+Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
+types. Formally it can be expressed like this (see :ref:`Difference Types`)
+
+``NonNullable<T> = T - null - undefined``.
+
+This implies:
+
+- ``NonNullable<T>`` leaves ``T`` intact if type ``T`` contains neither ``null``
+  nor ``undefined``;
+- ``NonNullable<null>``,  ``NonNullable<undefined>`` or application of
+  ``NonNullable<>`` to the union of ``null`` and ``undefined`` returns ``never``;
+- ``NonNullable<Any> = Any - null - undefined``
+
+
+The use of type ``NonNullable<T>`` is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    type X = Object | null | undefined
+    type Y = NonNullable<X> // type of 'Y' is Object
+
+    class A <T> {
+      field: NonNullable<T> // This is a non-nullable version of the type parameter
+      constructor (field: NonNullable<T>) {
+        this.field = field
+      }
+    }
+
+    const a = new A<Object|undefined> (new Object)
+    a.field // type of field is Object
+
+.. index::
+   utility type
+   null type
+   undefined type
+   field
+
+|
+
+.. _Partial Utility Type:
+
+Partial Utility Type
+====================
+
+.. meta:
+    frontend_status: Done
+
+Type ``Partial<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to optional. ``T`` must be a class or
+an interface type. Otherwise, a :index:`compile-time error` occurs. No method
+(not even any getter or setter) of ``T`` is a part of the ``Partial<T>`` type.
+The use is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Issue {
+        title: string
+        description: string
+    }
+
+    function process(issue: Partial<Issue>) {
+        if (issue.title != undefined) {
+            /* process title */
+        }
+    }
+
+    process({title: "aa"}) // description is undefined
+
+In the example above, type ``Partial<Issue>`` is transformed to a distinct but
+analogous type as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface /*some name*/ {
+        title?: string
+        description?: string
+    }
+
+.. index::
+   type
+   property
+   optional property
+   class type
+   interface type
+   method
+   getter
+   setter
+   distinct type
+
+Type ``T`` is not assignable to ``Partial<T>`` (see
+:ref:`Assignability`), and no subtyping relation (see
+:ref:`Subtyping`) holds between ``T``
+and ``Partial<T>``. Variables of ``Partial<T>`` are to be initialized
+with valid object literals.
+
+If ``U`` is a subtype of ``T``, then ``Partial<U>`` is a subtype of ``Partial<T>``.
+
+.. note::
+   If class ``T`` has a user-defined getter, setter, or both, then none of
+   those is called when object literal is used with ``Partial<T>`` variables.
+   Object literal has its own built-in getters and setters to modify its
+   variables. It is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        property: number
+    }
+    class A implements I {
+        _property: number
+        set property(property: number) {
+            console.log ("Setter called")
+            this._property = property
+        }
+        get property(): number {
+            console.log ("Getter called");
+            return this._property
+        }
+    }
+
+    function foo (partial: Partial<A>) {
+        partial.property = 42 // setter to be called
+        console.log(partial.property) // getter to be called
+    }
+
+    foo ({property: 1}) // No getter or setter from class A is called
+    // 42 is printed as object literal has its own setter and getter
+
+.. index::
+   type
+   assignability
+   assignable type
+   variable
+   initialization
+   object literal
+   class
+   user-defined getter
+   built-in getter
+   getter
+   setter
+   user-defined setter
+   built-in setter
+   property
+
+|
+
+.. _Required Utility Type:
+
+Required Utility Type
+=====================
+
+.. meta:
+    frontend_status: Done
+
+Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
+all fields (see :ref:`Field Declarations`) and properties in their field form
+(see :ref:`Interface Properties`) of ``T`` set to required (i.e., not optional).
+``T`` must be a class or an interface type, otherwise a
+:index:`compile-time error` occurs. No method (not even any getter or setter)
+of ``T`` is part of the  ``Required<T>`` type. Its usage is represented in the
+example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Issue {
+        title?: string
+        description?: string
+    }
+
+    let c: Required<Issue> = { // Compile-time error, 'description' should be defined
+        title: "aa"
+    }
+
+In the example above, type ``Required<Issue>`` is transformed to a distinct
+but analogous type as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface /*some name*/ {
+        title: string
+        description: string
+    }
+
+Type ``T`` is not assignable to ``Required<T>`` (see
+:ref:`Assignability`), and no subtyping relation (see
+:ref:`Subtyping`) holds between ``T`` and
+``Required<T>``. Variables of ``Required<T>`` are to be initialized
+with valid object literals.
+
+If ``U`` is a subtype of ``T``, then
+``Required<U>`` is a subtype of ``Required<T>``.
+
+.. index::
+   type
+   interface type
+   utility type
+   assignability
+   assignable type
+   property
+   required property
+   method
+   getter
+   setter
+   type
+   object literal
+   class type
+   interface type
+   distinct type
+   initialization
+   variable
+
+|
+
+.. _Readonly Utility Type:
+
+Readonly Utility Type
+=====================
+
+.. meta:
+    frontend_status: Done
+
+Type ``Readonly<T>`` constructs a type with all fields (see
+:ref:`Field Declarations`) and properties in their field form (see
+:ref:`Interface Properties`) of ``T`` set to ``readonly``. It means that such
+fields and properties of the constructed type cannot be reassigned. ``T`` must
+be a class or an interface type, otherwise a :index:`compile-time error`
+occurs. No method (not even any getter or setter) of ``T`` is part of the
+``Readonly<T>`` type. Its usage is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Issue {
+        title: string
+    }
+
+    const myIssue: Readonly<Issue> = {
+        title: "One"
+    };
+
+    myIssue.title = "Two" // compile-time error, readonly property
+
+.. index::
+   type
+   readonly type
+   utility type
+   type readonly
+   constructed value
+   method
+   reassignment
+   assignability
+   assignable type
+   property
+   interface type
+   getter
+   setter
+
+Type ``T`` is assignable (see :ref:`Assignability`) to ``Readonly<T>``,
+and allows assignments as a consequence:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       f1: string = ""
+       f2: number = 1
+       f3: boolean = true
+    }
+    let x = new A
+    let y: Readonly<A> = x // OK
+
+|
+
+Type ``T`` is a subtype (see :ref:`Subtyping`) of ``Readonly<T>``.
+
+If type ``U`` is a subtype of ``T``, then ``Readonly<U>`` is a subtype
+of ``Readonly<T>``.
+
+.. _Record Utility Type:
+
+Record Utility Type
+===================
+
+.. meta:
+    frontend_status: Done
+
+Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
+to values of type ``V``.
+
+Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
+``string``, string literal types, and union types constructed from
+these types.
+
+A :index:`compile-time error` occurs if any other type, or literal of any other
+type is used in place of this type.
+
+Its usage is represented in the example below:
+
+.. index::
+   record utility type
+   utility type
+   value
+   container
+   restriction
+   union type
+   numeric type
+   string type
+   literal
+   string literal type
+   compile-time error
+   type
+   key
+   union type
+
+
+.. code-block:: typescript
+   :linenos:
+
+    type R1 = Record<number, Object>             // OK
+    type R2 = Record<boolean, Object>            // compile-time error
+    type R3 = Record<"salary" | "bonus", Object> // OK
+    type R4 = Record<"salary" | boolean, Object> // compile-time error
+    type R5 = Record<"salary" | number, Object>  // OK
+    type R6 = Record<string | number, Object>    // OK
+
+Type ``V`` has no restrictions.
+
+A special form of object literals is supported for instances of type ``Record``
+(see :ref:`Object Literal of Record Type`).
+
+Access to ``Record<K, V>`` values is performed by an *indexing expression* like
+*r[index]*, where *r* is an instance of type ``Record``, and *index* is the
+expression of type ``K`` (see :ref:`Record Indexing Expression` for detail).
+
+Variables of type ``Record<K, V>`` can be initialized by a valid object
+literal of Record type (see :ref:`Object Literal of Record Type`) where the
+literal is valid if the type of key expression is compatible with key type
+``K``, and the type of value expression is compatible with the type ``V``.
+
+.. code-block:: typescript
+   :linenos:
+
+    type Keys = 'key1' | 'key2' | 'key3'
+
+    let x: Record<Keys, number> = {
+        'key1': 1,
+        'key2': 2,
+        'key3': 4,
+    }
+    console.log(x['key2']) // prints 2
+    x['key2'] = 8
+    console.log(x['key2']) // prints 8
+
+In the example above, ``K`` is a union of literal types and thus the result of
+an indexing expression is of type ``V``. In this case it is ``number``.
+
+.. index::
+   restriction
+   object literal
+   literal
+   instance
+   Record type
+   access
+   indexing expression
+   index expression
+   index
+   number
+   expression
+   variable
+   compatibility
+   value
+
+|
+
+.. _ReturnType Utility Type:
+
+ReturnType Utility Type
+=======================
+
+.. meta:
+    frontend_status: None
+
+Type ``ReturnType<T>`` constructs a new type from the return type of a function
+type ``T`` (see :ref:`Function Types`). A :index:`compile-time error` occurs if
+a non-function type except type ``never`` is provided. The usage is represented
+in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   type MyString = ReturnType<()=> string> // OK
+   type Incorrect = ReturnType<string>     // Compile-time error
+
+   function foo<P extends Function, R = ReturnType<P>>() {}
+   /* OK, default type for the second type parameter is the return type of
+      the function type provided as the first type argument */
+
+   foo<()=>number>()  // R is number
+
+   type anAny = ReturnType<Function>  // anAny is Any
+   type aNever = Return Type<never>   // aNever is never
+
+
+|
+
+.. _Utility Type Private Fields:
+
+Utility Type Private Fields
+===========================
+
+.. meta:
+    frontend_status: Done
+
+Utility types are built on top of other types. Private fields of the initial
+type stay in the utility type but they are not accessible (see
+:ref:`Accessible`) and cannot be accessed in any way. It is represented in the
+example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(): string {  // Potentially some side effect
+      return "private field value"
+   }
+
+   class A {
+      public_field = 444
+      private private_field = foo()
+   }
+
+   function bar (part_a: Readonly<A>) {
+      console.log (part_a)
+   }
+
+   bar ({public_field: 777}) // OK, object literal has no field `private_field`
+   bar ({public_field: 777, private_field: ""}) // compile-time error, incorrect field name
+
+   bar (new A) // OK, object of type Readonly<A> has field `private_field`
+
+.. index::
+   utility type
+   private field
+   type
+   access
+   accessibility
+   field name
+
+|
+
+.. _Nesting Utility Types:
+
+Nesting Utility Types
+===========================
+
+.. meta:
+    frontend_status: Partly
+
+If more than one utility types are required then they can be nested as in example below:
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Issue {
+     title?: string
+   }
+
+   const myIssue: Required<Readonly<Issue>> = {
+      title: "One"
+   };
+   console.log(myIssue.title)  // safe: required property
+   myIssue.title = "Two" // compile-time error, readonly property
+
+.. index::
+   utility type
+   private field
+   nesting
+   readonly property
+   required property
+   type
+   access
+   accessibility
+
+|
+
 .. _Default Values for Types:
 
 Default Values for Types
@@ -2859,8 +3433,6 @@ that require no explicit initialization (see :ref:`Variable Declarations`):
 - :ref:`Value Types`;
 - Type ``undefined`` and all its supertypes
 
-.. -  Nullable reference types with the default value *null* (see :ref:`Literals`).
-
 All other types, including reference types, enumeration types, and type
 parameters have no default values.
 
@@ -2871,7 +3443,6 @@ Default values of value types are as follows:
    variable
    explicit initialization
    literal type
-   nullable reference type
    undefined type
    type parameter
    reference type

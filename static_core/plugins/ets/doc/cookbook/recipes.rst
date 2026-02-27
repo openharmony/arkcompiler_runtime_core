@@ -1849,16 +1849,27 @@ changed at runtime. Thus, deleting a property makes no sense.
 
 .. code-block:: typescript
 
-    // To mimic the original semantics, you can declare a nullable type,
-    // and assign null to mark value absence:
+    // To mimic the original semantics, you can declare a nullish type,
+    // and assign undefined to mark value absence:
 
     class Point {
-        x: number | null = 0
-        y: number | null = 0
+        x: number | undefined = 0
+        y: number | undefined = 0
     }
 
     let p = new Point()
-    p.y = null
+    p.y = undefined
+
+.. note::
+    |LANG| allows using both ``null`` and ``undefined``
+    for nullish types. However, ``null`` is not recommended,
+    and is kept for compatibility with |TS| only:
+
+    .. code-block:: typescript
+        :linenos:
+
+        let x: number | undefined = undefined // OK, recommended
+        let y: number | null = null  // Also OK but not recommended
 
 |CB_SEE|
 ~~~~~~~~
@@ -4135,7 +4146,7 @@ When porting from the standard |TS|, turn on the following flags:
         }
     }
 
-    let n: number = null // Compile-time error only with strictNullChecks
+    let n: number = undefined // Compile-time error only with strictNullChecks
 
 |CB_OK|
 ~~~~~~~
@@ -4152,7 +4163,7 @@ When porting from the standard |TS|, turn on the following flags:
         return s
     }
 
-    let n1: number | null = null
+    let n1: number | undefined = undefined
     let n2: number = 0
 
 |CB_SEE|
@@ -4189,18 +4200,20 @@ in place with special comments. |LANG| does not support ``@ts-ignore`` and
     // Some code with switched off type checker
     // ...
 
-    let s1: string = null // No error, type checker suppressed
+    let s1: string = null // TS - no error, type checker suppressed
+                          // ArkTS - compile-time error
 
     // @ts-ignore
-    let s2: string = null // No error, type checker suppressed
+    let s2: string = null // TS - no error, type checker suppressed
+                          // ArkTS - compile-time error
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    let s1: string | null = null // No error, properly types
-    let s2: string = null // Compile-time error
+    let s1: string | undefined = undefined // No error, properly typed
+    let s2: string = undefined // Compile-time error
 
 |CB_SEE|
 ~~~~~~~~

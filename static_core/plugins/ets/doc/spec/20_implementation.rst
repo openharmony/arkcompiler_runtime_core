@@ -132,7 +132,6 @@ but not for ``T`` itself:
    type argument
    type erasure
    function
-   value type
    array
 
 |
@@ -280,7 +279,7 @@ The use of the *bridge* method is represented by the following code:
 More formally, a bridge method ``m(C``:sub:`1` ``, ..., C``:sub:`n` ``)``
 is created in ``D``, in the following cases:
 
-- Class ``B`` comprizes type parameters
+- Class ``B`` comprises type parameters
   ``B<T``:sub:`1` ``extends C``:sub:`1` ``, ..., T``:sub:`n` ``extends C``:sub:`n` ``>``;
 - Subclass ``D`` is defined as ``class D extends B<X``:sub:`1` ``, ..., X``:sub:`n` ``>``;
 - Method ``m`` of class ``D`` overrides ``m`` from ``B`` with type parameters in signature,

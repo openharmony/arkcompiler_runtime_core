@@ -317,8 +317,8 @@ interface has the same name as the ``Object``'s ``public`` method.
    :linenos:
 
     interface I {
-        toString (p: number): void // Compile-time error
-        toString(): string { return "some string" } // Compile-time error
+        toString (p: number): void // compile-time error
+        toString(): string { return "some string" } // compile-time error
     }
 
 .. index::
