@@ -295,6 +295,22 @@ extern "C" void StdSystemSetTaskPoolIdleThreshold(int32_t threshold)
     method->GetPandaMethod()->Invoke(coro, args.data());
 }
 
+extern "C" void StdSystemSetTaskPoolBlockedWorkerThreshold(int32_t thresholdMs)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *method = PlatformTypes(coro)->stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerThreshold;
+    std::array args = {Value {thresholdMs}};
+    method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
+extern "C" void StdSystemSetTaskPoolBlockedWorkerMonitorInterval(int32_t intervalMs)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *method = PlatformTypes(coro)->stdConcurrencyTaskpoolSetTaskPoolBlockedWorkerMonitorInterval;
+    std::array args = {Value {intervalMs}};
+    method->GetPandaMethod()->Invoke(coro, args.data());
+}
+
 extern "C" EtsInt StdSystemGetTaskPoolWorkersNum()
 {
     auto *klass = GetTaskPoolClass();
@@ -333,6 +349,13 @@ extern "C" void StdSystemRetriggerTaskPoolShrink()
     auto *method = EtsClass::FromRuntimeClass(klass)->GetStaticMethod("retriggerTaskPoolShrink", ":V");
     ASSERT(method != nullptr);
     auto *coro = EtsCoroutine::GetCurrent();
+    method->GetPandaMethod()->Invoke(coro, nullptr);
+}
+
+extern "C" void StdSystemRetriggerTaskPoolBlockedExpandMonitor()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *method = PlatformTypes(coro)->stdConcurrencyTaskpoolRetriggerTaskPoolBlockedExpandMonitor;
     method->GetPandaMethod()->Invoke(coro, nullptr);
 }
 

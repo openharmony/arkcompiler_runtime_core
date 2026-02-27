@@ -100,6 +100,10 @@ export namespace taskpool {
                 let count = getNewTaskTotalCount();
                 this.idleTime = 0;
 
+                // Mark synchronous task body execution start.
+                // Use an atomic millisecond tick to avoid extra locking in the managerWorker monitor.
+                this.executingTaskBodyStartTime.store((Chrono.nanoNow() / Chrono.NS_PER_MS).toInt());
+
                 try {
                     let res: Any = null;
                     res = internalTask?.execute(this);
@@ -122,6 +126,8 @@ export namespace taskpool {
                         }
                     });
                 } finally {
+                    // Clear synchronous task body execution mark.
+                    this.executingTaskBodyStartTime.store(0);
                     // this is to mock ArkTS-dyn behavior
                     EAWorker.postToMain<void>(() => {
                         setTimeout(() => {
@@ -245,11 +251,68 @@ export namespace taskpool {
                             }
                             worker.closeWorker();
                             workers.delete(worker);
+                            // Ensure special-expansion bookkeeping does not leak when a worker is destroyed.
+                            this.blockedExpandedWorkerIds.delete(worker.workerId);
                             count++;
                         }
                         
                     })
                 }, triggerInterval);
+            });
+        }
+
+        // For managerWorker to expand when some workers are blocked for a long time.
+        triggerBlockedExpandMonitor(): void {
+            this.run<void>((): void => {
+                this.blockedExpandTimerId = setInterval(() => {
+                    const nowMsTick: int = (Chrono.nanoNow() / Chrono.NS_PER_MS).toInt();
+                    const newlyBlockedWorkerIds: Array<int> = new Array<int>();
+
+                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                        for (let w: GlobalQueueWorker of workers) {
+                            let isBlocked: boolean = false;
+                            const startMsTick: int = w.executingTaskBodyStartTime.load();
+                            if (startMsTick != 0) {
+                                const elapsedMs: int = nowMsTick - startMsTick;
+                                // elapsedMs is computed on a 32-bit tick and is safe for small thresholds.
+                                isBlocked = elapsedMs >= blockedWorkerThresholdMs;
+                            }
+
+                            if (isBlocked) {
+                                if (!this.blockedExpandedWorkerIds.has(w.workerId)) {
+                                    newlyBlockedWorkerIds.push(w.workerId);
+                                }
+                            } else {
+                                if (this.blockedExpandedWorkerIds.has(w.workerId)) {
+                                    this.blockedExpandedWorkerIds.delete(w.workerId);
+                                }
+                            }
+                        }
+
+                        if (newlyBlockedWorkerIds.length == 0) {
+                            return;
+                        }
+
+                        // Degrade strategy: expand as many as possible within the limit.
+                        const available: int = workersLimit - workers.size;
+                        const expandCount: int = min(available, newlyBlockedWorkerIds.length.toInt());
+                        if (expandCount <= 0) {
+                            return;
+                        }
+
+                        for (let i: int = 0; i < expandCount; ++i) {
+                            const blockedId: int = newlyBlockedWorkerIds[i];
+                            let w: GlobalQueueWorker = new GlobalQueueWorker(isTaskpoolSupportInterop);
+                            if (this.isAlive()) {
+                                workers.add(w);
+                                // Record only workers that actually triggered a special expansion in this tick.
+                                this.blockedExpandedWorkerIds.add(blockedId);
+                            } else {
+                                w.closeWorker();
+                            }
+                        }
+                    });
+                }, blockedWorkerMonitorIntervalMs);
             });
         }
 
@@ -259,9 +322,26 @@ export namespace taskpool {
             this.triggerShrink();
         }
 
+        // For managerWorker to (re)start blocked-worker expansion monitor.
+        retriggerBlockedExpandMonitor(): void {
+            if (isTaskPoolUseLaunch) {
+                return;
+            }
+            if (this.blockedExpandTimerId != -1) {
+                clearInterval(this.blockedExpandTimerId);
+                this.blockedExpandTimerId = -1;
+            }
+            this.blockedExpandedWorkerIds.clear();
+            this.triggerBlockedExpandMonitor();
+        }
+
         // For managerWorker to stop and release.
         stopManagerWorker(): void {
             clearInterval(this.timerId);
+            if (this.blockedExpandTimerId != -1) {
+                clearInterval(this.blockedExpandTimerId);
+                this.blockedExpandTimerId = -1;
+            }
             this.join();
         }
 
@@ -274,8 +354,18 @@ export namespace taskpool {
         public currentPriority?: Priority = Priority.MEDIUM;
         public currentTasks: Set<Task> = new Set<Task>();
         public idleTime: long = 0;
+
+        // Start time of the current synchronous execution in this worker thread.
+        // Stored as an atomic millisecond tick (lower 32-bit of ms-since-boot); 0 means not executing.
+        private executingTaskBodyStartTime: AtomicInt = new AtomicInt(0);
+
         static workerCount: int = 0;
         private timerId: int;
+
+        // managerWorker only: blocked-worker expansion monitor timer.
+        private blockedExpandTimerId: int = -1;
+        // managerWorker only: worker ids that already triggered a special expansion.
+        private blockedExpandedWorkerIds: Set<int> = new Set<int>();
     }
 
     /**
@@ -2081,6 +2171,31 @@ export namespace taskpool {
     }
 
     /**
+     * @brief Set blocked worker threshold in ms.
+     * If a worker stays inside a synchronous task execution longer than this threshold,
+     * managerWorker will attempt a special expansion.
+     * @param thresholdMs The blocked threshold value in milliseconds.
+     */
+    function setTaskPoolBlockedWorkerThreshold(thresholdMs: int): void {
+        if (thresholdMs <= 0) {
+            return;
+        }
+        blockedWorkerThresholdMs = thresholdMs;
+    }
+
+    /**
+     * @brief Set blocked worker monitor interval in ms.
+     * managerWorker checks blocked workers periodically with this interval.
+     * @param intervalMs The monitor interval value in milliseconds.
+     */
+    function setTaskPoolBlockedWorkerMonitorInterval(intervalMs: int): void {
+        if (intervalMs <= 0) {
+            return;
+        }
+        blockedWorkerMonitorIntervalMs = intervalMs;
+    }
+
+    /**
      * @brief Get current taskpool workers num for debug.
      * @returns TaskPool workers num.
      */
@@ -2108,6 +2223,16 @@ export namespace taskpool {
      */
     function retriggerTaskPoolShrink(): void {
         managerWorker?.retriggerShrink();
+    }
+
+    /**
+     * @brief (Re)start blocked-worker expansion monitor in taskpool test suite for debug.
+     *
+     * NOTE: blocked-worker monitor interval is captured when the monitor is started.
+     * Call this after setting blocked-worker threshold/interval if taskpool is already initialized.
+     */
+    function retriggerTaskPoolBlockedExpandMonitor(): void {
+        managerWorker?.retriggerBlockedExpandMonitor();
     }
 
     /**
@@ -2153,6 +2278,8 @@ export namespace taskpool {
                     // Create managerWorker, and start to trigger shrink.
                     managerWorker = new GlobalQueueWorker();
                     managerWorker.retriggerShrink();
+                    // Start blocked-worker expansion monitor separately from shrink logic.
+                    managerWorker.retriggerBlockedExpandMonitor();
                 }
 
                 // Init taskpool worker pool.
@@ -2189,6 +2316,8 @@ export namespace taskpool {
                 // Create managerWorker, and start to trigger shrink.
                 managerWorker = new GlobalQueueWorker();
                 managerWorker!.retriggerShrink();
+                // Start blocked-worker expansion monitor separately from shrink logic.
+                managerWorker!.retriggerBlockedExpandMonitor();
             }
 
             for (let i = 0; i < initialWorkersNumber; ++i) {
@@ -2545,7 +2674,8 @@ export namespace taskpool {
     const isTaskPoolUseLaunch: boolean = isUsingLaunch();
     const isTaskpoolSupportInterop: boolean = isSupportingInterop();
 
-    const initialWorkersNumber: int = 2;
+    // If taskpool supports interop, reduce initialWorkersNumber to minimize VM creation
+    const initialWorkersNumber: int = isTaskpoolSupportInterop ? 1 : 2;
     const continuousExecutionCount: int = 5;
 
     const taskCountMutex = ConcurrencyHelpers.mutexCreate();
@@ -2555,6 +2685,13 @@ export namespace taskpool {
     let managerWorker: GlobalQueueWorker | undefined = undefined;
     let triggerInterval: int = 30000; // 30s is the default shrink interval.
     let idleThreshold: int = 60000; // If the worker is idle for more than 60s, it will be released.
+
+    // Special expansion when a worker is blocked inside synchronous task execution.
+    // Threshold (ms) after which a worker is considered blocked.
+    let blockedWorkerThresholdMs: int = 3000;
+    // Monitor interval (ms) for managerWorker to check blocked workers.
+    let blockedWorkerMonitorIntervalMs: int = 1000;
+
     let workersLimit: int = max(4, getTaskPoolWorkersLimit()); // 4 is the minimum of workers limit.
     const STEP_SIZE: int = 2;
     const SHRINK_STEP: int = 4; // 4: try to release 4 threads every time.
