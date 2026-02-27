@@ -82,4 +82,38 @@ function main() {
     arktest.assertTrue(d instanceof D)
     arktest.assertTrue(d instanceof C)
     arktest.assertFalse(c instanceof D)
+
+    // Local variable tests: same assertions as above, but using local-scope variables.
+    // Local variables (unlike globals) go through smart-cast condition checking in the
+    // type checker, exercising CheckTestObjectCondition for ETSObjectType-typed expressions.
+    let la: A = new A()
+    arktest.assertTrue(la instanceof A)
+    arktest.assertTrue(la instanceof I)
+    arktest.assertFalse(la instanceof B)
+    arktest.assertFalse(la instanceof J)
+
+    la = new B()
+    arktest.assertTrue(la instanceof A)
+    arktest.assertTrue(la instanceof I)
+    arktest.assertTrue(la instanceof B)
+    arktest.assertTrue(la instanceof J)
+
+    let li: I = new A()
+    arktest.assertTrue(li instanceof A)
+    arktest.assertTrue(li instanceof I)
+    arktest.assertFalse(li instanceof B)
+    arktest.assertFalse(li instanceof J)
+
+    li = new B()
+    arktest.assertTrue(li instanceof A)
+    arktest.assertTrue(li instanceof I)
+    arktest.assertTrue(li instanceof B)
+    arktest.assertTrue(li instanceof J)
+
+    let lc: C = new C()
+    let ld: D = new D()
+    arktest.assertTrue(lc instanceof C)
+    arktest.assertFalse(lc instanceof D)
+    arktest.assertTrue(ld instanceof C)
+    arktest.assertTrue(ld instanceof D)
 }

@@ -84,3 +84,38 @@ cases:
       arktest.assertTrue(!v1, "expect v1 to be false")
       let v2 = ((p: boolean) => p ? 1 : 0)(((): Any => a)() instanceof FixedArray<int>)
       arktest.assertEQ(v2, 0, "expect v2 to be 0")
+
+  # FixedArray with interface / abstract-class element types and covariance.
+  # Spec 5.2.7: FixedArray<B> <: FixedArray<A> when B <: A.
+  - decl: |-
+      interface IElem {}
+      class CElem implements IElem {}
+    use: |-
+      let vi: FixedArray<IElem> = [new CElem, new CElem]
+      arktest.assertTrue(vi instanceof FixedArray<IElem>, "FixedArray<interface> instanceof same interface array type")
+      let vc: FixedArray<CElem> = [new CElem]
+      arktest.assertTrue(vc instanceof FixedArray<IElem>, "covariance: FixedArray<impl-class> instanceof FixedArray<interface>")
+      arktest.assertFalse(vc instanceof FixedArray<A>, "FixedArray<impl-class> instanceof unrelated FixedArray<A> is false")
+
+  # FixedArray with abstract class element type; verify covariance and non-subtype false case.
+  - decl: |-
+      interface IBase {}
+      abstract class ACBase implements IBase {}
+      class SCBase extends ACBase {}
+    use: |-
+      let vac: FixedArray<ACBase> = [new SCBase, new SCBase]
+      arktest.assertTrue(vac instanceof FixedArray<ACBase>, "FixedArray<abstract-class> instanceof FixedArray<abstract-class>")
+      arktest.assertTrue(vac instanceof FixedArray<IBase>, "covariance: FixedArray<abstract-class> instanceof FixedArray<interface>")
+      arktest.assertFalse(vac instanceof FixedArray<SCBase>, "FixedArray<base> instanceof FixedArray<derived-class> is false")
+
+  # 2D FixedArray covariance via interface element type and non-subtype false case.
+  # Spec 5.2.7 applied twice: FixedArray<FixedArray<AC>> <: FixedArray<FixedArray<I>> when AC <: I.
+  - decl: |-
+      interface IBase2 {}
+      abstract class ACBase2 implements IBase2 {}
+      class SCBase2 extends ACBase2 {}
+    use: |-
+      let inner: FixedArray<ACBase2> = [new SCBase2, new SCBase2]
+      let v2d: FixedArray<FixedArray<ACBase2>> = [inner, inner]
+      arktest.assertTrue(v2d instanceof FixedArray<FixedArray<IBase2>>, "2D covariance: FixedArray<FixedArray<AC>> instanceof FixedArray<FixedArray<I>>")
+      arktest.assertFalse(v2d instanceof FixedArray<FixedArray<SCBase2>>, "2D: FixedArray<FixedArray<AC>> is not instanceof FixedArray<FixedArray<SC>>")
