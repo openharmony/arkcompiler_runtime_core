@@ -166,6 +166,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_Float.cpp",
   "runtime/intrinsics/std_core_Promise.cpp",
   "runtime/intrinsics/std_core_StackTrace.cpp",
+  "runtime/intrinsics/std_concurrency_LegacyAtomics.cpp",
   "runtime/intrinsics/std_concurrency_Atomics.cpp",
   "runtime/intrinsics/gc_task_tracker.cpp",
   "runtime/intrinsics/std_core_AniHelpers.cpp",

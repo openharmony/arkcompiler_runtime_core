@@ -54,22 +54,3 @@ final class ConcurrencyHelpers {
     public static native condVarNotifyOne(condVar: Object, mutex: Object): void;
     public static native condVarNotifyAll(condVar: Object, mutex: Object): void;
 }
-
-final class AtomicInt {
-    constructor(v: int) {
-        this.value = v;
-    }
-
-    public native store(v: int): void;
-    public native load(): int;
-    
-    // Atomically sets the value to the given value and returns the previous value.
-    public native exchange(v: int): int;
-    // Returns the previous value of the atomic integer.
-    public native compareAndSwap(expected: int, newValue: int): int;
-
-    public native fetchAdd(v: int): int;
-    public native fetchSub(v: int): int;
-
-    private value: int;
-}
