@@ -95,7 +95,7 @@ export class AsyncLock {
             wrapped = (l: AsyncLock) => { return l.syncwrapper<T, U>(callback, options,  asyncLockInfo); }
         } else {
             ConcurrencyHelpers.mutexLock(this.mutex);
-            this.pending.add(asyncLockInfo);
+            this.pendingQueue.push(asyncLockInfo);
             ConcurrencyHelpers.mutexUnlock(this.mutex);
         }
         return AsyncLock.launchPromise(wrapped, this);
@@ -104,10 +104,13 @@ export class AsyncLock {
     private canAcquireLock<T>(mode: AsyncLockMode, callerCID: int, asyncLockInfo: AsyncLockInfo) : boolean {
         ConcurrencyHelpers.mutexLock(this.mutex);
         try {
-            if (this.holderCID == 0 && this.mode == AsyncLockMode.UNLOCKED) {
+            // FIFO fairness: if there are queued waiters, newcomers cannot bypass them.
+            if (this.pendingQueue.length > 0) {
+                return false;
+            }
+            if (this.counter == 0 && this.mode == AsyncLockMode.UNLOCKED) {
                 this.counter = 1;
                 this.held.add(asyncLockInfo);
-                this.holderCID = callerCID;
                 this.mode = mode;
                 return true;
             }
@@ -125,12 +128,12 @@ export class AsyncLock {
 
     private syncwrapper<T,U>(callback: AsyncLockCallback<T>, options : AsyncLockOptions<U>, asyncLockInfo: AsyncLockInfo) : Promise<Awaited<T>> {
         try {
-            return  Promise.resolve<T>(callback()).finally(() => {	 
-                if (options.signal != null && options.signal!.aborted == true) {	 
-                    this.fireCondEvent();	 
-                    throw new Error('AsyncLock:: Operation aborted by signal');	 
-                }	 
-                this.unlock(asyncLockInfo);	 
+            return  Promise.resolve<T>(callback()).finally(() => {
+                if (options.signal != null && options.signal!.aborted == true) {
+                    this.fireCondEvent();
+                    throw new Error('AsyncLock:: Operation aborted by signal');
+                }
+                this.unlock(asyncLockInfo);
             });
         } catch(e) {
             this.unlock(asyncLockInfo);
@@ -180,30 +183,38 @@ export class AsyncLock {
         while (isDone == false) {
 
              if (options.signal != null && options.signal!.aborted == true) {
+                 ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
                  this.fireCondEvent();
                  throw new Error('AsyncLock:: Operation aborted by signal');
             }
             if(isTimeoutExec == true) {
+                ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
                 throw new Error('AsyncLock:: ' + this.deadLockPrinter.toString('Operation timed out'));
             }
 
             if(options.isAvailable) {
+                ConcurrencyHelpers.lockGuard(this.mutex, () => { this.removeFromPendingQueue(asyncLockInfo); });
                 throw new Error('AsyncLock:: Lock is not available');
             }
 
             ConcurrencyHelpers.mutexLock(this.mutex);
-            if (this.holderCID == 0) {
-                this.holderCID = callerCID;
-                this.mode = mode;
-                this.counter = 1;
-                this.pending.delete(asyncLockInfo);
-                this.held.add(asyncLockInfo);
-                isDone = true;
-            } else if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED) {
-                this.counter++;
-                this.pending.delete(asyncLockInfo);
-                this.held.add(asyncLockInfo);
-                isDone = true;
+            if (this.counter == 0) {
+                if ((mode == AsyncLockMode.EXCLUSIVE && this.pendingQueue[0] == asyncLockInfo) ||
+                    (mode == AsyncLockMode.SHARED && !this.hasPendingExclusiveBefore(asyncLockInfo))) {
+                    this.mode = mode;
+                    this.counter++;
+                    this.removeFromPendingQueue(asyncLockInfo);
+                    this.held.add(asyncLockInfo);
+                    isDone = true;
+                }
+            } else {
+                if (mode == AsyncLockMode.SHARED && this.mode == AsyncLockMode.SHARED &&
+                    !this.hasPendingExclusiveBefore(asyncLockInfo)) {
+                    this.counter++;
+                    this.removeFromPendingQueue(asyncLockInfo);
+                    this.held.add(asyncLockInfo);
+                    isDone = true;
+                }
             }
 
             if (isDone == false) {
@@ -225,11 +236,33 @@ export class AsyncLock {
         this.held.delete(asyncLockInfo);
         this.counter--;
         if (this.counter == 0) {
-            this.holderCID = 0;
             this.mode = AsyncLockMode.UNLOCKED;
             ConcurrencyHelpers.condVarNotifyAll(this.condVar, this.mutex);
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
+
+    private hasPendingExclusiveBefore(asyncLockInfo: AsyncLockInfo): boolean {
+        for (let i = 0; i < this.pendingQueue.length; ++i) {
+            let info = this.pendingQueue[i];
+            if (info == asyncLockInfo) {
+                return false;
+            }
+            if (info.mode == AsyncLockMode.EXCLUSIVE) {
+                return true;
+            }
+        }
+        // Not found in queue, treat as blocked to avoid bypassing FIFO.
+        return true;
+    }
+
+    private removeFromPendingQueue(asyncLockInfo: AsyncLockInfo): void {
+        for (let i = 0; i < this.pendingQueue.length; ++i) {
+            if (this.pendingQueue[i] == asyncLockInfo) {
+                this.pendingQueue.splice(i, 1);
+                return;
+            }
+        }
     }
 
     /**
@@ -262,7 +295,11 @@ export class AsyncLock {
      */
     public query(): AsyncLockState {
         ConcurrencyHelpers.mutexLock(this.mutex);
-        let state = new AsyncLockState(this.held, this.pending);
+        let pendingSet = new Set<AsyncLockInfo>();
+        for (let i = 0; i < this.pendingQueue.length; ++i) {
+            pendingSet.add(this.pendingQueue[i]);
+        }
+        let state = new AsyncLockState(this.held, pendingSet);
         ConcurrencyHelpers.mutexUnlock(this.mutex);
         return state;
     }
@@ -270,11 +307,12 @@ export class AsyncLock {
     private queryDeadlock(deadLockPrinter : DeadLockInfo) {
         ConcurrencyHelpers.mutexLock(this.mutex);
         this.held.forEach((v : AsyncLockInfo) => {
-            this.pending.forEach((p : AsyncLockInfo) => {
+            for (let i = 0; i < this.pendingQueue.length; ++i) {
+                let p = this.pendingQueue[i];
                 if (v.contextId != p.contextId) {
                     deadLockPrinter.add(v, p);
                 }
-            })
+            }
         });
         ConcurrencyHelpers.mutexUnlock(this.mutex);
     }
@@ -292,12 +330,11 @@ export class AsyncLock {
 
     public readonly name: string;
     private static LastAnonymousId: int = 0;
-    private holderCID: int = 0;
     private mode: AsyncLockMode = AsyncLockMode.UNLOCKED;
     private counter: int = 0;
     private mutex: Object = ConcurrencyHelpers.mutexCreate();
     private held: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
-    private pending: Set<AsyncLockInfo> = new Set<AsyncLockInfo>();
+    private pendingQueue: Array<AsyncLockInfo> = new Array<AsyncLockInfo>();
     private condVar: Object = ConcurrencyHelpers.condVarCreate();
     private deadLockPrinter: DeadLockInfo = new DeadLockInfo();
 }
@@ -346,3 +383,4 @@ final class AsyncLockHelper extends AsyncLock {
         super(name);
     }
 }
+
