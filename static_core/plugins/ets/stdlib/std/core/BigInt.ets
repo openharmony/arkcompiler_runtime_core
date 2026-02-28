@@ -1381,6 +1381,20 @@ export final class BigInt {
     }
 
     /**
+     * Creates a new instance of BigInt from existing Long number
+     *
+     * @param { Long } value BigInt value
+     * @returns { BigInt } A new BigInt instance from existing Long number
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    static $_invoke(value: long): BigInt {
+        return new BigInt(value)
+    }
+
+    /**
      * Creates a new instance of BigInt from number instance
      *
      * @param value number value
