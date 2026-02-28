@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,15 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 class LibAbcKitJSModifyApiModulesTest : public ::testing::Test {};
 
 static constexpr int MAX_ITER = 256;
+
+static AbckitInst *FindFirstCallThis0(AbckitGraph *graph)
+{
+    auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0WITHNAME);
+    if (inst != nullptr) {
+        return inst;
+    }
+    return helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0);
+}
 
 static void StByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
 {
@@ -369,7 +378,7 @@ static void LdByNameTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(load, nullptr);
 
-    AbckitInst *call0 = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0);
+    AbckitInst *call0 = FindFirstCallThis0(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(call0, nullptr);
 
@@ -482,7 +491,7 @@ static void LdByValueTest(AbckitFile *file, AbckitGraph *graph, bool isSuper)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(load, nullptr);
 
-    AbckitInst *call0 = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0);
+    AbckitInst *call0 = FindFirstCallThis0(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(call0, nullptr);
 

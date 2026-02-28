@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1188,6 +1188,84 @@ AbckitInst *IcreateCallthis3(AbckitGraph *graph, AbckitInst *acc, AbckitInst *in
     return DEFAULT_INST;
 }
 
+AbckitInst *IcreateCallthis0withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateCallthis1withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0,
+                                     AbckitInst *input1)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateCallthis2withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0,
+                                     AbckitInst *input1, AbckitInst *input2)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    EXPECT_TRUE(input2 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
+// CC-OFFNXT(G.FUN.01) function args are necessary
+AbckitInst *IcreateCallthis3withname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0,
+                                     AbckitInst *input1, AbckitInst *input2, AbckitInst *input3)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    EXPECT_TRUE(input2 == DEFAULT_INST);
+    EXPECT_TRUE(input3 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, size_t argCount,
+                                         ...)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(argCount == 1U);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateWideCallthisrangewithname(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, size_t argCount,
+                                             ...)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(acc == DEFAULT_INST);
+    EXPECT_TRUE(string == DEFAULT_STRING);
+    EXPECT_TRUE(argCount == 1U);
+    return DEFAULT_INST;
+}
+
 AbckitInst *IcreateCallthisrange(AbckitGraph *graph, AbckitInst *acc, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
@@ -2021,6 +2099,12 @@ AbckitIsaApiDynamic g_isaApiDynamicImpl = {
     IcreateCallthis1,
     IcreateCallthis2,
     IcreateCallthis3,
+    IcreateCallthis0withname,
+    IcreateCallthis1withname,
+    IcreateCallthis2withname,
+    IcreateCallthis3withname,
+    IcreateCallthisrangewithname,
+    IcreateWideCallthisrangewithname,
     IcreateCallthisrange,
     IcreateWideCallthisrange,
     IcreateSupercallthisrange,

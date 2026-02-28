@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,9 @@ bool VisitBlock(AbckitBasicBlock *bb, void *data)
     auto *vData = reinterpret_cast<VisitData *>(data);
     auto *inst = g_implG->bbGetFirstInst(bb);
     while (inst != nullptr) {
-        if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1) {
+        auto opcode = g_dynG->iGetOpcode(inst);
+        if (opcode == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1 ||
+            opcode == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1WITHNAME) {
             auto *ldExternal = g_dynG->iCreateLdexternalmodulevar(vData->ctxG, vData->ci);
             auto *classThrow = g_dynG->iCreateThrowUndefinedifholewithname(
                 vData->ctxG, ldExternal, g_implI->classGetName(vData->ud->classToReplace));
