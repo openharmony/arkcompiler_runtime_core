@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,27 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(DISABLES_TESTS
-    object_literal
-    checked
-    number_subtypes
-    perf
-    standalone_function
-    test_intrins
-    esvalue_load_rte
-    declgen_ets2ts
-    array
-    map
-    set
-    mimic_iterator
-    indexed_type
-)
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
 
-SUBDIRLIST(EXECUTED_TESTS
-    ${CMAKE_CURRENT_LIST_DIR}
-    DISABLES_TESTS
+panda_ets_interop_js_gtest(ets_interop_js__esarray
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esarray.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esarray_static.ets
+    TS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/esarray_dynamic.ts
+    ETS_CONFIG ${ETS_CONFIG}
 )
-
-foreach(TEST_DIR ${EXECUTED_TESTS})
-    add_subdirectory(${TEST_DIR})
-endforeach()

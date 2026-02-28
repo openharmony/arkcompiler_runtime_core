@@ -369,18 +369,6 @@ private:
         ScopedNativeCodeThread nativeScope(EtsCoroutine::GetCurrent());
         napi_env env = ctxx->GetJSEnv();
         bool isInstanceof;
-        NAPI_CHECK_FATAL(napi_is_array(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            return MObjectObjectType::ARRAY;
-        }
-        NAPI_CHECK_FATAL(napi_is_map(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            return MObjectObjectType::MAP;
-        }
-        NAPI_CHECK_FATAL(napi_is_set(env, jsValue, &isInstanceof));
-        if (isInstanceof) {
-            return MObjectObjectType::SET;
-        }
         NAPI_CHECK_FATAL(napi_is_promise(env, jsValue, &isInstanceof));
         if (isInstanceof) {
             return MObjectObjectType::PROMISE;
@@ -410,15 +398,6 @@ private:
         napi_env env = ctxx->GetJSEnv();
         auto objectType = GetObjectObjectType(ctxx, jsValue);
         switch (objectType) {
-            case MObjectObjectType::ARRAY: {
-                return MArray(ctxx, jsValue);
-            }
-            case MObjectObjectType::MAP: {
-                return MMap(ctxx, jsValue);
-            }
-            case MObjectObjectType::SET: {
-                return MSet(ctxx, jsValue);
-            }
             case MObjectObjectType::PROMISE: {
                 return BuiltinConvert<JSConvertPromise>(ctxx, env, jsValue);
             }

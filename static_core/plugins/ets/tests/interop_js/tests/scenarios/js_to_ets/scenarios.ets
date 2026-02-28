@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -333,7 +333,7 @@ function testClassInPlaceFieldDeclarations(): boolean {
 function testFunctionReturnsCompositeTypeInt(): boolean {
     let isOk = true;
     for (let i = 0; i < 4; i++){
-        const expectedValue = functionReturnsCompositeType.invoke(i).unwrap() as (string | number | double | Array<string>);
+        const expectedValue = functionReturnsCompositeType.invoke(i).unwrap() as (string | number | double | object);
         switch (i) {
             case 0:
                 isOk = isOk && expectedValue as String === '1';

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,27 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let arrObj: es.Array<boolean>;
-export declare let ARRNUM1: number;
-export declare let ARRNUM2: number;
-export declare let ARRNUM3: number;
-export declare let testArr1: es.Array<number>;
-export declare let testArr2: es.Array<number>;
-export declare function InsertArray(num: boolean): void;
-export declare function GetArrLength(): number;
-export declare function SetArrLength(len: number): void;
-export declare function IsEqual(): boolean;
-export declare class User {
-    userName_: string;
-    userIdx_: number;
-    constructor(userName: string, userIdx: number);
-    get userName(): string;
-    set userName(newUsername: string);
-    get userIdx(): number;
-    set userIdx(newIdx: number);
-    GetUserName(): string;
-    GetUserIdx(): number;
+
+export declare class ESUser {
+    get name(): string;
+    get age(): number;
 }
+
+export declare function returnESUserArray(): es.Array<ESUser>;
+export declare function testUserArrayName(arr: es.Array<object>, idx: number, name: string): boolean;
+export declare function testUserArrayAge(arr: es.Array<object>, idx: number, age: number): boolean;
+export declare function returnFlatArray(): es.Array<object>;
+export declare function esFuncArrayTest(arr: es.Array<number>, func: (arr: es.Array<number>) => boolean): boolean;
+export declare function returnSameArray(): es.Array<number>;
+export declare function createEmptyArray<T>(): es.Array<T>;
 
 type StdArray<T> = T[];
 

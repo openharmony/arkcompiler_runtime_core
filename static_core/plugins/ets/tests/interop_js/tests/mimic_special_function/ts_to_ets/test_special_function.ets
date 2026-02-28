@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 import {
-    arrObj, User,
+    arrObj, User, es,
     InsertArray, GetArrLength, SetArrLength,
     ARRNUM1, ARRNUM2, ARRNUM3,
     testArr1, testArr2, 
@@ -24,25 +24,25 @@ import {
 const INSERT_NUMBER3: boolean = false;
 
 function testMimicArrAdd() {
-    (arrObj as Array<boolean>).push(INSERT_NUMBER3);
+    arrObj.push(INSERT_NUMBER3);
     InsertArray(true);
-    return (arrObj as Array<boolean>).length === GetArrLength();
+    return arrObj.length === GetArrLength();
 }
 
 function testMimicArrLength() {
     SetArrLength(10);
-    return (arrObj as Array<boolean>).length === 10;
+    return arrObj.length === 10;
 }
 
 function testGetArray() {
-    let numArr: Array<number> = testArr1 as Array<number>;
+    let numArr: es.Array<number> = testArr1;
     return numArr[0] === ARRNUM1 as number &&
         numArr[1] === ARRNUM2 as number &&
         numArr[2] === ARRNUM3 as number;
 }
 
 function testSetArray() {
-    let numArr2: Array<number> = testArr2 as Array<number>;
+    let numArr2: es.Array<number> = testArr2;
     numArr2[0] = ARRNUM1 as number;
     numArr2[1] = ARRNUM2 as number;
     numArr2[2] = ARRNUM3 as number;

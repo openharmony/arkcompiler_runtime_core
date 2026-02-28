@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,16 @@
  * limitations under the License.
  */
 
-export declare class MyError extends Error {
-    MyMessage: string;
-    constructor(message: string);
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
+
+namespace ark::ets::interop::js::testing {
+
+class EtsEsMapTest : public EtsInteropTest {};
+
+TEST_F(EtsEsMapTest, esmap)
+{
+    ASSERT_TRUE(RunJsTestSuite("esmap_dynamic.ts"));
 }
 
-export declare let myErrorInstance: MyError;
-
-export declare class Foo {
-    constructor();
-
-    barProperty: number;
-    arrayLikeProperty: Object;
-
-    getBar(): number;
-    static getMagic(): number;
-}
-
-export declare let fooInstance: Foo;
-
-export declare class FooError extends Error {
-    constructor();
-
-    barProperty: number;
-    arrayProperty: Any;
-}
-
-export declare let fooErrorInstance: FooError;
+}  // namespace ark::ets::interop::js::testing

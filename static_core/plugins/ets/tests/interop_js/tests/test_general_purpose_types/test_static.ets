@@ -19,7 +19,7 @@ import { Greeting, h, g } from "testDecl";
 import { Color, UserRole } from "testDecl";
 import { union, u } from "testDecl";
 import { foo, C, iface } from "testDecl";
-import { stringlist, numberlist } from "testDecl";
+import { stringlist, numberlist, es } from 'testDecl';
 
 function TestGeneralPurposeTypes1() {
     arktest.assertEQ(a, 42);
@@ -70,11 +70,12 @@ function baz(i: iface) {
 }
 
 function TestGeneralPurposeTypes7() {
-    let index = 1;
-    for(let e of numberlist) {
-        arktest.assertEQ(e, index);
-        index++;
-    }
+    // TODO: enable after support iterable protocol
+    // let index = 1;
+    // for(let e of numberlist) {
+    //     arktest.assertEQ(e, index);
+    //     index++;
+    // }
     arktest.assertEQ(stringlist[0], "Hello world");
 }
 

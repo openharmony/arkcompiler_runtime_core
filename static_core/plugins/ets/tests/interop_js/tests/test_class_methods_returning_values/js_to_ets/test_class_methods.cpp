@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,20 +65,6 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnNullAsAny)
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMapAsAny)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMapAsAny");
-    ASSERT_EQ(ret, true);
-}
-
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnSetAsAny)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnSetAsAny");
-    ASSERT_EQ(ret, true);
-}
-
 TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringAsLiteral)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
@@ -108,19 +94,6 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnBoolAsLiteral)
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMap)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMap");
-    ASSERT_EQ(ret, true);
-}
-
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnSet)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnSet");
-    ASSERT_EQ(ret, true);
-}
 // NOTE (#24570): fix interop tests with tuples
 TEST_F(EtsInteropClassMethodsReturningValuesTest, DISABLED_TestReturnTuple)
 {
@@ -133,13 +106,6 @@ TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnStringSubsetByRef)
 {
     // NOLINTNEXTLINE(modernize-use-auto)
     auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnStringSubsetByRef");
-    ASSERT_EQ(ret, true);
-}
-
-TEST_F(EtsInteropClassMethodsReturningValuesTest, TestReturnMapSubsetByRef)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsFunction<bool>(GetPackageName(), "TestReturnMapSubsetByRef");
     ASSERT_EQ(ret, true);
 }
 
