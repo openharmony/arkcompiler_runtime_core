@@ -21,6 +21,7 @@
 #include "ets_panda_file_items.h"
 #include "libarkbase/utils/utf.h"
 #include "libarkbase/utils/utils.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_typed_arrays.h"
 #include "plugins/ets/runtime/types/ets_typed_unsigned_arrays.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
@@ -48,7 +49,7 @@ static void *GetNativeData(T *array)
     auto *arrayBuffer = static_cast<EtsEscompatArrayBuffer *>(&*array->GetBuffer());
     if (UNLIKELY(arrayBuffer->WasDetached())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "ArrayBuffer was detached");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "ArrayBuffer was detached");
         return nullptr;
     }
     return arrayBuffer->GetData();
@@ -71,7 +72,7 @@ static void EtsEscompatTypedArraySet(T *thisArray, EtsInt pos, typename T::Eleme
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
+        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "invalid index");
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -97,7 +98,7 @@ typename T::ElementType EtsEscompatTypedArrayGet(T *thisArray, EtsInt pos)
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos >= thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "invalid index");
+        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "invalid index");
         return 0;
     }
     /**
@@ -205,7 +206,7 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -417,7 +418,7 @@ static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dst
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(actualLength > static_cast<uint32_t>(thisArray->GetLengthInt()))) {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
         return;
     }
 
@@ -460,7 +461,7 @@ static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     if (UNLIKELY(actualLength < 0 || actualLength > thisArrayLengthInt)) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::RANGE_ERROR, "offset is out of bounds");
+        ThrowEtsException(coro, PlatformTypes(coro)->coreRangeError, "offset is out of bounds");
         return;
     }
 
@@ -474,7 +475,7 @@ static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *
         if (UNLIKELY(*optElement == nullptr)) {
             PandaStringStream ss;
             ss << "element at index " << i << " is undefined";
-            ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR, ss.str());
+            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError, ss.str());
             return;
         }
         const auto val = arrayElement.GetTyped(*optElement);
@@ -1214,7 +1215,7 @@ T *EtsEscompatTypedArraySortWrapper(T *thisArray, bool withNaN = false)
         auto coro = EtsCoroutine::GetCurrent();
         [[maybe_unused]] EtsHandleScope scope(coro);
         EtsHandle<EtsObject> handle(coro, thisArray);
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "ArrayBuffer was detached");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "ArrayBuffer was detached");
         return static_cast<T *>(handle.GetPtr());
     }
     void *dataPtr = arrayBuffer->GetData();

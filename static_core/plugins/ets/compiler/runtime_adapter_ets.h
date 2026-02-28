@@ -15,7 +15,6 @@
 #ifndef PANDA_ETS_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 #define PANDA_ETS_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H
 
-#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "bytecode_optimizer/runtime_adapter.h"
 
 namespace ark {
@@ -33,8 +32,7 @@ public:
     bool IsEtsConstructor(MethodPtr method) const
     {
         const auto methodName = GetMethodName(method);
-        return (methodName == ets::panda_file_items::CTOR || methodName == ets::panda_file_items::CCTOR ||
-                methodName == ets::panda_file_items::DOT_CTOR || methodName == ets::panda_file_items::DOT_CCTOR);
+        return (methodName == CTOR || methodName == CCTOR || methodName == DOT_CTOR || methodName == DOT_CCTOR);
     }
 
     std::string GetSignature(MethodPtr method) const
@@ -75,61 +73,57 @@ public:
 
     bool IsMethodStringConcat(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_CONCAT &&
-               GetSignature(method) == ets::panda_file_items::signatures::STRING_ARRAY_RET_STRING;
+        return GetMethodFullName(method, false) == METHODS_STRING_CONCAT &&
+               GetSignature(method) == SIGNATURES_STRING_ARRAY_RET_STRING;
     }
 
     bool IsMethodStringGetLength(MethodPtr method) const override
     {
         auto methodName = GetMethodFullName(method, false);
-        return (methodName == ets::panda_file_items::getters::STRING_GET_LENGTH ||
-                methodName == ets::panda_file_items::methods::STRING_GET_LENGTH) &&
-               GetSignature(method) == ets::panda_file_items::signatures::RET_INT;
+        return (methodName == GETTERS_STRING_GET_LENGTH || methodName == METHODS_STRING_GET_LENGTH) &&
+               GetSignature(method) == SIGNATURES_RET_INT;
     }
 
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) &&
-               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
-               GetSignature(method) == ets::panda_file_items::signatures::STRING_RET_VOID;
+        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == CLASSES_STRING_BUILDER &&
+               GetSignature(method) == SIGNATURES_STRING_RET_VOID;
     }
 
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) &&
-               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
-               GetSignature(method) == ets::panda_file_items::signatures::CHAR_ARRAY_RET_VOID;
+        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == CLASSES_STRING_BUILDER &&
+               GetSignature(method) == SIGNATURES_CHAR_ARRAY_RET_VOID;
     }
 
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
-        return IsEtsConstructor(method) &&
-               GetClassNameFromMethod(method) == ets::panda_file_items::classes::STRING_BUILDER &&
-               GetSignature(method) == ets::panda_file_items::signatures::RET_VOID;
+        return IsEtsConstructor(method) && GetClassNameFromMethod(method) == CLASSES_STRING_BUILDER &&
+               GetSignature(method) == SIGNATURES_RET_VOID;
     }
 
     bool IsMethodStringBuilderToString(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_BUILDER_TO_STRING &&
-               GetSignature(method) == ets::panda_file_items::signatures::RET_STRING;
+        return GetMethodFullName(method, false) == METHODS_STRING_BUILDER_TO_STRING &&
+               GetSignature(method) == SIGNATURES_RET_STRING;
     }
 
     bool IsMethodStringBuilderAppend(MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == ets::panda_file_items::methods::STRING_BUILDER_APPEND;
+        return GetMethodFullName(method, false) == METHODS_STRING_BUILDER_APPEND;
     }
 
     bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const override
     {
-        return GetClassName(klass) == ets::panda_file_items::classes::STRING_BUILDER;
+        return GetClassName(klass) == CLASSES_STRING_BUILDER;
     }
 
     bool IsMethodStringBuilderGetStringLength([[maybe_unused]] MethodPtr method) const override
     {
-        return GetMethodFullName(method, false) == ets::panda_file_items::getters::STRING_BUILDER_GET_STRING_LENGTH;
+        return GetMethodFullName(method, false) == GETTERS_STRING_BUILDER_GET_STRING_LENGTH;
     }
 
     bool IsIntrinsicStringBuilderToString([[maybe_unused]] IntrinsicId id) const override
@@ -240,7 +234,7 @@ public:
 
     ClassPtr GetStringBuilderClass() const override
     {
-        const uint8_t *mutf8Name = utf::CStringAsMutf8(ets::panda_file_items::class_descriptors::STRING_BUILDER.data());
+        const uint8_t *mutf8Name = utf::CStringAsMutf8(CLASS_DESCRIPTORS_STRING_BUILDER.data());
         auto classId = pandaFile_.GetClassId(mutf8Name);
         return reinterpret_cast<ClassPtr>(classId.GetOffset());
     }
@@ -255,7 +249,7 @@ public:
         if (classEntityId.IsValid() && !pandaFile_.IsExternal(classEntityId)) {
             panda_file::ClassDataAccessor cda(pandaFile_, classEntityId);
 
-            const uint8_t *lengthMutf8 = utf::CStringAsMutf8(ets::panda_file_items::fields::LENGTH.data());
+            const uint8_t *lengthMutf8 = utf::CStringAsMutf8(FIELDS_LENGTH.data());
             panda_file::File::StringData lengthSD = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(lengthMutf8)),
                                                      lengthMutf8};
 
@@ -314,14 +308,40 @@ public:
 
     MethodPtr GetGetterStringBuilderStringLength() const override
     {
-        return FindMethodByName("std.core.StringBuilder::%%get-stringLength");
+        return FindMethodByName(std::string(GETTERS_STRING_BUILDER_GET_STRING_LENGTH));
     }
 
     MethodPtr GetMethodStringBuilderAppendString([[maybe_unused]] ClassPtr klass) const override
     {
-        return FindMethodByName("std.core.StringBuilder::append", "(Lstd/core/String;)Lstd/core/StringBuilder;");
+        return FindMethodByName(std::string(METHODS_STRING_BUILDER_APPEND),
+                                std::string(SIGNATURES_STRING_RET_STRING_BUILDER));
     }
+
+private:
+    static constexpr std::string_view CLASS_DESCRIPTORS_STRING_BUILDER = "Lstd/core/StringBuilder;";
+    static constexpr std::string_view CLASSES_STRING_BUILDER = "std.core.StringBuilder";
+    static constexpr std::string_view METHODS_STRING_CONCAT = "std.core.String::concat";
+    static constexpr std::string_view METHODS_STRING_GET_LENGTH = "std.core.String::getLength";
+    static constexpr std::string_view METHODS_STRING_BUILDER_APPEND = "std.core.StringBuilder::append";
+    static constexpr std::string_view METHODS_STRING_BUILDER_TO_STRING = "std.core.StringBuilder::toString";
+    static constexpr std::string_view GETTERS_STRING_GET_LENGTH = "std.core.String::%%get-length";
+    static constexpr std::string_view GETTERS_STRING_BUILDER_GET_STRING_LENGTH =
+        "std.core.StringBuilder::%%get-stringLength";
+    static constexpr std::string_view SIGNATURES_RET_VOID = "()V";
+    static constexpr std::string_view SIGNATURES_RET_INT = "()I";
+    static constexpr std::string_view SIGNATURES_CHAR_ARRAY_RET_VOID = "([C)V";
+    static constexpr std::string_view SIGNATURES_STRING_RET_VOID = "(Lstd/core/String;)V";
+    static constexpr std::string_view SIGNATURES_STRING_ARRAY_RET_STRING = "([Lstd/core/String;)Lstd/core/String;";
+    static constexpr std::string_view SIGNATURES_RET_STRING = "()Lstd/core/String;";
+    static constexpr std::string_view SIGNATURES_STRING_RET_STRING_BUILDER =
+        "(Lstd/core/String;)Lstd/core/StringBuilder;";
+    static constexpr std::string_view FIELDS_LENGTH = "length";
+    static constexpr std::string_view CTOR = "<ctor>";
+    static constexpr std::string_view CCTOR = "<cctor>";
+    static constexpr std::string_view DOT_CTOR = ".ctor";
+    static constexpr std::string_view DOT_CCTOR = ".cctor";
 };
+
 }  // namespace ark
 
 #endif  // PANDA_ETS_BYTECODE_OPTIMIZER_RUNTIME_ADAPTER_H

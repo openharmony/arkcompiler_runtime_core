@@ -17,7 +17,6 @@
 #include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
 #include "ets_coroutine.h"
-#include "ets_panda_file_items.h"
 #include "ets_stubs.h"
 #include "ets_stubs-inl.h"
 #include "ets_exceptions.h"
@@ -126,17 +125,16 @@ static PandaString::size_type TrySkipHexPrefix(const PandaString &str, const Pan
 template <typename T>
 T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t radix)
 {
-    namespace tags = panda_file_items::class_descriptors;
-
     if (radix == 0) {
         radix = DECIMAL;
     }
     if (radix < MIN_RADIX || radix > MAX_RADIX) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::ARGUMENT_OUT_OF_RANGE_ERROR, "Invalid radix");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError, "Invalid radix");
         return 0;
     }
     if (ToDigit(str[startIndex]) >= radix) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+                          "String does not contain a valid number");
         return 0;
     }
     T result = 0;
@@ -146,7 +144,8 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
             break;
         }
         if (result < (std::numeric_limits<T>::min() + digit) / radix) {
-            ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Value exceeds integer limits");
+            ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+                              "Value exceeds integer limits");
             return 0;
         }
         result = result * radix - digit;
@@ -157,12 +156,11 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
 template <typename T>
 T StringToInt(EtsString *str, uint8_t radix)
 {
-    namespace tags = panda_file_items::class_descriptors;
-
     auto ps = str->TrimLeft()->GetMutf8();
     PandaString::size_type index = 0;
     if (index >= ps.size()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+                          "String does not contain a valid number");
         return 0;
     }
     auto sign = ReadSign(ps[index]);
@@ -170,7 +168,8 @@ T StringToInt(EtsString *str, uint8_t radix)
         ++index;
     }
     if (index >= ps.size()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "String does not contain a valid number");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+                          "String does not contain a valid number");
         return 0;
     }
     if (radix == HEXADECIMAL) {
@@ -181,7 +180,8 @@ T StringToInt(EtsString *str, uint8_t radix)
         return result;
     }
     if (result < -std::numeric_limits<T>::max()) {
-        ThrowEtsException(EtsCoroutine::GetCurrent(), tags::FORMAT_ERROR, "Value exceeds integer limits");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatFormatError,
+                          "Value exceeds integer limits");
         return 0;
     }
     return -result;

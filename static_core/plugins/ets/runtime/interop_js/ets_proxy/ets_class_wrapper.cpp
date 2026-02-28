@@ -276,8 +276,7 @@ public:
             return etsObject;
         }
         if (IsStdClass(klass_)) {
-            auto *objectConverter =
-                ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+            auto *objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
             auto *ret = objectConverter->Unwrap(ctx, jsValue);
             ASSERT(ret != nullptr);
             if (!ret->IsInstanceOf(EtsClass::FromRuntimeClass(klass_))) {
@@ -358,13 +357,12 @@ public:
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsValue)
     {
-        auto objectConverter =
-            ctx->GetEtsClassWrappersCache()->Lookup(EtsClass::FromRuntimeClass(ctx->GetObjectClass()));
+        auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(PlatformTypes()->coreObject);
         ASSERT(objectConverter != nullptr);
         auto ret = objectConverter->Unwrap(ctx, jsValue);
 
         std::array args = {Value {ret->GetCoreType()}};
-        auto *method = EtsClass::FromRuntimeClass(ctx->GetJSRuntimeClass())->GetStaticMethod("CreateIterator", nullptr);
+        auto *method = PlatformTypes()->interopJSRuntime->GetStaticMethod("CreateIterator", nullptr);
         auto *coro = EtsCoroutine::GetCurrent();
         auto resObject = method->GetPandaMethod()->Invoke(coro, args.data());
         ret = EtsObject::FromCoreType(resObject.GetAs<ObjectHeader *>());

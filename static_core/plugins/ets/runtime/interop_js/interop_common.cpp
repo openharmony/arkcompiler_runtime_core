@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,9 +141,9 @@ void ThrowNoInteropContextException()
     auto *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
     auto ctx = thread->GetVM()->GetLanguageContext();
-    auto descriptor = utf::CStringAsMutf8(panda_file_items::class_descriptors::NO_INTEROP_CONTEXT_ERROR.data());
+    auto descriptor = PlatformTypes()->interopNoInteropContextError->GetDescriptor();
     PandaString msg = "Interop call may be done only from _main_ or exclusive worker";
-    ThrowException(ctx, thread, descriptor, utf::CStringAsMutf8(msg.c_str()));
+    ThrowException(ctx, thread, utf::CStringAsMutf8(descriptor), utf::CStringAsMutf8(msg.c_str()));
 }
 
 void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass)

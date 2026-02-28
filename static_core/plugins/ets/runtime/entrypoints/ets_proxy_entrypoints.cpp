@@ -196,8 +196,7 @@ static int64_t UnboxResult(EtsCoroutine *coroutine, EtsMethod *ifaceMethod, Valu
         PandaOStringStream msg;
         msg << "result has type " << EtsTypeToString(effectiveReturnType) << ", but got "
             << EtsObject::FromCoreType(boxedResult)->GetClass()->GetName()->GetMutf8();
-        ark::ets::ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR,
-                                    msg.str().c_str());
+        ark::ets::ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, msg.str().c_str());
     }
     return unboxedResult.GetAsLong();
 }

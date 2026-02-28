@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/intrinsics/gc_task_tracker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -75,7 +75,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR, eMsg.str());
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, eMsg.str());
         return -1;
     }
     auto &gcTaskTracker = GCTaskTracker::InitIfNeededAndGet(gc);
@@ -98,7 +98,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     }
     // Run GC in GC-thread
     if ((reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) && gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
                           "Calling GC threshold not in place after calling postponeGCStart");
         return -1;
     }
@@ -151,12 +151,12 @@ extern "C" void StdGCPostponeGCStart()
     ASSERT(coroutine != nullptr);
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
                           "GC postpone is not supported for this GC type");
         return;
     }
     if (gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
                           "Calling postponeGCStart without calling postponeGCEnd");
         return;
     }
@@ -169,12 +169,12 @@ extern "C" void StdGCPostponeGCEnd()
     ASSERT(coroutine != nullptr);
     auto *gc = coroutine->GetVM()->GetGC();
     if (!gc->IsPostponeGCSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
                           "GC postpone is not supported for this GC type");
         return;
     }
     if (!gc->IsPostponeEnabled()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalStateError,
                           "Calling postponeGCEnd without calling postponeGCStart");
         return;
     }
@@ -188,13 +188,13 @@ template <class ResArrayType>
     ASSERT(coroutine != nullptr);
 
     if (length < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return nullptr;
     }
     auto *vm = coroutine->GetVM();
     if (!vm->GetGC()->IsPinningSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
                           "Object pinning does not support with current GC");
         return nullptr;
     }
@@ -203,7 +203,7 @@ template <class ResArrayType>
     if (array == nullptr) {
         PandaStringStream ss;
         ss << "Could not allocate array of " << length << " elements";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, ss.str());
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreOutOfMemoryError, ss.str());
         return nullptr;
     }
 
@@ -277,7 +277,7 @@ extern "C" void StdGCPinObject(EtsObject *obj)
     auto *vm = coroutine->GetVM();
     auto *gc = vm->GetGC();
     if (!gc->IsPinningSupported()) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
                           "Object pinning does not support with current gc");
         return;
     }
@@ -311,7 +311,7 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     ASSERT(coroutine != nullptr);
 
     if (counter < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError,
                           "counter for allocation is negative");
         return;
     }
@@ -322,12 +322,12 @@ extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     if (!gc->CheckGCCause(reason)) {
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR, eMsg.str());
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreIllegalArgumentError, eMsg.str());
         return;
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreUnsupportedOperationError,
                           "VM is running with unsupported GC trigger");
         return;
     }
@@ -365,7 +365,7 @@ extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return;
     }
@@ -379,7 +379,7 @@ extern "C" void StdGCRegisterNativeFree(EtsLong size)
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->coreNegativeArraySizeError,
                           "The value must be non negative");
         return;
     }

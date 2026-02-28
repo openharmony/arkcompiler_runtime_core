@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "include/class.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
 #include "plugins/ets/runtime/interop_js/js_proxy/js_proxy.h"
@@ -123,10 +124,8 @@ static Span<Method> BuildProxyMethods(Class *cls, Span<Method *> targetMethods, 
 /*static*/
 JSProxy *JSProxy::CreateInterfaceProxy(const PandaSet<Class *> &interfaces, std::string &interfaceName)
 {
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
     auto descriptor = MakeProxyDescriptor(utf::CStringAsMutf8(interfaceName.data()));
-    Class *objectClass = ctx->GetObjectClass();
+    Class *objectClass = PlatformTypes()->coreObject->GetRuntimeClass();
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     ClassLinkerContext *context = objectClass->GetLoadContext();
 
@@ -167,9 +166,7 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
 {
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
-    auto ctx = InteropCtx::Current(coro);
     ASSERT(functionInterface != nullptr);
-    ASSERT(ctx != nullptr);
     Class *interfaceCls = functionInterface->GetRuntimeClass();
     ASSERT(interfaceCls->IsInterface());
 
@@ -177,7 +174,7 @@ JSProxy *JSProxy::CreateFunctionProxy(EtsClass *functionInterface)
     auto descriptor = MakeProxyDescriptor(interfaceCls->GetDescriptor());
 
     // use `Object` as the base class for the proxy function
-    Class *objectClass = ctx->GetObjectClass();
+    Class *objectClass = PlatformTypes(coro)->coreObject->GetRuntimeClass();
     ASSERT(objectClass != nullptr);
     // get the proxy function class if it is already created
     // otherwise, create the class

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
 
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
@@ -39,7 +40,7 @@ class JSValue : private EtsObject {
 public:
     static JSValue *FromEtsObject(EtsObject *etsObject)
     {
-        ASSERT(etsObject->GetClass() == EtsClass::FromRuntimeClass(InteropCtx::Current()->GetJSValueClass()));
+        ASSERT(etsObject->GetClass() == PlatformTypes()->interopJSValue);
         return static_cast<JSValue *>(etsObject);
     }
 
@@ -269,11 +270,11 @@ private:
         return val;
     }
 
-    static JSValue *AllocUndefined(EtsCoroutine *coro, InteropCtx *ctx)
+    static JSValue *AllocUndefined(EtsCoroutine *coro, [[maybe_unused]] InteropCtx *ctx)
     {
         JSValue *jsValue;
         {
-            auto obj = ObjectHeader::Create(coro, ctx->GetJSValueClass());
+            auto obj = ObjectHeader::Create(coro, PlatformTypes(coro)->interopJSValue->GetRuntimeClass());
             if (UNLIKELY(!obj)) {
                 return nullptr;
             }

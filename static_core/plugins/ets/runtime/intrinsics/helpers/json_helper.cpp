@@ -16,6 +16,7 @@
 #include "include/thread_scopes.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/intrinsics/helpers/json_helper.h"
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
@@ -93,8 +94,7 @@ bool JSONStringifier::SerializeGetters(EtsCoroutine *coro, EtsHandle<EtsObject> 
             // but it's still possible to manually emit bytecode with arbitrary number of parameters
             // in "%%get-" method.
             // `TypeError` is thrown here to align native implementation with managed `getGettersKeyValuePairs`.
-            ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
-                              "Expected zero arguments in getter");
+            ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Expected zero arguments in getter");
             return false;
         }
 
@@ -187,7 +187,7 @@ bool JSONStringifier::SerializeJSONObject(EtsHandle<EtsObject> &value)
     auto *coro = EtsCoroutine::GetCurrent();
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "cyclic object value");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "cyclic object value");
         return false;
     }
 
@@ -546,7 +546,7 @@ bool JSONStringifier::SerializeJSONRecord(EtsHandle<EtsObject> &value)
 
     bool isContain = PushValue(value);
     if (isContain) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "cyclic object value");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "cyclic object value");
         return false;
     }
 
@@ -643,7 +643,7 @@ bool JSONStringifier::SerializeJsonSerializable(EtsHandle<EtsObject> &value)
 
     EtsHandle<EtsObject> resObj(coro, result);
     if (!resObj->IsStringClass()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "toJSON must return string");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "toJSON must return string");
         return false;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,6 @@
 #include "runtime/mem/gc/gc_types.h"
 #include "runtime/mem/gc/gc_settings.h"
 #include "runtime/include/mem/allocator.h"
-#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/tooling/pt_ets_extension.h"
 
 #include "ets_class_linker_extension.h"
@@ -67,186 +66,186 @@ public:
 
     const uint8_t *GetObjectClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::OBJECT.data());
+        return utf::CStringAsMutf8("Lstd/core/Object;");
     }
 
     const uint8_t *GetClassClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS.data());
+        return utf::CStringAsMutf8("Lstd/core/Class;");
     }
 
     const uint8_t *GetUniqueObjectClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_VALUE.data());
+        return utf::CStringAsMutf8("Lstd/core/Null;");
     }
 
     const uint8_t *GetClassArrayClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_ARRAY.data());
+        return utf::CStringAsMutf8("[Lstd/core/Class;");
     }
 
     const uint8_t *GetStringArrayClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::STRING_ARRAY.data());
+        return utf::CStringAsMutf8("[Lstd/core/String;");
     }
 
     const uint8_t *GetCtorName() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::CTOR.data());
+        return utf::CStringAsMutf8("<ctor>");
     }
 
     const uint8_t *GetCctorName() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::CCTOR.data());
+        return utf::CStringAsMutf8("<cctor>");
     }
 
     const uint8_t *GetNullPointerExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_POINTER_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/NullPointerError;");
     }
 
     const uint8_t *GetStackOverflowErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/StackOverflowError;");
     }
 
     const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/ArrayIndexOutOfBoundsError;");
     }
 
     const uint8_t *GetIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/IndexOutOfBoundsError;");
     }
 
     const uint8_t *GetIllegalStateExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/IllegalStateError;");
     }
     const uint8_t *GetNegativeArraySizeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/NegativeArraySizeError;");
     }
 
     const uint8_t *GetStringIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/StringIndexOutOfBoundsError;");
     }
 
     const uint8_t *GetRangeErrorExceptionClassDescriptor() const
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::RANGE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/RangeError;");
     }
 
     const uint8_t *GetArithmeticExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARITHMETIC_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/ArithmeticError;");
     }
 
     const uint8_t *GetClassCastExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_CAST_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/ClassCastError;");
     }
 
     const uint8_t *GetAbstractMethodErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_ABSTRACT_METHOD_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerAbstractMethodError;");
     }
 
     const uint8_t *GetArrayStoreExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_STORE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/ArrayStoreError;");
     }
 
     const uint8_t *GetRuntimeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::RUNTIME_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/RuntimeError;");
     }
 
     const uint8_t *GetFileNotFoundExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::FILE_NOT_FOUND_ERROR.data());
+        UNREACHABLE();
     }
 
     const uint8_t *GetIOExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::IO_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/IOError;");
     }
 
     const uint8_t *GetIllegalArgumentExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/IllegalArgumentError;");
     }
 
     const uint8_t *GetIllegalAccessExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_ACCESS_ERROR.data());
+        UNREACHABLE();
     }
 
     const uint8_t *GetOutOfMemoryErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/OutOfMemoryError;");
     }
 
     const uint8_t *GetNoClassDefFoundErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_CLASS_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedClassError;");
     }
 
     const uint8_t *GetClassCircularityErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_TYPE_CIRCULARITY_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerTypeCircularityError;");
     }
 
     const uint8_t *GetCoroutinesLimitExceedErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::COROUTINES_LIMIT_EXCEED_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/CoroutinesLimitExceedError;");
     }
 
     const uint8_t *GetNoSuchFieldErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_FIELD_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedFieldError;");
     }
 
     const uint8_t *GetNoSuchMethodErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_UNRESOLVED_METHOD_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerUnresolvedMethodError;");
     }
 
     const uint8_t *GetExceptionInInitializerErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::EXCEPTION_IN_INITIALIZER_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/ExceptionInInitializerError;");
     }
 
     const uint8_t *GetClassNotFoundExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_CLASS_NOT_FOUND_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerClassNotFoundError;");
     }
 
     const uint8_t *GetInstantiationErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::INSTANTIATION_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/InstantiationError;");
     }
 
     const uint8_t *GetUnsupportedOperationExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/UnsupportedOperationError;");
     }
 
     const uint8_t *GetVerifyErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_VERIFICATION_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerVerificationError;");
     }
 
     const uint8_t *GetErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ERROR.data());
+        return utf::CStringAsMutf8("Lescompat/Error;");
     }
 
     const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::LINKER_BAD_SUPERTYPE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/LinkerBadSupertypeError;");
     }
 
     coretypes::TaggedValue GetInitialTaggedValue() const override
@@ -293,7 +292,7 @@ public:
 
     const uint8_t *GetIllegalMonitorStateExceptionDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_ERROR.data());
+        return utf::CStringAsMutf8("Lstd/core/IllegalMonitorStateError;");
     }
 
     void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;

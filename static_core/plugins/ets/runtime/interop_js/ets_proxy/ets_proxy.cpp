@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,7 +107,7 @@ napi_value CreateEtsRecordInstance(napi_env env)
 
 napi_value GetETSInstance(napi_env env, std::string_view classDescriptor)
 {
-    if (classDescriptor == ark::ets::panda_file_items::class_descriptors::RECORD) {
+    if (classDescriptor == PlatformTypes()->coreRecord->GetDescriptor()) {
         return CreateEtsRecordInstance(env);
     }
 

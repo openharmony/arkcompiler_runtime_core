@@ -20,6 +20,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -77,8 +78,7 @@ static ObjectHeader *CreateTypeCastException(EtsObject *source, EtsClass *target
         message.append(inclUndefined ? "undefined" : "never");
     }
 
-    auto exc =
-        ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data());
+    auto exc = ets::SetupEtsException(coro, PlatformTypes()->coreClassCastError, message.data());
     if (UNLIKELY(exc == nullptr)) {
         ASSERT(coro->HasPendingException());
         return nullptr;
@@ -105,8 +105,7 @@ ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
 {
     if (UNLIKELY(!cls->IsArrayClass())) {
         // should not appear for the optimized version of intrinsic, which is always inlined
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ERROR,
-                          "class is not an array");
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatError, "class is not an array");
         return nullptr;
     }
     return coretypes::Array::Create(cls->GetRuntimeClass(), length);

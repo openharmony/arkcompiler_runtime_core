@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_call_stack.h"
 #include "plugins/ets/runtime/interop_js/interop_context_api.h"
 
@@ -66,30 +67,6 @@ napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (
 #endif
 
 namespace ark::ets::interop::js {
-
-namespace descriptors = panda_file_items::class_descriptors;
-
-// NOLINTNEXTLINE(modernize-avoid-c-arrays)
-static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
-    descriptors::FUNCTION0,   descriptors::FUNCTION1,   descriptors::FUNCTION2,   descriptors::FUNCTION3,
-    descriptors::FUNCTION4,   descriptors::FUNCTION5,   descriptors::FUNCTION6,   descriptors::FUNCTION7,
-    descriptors::FUNCTION8,   descriptors::FUNCTION9,   descriptors::FUNCTION10,  descriptors::FUNCTION11,
-    descriptors::FUNCTION12,  descriptors::FUNCTION13,  descriptors::FUNCTION14,  descriptors::FUNCTION15,
-    descriptors::FUNCTION16,  descriptors::FUNCTIONN,   descriptors::FUNCTIONR0,  descriptors::FUNCTIONR1,
-    descriptors::FUNCTIONR2,  descriptors::FUNCTIONR3,  descriptors::FUNCTIONR4,  descriptors::FUNCTIONR5,
-    descriptors::FUNCTIONR6,  descriptors::FUNCTIONR7,  descriptors::FUNCTIONR8,  descriptors::FUNCTIONR9,
-    descriptors::FUNCTIONR10, descriptors::FUNCTIONR11, descriptors::FUNCTIONR12, descriptors::FUNCTIONR13,
-    descriptors::FUNCTIONR14, descriptors::FUNCTIONR15, descriptors::FUNCTIONR16,
-};
-
-static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)
-{
-    ASSERT(etsClassLinker != nullptr);
-    ASSERT(etsClassLinker->GetClass(descriptor.data()));
-    auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
-    ASSERT(klass != nullptr);
-    return klass;
-}
 
 #if defined(PANDA_TARGET_OHOS)
 static void AppStateCallback(int state, int64_t timeStamp)
@@ -362,16 +339,8 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
     if (linkerCtx_ == nullptr) {
         linkerCtx_ = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
     }
-    CacheClasses(etsClassLinker);
     etsProxyRefStorage = ets_proxy::SharedReferenceStorage::Create(pandaEtsVm);
     ASSERT(etsProxyRefStorage.get() != nullptr);
-
-    EtsClass *promiseInteropClass =
-        EtsClass::FromRuntimeClass(CacheClass(etsClassLinker, "Lstd/interop/js/PromiseInterop;"));
-    ASSERT(promiseInteropClass != nullptr);
-    promiseInteropConnectMethod =
-        promiseInteropClass->GetStaticMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
-    ASSERT(promiseInteropConnectMethod != nullptr);
 
     // xgc-related things
     stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>(vm);
@@ -388,31 +357,6 @@ InteropCtx::SharedEtsVmState::~SharedEtsVmState()
 {
     // will happen in the runtime destruction flow
     XGC::Destroy();
-}
-
-void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
-{
-    jsRuntimeClass = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
-    jsValueClass = CacheClass(etsClassLinker, descriptors::JS_VALUE);
-    esErrorClass = CacheClass(etsClassLinker, descriptors::ES_ERROR);
-    objectClass = CacheClass(etsClassLinker, descriptors::OBJECT);
-    stringClass = CacheClass(etsClassLinker, descriptors::STRING);
-    bigintClass = CacheClass(etsClassLinker, descriptors::BIG_INT);
-    nullValueClass = CacheClass(etsClassLinker, descriptors::NULL_VALUE);
-    promiseClass = CacheClass(etsClassLinker, descriptors::PROMISE);
-    errorClass = CacheClass(etsClassLinker, descriptors::ERROR);
-    typeClass = CacheClass(etsClassLinker, descriptors::TYPE);
-
-    boxIntClass = CacheClass(etsClassLinker, descriptors::BOX_INT);
-    boxLongClass = CacheClass(etsClassLinker, descriptors::BOX_LONG);
-
-    arrayClass = CacheClass(etsClassLinker, descriptors::ARRAY);
-
-    arrayAsListIntClass = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
-
-    for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
-        functionalInterfaces.insert(CacheClass(etsClassLinker, descr));
-    }
 }
 
 // NOLINTBEGIN(fuchsia-statically-constructed-objects)
@@ -492,8 +436,8 @@ InteropCtx::~InteropCtx()
 
 void InteropCtx::InitJsValueFinalizationRegistry(EtsCoroutine *coro)
 {
-    auto *method = EtsClass::FromRuntimeClass(sharedEtsVmState_->jsRuntimeClass)
-                       ->GetStaticMethod("createFinalizationRegistry", ":Lstd/core/FinalizationRegistry;");
+    auto *method = PlatformTypes(coro)->interopJSRuntime->GetStaticMethod("createFinalizationRegistry",
+                                                                          ":Lstd/core/FinalizationRegistry;");
     ASSERT(method != nullptr);
     Value res;
     if (coro->IsManagedCode()) {
@@ -531,12 +475,13 @@ EtsObject *InteropCtx::CreateETSCoreESError(EtsCoroutine *coro, EtsObject *etsOb
 
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {utf::Mutf8AsCString(GetObjectClass()->GetDescriptor())});
+                        Method::Proto::RefTypeVector {
+                            utf::Mutf8AsCString(PlatformTypes(coro)->coreObject->GetRuntimeClass()->GetDescriptor())});
     auto ctorName = utf::CStringAsMutf8(panda_file_items::CTOR.data());
-    auto ctor = GetESErrorClass()->GetDirectMethod(ctorName, proto);
+    auto ctor = PlatformTypes(coro)->interopESError->GetRuntimeClass()->GetDirectMethod(ctorName, proto);
     ASSERT(ctor != nullptr);
 
-    auto excObj = ObjectHeader::Create(coro, GetESErrorClass());
+    auto excObj = ObjectHeader::Create(coro, PlatformTypes(coro)->interopESError->GetRuntimeClass());
     if (UNLIKELY(excObj == nullptr)) {
         return nullptr;
     }
@@ -578,7 +523,8 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 
     bool isInstanceof = false;
     NAPI_CHECK_FATAL(napi_is_error(env, val, &isInstanceof));
-    auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? ctx->GetErrorClass() : ctx->GetESErrorClass());
+    auto objRefconv = JSRefConvertResolve(ctx, isInstanceof ? PlatformTypes(coro)->escompatError->GetRuntimeClass()
+                                                            : PlatformTypes(coro)->interopESError->GetRuntimeClass());
     ASSERT(objRefconv != nullptr);
     LocalObjectHandle<EtsObject> etsObj(coro, objRefconv->Unwrap(ctx, val));
     if (UNLIKELY(etsObj.GetPtr() == nullptr)) {
@@ -588,7 +534,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
     }
 
     auto klass = etsObj->GetClass()->GetRuntimeClass();
-    if (LIKELY(ctx->GetErrorClass()->IsAssignableFrom(klass))) {
+    if (LIKELY(PlatformTypes(coro)->escompatError->GetRuntimeClass()->IsAssignableFrom(klass))) {
         coro->SetException(etsObj->GetCoreType());
         return;
     }
@@ -605,7 +551,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, const char *msg)
 {
     ASSERT_MANAGED_CODE();
     ASSERT(!coro->HasPendingException());
-    ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg);
+    ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError, msg);
 }
 
 void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)
@@ -692,7 +638,7 @@ void InteropCtx::ForwardEtsException(EtsCoroutine *coro)
     coro->ClearException();
 
     auto klass = exc->ClassAddr<Class>();
-    ASSERT(GetErrorClass()->IsAssignableFrom(klass));
+    ASSERT(PlatformTypes()->escompatError->GetRuntimeClass()->IsAssignableFrom(klass));
     JSRefConvert *refconv = JSRefConvertResolve<true>(this, klass);
     if (UNLIKELY(refconv == nullptr)) {
         INTEROP_LOG(INFO) << "Exception thrown while forwarding ets exception: " << klass->GetDescriptor();

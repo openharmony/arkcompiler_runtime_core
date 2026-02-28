@@ -25,11 +25,9 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     : JSRefConvert(this), klass_ {EtsClass::FromRuntimeClass(klass)}
 {
     // Mark interop function dynamic class as XRef class
-    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
 
     // Get and store interop dynamic function class
-    auto *interopDynamicFunction =
-        classLinker->GetClass(panda_file_items::class_descriptors::INTEROP_DYNAMIC_FUNCTION.data());
+    auto *interopDynamicFunction = PlatformTypes()->interopDynamicFunction;
     if (UNLIKELY(interopDynamicFunction == nullptr)) {
         // just throw exception
         auto coro = EtsCoroutine::GetCurrent();
@@ -41,8 +39,7 @@ JSRefConvertFunction::JSRefConvertFunction(Class *klass)
     this->interopDynamicFunctionClass_ = interopDynamicFunction;
 
     // Get and store interop create dynamic function method
-    auto *createDynamicFunctionMethod = EtsClass::FromRuntimeClass(interopDynamicFunction->GetRuntimeClass())
-                                            ->GetStaticMethod("CreateDynamicFunction", nullptr);
+    auto *createDynamicFunctionMethod = interopDynamicFunction->GetStaticMethod("CreateDynamicFunction", nullptr);
     if (UNLIKELY(createDynamicFunctionMethod == nullptr)) {
         InteropCtx::ThrowETSError(EtsCoroutine::GetCurrent(),
                                   "Interop: CreateDynamicFunction() of Lstd/interop/js/DynamicFunction; is not found.");

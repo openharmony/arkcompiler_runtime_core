@@ -23,6 +23,7 @@
 
 #include "ets_coroutine.h"
 #include "libarkbase/utils/bit_helpers.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -393,8 +394,7 @@ EtsString *FpToString(FpType number, int radix)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
         snprintf_s(buf.data(), buf.size(), buf.size() - 1, "radix must be %.f to %.f", helpers::MIN_RADIX,
                    helpers::MAX_RADIX);
-        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::ARGUMENT_OUT_OF_RANGE_ERROR,
-                          buf.data());
+        ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->coreArgumentOutOfRangeError, buf.data());
         return nullptr;
     }
 

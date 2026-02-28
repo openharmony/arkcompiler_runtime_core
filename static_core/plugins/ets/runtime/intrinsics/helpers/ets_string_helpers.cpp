@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "ets_string_helpers.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_escompat_array.h"
 
 namespace ark::ets::intrinsics::helpers {
@@ -110,7 +111,7 @@ EtsString *CreateNewStringFromCharCode(EtsEscompatArray *charCodes)
             if (UNLIKELY(*optElement == nullptr)) {
                 PandaStringStream ss;
                 ss << "element at index " << i << " is undefined";
-                ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR, ss.str());
+                ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError, ss.str());
                 return false;
             }
             uint16_t codeValue =

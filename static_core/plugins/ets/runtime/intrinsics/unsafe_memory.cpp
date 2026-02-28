@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 #include "libarkbase/utils/arch.h"
 #include "runtime/handle_scope.h"
@@ -37,9 +38,9 @@ bool EnsureBootContext()
         }
     }
 
-    auto e = panda_file_items::class_descriptors::ILLEGAL_STATE_ERROR;
+    auto *errorClass = PlatformTypes(coro)->coreIllegalStateError;
     auto msg = "Unsafe intrinsics: cannot ensure the boot context!";
-    ThrowEtsException(coro, e, msg);
+    ThrowEtsException(coro, errorClass, msg);
     return false;
 }
 

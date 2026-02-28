@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -54,8 +55,7 @@ static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &ext
                            const std::string &path)
 {
     if (!extractor || !extractor->Init()) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
-                               "Open failed, file: " + path);
+        ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError, "Open failed, file: " + path);
         return false;
     }
     return true;
@@ -101,7 +101,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
         // get hap path
         size_t pos = pathStr.rfind("/ets/");
         if (pos == std::string::npos) {
-            ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
+            ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError,
                                    PandaString("Open failed, file: ") + path);
             return nullptr;
         }
@@ -121,7 +121,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     }
 
     if (pf == nullptr) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ABC_FILE_NOT_FOUND_ERROR,
+        ets::ThrowEtsException(coro, PlatformTypes(coro)->coreAbcFileNotFoundError,
                                PandaString("Abc file not found: ") + path);
         return nullptr;
     }
@@ -140,7 +140,7 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
 
     auto pf = panda_file::OpenPandaFileFromMemory(array->GetData<void>(), array->GetLength());
     if (pf == nullptr) {
-        ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR,
+        ets::ThrowEtsException(coro, PlatformTypes(coro)->escompatError,
                                PandaString("Failed to load abc file from memory"));
         return nullptr;
     }

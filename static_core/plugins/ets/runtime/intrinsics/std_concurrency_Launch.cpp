@@ -16,6 +16,7 @@
 #include "coroutines/coroutine_worker_group.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/include/runtime.h"
@@ -43,8 +44,7 @@ static EtsMethod *ResolveInvokeMethod(EtsCoroutine *coro, VMHandle<EtsObject> fu
         return nullptr;
     }
     if (!func->GetClass()->IsFunction()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
-                          "Method have to be instance of std.core.Function");
+        ThrowEtsException(coro, PlatformTypes()->escompatTypeError, "Method have to be instance of std.core.Function");
     }
     auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(coro)->coreFunctionUnsafeCall);
     ASSERT(method != nullptr);
@@ -67,7 +67,7 @@ ObjectHeader *Launch(EtsObject *func, EtsArray *arr, bool abortFlag,
         return nullptr;
     }
     if (coro->GetCoroutineManager()->IsCoroutineSwitchDisabled()) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::INVALID_COROUTINE_OPERATION_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->coreInvalidCoroutineOperationError,
                           "Cannot launch coroutines in the current context!");
         return nullptr;
     }

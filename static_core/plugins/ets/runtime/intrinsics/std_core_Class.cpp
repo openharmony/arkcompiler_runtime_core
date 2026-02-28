@@ -360,7 +360,7 @@ EtsReflectMethod *StdCoreClassGetInstanceMethodInternal(EtsClass *cls, EtsString
             // Multiple overloads found
             PandaOStringStream msg;
             msg << "Found two methods with the same name '" << nameCStr << "'. Please specify signature.";
-            ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg.str().c_str());
+            ThrowEtsException(coro, PlatformTypes()->escompatError, msg.str().c_str());
             return nullptr;  // unreachable after throw, but makes control flow clear
         }
         method = *resolved;  // nullptr if not found, non-null if single method found

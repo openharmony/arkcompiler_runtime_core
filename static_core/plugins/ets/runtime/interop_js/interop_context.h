@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -302,86 +302,6 @@ public:
         return &refconvertCache_;
     }
 
-    Class *GetJSRuntimeClass() const
-    {
-        return sharedEtsVmState_->jsRuntimeClass;
-    }
-
-    Class *GetJSValueClass() const
-    {
-        return sharedEtsVmState_->jsValueClass;
-    }
-
-    Class *GetESErrorClass() const
-    {
-        return sharedEtsVmState_->esErrorClass;
-    }
-
-    Class *GetObjectClass() const
-    {
-        return sharedEtsVmState_->objectClass;
-    }
-
-    Class *GetStringClass() const
-    {
-        return sharedEtsVmState_->stringClass;
-    }
-
-    Class *GetBigIntClass() const
-    {
-        return sharedEtsVmState_->bigintClass;
-    }
-
-    Class *GetArrayAsListIntClass() const
-    {
-        return sharedEtsVmState_->arrayAsListIntClass;
-    }
-
-    Class *GetNullValueClass() const
-    {
-        return sharedEtsVmState_->nullValueClass;
-    }
-
-    Class *GetPromiseClass() const
-    {
-        return sharedEtsVmState_->promiseClass;
-    }
-
-    Method *GetPromiseInteropConnectMethod() const
-    {
-        return sharedEtsVmState_->promiseInteropConnectMethod;
-    }
-
-    Class *GetErrorClass() const
-    {
-        return sharedEtsVmState_->errorClass;
-    }
-
-    Class *GetTypeClass() const
-    {
-        return sharedEtsVmState_->typeClass;
-    }
-
-    Class *GetBoxIntClass() const
-    {
-        return sharedEtsVmState_->boxIntClass;
-    }
-
-    Class *GetBoxLongClass() const
-    {
-        return sharedEtsVmState_->boxLongClass;
-    }
-
-    Class *GetArrayClass() const
-    {
-        return sharedEtsVmState_->arrayClass;
-    }
-
-    bool IsFunctionalInterface(Class *klass) const
-    {
-        return sharedEtsVmState_->functionalInterfaces.count(klass) > 0;
-    }
-
     js_proxy::JSProxy *GetJsProxyInstance(EtsClass *cls) const
     {
         return sharedEtsVmState_->GetJsProxyInstance(cls);
@@ -541,31 +461,12 @@ private:
         js_proxy::JSProxy *GetInterfaceProxyInstance(std::string &interfaceName) const;
         void SetInterfaceProxyInstance(std::string &interfaceName, js_proxy::JSProxy *proxy);
 
-        // Intentionally leaving these members public to avoid duplicating the InteropCtx's accessors.
-        // Maybe its worth to add some e.g. VmState() method to the InteropCtx and move all its accessors here
-        Class *jsRuntimeClass {};
-        Class *jsValueClass {};
-        Class *esErrorClass {};
-        Class *objectClass {};
-        Class *stringClass {};
-        Class *bigintClass {};
-        Class *arrayAsListIntClass {};
-        Class *nullValueClass {};
-        Class *promiseClass {};
-        Class *errorClass {};
-        Class *typeClass {};
-        Class *arrayClass {};
-        Class *boxIntClass {};
-        Class *boxLongClass {};
-        PandaSet<Class *> functionalInterfaces {};
-        Method *promiseInteropConnectMethod = nullptr;
         PandaEtsVM *pandaEtsVm = nullptr;
         PandaUniquePtr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage {};
         PandaUniquePtr<arkplatform::STSVMInterface> stsVMInterface {};
 
     private:
         explicit SharedEtsVmState(PandaEtsVM *vm);
-        void CacheClasses(EtsClassLinker *etsClassLinker);
 
         // class -> proxy instance, should be accessed under a mutex, hence private
         PandaMap<EtsClass *, PandaUniquePtr<js_proxy::JSProxy>> jsProxies_;

@@ -14,6 +14,7 @@
  */
 
 #include "runtime/include/mem/panda_string.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/object_header.h"
@@ -106,7 +107,7 @@ void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
         ThrowNoInteropContextException();
         return;
     }
-    ASSERT(cbarg->GetClass()->GetRuntimeClass() == ctx->GetJSValueClass());
+    ASSERT(cbarg->GetClass()->GetRuntimeClass() == PlatformTypes()->interopJSValue->GetRuntimeClass());
     return JSValue::FinalizeETSWeak(ctx, cbarg);
 }
 
@@ -462,7 +463,7 @@ static ALWAYS_INLINE inline bool CheckEtsObjectFoundException(EtsCoroutine *coro
 {
     if (EtsReferenceNullish(coroutine, etsObject)) {
         PandaString message = "Need object";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+        ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message.c_str());
         return true;
     }
     return false;
@@ -1082,7 +1083,7 @@ uint8_t ESValueAnyInstanceOf(EtsObject *etsObject, EtsObject *ctor)
     bool result = false;
     if (etsObject == nullptr || ctor == nullptr) {
         PandaString message = "Need object";
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, message.c_str());
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, message.c_str());
     } else {
         result = EtsIsinstance(coro, etsObject, ctor);
     }
@@ -1458,7 +1459,7 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
 
     auto klass = ref->template ClassAddr<Class>();
     // start fastpath
-    if (klass == ctx->GetJSValueClass()) {
+    if (klass == PlatformTypes(coro)->interopJSValue->GetRuntimeClass()) {
         auto value = JSValue::FromEtsObject(EtsObject::FromCoreType(ref));
         napi_value res = JSConvertJSValue::Wrap(env, value);
         if (UNLIKELY(res == nullptr)) {

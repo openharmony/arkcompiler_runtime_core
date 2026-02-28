@@ -15,9 +15,16 @@
 
 #include "plugins/ets/runtime/intrinsics/helpers/reflection_helpers.h"
 
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets::intrinsics::helpers {
+
+static void ThrowEtsInvalidType(EtsCoroutine *coroutine, const char *classSignature)
+{
+    PandaString message = "Invalid operand type: " + PandaString(classSignature);
+    ThrowEtsException(coroutine, PlatformTypes(coroutine)->escompatTypeError, message);
+}
 
 bool CheckPrimitiveReciever(EtsCoroutine *coro, EtsObject *arg, EtsClass *argClass, EtsClass *paramClass,
                             Value *argValue)
@@ -72,7 +79,7 @@ bool CheckReceiverType(EtsCoroutine *coro, EtsObject *arg, EtsClass *paramClass,
 {
     if (arg == nullptr) {
         if (paramClass->IsPrimitive()) {
-            ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
+            ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
                               "undefined argument is not allowed for primitive reciever");
             return false;
         }
@@ -122,7 +129,7 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisO
 {
     // For instance methods, thisObj validation is required
     if (thisObj == nullptr) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
                           "Instance method invocation requires non-null 'thisObj'");
         return nullptr;
     }
@@ -132,14 +139,14 @@ EtsMethod *ValidateAndResolveInstanceMethod(EtsCoroutine *coro, EtsObject *thisO
         PandaOStringStream ss;
         ss << "Object type [" << thisObj->GetClass()->GetRuntimeClass()->GetName()
            << "] is not compatible with method owner type [" << method->GetClass()->GetRuntimeClass()->GetName() << ']';
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, ss.str());
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, ss.str());
         return nullptr;
     }
 
     // Resolve virtual method - this is instance-method specific
     EtsMethod *resolved = thisObj->GetClass()->ResolveVirtualMethod(method);
     if (resolved == nullptr) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "Virtual method resolution failed");
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Virtual method resolution failed");
         return nullptr;
     }
     return resolved;
@@ -149,14 +156,14 @@ bool ValidateInstanceField(EtsCoroutine *coro, EtsObject *thisObj, EtsField *fie
 {
     // For instance methods, thisObj validation is required
     if (thisObj == nullptr) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->coreNullPointerError,
                           "Instance field manipulation requires non-null 'thisObj'");
         return false;
     }
 
     // Validate that thisObj is subtype of method owner
     if (!field->GetDeclaringClass()->IsAssignableFrom(thisObj->GetClass())) {
-        ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR,
+        ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError,
                           "Object type is not compatible with field owner type");
         return false;
     }
@@ -250,7 +257,7 @@ Value GetPrimitiveValue(EtsCoroutine *coro, EtsObject *thisObj, EtsType fieldTyp
         case EtsType::UNKNOWN:
             break;
     }
-    ThrowEtsException(coro, panda_file_items::class_descriptors::TYPE_ERROR, "Failed to resolve primitive field type");
+    ThrowEtsException(coro, PlatformTypes(coro)->escompatTypeError, "Failed to resolve primitive field type");
     return Value(0);
 }
 
@@ -267,7 +274,7 @@ EtsBoolean IsLiteralInitializedInterface(EtsObject *target)
     panda_file::ClassDataAccessor cda(pf, runtimeClass->GetFileId());
     bool retBoolVal = false;
 
-    cda.EnumerateAnnotation(panda_file_items::class_descriptors::INTERFACE_OBJ_LITERAL.data(),
+    cda.EnumerateAnnotation(EtsPlatformTypes::DESCRIPTOR_annotationsInterfaceObjectLiteral,
                             [&retBoolVal](panda_file::AnnotationDataAccessor &) {
                                 retBoolVal = true;
                                 return true;

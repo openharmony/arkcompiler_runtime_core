@@ -17,6 +17,7 @@
 #include "ets_class_linker_extension.h"
 #include "ets_to_string_cache.h"
 #include "ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 #include "libarkbase/mem/mem.h"
 
 namespace ark::ets::detail {
@@ -171,20 +172,16 @@ private:
 template <typename T>
 EtsClass *EtsToStringCacheElement<T>::GetClass(EtsCoroutine *coro)
 {
-    auto *classLinker = coro->GetPandaVM()->GetClassLinker();
-    auto *ext = classLinker->GetEtsClassLinkerExtension();
-
-    std::string_view classDescriptor;
+    auto *pt = PlatformTypes(coro);
     if constexpr (std::is_same_v<T, EtsDouble>) {
-        classDescriptor = panda_file_items::class_descriptors::DOUBLE_TO_STRING_CACHE_ELEMENT;
+        return pt->coreDoubleToStringCacheElement;
     } else if constexpr (std::is_same_v<T, EtsFloat>) {
-        classDescriptor = panda_file_items::class_descriptors::FLOAT_TO_STRING_CACHE_ELEMENT;
+        return pt->coreFloatToStringCacheElement;
     } else if constexpr (std::is_same_v<T, EtsLong>) {
-        classDescriptor = panda_file_items::class_descriptors::LONG_TO_STRING_CACHE_ELEMENT;
+        return pt->coreLongToStringCacheElement;
     } else {
         UNREACHABLE();
     }
-    return classLinker->GetClass(classDescriptor.data(), false, ext->GetBootContext());
 }
 
 /* static */

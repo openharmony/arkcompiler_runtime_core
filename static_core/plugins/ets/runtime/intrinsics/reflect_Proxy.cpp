@@ -17,6 +17,7 @@
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_platform_types.h"
 
 namespace ark::ets::intrinsics {
 
@@ -37,7 +38,7 @@ static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *
                 PandaOStringStream msg;
                 msg << "All given to Proxy classes must be an interface. But given class '"
                     << proxyInterfaces[idx]->GetName() << " is not an interface";
-                ark::ets::ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::TYPE_ERROR,
+                ark::ets::ThrowEtsException(EtsCoroutine::GetCurrent(), PlatformTypes()->escompatTypeError,
                                             msg.str().c_str());
 
                 allocator->Free(proxyInterfaces.Data());

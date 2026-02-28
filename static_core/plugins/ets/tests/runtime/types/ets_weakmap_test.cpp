@@ -79,9 +79,7 @@ protected:
 // Test that regular objects are valid WeakMap keys
 TEST_F(EtsWeakMapTest, ValidateKeyAcceptsObjects)
 {
-    // Create a simple object instance
-    EtsClass *objectClass =
-        coro_->GetPandaVM()->GetClassLinker()->GetClass(panda_file_items::class_descriptors::OBJECT.data());
+    EtsClass *objectClass = PlatformTypes()->coreObject;
     ASSERT_NE(objectClass, nullptr);
 
     EtsObject *obj = EtsObject::Create(coro_, objectClass);
@@ -192,9 +190,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsString)
 // Test that BigInt is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsBigInt)
 {
-    // Create a BigInt
-    EtsClass *bigIntClass =
-        coro_->GetPandaVM()->GetClassLinker()->GetClass(panda_file_items::class_descriptors::BIG_INT.data());
+    EtsClass *bigIntClass = PlatformTypes(coro_)->coreBigInt;
     ASSERT_NE(bigIntClass, nullptr);
 
     // Create a simple BigInt object (we can't easily construct a proper BigInt from C++,
@@ -209,8 +205,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyRejectsBigInt)
 // Test that NullValue is rejected
 TEST_F(EtsWeakMapTest, ValidateKeyRejectsNullValue)
 {
-    EtsClass *nullValueClass =
-        coro_->GetPandaVM()->GetClassLinker()->GetClass(panda_file_items::class_descriptors::NULL_VALUE.data());
+    EtsClass *nullValueClass = PlatformTypes()->coreNull;
     ASSERT_NE(nullValueClass, nullptr);
 
     EtsObject *nullValue = EtsObject::Create(coro_, nullValueClass);
@@ -235,9 +230,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsArray)
 // Test multiple valid reference types
 TEST_F(EtsWeakMapTest, ValidateKeyAcceptsMultipleReferenceTypes)
 {
-    // Test with Error object
-    EtsClass *errorClass =
-        coro_->GetPandaVM()->GetClassLinker()->GetClass(panda_file_items::class_descriptors::ERROR.data());
+    EtsClass *errorClass = PlatformTypes()->escompatError;
     ASSERT_NE(errorClass, nullptr);
 
     EtsObject *error = EtsObject::Create(coro_, errorClass);
