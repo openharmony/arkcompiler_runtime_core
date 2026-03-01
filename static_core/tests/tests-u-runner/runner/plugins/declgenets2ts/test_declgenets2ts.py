@@ -26,6 +26,20 @@ from runner.enum_types.params import Params, TestEnv, TestReport
 from runner.plugins.ets.ets_templates.test_metadata import get_metadata, TestMetadata
 from runner.test_file_based import TestFileBased
 
+def create_tmp_interop_import_file(interop_path: str) -> None:
+    if path.exists(interop_path):
+        return
+    makedirs(path.dirname(interop_path), exist_ok=True)
+    interop_file = """\
+    declare namespace st {
+        export class Array<T> {}
+        export class Map<K, V> {}
+        export class Set<T> {}
+    }
+    export default st;
+    """
+    with open(interop_path, "w", encoding="utf-8") as f:
+        f.write(interop_file)
 
 class TestDeclgenETS2TS(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
@@ -116,7 +130,27 @@ class TestDeclgenETS2TS(TestFileBased):
             tsc_flags.append("--project")
             tsc_flags.append(tsconfig_file)
         else:
-            tsc_flags.append(test_dets)
+            tmp_interop_import_path = f"{path.join(path.dirname(test_dets), path.basename(test_dets))}_includes.d.ets"
+            create_tmp_interop_import_file(tmp_interop_import_path)
+            tsconfig_file = path.join(path.dirname(test_dets), path.basename(test_dets) + "_tsconfig.json")
+            with os_fdopen(os_open(tsconfig_file, O_WRONLY|O_CREAT, 0o644), "w", encoding="utf-8") as handler:
+                tsconfig = f"""\
+                {{
+                    "compilerOptions": {{
+                    "baseUrl": "{self.decl_path}",
+                    "paths": {{
+                        "@ohos.lang.interop": [
+                            "{tmp_interop_import_path}"
+                        ]
+                    }}
+                }},
+                "files" : [
+                    "{test_dets}"
+                ]
+                }}"""
+                handler.write(tsconfig)
+            tsc_flags.append("--project")
+            tsc_flags.append(tsconfig_file)
 
         params = Params(
             executor=self.tsc_executor,

@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare const CONSTANT: number;
 export declare class Bibka {
     public static get NOT_GLOBAL(): number;
     constructor();
 }
 export type UT = null | undefined | never;
-export type UTA = Array<UT>;
+export type UTA = st.Array<UT>;
 export type a1 = "a" | "b" | "c";
 export type b1 = Record<string, number | string | boolean | [] | Record<string, number | string | boolean | []>>;
 export type c1 = Record<number, string> | Record<string, number>;

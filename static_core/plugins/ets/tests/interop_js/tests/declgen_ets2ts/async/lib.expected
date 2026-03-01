@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare function AsyncIdentity(param: number): Promise<number>;
 export declare const myPromise: Promise<number>;
 export declare let cb: (arg: number) => void;

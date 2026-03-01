@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare let cb: (this: X1) => void;
 export declare interface I0 {
     I0Method?(a: string): string;
@@ -55,7 +56,7 @@ export declare class C1 {
     constructor();
 }
 export declare class C2 {
-    public foo2(...nums: Array<number>): void;
+    public foo2(...nums: st.Array<number>): void;
     constructor();
 }
 export declare class C3 {
@@ -75,7 +76,7 @@ export declare class C6 {
     constructor();
 }
 export declare class C7 {
-    public static foo7(...nums: Array<number>): void;
+    public static foo7(...nums: st.Array<number>): void;
     constructor();
 }
 export declare class C8 {

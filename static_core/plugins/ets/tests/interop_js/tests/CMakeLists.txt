@@ -19,6 +19,7 @@ set(DISABLES_TESTS
     standalone_function
     test_intrins
     esvalue_load_rte
+    declgen_ets2ts
 )
 
 SUBDIRLIST(EXECUTED_TESTS

@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare function foo3(a: Array<string>): void;
+import st from "@ohos.lang.interop";
+export declare function foo3(a: st.Array<string>): void;
 export declare function foo6(iface5: Iface5): void;
 export declare interface Iface {
     n: number;
@@ -22,15 +23,15 @@ export declare interface Iface2 {
     foo1(): void;
 }
 export declare interface Iface3 {
-    foo2(...nums: Array<number>): void;
+    foo2(...nums: st.Array<number>): void;
 }
 export declare class C {
-    public static foo3(a: Array<string>): void;
-    public bar(a: Array<string>): void;
+    public static foo3(a: st.Array<string>): void;
+    public bar(a: st.Array<string>): void;
     constructor();
 }
 export declare interface Iface4 {
-    foo3(a: Array<string>): void;
+    foo3(a: st.Array<string>): void;
 }
 export declare interface I {
     s: string;

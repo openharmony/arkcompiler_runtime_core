@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import st from "@ohos.lang.interop";
 export declare function Identity<T>(x: T): T;
 export declare function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void;
 export declare function foo1<T>(x: Partial<C1<T>>): void;

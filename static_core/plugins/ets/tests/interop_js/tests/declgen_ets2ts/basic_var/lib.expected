@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export declare let arr: Array<number>;
+import st from "@ohos.lang.interop";
+export declare let arr: st.Array<number>;
 export declare let w: bigint;
 export declare let w1: boolean;
 export declare let w2: string;
