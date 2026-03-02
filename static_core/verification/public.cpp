@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,8 +200,7 @@ Status Verify(Service *service, ark::Method *method, VerificationMode mode)
     auto uniqId = method->GetUniqId();
     auto methodName = method->GetFullName();
 
-    auto lang = method->GetClass()->GetSourceLang();
-    auto *processor = service->verifierService->GetProcessor(lang);
+    auto *processor = service->verifierService->GetProcessor(method->GetClass()->GetLoadContext());
 
     if (processor == nullptr) {
         LOG(INFO, VERIFIER) << "Attempt to  verify " << method->GetFullName(true)
@@ -221,6 +220,7 @@ Status Verify(Service *service, ark::Method *method, VerificationMode mode)
     }
     Job job {service, method, verifMethodOptions};
     bool result = job.DoChecks(processor->GetTypeSystem());
+    processor->ResetTypeSystem();
 
     LOG(DEBUG, VERIFIER) << "Verification result for '" << methodName << "': " << result;
 

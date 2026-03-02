@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,15 +44,15 @@ public:
         return linker_;
     }
 
-    TaskProcessor *GetProcessor(SourceLang lang);
+    TaskProcessor *GetProcessor(ClassLinkerContext *ctx);
     void ReleaseProcessor(TaskProcessor *processor);
 
 private:
-    struct LangData {
-        explicit LangData(SourceLang language) : lang {language} {}
+    struct LoadContextData {
+        explicit LoadContextData(ClassLinkerContext *ctx) : loadContext {ctx} {}
 
         // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-        SourceLang lang;
+        ClassLinkerContext *loadContext;
         size_t totalProcessors = 0;
         PandaDeque<TaskProcessor *> queue;
         // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -63,29 +63,35 @@ private:
 
     ark::os::memory::Mutex lock_;
     ark::os::memory::ConditionVariable condVar_ GUARDED_BY(lock_);
-    PandaUnorderedMap<panda_file::SourceLang, LangData> processors_ GUARDED_BY(lock_);
+    PandaUnorderedMap<ClassLinkerContext *, LoadContextData> processors_ GUARDED_BY(lock_);
 
     bool shutdown_ {false};
 };
 
 class TaskProcessor final {
 public:
-    explicit TaskProcessor(VerifierService *service, SourceLang lang) : service_ {service}, lang_ {lang} {};
+    explicit TaskProcessor(VerifierService *service, ClassLinkerContext *ctx)
+        : service_ {service}, loadContext_ {ctx} {};
 
     TypeSystem *GetTypeSystem()
     {
         return &typeSystem_;
     }
 
-    SourceLang GetLang()
+    void ResetTypeSystem()
     {
-        return lang_;
+        this->typeSystem_ = TypeSystem {service_, loadContext_->GetSourceLang()};
+    }
+
+    ClassLinkerContext *GetLoadContext()
+    {
+        return loadContext_;
     }
 
 private:
     VerifierService *service_;
-    SourceLang const lang_;
-    TypeSystem typeSystem_ {service_, lang_};
+    ClassLinkerContext *const loadContext_;
+    TypeSystem typeSystem_ {service_, loadContext_->GetSourceLang()};
 };
 
 }  // namespace ark::verifier

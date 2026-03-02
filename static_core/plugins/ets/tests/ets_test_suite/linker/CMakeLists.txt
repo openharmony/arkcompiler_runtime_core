@@ -138,13 +138,12 @@ function(test_runtime_linker_extensions test)
         SKIP_ARM32_COMPILER
         RUNTIME_EXTRA_OPTIONS
         "--compiler-inlining-blacklist='${test}.Test::createReferencedLinker,${test}.Test::createUnreferencedLinker'"
-        "--verification-mode=disabled" # issues:22179: remove "--verification-mode=disabled" option after fix
         )
 
 endfunction()
 
 # NOTE(dslynko, #32751): Re-enable after fixing flaky failures
-# test_runtime_linker_extensions(runtime_linker_extensions) #issues:22179 enable verifier after bugfix
+# test_runtime_linker_extensions(runtime_linker_extensions)
 
 function(test_app_linker_context_exception TARGET WORK_DIR)
     # Must provide a valid abc file, so that runtime would start creating application linker context
@@ -247,7 +246,6 @@ function(test_proxy_with_linker TARGET WORK_DIR)
             --boot-panda-files=${BOOT_PANDA_FILES}
             --load-runtimes=ets
             --gc-type=g1-gc
-            --verification-mode=disabled
             ${MAIN_ABC}
             main.ETSGLOBAL::main
         DEPENDS ark etsstdlib ${MAIN_ABC_TARGET} ${ADDITIONAL_FILES_COMPILE_TARGET}

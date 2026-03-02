@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,12 @@ namespace ark::verifier {
 struct MethodOption {
     enum class InfoType { CONTEXT, REG_CHANGES, CFLOW, JOBFILL };
     enum class MsgClass { ERROR, WARNING, HIDDEN };
-    enum class CheckType { CFLOW, RESOLVE_ID, REG_USAGE, TYPING, ABSINT };
+    enum class CheckType { CFLOW, RESOLVE_ID, REG_USAGE, ABSINT };
     using InfoTypeFlag =
         FlagsForEnum<unsigned, InfoType, InfoType::CONTEXT, InfoType::REG_CHANGES, InfoType::CFLOW, InfoType::JOBFILL>;
     using MsgClassFlag = FlagsForEnum<unsigned, MsgClass, MsgClass::ERROR, MsgClass::WARNING, MsgClass::HIDDEN>;
-    using CheckEnum = SaturatedEnum<CheckType, CheckType::ABSINT, CheckType::TYPING, CheckType::REG_USAGE,
-                                    CheckType::RESOLVE_ID, CheckType::CFLOW>;
+    using CheckEnum =
+        SaturatedEnum<CheckType, CheckType::ABSINT, CheckType::REG_USAGE, CheckType::RESOLVE_ID, CheckType::CFLOW>;
 };
 
 class MethodOptions {
@@ -149,9 +149,6 @@ public:
         result += "  Checks: ";
         enabledCheck_.EnumerateValues([&](auto flag) {
             switch (flag) {
-                case MethodOption::CheckType::TYPING:
-                    result += "'typing' ";
-                    break;
                 case MethodOption::CheckType::ABSINT:
                     result += "'absint' ";
                     break;

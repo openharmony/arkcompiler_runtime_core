@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,30 +23,6 @@
 #include "verification/public_internal.h"
 
 namespace ark::verifier {
-bool Job::UpdateTypes(TypeSystem *types) const
-{
-    bool result = true;
-    Job::ErrorHandler handler;
-
-    auto hasType = [&](Class const *klass) {
-        types->MentionClass(klass);
-        return true;
-    };
-    ForAllCachedTypes([&](Type type) {
-        if (type.IsClass()) {
-            result = result && hasType(type.GetClass());
-        }
-    });
-    ForAllCachedMethods([&](Method const *method) { types->GetMethodSignature(method); });
-    ForAllCachedFields([&](Field const *field) {
-        result = result && hasType(field->GetClass());
-        if (field->GetType().IsReference()) {
-            ScopedChangeThreadStatus st(ManagedThread::GetCurrent(), ThreadStatus::RUNNING);
-            result = result && hasType(field->ResolveTypeClass(&handler));
-        }
-    });
-    return result;
-}
 
 bool Job::Verify(TypeSystem *types) const
 {
@@ -77,23 +53,12 @@ bool Job::DoChecks(TypeSystem *types)
 
     DBG_MANAGED_BRK(&service_->debugCtx, method_->GetUniqId(), 0xFFFF);
 
-    if (check[MethodOption::CheckType::TYPING]) {
-        if (!UpdateTypes(types)) {
-            LOG(WARNING, VERIFIER) << "Cannot update types from cached classes for method "
-                                   << method_->GetFullName(true);
-            return false;
-        }
-    }
-
     if (check[MethodOption::CheckType::ABSINT]) {
         if (!Verify(types)) {
             LOG(WARNING, VERIFIER) << "Abstract interpretation failed for method " << method_->GetFullName(true);
             return false;
         }
     }
-
-    // Clean up temporary types
-    types->ResetTypeSpans();
 
     return true;
 }

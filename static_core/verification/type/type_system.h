@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,17 +92,7 @@ public:
 
     PandaUnorderedSet<Type> const *SupertypesOfClass(Class const *klass);
 
-    void DisplayTypeSystem(std::function<void(PandaString const &)> const &handler);
-
-    /* Make TypeSystem remember the class for dumping */
-    void MentionClass(Class const *klass);
-
     Type BootDescriptorToType(uint8_t const *descr);
-
-    void ResetTypeSpans()
-    {
-        typeSpans_.clear();
-    }
 
     Span<Type const> GetTypeSpan(size_t start, size_t sz) const
     {
@@ -131,10 +121,8 @@ private:
     ClassLinkerContext *bootLinkerCtx_;
 
     PandaUnorderedMap<Type, Type> normalizedTypeOf_;
-    PandaUnorderedMap<Method::UniqId, Method const *> methodOfId_;
     PandaUnorderedMap<Method::UniqId, MethodSignature> signatureOfMethod_;
     PandaUnorderedMap<Class const *, PandaUnorderedSet<Type>> supertypesCache_;
-    PandaUnorderedSet<Class const *> knownClasses_;
 
     // Storage for members of intersection and union types.
     PandaVector<Type> typeSpans_;
@@ -147,10 +135,6 @@ private:
     Variables variables_;
 
     void ExtendBySupers(PandaUnorderedSet<Type> *set, Class const *klass);
-
-    void DisplayClasses(std::function<void(PandaString const &)> const &handler) const;
-    void DisplayMethods(std::function<void(PandaString const &, PandaString const &)> const &handler) const;
-    void DisplaySubtyping(std::function<void(PandaString const &, PandaString const &)> const &handler);
 };
 
 }  // namespace ark::verifier
