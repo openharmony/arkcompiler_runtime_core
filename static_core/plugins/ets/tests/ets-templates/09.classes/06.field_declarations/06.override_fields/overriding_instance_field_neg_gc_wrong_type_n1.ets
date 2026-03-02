@@ -13,26 +13,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    The term same-type in case of generic classes means that the type
+    of a field in a derived class must be the same as in the base
+    class instantiated with a parameter of the same type as the type
+    of the field in the derived class.
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Semantic error ESE52491: f in D cannot override f in B because overriding type is not compatible with the base type."
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class B<T> {
+  f: T
+  constructor(v: T) {
+    this.f = v
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<U, V> extends B<U> {
+  f: V
+  constructor(v: U) {
+    super(v)
+  }
 }
 
 function main(): void {
 }
-
-{% endfor %}

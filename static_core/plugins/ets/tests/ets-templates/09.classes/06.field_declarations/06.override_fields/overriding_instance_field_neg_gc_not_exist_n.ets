@@ -13,26 +13,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-    Checking static field declaration in derived class
-    with same name and same type as in superclass.
-params: hiding with different type
+    Field marked with the modifier override does not override a field from a superclass.
 tags: [compile-only, negative]
-expected_out: "{{c.expected_out}}"
+expected_out: "Semantic error ESE49702: The 'override' modifier is invalid here because the base class 'Base' does not declare this member."
 ---*/
 
-class Base {
-  static field: {{c.base_type}} = {{c.base_value}}
+class Base<T> {
+  f1: T
+  constructor(v: T) {
+    this.f1 = v
+  }
 }
 
-class A extends Base {
-  static field: {{c.derived_type}} = {{c.derived_value}}
+class D<T> extends Base<T> {
+  override f2: T
+  constructor(v: T) {
+    super(v)
+    this.f2 = v
+  }
 }
 
 function main(): void {
 }
-
-{% endfor %}
