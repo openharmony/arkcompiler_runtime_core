@@ -3375,7 +3375,7 @@ function filterInvalidSDKNamedImports(
     const imported = checker.getSymbolAtLocation(element.name);
     const real = imported ? checker.getAliasedSymbol(imported) : undefined;
 
-    if (real && !isSymbolFromInvalidSDK(real, current)) {
+    if (!real || !isSymbolFromInvalidSDK(real, current)) {
       valid.push(element);
     }
   }

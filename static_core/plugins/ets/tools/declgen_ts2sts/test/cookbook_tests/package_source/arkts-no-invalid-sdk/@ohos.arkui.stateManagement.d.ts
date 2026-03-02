@@ -12,20 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import taskpool from "@ohos.taskpool";
-import { Callback as A } from "./@ohos.base";
-import taskpool2 from "./bridge1";
-import { A as A2 } from "./bridge2";
-import { LocalStorage } from './@ohos.arkui.stateManagement';
-
-export declare const task: taskpool.Task;
-export declare const task2: taskpool2.Task;
-export declare const a: A<string>;
-export declare const a2: A2<taskpool2.Task>;
-
-export declare function testFoo(a: A<string>): A2<taskpool2.Task>;
-export declare class TestClass {
-    v1: taskpool.Task;
-    v2: A<number>;
-    v3: A2<taskpool2.Task>;
+export declare class LocalStorage {
 }

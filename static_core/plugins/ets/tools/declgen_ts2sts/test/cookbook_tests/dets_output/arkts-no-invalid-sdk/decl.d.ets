@@ -15,6 +15,7 @@
  */
 import { Callback as A } from "./@ohos.base";
 import { A as A2 } from "./bridge2";
+import { LocalStorage } from './@ohos.arkui.stateManagement';
 export declare const task: Any;
 export declare const task2: Any;
 export declare const a: A<string>;
