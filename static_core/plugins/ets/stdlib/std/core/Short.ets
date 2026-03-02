@@ -324,13 +324,13 @@ export final class Short extends Integral implements Comparable<Short> {
     /**
      * Converts this object to a string
      *
-     * @param { number } radix the radix base for string representation
+     * @param { int } radix the radix base for string representation
      * @returns { string } result of the conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toString(radix: number): string {
+    public toString(radix: int): string {
         return (new Long(this.value)).toString(radix);
     }
 

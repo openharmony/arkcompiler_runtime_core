@@ -15,6 +15,10 @@
 
 package std.core;
 
+// initialized in _initializerBlock_.ets
+/** Lookup table used to convert integer numbers to strings with radix */
+const digitChars: char[];
+
 /**
  * Represents boxed long value and related operations
  */
@@ -240,37 +244,37 @@ export final class Long extends Integral implements Comparable<Long> {
     /**
      * Converts this object to a string
      *
+     * @param radix the radix base for string representation
+     * 
      * @returns result of the conversion
      */
-    public toString(radix: number): string {
-        if (radix.toInt() < 2 || radix.toInt() > 36) {
-            throw new RangeError('Radix must be between 2 and 36');
+    public toString(radix: int): string {
+        if (radix < 2 || radix > 36) {
+            throw new RangeError('Radix must be between 2 and 36')
         }
         if (this.value == 0) {
-            return '0';
+            return '0'
         }
-        const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-        let val: long = this.value;
-        let negative: boolean = (val < 0);
-        let digitsNum: int = (log(abs(val.toDouble())) / log(radix) + 1).toInt();
-        if (negative) {
-            ++digitsNum;
+
+        // NOTE (igorlegalov): workaround for #26305, replace with 0 when the circular dependency bug is fixed
+        const zero: int = (0.0).toInt()
+        const negative: boolean = this.value < 0
+
+        let digitsNum: int = negative ? 1 : zero
+        for (let val: long = abs(this.value); val > 0; val /= radix) {
+            digitsNum++
         }
-        let data : FixedArray<char> = new FixedArray<char>(digitsNum);
-        let curPlace = digitsNum - 1;
-        while (val != 0) {
-            let remainder = val % radix.toInt();
-            if (negative) {
-                remainder = -remainder;
-            }
-            data[curPlace] = chars.charAt(remainder.toInt());
-            val /= radix.toInt();
-            curPlace -= 1;
+
+        const data: FixedArray<char> = new FixedArray<char>(digitsNum)
+        let i: int = digitsNum - 1
+        for (let val: long = abs(this.value); val > 0; val /= radix) {
+            let remainder: long = val % radix
+            data[i--] = digitChars[remainder.toInt()]
         }
         if (negative) {
-            data[0] = c'-';
+            data[0] = c'-'
         }
-        return new String(data);
+        return new String(data)
     }
 
     /**
