@@ -19,10 +19,6 @@ top_level_class_modifiers:
 
 # Type constraints for generic parameters
 constraints:
-  - type: undefined
-    use: void
-  - type: null
-    use: void
   - type: void
     use: Object
   - type: void
