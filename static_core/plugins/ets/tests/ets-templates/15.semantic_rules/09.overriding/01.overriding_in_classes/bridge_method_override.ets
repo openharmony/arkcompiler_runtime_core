@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-{%- for case in cases %}
+{%- for c in cases %}
 
 /*---
-desc: Test overriding conflict that can't be caught at compile
-tags: [negative]
-expected_error: "{{ case.expected_error }}"
+desc: From 24525. In order for overriding to work, we need to generate bridge methods in Derived.
 ---*/
 
-{{ case.decl }}      
 
-{{ case.call }}
+{{c.decl}}
+
+function main() {
+    {{c.use|indent}}
+}
 
 {%- endfor %}

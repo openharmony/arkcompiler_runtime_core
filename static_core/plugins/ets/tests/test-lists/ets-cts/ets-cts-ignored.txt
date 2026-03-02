@@ -1545,6 +1545,12 @@
 #33242
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_public_in_sub_n.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/private_method_non_compatible_n.ets
+#24525 bridges for overrides for formerly primitive types
+15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_4.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/bridge_method_override_5.ets
+
+#33447 Verifier error on 2 methods in subclass override same method in superclass
+15.semantic_rules/09.overriding/01.overriding_in_classes/several_methods_override_negative.ets
 
 #28235 Constructor Names not yet work
 15.semantic_rules/09.overriding/constructor_no_override_1.ets
@@ -1567,10 +1573,10 @@
 15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_positive_30.ets
 
 #31865 verifier error on conflicting method implementations
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_runtime_negative_0.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_runtime_negative_1.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_runtime_negative_2.ets
-15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_runtime_negative_3.ets
+15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_0.ets
+15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_1.ets
+15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_2.ets
+15.semantic_rules/09.overriding/overriding_conflict/deep_inheritance_overriding_generics_3.ets
 
 #32086 overload functions from the same scope
 15.semantic_rules/10.overloading/overload_with_import/function_import_1_source_0.ets
