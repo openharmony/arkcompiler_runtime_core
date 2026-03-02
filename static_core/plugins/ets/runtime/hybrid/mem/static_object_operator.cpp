@@ -116,9 +116,12 @@ size_t StaticObjectOperator::ForEachRefFieldAndGetSize(const common_vm::BaseObje
     return size;
 }
 
-void StaticObjectOperator::ClearRef(common_vm::RefField<> &field) const
+void StaticObjectOperator::ClearRef(common_vm::BaseObject *object, common_vm::RefField<> &field) const
 {
     field.SetTargetObject(nullptr);
+    auto *vm = ark::ets::PandaEtsVM::GetCurrent();
+    auto *referenceProcessor = static_cast<mem::ets::EtsReferenceProcessor *>(vm->GetReferenceProcessor());
+    referenceProcessor->EnqueueReference(reinterpret_cast<ObjectHeader *>(object));
 }
 
 common_vm::BaseObject *StaticObjectOperator::GetForwardingPointer(const common_vm::BaseObject *object) const

@@ -94,7 +94,8 @@ private:
 
     PandaEtsVM *vm_ {nullptr};
     std::atomic<uint32_t> finRegCleanupCoroCount_ {0};
-    PandaList<EtsFinalizationRegistry *> finalizationList_;
+    os::memory::Mutex cleanupMutex_;
+    PandaList<EtsFinalizationRegistry *> finalizationList_ GUARDED_BY(cleanupMutex_);
 };
 }  // namespace ark::ets
 

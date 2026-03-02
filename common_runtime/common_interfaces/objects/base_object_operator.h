@@ -48,7 +48,7 @@ public:
     virtual size_t ForEachRefFieldAndGetSize(const BaseObject *object, const RefFieldVisitor &visitor,
                                              const RefFieldVisitor &weakFieldHandler) const = 0;
     // Clear the field
-    virtual void ClearRef(RefField<> &field) const = 0;
+    virtual void ClearRef(BaseObject *object, RefField<> &field) const = 0;
     // Get forwarding pointer.
     virtual BaseObject *GetForwardingPointer(const BaseObject *object) const = 0;
     // Set forwarding pointer.

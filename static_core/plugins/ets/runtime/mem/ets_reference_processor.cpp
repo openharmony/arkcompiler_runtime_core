@@ -221,4 +221,16 @@ void EtsReferenceProcessor::EnqueueFinalizer(ark::ets::EtsWeakReference *weakRef
     }
 }
 
+void EtsReferenceProcessor::ProcessClearedReferences()
+{
+    ASSERT(Coroutine::GetCurrent() != nullptr);
+    weakReferences_.FlushSets();
+    while (!weakReferences_.IsEmpty()) {
+        auto *weakRefObj = weakReferences_.Extract();
+        ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
+        auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
+        EnqueueFinalizer(weakRef);
+    }
+}
+
 }  // namespace ark::mem::ets

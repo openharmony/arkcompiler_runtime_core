@@ -291,7 +291,7 @@ public:
     void SuspendForStw();
 
     // temporary impl to clean GC callback, and need to refact to flip function
-    __attribute__((visibility ("default"))) void HandleJSGCCallback();
+    __attribute__((visibility ("default"))) void HandleGCCallback();
 
     void GcPhaseEnum(GCPhase newPhase);
     void GCPhasePreForward(GCPhase newPhase);

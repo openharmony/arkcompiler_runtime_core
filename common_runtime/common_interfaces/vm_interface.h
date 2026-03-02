@@ -29,6 +29,7 @@ public:
     virtual void UpdateAndSweep(const WeakRefFieldVisitor &visitor) = 0;
     virtual void VisitPreforwardRoots(const RefFieldVisitor &visitor) = 0;
     virtual void UpdateReadBarrierEntrypoint(void *thread, GCPhase phase) = 0;
+    virtual void ProcessFinalizationRegistryCleanup() = 0;
     // Deleted copy operations
     VMInterface(const VMInterface &) = delete;
     VMInterface &operator=(const VMInterface &) = delete;

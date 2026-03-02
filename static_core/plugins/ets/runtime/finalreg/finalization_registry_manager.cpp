@@ -46,7 +46,9 @@ CoroutineWorkerDomain FinalizationRegistryManager::GetCoroDomain(EtsCoroutine *c
     return CoroutineWorkerDomain::GENERAL;
 }
 
-void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
+// NO_THREAD_SAFETY_ANALYSIS is used here because there is no need to lock `finalizationList_` in this method, since
+// this method is not called during the execution of `StartCleanupCoroIfNeeded`.
+NO_THREAD_SAFETY_ANALYSIS void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
 {
     auto workerId = finReg->GetWorkerId();
     auto workerDomain = finReg->GetWorkerDomain();
@@ -72,7 +74,9 @@ void FinalizationRegistryManager::Enqueue(EtsFinalizationRegistry *finReg)
     }
 }
 
-void FinalizationRegistryManager::UpdateAndSweep(const ReferenceUpdater &updater)
+// NO_THREAD_SAFETY_ANALYSIS is used here because there is no need to lock `finalizationList_` in this method, since
+// this method is not called during the execution of `StartCleanupCoroIfNeeded`.
+NO_THREAD_SAFETY_ANALYSIS void FinalizationRegistryManager::UpdateAndSweep(const ReferenceUpdater &updater)
 {
     auto it = finalizationList_.begin();
     while (it != finalizationList_.end()) {
@@ -183,6 +187,7 @@ static std::pair<EtsFinRegNode *, EtsFinRegNode *> CombineLists(EtsFinalizationR
 void FinalizationRegistryManager::StartCleanupCoroIfNeeded(EtsCoroutine *coro)
 {
     ASSERT(coro != nullptr);
+    os::memory::LockHolder lock(cleanupMutex_);
     auto *coroManager = coro->GetCoroutineManager();
     auto currentWorkerId = coro->GetWorker()->GetId();
     auto currentWorkerDomain = GetCoroDomain(coro);
