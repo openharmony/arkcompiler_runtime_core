@@ -172,7 +172,7 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
             if (entityType == EntityType::CLASS) {
                 panda_file::ClassDataAccessor cda(*file_, entityId);
                 auto nameData = file_->GetStringData(cda.GetClassId());
-                std::string className = keyData_.GetAbcStringTable().StringDataToString(nameData);
+                std::string className = StringDataToString(nameData);
                 std::replace(className.begin(), className.end(), '/', '.');
 
                 auto recordType = pandasm::Type::FromDescriptor(className);
@@ -232,7 +232,7 @@ void AbcAnnotationProcessor::ProcessArrayAnnotationElement(std::vector<pandasm::
         if (entityType == EntityType::CLASS) {
             panda_file::ClassDataAccessor cda(*file_, entityId);
             auto nameData = file_->GetStringData(cda.GetClassId());
-            std::string className = keyData_.GetAbcStringTable().StringDataToString(nameData);
+            std::string className = StringDataToString(nameData);
             std::replace(className.begin(), className.end(), '/', '.');
 
             auto recordType = pandasm::Type::FromDescriptor(className);
