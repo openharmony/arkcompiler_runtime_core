@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+Copyright (c) 2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,14 +15,14 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: Ambient Function declarations
-files: ['./function_declarations1.ets']
+desc: Ambient variable declarations implementations
+files: ['./variable_declarations1.ets']
 ---*/
 
-import { fun, foo, bar, baz } from './function_declarations1.d'
+import { {{c.decl}} } from './variable_declarations1.d'
 
 function main() {
-   {{c.use|indent}}
+  {{c.use|indent}}
 }
 
 {% endfor %}
