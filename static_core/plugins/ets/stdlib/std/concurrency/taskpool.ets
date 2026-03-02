@@ -99,7 +99,10 @@ export namespace taskpool {
 
                 const internalTask = InternalTask.of(task);
                 this.currentPriority = internalTask?.priority;
-                this.currentTasks.add(task);
+                ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
+                    const curCount: int | undefined = this.currentTasks.get(task);
+                    this.currentTasks.set(task, curCount == undefined ? 1 : curCount + 1);
+                });
                 let count = getNewTaskTotalCount();
                 this.idleTime = 0;
 
@@ -190,7 +193,11 @@ export namespace taskpool {
                 ConcurrencyHelpers.lockGuard(workersMutex, () => {
                     let idleWorkersNum: int = 0;
                     for (let w : GlobalQueueWorker of workers) {
-                        if(w.currentTasks.size.toInt() === 0) {
+                        let currentTasksSize: int = 0;
+                        ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
+                            currentTasksSize = w.currentTasks.size.toInt();
+                        });
+                        if (currentTasksSize === 0) {
                             idleWorkersNum++;
                         }
                     }
@@ -219,7 +226,11 @@ export namespace taskpool {
                     let runningWorkersNum: int = 0;
                     ConcurrencyHelpers.lockGuard(workersMutex, () => {
                         for (let w: GlobalQueueWorker of workers) {
-                            if(w.currentTasks.size.toInt() !== 0) {
+                            let currentTasksSize: int = 0;
+                            ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
+                                currentTasksSize = w.currentTasks.size.toInt();
+                            });
+                            if (currentTasksSize !== 0) {
                                 runningWorkersNum++;
                             }
                         }
@@ -355,7 +366,8 @@ export namespace taskpool {
         public isActive: boolean = true;
         public workerId: int = -1;
         public currentPriority?: Priority = Priority.MEDIUM;
-        public currentTasks: Set<Task> = new Set<Task>();
+        public currentTasks: Map<Task, int> = new Map<Task, int>();
+        public currentTasksMutex: Object = ConcurrencyHelpers.mutexCreate();
         public idleTime: long = 0;
 
         // Start time of the current synchronous execution in this worker thread.
@@ -694,8 +706,15 @@ export namespace taskpool {
                         allTasks.set(this.task, count - 1);
                     }
                     if (currentWorker !== undefined) {
-                        currentWorker!.currentTasks.delete(this.task);
-                        currentWorker!.currentPriority = undefined;
+                        ConcurrencyHelpers.lockGuard(currentWorker!.currentTasksMutex, () => {
+                            const curCount: int | undefined = currentWorker!.currentTasks.get(this.task);
+                            if (curCount == undefined || curCount <= 1) {
+                                currentWorker!.currentTasks.delete(this.task);
+                            } else {
+                                currentWorker!.currentTasks.set(this.task, curCount - 1);
+                            }
+                            currentWorker!.currentPriority = undefined;
+                        });
                     }
 
                     // Check if task timed out during execution
@@ -2296,19 +2315,19 @@ export namespace taskpool {
                 const threadInfo: ThreadInfo = new ThreadInfo();
                 threadInfo.tid = worker.workerId;
                 threadInfo.priority = worker!.currentPriority;
-                let tasks = worker.currentTasks;
-                const tasksCount = tasks.size.toInt();
-                if (tasksCount == 0) {
-                    threadInfos.push(threadInfo);
-                    return;
-                }
-                const taskIds: int[] = new int[tasksCount];
-                let currentIndex: int = 0;
-                tasks.forEach((task: Task) => {
-                    taskIds[currentIndex] = task.taskId;
-                    currentIndex++;
+                ConcurrencyHelpers.lockGuard(worker.currentTasksMutex, () => {
+                    const tasksCount = worker.currentTasks.size.toInt();
+                    if (tasksCount == 0) {
+                        return;
+                    }
+                    const taskIds: int[] = new int[tasksCount];
+                    let currentIndex: int = 0;
+                    worker.currentTasks.forEach((_count: int, task: Task) => {
+                        taskIds[currentIndex] = task.taskId;
+                        currentIndex++;
+                    });
+                    threadInfo.taskIds = taskIds;
                 });
-                threadInfo.taskIds = taskIds;
                 threadInfos.push(threadInfo);
             })
         }
@@ -2377,13 +2396,21 @@ export namespace taskpool {
     function getTask(taskId: int, taskName?: string): Task | undefined {
         let task: Task | undefined = undefined;
         let workerId = CoroutineExtras.getWorkerId();
-        let currentWorker = filter<GlobalQueueWorker>(workers, (worker: GlobalQueueWorker) => worker.workerId == workerId);
+        // When executing a task triggers worker expansion, not using locks can lead to reading "dirty" workers information.
+        let currentWorker: Array<GlobalQueueWorker> = [];
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            currentWorker = filter<GlobalQueueWorker>(workers, (worker: GlobalQueueWorker) => worker.workerId == workerId);
+        });
         if (currentWorker.length != 0) {
             // if currentWorker exists, we can only get one worker
-            filter<Task>(currentWorker[0].currentTasks, (t: Task) => t.taskId == taskId).some((t: Task)=>{
-                task = t;
-                return true;
-            })
+            ConcurrencyHelpers.lockGuard(currentWorker[0].currentTasksMutex, () => {
+                for (let t: Task of currentWorker[0].currentTasks.keys()) {
+                    if (t.taskId == taskId) {
+                        task = t;
+                        break;
+                    }
+                }
+            });
         }
         if (taskName !== undefined && task !== undefined && task!.name != taskName) {
             return undefined;

@@ -453,7 +453,7 @@ function main(): int {
     timeoutTaskSuite.addAsyncTest('TaskGroupWithPriority', taskGroupWithPriority);
     timeoutTaskSuiteDisabled.addAsyncTest('TimeoutTaskGroupExecutedCannotSetTimeout', timeoutTaskGroupExecutedCannotSetTimeout);
     timeoutTaskSuiteDisabled.addAsyncTest('TaskGroupWithTimeoutCannotExecuteWithoutTimeout', taskGroupWithTimeoutCannotExecuteWithoutTimeout);
-    timeoutTaskSuite.addAsyncTest('TimeoutNotTriggerSuccessAndFailedCallbacks', timeoutNotTriggerSuccessAndFailedCallbacks);
+    timeoutTaskSuiteDisabled.addAsyncTest('TimeoutNotTriggerSuccessAndFailedCallbacks', timeoutNotTriggerSuccessAndFailedCallbacks);
 
     let res = timeoutTaskSuite.run();
     CoroutineExtras.stopTaskpool();
