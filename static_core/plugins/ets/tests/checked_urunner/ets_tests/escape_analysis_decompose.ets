@@ -14,11 +14,12 @@
  */
 
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
-//! RUN_FRONTEND            options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
+//! RUN_FRONTEND options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=false"
 
 //! CHECKER      JIT escape analysis decompose
 //! SKIP_IF      @architecture == "arm32"
-//! RUN          force_jit: true, options: "--compiler-regex=.*next[0-9]* --compiler-inlining=true", entry: "escape_analysis_decompose.ETSGLOBAL::main"
+//! RUN          force_jit: true, options: "--compiler-regex=.*next[0-9]* --compiler-inlining=true",
+//!              entry: "escape_analysis_decompose.ETSGLOBAL::main"
 //!
 //! EVENT        /DeoptimizationReason,escape_analysis_decompose.ETSGLOBAL::__noinline__next2,IFIMM_TRY/
 //! EVENT        /Deoptimization,escape_analysis_decompose.ETSGLOBAL::__noinline__next2,4,IFRAME/

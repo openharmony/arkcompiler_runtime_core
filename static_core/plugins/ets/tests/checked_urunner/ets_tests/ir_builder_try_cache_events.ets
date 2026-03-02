@@ -14,7 +14,8 @@
  */
 
 //! CHECKER      IrBuilder try-cache is used only for try/catch path (JIT)
-//! RUN          force_jit: true, options: "--compiler-regex='ir_builder_try_cache_events\\.ETSGLOBAL::(main|withTry|withoutTry)'", \
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='ir_builder_try_cache_events\\.ETSGLOBAL::(main|withTry|withoutTry)'",
 //!              entry: "ir_builder_try_cache_events.ETSGLOBAL::main"
 //! EVENT        /IrBuilderTryCache,ir_builder_try_cache_events\.ETSGLOBAL::withTry,PUT/
 //! EVENT_NEXT   /IrBuilderTryCache,ir_builder_try_cache_events\.ETSGLOBAL::withTry,GET/

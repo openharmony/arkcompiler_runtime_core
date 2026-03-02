@@ -14,7 +14,8 @@
  */
 
 //! CHECKER      IR Builder inlining double
-//! RUN          force_jit: true, options: "--compiler-regex='ets_isFinite.*checkIsfiniteF64.*'", entry: "ets_isFinite.ETSGLOBAL::checkIsfiniteF64"
+//! RUN          force_jit: true, options: "--compiler-regex='ets_isFinite.*checkIsfiniteF64.*'",
+//!              entry: "ets_isFinite.ETSGLOBAL::checkIsfiniteF64"
 //! METHOD       "ets_isFinite.ETSGLOBAL::checkIsfiniteF64"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Bitcast/
@@ -36,7 +37,8 @@
 //! RUN          entry: "ets_isFinite.ETSGLOBAL::checkIsfiniteF64"
 
 //! CHECKER      IR Builder inlining float
-//! RUN          force_jit: true, options: "--compiler-regex='ets_isFinite.*checkIsfiniteF32.*'", entry: "ets_isFinite.ETSGLOBAL::checkIsfiniteF32"
+//! RUN          force_jit: true, options: "--compiler-regex='ets_isFinite.*checkIsfiniteF32.*'",
+//!              entry: "ets_isFinite.ETSGLOBAL::checkIsfiniteF32"
 //! METHOD       "ets_isFinite.ETSGLOBAL::checkIsfiniteF32"
 //! PASS_AFTER   "IrBuilder"
 //! INST         /Bitcast/
@@ -59,23 +61,47 @@
 
 
 function checkIsfiniteF64() : int {
-    if (Double.isFinite(Double.NaN)) return 11;
-    if (Double.isFinite(Double.POSITIVE_INFINITY)) return 12;
-    if (Double.isFinite(Double.NEGATIVE_INFINITY)) return 13;
-    if (!Double.isFinite(Double.MAX_VALUE)) return 14;
-    if (!Double.isFinite(Double.MIN_VALUE)) return 15;
-    if (!Double.isFinite(1.2345)) return 16;
+    if (Double.isFinite(Double.NaN)) {
+        return 11;
+    }
+    if (Double.isFinite(Double.POSITIVE_INFINITY)) {
+        return 12;
+    }
+    if (Double.isFinite(Double.NEGATIVE_INFINITY)) {
+        return 13;
+    }
+    if (!Double.isFinite(Double.MAX_VALUE)) {
+        return 14;
+    }
+    if (!Double.isFinite(Double.MIN_VALUE)) {
+        return 15;
+    }
+    if (!Double.isFinite(1.2345)) {
+        return 16;
+    }
 
     return 0;
 }
 
 function checkIsfiniteF32() : int {
-    if (Float.isFinite(Float.NaN)) return 1;
-    if (Float.isFinite(Float.POSITIVE_INFINITY)) return 2;
-    if (Float.isFinite(Float.NEGATIVE_INFINITY)) return 3;
-    if (!Float.isFinite(Float.MAX_VALUE)) return 4;
-    if (!Float.isFinite(Float.MIN_VALUE)) return 5;
-    if (!Float.isFinite(1.2345f)) return 6;
+    if (Float.isFinite(Float.NaN)) {
+        return 1;
+    }
+    if (Float.isFinite(Float.POSITIVE_INFINITY)) {
+        return 2;
+    }
+    if (Float.isFinite(Float.NEGATIVE_INFINITY)) {
+        return 3;
+    }
+    if (!Float.isFinite(Float.MAX_VALUE)) {
+        return 4;
+    }
+    if (!Float.isFinite(Float.MIN_VALUE)) {
+        return 5;
+    }
+    if (!Float.isFinite(1.2345f)) {
+        return 6;
+    }
 
     return 0;
 }

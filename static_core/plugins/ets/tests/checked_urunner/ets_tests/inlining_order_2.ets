@@ -62,22 +62,22 @@
 //!#    (Inlining in catch blocks is not supported)
 
 function cold(): int {
- return 30; 
+    return 30; 
 }
 function if4th(i:int):int {
- return -i; 
+    return -i; 
 }
 function ifNot4th(i:int):int {
- return -i; 
+    return -i; 
 }
 function if2nd(i:int):int {
- return -i; 
+    return -i; 
 }
 function hotCatch(i:int):int {
- return -i; 
+    return -i; 
 }
 function hot(i:int):int {
- return -i; 
+    return -i; 
 }
 
 function testLoops(): void {

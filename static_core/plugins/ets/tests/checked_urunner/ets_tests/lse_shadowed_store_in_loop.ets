@@ -14,7 +14,9 @@
  */
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash
-//! RUN          force_jit: true, options: "--compiler-regex='.*testLoopStore.*'", entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
+//! RUN          force_jit: true,
+//!              options: "--compiler-regex='.*testLoopStore.*' --compiler-inlining-blacklist='leakRef'",
+//!              entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
 //! INST_COUNT   /StoreObject.*Container\.x/, 3
@@ -23,7 +25,7 @@
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT)
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PAOC     options: "--compiler-regex='.*testLoopStore.*'"
+//! RUN_PAOC     options: "--compiler-regex='.*testLoopStore.*' --compiler-inlining-blacklist='leakRef'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
 //! INST_COUNT   /StoreObject.*Container\.x/, 3
@@ -33,7 +35,7 @@
 
 //! CHECKER      Check LSE eliminates shadowed store in loop without crash (AOT-PGO)
 //! SKIP_IF      @architecture == "arm32"
-//! RUN_PGO_PROF entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main"
+//! RUN_PGO_PROF entry: "lse_shadowed_store_in_loop.ETSGLOBAL::main --compiler-inlining-blacklist='leakRef'"
 //! RUN_PGO_PAOC options: "--compiler-regex='.*testLoopStore.*'"
 //! METHOD       "lse_shadowed_store_in_loop.ETSGLOBAL::testLoopStore"
 //! PASS_BEFORE  "LSE"
@@ -54,11 +56,11 @@ class Container {
     x: A | undefined
 }
 
-function __noinline__leakRef(c: Container) {}
+function leakRef(c: Container) {}
 
 function testLoopStore(iters: int, cProvider: () => Container): Container {
     let c = new Container()
-    __noinline__leakRef(c)  // Make sure c is not removed by PEA
+    leakRef(c)  // Make sure c is not removed by PEA
     for (let i = 0; i < iters; i++) {
         const newC = cProvider()
         c.x = new A(iters)  // LSE removes this shadowed store; don't crash!

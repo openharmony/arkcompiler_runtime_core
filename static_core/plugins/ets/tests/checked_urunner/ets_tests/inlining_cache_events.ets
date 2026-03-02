@@ -97,7 +97,7 @@ function mainNegative(): int {
 }
 
 function mainExternal(): int {
-    let arr: Array<int> = [1, 2, 3, 4];
+    let arr: int[] = [1, 2, 3, 4];
     arr.reverse();
     arr.reverse();
     return 0;

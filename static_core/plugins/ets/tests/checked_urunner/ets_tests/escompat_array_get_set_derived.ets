@@ -17,7 +17,8 @@
 //! RUN_FRONTEND            options: "--ets-strings-concat=false"
 
 //! CHECKER JIT IR Builder, MyArray.get/set shall not be inlined as Intrinsics.EscompatArrayGet/Set in IRBuilder pass.
-//! RUN     force_jit: true, options: "--compiler-regex='.*(test1|array[GS]et|MyArray).*'", entry: "escompat_array_get_set_derived.ETSGLOBAL::test1"
+//! RUN     force_jit: true, options: "--compiler-regex='.*(test1|array[GS]et|MyArray).*'",
+//!         entry: "escompat_array_get_set_derived.ETSGLOBAL::test1"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::arrayGet"
 //! PASS_AFTER "IrBuilder"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
@@ -55,7 +56,8 @@
 //! RUN        entry: "escompat_array_get_set_derived.ETSGLOBAL::test1"
 
 //! CHECKER JIT IR Builder, Inlining & static devirtualization as std.core.Array.get/set.
-//! RUN     force_jit: true, options: "--compiler-regex='.*(test2|array[GS]et|MyArray).*'", entry: "escompat_array_get_set_derived.ETSGLOBAL::test2"
+//! RUN     force_jit: true, options: "--compiler-regex='.*(test2|array[GS]et|MyArray).*'",
+//!         entry: "escompat_array_get_set_derived.ETSGLOBAL::test2"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::test2"
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/
@@ -79,7 +81,8 @@
 //! RUN        entry: "escompat_array_get_set_derived.ETSGLOBAL::test2"
 
 //! CHECKER JIT IR Builder, Inlining & static devirtualization as MyArray.get/set.
-//! RUN     force_jit: true, options: "--compiler-regex='.*(test3|array[GS]et|MyArray).*'", entry: "escompat_array_get_set_derived.ETSGLOBAL::test3"
+//! RUN     force_jit: true, options: "--compiler-regex='.*(test3|array[GS]et|MyArray).*'",
+//!         entry: "escompat_array_get_set_derived.ETSGLOBAL::test3"
 //! METHOD  "escompat_array_get_set_derived.ETSGLOBAL::test3"
 //! PASS_AFTER "Inline"
 //! INST_NOT   /Intrinsic.EscompatArrayGet/

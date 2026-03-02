@@ -14,7 +14,8 @@
  */
 
 //! CHECKER     Verify that array method calls remain non-inlined in a custom class extending Map.
-//! RUN         force_jit: true, options: "--compiler-regex='.*test.*'", entry: "ets_escompat_map_no_inline_array_calls.ETSGLOBAL::test"
+//! RUN         force_jit: true, options: "--compiler-regex='.*test.*'",
+//!             entry: "ets_escompat_map_no_inline_array_calls.ETSGLOBAL::test"
 //! METHOD      "ets_escompat_map_no_inline_array_calls.ETSGLOBAL::test"
 //!
 //! PASS_BEFORE "Inline"

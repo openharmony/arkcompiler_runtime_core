@@ -51,14 +51,14 @@ class Error0 extends Error {}
 class Error1 extends Error {}
 
 function throwErrors(i: int): void {
- switch (i) {
-   case 0:
+  switch (i) {
+    case 0:
       throw new Error0();
-   case 1:
-     throw new Error1();
-   default:
-     break;
- }
+    case 1:
+      throw new Error1();
+    default:
+      break;
+  }
 }
 
 class MultipleCatch {
