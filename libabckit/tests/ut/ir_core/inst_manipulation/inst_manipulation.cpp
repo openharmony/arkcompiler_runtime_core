@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <fstream>
+#include <cstdlib>
 
 #include "libabckit/c/abckit.h"
 #include "adapter_static/ir_static.h"

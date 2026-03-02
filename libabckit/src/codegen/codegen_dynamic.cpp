@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "libabckit/src/adapter_dynamic/runtime_adapter_dynamic.h"
 #include "generated/generate_ecma.inl"
 #include "static_core/runtime/include/coretypes/tagged_value.h"
+#include <limits>
 
 namespace libabckit {
 
@@ -142,9 +143,45 @@ void CodeGenDynamic::EmitJump(const BasicBlock *bb)
     result_.push_back(PandasmWrapper::Create_JMP_Wrapper(LabelName(sucBb->GetId())));
 }
 
-void CodeGenDynamic::AddLineNumber([[maybe_unused]] const Inst *inst, [[maybe_unused]] const size_t idx) {}
+void CodeGenDynamic::AddLineNumber(const Inst *inst, const size_t idx)
+{
+    if (idx >= result_.size()) {
+        return;
+    }
+    const auto debugPos = ResolveDebugPosition(inst, idx);
+    result_[idx].insDebug.SetLineNumber(debugPos.first);
+}
 
-void CodeGenDynamic::AddColumnNumber([[maybe_unused]] const Inst *inst, [[maybe_unused]] const uint32_t idx) {}
+void CodeGenDynamic::AddColumnNumber(const Inst *inst, const uint32_t idx)
+{
+    if (idx >= result_.size()) {
+        return;
+    }
+    const auto debugPos = ResolveDebugPosition(inst, idx);
+    result_[idx].insDebug.SetColumnNumber(debugPos.second);
+}
+
+std::pair<size_t, uint32_t> CodeGenDynamic::ResolveDebugPosition(const Inst *inst, size_t idx) const
+{
+    if (irInterface_ != nullptr && inst != nullptr && inst->GetPc() != ark::compiler::INVALID_PC) {
+        size_t line = 0;
+        uint32_t column = 0;
+        if (irInterface_->TryGetLineColumnByPc(static_cast<size_t>(inst->GetPc()), &line, &column)) {
+            return {line, column};
+        }
+    }
+
+    // for newly inserted IR instructions without original pc:
+    // inherit nearest previous emitted instruction with known source position.
+    for (size_t prev = idx; prev > 0; --prev) {
+        const auto &dbg = result_[prev - 1].insDebug;
+        if (dbg.lineNumber != 0 || dbg.columnNumber != 0) {
+            return {dbg.lineNumber, dbg.columnNumber};
+        }
+    }
+
+    return {std::numeric_limits<size_t>::max(), std::numeric_limits<uint32_t>::max()};
+}
 
 void CodeGenDynamic::EncodeSpillFillData(const ark::compiler::SpillFillData &sf)
 {

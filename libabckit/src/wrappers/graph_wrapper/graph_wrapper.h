@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,12 @@
 #include "libabckit/c/statuses.h"
 #include "libabckit/src/ir_impl.h"
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "libabckit/src/wrappers/abcfile_wrapper.h"
 #include "libabckit/src/wrappers/pandasm_wrapper.h"
@@ -31,10 +34,14 @@ namespace libabckit {
 
 class GraphWrapper {
 public:
+    using LineColumnPair = std::pair<size_t, uint32_t>;
     static void CreateGraphWrappers(AbckitGraph *graph);
     static AbckitGraph *BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface *irInterface, AbckitFile *file,
                                           uint32_t methodOffset);
-    static void *BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName);
+    static void *BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName,
+                                  std::unordered_map<size_t, LineColumnPair> *pcToLineColumn = nullptr);
+    static void BuildPcToLineColumnMap(AbckitGraph *graph, const std::vector<LineColumnPair> &lineColumnPerIns,
+                                       std::unordered_map<size_t, LineColumnPair> &outMap);
     static void DestroyGraphDynamic(AbckitGraph *graph);
 };
 

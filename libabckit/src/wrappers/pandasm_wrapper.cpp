@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ void FunctionWrapper::Update()
     func->slots_num = slotsNum;
     for (auto insWrap : ins) {
         auto insDebug = pandasm::debuginfo::Ins(insWrap.insDebug.lineNumber);
+        insDebug.SetColumnNumber(insWrap.insDebug.columnNumber);
         auto opcode = OpcFromName(insWrap.opcode);
         auto regs = std::move(insWrap.regs);
         auto ids = std::move(insWrap.ids);
