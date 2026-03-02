@@ -173,13 +173,16 @@ export class Object {
     /**
      * Converts this object to locale-specific string representation
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings.
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } A locale-specific string representing the object.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): String {
-        return reflect.Value.of(this).toLocaleString()
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
+        return this.toString()
     }
 
     /**

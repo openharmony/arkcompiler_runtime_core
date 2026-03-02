@@ -1261,50 +1261,25 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
     /**
      * Converts Uint8ClampedArray to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Uint8ClampedArray.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Uint8ClampedArray to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts Uint8ClampedArray to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i).toDouble()).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1).toDouble()).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -3007,50 +2982,25 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Uint8Array to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Uint8Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Uint8Array to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts Uint8Array to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i).toDouble()).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1).toDouble()).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -4734,50 +4684,25 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Uint16Array to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Uint16Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Uint16Array to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts Uint16Array to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i).toDouble()).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1).toDouble()).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -6501,50 +6426,25 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Uint32Array to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("Uint32Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts Uint32Array to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts Uint32Array to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append((this.getUnsafe(i).toDouble()).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append((this.getUnsafe(this.lengthInt - 1).toDouble()).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -8286,50 +8186,25 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
     /**
      * Converts BigUint64Array to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("BigUint64Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts BigUint64Array to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts BigUint64Array to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new BigInt(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(new BigInt(this.getUnsafe(0)).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(new BigInt(this.getUnsafe(i)).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**

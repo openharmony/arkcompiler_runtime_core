@@ -565,10 +565,6 @@ export final class ClassValue extends reflect.Value {
     public override toString(): string {
         return "[object Object]"
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -696,19 +692,18 @@ export final class ArrayValue extends reflect.Value {
         return res.toString()
     }
 
-    public override toLocaleString(): string {
-        const len = this.getLength()
-        if (len == 0) {
-            return ""
-        }
-        let res = new StringBuilder()
-        for (let i = 0; i < len; i++) {
-            res.append(this.getElement(i).toLocaleString())
-            if (i != len - 1) {
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
+        const len = this.getLength();
+        if (len > 0) {
+            const res = new StringBuilder()
+            res.append(this.getElement(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < len; ++i) {
                 res.append(",")
+                res.append(this.getElement(i).toLocaleString(locales, options))
             }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 }
 
@@ -735,10 +730,6 @@ export final class LambdaValue extends reflect.Value {
 
     public override toString(): string {
         return "Cannot get source code of function";
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }
 
@@ -773,10 +764,6 @@ export final class BooleanValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -809,10 +796,6 @@ export final class ByteValue extends reflect.Value {
 
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }
 
@@ -847,10 +830,6 @@ export final class ShortValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -883,10 +862,6 @@ export final class CharValue extends reflect.Value {
 
     public override toString(): string {
         return new StringBuilder("\"").append(this.data).append("\"").toString()
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }
 
@@ -921,10 +896,6 @@ export final class IntValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -957,10 +928,6 @@ export final class FloatValue extends reflect.Value {
 
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }
 
@@ -995,10 +962,6 @@ export final class DoubleValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -1032,10 +995,6 @@ export final class LongValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -1065,10 +1024,6 @@ export final class StringValue extends reflect.Value {
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -1093,10 +1048,6 @@ export final class NullValue extends reflect.Value {
 
     public override toString(): string {
         return NullType.REF.toString()
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }
 
@@ -1123,10 +1074,6 @@ export final class UndefinedValue extends reflect.Value {
     public override toString(): string {
         return UndefinedType.REF.toString()
     }
-
-    public override toLocaleString(): string {
-        return this.toString()
-    }
 }
 
 /**
@@ -1151,9 +1098,5 @@ export final class VoidValue extends reflect.Value {
 
     public override toString(): string {
         return VoidType.REF.toString()
-    }
-
-    public override toLocaleString(): string {
-        return this.toString()
     }
 }

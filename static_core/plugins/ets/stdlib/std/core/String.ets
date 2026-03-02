@@ -1244,19 +1244,6 @@ export final class String extends Object implements Comparable<String>, Iterable
     }
 
     /**
-     * The `toString()` method returns the string representation of the given String
-     *     in the form of a copy of the original object.
-     *
-     * @returns { String } a copy of the original String
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override toLocaleString(): String {
-        return this;
-    }
-
-    /**
      * The at() method takes an integer value and returns a new String consisting of the single UTF-16 code unit located
      *     at the specified offset. This method allows for positive and negative integers.
      *     Negative integers count back from the last string character.

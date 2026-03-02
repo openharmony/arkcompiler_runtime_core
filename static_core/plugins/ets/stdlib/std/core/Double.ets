@@ -22,7 +22,7 @@ package std.core;
 
 /**
  * Represents boxed double value and related operations
- * 
+ *
  * @extends Floating
  * @implements Comparable<Double>
  * @syscap SystemCapability.Utils.Lang
@@ -58,7 +58,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * Constructs a new Double instance from BigInt
      *
-     * @param { BigInt } value 
+     * @param { BigInt } value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
@@ -195,7 +195,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * Size of this type in bits
-     * 
+     *
      * @type { byte }
      * @readonly
      * @static
@@ -255,7 +255,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * Number of significant precision bits in this floating type
-     * 
+     *
      * @type { byte }
      * @readonly
      * @static
@@ -268,7 +268,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * Minimal possible difference between two double values.
      * For double (IEEE-754 binary64) it is 2^(-52) and its bit representation is 0x3cb0000000000000.
-     * 
+     *
      * @type { double }
      * @readonly
      * @static
@@ -461,9 +461,9 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * toString(d: double, r: int): String -- returns a string representation of d by radix r
-     * 
-     * @param { double } d 
-     * @param { int } r 
+     *
+     * @param { double } d
+     * @param { int } r
      * @returns { String } return the string value
      * @static
      * @syscap SystemCapability.Utils.Lang
@@ -489,7 +489,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * toString
      *
-     * @param { int } r 
+     * @param { int } r
      * @returns { String } return the string value
      * @static
      * @syscap SystemCapability.Utils.Lang
@@ -503,7 +503,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * toString
      *
-     * @param { Number } d 
+     * @param { Number } d
      * @returns { String } return the string value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -526,30 +526,39 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Without an argument method returns just toString value
+     * Converts this object to a locale-specific string representation
      *
-     * @returns { String } result of the conversion
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { Intl.NumberFormatOptions } [ options ] An object with some or all of the properties of the
+     *     Intl.NumberFormat options
+     * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): String {
-        return new Intl.NumberFormat().format(this.value)
+    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions): String {
+        const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
+        return formatter.format(this.value)
     }
 
     /**
-     * toLocaleString
+     * Converts this object to a locale-specific string representation
      *
-     * @param { string | Intl.Locale | (string | Intl.Locale)[] } [locales] set intl locales
-     * @param { Intl.NumberFormatOptions } [options] set intl param options
-     * @returns { string } result of the conversion
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with some or all of the properties of the
+     *     Intl.NumberFormat options
+     * @returns { String } result of the locale-specific conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(locales?: string | Intl.Locale | (string | Intl.Locale)[], options?: Intl.NumberFormatOptions): string {
-        const formatter = new Intl.NumberFormat(Intl.intlLocalesToLanguageTags(locales), options)
-        return formatter.format(this.value)
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
+        if (options instanceof Intl.NumberFormatOptions) {
+            return this.toLocaleString(locales, options)
+        }
+        return this.toLocaleString(locales, undefined)
     }
 
     /**
@@ -568,7 +577,7 @@ export final class Double extends Floating implements Comparable<Double> {
     }
 
     /**
-     * Checks for equality this instance with provided object, 
+     * Checks for equality this instance with provided object,
      * treated as a Double Returns false if type of provided object is not the same as this type
      *
      * @param { Any } other object to be checked against
@@ -839,7 +848,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * parseInt(String) parses from String an integer of radix 10
-     * 
+     *
      * @returns the result of parsing
      * @param { String } s the string to convert
      * @returns { double } the result of parsing
@@ -851,7 +860,7 @@ export final class Double extends Floating implements Comparable<Double> {
     public static parseInt(s: String): double {
         return Double.parseIntCore(s, 0);
     }
-    
+
     /**
      * parseInt(String, int) parses from String an integer of specified radix
      * If args ('10', 1) -> thrown ArgumentOutOfRangeError, ('10', 37) -> thrown ArgumentOutOfRangeError
@@ -859,7 +868,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If args ('10', 10) -> 10, ('10', 0) -> 10
      * If args ('ff', 16) -> 255
      * etc.
-     * 
+     *
      * @param { String } s the string to convert
      * @param { int } r the radix of conversion; should be [2, 36]; 0 assumed to be 10
      * @returns { double } the result of parsing
@@ -935,7 +944,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * toExponential() returns std.core.String representing the underlying double in exponential notation
      *
-     * @param { double } [ d ] 
+     * @param { double } [ d ]
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -954,7 +963,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(1.01); d.toPrecision(4.7) -> '1.010'
      * If d = new Double(0.25); d.toPrecision(0) -> thrown ArgumentOutOfRangeError
      * If d = new Double(12345.123455); d.toPrecision(10) -> '12345.12346'
-     * 
+     *
      * @param { double } d precision (rounded to nearest integer); must be in [1, 100]
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
@@ -966,7 +975,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * toPrecision() returns std.core.String representing the underlying double in exponential notation
      *     basically, if toPrecision called with no argument it's just toString according to spec
-     * 
+     *
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -985,7 +994,7 @@ export final class Double extends Floating implements Comparable<Double> {
      * If d = new Double(Double.POSITIVE_INFINITY); d.toFixed(3) -> 'Infinity'
      * If d = new Double(Double.NaN); d.toFixed(3) -> 'NaN'
      * If d = new Double(0.25); d.toFixed(200) -> thrown ArgumentOutOfRangeError
-     * 
+     *
      * @param { double } d fixed size (integer part); must be in [0, 100]
      * @returns { String } the result of conversion
      * @syscap SystemCapability.Utils.Lang
@@ -1009,7 +1018,7 @@ export final class Double extends Floating implements Comparable<Double> {
     /**
      * toFixed(double) returns std.core.String representing the underlying double using fixed-point notation
      *
-     * @param { double } [ d ] 
+     * @param { double } [ d ]
      * @returns { String }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1024,7 +1033,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * Converts bit representation to corresponding IEEE-754 floating point representation
-     * 
+     *
      * @param { long } bits bits to convert
      * @returns { double } converted value
      * @static
@@ -1036,7 +1045,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
     /**
      * Converts IEEE-754 floating point representation to corresponding bit representation
-     * 
+     *
      * @param { double } val value to convert
      * @returns { long } bit representation
      * @static
@@ -1069,7 +1078,7 @@ export final class Double extends Floating implements Comparable<Double> {
 
 /**
  * `Number' values represent floating-point numbers like 6 or -3.14
- * 
+ *
  * @typedef { Double } Number
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel

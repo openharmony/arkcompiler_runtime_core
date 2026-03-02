@@ -425,7 +425,7 @@ function ecmaInLeapYear(year: int): byte {
 
 /**
  * Date JS API-compatible class
- * 
+ *
  * @syscap SystemCapability.Utils.Lang
  * @FaAndStageModel
  * @since 24
@@ -493,7 +493,7 @@ export class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
-     * 
+     *
      * @throws {RangeError} if the argument doesn't represent a valid date.
      */
     private static parseDateFromString(dateStr: String): long {
@@ -546,10 +546,10 @@ export class Date {
     }
 
     /**
-     * `Date` constructor. NOTE: Dates before `1921-01-01T00:00:00 GMT` 
+     * `Date` constructor. NOTE: Dates before `1921-01-01T00:00:00 GMT`
      * can be represented as UTC milliseconds in different ways then TS do.
      *
-     * @param { long | string | Date } value 
+     * @param { long | string | Date } value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
@@ -611,10 +611,10 @@ export class Date {
     }
 
     /**
-     * The `isDateValid()` method checks if constructed date is maximum of 
+     * The `isDateValid()` method checks if constructed date is maximum of
      * ±100,000,000 (one hundred million) days relative to January 1,
-     * 1970 UTC (that is, April 20, 271821 BCE ~ September 13, 275760 CE) 
-     * can be represented by the standard Date object 
+     * 1970 UTC (that is, April 20, 271821 BCE ~ September 13, 275760 CE)
+     * can be represented by the standard Date object
      * (equivalent to ±8,640,000,000,000,000 milliseconds).
      *
      * @returns { boolean } return current date is valid date
@@ -640,7 +640,7 @@ export class Date {
 
     /**
      * The `now()` static method returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of 
+     * which is defined as the midnight at the beginning of
      * January 1, 1970, UTC. which is defined as the midnight at the beginning of January 1, 1970, UTC.
      *
      * @returns { long }
@@ -654,7 +654,7 @@ export class Date {
     /**
      * Gets local time offset.
      *
-     * @param { long } ms 
+     * @param { long } ms
      * @returns { long }
      * @static
      * @syscap SystemCapability.Utils.Lang
@@ -666,7 +666,7 @@ export class Date {
     /**
      * Gets time zone name.
      *
-     * @param { long } ms 
+     * @param { long } ms
      * @returns { String }
      * @static
      * @syscap SystemCapability.Utils.Lang
@@ -753,35 +753,47 @@ export class Date {
         return new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), effectiveOptions).format(this.getTime())
     }
 
+    //NOTE (ikorobkov): uncomment when #33175 will be fixed
+    // /**
+    //  * Gets a string with a language-sensitive representation of this date with respect to locale.
+    //  *
+    //  * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+    //  *     array of such strings
+    //  * @param { Intl.DateTimeFormatOptions } [ options ]  An object with some or all of the properties of the
+    //  *     Intl.DateTimeFormatOptions options
+    //  * @returns { string } Gets a string with a language-sensitive representation of this date
+    //  * @syscap SystemCapability.Utils.Lang
+    //  * @FaAndStageModel
+    //  * @since 24
+    //  */
+    // public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
+    //     const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
+    //     return formatter.format(this.getTime())
+    // }
+
     /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
      *
-     * @param { Intl.LocalesArgument } [ locales ] 
-     * @param { Intl.DateTimeFormatOptions } [ options ] 
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with some or all of the properties of the
+     *     Intl.DateTimeFormatOptions options
      * @returns { string } Gets a string with a language-sensitive representation of this date
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
-        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options ?? Date.DATE_TIME_FORMAT_OPTIONS)
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): String {
+        let options_: Intl.DateTimeFormatOptions | undefined = undefined
+        if (options instanceof Intl.DateTimeFormatOptions) {
+            options_ = options as Intl.DateTimeFormatOptions
+        }
+        const formatter = new Intl.DateTimeFormat(Intl.intlLocalesToLanguageTags(locales), options_ ?? Date.DATE_TIME_FORMAT_OPTIONS)
         return formatter.format(this.getTime())
     }
 
     /**
-     * Gets a string with a language-sensitive representation of this date.
-     *
-     * @returns { string } Gets a string with a language-sensitive representation of this date
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(): string {
-        return this.toLocaleString(undefined)
-    }
-
-    /**
-     * Gets a string with a language-sensitive representation of 
+     * Gets a string with a language-sensitive representation of
      * the date portion of the specified date
      * in the user agent's timezone.
      * of the date portion of the specified date in the user agent's timezone.
@@ -812,13 +824,13 @@ export class Date {
     }
 
     /**
-     * Returns a string with a language-sensitive representation of 
+     * Returns a string with a language-sensitive representation of
      * the date portion of the specified date
      * in the user agent's timezone.
      * of the date portion of the specified date in the user agent's timezone.
      *
-     * @param { Intl.LocalesArgument } [ locales ] 
-     * @param { Intl.DateTimeFormatOptions } [ options ] 
+     * @param { Intl.LocalesArgument } [ locales ]
+     * @param { Intl.DateTimeFormatOptions } [ options ]
      * @returns { string }
      * @throws { TypeError } - Input parameter error.
      * @syscap SystemCapability.Utils.Lang
@@ -1139,7 +1151,7 @@ export class Date {
      * Sets the hours for a specified date according to local time.
      *
      * @param { int } value new hours
-     * @param { int } min 
+     * @param { int } min
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1155,8 +1167,8 @@ export class Date {
      * Sets the hours for a specified date according to local time.
      *
      * @param { int } value new hours
-     * @param { int } min 
-     * @param { int } sec 
+     * @param { int } min
+     * @param { int } sec
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1173,9 +1185,9 @@ export class Date {
      * Sets the hours for a specified date according to local time.
      *
      * @param { int } value new hours
-     * @param { int } min 
-     * @param { int } sec 
-     * @param { int } ms 
+     * @param { int } min
+     * @param { int } sec
+     * @param { int } ms
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1209,7 +1221,7 @@ export class Date {
      * Sets the hour for a specified date according to universal time.
      *
      * @param { int } value new hours
-     * @param { int } min 
+     * @param { int } min
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1225,8 +1237,8 @@ export class Date {
      * Sets the hour for a specified date according to universal time.
      *
      * @param { int } value new hours
-     * @param { int } min 
-     * @param { int } sec 
+     * @param { int } min
+     * @param { int } sec
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1243,9 +1255,9 @@ export class Date {
      * Sets the hour for a specified date according to universal time.
      *
      * @param { int } value new hours
-     * @param { int } min 
-     * @param { int } sec 
-     * @param { int } ms 
+     * @param { int } min
+     * @param { int } sec
+     * @param { int } ms
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1261,7 +1273,7 @@ export class Date {
 
     /**
      * Returns the milliseconds in the specified date according to local time.
-     * 
+     *
      * @returns { int }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1426,7 +1438,7 @@ export class Date {
      * Sets the seconds for a specified date according to local time.
      *
      * @param { int } value new seconds
-     * @param { int } ms 
+     * @param { int } ms
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1458,7 +1470,7 @@ export class Date {
      * Sets the seconds for a specified date according to universal time.
      *
      * @param { int } value new seconds
-     * @param { int } ms 
+     * @param { int } ms
      * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1504,7 +1516,7 @@ export class Date {
      * Sets the minutes for a specified date according to universal time.
      *
      * @param { int } value new minutes
-     * @param { int } sec 
+     * @param { int } sec
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1520,8 +1532,8 @@ export class Date {
      * Sets the minutes for a specified date according to universal time.
      *
      * @param { int } value new minutes
-     * @param { int } sec 
-     * @param { int } ms 
+     * @param { int } sec
+     * @param { int } ms
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1566,7 +1578,7 @@ export class Date {
      * Sets the minutes for a specified date according to local time.
      *
      * @param { int } value new minutes
-     * @param { int } sec 
+     * @param { int } sec
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1582,8 +1594,8 @@ export class Date {
      * Sets the minutes for a specified date according to local time.
      *
      * @param { int } value new minutes
-     * @param { int } sec 
-     * @param { int } ms 
+     * @param { int } sec
+     * @param { int } ms
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1653,7 +1665,7 @@ export class Date {
      * Sets the month for a specified date according to the currently set year.
      *
      * @param { int } month new month
-     * @param { int } date 
+     * @param { int } date
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1696,7 +1708,7 @@ export class Date {
      * Sets the month for a specified date according to universal time.
      *
      * @param { int } month new month
-     * @param { int } date 
+     * @param { int } date
      * @returns { long } get new date value
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel

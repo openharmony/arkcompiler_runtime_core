@@ -116,19 +116,6 @@ export final class Char extends Object implements Comparable<Char> {
     }
 
     /**
-     * The `toLocaleString()` method returns the string representation of the given Char in the form of a copy
-     * of the original object.
-     *
-     * @returns { String }
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public override toLocaleString(): String {
-        return this.toString();
-    }
-
-    /**
      * compare(Char, Char) compares two Chars by their underlying chars.
      *
      * @param { Char } lhs the first Char to compare.
@@ -503,7 +490,7 @@ export final class Char extends Object implements Comparable<Char> {
      * isValidCodePoint() checks if the code point is correctly encoded.
      * See UTF-16 for more details.
      *
-     * @param { UTF_16_CodePoint } codePoint 
+     * @param { UTF_16_CodePoint } codePoint
      * @returns { boolean }
      * @static
      * @syscap SystemCapability.Utils.Lang

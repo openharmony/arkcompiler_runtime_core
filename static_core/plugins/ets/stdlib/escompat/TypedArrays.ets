@@ -1242,21 +1242,25 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Int8Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new Number(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -2986,21 +2990,25 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Int16Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new Number(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -4698,21 +4706,25 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Int32Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new Number(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -6444,21 +6456,25 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /**
      * Converts BigInt64Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new BigInt(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)).toLocaleString())
+            const res: StringBuilder = new StringBuilder()
+            res.append(new BigInt(this.getUnsafe(0)).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(new BigInt(this.getUnsafe(i)).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -8162,21 +8178,25 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Float32Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new Number(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**
@@ -9771,21 +9791,25 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Converts Float64Array to a string with respect to locale
      *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *      array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-            res.append(new Number(this.getUnsafe(i)).toLocaleString())
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
-            res.append(new Number(this.getUnsafe(this.lengthInt - 1))).toLocaleString()
+            const res: StringBuilder = new StringBuilder()
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**

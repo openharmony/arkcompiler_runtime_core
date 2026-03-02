@@ -1507,58 +1507,33 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
     /**
      * Converts {{element['name']}}Array to a string with respect to locale
      *
-     * @param { Object } locales
-     * @param { Object } options
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object, options: Object): string {
-        throw new Error("{{element['name']}}Array.toLocaleString: not implemented")
-    }
-
-    /**
-     * Converts {{element['name']}}Array to a string with respect to locale
-     *
-     * @param { Object } locales
-     * @returns { string } - string representation
-     * @throws { Error } - function not implemented
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     */
-    public toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object())
-    }
-
-    /**
-     * Converts {{element['name']}}Array to a string with respect to locale
-     *
+     * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
+     *     array of such strings
+     * @param { object } [ options ] An object with configuration properties.
      * @returns { string } - string representation
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      * @since 24
      */
-    public toLocaleString(): string {
-        let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.lengthInt - 1; ++i) {
-        {%- if element['name'] != 'BigUint64' %}
-            res.append((this.getUnsafe(i).toDouble()).toLocaleString())
-        {%- else %}
-            res.append(new BigInt(this.getUnsafe(i)).toLocaleString())
-        {%- endif %}
-            res.append(",")
-        }
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.lengthInt > 0) {
+            const res: StringBuilder = new StringBuilder()
         {%- if element['name'] != 'BigUint64' %}
-            res.append((this.getUnsafe(this.lengthInt - 1).toDouble()).toLocaleString())
+            res.append(this.getUnsafe(0).toLocaleString(locales, options))
         {%- else %}
-            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)).toLocaleString())
+            res.append(new BigInt(this.getUnsafe(0)).toLocaleString(locales, options))
         {%- endif %}
+            for (let i: int = 1; i < this.lengthInt; ++i) {
+                res.append(",")
+            {%- if element['name'] != 'BigUint64' %}
+                res.append(this.getUnsafe(i).toLocaleString(locales, options))
+            {%- else %}
+                res.append(new BigInt(this.getUnsafe(i)).toLocaleString(locales, options))
+            {%- endif %}
+            }
+            return res.toString()
         }
-        return res.toString()
+        return ""
     }
 
     /**

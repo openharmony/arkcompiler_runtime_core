@@ -38,7 +38,7 @@ export namespace Intl {
     export type UnicodeBCP47LocaleIdentifier = string;
     export type DateTimeFormatPartTypes = "day" | "dayPeriod" | "era" | "fractionalSecond" | "hour" | "literal" | "minute" | "month" | "second" | "timeZoneName" | "unknown" | "weekday" | "year";
     export type DateTimeRangeFormatPartSource = "startRange" | "endRange" | "shared"
-    export type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[] | undefined
+    export type LocalesArgument = UnicodeBCP47LocaleIdentifier | Locale | readonly (UnicodeBCP47LocaleIdentifier | Locale)[]
 
     class LocaleMatch {
         static native bestFitLocale(locale: string[]): string
@@ -396,7 +396,7 @@ export namespace Intl {
         set fractionalSecondDigits(val: number | undefined) {this.fractionalSecondDigits_ = val}
         get fractionalSecondDigits(): number | undefined { return this.fractionalSecondDigits_}
         set hour12(val: boolean | undefined) {this.hour12_ = val}
-        get hour12(): boolean | undefined { return this.hour12_} 
+        get hour12(): boolean | undefined { return this.hour12_}
         set hour(val: "numeric" | "2-digit" | undefined) { this.hour_ = val}
         get hour(): "numeric" | "2-digit" | undefined { return this.hour_}
         set hourCycle(val: "h11" | "h12" | "h23" | "h24" | undefined) { this.hourCycle_ = val}
@@ -642,7 +642,7 @@ export namespace Intl {
         get numberingSystem(): string {
             return this._numberingSystem
         }
-        set numberingSystem(numberingSystem: string) {   
+        set numberingSystem(numberingSystem: string) {
             this._numberingSystem = numberingSystem
         }
 
@@ -663,7 +663,7 @@ export namespace Intl {
         get timeZone(): string {
             return this._timeZone
         }
-        set timeZone(timeZone: string) {   
+        set timeZone(timeZone: string) {
             this._timeZone = timeZone
         }
 
@@ -691,24 +691,24 @@ export namespace Intl {
 
 export class DateTimeFormat {
         private static isEmpty(options: DateTimeFormatOptions): boolean {
-            return options.localeMatcher === undefined 
-                    && options.dateStyle === undefined 
-                    && options.day === undefined 
-                    && options.dayPeriod === undefined 
+            return options.localeMatcher === undefined
+                    && options.dateStyle === undefined
+                    && options.day === undefined
+                    && options.dayPeriod === undefined
                     && options.era === undefined
-                    && options.formatMatcher === undefined 
-                    && options.fractionalSecondDigits === undefined 
-                    && options.hour12 === undefined 
-                    && options.hour === undefined 
-                    && options.hourCycle === undefined 
-                    && options.minute === undefined 
-                    && options.month === undefined 
-                    && options.numberingSystem === undefined 
-                    && options.second === undefined 
-                    && options.timeStyle === undefined 
-                    && options.timeZone === undefined 
-                    && options.timeZoneName === undefined 
-                    && options.weekday === undefined 
+                    && options.formatMatcher === undefined
+                    && options.fractionalSecondDigits === undefined
+                    && options.hour12 === undefined
+                    && options.hour === undefined
+                    && options.hourCycle === undefined
+                    && options.minute === undefined
+                    && options.month === undefined
+                    && options.numberingSystem === undefined
+                    && options.second === undefined
+                    && options.timeStyle === undefined
+                    && options.timeZone === undefined
+                    && options.timeZoneName === undefined
+                    && options.weekday === undefined
                     && options.year === undefined
         }
 
@@ -885,7 +885,7 @@ export class DateTimeFormat {
             }
 
             const hcDefault = this.getLocaleHourCycle()
-            const hourCycle = this.options.hourCycle 
+            const hourCycle = this.options.hourCycle
             const hc = hourCycle == undefined ? hcDefault : hourCycle
             if (needDateDefaults) {
                 skeleton.append("yMd")
@@ -1031,7 +1031,7 @@ export class DateTimeFormat {
             this.appendSecondPattern(timePattern)
             this.appendFractionalSecondPattern(timePattern)
             this.appendTimeZoneNamePattern(timePattern)
-            
+
             return timePattern.toString()
         }
 
@@ -1327,7 +1327,7 @@ export class DateTimeFormat {
         type: "element" | "literal"
         value: string
     }
-    
+
     export class ListFormat {
         private locale: string
         private style: ListFormatStyle
@@ -1384,7 +1384,7 @@ export class DateTimeFormat {
                     arr.push(item)
                 }
             }
-            
+
             const result = new string[arr.length]
             for (let i = 0; i < arr.length; i++) {
                 result[i] = arr[i]
@@ -1435,7 +1435,7 @@ export class DateTimeFormat {
         numeric: boolean | undefined
         caseFirst: string | undefined
         baseName: string | undefined
-        
+
         constructor(
             language: string | undefined,
             script: string | undefined,
@@ -1467,7 +1467,7 @@ export class DateTimeFormat {
         // Using single entry keeps memory footprint minimal while covering most use cases
         private static lastParsedTag: string | undefined = undefined;
         private static lastParsedResult: ParsedLocaleData | undefined = undefined;
-        
+
         /**
          * Get cached locale data for a given tag
          * @param tag The BCP47 language tag to lookup
@@ -1479,7 +1479,7 @@ export class DateTimeFormat {
             }
             return undefined
         }
-        
+
         /**
          * Cache locale data for a given tag
          * @param tag The BCP47 language tag to use as cache key
@@ -1489,7 +1489,7 @@ export class DateTimeFormat {
             Locale.lastParsedTag = tag
             Locale.lastParsedResult = data
         }
-        
+
         private _baseName?: string;
         private _language?: string;
         private _calendar?: string;
@@ -1590,11 +1590,11 @@ export class DateTimeFormat {
         public constructor(tag: BCP47LanguageTag | Locale, options?: LocaleOptions) {
             // Step 1: Initialize locale
             this.initLocale()
-            
+
             // Use local variable for default language to avoid multiple calls within same constructor
             let defaultLanguage: string | undefined = undefined
             let canSkipValidation: boolean = false
-            
+
             // Step 2: Process tag parameter
             if (tag instanceof BCP47LanguageTag) {
                 this.tag = tag
@@ -1604,7 +1604,7 @@ export class DateTimeFormat {
                 if (tag.language == undefined || tag.baseName == undefined) {
                     defaultLanguage = this.defaultLang()
                 }
-                
+
                 this.language = (tag.language != undefined) ? tag.language : defaultLanguage
                 this.baseName = (tag.baseName != undefined) ? tag.baseName : defaultLanguage
                 this.calendar = (tag.calendar != undefined) ? tag.calendar : ""
@@ -1617,17 +1617,17 @@ export class DateTimeFormat {
                 this.script = tag.script
                 this.tag = tag.tag
             }
-            
+
             // Step 3: Process options parameter
             if (options != undefined) {
                 canSkipValidation = false  // Options modify the locale, so validation is required
                 this.checkOptions(options)
-                
+
                 // Only fetch defaultLang if we need it and haven't already cached it in local variable
                 if ((options.language == undefined || options.baseName == undefined) && defaultLanguage == undefined) {
                     defaultLanguage = this.defaultLang()
                 }
-                
+
                 // For options overrides, use options value if provided, else keep current value or use default
                 if (options.language != undefined) {
                     this.language = options.language
@@ -1804,7 +1804,7 @@ export class DateTimeFormat {
                 this.baseName = cached.baseName
                 return true  // Cache hit
             }
-            
+
             if (this.isTagValid(this.tag as string) == 1) {
                 throw new RangeError(this.errMsg)
             }
@@ -1828,7 +1828,7 @@ export class DateTimeFormat {
                }
             }
             this.fillBaseName()
-            
+
             // Cache the parsed result to avoid redundant parsing for the same tag
             Locale.setCachedLocale(this.tag, new ParsedLocaleData(
                 this.language,
@@ -1842,7 +1842,7 @@ export class DateTimeFormat {
                 this.caseFirst,
                 this.baseName
             ))
-            
+
             return false  // Cache miss
         }
 
@@ -2658,7 +2658,7 @@ export class DateTimeFormat {
         set minimumSignificantDigits(val: number) { this.minimumSignificantDigits_ = val}
         get maximumSignificantDigits(): number { return this.maximumSignificantDigits_ }
         set maximumSignificantDigits(val: number) { this.maximumSignificantDigits_ = val}
-        
+
         private locale_: string = ""
         private type_: string = ""
         private minimumIntegerDigits_: number = 0
@@ -2840,7 +2840,7 @@ export class DateTimeFormat {
 
         static supportedLocalesOf(locales: string | string[], options?: RelativeTimeFormatOptions): string[] {
             return RelativeTimeFormat.supportedLocalesOfImpl(
-                (locales instanceof string) ? [locales] : locales, 
+                (locales instanceof string) ? [locales] : locales,
                 options ?? { numeric: "always", style: "long" } as RelativeTimeFormatOptions
             )
         }
@@ -3088,7 +3088,7 @@ export class DateTimeFormat {
             const matchingStrategy = options?.localeMatcher ?? 'best fit';
             try {
                 return matchingStrategy == 'lookup'
-                    ? intlLookUpLocales(locales) 
+                    ? intlLookUpLocales(locales)
                     : intlBestFitLocales(locales)
             }
             catch(e) {

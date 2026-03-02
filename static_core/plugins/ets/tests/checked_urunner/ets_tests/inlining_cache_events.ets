@@ -67,7 +67,9 @@
 //!                --compiler-regex='inlining_cache_events\.ETSGLOBAL::mainExternal'", \
 //!              entry: "inlining_cache_events.ETSGLOBAL::mainExternal"
 //! EVENT_NOT    /inlining_cache_events.ETSGLOBAL::mainExternal,inlining-cache.*/
-//! EVENT_NOT    /Inline,inlining_cache_events.ETSGLOBAL::mainExternal,.*/
+//!# NOTE (ikorobkov): uncomment line EVENT_NOT and remove EVENT when #33357 will be fixed
+//!# EVENT_NOT    /Inline,inlining_cache_events.ETSGLOBAL::mainExternal,.*/
+//! EVENT        /inlining_cache_events.ETSGLOBAL::mainExternal,.*,inlined_method:std.core.Array::reverse/
 
 function inlineReusable(a0: int, a1: int): int {
     let v: int = 2;

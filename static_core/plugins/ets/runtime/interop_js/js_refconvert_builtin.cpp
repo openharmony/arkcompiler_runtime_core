@@ -267,6 +267,11 @@ private:
             {utf::CStringAsMutf8("setMilliseconds"), {"I:J", 2, "setMilliseconds"}},
             {utf::CStringAsMutf8("setUTCMilliseconds"), {"I:J", 2, "setUTCMilliseconds"}},
             {utf::CStringAsMutf8("setTime"), {"J:J", 2, "setTime"}},
+            // NOTE (ikorobkov): uncomment when #33175 will be fixed
+            //{utf::CStringAsMutf8("toLocaleString"),
+            //{"{ULstd/core/Intl/Locale;Lstd/core/ReadonlyArray;Lstd/core/String;}Lstd/core/Intl/"
+            // "DateTimeFormatOptions;:Lstd/core/String;",
+            // 2, "toLocaleString"}},
         };
         wDate_ = RegisterClassWithLeafMatcher(PlatformTypes()->coreDate->GetDescriptor(), "Date", &W_DATE_OVERLOADS);
     }
