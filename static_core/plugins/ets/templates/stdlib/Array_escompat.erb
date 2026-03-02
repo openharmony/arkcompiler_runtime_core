@@ -267,53 +267,6 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Creates a new empty instance of Array.
-     *
-     * @returns { Array<T> } A new Array instance.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     * @example
-     * ```arkts
-     * // Using the constructor
-     * const a = new Array<number>();
-     *
-     * // Using the invoke overload (behaves like calling Array() as a function)
-     * const b = Array<number>();
-     * ```
-     */
-    static $_invoke<T>(): Array<T> {
-        return new Array<T>();
-    }
-
-    /**
-     * Creates a new instance of an Array with the specified length.
-     *
-     * @param { int } [arrayLength] The length of the array to be created (optional).
-     * @returns { Array<T> } A new Array instance with the specified length.
-     * @static
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     * @since 24
-     * @example
-     * ```arkts
-     * // Constructor form
-     * const a = new Array<number>(3); // length = 3
-     *
-     * // Invoke overload form (Array() as a function)
-     * const b = Array<number>(3);     // also creates an array of length 3
-     * ```
-     */
-    static $_invoke<T>(arrayLength?: int): Array<T> {
-        if (arrayLength != undefined) {
-            return new Array<T>(arrayLength);
-        } else {
-            return new Array<T>();
-        }
-    }
-
-    /**
      * Creates a new instance of Array with the given elements.
      *
      * @param { T[] } items The elements to initialize the array with.

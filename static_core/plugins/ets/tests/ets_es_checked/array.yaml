@@ -262,8 +262,3 @@ sub:
                   'a\uDFB7'
                 - |
                   'a𠮷b'
-      - self: null
-        sub:
-          - expr: Array<number>().length
-            ret_type: int
-            expected: 0
