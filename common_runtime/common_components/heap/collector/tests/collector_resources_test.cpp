@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include "common_components/tests/test_helper.h"
 #include "common_interfaces/base_runtime.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 class CollectorResourcesTest : public BaseTestWithScope {
 protected:
     static void SetUpTestCase()
@@ -56,7 +56,7 @@ HWTEST_F_L0(CollectorResourcesTest, RequestGC) {
     Heap::GetHeap().EnableGC(false);
     EXPECT_TRUE(!Heap::GetHeap().GetCollectorResources().IsGCActive());
     GCReason reason = gcRequests.reason;
-    Heap::GetHeap().GetCollectorResources().RequestGC(reason, true, common::GC_TYPE_FULL);
+    Heap::GetHeap().GetCollectorResources().RequestGC(reason, true, common_vm::GC_TYPE_FULL);
 }
 
 HWTEST_F_L0(CollectorResourcesTest, RequestGCAndWaitTest) {
@@ -64,7 +64,7 @@ HWTEST_F_L0(CollectorResourcesTest, RequestGCAndWaitTest) {
     GCReason reason = gcRequests.reason;
     Heap::GetHeap().EnableGC(true);
     EXPECT_TRUE(Heap::GetHeap().GetCollectorResources().IsGCActive());
-    Heap::GetHeap().GetCollectorResources().RequestGC(reason, false, common::GC_TYPE_FULL);
+    Heap::GetHeap().GetCollectorResources().RequestGC(reason, false, common_vm::GC_TYPE_FULL);
     EXPECT_TRUE(!gcRequests.IsSyncGC());
 }
 
@@ -72,4 +72,4 @@ HWTEST_F_L0(CollectorResourcesTest, GetGCThreadCountTest) {
     uint32_t res = Heap::GetHeap().GetCollectorResources().GetGCThreadCount(false);
     EXPECT_EQ(res, 2u);
 }
-} // namespace common::test
+} // namespace common_vm::test

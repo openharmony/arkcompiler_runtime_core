@@ -15,12 +15,12 @@
 
 // NOLINTBEGIN(cppcoreguidelines-special-member-functions)
 
-#ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
-#define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_H
 
 #include "common_interfaces/objects/string/base_string.h"
 
-namespace common {
+namespace common_vm {
 /*
  +-----------------------------+ <-- offset 0
  |      BaseObject fields      |
@@ -239,7 +239,7 @@ inline uint16_t *LineString::GetDataUtf16Writable() const
     DCHECK_CC(IsUtf16() && "BaseString: Read data as utf16 for utf8 string");
     return GetData();
 }
-}  // namespace common
+}  // namespace common_vm
 
 // NOLINTEND(cppcoreguidelines-special-member-functions)
 

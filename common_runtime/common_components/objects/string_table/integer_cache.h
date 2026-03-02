@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTEGER_CACHE_H
-#define COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTEGER_CACHE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTEGER_CACHE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTEGER_CACHE_H
 
 #include <array>
 #include "common_interfaces/objects/string/base_string.h"
 #include "common_interfaces/objects/string/line_string.h"
 
-namespace common {
+namespace common_vm {
 
 /*
  Used only when 0 < string->GetLength() <= 4

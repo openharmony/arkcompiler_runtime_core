@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H
-#define COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H
 
 #include <unordered_map>
 
@@ -23,7 +23,7 @@
 #include "common_components/heap/collector/marking_collector.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common {
+namespace common_vm {
 
 class CopyTable {
 public:
@@ -142,7 +142,7 @@ public:
         return const_cast<ArkCollector*>(this)->fwdTable_.GetForwardingPointer(obj);
     }
 
-    void SetGCThreadQosPriority(common::PriorityMode mode);
+    void SetGCThreadQosPriority(common_vm::PriorityMode mode);
 
     BaseObject* CopyObjectImpl(BaseObject* obj);
     BaseObject* CopyObjectAfterExclusive(BaseObject* obj) override;
@@ -203,8 +203,8 @@ private:
     template <EnumRootsPolicy policy>
     CArrayList<BaseObject *> EnumRoots();
 
-    template <void (&rootsVisitFunc)(const common::RefFieldVisitor &)>
-    void EnumRootsImpl(const common::RefFieldVisitor &visitor)
+    template <void (&rootsVisitFunc)(const common_vm::RefFieldVisitor &)>
+    void EnumRootsImpl(const common_vm::RefFieldVisitor &visitor)
     {
         // assemble garbage candidates.
         reinterpret_cast<RegionalHeap &>(theAllocator_).AssembleGarbageCandidates();
@@ -215,7 +215,7 @@ private:
 
         rootsVisitFunc(visitor);
     }
-    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(STWParam& param, const common::RefFieldVisitor &visitor);
+    CArrayList<CArrayList<BaseObject *>> EnumRootsFlip(STWParam& param, const common_vm::RefFieldVisitor &visitor);
 
     void MarkingHeap(const CArrayList<BaseObject *> &collectedRoots);
     void PostMarking();
@@ -241,6 +241,6 @@ private:
 
     GCMode gcMode_ = GCMode::CMC;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_ARKCOLLECTOR_H

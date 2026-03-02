@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H
 
 #include "common_components/base/immortal_wrapper.h"
 #include "common_components/base/mem_utils.h"
@@ -24,7 +24,7 @@
 #include <sys/mman.h>
 #endif
 
-namespace common {
+namespace common_vm {
 static constexpr size_t kBitsPerByte = 8;
 static constexpr size_t kMarkedBytesPerBit = 8;
 static constexpr size_t kBitsPerWord = sizeof(uint64_t) * kBitsPerByte;
@@ -72,6 +72,6 @@ struct RegionBitmap {
         return ret;
     }
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_REGION_BITMAP_H

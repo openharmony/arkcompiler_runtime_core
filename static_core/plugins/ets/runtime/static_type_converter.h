@@ -20,13 +20,13 @@
 #include "common_interfaces/objects/static_type_converter_interface.h"
 
 namespace ark::ets {
-class StaticTypeConverter : public common::StaticTypeConverterInterface {
+class StaticTypeConverter : public common_vm::StaticTypeConverterInterface {
 public:
     static void Initialize();
 
-    common::BoxedValue PUBLIC_API WrapBoxed(common::BaseType value) override;
+    common_vm::BoxedValue PUBLIC_API WrapBoxed(common_vm::BaseType value) override;
 
-    common::BaseType PUBLIC_API UnwrapBoxed(common::BoxedValue value) override;
+    common_vm::BaseType PUBLIC_API UnwrapBoxed(common_vm::BoxedValue value) override;
 
 private:
     static StaticTypeConverter stcTypeConverter_;

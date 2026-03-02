@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/platform/os.h"
 
-namespace common {
+namespace common_vm {
 
 static ImmortalWrapper<HeapBitmapManager> forwardDataManager;
 HeapBitmapManager& HeapBitmapManager::GetHeapBitmapManager() { return *forwardDataManager; }
@@ -76,4 +76,4 @@ void HeapBitmapManager::DestroyHeapBitmap()
     initialized = false;
 }
 
-} // namespace common
+} // namespace common_vm

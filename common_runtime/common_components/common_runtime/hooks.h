@@ -13,8 +13,8 @@
  * limitations under the License.
  **/
 
-#ifndef COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
-#define COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
 
 #include <cstdint>
 
@@ -24,7 +24,7 @@
 
 // Visitor that iterate all `RefField`s in a TaggedObject and add them to
 // `LocalMarkStack` Should be moved to BaseRT and panda namespace later
-namespace common {
+namespace common_vm {
 // Roots in BaseRuntime
 PUBLIC_API void VisitBaseRoots(const RefFieldVisitor &visitor);
 // Dynamic VM Roots scanning
@@ -77,5 +77,5 @@ PUBLIC_API void MarkThreadLocalJitFortInstalled(void *mutator, void *machineCode
 // Used for init/fini BaseRuntime from static
 PUBLIC_API void CheckAndInitBaseRuntime(const RuntimeParam &param);
 PUBLIC_API void CheckAndFiniBaseRuntime();
-}  // namespace common
-#endif  // COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_RUNTIME_HOOKS_H

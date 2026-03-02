@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 
 class TestAllocator : public Allocator {
 public:
@@ -46,7 +46,7 @@ public:
     void FeedHungryBuffers() override {}
     size_t GetSurvivedSize() const override { return 0; }
 };
-class AllocatorTest : public common::test::BaseTestWithScope {
+class AllocatorTest : public common_vm::test::BaseTestWithScope {
 };
 
 HWTEST_F_L0(AllocatorTest, EnvNotSet)

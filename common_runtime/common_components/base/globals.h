@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_BASE_GLOBALS_H
-#define COMMON_COMPONENTS_BASE_GLOBALS_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_GLOBALS_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_GLOBALS_H
 
 #include <cstddef>
 
 #include "common_components/base/ark_sanitizer.h"
 #include "common_interfaces/base/common.h"
 
-namespace common {
+namespace common_vm {
 // Time Factors
 constexpr uint64_t TIME_FACTOR = 1000LL;
 constexpr uint64_t SECOND_TO_NANO_SECOND = TIME_FACTOR * TIME_FACTOR * TIME_FACTOR;
@@ -82,6 +82,6 @@ constexpr T AlignDown(T size, T alignment)
 {
     return (size & ~static_cast<T>(alignment - 1));
 }
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_BASE_GLOBALS_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_GLOBALS_H

@@ -485,7 +485,7 @@ ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(Interop
     TaggedType *result = nullptr;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        result = common::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
+        result = common_vm::DynamicObjectAccessorUtil::GetProperty(ArkNapiHelper::ToBaseObject(jsVal), name);
     }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);

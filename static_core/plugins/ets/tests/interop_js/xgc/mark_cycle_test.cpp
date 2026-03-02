@@ -65,7 +65,7 @@ public:
     }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    void MarkFromObject(napi_ref obj, const common::RefFieldVisitor &visitor) override
+    void MarkFromObject(napi_ref obj, const common_vm::RefFieldVisitor &visitor) override
     {
         values_->markFromObjectCalled = true;
         XGCVmAdaptor::MarkFromObject(obj, visitor);

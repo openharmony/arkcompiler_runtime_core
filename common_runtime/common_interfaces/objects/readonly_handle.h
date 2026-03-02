@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,11 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
-#define COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_READONLY_HANDLE_H
 
 #include "common_interfaces/objects/base_object.h"
-namespace common {
+namespace common_vm {
 template <typename T>
 class ReadOnlyHandle {
 public:

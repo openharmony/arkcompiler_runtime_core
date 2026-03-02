@@ -171,13 +171,13 @@ String *String::AllocLineStringObject(ManagedThread *thread, size_t length, bool
     auto *stringClass =
         Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
     size_t size = compressed ? LineString::ComputeSizeMUtf8(length) : LineString::ComputeSizeUtf16(length);
-    common::BaseString *string =
-        movable ? reinterpret_cast<common::BaseString *>(
+    common_vm::BaseString *string =
+        movable ? reinterpret_cast<common_vm::BaseString *>(
                       // CC-OFFNXT(G.FMT.06-CPP) project code style
                       vm->GetHeapManager()->AllocateObject(stringClass, size, DEFAULT_ALIGNMENT, thread,
                                                            mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT,
                                                            pinned))
-                : reinterpret_cast<common::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
+                : reinterpret_cast<common_vm::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
                       // CC-OFFNXT(G.FMT.06-CPP) project code style
                       stringClass, size, DEFAULT_ALIGNMENT, thread,
                       mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT));
@@ -212,10 +212,10 @@ String *String::FastSubUtf8String(String *src, uint32_t start, uint32_t length, 
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
 
     // 3. copy it
-    common::Span<uint8_t> dest(lineStrHandle->GetDataUtf8Writable(), length);
+    common_vm::Span<uint8_t> dest(lineStrHandle->GetDataUtf8Writable(), length);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    common::Span<const uint8_t> source(srcFlat.GetDataUtf8() + start, length);
-    common::BaseString::MemCopyChars(dest, length, source, length);
+    common_vm::Span<const uint8_t> source(srcFlat.GetDataUtf8() + start, length);
+    common_vm::BaseString::MemCopyChars(dest, length, source, length);
     return lineStrHandle.GetPtr();
 }
 
@@ -227,7 +227,7 @@ String *String::FastSubUtf16String(String *src, uint32_t start, uint32_t length,
     VMHandle<String> srcHandle(thread, src);
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    bool canBeCompressed = common::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
+    bool canBeCompressed = common_vm::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
 
     // 2. alloc dest line string
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
@@ -242,13 +242,13 @@ String *String::FastSubUtf16String(String *src, uint32_t start, uint32_t length,
 
     if (canBeCompressed) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        common::BaseString::CopyChars(lineStrHandle->GetDataUtf8Writable(), srcFlat.GetDataUtf16() + start, length);
+        common_vm::BaseString::CopyChars(lineStrHandle->GetDataUtf8Writable(), srcFlat.GetDataUtf16() + start, length);
     } else {
         uint32_t len = length * (sizeof(uint16_t) / sizeof(uint8_t));
-        common::Span<uint16_t> dest(lineStrHandle->GetDataUtf16Writable(), length);
+        common_vm::Span<uint16_t> dest(lineStrHandle->GetDataUtf16Writable(), length);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        common::Span<const uint16_t> source(srcFlat.GetDataUtf16() + start, length);
-        common::BaseString::MemCopyChars(dest, len, source, len);
+        common_vm::Span<const uint16_t> source(srcFlat.GetDataUtf16() + start, length);
+        common_vm::BaseString::MemCopyChars(dest, len, source, len);
     }
     return lineStrHandle.GetPtr();
 }
@@ -274,7 +274,7 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
     }
 
     // no need to make sliced string if too short
-    if (length < common::SlicedString::MIN_SLICED_STRING_LENGTH) {
+    if (length < common_vm::SlicedString::MIN_SLICED_STRING_LENGTH) {
         if (src->IsUtf8()) {
             return FastSubUtf8String(src, start, length, ctx);
         }
@@ -286,7 +286,7 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
     if (src->IsUtf16()) {
         FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        bool canBeCompressed = common::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
+        bool canBeCompressed = common_vm::BaseString::CanBeCompressed(srcFlat.GetDataUtf16() + start, length);
         if (canBeCompressed) {
             auto *lineStr = AllocLineStringObject(thread, length, canBeCompressed, ctx, vm);
             if (lineStr == nullptr) {
@@ -297,7 +297,8 @@ String *String::FastSubString(String *src, uint32_t start, uint32_t length, cons
             // maybe happen gc , get srcFlat again
             srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            common::BaseString::CopyChars(lineStrHandle->GetDataUtf8Writable(), srcFlat.GetDataUtf16() + start, length);
+            common_vm::BaseString::CopyChars(lineStrHandle->GetDataUtf8Writable(), srcFlat.GetDataUtf16() + start,
+                                             length);
             return lineStrHandle.GetPtr();
         }
     }
@@ -321,16 +322,16 @@ String *String::ConcatLineStringCompressed(VMHandle<String> &str1Handle, VMHandl
     PandaVector<uint8_t> tree8Buf1;
     PandaVector<uint8_t> tree8Buf2;
     // copy left part
-    common::Span<uint8_t> sp(newStringHandle->GetDataUtf8Writable(), newLength);
-    common::Span<const uint8_t> src1(
+    common_vm::Span<uint8_t> sp(newStringHandle->GetDataUtf8Writable(), newLength);
+    common_vm::Span<const uint8_t> src1(
         str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf8(tree8Buf1) : str1Handle->GetDataUtf8(), length1);
-    common::BaseString::MemCopyChars(sp, newLength, src1, length1);
+    common_vm::BaseString::MemCopyChars(sp, newLength, src1, length1);
 
     // copy right part
     sp = sp.SubSpan(length1);
-    common::Span<const uint8_t> src2(
+    common_vm::Span<const uint8_t> src2(
         str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf8(tree8Buf2) : str2Handle->GetDataUtf8(), length2);
-    common::BaseString::MemCopyChars(sp, length2, src2, length2);
+    common_vm::BaseString::MemCopyChars(sp, length2, src2, length2);
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
@@ -355,32 +356,32 @@ String *String::ConcatLineStringUnCompressed(VMHandle<String> &str1Handle, VMHan
     // copy left part
     PandaVector<uint8_t> tree8Buf1;
     PandaVector<uint16_t> tree16Buf1;
-    common::Span<uint16_t> sp(newStringHandle->GetDataUtf16Writable(), newLength);
+    common_vm::Span<uint16_t> sp(newStringHandle->GetDataUtf16Writable(), newLength);
     if (str1Handle->IsUtf8()) {
-        common::BaseString::CopyChars(sp.data(),
-                                      str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf8(tree8Buf1)
-                                                                 : str1Handle->GetDataUtf8(),
-                                      length1);
+        common_vm::BaseString::CopyChars(sp.data(),
+                                         str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf8(tree8Buf1)
+                                                                    : str1Handle->GetDataUtf8(),
+                                         length1);
     } else {
-        common::Span<const uint16_t> src1(str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf16(tree16Buf1)
-                                                                     : str1Handle->GetDataUtf16(),
-                                          length1);
-        common::BaseString::MemCopyChars(sp, newLength << 1U, src1, length1 << 1U);
+        common_vm::Span<const uint16_t> src1(str1Handle->IsTreeString() ? str1Handle->GetTreeStringDataUtf16(tree16Buf1)
+                                                                        : str1Handle->GetDataUtf16(),
+                                             length1);
+        common_vm::BaseString::MemCopyChars(sp, newLength << 1U, src1, length1 << 1U);
     }
     // copy right part
     PandaVector<uint8_t> tree8Buf2;
     PandaVector<uint16_t> tree16Buf2;
     sp = sp.SubSpan(length1);
     if (str2Handle->IsUtf8()) {
-        common::BaseString::CopyChars(sp.data(),
-                                      str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf8(tree8Buf2)
-                                                                 : str2Handle->GetDataUtf8(),
-                                      length2);
+        common_vm::BaseString::CopyChars(sp.data(),
+                                         str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf8(tree8Buf2)
+                                                                    : str2Handle->GetDataUtf8(),
+                                         length2);
     } else {
-        common::Span<const uint16_t> src2(str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf16(tree16Buf2)
-                                                                     : str2Handle->GetDataUtf16(),
-                                          length2);
-        common::BaseString::MemCopyChars(sp, length2 << 1U, src2, length2 << 1U);
+        common_vm::Span<const uint16_t> src2(str2Handle->IsTreeString() ? str2Handle->GetTreeStringDataUtf16(tree16Buf2)
+                                                                        : str2Handle->GetDataUtf16(),
+                                             length2);
+        common_vm::BaseString::MemCopyChars(sp, length2 << 1U, src2, length2 << 1U);
     }
 
     TSAN_ANNOTATE_IGNORE_WRITES_END();
@@ -419,7 +420,7 @@ String *String::Concat(String *str1, String *str2, const LanguageContext &ctx, P
 
     // concat with tree string if too long
     bool compressed = String::GetCompressedStringsEnabled() && (str1Handle->IsUtf8()) && (str2Handle->IsUtf8());
-    if (newLength >= common::TreeString::MIN_TREE_STRING_LENGTH) {
+    if (newLength >= common_vm::TreeString::MIN_TREE_STRING_LENGTH) {
         return CreateTreeString(thread, str1Handle, str2Handle, newLength, compressed, ctx, vm);
     }
 
@@ -444,10 +445,10 @@ String *String::GetSlicedString(String *src, uint32_t start, uint32_t length, co
     VMHandle<String> baseStrHandle(ManagedThread::GetCurrent(), baseStr);
 
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
-    auto slicedStr = common::SlicedString::Cast(baseStrHandle->ToString());
+    auto slicedStr = common_vm::SlicedString::Cast(baseStrHandle->ToString());
     slicedStr->InitLengthAndFlags(length, srcFlat.GetString()->IsMUtf8());
     slicedStr->SetMixHashcode(0);
-    auto writeBarrier = [](void *obj, size_t offset, common::BaseObject *str) {
+    auto writeBarrier = [](void *obj, size_t offset, common_vm::BaseObject *str) {
         ObjectAccessor::SetObject(obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
 
@@ -462,14 +463,14 @@ String *String::AllocSlicedStringObject(const LanguageContext &ctx, PandaVM *vm,
     auto *thread = ManagedThread::GetCurrent();
     auto *slicedStrCls =
         Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::SLICED_STRING);
-    size_t size = common::SlicedString::SIZE;
-    common::BaseString *slicedStr = nullptr;
+    size_t size = common_vm::SlicedString::SIZE;
+    common_vm::BaseString *slicedStr = nullptr;
     if (movable) {
-        slicedStr = reinterpret_cast<common::BaseString *>(
+        slicedStr = reinterpret_cast<common_vm::BaseString *>(
             vm->GetHeapManager()->AllocateObject(slicedStrCls, size, DEFAULT_ALIGNMENT, thread,
                                                  mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT, pinned));
     } else {
-        slicedStr = reinterpret_cast<common::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
+        slicedStr = reinterpret_cast<common_vm::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
             slicedStrCls, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT));
     }
     if (LIKELY(slicedStr != nullptr)) {
@@ -487,14 +488,14 @@ String *String::AllocTreeStringObject(ManagedThread *thread, const LanguageConte
 {
     ASSERT(vm != nullptr);
     auto *treeStrCls = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::TREE_STRING);
-    size_t size = common::TreeString::SIZE;
-    common::BaseString *treeStr = nullptr;
+    size_t size = common_vm::TreeString::SIZE;
+    common_vm::BaseString *treeStr = nullptr;
     if (movable) {
-        treeStr = reinterpret_cast<common::BaseString *>(
+        treeStr = reinterpret_cast<common_vm::BaseString *>(
             vm->GetHeapManager()->AllocateObject(treeStrCls, size, DEFAULT_ALIGNMENT, thread,
                                                  mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT, pinned));
     } else {
-        treeStr = reinterpret_cast<common::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
+        treeStr = reinterpret_cast<common_vm::BaseString *>(vm->GetHeapManager()->AllocateNonMovableObject(
             treeStrCls, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT));
     }
     if (LIKELY(treeStr != nullptr)) {
@@ -511,7 +512,7 @@ String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHa
     if (baseStr == nullptr) {
         return nullptr;
     }
-    auto *treeStr = common::TreeString::Cast(baseStr->ToString());
+    auto *treeStr = common_vm::TreeString::Cast(baseStr->ToString());
 
     // After copying we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
@@ -519,11 +520,11 @@ String *String::CreateTreeString(ManagedThread *thread, VMHandle<String> &leftHa
     treeStr->InitLengthAndFlags(length, compressed);
     treeStr->SetMixHashcode(0);
 
-    auto writeBarrierLeft = [thread](void *obj, size_t offset, common::BaseObject *str) {
+    auto writeBarrierLeft = [thread](void *obj, size_t offset, common_vm::BaseObject *str) {
         ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetLeftSubString(std::move(writeBarrierLeft), leftHandle->ToString());
-    auto writeBarrierRight = [thread](void *obj, size_t offset, common::BaseObject *str) {
+    auto writeBarrierRight = [thread](void *obj, size_t offset, common_vm::BaseObject *str) {
         ObjectAccessor::SetObject(thread, obj, offset, reinterpret_cast<ObjectHeader *>(str));
     };
     treeStr->SetRightSubString(std::move(writeBarrierRight), rightHandle->ToString());
@@ -544,11 +545,11 @@ constexpr int32_t KMP_MIN_PATTERN_LENGTH = 10;
 }  // namespace
 
 template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
-int32_t GetIndexOf(common::Span<const T1> lhs, common::Span<const T2> rhs, int pos, int max)
+int32_t GetIndexOf(common_vm::Span<const T1> lhs, common_vm::Span<const T2> rhs, int pos, int max)
 {
     ASSERT(pos >= 0 && max >= pos);
     return rhs.size() < KMP_MIN_PATTERN_LENGTH || max == pos
-               ? common::BaseString::IndexOf(lhs, rhs, pos, max)
+               ? common_vm::BaseString::IndexOf(lhs, rhs, pos, max)
                : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.IndexOf(Span {lhs.begin(), lhs.end()}, pos);
 }
 
@@ -561,30 +562,30 @@ int32_t FastIndexOf(Str &lhs, Str &rhs, int pos)
 
     auto max = static_cast<int32_t>(lhsCount - rhsCount);
     if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
         return GetIndexOf(lhsSp, rhsSp, pos, max);
     } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
         return GetIndexOf(lhsSp, rhsSp, pos, max);
     } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
         return GetIndexOf(lhsSp, rhsSp, pos, max);
     } else {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
         return GetIndexOf(lhsSp, rhsSp, pos, max);
     }
 }
 
 template <typename T1, typename T2>  // CC-OFFNXT(G.NAM.03-CPP) false positive, this is a function
-int32_t GetLastIndexOf(common::Span<const T1> lhs, common::Span<const T2> rhs, int pos)
+int32_t GetLastIndexOf(common_vm::Span<const T1> lhs, common_vm::Span<const T2> rhs, int pos)
 {
     ASSERT(pos >= 0 && lhs.size() >= pos + rhs.size() && (lhs.size() != rhs.size() || pos == 0));
     return rhs.size() < KMP_MIN_PATTERN_LENGTH || pos == 0
-               ? common::BaseString::LastIndexOf(lhs, rhs, pos)
+               ? common_vm::BaseString::LastIndexOf(lhs, rhs, pos)
                : algo::KmpStringMatcher<T2> {{rhs.begin(), rhs.end()}}.LastIndexOf(Span {lhs.begin(), lhs.end()}, pos);
 }
 
@@ -596,20 +597,20 @@ int32_t FastLastIndexOf(Str &lhs, Str &rhs, int pos)
     ASSERT(lhsCount >= rhsCount);
 
     if (rhs.IsUtf8() && lhs.IsUtf8()) {
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
         return GetLastIndexOf(lhsSp, rhsSp, pos);
     } else if (rhs.IsUtf16() && lhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
         return GetLastIndexOf(lhsSp, rhsSp, pos);
     } else if (rhs.IsUtf16()) {  // NOLINT(readability-else-after-return)
-        common::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
-        common::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
+        common_vm::Span<const uint8_t> lhsSp(lhs.GetDataUtf8(), lhsCount);
+        common_vm::Span<const uint16_t> rhsSp(rhs.GetDataUtf16(), rhsCount);
         return GetLastIndexOf(lhsSp, rhsSp, pos);
     } else {  // NOLINT(readability-else-after-return)
-        common::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
-        common::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
+        common_vm::Span<const uint16_t> lhsSp(lhs.GetDataUtf16(), lhsCount);
+        common_vm::Span<const uint8_t> rhsSp(rhs.GetDataUtf8(), rhsCount);
         return GetLastIndexOf(lhsSp, rhsSp, pos);
     }
 }
@@ -725,18 +726,18 @@ int32_t String::Compare(VMHandle<String> &left, VMHandle<String> &right, const L
     if (lflat.IsUtf8()) {
         // left utf8 , right utf8
         if (right.GetPtr()->IsMUtf8()) {
-            common::Span<const uint8_t> lspan(lflat.GetDataUtf8(), lCount);
-            common::Span<const uint8_t> rspan(rflat.GetDataUtf8(), rCount);
-            int32_t charDiff = common::CompareStringSpan(lspan, rspan, minCount);
+            common_vm::Span<const uint8_t> lspan(lflat.GetDataUtf8(), lCount);
+            common_vm::Span<const uint8_t> rspan(rflat.GetDataUtf8(), rCount);
+            int32_t charDiff = common_vm::CompareStringSpan(lspan, rspan, minCount);
             if (charDiff != 0) {
                 return charDiff;
             }
 
             // left utf8 , right utf16
         } else {
-            common::Span<const uint8_t> lspan(lflat.GetDataUtf8(), lCount);
-            common::Span<const uint16_t> rspan(rflat.GetDataUtf16(), rCount);
-            int32_t charDiff = common::CompareStringSpan(lspan, rspan, minCount);
+            common_vm::Span<const uint8_t> lspan(lflat.GetDataUtf8(), lCount);
+            common_vm::Span<const uint16_t> rspan(rflat.GetDataUtf16(), rCount);
+            int32_t charDiff = common_vm::CompareStringSpan(lspan, rspan, minCount);
             if (charDiff != 0) {
                 return charDiff;
             }
@@ -744,17 +745,17 @@ int32_t String::Compare(VMHandle<String> &left, VMHandle<String> &right, const L
     } else {
         // left utf16 , right utf16
         if (right.GetPtr()->IsUtf16()) {
-            common::Span<const uint16_t> lspan(lflat.GetDataUtf16(), lCount);
-            common::Span<const uint16_t> rspan(rflat.GetDataUtf16(), rCount);
-            int32_t charDiff = common::CompareStringSpan(lspan, rspan, minCount);
+            common_vm::Span<const uint16_t> lspan(lflat.GetDataUtf16(), lCount);
+            common_vm::Span<const uint16_t> rspan(rflat.GetDataUtf16(), rCount);
+            int32_t charDiff = common_vm::CompareStringSpan(lspan, rspan, minCount);
             if (charDiff != 0) {
                 return charDiff;
             }
             // left utf16 , right utf8
         } else {
-            common::Span<const uint16_t> lspan(lflat.GetDataUtf16(), lCount);
-            common::Span<const uint8_t> rspan(rflat.GetDataUtf8(), rCount);
-            int32_t charDiff = common::CompareStringSpan(lspan, rspan, minCount);
+            common_vm::Span<const uint16_t> lspan(lflat.GetDataUtf16(), lCount);
+            common_vm::Span<const uint8_t> rspan(rflat.GetDataUtf8(), rCount);
+            int32_t charDiff = common_vm::CompareStringSpan(lspan, rspan, minCount);
             if (charDiff != 0) {
                 return charDiff;
             }
@@ -783,7 +784,7 @@ bool String::CanBeCompressedUtf16(const uint16_t *utf16Data, uint32_t utf16Lengt
     bool isCompressed = true;
     Span<const uint16_t> data(utf16Data, utf16Length);
     for (uint32_t i = 0; i < utf16Length; i++) {
-        if (!common::BaseString::IsASCIICharacter(data[i]) && data[i] != non) {
+        if (!common_vm::BaseString::IsASCIICharacter(data[i]) && data[i] != non) {
             isCompressed = false;
             break;
         }
@@ -797,7 +798,7 @@ bool String::CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length
     bool isCompressed = true;
     Span<const uint8_t> data(mutf8Data, mutf8Length);
     for (uint32_t i = 0; i < mutf8Length; i++) {
-        if (!common::BaseString::IsASCIICharacter(data[i]) && data[i] != non) {
+        if (!common_vm::BaseString::IsASCIICharacter(data[i]) && data[i] != non) {
             isCompressed = false;
             break;
         }
@@ -809,7 +810,7 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
 {
     ASSERT(src != nullptr);
     auto length = static_cast<int32_t>(src->GetLength());
-    bool canBeCompressed = common::BaseString::IsASCIICharacter(newC);
+    bool canBeCompressed = common_vm::BaseString::IsASCIICharacter(newC);
 
     // allocator may trig gc and move src, need to hold it
     auto thread = ManagedThread::GetCurrent();
@@ -888,9 +889,9 @@ bool String::IsMutf8EqualsUtf16(const uint8_t *utf8Data, const uint16_t *utf16Da
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto tmpBuffer = allocator->AllocArray<uint16_t>(utf16DataLength);
     utf::ConvertMUtf8ToUtf16(utf8Data, utf::Mutf8Size(utf8Data), tmpBuffer);
-    common::Span<const uint16_t> data1(tmpBuffer, utf16DataLength);
-    common::Span<const uint16_t> data2(utf16Data, utf16DataLength);
-    bool result = common::BaseString::StringsAreEquals(data1, data2);
+    common_vm::Span<const uint16_t> data1(tmpBuffer, utf16DataLength);
+    common_vm::Span<const uint16_t> data2(utf16Data, utf16DataLength);
+    bool result = common_vm::BaseString::StringsAreEquals(data1, data2);
     allocator->Delete(tmpBuffer);
     return result;
 }
@@ -909,21 +910,21 @@ bool String::StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8Data, uint32
         }
         ASSERT(str1CanBeCompressed == data2CanBeCompressed);
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common::BaseString *>(
+            return reinterpret_cast<common_vm::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         if (str1CanBeCompressed) {
             std::vector<uint8_t> bufStr1Utf8;
             int32_t str1Count = static_cast<int32_t>(str1->GetLength());  // NOLINT(modernize-use-auto)
             const uint8_t *str1Utf8DataFlat =
-                common::BaseString::GetUtf8DataFlat(readBarrier, str1->ToString(), bufStr1Utf8);
-            common::Span<const uint8_t> data1(str1Utf8DataFlat, str1Count);
-            common::Span<const uint8_t> data2(mutf8Data, utf16Length);
-            result = common::BaseString::StringsAreEquals(data1, data2);
+                common_vm::BaseString::GetUtf8DataFlat(readBarrier, str1->ToString(), bufStr1Utf8);
+            common_vm::Span<const uint8_t> data1(str1Utf8DataFlat, str1Count);
+            common_vm::Span<const uint8_t> data2(mutf8Data, utf16Length);
+            result = common_vm::BaseString::StringsAreEquals(data1, data2);
         } else {
             std::vector<uint16_t> bufStr1Utf16;
             const uint16_t *str1Utf16DataFlat =
-                common::BaseString::GetUtf16DataFlat(readBarrier, str1->ToString(), bufStr1Utf16);
+                common_vm::BaseString::GetUtf16DataFlat(readBarrier, str1->ToString(), bufStr1Utf16);
             result = IsMutf8EqualsUtf16(mutf8Data, str1Utf16DataFlat, str1->GetLength());
         }
     }
@@ -934,9 +935,10 @@ bool String::StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8Data, uint32
 bool String::StringsAreEqual(String *str1, String *str2)
 {
     auto readBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
+        return reinterpret_cast<common_vm::BaseString *>(
+            ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
     };
-    return common::BaseString::StringsAreEqual(std::move(readBarrier), str1->ToString(), str2->ToString());
+    return common_vm::BaseString::StringsAreEqual(std::move(readBarrier), str1->ToString(), str2->ToString());
 }
 
 }  // namespace ark::coretypes

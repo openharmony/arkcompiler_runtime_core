@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,10 @@
 #define PR_SET_VMA_ANON_NAME 0
 #endif
 
-namespace common::os {
+namespace common_vm::os {
 int PrctlSetVMA(const void *p, const size_t size, const char *tag)
 {
     return prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, p, size, tag);
 }
-}  // namespace common::os
+}  // namespace common_vm::os
  

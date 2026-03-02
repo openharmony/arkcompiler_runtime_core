@@ -18,7 +18,7 @@
 #include "common_components/heap/ark_collector/ark_collector.h"
 #include "common_runtime/hooks.h"
 
-namespace common {
+namespace common_vm {
 
 void FixHeapWorker::CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &list, FixRegionType type)
 {
@@ -193,4 +193,4 @@ void PostFixHeapWorker::CollectEmptyRegions()
     stats.nonMovableGarbageSize += garbageSize;
 }
 
-};  // namespace common
+};  // namespace common_vm

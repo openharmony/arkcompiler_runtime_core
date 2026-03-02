@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H
-#define COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H
 
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common {
+namespace common_vm {
 template<class STWFunction>
 void MutatorManager::FlipMutators(STWParam& param, STWFunction&& stwFunction, FlipFunction *flipFunction)
 {
@@ -59,6 +59,6 @@ void MutatorManager::FlipMutators(STWParam& param, STWFunction&& stwFunction, Fl
     }
     MutatorManagementWUnlock();
 }
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_INL_H

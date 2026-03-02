@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_BASE_ARK_SANITIZER_H
-#define COMMON_COMPONENTS_BASE_ARK_SANITIZER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ARK_SANITIZER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ARK_SANITIZER_H
 
 #if (defined(__has_feature) && __has_feature(address_sanitizer)) || defined(__SANITIZE_ADDRESS__)
 #define HAS_SANITIZER
@@ -76,4 +76,4 @@ void* __hwasan_tag_pointer(void const volatile *addr, unsigned char tag) __attri
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
 #endif
 
-#endif  // COMMON_COMPONENTS_BASE_ARK_SANITIZER_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ARK_SANITIZER_H

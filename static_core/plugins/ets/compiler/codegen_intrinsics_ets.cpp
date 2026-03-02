@@ -564,8 +564,8 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
 void Codegen::CreateStringLastIndexOf(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
-    constexpr uint32_t LENGTH_START_BIT = common::BaseString::LengthBits::START_BIT;
-    constexpr uint32_t LENGTH_BITS_NUM = common::BaseString::STRING_LENGTH_BITS_NUM;
+    constexpr uint32_t LENGTH_START_BIT = common_vm::BaseString::LengthBits::START_BIT;
+    constexpr uint32_t LENGTH_BITS_NUM = common_vm::BaseString::STRING_LENGTH_BITS_NUM;
     constexpr auto LENGTH_ZERO = (((uint32_t)0xFFFFFFFF) << LENGTH_BITS_NUM) >> LENGTH_BITS_NUM;
     auto *enc = GetEncoder();
     auto str = src[FIRST_OPERAND];

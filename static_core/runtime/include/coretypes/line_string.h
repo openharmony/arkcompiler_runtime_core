@@ -31,7 +31,7 @@ namespace ark::coretypes {
 class Array;
 class LineString : public ObjectHeader {
 public:
-    static constexpr uint32_t STRING_LENGTH_SHIFT = common::BaseString::LengthBits::START_BIT;
+    static constexpr uint32_t STRING_LENGTH_SHIFT = common_vm::BaseString::LengthBits::START_BIT;
 
     static LineString *Cast(ObjectHeader *object)
     {
@@ -89,19 +89,19 @@ public:
     static LineString *CreateNewLineStringFromBytes(uint32_t offset, uint32_t length, uint32_t highByte,
                                                     Array *bytearray, const LanguageContext &ctx, PandaVM *vm);
 
-    common::BaseString *ToString()
+    common_vm::BaseString *ToString()
     {
-        return common::BaseString::Cast(reinterpret_cast<common::BaseObject *>(this));
+        return common_vm::BaseString::Cast(reinterpret_cast<common_vm::BaseObject *>(this));
     }
 
-    const common::BaseString *ToStringConst() const
+    const common_vm::BaseString *ToStringConst() const
     {
-        return common::BaseString::ConstCast(reinterpret_cast<const common::BaseObject *>(this));
+        return common_vm::BaseString::ConstCast(reinterpret_cast<const common_vm::BaseObject *>(this));
     }
 
-    common::LineString *ToLineString()
+    common_vm::LineString *ToLineString()
     {
-        return common::LineString::Cast(ToString());
+        return common_vm::LineString::Cast(ToString());
     }
 
     template <bool VERIFY = true>
@@ -143,7 +143,7 @@ public:
     /// Methods for uncompressed strings (UTF16)
     static size_t ComputeSizeUtf16(uint32_t utf16Length)
     {
-        return common::LineString::ComputeSizeUtf16(utf16Length);
+        return common_vm::LineString::ComputeSizeUtf16(utf16Length);
     }
 
     uint16_t *GetDataUtf16()
@@ -154,7 +154,7 @@ public:
     /// Methods for compresses strings (MUTF8 or LATIN1)
     static size_t ComputeSizeMUtf8(uint32_t mutf8Length)
     {
-        return common::LineString::ComputeSizeUtf8(mutf8Length);
+        return common_vm::LineString::ComputeSizeUtf8(mutf8Length);
     }
 
     uint8_t *GetDataUtf8()
@@ -290,13 +290,13 @@ public:
 
     size_t ObjectSize() const
     {
-        return common::LineString::ObjectSize(ToStringConst());
+        return common_vm::LineString::ObjectSize(ToStringConst());
     }
 
     uint32_t GetHashcode()
     {
         auto readBarrier = [](void *obj, size_t offset) {
-            return reinterpret_cast<common::BaseString *>(
+            return reinterpret_cast<common_vm::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         return ToString()->GetHashcode(std::move(readBarrier));
@@ -307,17 +307,17 @@ public:
 
     static constexpr uint32_t GetLengthOffset()
     {
-        return common::BaseString::LENGTH_AND_FLAGS_OFFSET;
+        return common_vm::BaseString::LENGTH_AND_FLAGS_OFFSET;
     }
 
     static constexpr uint32_t GetDataOffset()
     {
-        return common::LineString::DATA_OFFSET;
+        return common_vm::LineString::DATA_OFFSET;
     }
 
     static constexpr uint32_t GetHashcodeOffset()
     {
-        return common::BaseString::MIX_HASHCODE_OFFSET;
+        return common_vm::BaseString::MIX_HASHCODE_OFFSET;
     }
 
     static constexpr uint32_t GetStringCompressionMask()
@@ -387,7 +387,7 @@ public:
     static bool IsASCIICharacter(uint16_t data)
     {
         // \0 is not considered ASCII in Modified-UTF8
-        return common::BaseString::IsASCIICharacter(data);
+        return common_vm::BaseString::IsASCIICharacter(data);
     }
 
 protected:

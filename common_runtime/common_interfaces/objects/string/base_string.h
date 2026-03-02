@@ -22,8 +22,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
-#define COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/utils/field_macro.h"
@@ -36,7 +36,7 @@
 #include <vector>
 #include <cstring>
 
-namespace common {
+namespace common_vm {
 class LineString;
 class TreeString;
 class SlicedString;
@@ -859,8 +859,8 @@ inline uint32_t BaseString::MixHashcode(uint32_t hashcode, bool isInteger)
 {
     return isInteger ? (hashcode | IS_INTEGER_MASK) : (hashcode & (~IS_INTEGER_MASK));
 }
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_BASE_STRING_DECLARE_H
 
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //             cppcoreguidelines-special-member-functions, modernize-deprecated-headers,

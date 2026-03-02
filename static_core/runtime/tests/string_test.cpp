@@ -1863,10 +1863,10 @@ TEST_F(StringTest, SlicedStringGC)
     ASSERT_EQ(resultHandle->IsSlicedString(), true);
 
     auto firstReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
-    const common::SlicedString *slicedString = resultHandle->ToSlicedString();
-    String *parentString = String::Cast(slicedString->GetParent<common::BaseString *>(std::move(firstReadBarrier)));
+    const common_vm::SlicedString *slicedString = resultHandle->ToSlicedString();
+    String *parentString = String::Cast(slicedString->GetParent<common_vm::BaseString *>(std::move(firstReadBarrier)));
     ASSERT_EQ(parentString->IsLineString(), true);
     ASSERT_EQ(slicedString->IsSlicedString(), true);
     ASSERT_EQ(String::StringsAreEqual(parentString, stringHandle.GetPtr()), true);
@@ -1877,10 +1877,10 @@ TEST_F(StringTest, SlicedStringGC)
 
     // 3. check SlicedString not changed
     auto secondReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
     slicedString = resultHandle->ToSlicedString();
-    parentString = String::Cast(slicedString->GetParent<common::BaseString *>(std::move(secondReadBarrier)));
+    parentString = String::Cast(slicedString->GetParent<common_vm::BaseString *>(std::move(secondReadBarrier)));
     ASSERT_EQ(parentString->IsLineString(), true);
     ASSERT_EQ(slicedString->IsSlicedString(), true);
     ASSERT_EQ(String::StringsAreEqual(parentString, stringHandle.GetPtr()), true);
@@ -1909,16 +1909,16 @@ TEST_F(StringTest, TreeStringGC)
     ASSERT_EQ(resultHandle->IsTreeString(), true);
 
     auto leftFirstReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
 
     auto rightFirstReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
 
-    common::TreeString *tree = resultHandle->ToTreeString();
-    String *left = String::Cast(tree->GetLeftSubString<common::BaseString *>(std::move(leftFirstReadBarrier)));
-    String *right = String::Cast(tree->GetRightSubString<common::BaseString *>(std::move(rightFirstReadBarrier)));
+    common_vm::TreeString *tree = resultHandle->ToTreeString();
+    String *left = String::Cast(tree->GetLeftSubString<common_vm::BaseString *>(std::move(leftFirstReadBarrier)));
+    String *right = String::Cast(tree->GetRightSubString<common_vm::BaseString *>(std::move(rightFirstReadBarrier)));
     ASSERT_EQ(left->IsLineString(), true);
     ASSERT_EQ(right->IsLineString(), true);
     ASSERT_EQ(String::StringsAreEqual(left, sub1Handle.GetPtr()), true);
@@ -1929,15 +1929,15 @@ TEST_F(StringTest, TreeStringGC)
 
     // 3. check TreeString not changed
     auto leftSecondReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
 
     auto rightSecondReadBarrier = [](void *obj, size_t offset) {
-        return reinterpret_cast<common::BaseString *>(ObjectAccessor::GetObject(obj, offset));
+        return reinterpret_cast<common_vm::BaseString *>(ObjectAccessor::GetObject(obj, offset));
     };
     tree = resultHandle->ToTreeString();
-    left = String::Cast(tree->GetLeftSubString<common::BaseString *>(std::move(leftSecondReadBarrier)));
-    right = String::Cast(tree->GetRightSubString<common::BaseString *>(std::move(rightSecondReadBarrier)));
+    left = String::Cast(tree->GetLeftSubString<common_vm::BaseString *>(std::move(leftSecondReadBarrier)));
+    right = String::Cast(tree->GetRightSubString<common_vm::BaseString *>(std::move(rightSecondReadBarrier)));
     ASSERT_EQ(left->IsLineString(), true);
     ASSERT_EQ(right->IsLineString(), true);
     ASSERT_EQ(String::StringsAreEqual(left, sub1Handle.GetPtr()), true);
@@ -1993,12 +1993,12 @@ TEST_F(StringOOMTest, AllocSlicedStringObjectWithOOM)
     auto ctx = GetLanguageContext();
     HandleScope<ObjectHeader *> scope(thread_);
 
-    String *src = mem::ObjectAllocator::AllocString(common::SlicedString::SIZE);
+    String *src = mem::ObjectAllocator::AllocString(common_vm::SlicedString::SIZE);
     ASSERT_NE(src, nullptr);
 
     coretypes::String *objString;
     do {
-        objString = mem::ObjectAllocator::AllocString(common::SlicedString::SIZE);
+        objString = mem::ObjectAllocator::AllocString(common_vm::SlicedString::SIZE);
     } while (objString != nullptr);
 
     String *slicedStr = String::GetSlicedString(src, 0, 1, ctx, vm, true, false);
@@ -2011,14 +2011,14 @@ TEST_F(StringOOMTest, AllocTreeStringObjectWithOOM)
     auto ctx = GetLanguageContext();
     HandleScope<ObjectHeader *> scope(thread_);
 
-    String *left = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
-    String *right = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
+    String *left = mem::ObjectAllocator::AllocString(common_vm::TreeString::SIZE);
+    String *right = mem::ObjectAllocator::AllocString(common_vm::TreeString::SIZE);
     ASSERT_NE(left, nullptr);
     ASSERT_NE(right, nullptr);
 
     coretypes::String *objString;
     do {
-        objString = mem::ObjectAllocator::AllocString(common::TreeString::SIZE);
+        objString = mem::ObjectAllocator::AllocString(common_vm::TreeString::SIZE);
     } while (objString != nullptr);
 
     VMHandle<coretypes::String> leftHandle(thread_, left);

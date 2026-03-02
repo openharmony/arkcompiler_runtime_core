@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_GCREQUEST_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_GCREQUEST_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_GCREQUEST_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_GCREQUEST_H
 
 #include <cstdint>
 #include <limits>
@@ -21,7 +21,7 @@
 #include "common_components/base/globals.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common {
+namespace common_vm {
 // Minimum time between async GC (heuristic, native).
 constexpr uint64_t MIN_ASYNC_GC_INTERVAL_NS = SECOND_TO_NANO_SECOND;
 constexpr uint64_t LONG_MIN_HEU_GC_INTERVAL_NS = 200 * MILLI_SECOND_TO_NANO_SECOND;
@@ -49,6 +49,6 @@ struct GCRequest {
 
 // Defined in gcRequest.cpp
 extern GCRequest g_gcRequests[];
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_GC_DEBUGGER_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_GC_DEBUGGER_H

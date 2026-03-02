@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_TYPE_DEF_H
-#define COMMON_COMPONENTS_COMMON_TYPE_DEF_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_TYPE_DEF_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_TYPE_DEF_H
 
 #include <climits>
 #include <cstdint>
 #include <limits>
 
-namespace common {
+namespace common_vm {
 class BaseObject;
 }
 
 // commonly agreed type interfaces for a managed runtime:
 //    they're opaque across modules, but we still want it provides a degree
 //    of type safety.
-namespace common {
+namespace common_vm {
 // Those are mostly managed pointer types for GC
 using HeapAddress = uint64_t; // Managed address
 constexpr uintptr_t NULL_ADDRESS = 0;
 
 // object model related types
-using common::BaseObject;
+using common_vm::BaseObject;
 
 // basic types for managed world: modify them together
 using MIndex = uint64_t;  // index of array
@@ -48,6 +48,6 @@ enum class AllocType {
     RAW_POINTER_OBJECT,
     READ_ONLY_OBJECT,
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_COMMON_TYPE_DEF_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_TYPE_DEF_H

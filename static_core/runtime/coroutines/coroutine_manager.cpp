@@ -34,7 +34,7 @@ Coroutine *CoroutineManager::CreateMainCoroutine(Runtime *runtime, PandaVM *vm)
     Coroutine::SetCurrent(main);
     main->InitBuffers();
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto hasJsRuntime = common::Mutator::GetCurrent() != nullptr;
+    auto hasJsRuntime = common_vm::Mutator::GetCurrent() != nullptr;
     main->LinkToExternalMutator(true);
     // We need to unbind mutator before binding in the RequestResume,
     // as it was bound during JS runtime creation/execution

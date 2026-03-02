@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_type.h"
@@ -23,7 +23,7 @@
 namespace panda::ecmascript {
 class HandlerBase;
 }
-namespace common {
+namespace common_vm {
 // for IC
 using HandlerBase = panda::ecmascript::HandlerBase;
 
@@ -52,5 +52,5 @@ class DynamicObjectDescriptorInterface {
 // interfaces used to access property layout infomation for static object.
 // It will be declared and implemented by static vm side.
 class StaticObjectDescriptorInterface {};
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_DESCRIPTOR_H

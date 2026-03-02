@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_THREAD_THREAD_STATE_H
-#define COMMON_INTERFACES_THREAD_THREAD_STATE_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_H
 
 #include <atomic>
 #include <cstdint>
 
 #include "common_interfaces/base/common.h"
 
-namespace common {
+namespace common_vm {
 
 // NOLINTBEGIN(hicpp-signed-bitwise)
 enum ThreadFlag : uint16_t {
@@ -81,5 +81,5 @@ public:
 private:
     std::atomic<int32_t> passBarrierCount_;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_H

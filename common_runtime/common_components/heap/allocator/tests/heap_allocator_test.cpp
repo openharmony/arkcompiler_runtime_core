@@ -20,9 +20,9 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/thread/mutator.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 class HeapAllocatorTest : public BaseTestWithScope {
 protected:
     static void SetUpTestCase()
@@ -55,7 +55,7 @@ protected:
 
 HWTEST_F_L0(HeapAllocatorTest, AllocLargeObject)
 {
-    uintptr_t addr = common::HeapAllocator::AllocateInHuge(Heap::NORMAL_UNIT_SIZE, common::LanguageType::DYNAMIC);
+    uintptr_t addr = common_vm::HeapAllocator::AllocateInHuge(Heap::NORMAL_UNIT_SIZE, common_vm::LanguageType::DYNAMIC);
     ASSERT(addr > 0);
     RegionDesc* region = RegionDesc::GetAliveRegionDescAt(addr);
     ASSERT(region->IsLargeRegion());
@@ -63,7 +63,7 @@ HWTEST_F_L0(HeapAllocatorTest, AllocLargeObject)
 
 HWTEST_F_L0(HeapAllocatorTest, AllocLargeRegion)
 {
-    uintptr_t addr = common::HeapAllocator::AllocateLargeRegion(Heap::NORMAL_UNIT_SIZE);
+    uintptr_t addr = common_vm::HeapAllocator::AllocateLargeRegion(Heap::NORMAL_UNIT_SIZE);
     ASSERT(addr > 0);
     RegionDesc *region = RegionDesc::GetAliveRegionDescAt(addr);
     ASSERT(region->IsLargeRegion());

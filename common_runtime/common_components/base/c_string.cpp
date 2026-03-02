@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include <libgen.h>
 
-namespace common {
+namespace common_vm {
 // The last two characters are units, such as "kb" or "ms".
 constexpr int8_t LAST_CHARACTERS_SIZE = 2;
 // nDecimal = ceil(sizeof(int32_t) * 8 * log(2)) = ceil(2.41 * sizeof(int32_t))
@@ -575,4 +575,4 @@ void CString::ReplaceAll(CString replacement, CString target)
     return;
 }
 
-} // namespace common
+} // namespace common_vm

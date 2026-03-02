@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_PAGEALLOCATOR_H
-#define COMMON_COMPONENTS_COMMON_PAGEALLOCATOR_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_PAGEALLOCATOR_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_PAGEALLOCATOR_H
 
 #include <pthread.h>
 #if defined(__linux__) || defined(PANDA_TARGET_OHOS) || defined(__APPLE__)
@@ -29,7 +29,7 @@
 #include "common_components/common/page_pool.h"
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 // when there is a need to use PageAllocator to manage
 // the memory for a specific data structure, please add
 // a new type
@@ -376,5 +376,5 @@ inline bool operator==(StdContainerAllocator<Tp, tag>&, StdContainerAllocator<Tp
 {
     return true;
 }
-} // namespace common
+} // namespace common_vm
 #endif

@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +22,14 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_TRAITS_H
-#define COMMON_INTERFACES_OBJECTS_TRAITS_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_TRAITS_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_TRAITS_H
 
 #include "common_interfaces/objects/base_object.h"
 #include <type_traits>
 #include <vector>
 
-namespace common::objects_traits {
+namespace common_vm::objects_traits {
 
 template <typename U>
 constexpr bool is_heap_object_v = std::is_base_of_v<BaseObject, std::remove_pointer_t<U>>;
@@ -82,7 +82,7 @@ using vector_with_same_alloc_t =
     std::vector<NewT, rebind_alloc_t<get_allocator_type_t<Vec>, NewT>>;
 
 
-} // namespace common::objects_traits
+} // namespace common_vm::objects_traits
 
 
 #endif //COMMON_INTERFACES_OBJECTS_TRAITS_H

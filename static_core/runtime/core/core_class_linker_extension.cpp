@@ -104,17 +104,17 @@ void CoreClassLinkerExtension::FillStringClass(Class *strCls, ClassRoot flag)
         case ClassRoot::SLICED_STRING: {
             // used for gc
             strCls->SetSlicedStringClass();
-            strCls->SetRefFieldsNum(common::SlicedString::REF_FIELDS_COUNT, false);
-            strCls->SetRefFieldsOffset(common::SlicedString::PARENT_OFFSET, false);
-            (static_cast<BaseClass *>(strCls))->SetObjectSize(common::SlicedString::SIZE);
+            strCls->SetRefFieldsNum(common_vm::SlicedString::REF_FIELDS_COUNT, false);
+            strCls->SetRefFieldsOffset(common_vm::SlicedString::PARENT_OFFSET, false);
+            (static_cast<BaseClass *>(strCls))->SetObjectSize(common_vm::SlicedString::SIZE);
             break;
         }
         case ClassRoot::TREE_STRING: {
             // used for gc
             strCls->SetTreeStringClass();
-            strCls->SetRefFieldsNum(common::TreeString::REF_FIELDS_COUNT, false);
-            strCls->SetRefFieldsOffset(common::TreeString::LEFT_OFFSET, false);
-            (static_cast<BaseClass *>(strCls))->SetObjectSize(common::TreeString::SIZE);
+            strCls->SetRefFieldsNum(common_vm::TreeString::REF_FIELDS_COUNT, false);
+            strCls->SetRefFieldsOffset(common_vm::TreeString::LEFT_OFFSET, false);
+            (static_cast<BaseClass *>(strCls))->SetObjectSize(common_vm::TreeString::SIZE);
             break;
         }
         default: {

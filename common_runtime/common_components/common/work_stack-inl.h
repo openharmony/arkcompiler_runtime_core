@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H
-#define COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H
 
 #include "common_components/common/work_stack.h"
 
 #include <errno.h>
 
-namespace common {
+namespace common_vm {
 
 template <typename T, size_t capacity>
 bool StackBase<T, capacity>::IsEmpty() const
@@ -171,5 +171,5 @@ bool LocalStackImpl<T, capacity, PushToGlobalNotify>::PopOutStackFromGlobal()
     return false;
 }
 }  // namespace __work_stack_internal_impl
-}  // namespace common
-#endif  // COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_WORK_STACK_INL_H

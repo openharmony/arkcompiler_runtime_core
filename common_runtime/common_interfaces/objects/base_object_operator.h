@@ -22,8 +22,8 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
 
 #include <cstddef>
 #include <cstdint>
@@ -32,7 +32,7 @@
 #include "common_interfaces/objects/field.h"
 #include "common_interfaces/objects/ref_field.h"
 #include "common_interfaces/objects/base_state_word.h"
-namespace common {
+namespace common_vm {
 class BaseObject;
 
 class BaseObjectOperatorInterfaces {
@@ -63,8 +63,8 @@ private:
     BaseObjectOperatorInterfaces *staticObjOp_;
     friend BaseObject;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_OPERATOR_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

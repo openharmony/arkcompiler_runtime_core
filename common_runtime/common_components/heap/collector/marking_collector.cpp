@@ -24,7 +24,7 @@
 #include "common_interfaces/base/runtime_param.h"
 #include "common_components/heap/collector/utils.h"
 
-namespace common {
+namespace common_vm {
 const size_t MarkingCollector::MAX_MARKING_WORK_SIZE = 16; // fork task if bigger
 const size_t MarkingCollector::MIN_MARKING_WORK_SIZE = 8;  // forbid forking task if smaller
 
@@ -49,7 +49,7 @@ void StaticRootTable::VisitRoots(const RefFieldVisitor& visitor)
 }
 
 template <bool ProcessXRef>
-class ConcurrentMarkingTask : public common::Task {
+class ConcurrentMarkingTask : public common_vm::Task {
 public:
     ConcurrentMarkingTask(uint32_t id, MarkingCollector &tc, ParallelMarkingMonitor &monitor,
                           GlobalMarkStack &globalMarkStack)
@@ -747,4 +747,4 @@ void MarkingCollector::ExemptFromSpace()
     space.ExemptFromSpace();
 }
 
-} // namespace common
+} // namespace common_vm

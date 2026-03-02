@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,10 @@
 #include "common_components/tests/test_helper.h"
 #include <cstdint>
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
-class MarkingCollectorTest : public common::test::BaseTestWithScope {
+namespace common_vm::test {
+class MarkingCollectorTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -72,11 +72,11 @@ HWTEST_F_L0(MarkingCollectorTest, RunGarbageCollection)
 {
     MarkingCollector& collector = reinterpret_cast<MarkingCollector&>(Heap::GetHeap().GetCollector());
     Heap::GetHeap().SetGCReason(GCReason::GC_REASON_YOUNG);
-    collector.RunGarbageCollection(0, GCReason::GC_REASON_USER, common::GC_TYPE_FULL);
+    collector.RunGarbageCollection(0, GCReason::GC_REASON_USER, common_vm::GC_TYPE_FULL);
     ASSERT_FALSE(Heap::GetHeap().GetCollector().GetGCStats().isYoungGC());
 
     Heap::GetHeap().SetGCReason(GCReason::GC_REASON_BACKUP);
-    collector.RunGarbageCollection(0, GCReason::GC_REASON_OOM, common::GC_TYPE_FULL);
+    collector.RunGarbageCollection(0, GCReason::GC_REASON_OOM, common_vm::GC_TYPE_FULL);
     ASSERT_FALSE(Heap::GetHeap().GetCollector().GetGCStats().isYoungGC());
 }
 
@@ -84,7 +84,7 @@ HWTEST_F_L0(MarkingCollectorTest, RunGarbageCollectionTest2)
 {
     MarkingCollector& collector = reinterpret_cast<MarkingCollector&>(Heap::GetHeap().GetCollector());
     Heap::GetHeap().SetGCReason(GCReason::GC_REASON_YOUNG);
-    collector.RunGarbageCollection(0, GCReason::GC_REASON_YOUNG, common::GC_TYPE_FULL);
+    collector.RunGarbageCollection(0, GCReason::GC_REASON_YOUNG, common_vm::GC_TYPE_FULL);
     ASSERT_TRUE(Heap::GetHeap().GetCollector().GetGCStats().isYoungGC());
 }
 

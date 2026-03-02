@@ -22,7 +22,7 @@
 #include "common_components/sanitizer/sanitizer_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 BaseObject* CopyBarrier::ReadRefField(BaseObject* obj, RefField<false>& field) const
 {
     do {
@@ -140,4 +140,4 @@ void CopyBarrier::CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MInd
         LOG_COMMON(FATAL) << "Unresolved fatal";
         UNREACHABLE_CC();
 }
-} // namespace common
+} // namespace common_vm

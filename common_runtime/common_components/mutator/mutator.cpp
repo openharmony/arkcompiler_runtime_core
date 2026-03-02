@@ -33,7 +33,7 @@
 #include "common_interfaces/thread/mutator-inl.h"
 #include "common_interfaces/thread/mutator_state_transition.h"
 
-namespace common {
+namespace common_vm {
 thread_local Mutator *currentMutator = nullptr;
 
 ThreadLocalData *GetThreadLocalData()
@@ -480,4 +480,4 @@ Mutator::TryBindMutatorScope::~TryBindMutatorScope()
     }
 }
 
-} // namespace common
+} // namespace common_vm

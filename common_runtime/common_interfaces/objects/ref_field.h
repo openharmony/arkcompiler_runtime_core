@@ -22,13 +22,13 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_REF_FIELD_H
-#define COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H
 
 #include <atomic>
 #include <functional>
 #include "common_interfaces/objects/base_state_word.h"
-namespace common {
+namespace common_vm {
 class BaseObject;
 
 template <bool isAtomic = false>
@@ -175,8 +175,8 @@ private:
         RefFieldValue fieldVal;
     };
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_REF_FIELD_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_REF_FIELD_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

@@ -17,7 +17,7 @@
 #include "common_components/heap/heap.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 namespace {
 const char* const COLLECTOR_NAME[] = { "No Collector", "Proxy Collector", "Regional-Copying Collector",
                                        "Smooth Collector" };
@@ -56,4 +56,4 @@ void Collector::RequestGC(GCReason reason, bool async, GCType gcType)
     RequestGCInternal(reason, async, gcType);
     return;
 }
-} // namespace common.
+} // namespace common_vm.

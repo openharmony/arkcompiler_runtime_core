@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H
-#define COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H
 
 #if (defined(__has_feature) && __has_feature(address_sanitizer)) || defined(__SANITIZE_ADDRESS__)
 #define HAS_SANITIZER
@@ -53,4 +53,4 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __att
 #define ASAN_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
 #endif
 
-#endif  // COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_BASE_ASAN_INTERFACE_H

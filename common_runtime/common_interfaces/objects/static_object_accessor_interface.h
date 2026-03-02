@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H
-#define COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H
 
 #include "common_interfaces/objects/base_type.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 // NOTE (#26214): extracted `StaticObjectAccessor` here untill `JSTaggedValue` migrated from ets_runtime
 class StaticObjectAccessorInterface {
 public:
@@ -44,5 +44,5 @@ public:
     // NOLINTNEXTLINE(misc-misplaced-const)
     virtual bool SetElementByIdx(Mutator *mutator, BaseObject *obj, uint32_t index, const BoxedValue value) = 0;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_OBJECT_ACCESSOR_INTERFACE_H

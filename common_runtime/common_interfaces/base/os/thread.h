@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <thread>
 
-namespace common::os::thread {
+namespace common_vm::os::thread {
 
 using ThreadId = uint32_t;
 using NativeHandleType = std::thread::native_handle_type;
@@ -38,6 +38,6 @@ NativeHandleType GetNativeHandle();
  */
 int SetThreadName(NativeHandleType threadNativeHandle, const char *name);
 
-}  // namespace common::os::thread
+}  // namespace common_vm::os::thread
 
 #endif  // COMMON_COMMON_RUNTIME_INCLUDE_BASE_OS_THREAD_H

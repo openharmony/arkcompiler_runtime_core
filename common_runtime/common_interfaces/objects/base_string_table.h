@@ -19,7 +19,7 @@
 #include "common_interfaces/objects/readonly_handle.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 class BaseString;
 
 template <typename Impl>

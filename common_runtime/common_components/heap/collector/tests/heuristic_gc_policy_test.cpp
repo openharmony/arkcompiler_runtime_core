@@ -23,9 +23,9 @@
 #include "common_components/tests/test_helper.h"
 #include "heap/heap_allocator.h"
 
-using namespace common;
-namespace common::test {
-class HeuristicGCPolicyTest : public common::test::BaseTestWithScope {
+using namespace common_vm;
+namespace common_vm::test {
+class HeuristicGCPolicyTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -256,7 +256,7 @@ HWTEST_F_L0(HeuristicGCPolicyTest, CheckAndTriggerHintGCLow) {
     result = heuristicGCPolicy.CheckAndTriggerHintGC(MemoryReduceDegree::LOW);
     EXPECT_EQ(result, false);
 
-    auto obj = common::HeapAllocator::AllocateLargeRegion(7 * MB);
+    auto obj = common_vm::HeapAllocator::AllocateLargeRegion(7 * MB);
     RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
     HeapAddress start = regionInfo->GetRegionAllocPtr();
     HeapAddress end = regionInfo->GetRegionEnd();
@@ -274,7 +274,7 @@ HWTEST_F_L0(HeuristicGCPolicyTest, CheckAndTriggerHintGCHigh) {
     Heap& heap = Heap::GetHeap();
     HeuristicGCPolicy& heuristicGCPolicy = heap.GetHeuristicGCPolicy();
 
-    auto obj = common::HeapAllocator::AllocateLargeRegion(2 * MB);
+    auto obj = common_vm::HeapAllocator::AllocateLargeRegion(2 * MB);
     RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
     HeapAddress start = regionInfo->GetRegionAllocPtr();
     HeapAddress end = regionInfo->GetRegionEnd();
@@ -287,4 +287,4 @@ HWTEST_F_L0(HeuristicGCPolicyTest, CheckAndTriggerHintGCHigh) {
     bool result = heuristicGCPolicy.CheckAndTriggerHintGC(MemoryReduceDegree::HIGH);
     EXPECT_EQ(result, true);
 }
-} // namespace common::test
+} // namespace common_vm::test

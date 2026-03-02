@@ -15,8 +15,8 @@
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
 
-#ifndef COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
-#define COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
 #include <vector>
 
@@ -25,7 +25,7 @@
 #include "common_interfaces/objects/utils/utf_utils.h"
 #include "securec.h"
 
-namespace common {
+namespace common_vm {
 
 inline size_t LineString::ComputeSizeUtf8(uint32_t utf8Len)
 {
@@ -59,10 +59,10 @@ uint16_t LineString::Get(int32_t index) const
         }
     }
     if (!IsUtf16()) {
-        common::Span<const uint8_t> sp(GetDataUtf8(), length);
+        common_vm::Span<const uint8_t> sp(GetDataUtf8(), length);
         return sp[index];
     }
-    common::Span<const uint16_t> sp(GetDataUtf16(), length);
+    common_vm::Span<const uint16_t> sp(GetDataUtf16(), length);
     return sp[index];
 }
 
@@ -199,7 +199,7 @@ LineString *LineString::Create(Allocator &&allocator, size_t length, bool compre
     return string;
 }
 
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STRING_LINE_STRING_INL_H
 
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

@@ -15,7 +15,7 @@
 
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 #ifdef ENABLE_HILOG
 Level ConvertToLevel(LogLevel hilogLevel)
 {
@@ -196,4 +196,4 @@ std::string FormatLog(const char *format, ...) noexcept
     va_end(args);
     return "[CMC GC] " + msg;
 }
-}  // namespace common
+}  // namespace common_vm

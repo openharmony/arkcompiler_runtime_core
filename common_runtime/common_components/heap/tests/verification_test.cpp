@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,15 @@
 #include "common_components/tests/test_helper.h"
 #include "objects/base_object_operator.h"
 
-using namespace common;
-namespace common::test {
-class TestBaseObjectOperator : public common::BaseObjectOperatorInterfaces {
+using namespace common_vm;
+namespace common_vm::test {
+class TestBaseObjectOperator : public common_vm::BaseObjectOperatorInterfaces {
 public:
     bool IsValidObject([[maybe_unused]] const BaseObject *object) const override { return enbaleValidObject_; }
-    void ForEachRefField(const BaseObject *object, const common::RefFieldVisitor &visitor) const override {}
+    void ForEachRefField(const BaseObject *object, const common_vm::RefFieldVisitor &visitor) const override {}
     size_t ForEachRefFieldAndGetSize(
         const BaseObject *object,
-        const common::RefFieldVisitor &visitor) const override
+        const common_vm::RefFieldVisitor &visitor) const override
     {
         return 0;
     }
@@ -42,7 +42,7 @@ private:
     bool enbaleValidObject_ = false;
     size_t size_ = 0;
 };
-class VerificationTest : public common::test::BaseTestWithScope {
+class VerificationTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -291,4 +291,4 @@ HWTEST_F_L0(VerificationTest, IterateRemarked_VerifyAllRefs)
     EXPECT_EQ(markSet.size(), 1);
     EXPECT_TRUE(markSet.find(testObj) != markSet.end());
 }
-} // namespace common::test
+} // namespace common_vm::test

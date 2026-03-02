@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,12 @@
 //             cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays,
 //             readability-implicit-bool-conversion)
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
-#define COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 
 #include <stddef.h>
 #include <cstdint>
-namespace common {
+namespace common_vm {
 using StateWordType = uint64_t;
 using MAddress = uint64_t;
 class TypeInfo;
@@ -109,12 +109,12 @@ public:
         return state_.forwardState_;
     }
 
-    common::StateWordType GetBaseClassAddress() const
+    common_vm::StateWordType GetBaseClassAddress() const
     {
         return state_.bascClass_;
     }
 
-    void SetFullBaseClassAddress(common::StateWordType address)
+    void SetFullBaseClassAddress(common_vm::StateWordType address)
     {
         state_.bascClass_ = address;
     }
@@ -185,8 +185,8 @@ private:
     friend class BaseObject;
 };
 static_assert(sizeof(BaseStateWord) == sizeof(uint64_t), "Excepts 8 bytes");
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_STATE_WORD_H
 // NOLINTEND(readability-identifier-naming, cppcoreguidelines-macro-usage,
 //           cppcoreguidelines-special-member-functions, modernize-deprecated-headers,
 //           readability-else-after-return, readability-duplicate-include,

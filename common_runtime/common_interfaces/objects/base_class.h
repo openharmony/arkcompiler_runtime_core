@@ -18,7 +18,7 @@
 #include <cstdint>
 #include "common_interfaces/base/bit_field.h"
 
-namespace common {
+namespace common_vm {
 class BaseObject;
 
 enum class ObjectType : uint8_t {
@@ -44,8 +44,8 @@ public:
 
     using HeaderType = uint64_t;
 
-    static constexpr size_t TYPE_BITFIELD_NUM = common::BITS_PER_BYTE * sizeof(ObjectType);
-    using ObjectTypeBits = common::BitField<ObjectType, 0, TYPE_BITFIELD_NUM>; // 8
+    static constexpr size_t TYPE_BITFIELD_NUM = common_vm::BITS_PER_BYTE * sizeof(ObjectType);
+    using ObjectTypeBits = common_vm::BitField<ObjectType, 0, TYPE_BITFIELD_NUM>; // 8
 
     ObjectType GetObjectType() const
     {
@@ -92,5 +92,5 @@ protected:
     uint64_t bitfield_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
-}  // namespace common
+}  // namespace common_vm
 #endif //COMMON_INTERFACE_OBJECTS_BASE_CLASS_H

@@ -23,7 +23,7 @@
 
 #include "common_interfaces/objects/base_object.h"
 
-namespace common {
+namespace common_vm {
 using namespace std;
 Allocator::Allocator()
 {
@@ -85,4 +85,4 @@ Allocator* Allocator::CreateAllocator()
     LOGF_CHECK(heapSpace != nullptr) << "New RegionalHeap failed";
     return heapSpace;
 }
-} // namespace common
+} // namespace common_vm

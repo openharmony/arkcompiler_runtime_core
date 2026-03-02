@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include "common_components/heap/collector/collector_proxy.h"
 
-namespace common {
+namespace common_vm {
 bool GCRunner::Execute(void* owner)
 {
     ASSERT_LOGF(owner != nullptr, "task queue owner ptr should not be null!");
@@ -55,4 +55,4 @@ bool GCRunner::Execute(void* owner)
     }
     return true;
 }
-} // namespace common
+} // namespace common_vm

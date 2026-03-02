@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H
-#define COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H
 
 #include "common_components/heap/allocator/region_manager.h"
 #include "common_components/heap/space/regional_space.h"
@@ -23,7 +23,7 @@
 #include "common_components/base/asan_interface.h"
 #endif
 
-namespace common {
+namespace common_vm {
 // regions for non movable objects
 class NonMovableSpace : public RegionalSpace {
 public:
@@ -162,4 +162,4 @@ private:
 };
 }
 
-#endif // COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_SPACE_NONMOVABLE_SPACE_H

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
-#define COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
 
 #include <cstddef>
 #include <cstdint>
@@ -29,7 +29,7 @@
 #define DEQUE_ASSERT(cond, msg) (void(0))
 #endif
 
-namespace common {
+namespace common_vm {
 // Designed for single-use, single-purpose operations
 // Supports both queue-like and stack-like operations
 // Memory is efficiently cleared in O(1) time by simply resetting pointers
@@ -238,6 +238,6 @@ private:
     HeapAddress endAddr_ = 0;
     MemoryMap* memMap_ = nullptr;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_ROSALLOC_DEQUE_H

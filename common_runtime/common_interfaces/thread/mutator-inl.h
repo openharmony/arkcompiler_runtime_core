@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_THREAD_MUTATOR_INL_H
-#define COMMON_INTERFACES_THREAD_MUTATOR_INL_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H
 
 #include "common_interfaces/thread/mutator.h"
 
 #include "common_interfaces/base/common.h"
 
-namespace common {
+namespace common_vm {
 inline void Mutator::DoEnterSaferegion()
 {
     // set current mutator in saferegion.
@@ -97,5 +97,5 @@ bool Mutator::TransferToNativeIfInRunning()
     return EnterSaferegion(false);
 }
 
-}  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_MUTATOR_INL_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_MUTATOR_INL_H

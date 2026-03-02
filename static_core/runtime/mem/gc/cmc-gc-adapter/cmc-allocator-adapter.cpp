@@ -38,7 +38,8 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::Allocate([[maybe_unused]] size_t size,
                                                    [[maybe_unused]] bool pinned)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    return reinterpret_cast<void *>(common::HeapAllocator::AllocateInYoungOrHuge(size, common::LanguageType::STATIC));
+    return reinterpret_cast<void *>(
+        common_vm::HeapAllocator::AllocateInYoungOrHuge(size, common_vm::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -52,7 +53,7 @@ void *CMCObjectAllocatorAdapter<MT_MODE>::AllocateNonMovable(
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<ObjectHeader *>(
-        common::HeapAllocator::AllocateInNonmoveOrHuge(size, common::LanguageType::STATIC));
+        common_vm::HeapAllocator::AllocateInNonmoveOrHuge(size, common_vm::LanguageType::STATIC));
 #else
     return nullptr;
 #endif
@@ -62,12 +63,12 @@ template <MTModeT MT_MODE>
 void CMCObjectAllocatorAdapter<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto visitor = [&](common::BaseObject *obj) {
+    auto visitor = [&](common_vm::BaseObject *obj) {
         if (obj->IsStatic()) {
             objectVisitor(reinterpret_cast<ObjectHeader *>(obj));
         }
     };
-    common::BaseRuntime::ForEachObj(visitor, true);
+    common_vm::BaseRuntime::ForEachObj(visitor, true);
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
-#define COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
 
 #include "common_components/base/globals.h"
 #include "common_interfaces/base_runtime.h"
 #include "common_components/taskpool/taskpool.h"
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 enum class StartupStatus: uint8_t {
     BEFORE_STARTUP,
     COLD_STARTUP,
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    class StartupFinishTask : public common::Task {
+    class StartupFinishTask : public common_vm::Task {
     public:
         StartupFinishTask(uint32_t id) : Task(id) {}
         bool Run([[maybe_unused]] uint32_t threadIndex) override
@@ -64,7 +64,7 @@ private:
         }
     };
 
-    class StartupTask : public common::Task {
+    class StartupTask : public common_vm::Task {
     public:
         StartupTask(uint32_t id, Taskpool *pool, size_t delay)
             : Task(id), threadPool_(pool), delay_(delay) {}
@@ -206,6 +206,6 @@ private:
     std::atomic<AppSensitiveStatus> sensitiveStatus_ {AppSensitiveStatus::NORMAL_SCENE};
     std::atomic<size_t> recordSizeBeforeSensitive_ {0};
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEURISTIC_GC_POLICY_H

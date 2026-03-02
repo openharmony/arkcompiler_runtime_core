@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H
 
 #include <condition_variable>
 #include <cstdint>
@@ -26,7 +26,7 @@
 #include "common_components/log/log.h"
 
 // gc task and task queue implementation
-namespace common {
+namespace common_vm {
 class GCTask {
 public:
     enum class GCTaskType : uint32_t {
@@ -298,6 +298,6 @@ private:
     GCTaskQueueType syncTaskQueue_;
     GCLocklessTaskQueue<Type> asyncTaskQueue_;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_TASK_QUEUE_H

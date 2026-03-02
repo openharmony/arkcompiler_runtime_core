@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_MEM_COMMON_H
-#define COMMON_COMPONENTS_COMMON_MEM_COMMON_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_MEM_COMMON_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_MEM_COMMON_H
 
 #include <algorithm>
 #include <mutex>
@@ -23,7 +23,7 @@
 
 #include "common_components/common/page_pool.h"
 
-namespace common {
+namespace common_vm {
 using pageID = unsigned long long;
 // The maximum number of pages that PageCache can allocate
 constexpr size_t MAX_NPAGES = 129;
@@ -194,5 +194,5 @@ private:
     Span* head_ = new Span;
     std::mutex mtx_;
 };
-} // namespace common
+} // namespace common_vm
 #endif

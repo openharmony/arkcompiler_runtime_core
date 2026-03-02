@@ -60,7 +60,7 @@ public:
         : Thread(vm), runtime_(runtime), name_(std::move(name)), id_(id), isMainWorker_(isMainWorker)
     {
 #if defined(ARK_USE_COMMON_RUNTIME)
-        mutator_ = common::Mutator::CreateAndRegisterNewMutator(nullptr);
+        mutator_ = common_vm::Mutator::CreateAndRegisterNewMutator(nullptr);
 #endif  // ARK_USE_COMMON_RUNTIME
     }
     ~CoroutineWorker() override
@@ -156,7 +156,7 @@ public:
     }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common::Mutator *GetMutator()
+    common_vm::Mutator *GetMutator()
     {
         return mutator_;
     }
@@ -172,7 +172,7 @@ private:
     os::memory::Mutex posterLock_;
     PandaUniquePtr<CallbackPoster> extSchedulingPoster_;
 #if defined(ARK_USE_COMMON_RUNTIME)
-    common::Mutator *mutator_ = nullptr;
+    common_vm::Mutator *mutator_ = nullptr;
 #endif  // ARK_USE_COMMON_RUNTIME
 };
 

@@ -27,7 +27,7 @@
 
 namespace ark {
 #if defined(ARK_USE_COMMON_RUNTIME)
-using CommonRootVisitor = common::CommonRootVisitor;
+using CommonRootVisitor = common_vm::CommonRootVisitor;
 
 extern "C" void VisitCoroutine(void *coroutine, CommonRootVisitor visitor);
 #endif  // ARK_USE_COMMON_RUNTIME

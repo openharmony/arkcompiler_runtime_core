@@ -26,11 +26,11 @@
 #include "gtest/gtest.h"
 #include <cstddef>
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 using SuspensionType = MutatorBase::SuspensionType;
-class ArkCollectorTest : public common::test::BaseTestWithScope {
+class ArkCollectorTest : public common_vm::test::BaseTestWithScope {
 protected:
     static void SetUpTestCase()
     {
@@ -112,7 +112,7 @@ HWTEST_F_L0(ArkCollectorTest, ForwardUpdateRawRefTest0)
 
     new (obj) BaseObject();
 
-    common::ObjectRef root = {obj};
+    common_vm::ObjectRef root = {obj};
 
     BaseObject *oldObj = arkCollector->ForwardUpdateRawRef(root);
     EXPECT_EQ(oldObj, obj);
@@ -176,7 +176,7 @@ private:
 
 class DummyObject : public BaseObject {
 public:
-    const common::TypeInfo* GetTypeInfo() const { return nullptr; }
+    const common_vm::TypeInfo* GetTypeInfo() const { return nullptr; }
     size_t GetSize() const { return sizeof(DummyObject); }
 
     void SetClass(uintptr_t cls)
@@ -206,14 +206,14 @@ private:
     BaseStateWord stateWord_;
 };
 
-class TestBaseObjectOperator : public common::BaseObjectOperatorInterfaces {
+class TestBaseObjectOperator : public common_vm::BaseObjectOperatorInterfaces {
 public:
     bool IsValidObject([[maybe_unused]] const BaseObject *object) const override { return true; }
-    void ForEachRefField(const BaseObject *object, const common::RefFieldVisitor &visitor) const override {}
+    void ForEachRefField(const BaseObject *object, const common_vm::RefFieldVisitor &visitor) const override {}
     size_t GetSize(const BaseObject *object) const override{ return size_; }
     size_t ForEachRefFieldAndGetSize(
         const BaseObject *object,
-        const common::RefFieldVisitor &visitor) const override
+        const common_vm::RefFieldVisitor &visitor) const override
     {
         return 0;
     }
@@ -518,7 +518,7 @@ public:
     void ForEachRefField(const BaseObject *object, const RefFieldVisitor &visitor) const override {}
     size_t ForEachRefFieldAndGetSize(
         const BaseObject *object,
-        const common::RefFieldVisitor &visitor) const override
+        const common_vm::RefFieldVisitor &visitor) const override
     {
         return 0;
     }
@@ -671,4 +671,4 @@ HWTEST_F_L0(ArkCollectorTest, TryUpdateRefFieldImpl_TEST4)
     bool ret = arkCollector->TryForwardRefField(nullptr, field, obj);
     EXPECT_TRUE(ret);
 }
-}  // namespace common::test
+}  // namespace common_vm::test

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
-#define COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
 #include "common_interfaces/objects/base_type.h"
 
-namespace common {
+namespace common_vm {
 // Type Converter implemented for static vm.
 class StaticTypeConverterInterface {
 public:
@@ -27,5 +27,5 @@ public:
     // convert BoxedValue to BaseType
     virtual BaseType UnwrapBoxed(BoxedValue value) = 0;
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_STATIC_TYPE_CONVERTER_INTERFACE_H

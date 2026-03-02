@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,9 @@
 #include "common_components/heap/heap_manager.h"
 #include "common_interfaces/base_runtime.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 class MarkingBarrierTest : public BaseTestWithScope {
 protected:
     static void SetUpTestCase()
@@ -455,4 +455,4 @@ HWTEST_F_L0(MarkingBarrierTest, CompareAndSwapRefField_TEST3)
         oldObj, newField, oldObj, newObj, std::memory_order_seq_cst, std::memory_order_seq_cst);
     ASSERT_FALSE(result);
 }
-}  // namespace common::test
+}  // namespace common_vm::test

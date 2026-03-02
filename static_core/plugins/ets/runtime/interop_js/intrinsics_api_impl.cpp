@@ -56,7 +56,7 @@ static bool StringStartWith(std::string_view str, std::string_view startStr)
 
 namespace ark::ets::interop::js {
 
-using common::TaggedType;
+using common_vm::TaggedType;
 
 [[maybe_unused]] static bool NotNativeOhmUrl(std::string_view url)
 {
@@ -801,8 +801,8 @@ EtsObject *InvokeWithObjectReturn(EtsObject *thisObj, EtsObject *func, Span<VMHa
     TaggedType *retVal = nullptr;
     {
         ScopedNativeCodeThread nativeScope(coro);
-        retVal = common::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
-                                                                 realArgs.data());
+        retVal = common_vm::DynamicObjectAccessorUtil::CallFunction(thisTaggedType, funcTaggedType, realArgs.size(),
+                                                                    realArgs.data());
     }
     if (NapiIsExceptionPending(env)) {
         ctx->ForwardJSException(coro);

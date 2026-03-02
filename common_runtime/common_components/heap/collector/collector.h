@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H
 
 #include <atomic>
 #include <cstdint>
@@ -29,7 +29,7 @@
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/base/runtime_param.h"
 
-namespace common {
+namespace common_vm {
 enum CollectorType {
     NO_COLLECTOR = 0,   // No Collector
     PROXY_COLLECTOR,           // Proxy of Collector
@@ -109,6 +109,6 @@ protected:
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;
     std::atomic<GCPhase> gcPhase_ = { GCPhase::GC_PHASE_IDLE };
 };
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_H

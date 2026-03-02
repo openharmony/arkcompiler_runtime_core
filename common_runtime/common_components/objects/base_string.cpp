@@ -23,7 +23,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace common {
+namespace common_vm {
 size_t UtfUtils::DebuggerConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len,
                                                   size_t utf8Len, size_t start, bool modify, bool isWriteBuffer)
 {
@@ -77,8 +77,8 @@ template uint32_t BaseString::CalculateDataConcatHashCode<uint16_t, uint8_t>(con
                                                                              const uint8_t *dataSecond,
                                                                              size_t sizeSecond);
 
-template <typename T1, typename T2>
-bool IsSubStringAtSpan(common::Span<T1> &lhsSp, common::Span<T2> &rhsSp, uint32_t offset)
+template <typename T1, typename T2> // CC-OFFNXT(G.NAM.03-CPP) project code style
+bool IsSubStringAtSpan(common_vm::Span<T1> &lhsSp, common_vm::Span<T2> &rhsSp, uint32_t offset)
 {
     size_t rhsSize = rhsSp.size();
     DCHECK_CC(rhsSize + offset <= lhsSp.size());
@@ -92,14 +92,15 @@ bool IsSubStringAtSpan(common::Span<T1> &lhsSp, common::Span<T2> &rhsSp, uint32_
     return true;
 }
 
-template bool IsSubStringAtSpan<const uint8_t, const uint8_t>(common::Span<const uint8_t> &lhsSp,
-                                                              common::Span<const uint8_t> &rhsSp, uint32_t offset);
-template bool IsSubStringAtSpan<const uint16_t, const uint16_t>(common::Span<const uint16_t> &lhsSp,
-                                                                common::Span<const uint16_t> &rhsSp, uint32_t offset);
-template bool IsSubStringAtSpan<const uint8_t, const uint16_t>(common::Span<const uint8_t> &lhsSp,
-                                                               common::Span<const uint16_t> &rhsSp, uint32_t offset);
-template bool IsSubStringAtSpan<const uint16_t, const uint8_t>(common::Span<const uint16_t> &lhsSp,
-                                                               common::Span<const uint8_t> &rhsSp, uint32_t offset);
+template bool IsSubStringAtSpan<const uint8_t, const uint8_t>(common_vm::Span<const uint8_t> &lhsSp,
+                                                              common_vm::Span<const uint8_t> &rhsSp, uint32_t offset);
+template bool IsSubStringAtSpan<const uint16_t, const uint16_t>(common_vm::Span<const uint16_t> &lhsSp,
+                                                                common_vm::Span<const uint16_t> &rhsSp,
+                                                                uint32_t offset);
+template bool IsSubStringAtSpan<const uint8_t, const uint16_t>(common_vm::Span<const uint8_t> &lhsSp,
+                                                               common_vm::Span<const uint16_t> &rhsSp, uint32_t offset);
+template bool IsSubStringAtSpan<const uint16_t, const uint8_t>(common_vm::Span<const uint16_t> &lhsSp,
+                                                               common_vm::Span<const uint8_t> &rhsSp, uint32_t offset);
 
 std::u16string Utf16ToU16String(const uint16_t *utf16Data, uint32_t dataLen)
 {
@@ -115,4 +116,4 @@ std::u16string Utf8ToU16String(const uint8_t *utf8Data, uint32_t dataLen)
     std::u16string u16str = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> {}.from_bytes(str);
     return u16str;
 }
-}  // namespace common
+}  // namespace common_vm

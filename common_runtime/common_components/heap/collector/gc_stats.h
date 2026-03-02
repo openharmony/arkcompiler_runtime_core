@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
 
 #include <algorithm>
 #include <atomic>
@@ -27,7 +27,7 @@
 #include "common_components/log/log.h"
 #include "common_interfaces/base_runtime.h"
 
-namespace common {
+namespace common_vm {
 // statistics for previous gc.
 class GCStats {
 public:
@@ -113,6 +113,6 @@ extern size_t g_gcCollectedTotalBytes;
 
 extern size_t g_fullGCCount;
 extern double g_fullGCMeanRate;
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_STATS_H

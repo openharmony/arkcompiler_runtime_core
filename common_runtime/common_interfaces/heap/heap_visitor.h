@@ -13,8 +13,8 @@
  * limitations under the License.
  **/
 
-#ifndef COMMON_INTERFACES_HEAP_VISITOR_H
-#define COMMON_INTERFACES_HEAP_VISITOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H
 
 #include <cstddef>
 #include <cstdint>
@@ -22,7 +22,7 @@
 #include "common_interfaces/base/common.h"
 #include "common_interfaces/objects/ref_field.h"
 
-namespace common {
+namespace common_vm {
 class BaseObject;
 class Mutator;
 using CommonRootVisitor = void (*)(void *root);
@@ -60,5 +60,5 @@ PUBLIC_API void RegisterUpdateStaticRootsHook(UpdateStaticRootsHookFunc func);
 PUBLIC_API void RegisterSweepStaticRootsHook(SweepStaticRootsHookFunc func);
 PUBLIC_API void RegisterUnmarkAllXRefsHook(UnmarkAllXRefsHookFunc func);
 PUBLIC_API void RegisterSweepUnmarkedXRefsHook(SweepUnmarkedXRefsHookFunc func);
-}  // namespace common
-#endif  // COMMON_INTERFACES_HEAP_VISITOR_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_VISITOR_H

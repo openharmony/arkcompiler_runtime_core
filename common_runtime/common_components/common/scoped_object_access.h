@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
-#define COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
 
 #include "common_components/mutator/thread_local.h"
 
 #include "common_interfaces/thread/mutator-inl.h"
 
-namespace common {
+namespace common_vm {
 // Scoped guard for saferegion.
 class ScopedEnterSaferegion {
 public:
@@ -66,6 +66,6 @@ private:
     Mutator& mutator;
     bool leavedSafeRegion;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_COMMON_SCOPED_SAFEREGION_H

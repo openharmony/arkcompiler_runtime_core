@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H
-#define COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H
 
 #include <cstdint>
 
 #include "common_components/base/config.h"
 #include "common_components/platform/string_hash.h"
 
-namespace common {
+namespace common_vm {
 class StringHashInternal {
 friend class StringHashHelper;
 private:
@@ -60,5 +60,5 @@ private:
         return hashTotal;
     }
 };
-}  // namespace common
-#endif  // COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_PLATFORM_STRING_HASH_COMMON_H

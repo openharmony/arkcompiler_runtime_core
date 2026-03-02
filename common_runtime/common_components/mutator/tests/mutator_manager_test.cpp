@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include "common_components/mutator/mutator_manager.h"
 #include "common_components/common_runtime/base_runtime.cpp"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 class MutatorManagerTest : public BaseTestWithScope {
 protected:
     void SetUp() override
@@ -282,4 +282,4 @@ HWTEST_F_L0(MutatorManagerTest, EnsurePhaseTransition_Test2)
     EXPECT_EQ(mutators.size(), 0);
     delete managerPtr;
 }
-}  // namespace common::test
+}  // namespace common_vm::test

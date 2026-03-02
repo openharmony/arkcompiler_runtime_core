@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H
-#define COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H
 
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/ark_collector/idle_barrier.h"
 
-namespace common {
+namespace common_vm {
 // PreforwardBarrier is the barrier for concurrent copying gc in fixup stage
 class PreforwardBarrier : public IdleBarrier {
 public:
@@ -44,6 +44,6 @@ public:
     void CopyStructArray(BaseObject* dstObj, HeapAddress dstField, MIndex dstSize, BaseObject* srcObj,
                          HeapAddress srcField, MIndex srcSize) const override;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ARK_COLLECTOR_MARKING_FIX_BARRIER_H

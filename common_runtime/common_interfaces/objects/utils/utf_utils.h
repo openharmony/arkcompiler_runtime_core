@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
-#define COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 
 #include <cstddef>
 #include <cstdint>
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)
-namespace common {
+namespace common_vm {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 static constexpr unsigned char firstByteMark[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
 class UtfUtils {
@@ -317,6 +317,6 @@ public:
 private:
     static uint32_t HandleAndDecodeInvalidUTF16(uint16_t const *utf16, size_t len, size_t *index);
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_UTILS_UTF_H
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic, readability-magic-numbers)

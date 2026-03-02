@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_TESTS_TEST_HELPER_H
-#define COMMON_COMPONENTS_TESTS_TEST_HELPER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_TESTS_TEST_HELPER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_TESTS_TEST_HELPER_H
 
 #include "gtest/gtest.h"
 
-namespace common::test {
+namespace common_vm::test {
 
 #define HWTEST_F_L0(testsuit, testcase) HWTEST_F(testsuit, testcase, testing::ext::TestSize.Level0)
 #define HWTEST_P_L0(testsuit, testcase) HWTEST_P(testsuit, testcase, testing::ext::TestSize.Level0)
@@ -39,5 +39,5 @@ public:
 
     void TearDown() override {}
 };
-}  // namespace common::test
-#endif  // COMMON_COMPONENTS_TESTS_TEST_HELPER_H
+}  // namespace common_vm::test
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_TESTS_TEST_HELPER_H

@@ -16,7 +16,7 @@
 #include "common_components/common_runtime/hooks.h"
 #include "common_components/log/log.h"
 
-namespace common {
+namespace common_vm {
 
 void (*g_visitAllStaticRootsCallback)(const RefFieldVisitor &) = nullptr;
 void (*g_visitStaticMutatorRootsCallback)(const RefFieldVisitor &, void *mutator) = nullptr;
@@ -184,4 +184,4 @@ void VisitDynamicWeakLocalRoots([[maybe_unused]] const WeakRefFieldVisitor &visi
 void VisitDynamicPreforwardRoots([[maybe_unused]] const RefFieldVisitor &visitorFunc) {}
 
 void VisitDynamicConcurrentRoots([[maybe_unused]] const RefFieldVisitor &visitorFunc) {}
-}  // namespace common
+}  // namespace common_vm

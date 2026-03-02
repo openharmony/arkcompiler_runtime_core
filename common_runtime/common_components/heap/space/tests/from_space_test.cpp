@@ -1,5 +1,5 @@
-/*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -18,9 +18,9 @@
 #include "common_components/mutator/thread_local.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
-namespace common::test {
-class FromSpaceTest : public common::test::BaseTestWithScope {
+using namespace common_vm;
+namespace common_vm::test {
+class FromSpaceTest : public common_vm::test::BaseTestWithScope {
 protected:
     class TestRegionList : public RegionList {
     public:
@@ -86,4 +86,4 @@ HWTEST_F_L0(FromSpaceTest, ParallelCopyFromRegions)
     fromSpace.ParallelCopyFromRegions(nullptr, 5);
     ASSERT_FALSE(AllocationBuffer::GetAllocBuffer() != nullptr);
 }
-} // namespace common::test
+} // namespace common_vm::test

@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_type.h"
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 // The interface will be implemented in the dynamic runtime to provide the ability to access properties of 1.0 objects.
 class DynamicObjectAccessorInterface {
 public:
@@ -43,4 +43,4 @@ public:
     virtual bool SetElementByIdx(Mutator *mutator, BaseObject *obj, const uint32_t index, JSTaggedValue value) = 0;
 };
 }  // namespace panda
-#endif  // COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_H
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_H

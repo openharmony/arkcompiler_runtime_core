@@ -15,7 +15,7 @@
 
 #include "common_components/common_runtime/hooks.h"
 
-namespace common {
+namespace common_vm {
 void SetBaseAddress(uintptr_t base) {}
 void JitFortUnProt(size_t size, void* base) {}
 void FillFreeObject(void *object, size_t size) {}
@@ -23,8 +23,8 @@ void VisitDynamicGlobalRoots(const RefFieldVisitor &visitorFunc) {}
 void VisitDynamicLocalRoots(const RefFieldVisitor &visitor) {}
 void VisitBaseRoots(const RefFieldVisitor &visitorFunc) {}
 void VisitDynamicConcurrentRoots(const RefFieldVisitor &visitorFunc) {}
-void VisitDynamicWeakGlobalRoots(const common::WeakRefFieldVisitor &visitorFunc) {}
-void VisitDynamicWeakGlobalRootsOld(const common::WeakRefFieldVisitor &visitorFunc) {}
+void VisitDynamicWeakGlobalRoots(const common_vm::WeakRefFieldVisitor &visitorFunc) {}
+void VisitDynamicWeakGlobalRootsOld(const common_vm::WeakRefFieldVisitor &visitorFunc) {}
 void VisitDynamicWeakLocalRoots(const WeakRefFieldVisitor &visitorFunc) {}
 void VisitDynamicPreforwardRoots(const RefFieldVisitor &visitorFunc) {}
 void VisitDynamicThreadRoot(const RefFieldVisitor &visitorFunc, void *vm) {}
@@ -45,4 +45,4 @@ void CheckAndInitBaseRuntime(const RuntimeParam &param) {}
 void CheckAndFiniBaseRuntime() {}
 void RemoveXRefFromDynamicRoots() {}
 void AddXRefToDynamicRoots() {}
-} // namespace common
+} // namespace common_vm

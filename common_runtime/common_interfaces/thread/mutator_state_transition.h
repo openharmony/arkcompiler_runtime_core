@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
-#define COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
 
 #include "common_interfaces/thread/mutator-inl.h"
 #include "common_interfaces/thread/thread_state.h"
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common {
+namespace common_vm {
 
 template <typename T, ThreadState newState>
 class MutatorStateTransitionScope final {
@@ -127,5 +127,5 @@ private:
     MutatorStateTransitionScope<T, ThreadState::IS_SUSPENDED> scope_;
     NO_COPY_SEMANTIC_CC(SuspendAllScope);
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_THREAD_THREAD_STATE_TRANSITION_H

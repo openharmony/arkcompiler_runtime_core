@@ -27,15 +27,15 @@ namespace ark::ets {
 
 StaticObjectAccessor StaticObjectAccessor::stcObjAccessor_;
 
-bool StaticObjectAccessor::HasProperty([[maybe_unused]] common::Mutator *mutator, const common::BaseObject *obj,
+bool StaticObjectAccessor::HasProperty([[maybe_unused]] common_vm::Mutator *mutator, const common_vm::BaseObject *obj,
                                        const char *name)
 {
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
     return etsObj->GetClass()->GetFieldIDByName(name) != nullptr;
 }
 
-common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::Mutator *mutator,
-                                                     const common::BaseObject *obj, const char *name)
+common_vm::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common_vm::Mutator *mutator,
+                                                        const common_vm::BaseObject *obj, const char *name)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -48,11 +48,11 @@ common::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] common::Mu
     if (field == nullptr) {
         return nullptr;
     }
-    return reinterpret_cast<common::BoxedValue>(GetPropertyValue(coro, etsObj, field));
+    return reinterpret_cast<common_vm::BoxedValue>(GetPropertyValue(coro, etsObj, field));
 }
 
-bool StaticObjectAccessor::SetProperty([[maybe_unused]] common::Mutator *mutator, common::BaseObject *obj,
-                                       const char *name, common::BoxedValue value)
+bool StaticObjectAccessor::SetProperty([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
+                                       const char *name, common_vm::BoxedValue value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -70,16 +70,16 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] common::Mutator *mutator
     return SetPropertyValue(coro, etsObj, field, reinterpret_cast<EtsObject *>(value));
 }
 
-bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common::Mutator *mutator,
-                                           [[maybe_unused]] const common::BaseObject *obj,
+bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
+                                           [[maybe_unused]] const common_vm::BaseObject *obj,
                                            [[maybe_unused]] const uint32_t index)
 {
     LOG(ERROR, RUNTIME) << "HasElementByIdx has no meaning for static object";
     return false;
 }
 
-common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common::Mutator *mutator,
-                                                         const common::BaseObject *obj, const uint32_t index)
+common_vm::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator,
+                                                            const common_vm::BaseObject *obj, const uint32_t index)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);
@@ -91,11 +91,11 @@ common::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] common
     EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:Lstd/core/Object;");
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObject)), ark::Value(index)};
     ark::Value value = method->GetPandaMethod()->Invoke(coro, args.data());
-    return reinterpret_cast<common::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
+    return reinterpret_cast<common_vm::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
 }
 
-bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common::Mutator *mutator, common::BaseObject *obj,
-                                           uint32_t index, const common::BoxedValue value)
+bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] common_vm::Mutator *mutator, common_vm::BaseObject *obj,
+                                           uint32_t index, const common_vm::BoxedValue value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     ASSERT(coro != nullptr);

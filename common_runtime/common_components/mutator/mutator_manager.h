@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H
-#define COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H
 
 #include <bitset>
 #include <list>
@@ -34,7 +34,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 const uint64_t WAIT_LOCK_INTERVAL = 5000; // 5us
 const uint64_t WAIT_LOCK_TIMEOUT = 30;    // seconds
 const uint32_t MAX_TIMEOUT_TIMES = 1;
@@ -300,6 +300,6 @@ public:
 
     __attribute__((always_inline)) ~ScopedSTWLock() { MutatorManager::Instance().UnlockStopTheWorld(); }
 };
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_MUTATOR_MUTATOR_MANAGER_H

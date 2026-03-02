@@ -192,9 +192,9 @@ public:
     void UnbindMutator();
 
     /// @returns true if mutator was created
-    bool CreateExternalMutatorIfNeeded(bool useSharedMutator, common::Mutator *m);
+    bool CreateExternalMutatorIfNeeded(bool useSharedMutator, common_vm::Mutator *m);
 
-    common::Mutator *GetMutator() const
+    common_vm::Mutator *GetMutator() const
     {
         ASSERT(mutator_ != nullptr);
         return mutator_;
@@ -308,10 +308,10 @@ private:
         // NOLINTEND(cppcoreguidelines-pro-type-union-access)
     }
 #if defined(ARK_USE_COMMON_RUNTIME)
-    static void SetSharedExternalMutator(common::Mutator *externalMutator);
-    static common::Mutator *GetSharedExternalMutator();
+    static void SetSharedExternalMutator(common_vm::Mutator *externalMutator);
+    static common_vm::Mutator *GetSharedExternalMutator();
 
-    common::Mutator *mutator_ {nullptr};
+    common_vm::Mutator *mutator_ {nullptr};
 #endif  // ARK_USE_COMMON_RUNTIME
 
     PandaVM *vm_ {nullptr};

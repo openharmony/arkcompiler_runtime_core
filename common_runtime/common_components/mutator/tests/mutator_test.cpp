@@ -20,9 +20,9 @@
 #include "common_interfaces/base_runtime.h"
 #include "common_interfaces/objects/base_object.h"
 
-using namespace common;
+using namespace common_vm;
 
-namespace common::test {
+namespace common_vm::test {
 class TestMutator : public Mutator {
 public:
     using Mutator::VisitRawObjects;
@@ -291,4 +291,4 @@ HWTEST_F_L0(MutatorTest, TryBindMutatorScopeTest)
     Mutator::TryBindMutatorScope scope(mutator);
     EXPECT_EQ(ThreadLocal::GetAllocBuffer(), nullptr);
 }
-}  // namespace common::test
+}  // namespace common_vm::test

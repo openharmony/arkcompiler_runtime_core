@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #endif
-namespace common {
+namespace common_vm {
 static_assert(Heap::NORMAL_UNIT_SIZE == RegionDesc::UNIT_SIZE);
 static_assert(Heap::NORMAL_UNIT_HEADER_SIZE == RegionDesc::UNIT_HEADER_SIZE);
 static_assert(Heap::NORMAL_UNIT_AVAILABLE_SIZE == RegionDesc::UNIT_AVAILABLE_SIZE);
@@ -370,4 +370,4 @@ void HeapImpl::StopGCWork() { collectorResources_.StopGCWork(); }
 
 void HeapImpl::RegisterAllocBuffer(AllocationBuffer& buffer) { GetAllocator().RegisterAllocBuffer(buffer); }
 void HeapImpl::UnregisterAllocBuffer(AllocationBuffer& buffer) { GetAllocator().UnregisterAllocBuffer(buffer); }
-} // namespace common
+} // namespace common_vm

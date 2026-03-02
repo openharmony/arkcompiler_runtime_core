@@ -19,7 +19,7 @@
 #include "common_interfaces/thread/mutator.h"
 #include "common_interfaces/profiler/heap_profiler_listener.h"
 
-namespace common {
+namespace common_vm {
 HeapProfilerListener &HeapProfilerListener::GetInstance()
 {
     static HeapProfilerListener instance;
@@ -61,4 +61,4 @@ void HeapProfilerListener::OnOutOfMemoryEventCb()
     }
     outOfMemoryEventCb_(thread);
 }
-}  // namespace common
+}  // namespace common_vm

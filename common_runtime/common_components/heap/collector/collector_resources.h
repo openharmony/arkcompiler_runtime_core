@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
 
 #include "common_components/heap/collector/finalizer_processor.h"
 #include "common_components/heap/collector/task_queue.h"
 #include "common_components/taskpool/taskpool.h"
 
-namespace common {
+namespace common_vm {
 class CollectorProxy;
 // CollectorResources provides the resources that a functional collector need,
 // such as gc thread/threadPool, gc task queue...
@@ -132,6 +132,6 @@ private:
     GCStats gcStats_;
     bool hasRelease = false;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_RESOURCES_H

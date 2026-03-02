@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H
 
 #include "common_components/heap/ark_collector/ark_collector.h"
 #include "common_components/heap/collector/collector.h"
 #include "common_components/heap/collector/collector_resources.h"
 
-namespace common {
+namespace common_vm {
 // CollectorProxy is a special kind of collector, it is derived from Base class Collector, thus behaves like a real
 // collector. However, it actually manages a set of collectors implemented yet, and delegate garbage-collecting to
 // one of these collectors.
@@ -90,6 +90,6 @@ private:
     ArkCollector* currentCollector_ = nullptr;
     ArkCollector arkCollector_;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_COLLECTOR_PROXY_H

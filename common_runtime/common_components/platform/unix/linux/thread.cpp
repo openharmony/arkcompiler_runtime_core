@@ -21,7 +21,7 @@
 
 #include "common_interfaces/base/common.h"
 
-namespace common::os::thread {
+namespace common_vm::os::thread {
 
 ThreadId GetCurrentThreadId()
 {
@@ -44,4 +44,4 @@ int SetThreadName([[maybe_unused]] NativeHandleType threadNativeHandle, const ch
     return pthread_setname_np(threadNativeHandle, name);
 }
 
-}  // namespace common::os::thread
+}  // namespace common_vm::os::thread

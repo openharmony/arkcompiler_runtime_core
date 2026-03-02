@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_H
-#define COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_HASHTRIEMAP_H
 
 #include "common_components/heap/heap.h"
 #include "common_components/log/log.h"
@@ -27,7 +27,7 @@ namespace panda::ecmascript {
 class TaggedObject;
 }
 
-namespace common {
+namespace common_vm {
 class TrieMapConfig {
 public:
     static constexpr uint32_t ROOT_BIT = 11U;

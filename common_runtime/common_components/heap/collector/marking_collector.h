@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H
-#define COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H
 
 #include <cstdint>
 #include <map>
@@ -27,7 +27,7 @@
 #include "common_components/heap/collector/copy_data_manager.h"
 #include "common_components/mutator/mutator_manager.h"
 
-namespace common {
+namespace common_vm {
 
 template <typename T>
 using CArrayList = std::vector<T>;
@@ -223,8 +223,8 @@ public:
         const auto &GetClosure() const { return closure_; }
 
     private:
-        common::RefFieldVisitor visitor_;
-        common::RefFieldVisitor weakVisitor_;
+        common_vm::RefFieldVisitor visitor_;
+        common_vm::RefFieldVisitor weakVisitor_;
         std::shared_ptr<BaseObject *> closure_;
     };
     virtual MarkingRefFieldVisitor CreateMarkingObjectRefFieldsVisitor(ParallelLocalMarkStack &workStack,
@@ -408,6 +408,6 @@ private:
     std::vector<StackType> stacks_;
 };
 
-} // namespace common
+} // namespace common_vm
 
-#endif  // COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_COLLECTOR_MARKING_COLLECTOR_H

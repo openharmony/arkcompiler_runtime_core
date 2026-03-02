@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
-#define COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
 
 #include "common_interfaces/objects/base_object.h"
 #include "common_components/common/type_def.h"
 #include <vector>
 
-namespace common {
+namespace common_vm {
 class Collector;
 // Barrier is the base class to define read/write barriers.
 class Barrier {
@@ -85,6 +85,6 @@ protected:
     };
     Collector& theCollector;
 };
-} // namespace common
+} // namespace common_vm
 
-#endif // COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H
+#endif // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_BARRIER_BARRIER_H

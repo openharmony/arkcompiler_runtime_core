@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "common_components/common/page_cache.h"
 #include "common_components/tests/test_helper.h"
 
-using namespace common;
+using namespace common_vm;
 
-class PageCacheTestSimple : public common::test::BaseTestWithScope {
+class PageCacheTestSimple : public common_vm::test::BaseTestWithScope {
 protected:
     void SetUp() override {}
     void TearDown() override {}

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_UTIL_H
-#define COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_UTIL_H
+#ifndef COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_UTIL_H
+#define COMMON_RUNTIME_COMMON_INTERFACES_OBJECTS_BASE_OBJECT_ACCESSOR_UTIL_H
 
-#include "common_interfaces/objects/base_object.h"
-#include "common_interfaces/objects/base_type.h"
+#include <cstdint>
 
-namespace common {
+#include "common_interfaces/base/common.h"
+
+namespace common_vm {
+class BaseObject;
+using TaggedType = uint64_t;
+
 // The interface will be implemented in the dynamic runtime to provide the ability to access properties of 1.0 objects.
 // Will switch to dynamicObjectAccessor interfaces after hybrid VM and CMC is fixed.
 class PUBLIC_API DynamicObjectAccessorUtil {
@@ -33,5 +37,5 @@ public:
     __attribute__((weak)) static TaggedType* CallFunction(TaggedType jsThis, TaggedType function, int32_t argc,
                                                           TaggedType *argv);
 };
-}  // namespace common
-#endif  // COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_UTIL_H
+}  // namespace common_vm
+#endif  // COMMON_RUNTIME_COMMON_INTERFACES_BASE_OBJECT_ACCESSOR_UTIL_H

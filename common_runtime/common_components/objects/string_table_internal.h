@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTERNAL_H
-#define COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTERNAL_H
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTERNAL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_OBJECTS_STRING_TABLE_INTERNAL_H
 
 #include "common_components/base/globals.h"
 #include "common_components/platform/mutex.h"
@@ -24,7 +24,7 @@
 #include "common_components/objects/string_table/hashtriemap.h"
 #include "common_components/taskpool/task.h"
 
-namespace common {
+namespace common_vm {
 
 class BaseStringTableMutex {
 public:

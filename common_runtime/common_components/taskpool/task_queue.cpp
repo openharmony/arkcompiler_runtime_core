@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "common_components/taskpool/task_queue.h"
 
-namespace common {
+namespace common_vm {
 void TaskQueue::PostTask(std::unique_ptr<Task> task)
 {
     std::lock_guard<std::mutex> guard(mtx_);
@@ -120,4 +120,4 @@ void TaskQueue::WaitForTask(std::unique_lock<std::mutex> &lock)
         cv_.wait(lock);
     }
 }
-}  // namespace common
+}  // namespace common_vm

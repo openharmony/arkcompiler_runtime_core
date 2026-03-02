@@ -21,7 +21,7 @@
 
 #include "common_interfaces/thread/mutator.h"
 
-namespace common {
+namespace common_vm {
 constexpr uint32_t DEFAULT_FINALIZER_TIMEOUT_MS = 2000;
 
 // Note: can only be called by FinalizerProcessor thread
@@ -273,4 +273,4 @@ void FinalizerProcessor::FeedHungryBuffers()
     Heap::GetHeap().GetAllocator().FeedHungryBuffers();
     shouldFeedHungryBuffers_.store(false, std::memory_order_relaxed);
 }
-} // namespace common
+} // namespace common_vm
