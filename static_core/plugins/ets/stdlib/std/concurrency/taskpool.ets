@@ -487,6 +487,7 @@ export namespace taskpool {
             this.condVar = ConcurrencyHelpers.condVarCreate();
             this.dependentTasks = new containers.ConcurrentSet<Task>();
             this.task = task;
+            this.creatorWorkerId = CoroutineExtras.getWorkerId();
         }
 
         static of(task: Task): InternalTask {
@@ -659,6 +660,7 @@ export namespace taskpool {
                 const count = allTasks.get(this.task) ?? 0;
                 if (count <= 1) {
                     allTasks.delete(this.task);
+                    taskSet.delete(this.task);
                 } else {
                     allTasks.set(this.task, count - 1);
                 }
@@ -707,6 +709,7 @@ export namespace taskpool {
                     const count = allTasks.get(this.task) ?? 0;
                     if (count <= 1) {
                         allTasks.delete(this.task);
+                        taskSet.delete(this.task);
                     } else {
                         allTasks.set(this.task, count - 1);
                     }
@@ -931,6 +934,8 @@ export namespace taskpool {
         dependentTasks: containers.ConcurrentSet<Task>;
         /// identifier of worker which starts to execute the task
         workerId: int = -1;
+        /// identifier of worker which created the task
+        creatorWorkerId: int = -1;
         /// an instance of the task is running
         isRunning: boolean = false;
         /// start time of the task
@@ -1028,6 +1033,7 @@ export namespace taskpool {
             // Each task has unique identifier
             this.taskId = Task.generateId();
             this.internalTask = new InternalTask(this);
+            taskSet.add(this);
         }
 
         /**
@@ -1802,7 +1808,6 @@ export namespace taskpool {
      * @returns { Promise<Any> } Promise for result of executed task
      */
     export function execute(func: Function, ...args: FixedArray<Any>): Promise<Any> {
-        initWorkerPoolSync();
         let task = new Task(func.name, func, ...args);
         return execute(task);
     }
@@ -2185,7 +2190,24 @@ export namespace taskpool {
      * @throws Error if the task does not exist when it is not executed or has been canceled
      */
     export function cancel(taskId: int): void {
-        let task = getTask(taskId);
+        let task: Task | undefined = undefined;
+        let currentWorker:Array<GlobalQueueWorker> = [];
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            currentWorker = Array.from(workers)
+        });
+        for (let i = 0; i < currentWorker.length; i++) {
+            ConcurrencyHelpers.lockGuard(currentWorker[i].currentTasksMutex, () => {
+                for (let t: Task of currentWorker[i].currentTasks.keys()) {
+                    if (t.taskId == taskId) {
+                        task = t;
+                        break;
+                    }
+                }
+            });
+            if (task != undefined) {
+                break;
+            }
+        }
         if (task === undefined) {
             let err = new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
             throw err;
@@ -2220,9 +2242,6 @@ export namespace taskpool {
         while(true) {
             let curState = InternalTask.of(task).state.load();
             if (curState == InternalState.CANCELED) {
-                return;
-            }
-            if (curState == InternalState.RUNNING) {
                 return;
             }
             if (curState == InternalState.NOT_FOUND) {
@@ -2399,25 +2418,23 @@ export namespace taskpool {
      * Get task by taskId and taskName(if have).
      * @returns The task
      */
-    function getTask(taskId: int, taskName?: string): Task | undefined {
+    export function getTask(taskId: int, taskName?: string): Task | undefined {
         let task: Task | undefined = undefined;
-        let workerId = CoroutineExtras.getWorkerId();
-        // When executing a task triggers worker expansion, not using locks can lead to reading "dirty" workers information.
-        let currentWorker: Array<GlobalQueueWorker> = [];
-        ConcurrencyHelpers.lockGuard(workersMutex, () => {
-            currentWorker = filter<GlobalQueueWorker>(workers, (worker: GlobalQueueWorker) => worker.workerId == workerId);
-        });
-        if (currentWorker.length != 0) {
-            // if currentWorker exists, we can only get one worker
-            ConcurrencyHelpers.lockGuard(currentWorker[0].currentTasksMutex, () => {
-                for (let t: Task of currentWorker[0].currentTasks.keys()) {
-                    if (t.taskId == taskId) {
-                        task = t;
-                        break;
-                    }
-                }
-            });
+        let currentWorkerId = CoroutineExtras.getWorkerId();
+        for(const t: Task of taskSet.keys()) {
+            if (t.taskId == taskId) {
+                task = t;
+                break;
+            }
         }
+
+        if (task !== undefined) {
+            let internalTask = InternalTask.of(task!);
+            if (internalTask.creatorWorkerId != currentWorkerId) {
+                return undefined;
+            }
+        }
+
         if (taskName !== undefined && task !== undefined && task!.name != taskName) {
             return undefined;
         }
@@ -2427,7 +2444,23 @@ export namespace taskpool {
     function getCurrentTask(): Task | undefined {
         let task: Task | undefined = undefined;
         let taskId = getTaskId();
-        return getTask(taskId);
+        let workerId = CoroutineExtras.getWorkerId();
+        let currentWorker:Array<GlobalQueueWorker> = [];
+        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+            currentWorker = filter<GlobalQueueWorker>(workers, (worker: GlobalQueueWorker) => worker.workerId == workerId);
+        });
+        if (currentWorker.length == 0) {
+            return task;
+        }
+        ConcurrencyHelpers.lockGuard(currentWorker[0].currentTasksMutex, () => {
+            for (let t: Task of currentWorker[0].currentTasks.keys()) {
+                if (t.taskId == taskId) {
+                    task = t;
+                    break;
+                }
+            }
+        });
+        return task;
     }
 
     function filter<T>(s: Set<T>, cb: (t: T, idx: int, arr: Array<T>) => boolean): Array<T> {
@@ -2724,26 +2757,6 @@ export namespace taskpool {
         }
     }
 
-    /**
-     * @brief Initialize taskpool taskQueues.
-     * @see taskpool.Task.enqueue
-     */
-    function initTaskQueues(): void {
-        if (isTaskQueuesInitialized) {
-            return;
-        }
-        taskQueues = new Map<Priority, Array<Task>>();
-        highTaskQueue = new Array<Task>();
-        mediumTaskQueue = new Array<Task>();
-        lowTaskQueue = new Array<Task>();
-        idleTaskQueue = new Array<Task>();
-        taskQueues.set(Priority.HIGH, highTaskQueue);
-        taskQueues.set(Priority.MEDIUM, mediumTaskQueue);
-        taskQueues.set(Priority.LOW, lowTaskQueue);
-        taskQueues.set(Priority.IDLE, idleTaskQueue);
-        isTaskQueuesInitialized = true;
-    }
-
     function initGlobalTaskQueues(): void {
         if (isGlobalTaskQueuesInitialized.get()) {
             return;
@@ -2952,55 +2965,6 @@ export namespace taskpool {
     }
 
     /**
-     * @brief The worker gets an executable task.
-     * @returns Task if task has no dependency, undefined - otherwise.
-     * @see taskpool.TaskPoolWorker.performTask
-     */
-    function getTask(): Task | undefined {
-        let task: Task | undefined = undefined;
-        ConcurrencyHelpers.lockGuard(taskQueuesMutex, () => {
-            if ((highTaskQueue?.length != 0) && (highTaskExecuteCount < continuousExecutionCount)) {
-                highTaskExecuteCount++;
-                task = getTaskImpl(highTaskQueue);
-                return;
-            }
-            highTaskExecuteCount = 0;
-            if ((mediumTaskQueue?.length != 0) && (mediumTaskExecuteCount < continuousExecutionCount)) {
-                mediumTaskExecuteCount++;
-                task = getTaskImpl(mediumTaskQueue);
-                return;
-            }
-            mediumTaskExecuteCount = 0;
-            if (lowTaskQueue?.length != 0) {
-                task = getTaskImpl(lowTaskQueue);
-                return;
-            }
-            if (idleTaskQueue?.length != 0 && highTaskQueue?.length == 0
-                && mediumTaskQueue?.length == 0 && lowTaskQueue?.length == 0) {
-                task = getTaskImpl(idleTaskQueue);
-                return;
-            }
-        })
-        return task;
-    }
-
-    function getTaskImpl(tasksQueue: Array<Task>): Task | undefined {
-        let task: Task | undefined = undefined;
-        let len = tasksQueue.length
-        for (let i = 0; i < len; ++i) {
-            task = tasksQueue.shift();
-            if (InternalTask.of(task!).taskDependenciesCount == 0) {
-                break;
-            } else {
-                let t: Task = task as Task;
-                tasksQueue.push(t);
-                task = undefined;
-            }
-        }
-        return task;
-    }
-
-    /**
      * @brief Get the number of tasks to be executed .
      * @returns tasks num.
      * @see taskpool.TaskPoolWorker.notifyTaskFinished
@@ -3066,19 +3030,11 @@ export namespace taskpool {
     let isInitTaskLaunched: AtomicFlag = new AtomicFlag(false);
 
     const taskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
-    let isTaskQueuesInitialized: boolean = false;
     let isGlobalTaskQueuesInitialized: AtomicFlag = new AtomicFlag(false);
     let taskQueues: Map<Priority, Array<Task>>;
     let globalTaskQueue: Map<Priority, containers.LinkedBlockingQueue<Task>>;
     let pendingDependencyTasks: Map<Task, Priority> = new Map<Task, Priority>();
 
-    let highTaskQueue: Array<Task>;
-    let mediumTaskQueue: Array<Task>;
-    let lowTaskQueue: Array<Task>;
-    let idleTaskQueue: Array<Task>;
-    let highTaskExecuteCount: int = 0;
-    let mediumTaskExecuteCount: int = 0;
-    
     // New task queue management variables
     const globalTaskQueuesMutex: Object = ConcurrencyHelpers.mutexCreate();
     const globalTaskCondVar: Object = ConcurrencyHelpers.condVarCreate();
@@ -3089,6 +3045,7 @@ export namespace taskpool {
 
     // all tasks in the taskpool
     let allTasks: containers.ConcurrentHashMap<Task, int> = new containers.ConcurrentHashMap<Task, int>();
+    let taskSet: containers.ConcurrentSet<Task> = new containers.ConcurrentSet<Task>();
     // manage the taskGroup
     let allGroups: containers.ConcurrentHashMap<int, TaskGroup> = new containers.ConcurrentHashMap<int, TaskGroup>();
 
