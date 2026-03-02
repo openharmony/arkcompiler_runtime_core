@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
@@ -40,6 +41,11 @@ class ParserValidator(BaseValidator):
             self.add(value, ParserValidator.es2panda_result_validator)
 
     @staticmethod
+    def normalize_build_system_path(output: str) -> str:
+        pattern = r'At File:\s*(?:[A-Za-z]:)?[/\\].*?[/\\]([^/\\]+\.ets:\d+:\d+)'
+        return re.sub(pattern, r'At File: \1', output)
+
+    @staticmethod
     def es2panda_result_validator(test: "TestStandardFlow", _: str, actual_output: str, _2: str,
                                   return_code: int) -> ValidationResult:
         fail_kind = ValidatorFailKind.NONE
@@ -48,7 +54,8 @@ class ParserValidator(BaseValidator):
             expected_path = test.path.with_stem(expected_name).with_suffix(".txt")
             with open(expected_path, encoding="utf-8") as file_pointer:
                 expected = file_pointer.read()
-            passed = expected == actual_output and return_code in [0, 1]
+            normalized_output = ParserValidator.normalize_build_system_path(actual_output)
+            passed = expected == normalized_output and return_code in [0, 1]
             if not passed:
                 fail_kind = ValidatorFailKind.COMPARE_OUTPUT
         except OSError:

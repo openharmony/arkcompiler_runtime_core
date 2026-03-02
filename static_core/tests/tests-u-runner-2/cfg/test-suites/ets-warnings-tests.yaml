@@ -59,3 +59,11 @@ collections:
         parameters:
             es2panda-test-suite-args:
                 - "--ets-warnings:werror"
+    diagnostic_format_default_tests:
+        parameters:
+            es2panda-test-suite-args:
+                - "--ets-warnings:diagnostic-format=default"
+    diagnostic_format_custom_tests:
+        parameters:
+            es2panda-test-suite-args:
+                - "--ets-warnings:diagnostic-format=build-system"
