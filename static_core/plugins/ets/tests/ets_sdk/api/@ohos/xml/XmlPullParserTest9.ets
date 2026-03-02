@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,7 +208,7 @@ function testXmlPullParserConstructor0011() {
     const TAG = 'testXmlPullParserConstructor0011';
     try {
         const MY_MAX = 65536;
-        let longText = new Array<char>(MY_MAX).join('a');
+        let longText = Array.create<char>(MY_MAX - 1, c'a').join('');
         let testXml =
             '<?xml version="1.0" encoding="UTF-8" ?>' +
             '<longText>' +

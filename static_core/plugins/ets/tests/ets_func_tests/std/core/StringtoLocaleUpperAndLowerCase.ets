@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ function testStringtoLocaleUpperCase() {
         arktest.assertEQ(input[i].toLocaleUpperCase("en-US"), outputUpper[i]);
         arktest.assertEQ(input[i].toLocaleUpperCase(["en-US", "tr-TR"]), outputUpper[i]);
         arktest.assertEQ(input[i].toLocaleUpperCase(["zh-CN", "tr-TR"]), outputUpper[i]);
-        arktest.assertEQ(input[i].toLocaleUpperCase(new Array<string>(0)), outputUpper[i]);
+        arktest.assertEQ(input[i].toLocaleUpperCase(new Array<string>()), outputUpper[i]);
     }
 }
 
@@ -33,7 +33,7 @@ function testStringtoLocaleLowerCase() {
         arktest.assertEQ(input[i].toLocaleLowerCase("en-US"), outputLower[i]);
         arktest.assertEQ(input[i].toLocaleLowerCase(["en-US", "tr-TR"]), outputLower[i]);
         arktest.assertEQ(input[i].toLocaleLowerCase(["zh-CN", "tr-TR"]), outputLower[i]);
-        arktest.assertEQ(input[i].toLocaleLowerCase(new Array<string>(0)), outputLower[i]);
+        arktest.assertEQ(input[i].toLocaleLowerCase(new Array<string>()), outputLower[i]);
     }
 }
 

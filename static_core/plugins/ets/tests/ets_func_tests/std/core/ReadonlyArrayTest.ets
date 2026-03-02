@@ -15,14 +15,12 @@
 
 class Arrays {
   static copy<T>(src: Array<T>): Array<T> {
-    const copy = new Array<T>(src.length);
-    for (let i = 0;i < src.length;i++) copy[i] = src[i];
+    const copy = new Array<T>(src.length, (i: int) => src[i]);
     return copy;
   }
 
   static copy(src: FixedArray<Number>): Array<Number> {
-    const copy = new Array<Number>(src.length);
-    for (let i = 0;i < src.length;i++) copy[i] = src[i];
+    const copy = new Array<Number>(src.length, (i: int) => src[i]);
     return copy;
   }
 

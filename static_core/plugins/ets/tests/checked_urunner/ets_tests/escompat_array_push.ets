@@ -42,7 +42,7 @@
 
 function testArrayPush() {
     let arraySize: int = 3;
-    let array1: number[] = new Array<number>(arraySize);
+    let array1: number[] = new Array<number>(arraySize, (index) => 0);
 
     array1.push(-1);
     arktest.assertEQ(array1[array1.length - 1], -1);

@@ -52,7 +52,7 @@ function main() {
     console.dirxml(new Error("Test error"));
 
     console.dirxml(null, undefined, 11, "123", new Object())
-    let arr = new Array<string | null | undefined>(3)
+    let arr = Array.create<string | null | undefined>(3, undefined)
     console.dirxml(arr)
 
     // Formatted strings

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -142,9 +142,9 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
             let arrGet = hasMapNO.get(i) as Array<string>;
@@ -155,15 +155,14 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
         }
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(1);
-            array[0] = "six";
+            let array: string[] = ['six'];
             hasMapNO.replace(i, array);
             let arrGet = hasMapNO.get(i) as Array<string>;
             arktest.assertEQ(array, arrGet);
@@ -173,9 +172,9 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
         }
@@ -188,9 +187,9 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
         }
@@ -206,17 +205,17 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
         }
         let iter_NO = hasMapNO.entries();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             let arrIter = iter_NO.next().value![1];
             for (let j = 0; j < i + 1; j++) {
@@ -229,9 +228,9 @@ function main(): int {
     {
         let hasMapNO: containers.ConcurrentHashMap<number, Array<string>> = new containers.ConcurrentHashMap<number, Array<string>>();
         for (let i = 0; i < 5; i++) {
-            let array: Array<string> = new Array<string>(5);
+            let array: string[] = [];
             for (let j = 0; j < i + 1; j++) {
-                array[j] = arrValues[j];
+                array.push(arrValues[j]);
             }
             hasMapNO.set(i, array);
         }

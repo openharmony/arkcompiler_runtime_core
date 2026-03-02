@@ -32,8 +32,12 @@
 
 class MyArray<T> extends Array<T> {
     public myArrayGetCounter: number = 0
-    public constructor(len: number) {
-        super(len.toInt());
+    public constructor() {
+        super();
+    }
+
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        super(arrayLen, initializer);
     }
 
     override $_get(index: int): T {
@@ -47,15 +51,15 @@ class MyArray<T> extends Array<T> {
 }
 
 class MyMap<K, V> extends Map<K, V> {
-    arr: K[]
+    arr: (K | undefined)[]
 
     public constructor(size: number) {
         super()
-        this.arr = new MyArray<K>(size)
+        this.arr = new MyArray<K | undefined>(size.toInt(), (index) => undefined)
     }
 
     public get(index: number): K {
-        return this.arr.$_get(index.toInt())
+        return this.arr.$_get(index.toInt())!
     }
 
     public set(index: number, key: K, val: V) {

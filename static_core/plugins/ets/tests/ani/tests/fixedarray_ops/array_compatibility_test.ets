@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,6 @@ function getArray(): int[] {
 }
 
 function getEscompatArray(): Array<int> {
-    let a: Array<int> = new Array<int>(5)
+    let a: int[] = Array.create<int>(5, 0)
     return a
 }

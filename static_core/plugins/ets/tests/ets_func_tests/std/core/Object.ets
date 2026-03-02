@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,7 +159,7 @@ function objectKeys(): int {
     let arr2 = new Array<number>()
     result += strArraysAreEqual(Object.keys(arr2), emptyArr) ? 0 : 1
 
-    let arr3 = new Array<number>(5)
+    let arr3 = Array.create<number>(5, 0)
     result += strArraysAreEqual(Object.keys(arr3), ['0', '1', '2', '3', '4']) ? 0 : 1
 
     return result
@@ -319,7 +319,7 @@ function objectGetOwnPropertyNames(): int {
     let arr2 = new Array<number>()
     result += strArraysAreEqual(Object.getOwnPropertyNames(arr2), ['length']) ? 0 : 1
 
-    let arr3 = new Array<number>(5)
+    let arr3 = Array.create<number>(5, 0)
     result += strArraysAreEqual(Object.getOwnPropertyNames(arr3), ['0', '1', '2', '3', '4', 'length']) ? 0 : 1
 
     return result

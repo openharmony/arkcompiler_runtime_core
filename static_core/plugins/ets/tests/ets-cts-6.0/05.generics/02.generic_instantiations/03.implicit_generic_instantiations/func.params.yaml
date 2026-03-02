@@ -56,8 +56,7 @@ cases:
 
     - decl: |-
           function bar<T>(p: T): Array<T> {
-              let x = Array<T>(5)
-              return x.fill(p)
+              return Array.create<T>(5, p)
           }
 
           // no constraints

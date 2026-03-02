@@ -35,7 +35,7 @@ cases:
         }
       use: |-
         function main() {
-            let ro = new Array<int>(1) as ReadonlyArray<int>;
+            let ro = Array.create<int>(1, 0) as ReadonlyArray<int>;
             foo(ro);
         }
 
@@ -80,7 +80,7 @@ cases:
         }
       use: |-
         function main() {
-            let rw: Array<int> = new Array<int>(1);
+            let rw: Array<int> = Array.create<int>(1, 0);
             foo(rw);
         }
 

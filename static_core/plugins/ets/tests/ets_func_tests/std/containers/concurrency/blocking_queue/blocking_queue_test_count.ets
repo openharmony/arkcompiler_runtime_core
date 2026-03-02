@@ -23,9 +23,9 @@ function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
 }
 
 function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
-	let res: Array<T> = new Array<T> (arr.length);
+	let res: T[] = [];
 	for (let i = 0; i < arr.length; ++ i)
-		res[i] = arr[i].Await();
+		res.push(arr[i].Await());
 	return res;
 }
 

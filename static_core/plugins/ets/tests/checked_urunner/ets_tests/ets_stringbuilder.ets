@@ -463,7 +463,7 @@ function main(): int {
 //! RUN_PAOC      options: "--compiler-regex='.*encodePercentEncoding.*' --compiler-inlining=false \
 //!                         --compiler-check-final=false"
 
-const HASH_TABLE: string[] = new Array<string>(256);
+const HASH_TABLE: string[] = Array.create<string>(256, '');
 const NO_ESCAPE_TABLE = new Int8Array(256);
 
 function encodePercentEncoding(str: string) {

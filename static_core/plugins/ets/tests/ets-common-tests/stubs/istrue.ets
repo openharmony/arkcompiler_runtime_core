@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,7 +158,7 @@ function testFunction() {
 
 function testMemoryAllocationsWithIsTrue() {
     const totalAllocations = 10000;
-    let allocations: Array<Object> = new Array<Object>(totalAllocations);
+    let allocations: Object[] = Array.create<Object>(totalAllocations, new Object());
     let count = 0;
 
     for (let i = 0; i < totalAllocations; i++) {

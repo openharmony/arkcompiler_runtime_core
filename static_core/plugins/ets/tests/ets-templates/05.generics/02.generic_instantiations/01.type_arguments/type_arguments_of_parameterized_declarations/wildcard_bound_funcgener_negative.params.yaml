@@ -27,7 +27,7 @@ wrong_constraints:
   - Object & int & String
   - Object & String & int
   - "enum Color { Red, Green, Blue }"
-  - "new Array<int>(1)"
+  - "Array.create<int>(1, 0)"
 
 # Generic types declarations with one type parameter
 type_with_one_generic:

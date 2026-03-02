@@ -14,8 +14,12 @@
  */
 
 class ExtArray<T> extends Array<T> {
-    public constructor(n: int) {
-        super(n)
+    public constructor() {
+        super()
+    }
+
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        super(arrayLen, initializer)
     }
 }
 
@@ -29,7 +33,7 @@ class ExtArray<T> extends Array<T> {
 //! INST          "Intrinsic.EscompatArrayUnshift"
 //! INST_NOT      /Call/
 function testUnshift() {
-    let a = new ExtArray<int>(2)
+    let a = new ExtArray<int>(2, (index) => 0)
     a[0] = 1
     a[1] = 2
     let n = a.unshift(71, 72, 73)

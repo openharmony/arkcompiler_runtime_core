@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ function main() {
     console.log(new Error("Test error"));
 
     console.log(null, undefined, 11, "123", new Object())
-    let arr = new Array<string | null | undefined>(3)
+    let arr = Array.create<string | null | undefined>(3, undefined)
     console.log(arr)
 
     // Formatted strings

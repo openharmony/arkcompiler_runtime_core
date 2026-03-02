@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,10 +141,7 @@ function testFunctionType(): int {
 function testNumericTypes(): int {
     let arr : Object[] = [new Char(), new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]
     let bt = Type.of(new Boolean())
-    let arrTypes = new Array<Type>(arr.length)
-    for (let i = 0; i < arr.length; i++) {
-        arrTypes[i] = Type.of(arr[i])
-    }
+    let arrTypes = new Array<Type>(arr.length, (i: int) => Type.of(arr[i]))
     let failures = 0
     for (let i = 0; i < arr.length; i++) {
         for (let j = 0; j < arr.length; j++) {

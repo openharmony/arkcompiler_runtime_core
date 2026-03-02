@@ -648,7 +648,7 @@ function testIU64FromArrayBigInt() {
     checkBigIntArray(BigInt64Array.of(), BigInt64Array.from(empty));
 
     const length: int = 128;
-    let arr: Array<bigint> = new Array<bigint>(length);
+    let arr: bigint[] = Array.create<bigint>(length, new BigInt());
     let fixarr: FixedArray<bigint> = new FixedArray<bigint>(length);
     let iexpected: BigInt64Array = new BigInt64Array(length);
     for (let i = 0; i < length; i++) {
@@ -710,7 +710,7 @@ function testIU64FromIterableBigInt() {
 
 function prepareTestData(length: int, from: int): [Set<int>, Array<int>, FixedArray<int>] {
     let set: Set<int> = new Set<int>();
-    let arr: Array<int> = new Array<int>(length);
+    let arr: int[] = Array.create<int>(length, 0);
     let fixarr: FixedArray<int> = new FixedArray<int>(length);
     let v: int = from;
     for (let i = 0; i < length; i++) {
@@ -724,7 +724,7 @@ function prepareTestData(length: int, from: int): [Set<int>, Array<int>, FixedAr
 
 function prepareTestData(length: int, from: number): [Set<number>, Array<number>, FixedArray<number>] {
     let set: Set<number> = new Set<number>();
-    let arr: Array<number> = new Array<number>(length);
+    let arr: number[] = Array.create<number>(length, 0);
     let fixarr: FixedArray<number> = new FixedArray<number>(length);
     let v: number = from;
     for (let i = 0; i < length; i++) {

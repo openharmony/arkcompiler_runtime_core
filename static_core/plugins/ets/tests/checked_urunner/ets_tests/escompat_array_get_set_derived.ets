@@ -63,7 +63,7 @@
 //! INST_COUNT /LoadArray/, 3
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST_NOT   /Call(Virtual|Static) .*Array::._set/
-//! INST_COUNT /StoreArray/, 3
+//! INST_COUNT /StoreArray/, 4
 
 //! CHECKER AOT IR Builder, Inlining & static devirtualization as std.core.Array.get/set.
 //! SKIP_IF    @architecture == "arm32"
@@ -75,7 +75,7 @@
 //! INST_COUNT /LoadArray/, 3
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST_NOT   /Call(Virtual|Static) .*Array::._set/
-//! INST_COUNT /StoreArray/, 3
+//! INST_COUNT /StoreArray/, 4
 //! RUN        entry: "escompat_array_get_set_derived.ETSGLOBAL::test2"
 
 //! CHECKER JIT IR Builder, Inlining & static devirtualization as MyArray.get/set.
@@ -87,7 +87,7 @@
 //! INST_COUNT /LoadArray/, 3
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST_NOT   /Call(Virtual|Static) .*Array::._set/
-//! INST_COUNT /StoreArray/, 3
+//! INST_COUNT /StoreArray/, 4
 
 //! CHECKER AOT IR Builder, Inlining & static devirtualization as MyArray.get/set.
 //! SKIP_IF    @architecture == "arm32"
@@ -99,7 +99,7 @@
 //! INST_COUNT /LoadArray/, 3
 //! INST_NOT   /Intrinsic.EscompatArraySet/
 //! INST_NOT   /Call(Virtual|Static) .*Array::._set/
-//! INST_COUNT /StoreArray/, 3
+//! INST_COUNT /StoreArray/, 4
 //! RUN        entry: "escompat_array_get_set_derived.ETSGLOBAL::test3"
 
 let myArrayGetCounter = 0;
@@ -111,9 +111,13 @@ function clearCounter(): void {
 }
 
 class MyArray<T> extends Array<T> {
-    public constructor(len: number) {
-		super(len.toInt());
+    public constructor() {
+		super();
 	}
+
+    public constructor(arrayLen: int, initializer: (index: int) => T) {
+        super(arrayLen, initializer);
+    }
 
 	public override $_get(index: int): T {
 		myArrayGetCounter += 1;
@@ -143,9 +147,9 @@ const NUM_ARRAY_BRANCHES = 2;
 function __noinline__testWithRandomBranch(branch: int): void {
     let arr: int[];
     if (branch == BASE_ARRAY_BRANCH) {
-        arr = new Array<int>(16);
+        arr = new Array<int>(16, (index: int) => 0);
     } else {
-        arr = new MyArray<int>(16);
+        arr = new MyArray<int>(16, (index: int) => 0);
     }
     arraySet(arr);
     arktest.assertEQ(arrayGet(arr), 20);
@@ -170,7 +174,7 @@ function test1(): void {
 }
 
 function test2(): void {
-    const arr = new Array<int>(16);
+    const arr = new Array<int>(16, (index: int) => 0);
     arraySet(arr);
     arktest.assertEQ(arrayGet(arr), 20);
     arktest.assertEQ(myArrayGetCounter, 0);
@@ -178,7 +182,7 @@ function test2(): void {
 }
 
 function test3(): void {
-    const arr = new MyArray<int>(16);
+    const arr = new MyArray<int>(16, (index: int) => 0);
     arraySet(arr);
     arktest.assertEQ(arrayGet(arr), 20);
     arktest.assertEQ(myArrayGetCounter, 3);

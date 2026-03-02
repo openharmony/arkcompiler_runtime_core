@@ -72,7 +72,7 @@ function createNewStringArray(size: int): Array<string> {
     for (let i = 0; i < src.length; i++) {
         src[i] = "s" + (i + 1);
     }
-    let arr: Array<string> = new Array<string>(size);
+    let arr: string[] = Array.create<string>(size, '');
     for (let i = 0; i < arr.length; i++) {
         arr[i] = src[(i + 1) % src.length];
     }

@@ -29,7 +29,7 @@ const constChar: char = c'Z';
 let varNumber: number = 1.42;
 let varString: string = 'Test String 1';
 let varBool: boolean = false;
-let varArray: Array<number> = new Array<number>(10);
+let varArray: number[] = Array.create<number>(10, 0);
 let varBigInt: BigInt = new BigInt(42);
 
 const enum EnumColor { Red, Green, Blue }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,9 +174,7 @@ function testArrayOfCircularObjects() : int {
     circularObject.prop = "Circular Reference Example"
     circularObject.reference = circularObject
 
-    let arr = new Array<TestObject3>(2)
-    arr[0] = circularObject
-    arr[1] = circularObject
+    let arr: TestObject3[] = [circularObject, circularObject]
 
     let expected = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, [length]: 2 ]"
     let expected1 = "[ { prop: 'Circular Reference Example',\n  reference: [Circular]\n   }, \n{ prop: 'Circular Reference Example',\n  reference: [Circular]\n   } ]"
@@ -228,8 +226,7 @@ function testFormatArrayObect(): int {
         arktest.assertEQ(util.format('Array: %O', arr), "Array: [  ]")
     }
     {
-        let arr =  new Array<TestObject4>(1)
-        arr[0] = new TestObject4()
+        let arr: TestObject4[] =  [new TestObject4()]
 
         let expected = "Array: [ { f1: '',\n  k1: 8,\n  t: false }, [length]: 1 ]"
         let expected1 = "Array: [ { f1: '',\n  k1: 8,\n  t: false } ]"

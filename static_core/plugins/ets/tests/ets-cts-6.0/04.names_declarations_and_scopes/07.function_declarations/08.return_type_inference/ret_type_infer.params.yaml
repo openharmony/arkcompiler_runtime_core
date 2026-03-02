@@ -156,7 +156,7 @@ cases:
 
     - decl: |-
             function foo() {  // infer std::Array
-                return new Array<int>(2);
+                return Array.create<int>(2, 0);
             }
       call: |-
             arktest.assertTrue(foo() instanceof Array);
