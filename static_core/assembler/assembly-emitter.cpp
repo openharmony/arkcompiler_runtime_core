@@ -1452,14 +1452,16 @@ bool AsmEmitter::MakeFunctionItems(
 /*static*/
 void AsmEmitter::AddFakeIndexDependenciesForUnusedItems(AsmEmitter::AsmEntityCollections &entities)
 {
-    static std::vector<std::pair<std::string, std::vector<std::string>>> unusedItemKeysToEmit = {
+    static std::vector<std::pair<std::string, std::vector<std::string>>> ALWAYS_EMIT_ITEMS_LIST = {
         {
+            // Necessary for SimplifyStringBuilder optimization in BCO mode only.
+            // In JIT/AOT we use stringLength field instead of get-stringLength method
             "std.core.String.%%get-length:i32;",
             {"std.core.StringBuilder.%%get-stringLength:i32;"},
         },
     };
 
-    for (auto &[key, values] : unusedItemKeysToEmit) {
+    for (auto &[key, values] : ALWAYS_EMIT_ITEMS_LIST) {
         auto dependant = entities.methodItems.find(key);
         if (dependant == entities.methodItems.end()) {
             continue;
