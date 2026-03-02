@@ -62,13 +62,13 @@ async function cancelInSuccessCallback(){
         syncSuccessCallbackCalled = true;
         arktest.expectError(() => {
             taskpool.cancel(task1);
-        }, new Error('taskpool:: task is not executed or has been executed'));
+        }, new Error('taskpool:: task has been executed'));
     });
     task2.onExecutionSucceeded(() => {
         asyncSuccessCallbackCalled = true;
         arktest.expectError(() => {
             taskpool.cancel(task2);
-        }, new Error('taskpool:: task is not executed or has been executed'));
+        }, new Error('taskpool:: task has been executed'));
     });
 
     await taskpool.execute(task1);
@@ -129,7 +129,9 @@ async function onExecutionFailedtestAsyncfun(){
 
 async function onExecutionFailedtestmultAsyncfun(){
     let catchSuccess : int = 0;
-    let event = new Event();
+    let event1 = new Event();
+    let event2 = new Event();
+    let event3 = new Event();
     let funca = async() : Any => {
         throw new Error('Error');
     };
@@ -140,18 +142,22 @@ async function onExecutionFailedtestmultAsyncfun(){
     task2.addDependency(task1);
     task1.onExecutionFailed((e : Error) => {
        catchSuccess++;
+       event1.fire();
     });
     task2.onExecutionFailed((e : Error) => {
        catchSuccess++;
+       event2.fire();
     });
     task3.onExecutionFailed((e : Error) => {
        catchSuccess++;
-       event.fire();
+       event3.fire();
     });
     taskpool.execute(task1);
     taskpool.execute(task2);
     taskpool.execute(task3);
-    event.wait();
+    event1.wait();
+    event2.wait();
+    event3.wait();
     arktest.assertEQ(catchSuccess,3);
 }
 

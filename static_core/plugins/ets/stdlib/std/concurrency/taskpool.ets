@@ -495,7 +495,7 @@ export namespace taskpool {
         private checkCommonExecution(): void {
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
-            } else if (this.seqId != 0) {
+            } else if (this.seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
             } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
@@ -512,7 +512,7 @@ export namespace taskpool {
          */
         private checkCommonExecutionWithAsync(): void {
             this.checkCommonExecution();
-            if (this.asyncId != 0) {
+            if (this.asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: asyncRunnerTask cannot execute outside");
             }
         }
@@ -541,10 +541,10 @@ export namespace taskpool {
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_DELAYED, "taskpool:: groupTask cannot executeDelayed outside");
             }
-            if (this.seqId != 0) {
+            if (this.seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: seqRunnerTask cannot executeDelayed outside");
             }
-            if (this.asyncId != 0) {
+            if (this.asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: asyncRunnerTask cannot executeDelayed outside");
             }
             if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
@@ -570,7 +570,7 @@ export namespace taskpool {
             if (period < 0) {
                 throw new Error(TASKPOOL_ERROR_PERIOD_NEGATIVE, "taskpool:: The period value is less than zero");
             }
-            if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId != 0 || this.hasTimeout) {
+            if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId.load() != 0 || this.hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC, "taskpool:: The concurrent task has been executed and cannot be executed periodically");
             }
             if (this.isDependent || this.dependentTasks.size != 0) {
@@ -645,7 +645,6 @@ export namespace taskpool {
                 } else {
                     allTasks.set(this.task, count - 1);
                 }
-                this.state.store(State.CANCELED.valueOf());
                 this.tryTriggerRunner();
                 this.throwCancelTaskError();
             }
@@ -706,9 +705,7 @@ export namespace taskpool {
                         return;
                     }
 
-                    if (this.state.load() != State.CANCELED.valueOf()) {
-                        this.state.store(InternalState.FINISHED.valueOf());
-                    }
+                    this.state.store(InternalState.FINISHED.valueOf());
                     try {
                         if (executionSucceeded) {
                             if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
@@ -752,10 +749,10 @@ export namespace taskpool {
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_CANCELED, "taskpool:: taskGroup has been canceled");
             }
-            if (this.seqId != 0) {
+            if (this.seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_CANCELED, "taskpool:: sequenceRunner task has been canceled");
             }
-            if (this.asyncId != 0) {
+            if (this.asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_CANCELED, "taskpool:: asyncRunner task has been canceled");
             }
             throw new Error(TASKPOOL_ERROR_TASK_CANCELED, "taskpool:: task has been canceled");
@@ -784,7 +781,15 @@ export namespace taskpool {
         enqueue(priority?: Priority): void {
             priority = priority === undefined ? Priority.MEDIUM : priority;
             this.priority = priority;
-            this.state.store(State.WAITING.valueOf());
+            while(true) {
+                let curState = this.state.load();
+                if (curState == State.CANCELED) {
+                    break;
+                }
+                if (this.state.compareAndSwap(curState, InternalState.WAITING) == curState) {
+                    break;
+                }
+            }
             if (!isTaskPoolUseLaunch) {
                 initGlobalTaskQueues();
                 globalTaskQueue?.get(priority)?.push(this.task);
@@ -813,7 +818,7 @@ export namespace taskpool {
         /// trigger next runner task to execute
         tryTriggerRunner(): void {
             // handle sequenceRunner
-            if (this.seqId != 0) {
+            if (this.seqId.load() != 0) {
                 let nextTask: Task | undefined = undefined;
                 ConcurrencyHelpers.lockGuard(this.runnerImpl.seqMutex, () => {
                     if (this.runnerImpl.tasks.length == 0) {
@@ -839,8 +844,8 @@ export namespace taskpool {
             }
 
             // handle asyncRunner
-            if (this.asyncId != 0) {
-                const asyncRunner = AsyncRunnerImpl.getAsyncRunnerById(this.asyncId);
+            if (this.asyncId.load() != 0) {
+                const asyncRunner = AsyncRunnerImpl.getAsyncRunnerById(this.asyncId.load());
                 if (asyncRunner) {
                     asyncRunner.handleTaskCompletionFromTryTriggerRunner();
                 }
@@ -889,9 +894,9 @@ export namespace taskpool {
         /// id of group which contains the task, 0 means the task is not part of any group
         groupId: int = 0;
         /// id of sequence runner which ran the task, 0 means task was not ran via any sequence runner
-        seqId: int = 0;
+        seqId: AtomicInt = new AtomicInt(0);
         /// id of async runner which ran the task, 0 means task was not ran via any async runner
-        asyncId: int = 0;
+        asyncId: AtomicInt = new AtomicInt(0);
         /// the task has been submitted into taskpool
         isSubmitted: boolean = false;
         /// the task depends on another task
@@ -1097,7 +1102,7 @@ export namespace taskpool {
             if (InternalTask.of(this).isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
             }
-            if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId != 0 || InternalTask.of(this).asyncId != 0) {
+            if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId.load() != 0 || InternalTask.of(this).asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency");
             }
             if (InternalTask.of(this).groupId != 0) {
@@ -1107,7 +1112,7 @@ export namespace taskpool {
                 if (InternalTask.of(task).isPeriodicTask) {
                     throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
                 }
-                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0 || InternalTask.of(this).asyncId != 0) {
+                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(this).asyncId.load() != 0) {
                     throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on");
                 }
                 if (InternalTask.of(task).groupId != 0) {
@@ -1363,7 +1368,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_LONG_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the long task");
             } else if (InternalTask.of(task).isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the periodicTask");
-            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0) {
+            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
             } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
@@ -1425,7 +1430,7 @@ export namespace taskpool {
             this.checkExecution(task);
 
             const internalTask = InternalTask.of(task);
-            internalTask.seqId = this.impl.id;
+            internalTask.seqId.store(this.impl.id);
             internalTask.runnerImpl = this.impl;
             taskSubmitted(task);
             internalTask.isSubmitted = true;
@@ -1455,8 +1460,16 @@ export namespace taskpool {
 
             ConcurrencyHelpers.lockGuard(this.impl.seqMutex, () => {
                 if (this.impl.isRunning) {
+                    while(true) {
+                        let curState = InternalTask.of(task).state.load();
+                        if (curState == State.CANCELED) {
+                            break;
+                        }
+                        if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.WAITING) == curState) {
+                            break;
+                        }
+                    }
                     this.impl.tasks.push(task);
-                    InternalTask.of(task).state.store(InternalState.WAITING.valueOf());
                 } else {
                     this.impl.isRunning = true;
                     internalTask.enqueue(this.impl.priority);
@@ -1485,7 +1498,7 @@ export namespace taskpool {
         private checkExecution(task: Task) {
             if (InternalTask.of(task).groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP, "taskpool:: sequenceRunner cannot execute groupTask");
-            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0 || InternalTask.of(task).hasTimeout) {
+            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(task).hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
             } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: sequenceRunner dependent task not allowed.");
@@ -1618,7 +1631,7 @@ export namespace taskpool {
 
             const internalTask = InternalTask.of(task);
             internalTask.runnerAsyncImpl = this.impl;
-            internalTask.asyncId = this.impl.id;
+            internalTask.asyncId.store(this.impl.id);
             taskSubmitted(task);
             internalTask.isSubmitted = true;
 
@@ -1640,7 +1653,15 @@ export namespace taskpool {
                     internalTask.enqueue(priority == undefined ? this.priority : priority);
                 } else {
                     // If waitingCapacity == 0, treat it's waitingQueue's length as unlimited. Task is added to tail.
-                    InternalTask.of(task).state.store(InternalState.WAITING.valueOf());
+                    while(true) {
+                        let curState = InternalTask.of(task).state.load();
+                        if (curState == State.CANCELED) {
+                            break;
+                        }
+                        if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.WAITING) == curState) {
+                            break;
+                        }
+                    }
                     if (this.impl.waitingCapacity == 0) {
                         this.impl.waitingQueue.push(task);
                     } else {
@@ -1685,7 +1706,7 @@ export namespace taskpool {
         private checkExecution(task: Task) {
             if (InternalTask.of(task).groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_GROUP, "taskpool:: asyncRunner cannot execute groupTask");
-            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).asyncId != 0) {
+            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_EXECUTED, "taskpool:: asyncRunner cannot execute executedTask");
             } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: asyncRunner dependent task not allowed.");
@@ -1693,7 +1714,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ASYNC_RUNNER, "taskpool:: asyncRunner cannot execute the periodicTask");
             } else if (InternalTask.of(task).isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
-            } else if (InternalTask.of(task).seqId != 0) {
+            } else if (InternalTask.of(task).seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_SQUENCE, "taskpool:: asyncRunner cannot execute seqenceRunnerTask");
             }
         }
@@ -2035,7 +2056,15 @@ export namespace taskpool {
         ConcurrencyHelpers.lockGuard(mutex, () => {
             pendingDelayed.add(task);
         });
-        InternalTask.of(task).state.store(InternalState.DELAYED.valueOf());
+        while(true) {
+            let curState = InternalTask.of(task).state.load();
+            if (curState == State.CANCELED) {
+                break;
+            }
+            if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.DELAYED) == curState) {
+                break;
+            }
+        }
         return new Promise<Any>((resolve, reject) => {
             InternalTask.of(task).timerId = setTimeout(() => {
                 ConcurrencyHelpers.lockGuard(mutex, () => {
@@ -2065,7 +2094,6 @@ export namespace taskpool {
                             }
                         });
                     })
-                    InternalTask.of(task).state.store(InternalState.WAITING.valueOf());
                     InternalTask.of(task).enqueue(priority);
                     p.then((res: Any) => {
                         resolve(res);
@@ -2150,12 +2178,8 @@ export namespace taskpool {
      */
     export function cancel(task: Task): void {
         tryCancelDependentTasks(task);
-        let currentState = InternalTask.of(task).state.load();
         // 1. task has been canceled skip it
         // 2. task is waiting or running, cancel it
-        if (currentState == InternalState.CANCELED.valueOf()) {
-            return;
-        }
         let timerId = -1;
         if (InternalTask.of(task).timerId !== -1) {
             timerId = InternalTask.of(task).timerId;
@@ -2164,36 +2188,34 @@ export namespace taskpool {
             }
             InternalTask.of(task).timerId = -1;
         }
-        if (currentState == InternalState.DELAYED.valueOf()) {
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
-            return;
-        }
-        if (currentState == InternalState.RUNNING.valueOf()){
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
-            return;
-        }
-        if (currentState == InternalState.WAITING.valueOf()) {
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
-            return;
-        }
         if (timerId != -1) {
             // canceled task set state to canceled, avoid duplicate execution
             InternalTask.of(task).state.store(State.CANCELED.valueOf());
             return;
         }
-        if (InternalTask.of(task).seqId != 0) {
-            if (currentState != InternalState.NOT_FOUND.valueOf()) {
-                throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
+        while(true) {
+            let curState = InternalTask.of(task).state.load();
+            if (curState == InternalState.CANCELED) {
+                return;
             }
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
-        } else if (InternalTask.of(task).asyncId != 0) {
-            if (currentState != InternalState.NOT_FOUND.valueOf()) {
-                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED, "taskpool:: asyncRunner task has been executed")
+            if (curState == InternalState.RUNNING) {
+                return;
             }
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
-        }
-        if (currentState == InternalState.NOT_FOUND.valueOf() || currentState == InternalState.FINISHED.valueOf()) {
-            throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
+            if (curState == InternalState.NOT_FOUND) {
+                throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
+            }
+            if (curState == InternalState.FINISHED) {
+                if (InternalTask.of(task).seqId.load() != 0) {
+                    throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
+                }
+                if (InternalTask.of(task).asyncId.load() != 0) {
+                    throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED, "taskpool:: asyncRunner task has been executed")
+                }
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
+            }
+            if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.CANCELED) == curState) {
+                return;
+            }
         }
     }
 
