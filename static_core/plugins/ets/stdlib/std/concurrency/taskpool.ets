@@ -69,6 +69,9 @@ export namespace taskpool {
     const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED: int = 10200112;
     const TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY: int = 10200113;
     const TASKPOOL_ERROR_SEQ_RUNNER_CHANGE_PRIORITY: int = 10200114;
+    const TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT: int = 10200115;
+    const TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED: int = 10200116;
+    const TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_OUTSIDE: int = 10200117;
 
     class GlobalQueueWorker extends EAWorker {
         public static closingTask: Task = new Task("closingTask", (): void => {});
@@ -422,6 +425,9 @@ export namespace taskpool {
 
         /// the task is ending
         ENDING = 6,
+
+        /// the task has timed out
+        TIMEOUT = 7,
     }
 
     /**
@@ -433,6 +439,35 @@ export namespace taskpool {
      * The type of callback with error code to be registered
      */
     export type CallbackFunctionWithError = (e: Error) => void;
+
+    /**
+     * @typedef Configs
+     * Provides configs that can be set for the task to execute.
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export interface Configs {
+        /**
+         * The priority of the task. The default value is taskpool.Priority.MEDIUM.
+         *
+         * @type { ?Priority }
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
+        priority?: Priority;
+
+        /**
+         * The timeout for the task in ms. The default value is Infinity.
+         *
+         * @type { ?number }
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         * @since 24
+         */
+        timeout?: number;
+    }
 
     class InternalTask {
         constructor(task: Task) {
@@ -454,11 +489,10 @@ export namespace taskpool {
         }
 
         /**
-         * Check that the task can be executed as common task
-         * @throws Error if the task can not be executed as common task
-         * @see taskpool.execute
+         * Common execution check for all task execution types
+         * @throws Error if the task violates common execution
          */
-        checkExecution(): void {
+        private checkCommonExecution(): void {
             if (this.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
             } else if (this.seqId != 0) {
@@ -469,6 +503,29 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG, "taskpool:: The long task can only be executed once");
             } else if (this.isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_AGAIN, "taskpool:: the periodicTask cannot execute again");
+            }
+        }
+
+        /**
+         * Common execution check including asyncRunner check
+         * @throws Error if the task violates common execution
+         */
+        private checkCommonExecutionWithAsync(): void {
+            this.checkCommonExecution();
+            if (this.asyncId != 0) {
+                throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: asyncRunnerTask cannot execute outside");
+            }
+        }
+
+        /**
+         * Check that the task can be executed as common task
+         * @throws Error if the task can not be executed as common task
+         * @see taskpool.execute
+         */
+        checkExecution(): void {
+            this.checkCommonExecution();
+            if (this.hasTimeout && this.state.load() != InternalState.NOT_FOUND.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: timeout task cannot be executed again");
             }
         }
 
@@ -499,6 +556,9 @@ export namespace taskpool {
             if (this.isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_EXECUTE_DELAYED, "taskpool:: the periodicTask cannot executeDelayed");
             }
+            if (this.hasTimeout && this.state.load() != InternalState.NOT_FOUND.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: timeout task cannot be executed again");
+            }
         }
 
         /**
@@ -510,11 +570,29 @@ export namespace taskpool {
             if (period < 0) {
                 throw new Error(TASKPOOL_ERROR_PERIOD_NEGATIVE, "taskpool:: The period value is less than zero");
             }
-            if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId != 0) {
+            if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId != 0 || this.hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC, "taskpool:: The concurrent task has been executed and cannot be executed periodically");
             }
             if (this.isDependent || this.dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC, "taskpool:: the task with dependency cannot executePeriodically");
+            }
+        }
+
+        /**
+         * Check that the task can be executed with timeout
+         * @throws Error if the task can not be executed with timeout
+         * @see taskpool.execute
+         */
+        checkExecutionForTimeout(): void {
+            this.checkCommonExecutionWithAsync();
+            if (this.isDependent || this.dependentTasks.size != 0) {
+                throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: timeout task with dependency cannot execute");
+            }
+            if (this.hasTimeout && this.state.load() !== InternalState.NOT_FOUND.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: timeout task cannot be executed again");
+            }
+            if (this.isSubmitted) {
+                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
             }
         }
 
@@ -571,6 +649,10 @@ export namespace taskpool {
                 this.tryTriggerRunner();
                 this.throwCancelTaskError();
             }
+            // Task timed out during waiting - skip user function execution (promise already rejected)
+            if (this.state.load() == InternalState.TIMEOUT.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout");
+            }
             this.callUserCallback(this.onStartCallback);
             let result: Any = null;
             let executionSucceeded: boolean = false;
@@ -615,6 +697,13 @@ export namespace taskpool {
                     if (currentWorker !== undefined) {
                         currentWorker!.currentTasks.delete(this.task);
                         currentWorker!.currentPriority = undefined;
+                    }
+
+                    // Check if task timed out during execution
+                    // If timed out, skip normal completion logic (promise already rejected)
+                    if (this.state.load() == InternalState.TIMEOUT.valueOf()) {
+                        this.tryTriggerRunner();
+                        return;
                     }
 
                     if (this.state.load() != State.CANCELED.valueOf()) {
@@ -769,9 +858,9 @@ export namespace taskpool {
                 if (GroupState.of(group).taskCount.load() == 0) {
                     if (GroupState.of(group).hasFailedTask.load() == 0) {
                         GroupState.of(group).successCallbacks.forEach((callback: CallbackFunction) => {
-                                try {
-                                    callback();
-                                } catch (e) {}
+                            try {
+                                callback();
+                            } catch (e) {}
                         });
                     }
                     GroupState.of(group).state_.store(InternalState.FINISHED.valueOf());
@@ -785,6 +874,16 @@ export namespace taskpool {
             while (this.pendingDeferreds.length > 0) {
                 this.pendingDeferreds.shift();
             }
+        }
+
+        /**
+         * Try to transition task state to TIMEOUT
+         * @returns true if state transition succeeded, false otherwise
+         */
+        tryTransitionToTimeout(): boolean {
+            return this.state.compareAndSwap(InternalState.NOT_FOUND, InternalState.TIMEOUT) == InternalState.NOT_FOUND ||
+                   this.state.compareAndSwap(InternalState.WAITING, InternalState.TIMEOUT) == InternalState.WAITING ||
+                   this.state.compareAndSwap(InternalState.RUNNING, InternalState.TIMEOUT) == InternalState.RUNNING;
         }
 
         /// id of group which contains the task, 0 means the task is not part of any group
@@ -813,6 +912,12 @@ export namespace taskpool {
         timerId: int = -1;
         /// id of the coroutine that executes task
         coroId: int = -1;
+        /// whether the task has a timeout set
+        hasTimeout: boolean = false;
+        /// timeout duration in milliseconds
+        timeoutMs: number = 0;
+        /// timer ID for timeout
+        timeoutTimerId: int = -1;
 
         // NOTE(ipetrov, #19949): Change to private when bug in frontend will be fixed
         taskMutex: Object;
@@ -1078,6 +1183,9 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_NOT_IN_TASKPOOL, "taskpool:: The function is not called in the TaskPool thread");
             }
             const task: Task = item;
+            if (InternalTask.of(task).state.load() == InternalState.TIMEOUT.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout");
+            }
             if (InternalTask.of(task).onReceiveCallback === undefined) {
                 throw new Error(TASKPOOL_ERROR_CALLBACK_NOT_REGISTERED, "taskpool:: The callback is not registered on the host side");
             }
@@ -1197,6 +1305,7 @@ export namespace taskpool {
         state_: AtomicInt = new AtomicInt(InternalState.NOT_FOUND);
         taskCount: AtomicInt = new AtomicInt(0);
         hasFailedTask: AtomicInt = new AtomicInt(0);
+        hasTimeout: boolean = false;
         successCallbacks: containers.ConcurrentSet<CallbackFunction> = new containers.ConcurrentSet<CallbackFunction>();
     }
 
@@ -1258,6 +1367,8 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
             } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
+            } else if (InternalTask.of(task).hasTimeout && InternalTask.of(task).state.load() != InternalState.NOT_FOUND.valueOf()) {
+                throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: timeout task cannot be executed again");
             }
         }
 
@@ -1374,7 +1485,7 @@ export namespace taskpool {
         private checkExecution(task: Task) {
             if (InternalTask.of(task).groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP, "taskpool:: sequenceRunner cannot execute groupTask");
-            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0) {
+            } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId != 0 || InternalTask.of(task).hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
             } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: sequenceRunner dependent task not allowed.");
@@ -1672,6 +1783,24 @@ export namespace taskpool {
         return executeImpl(task, priority);
     }
 
+    /**
+     * Execute a concurrent task with Configs.
+     *
+     * @param { Task } task - Task to be executed.
+     * @param { Configs } configs - Configs of the task.
+     * @returns { Promise<Any> } - Promise for result of executed task
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export function execute(task: Task, configs: Configs): Promise<Any>{
+        let timeout: number = configs.timeout ?? Infinity;
+        if (timeout >= 1 && timeout !== Infinity) {
+            return executeWithTimeout(task, configs);
+        }
+        return executeImpl(task, configs.priority);
+    }
+
     function executeImpl(task: Task, priority?: Priority): Promise<Any> {
         initWorkerPoolSync();
         const internalTask = InternalTask.of(task);
@@ -1698,6 +1827,51 @@ export namespace taskpool {
         return promise;
     }
 
+    function executeWithTimeout(task: Task, configs: Configs): Promise<Any> {
+        initWorkerPoolSync();
+        const internalTask = InternalTask.of(task);
+        internalTask.checkExecutionForTimeout();
+
+        internalTask.isSubmitted = true;
+        internalTask.hasTimeout = true;
+        internalTask.timeoutMs = configs.timeout ?? Infinity;
+
+        if (isTaskPoolUseLaunch) {
+            return launchPromise(internalTask.execute);
+        }
+
+        const promise = new Promise<Any>((resolve, reject) => {
+            const newDeferred = new PromiseDeferred(resolve, reject);
+            ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
+                if (internalTask.currentDeferred === undefined) {
+                    internalTask.currentDeferred = newDeferred;
+                } else {
+                    internalTask.pendingDeferreds.push(newDeferred);
+                }
+            });
+        });
+
+        // Create timeout promise
+        let timeoutTimerId: int = -1;
+        const timeoutPromise = new Promise<Any>((resolve, reject) => {
+            timeoutTimerId = setTimeout(() => {
+                if (internalTask.tryTransitionToTimeout()) {
+                    reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task has been timeout"));
+                }
+            }, internalTask.timeoutMs.toInt());
+        });
+
+        // Return race result
+        const racePromise = Promise.race<Any>([promise, timeoutPromise]);
+        internalTask.enqueue(configs.priority);
+        return racePromise.finally(() => {
+            if (timeoutTimerId !== -1) {
+                clearTimeout(timeoutTimerId);
+                timeoutTimerId = -1;
+            }
+        });
+    }
+
     /**
      * Execute a concurrent task group
      *
@@ -1706,21 +1880,35 @@ export namespace taskpool {
      * @returns { Promise<Array<Any>> } Promise for array of results of executed tasks from the group
      */
     export function execute(group: TaskGroup, priority?: Priority): Promise<Array<Any>> {
-        initWorkerPoolSync();
-        const tasksCount = GroupState.of(group).tasks.length.toInt();
-        if (tasksCount == 0) {
-            return Promise.resolve<Array<Any>>(new Array<Any>());
+        return executeImplGroup(group, priority);
+    }
+
+    /**
+     * Execute a concurrent task group with specified configs
+     *
+     * @param { TaskGroup } group - Task group to be executed.
+     * @param { Configs } configs - Configs of each task in the TaskGroup.
+     * @returns { Promise<Array<Any>> } Promise for array of results of executed tasks from the group
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     * @since 24
+     */
+    export function execute(group: TaskGroup, configs: Configs): Promise<Array<Any>> {
+        let timeout: number = configs.timeout ?? Infinity;
+        if (timeout >= 1 && timeout !== Infinity) {
+            return executeGroupWithTimeout(group, configs);
         }
-        taskGroupSubmitted(GroupState.of(group).id, tasksCount);
-        if (GroupState.of(group).isTaskAlreadySubmitted) {
-            GroupState.of(group).taskCount.store(tasksCount);
-            GroupState.of(group).hasFailedTask.store(0);
-            GroupState.of(group).successCallbacks.clear();
-        }
-        GroupState.of(group).isTaskAlreadySubmitted = true;
+        return executeImplGroup(group, configs.priority);
+    }
+
+    /**
+     * Submit all tasks in a group and return their promises
+     * @param group The task group
+     * @param priority Optional priority for task execution
+     * @returns Array of promises for each task
+     */
+    function submitGroupTasks(group: TaskGroup, priority?: Priority): Array<Promise<Any>> {
         const promises: Array<Promise<Any>> = new Array<Promise<Any>>();
-        allGroups.set(GroupState.of(group).id, group);
-        GroupState.of(group).state_.store(InternalState.WAITING.valueOf());
         GroupState.of(group).tasks.forEach((task: Task) => {
             InternalTask.of(task).isSubmitted = true;
             if (isTaskPoolUseLaunch) {
@@ -1741,7 +1929,80 @@ export namespace taskpool {
                 promises.push(promise);
             }
         });
+        return promises;
+    }
+
+    function executeImplGroup(group: TaskGroup, priority?: Priority): Promise<Array<Any>> {
+        initWorkerPoolSync();
+        const tasksCount = GroupState.of(group).tasks.length.toInt();
+        if (tasksCount == 0) {
+            return Promise.resolve<Array<Any>>(new Array<Any>());
+        }
+        // Check if taskGroup has already been configured with timeout
+        if (GroupState.of(group).hasTimeout) {
+            throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: the taskGroup cannot be executed again, taskGroup has already set timeout");
+        }
+        taskGroupSubmitted(GroupState.of(group).id, tasksCount);
+        if (GroupState.of(group).isTaskAlreadySubmitted) {
+            GroupState.of(group).taskCount.store(tasksCount);
+            GroupState.of(group).hasFailedTask.store(0);
+            GroupState.of(group).successCallbacks.clear();
+        }
+        GroupState.of(group).isTaskAlreadySubmitted = true;
+        allGroups.set(GroupState.of(group).id, group);
+        GroupState.of(group).state_.store(InternalState.WAITING.valueOf());
+        const promises = submitGroupTasks(group, priority);
         return Promise.all<Any>(promises);
+    }
+
+    function executeGroupWithTimeout(group: TaskGroup, configs: Configs): Promise<Array<Any>> {
+        initWorkerPoolSync();
+        const tasksCount = GroupState.of(group).tasks.length.toInt();
+        if (tasksCount == 0) {
+            return Promise.resolve<Array<Any>>(new Array<Any>());
+        }
+        // Check if taskGroup has already been executed
+        if (GroupState.of(group).state_.compareAndSwap(InternalState.NOT_FOUND, InternalState.WAITING) != InternalState.NOT_FOUND) {
+            throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP, "taskpool:: the taskGroup cannot be executed again, taskGroup cannot be set timeout");
+        }
+        taskGroupSubmitted(GroupState.of(group).id, tasksCount);
+        GroupState.of(group).isTaskAlreadySubmitted = true;
+        GroupState.of(group).hasTimeout = true;
+        allGroups.set(GroupState.of(group).id, group);
+        const promises = submitGroupTasks(group, configs.priority);
+
+        let timeoutTimerId: int = -1;
+        const timeoutPromise = new Promise<Array<Any>>((resolve, reject) => {
+            timeoutTimerId = setTimeout(() => {
+                if (timeoutTimerId === -1 ||
+                    GroupState.of(group).state_.load() === InternalState.CANCELED.valueOf() ||
+                    GroupState.of(group).state_.load() === InternalState.FINISHED.valueOf()) {
+                    return;
+                }
+                GroupState.of(group).state_.store(InternalState.TIMEOUT.valueOf());
+                GroupState.of(group).tasks.forEach((task: Task) => {
+                    InternalTask.of(task).state.store(InternalState.TIMEOUT.valueOf());
+                });
+                reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task group has been timeout"));
+            }, configs.timeout!.toInt());
+        });
+        const allPromise = Promise.all<Any>(promises);
+
+        return new Promise<Array<Any>>((resolve, reject) => {
+            Promise.race<Array<Any>>([allPromise, timeoutPromise]).then((result: Array<Any>) => {
+                if (timeoutTimerId != -1) {
+                    clearTimeout(timeoutTimerId);
+                    timeoutTimerId = -1;
+                }
+                resolve(result);
+            }).catch((error: Error) => {
+                if (timeoutTimerId != -1) {
+                    clearTimeout(timeoutTimerId);
+                    timeoutTimerId = -1;
+                }
+                reject(error);
+            });
+        });
     }
 
     /**
