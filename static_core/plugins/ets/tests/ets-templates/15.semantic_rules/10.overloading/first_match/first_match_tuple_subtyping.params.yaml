@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -72,13 +72,13 @@ cases:
         class C {}
         let tple1: [A, B] = [new A, new B]
         let tple2: [A, B, C] = [new A, new B, new C]
-        function foo(v: [A, B]): number { return 1 }
         function foo(v: [A, B, C]): number { return 2 }
+        function foo(v: [A, B]): number { return 1 }
       call: |-
         arktest.assertEQ(foo(tple1), 1, 'foo1 call expected');
         arktest.assertEQ(foo(tple2), 2, 'foo2 call expected');
 
-    - descr: Alias of 2 tuple signatures 
+    - descr: Alias of 2 tuple signatures
       decl: |-
         class A {}
         class B {}
