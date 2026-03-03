@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define LIBABCKIT_SRC_ADAPTER_STATIC_INST_MODIFIER_H
 
 #include <functional>
+#include <unordered_map>
 #include "static_core/assembler/assembly-program.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 
@@ -33,6 +34,9 @@ private:
 
     AbckitCoreFunction *GetFunction(const std::string &name) const;
 
+    // Build pandasm::Function* -> AbckitCoreFunction* index to avoid O(N) scan when GetFunction fails after rename.
+    void EnsurePandasmToFunctionIndex() const;
+
     void ModifyInstFunction(ark::pandasm::Ins &ins) const;
 
     void ModifyInstField(ark::pandasm::Ins &ins) const;
@@ -46,6 +50,8 @@ private:
     void RefreshClasses();
 
     AbckitFile *file_ = nullptr;
+    // Reverse index: pandasm::Function* -> AbckitCoreFunction* for O(1) lookup when instruction uses old name.
+    mutable std::unordered_map<ark::pandasm::Function *, AbckitCoreFunction *> pandasmToFunction_;
 };
 
 }  // namespace libabckit

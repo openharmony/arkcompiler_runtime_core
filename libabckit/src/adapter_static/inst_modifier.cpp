@@ -261,16 +261,43 @@ void libabckit::InstModifier::EnumerateInst(const std::function<void(ark::pandas
     }
 }
 
+static void ProcessFunctionMap(const std::unordered_map<std::string, AbckitCoreFunction *> &functionMap,
+                               std::unordered_map<ark::pandasm::Function *, AbckitCoreFunction *> &pandasmToFunction)
+{
+    for (const auto &[name, func] : functionMap) {
+        if (func == nullptr) {
+            continue;
+        }
+        auto *impl = func->GetArkTSImpl();
+        if (impl == nullptr) {
+            continue;
+        }
+        ark::pandasm::Function *pandasmFunc = impl->GetStaticImpl();
+        if (pandasmFunc != nullptr) {
+            pandasmToFunction[pandasmFunc] = func;
+        }
+    }
+}
+
+void libabckit::InstModifier::EnsurePandasmToFunctionIndex() const
+{
+    if (!pandasmToFunction_.empty()) {
+        return;
+    }
+    ProcessFunctionMap(this->file_->nameToFunctionStatic, pandasmToFunction_);
+    ProcessFunctionMap(this->file_->nameToFunctionInstance, pandasmToFunction_);
+}
+
 AbckitCoreFunction *libabckit::InstModifier::GetFunction(const std::string &name) const
 {
-    if (this->file_->nameToFunctionStatic.find(name) != this->file_->nameToFunctionStatic.end()) {
-        return this->file_->nameToFunctionStatic.at(name);
+    auto itStatic = this->file_->nameToFunctionStatic.find(name);
+    if (itStatic != this->file_->nameToFunctionStatic.end()) {
+        return itStatic->second;
     }
-
-    if (this->file_->nameToFunctionInstance.find(name) != this->file_->nameToFunctionInstance.end()) {
-        return this->file_->nameToFunctionInstance.at(name);
+    auto itInstance = this->file_->nameToFunctionInstance.find(name);
+    if (itInstance != this->file_->nameToFunctionInstance.end()) {
+        return itInstance->second;
     }
-
     return nullptr;
 }
 
@@ -289,22 +316,11 @@ void libabckit::InstModifier::ModifyInstFunction(ark::pandasm::Ins &ins) const
         return;
     }
 
-    // If GetFunction fails, it might be because the function name was changed
-    // and the nameToFunction map key has been updated, or ProgramUpdateFunctionTableKey
-    // has updated the functionTable key. In this case, we need to search through all
-    // functions to find the one that matches the old name by checking if any function
-    // in the functionTable (using any key) matches the instruction's old name context.
-    // Since we can't directly match old names anymore, we'll search by iterating through
-    // all functions and checking their underlying pandasm::Function pointers against
-    // all entries in functionTable, looking for a match that would have had the old name.
-    // However, a simpler approach: if GetFunction fails, it's likely the function
-    // doesn't exist or is external, so we should just return (the instruction update
-    // will be skipped). But if the function was renamed, the old name might still be
-    // in the functionTable before ProgramUpdateFunctionTableKey, so try that first.
+    // If GetFunction fails, the function may have been renamed (nameToFunction key is newName)
+    // while the instruction still holds oldName, and functionTable may still have oldName as key.
+    // Resolve via reverse index pandasm::Function* -> AbckitCoreFunction* to avoid O(N) scan.
     if (function == nullptr) {
         const auto prog = this->file_->GetStaticProgram();
-        // Try to find by oldName in functionTable (might still exist if ProgramUpdateFunctionTableKey
-        // hasn't run, or if there's a timing issue)
         ark::pandasm::Function *pandasmFunc = nullptr;
         auto staticIt = prog->functionStaticTable.find(oldName);
         if (staticIt != prog->functionStaticTable.end()) {
@@ -315,22 +331,11 @@ void libabckit::InstModifier::ModifyInstFunction(ark::pandasm::Ins &ins) const
                 pandasmFunc = &instanceIt->second;
             }
         }
-
-        // If found in functionTable, find corresponding AbckitCoreFunction by pointer comparison
         if (pandasmFunc != nullptr) {
-            for (const auto &[mapKey, func] : this->file_->nameToFunctionStatic) {
-                if (func->GetArkTSImpl()->GetStaticImpl() == pandasmFunc) {
-                    function = func;
-                    break;
-                }
-            }
-            if (function == nullptr) {
-                for (const auto &[mapKey, func] : this->file_->nameToFunctionInstance) {
-                    if (func->GetArkTSImpl()->GetStaticImpl() == pandasmFunc) {
-                        function = func;
-                        break;
-                    }
-                }
+            EnsurePandasmToFunctionIndex();
+            auto it = pandasmToFunction_.find(pandasmFunc);
+            if (it != pandasmToFunction_.end()) {
+                function = it->second;
             }
         }
     }
