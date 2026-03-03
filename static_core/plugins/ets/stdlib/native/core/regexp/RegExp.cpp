@@ -397,6 +397,37 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
     return DoExec(env, regexp, refs::g_regexpMatchArrayClass, regexpMatchArrayObject, execData);
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
+static ani_boolean Test(ani_env *env, [[maybe_unused]] ani_object regexp, ani_string pattern, ani_string flags,
+                        ani_string str, ani_int patternSize, ani_int strSize, ani_int lastIndex, ani_boolean hasSlashU)
+{
+    const bool isUtf16Pattern = IsUtf16(env, pattern);
+    const bool isUtf16Input = IsUtf16(env, str);
+    ExecData execData {pattern,
+                       str,
+                       flags,
+                       static_cast<int32_t>(lastIndex),
+                       static_cast<size_t>(patternSize),
+                       static_cast<size_t>(strSize),
+                       isUtf16Pattern,
+                       isUtf16Input,
+                       static_cast<bool>(hasSlashU)};
+
+    auto execResult = Execute(env, execData);
+
+    const auto flagsBits = static_cast<uint8_t>(CastToBitMask(env, execData.flags));
+
+    const bool global = (flagsBits & FLAG_GLOBAL) > 0;
+    const bool sticky = (flagsBits & FLAG_STICKY) > 0;
+    const bool globalOrSticky = global || sticky;
+    if (execResult.isSuccess && globalOrSticky) {
+        ani_field lastIndexField;
+        ANI_FATAL_IF_ERROR(env->Class_FindField(refs::g_regexpClass, LAST_INDEX_FIELD_NAME, &lastIndexField));
+        SetLastIndexField(env, regexp, lastIndexField, execResult.endIndex);
+    }
+    return execResult.isSuccess ? ANI_TRUE : ANI_FALSE;
+}
+
 void RegisterRegExpNativeMethods(ani_env *env)
 {
     const auto regExpImpls = std::array {
@@ -406,7 +437,9 @@ void RegisterRegExpNativeMethods(ani_env *env)
                              reinterpret_cast<void *>(Exec)},
         ani_native_function {"matchImpl",
                              "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:C{std.core.RegExpMatchArray}",
-                             reinterpret_cast<void *>(Match)}};
+                             reinterpret_cast<void *>(Match)},
+        ani_native_function {"testImpl", "C{std.core.String}C{std.core.String}C{std.core.String}iiiz:z",
+                             reinterpret_cast<void *>(Test)}};
 
     ani_class regexpClassLocal;
     ANI_FATAL_IF_ERROR(env->FindClass(REGEXP_CLASS_NAME, &regexpClassLocal));

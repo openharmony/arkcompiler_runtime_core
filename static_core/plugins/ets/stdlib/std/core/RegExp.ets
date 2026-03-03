@@ -747,6 +747,8 @@ export class RegExp extends Object {
 
     private native matchImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): RegExpMatchArray;
 
+    private native testImpl(pattern: String, flags: String, str: String, patternLength: int, strLength: int, lastIndex: int, hasSlashU: boolean): boolean;
+
     /**
      * Executes a match search on the string starting from the specified index.
      *
@@ -1088,11 +1090,21 @@ export class RegExp extends Object {
      * @since 24
      */
     public test(str: String): boolean {
-        let res = this.exec(str)
-        if (!res) {
+        if (str.length < this.lastIndex) {
             return false
         }
-        return res.isCorrect
+        let globalOrSticky = this.global || this.sticky
+        if (!globalOrSticky || (this.lastIndex < 0)) {
+            this.lastIndex = 0
+        }
+        const hasSlashU = str.contains("\\u", 0) || this.pattern_.contains("\\u", 0)
+        let res = this.testImpl(this.pattern_, this.flags_, str, this.pattern_.length, str.length, this.lastIndex, hasSlashU)
+
+        if (!res && globalOrSticky) {
+            this.lastIndex = 0
+        }
+
+        return res
     }
 
     /**
