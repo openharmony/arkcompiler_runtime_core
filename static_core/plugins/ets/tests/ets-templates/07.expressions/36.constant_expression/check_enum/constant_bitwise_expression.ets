@@ -15,7 +15,7 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant bitwise expression as enum initializer.
 ---*/
 

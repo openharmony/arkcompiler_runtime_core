@@ -15,7 +15,7 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with logical calculations as enum initializer.
 ---*/
 

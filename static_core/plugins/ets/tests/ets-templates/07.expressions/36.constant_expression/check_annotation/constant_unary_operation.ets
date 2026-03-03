@@ -15,7 +15,7 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with number conversion as annotation initializer.
 ---*/
 

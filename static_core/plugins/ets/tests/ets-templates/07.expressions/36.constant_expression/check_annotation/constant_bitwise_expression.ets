@@ -15,11 +15,8 @@
 
 {% for c in cases %}
 /*---
-desc: 
-    Constant expression with number conversion as annotation initializer.
-    Per 15.7.1 Type Inference for Numeric Literals, "The default type of a numeric literal is...
-      int or long for an integer literal... The default type is used in Numeric Operator Contexts
-      as the type of a literal is not inferred..."
+desc: >-
+    Constant expression with bitwise operation as annotation initializer.
 ---*/
 
 @interface MyAnno {

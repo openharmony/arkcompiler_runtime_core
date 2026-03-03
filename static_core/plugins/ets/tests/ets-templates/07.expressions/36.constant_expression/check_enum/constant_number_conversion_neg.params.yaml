@@ -12,4 +12,10 @@
 # limitations under the License.
 ---
 cases:
-  - { type: int, value: c'p', expected: 112 }
+  - type: |-
+      int
+    value: |-
+      c'p'
+    expected: 112
+    expect: |-
+      Semantic error ESE0318: Type 'Char' cannot be assigned to type 'Int'

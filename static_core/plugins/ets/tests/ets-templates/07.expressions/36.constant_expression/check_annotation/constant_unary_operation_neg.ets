@@ -15,9 +15,10 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression with number conversion as annotation initializer.
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
 @interface MyAnno {

@@ -1,4 +1,4 @@
-# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,8 +12,58 @@
 # limitations under the License.
 ---
 cases:
-  - { type: char, value: c'p', sign: '*', expected: 1120 }
-  - { type: char, value: c'p', sign: '/', expected: 11  }
-  - { type: char, value: c'p', sign: '%', expected: 2  }
-  - { type: char, value: c'p', sign: '+', expected: 122  }
-  - { type: char, value: c'p', sign: '-', expected: 102  }
+  - type: |-
+      char
+    value: |-
+      c'p'
+    sign: |-
+      *
+    expected: 1120
+    expect: >-
+      Semantic error ESE0342: Enumeration members can be initialized
+      only by compile-time expressions and initializers must be of
+      the same type.
+  - type: |-
+      char
+    value: |-
+      c'p'
+    sign: |-
+      /
+    expected: 11
+    expect: >-
+      Semantic error ESE0342: Enumeration members can be initialized
+      only by compile-time expressions and initializers must be of
+      the same type.
+  - type: |-
+      char
+    value: |-
+      c'p'
+    sign: |-
+      %
+    expected: 2
+    expect: >-
+      Semantic error ESE0342: Enumeration members can be initialized
+      only by compile-time expressions and initializers must be of
+      the same type.
+  - type: |-
+      char
+    value: |-
+      c'p'
+    sign: |-
+      +
+    expected: 122
+    expect: >-
+      Semantic error ESE0342: Enumeration members can be initialized
+      only by compile-time expressions and initializers must be of
+      the same type.
+  - type: |-
+      char
+    value: |-
+      c'p'
+    sign: |-
+      -
+    expected: 102
+    expect: >-
+      Semantic error ESE0342: Enumeration members can be initialized
+      only by compile-time expressions and initializers must be of
+      the same type.

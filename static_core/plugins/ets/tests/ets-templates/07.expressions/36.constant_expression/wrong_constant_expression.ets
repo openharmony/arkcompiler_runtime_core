@@ -15,16 +15,17 @@
 
 {%- for c in cases %}
 /*---
-desc: 
-    Constant expressions are expressions with values that can be evaluated at compile time.
+desc: >-
+    {{c.desc}}
 tags: [compile-only, negative]
+expected_out: "{{c.expect}}"
 ---*/
 
-{% if "Func" in c.use %}
+{% if c.decl is defined %}
 {{ c.decl }}
 {% endif %}
 
-function main() {
-    {{ c.use|indent }}
-}
+{{ c.use }}
+
+function main() {}
 {%- endfor %}

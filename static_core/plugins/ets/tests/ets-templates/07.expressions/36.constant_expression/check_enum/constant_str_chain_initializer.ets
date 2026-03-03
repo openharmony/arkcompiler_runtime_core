@@ -15,7 +15,7 @@
 
 {% for c in cases %}
 /*---
-desc: 
+desc:
     Constant expression chain initializer, declared in the same compilation unit.
 ---*/
 
