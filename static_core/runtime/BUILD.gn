@@ -531,6 +531,12 @@ if (is_ohos && is_standard_system) {
     "libuv:uv",
     "qos_manager:qos",
   ]
+  if (runtime_core_enable_ffrt) {
+    _libarkruntime_calculated_external_deps += [ "ffrt:libffrt" ]
+    _libarkruntime_calculated_defines += [
+      "PANDA_USE_FFRT",
+    ]
+  }
   if (!(ark_standalone_build || ark_static_standalone_build)) {
     _libarkruntime_calculated_defines += [
       "OHOS_PANDA_DEBUG_MODE_ENABLE",
