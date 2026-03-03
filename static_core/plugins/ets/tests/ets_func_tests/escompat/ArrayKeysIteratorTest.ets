@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function main(): int {
 function testArrayKeysIteratorFinal() {
     let array: Array<string> = new Array<string>();
     let iterator = array.keys();
-    let result: IteratorResult<number>;
+    let result: IteratorResult<int>;
 
     array.push('a');
     result = iterator.next();

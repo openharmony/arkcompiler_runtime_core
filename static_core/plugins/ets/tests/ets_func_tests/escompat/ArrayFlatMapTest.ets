@@ -51,7 +51,7 @@ class MyReadonlyArray<T> implements ReadonlyArray<T> {
         throw new Error('Not used in test');
     }
 
-    override entries(): IterableIterator<[number, T]> {
+    override entries(): IterableIterator<[int, T]> {
         throw new Error('Not used in test');
     }
 
@@ -95,7 +95,7 @@ class MyReadonlyArray<T> implements ReadonlyArray<T> {
         throw new Error('Not used in test');
     }
 
-    override keys(): IterableIterator<number> {
+    override keys(): IterableIterator<int> {
         throw new Error('Not used in test');
     }
 

@@ -39,8 +39,7 @@ class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx
     }
 }
 
- // NOTE(zaytsevaekaterina): fix in #26615 (num -> int)
-class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<[number, <%= ctx.el_type %>]> {
+class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<[int, <%= ctx.el_type %>]> {
     private parent: <%= ctx.this_type %>
     private idx: int = 0
     private isDone: boolean = false
@@ -49,17 +48,17 @@ class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ct
         this.parent = parent
     }
 
-    override next(): IteratorResult<[number, <%= ctx.el_type %>]> {
+    override next(): IteratorResult<[int, <%= ctx.el_type %>]> {
         if (this.isDone || this.idx >= <%= ctx.array_len_int.('this.parent') %>) {
             this.isDone = true
-            return new IteratorResult<[number, <%= ctx.el_type %>]>()
+            return new IteratorResult<[int, <%= ctx.el_type %>]>()
         }
         const i = this.idx++;
-        const vl: [number, <%= ctx.el_type %>] = [i.toDouble(), <%= ctx.get.('this.parent', 'i') %>]
-        return new IteratorResult<[number, <%= ctx.el_type %>]>(vl);
+        const vl: [int, <%= ctx.el_type %>] = [i, <%= ctx.get.('this.parent', 'i') %>]
+        return new IteratorResult<[int, <%= ctx.el_type %>]>(vl);
     }
 
-    override $_iterator(): IterableIterator<[number, <%= ctx.el_type %>]> {
+    override $_iterator(): IterableIterator<[int, <%= ctx.el_type %>]> {
         return this;
     }
 
