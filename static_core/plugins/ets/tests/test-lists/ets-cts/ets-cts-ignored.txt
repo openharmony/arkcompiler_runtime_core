@@ -18,9 +18,6 @@
 #31967
 03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.outside_let_const_selected_values.ets
 
-#31766
-03.types/06.value_types/01.numeric_types/smaller_to_larger_type/float_to_double/float_to_double.lets_const_hex.ets
-
 #33401 Verifier rejects arrays with void component type
 03.types/11.type_void_or_undefined/void/generic_void_array.ets
 03.types/11.type_void_or_undefined/void/generic_void_function.ets
@@ -38,7 +35,7 @@
 03.types/11.type_void_or_undefined/void/void_complex_scenarios_1.ets
 
 #31489
-03.types/11.type_void_or_undefined/void/void_generics_4.ets
+03.types/11.type_void_or_undefined/void/void_array.ets
 
 #25512
 03.types/19.union_types/united_switch_ext_5.ets
