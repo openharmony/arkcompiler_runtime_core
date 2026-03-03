@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported union.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_union.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_union.ets
 ---*/
 
-import u from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_union"
+import u from "../../06.exported_declarations/default_exported_declarations/default_export_union"
 
 function main(): void {
     arktest.assertTrue(u == undefined);

@@ -16,11 +16,11 @@
 /*---
 desc: Edit import default const variable.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_const.ets
 tags: [compile-only, negative]
 ---*/
 
-import {default as const_var} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_const"
+import {default as const_var} from "../../06.exported_declarations/default_exported_declarations/default_export_const"
 
 function main(): void {
     const_var = 3

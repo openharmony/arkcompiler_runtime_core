@@ -16,10 +16,10 @@
 /*---
 desc: Import a default exported class.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_class.ets
 ---*/
 
-import DefaultExportedClass from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
+import DefaultExportedClass from "../../06.exported_declarations/default_exported_declarations/default_export_class"
 
 function main(): void {
     let test_class = new DefaultExportedClass();

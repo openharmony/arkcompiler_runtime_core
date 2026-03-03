@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported function with 2 generic arguments.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function_gen.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_function_gen.ets
 ---*/
 
-import foo from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function_gen"
+import foo from "../../06.exported_declarations/default_exported_declarations/default_export_function_gen"
 
 function main(): void {
     arktest.assertEQ(foo(new Number(), new String()), 2);

@@ -18,13 +18,13 @@ desc: >-
     Import a default exported function using its name in a selective import.
     TypeError Use the default import syntax to import a default exported element
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_function.ets
 tags:
 - compile-only
 - negative
 ---*/
 
-import {TestFunc as TestFunc} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import {TestFunc as TestFunc} from "../../06.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
     TestFunc(42);

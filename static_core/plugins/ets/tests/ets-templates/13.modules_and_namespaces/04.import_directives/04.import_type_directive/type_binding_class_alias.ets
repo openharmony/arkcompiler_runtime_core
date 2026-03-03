@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import class type with alias.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_class.ets
 ---*/
 
-import type {MyClass as MyC} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
+import type {MyClass as MyC} from "../../06.exported_declarations/type_exported_declarations/export_type_class"
 
 function main(): void {
     let test_class = new MyC();

@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported primitive type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_type.ets
 ---*/
 
-import VAR_i from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type"
+import VAR_i from "../../06.exported_declarations/default_exported_declarations/default_export_type"
 
 function main(): void {
     let a: VAR_i = 2;

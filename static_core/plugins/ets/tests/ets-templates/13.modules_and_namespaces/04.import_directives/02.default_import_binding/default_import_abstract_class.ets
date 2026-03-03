@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported abstract class.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_abstract_class.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_abstract_class.ets
 ---*/
 
-import AC from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_abstract_class"
+import AC from "../../06.exported_declarations/default_exported_declarations/default_export_abstract_class"
 
 class C extends AC {}
 

@@ -16,10 +16,10 @@
 /*---
 desc: Import a default exported variable.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_variable.ets
 ---*/
 
-import test_var from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
+import test_var from "../../06.exported_declarations/default_exported_declarations/default_export_variable"
 
 function main(): void {
     arktest.assertEQ(test_var, "default_variable");

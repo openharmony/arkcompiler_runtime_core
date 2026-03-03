@@ -16,10 +16,10 @@
 /*---
 desc: Import default exported tuple.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_tuple.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_tuple.ets
 ---*/
 
-import TPL from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_tuple"
+import TPL from "../../06.exported_declarations/default_exported_declarations/default_export_tuple"
 
 function main(): void {
     let a: TPL = [new Number(), new String()];

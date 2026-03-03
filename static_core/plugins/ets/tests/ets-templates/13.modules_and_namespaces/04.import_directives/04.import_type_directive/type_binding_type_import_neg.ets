@@ -16,11 +16,11 @@ limitations under the License.
 /*---
 desc: A compile-time error occurs if import type is used, and one of bindings also uses type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_class.ets
 tags: [compile-only, negative]
 ---*/
 
-import type {type A} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
+import type {type A} from "../../06.exported_declarations/default_exported_declarations/default_export_class"
 
 function main(): void {
     let c: A = new A();

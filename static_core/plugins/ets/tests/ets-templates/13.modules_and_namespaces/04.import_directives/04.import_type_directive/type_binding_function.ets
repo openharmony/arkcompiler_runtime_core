@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import function type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_func.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_func.ets
 ---*/
 
-import type {foo} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_func"
+import type {foo} from "../../06.exported_declarations/type_exported_declarations/export_type_func"
 
 function main(): void {
     let bar: foo = (a: int): int => { return a }

@@ -16,10 +16,10 @@
 /*---
 desc: Import a default exported function.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_function.ets
 ---*/
 
-import DefaultExportedFunc from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import DefaultExportedFunc from "../../06.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
     arktest.assertEQ(DefaultExportedFunc(41), 42);

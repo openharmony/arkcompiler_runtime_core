@@ -16,10 +16,10 @@
 /*---
 desc: Import default entity from module A, imported from module B.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_3.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_type_2_level_3.ets
 ---*/
 
-import VAR_i from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level_3"
+import VAR_i from "../../06.exported_declarations/default_exported_declarations/default_export_type_2_level_3"
 
 function main() {
     let c: VAR_i = 3;

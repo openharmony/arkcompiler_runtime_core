@@ -16,10 +16,10 @@ limitations under the License.
 /*---
 desc: Import union type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_union.ets
+- ../../06.exported_declarations/type_exported_declarations/export_type_union.ets
 ---*/
 
-import type {UNI} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_union"
+import type {UNI} from "../../06.exported_declarations/type_exported_declarations/export_type_union"
 
 function main(): void {
     let a: UNI = "str"

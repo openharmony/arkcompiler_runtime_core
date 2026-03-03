@@ -16,11 +16,11 @@
 /*---
 desc: Import default and specific types from the same module.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2.ets
+- ../../06.exported_declarations/default_exported_declarations/default_export_type_2.ets
 ---*/
 
-import {A as B} from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2"
-import CLASS_A from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2"
+import {A as B} from "../../06.exported_declarations/default_exported_declarations/default_export_type_2"
+import CLASS_A from "../../06.exported_declarations/default_exported_declarations/default_export_type_2"
 
 function main() {
     let c: CLASS_A = new CLASS_A();
