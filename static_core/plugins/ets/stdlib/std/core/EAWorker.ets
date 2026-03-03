@@ -169,6 +169,9 @@ export class EAWorker {
             let wrappedInitialTask = this.worker.wrapTask<void>(this.initialTask);
             wrappedInitialTask();
         });
+        if (this.worker.getWorkerId() != INVALID_WORKER_ID) {
+            EAWorker.getWorkers().set(this.worker.getWorkerId(), this);
+        }
         this.worker.setPriority(this.priority);
         this.loopStarted.set(true);
     }
@@ -316,6 +319,21 @@ export class EAWorker {
     private isMain() {
         return this === EAWorker.main();
     }
+
+    private static handleInteropEnvError() {
+        let currentWorker = EAWorker.current();
+        currentWorker?.handleInteropEnvErrorInternal();
+    }
+
+    private handleInteropEnvErrorInternal() {
+        this.loopStarted.set(false);
+        this.loopJoined.set(true);
+        EAWorker.getWorkers().delete(this.worker.getWorkerId());
+        this.worker.handleCreateInteropEnvError();
+        EAWorker.postToMain<void>(() => {
+            throw new Error('EAWorker:: Cannot create EAWorker support interop without JsEnv');
+        });
+    }
 };
 
 export abstract class InternalWorker {
@@ -335,6 +353,8 @@ export abstract class InternalWorker {
     abstract start(initialTask: Task);
 
     abstract join(finalTask: Task): Job<void>;
+
+    abstract handleCreateInteropEnvError(): void;
 
     getName(): string {
         return this.name;
@@ -386,15 +406,55 @@ export abstract class InternalWorker {
 }
 
 class InteropWorker extends InternalWorker {
+    private interopInitialized: AtomicFlag = new AtomicFlag(false);
+    private pendingTasks: containers.LinkedBlockingQueue<PendingTaskHandler> = new containers.LinkedBlockingQueue<PendingTaskHandler>();
+
     constructor(name: string) {
         super(name, INVALID_WORKER_ID);
     }
 
     start(initialTask: Task) {
-        this.workerId = ExclusiveLauncher.elaunch(initialTask, this.getName(), true);
+        let wrappedTask = () => {
+            initialTask();
+            this.interopInitialized.set(true);
+            this.processPendingTasks();
+        }
+        this.workerId = ExclusiveLauncher.elaunch(wrappedTask, this.getName(), true);
+    }
+
+    private processPendingTasks() { 
+        while (this.pendingTasks.size > 0) {
+            let deferredTask = this.pendingTasks.poll();
+            if (deferredTask !== undefined) {
+                deferredTask.runTask();
+            }
+        }
     }
 
     public override run<R>(task: Function, ...args: FixedArray<Any>): Job<R> {
+        if (this.interopInitialized.get()) {
+            return this.runInternal<R>(task, args);
+        }
+
+        let completer = new CompletableJob<R>();
+        let pendingTask: Task = () => {
+            try { 
+                let serializeHelper = new InteropSerializeHelper(args);
+                let res = task.unsafeCall(...serializeHelper.deserialize()) as R;
+                completer.finish(res);
+            } catch (e) {
+                completer.fail(e);
+            }
+        }
+        let failJob: ErrorHandlerType = (err: Error) => {
+            completer.fail(err);
+        }
+        let deferredTask = new PendingTaskHandler(failJob, pendingTask);
+        this.pendingTasks.add(deferredTask);
+        return completer;
+    }
+
+    private runInternal<R>(task: Function, args: FixedArray<Any>): Job<R> {
         let serializeHelper = new InteropSerializeHelper(args);
         let wrappedTask = (): R => {
             return task.unsafeCall(...serializeHelper.deserialize()) as R;
@@ -410,6 +470,35 @@ class InteropWorker extends InternalWorker {
         }
         InternalWorker.join(this.workerId, finTask as Object);
         return joinJob;
+    }
+
+    handleCreateInteropEnvError() {
+        let err = new Error('EAWorker:: Cannot create EAWorker support interop without JsEnv');
+        while (this.pendingTasks.size > 0) {
+            let deferredTask = this.pendingTasks.poll();
+            if (deferredTask !== undefined) {
+                deferredTask.failJob(err);
+            }
+        }
+    }
+}
+
+
+class PendingTaskHandler {
+    private failJobHandler: ErrorHandlerType;
+    private task: Task;
+
+    constructor (failJobHandler: ErrorHandlerType, task: Task) {
+        this.failJobHandler = failJobHandler;
+        this.task = task;
+    }
+
+    public failJob(err: Error) {
+        this.failJobHandler(err);
+    }
+
+    public runTask() {
+        this.task();
     }
 }
 
@@ -433,6 +522,10 @@ class StaticWorker extends InternalWorker {
         this.joiningEvent.fire();
         return joinJob;
     }
+
+    handleCreateInteropEnvError() {
+        throw new Error("EAWorker:: Static worker does not support interop");
+    }
 }
 
 class MainEAWorker extends EAWorker {
@@ -452,6 +545,10 @@ export class MainWorker extends InternalWorker {
 
     join(finalTask: Task): Job<void> {
         throw new Error('EAWorker:: Main worker cannot be stopped');
+    }
+
+    handleCreateInteropEnvError() {
+        throw new Error("EAWorker:: Main worker do not need to handle create interop env error");
     }
 
     override setPriority(priority: WorkerPriority) {
