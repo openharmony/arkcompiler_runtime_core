@@ -4,10 +4,10 @@ ets-common-tests/atomics/concurrent_compare_exchange.ets
 #30702
 ets-common-tests/intrinsics/copyTo.ets
 
-#32342
+#32837
 ets-common-tests/taskpool/asyncrunner_tasks.ets
 
-#33011
+#33411
 ets-common-tests/taskpool/common_tasks_new.ets
 
 #32560
