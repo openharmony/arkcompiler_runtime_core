@@ -434,7 +434,7 @@ bool LLVMIrConstructor::EmitStringLastIndexOf(Inst *inst)
     auto fitBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "fit"), func_);
     auto callBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "call"), func_);
     // Negative startIndex implies no match, i.e. return -1
-    auto startIndexNegative = builder_.CreateICmpEQ(startIndex, builder_.getInt32(0));
+    auto startIndexNegative = builder_.CreateICmpSLT(startIndex, builder_.getInt32(0));
     auto charIndex1 = builder_.getInt32(-1);
     builder_.CreateCondBr(startIndexNegative, retBb, chkEmptyBb);
     // Empty string implies no match, i.e. return -1
