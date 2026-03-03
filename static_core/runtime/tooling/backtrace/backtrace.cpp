@@ -189,6 +189,7 @@ int Backtrace::SymbolizeByManagedFrame(uintptr_t pc, uintptr_t mapBase, uint32_t
                 return 1;
             }
             LOG(ERROR, RUNTIME) << "sourceFile not exist";
+            return 0;
         } else if (isRight) {  // NOLINT(readability-else-after-return)
             left = mid + 1;
         } else {
@@ -303,6 +304,7 @@ bool Backtrace::SymbolizeByNativeFrame(uintptr_t pc, uintptr_t mapBase, uintptr_
                 return true;
             }
             LOG(ERROR, RUNTIME) << "sourceFile not exist";
+            return false;
         } else if (isRight) {  // NOLINT(readability-else-after-return)
             left = mid + 1;
         } else {
