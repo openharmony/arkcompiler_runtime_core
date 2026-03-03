@@ -1010,6 +1010,29 @@ async function testAsyncLockErrorthrow(){
     taskpool.execute(task2).catch((e:Error)=>{arktest.assertTrue(false)});  
 }
 
+async function testAsyncLockOrder() {
+    let n = 0;
+    let ar: Array<int> = [];
+    let lock = new AsyncLock();
+    let promises: Promise<Promise<void>>[] = [];
+    promises.push(lock.lockAsync(async () => {
+        await new Promise<number>((resolve) => { setTimeout(resolve, 100, 1.0) });
+        ar.push(1);
+    }, AsyncLockMode.SHARED));
+    promises.push(lock.lockAsync(async () => {
+        await new Promise<number>((resolve) => { setTimeout(resolve, 300, 1.0) });
+        ar.push(2);
+    }, AsyncLockMode.EXCLUSIVE));
+    promises.push(lock.lockAsync(async () => {
+        await new Promise<number>((resolve) => { setTimeout(resolve, 200, 1.0) });
+        ar.push(3);
+    }, AsyncLockMode.SHARED));
+    await Promise.all(promises);
+    arktest.assertEQ(ar[0], 1, "Test failed: the first resolved promise is expected to be the first one");
+    arktest.assertEQ(ar[1], 2, "Test failed: the second resolved promise is expected to be the second one");
+    arktest.assertEQ(ar[2], 3, "Test failed: the third resolved promise is expected to be the third one");
+}
+
 function main(): int {
     let asyncLockTestsuite = new arktest.ArkTestsuite("asyncLockTestsuite");
 
@@ -1029,6 +1052,7 @@ function main(): int {
     asyncLockTestsuite.addTest('asynclockStateTest4', assertasynclockStateTest4);
     asyncLockTestsuite.addTest('asynclockabortTest', () => { arktest.assertTrue(abortTest()); });
     asyncLockTestsuite.addTest('assertasyncLockQueryTest',assertasyncLockQueryTest); 
+    asyncLockTestsuite.addAsyncTest('testAsyncLockOrder',testAsyncLockOrder);
     asyncLockTestsuite.addAsyncTest('testAsyncLockErrorthrow',testAsyncLockErrorthrow);
     let summ = 0;
     summ += asyncLockTestsuite.run();
