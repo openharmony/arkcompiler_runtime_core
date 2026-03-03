@@ -13,8 +13,17 @@
 
 |
 
-This chapter covers the |LANG| execution model and the language features that
-provide support for concurrent (asynchronous and parallel) code execution.
+|LANG| provides a wide variety of means for writing programs that efficiently
+utilize hardware resources by running certain pieces of code in parallel and
+asynchronously.
+
+This chapter covers:
+
+- the |LANG| execution model
+- the semantics of *asynchronous*, *parallel* and *concurrent* code execution in
+  |LANG|
+- the language features and standard library API that provide the corresponding
+  functionality
 
 |
 
@@ -31,17 +40,17 @@ runtime environment. A |C_JOB| is a piece of code that can be executed
 concurrently (that is, either asynchronously or in parallel with other |C_JOBS|)
 and communicate its return value via the language provided mechanism. 
 
-Given that the target platform allows for concurrent code execution, a
-|C_WORKER| is an abstraction over platform provided unit of concurrency.
-Typically, it will map 1:1 with OS threads. That means:
+Given that the target platform allows for parallel code execution, a |C_WORKER|
+is an abstraction over platform provided unit of parallelism. Typically, it will
+map 1:1 with OS threads. That means:
 
 -  every |C_JOB| is hosted by a |C_WORKER| with only one |C_JOB| per |C_WORKER|
    being executed at once
 -  if two or more |C_JOBS| run on different |C_WORKERS| then their code is able
    to run in parallel (this execution mode will be referred to as
    :term:`parallel execution`)
--  if several |C_JOBS| share the same |C_WORKER| then their code can never run in
-   parallel (this execution mode will be referred to as :term:`asynchronous
+-  if several |C_JOBS| share the same |C_WORKER| then their code can never run
+   in parallel (this execution mode will be referred to as :term:`asynchronous
    execution`).
 
 A |C_JOB|'s body has the starting point (the beginning of the corresponding
@@ -72,14 +81,14 @@ synchronization to avoid race conditions and guarantee thread safety.
 Overview of concurrency features
 ********************************
 
-|LANG| allows for both asynchronous and parallel programming, and provides
-machinery for trustworthy concurrent programs by providing the following:
+|LANG| allows for both asynchronous and parallel programming and provides the
+following:
 
 - :ref:`Asynchronous execution` primitives: ``async`` / ``await`` / ``Promise``;
 - :ref:`Parallel execution` API: ``EAWorker API`` / ``Taskpool API`` / 
   ``launch API``, including the structured concurrency support;
 - :ref:`Synchronization` API: locks API, atomics API and other means of
-     synchronization;
+  synchronization;
 
 The :ref:`API details and restrictions` section provides the detailed API
 description and the restrictions on its usage.

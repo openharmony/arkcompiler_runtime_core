@@ -69,6 +69,8 @@ is least busy at the time of resumption.
 .. code-block:: typescript
    :linenos:
 
+   async function g() { /* some actions */ }
+
    async function f() {
     // ...
 
@@ -82,7 +84,7 @@ is least busy at the time of resumption.
     let result1 = await p1 // can be safely awaited on the caller worker thread
 
     // Most of the details can be inferred from the context or omitted: 
-    let p2 = launch { await g() }
+    let p2 = launch async { await g() }
 
     // ...
    }
@@ -93,8 +95,12 @@ is least busy at the time of resumption.
    }
 
 The ``launch`` API allows to select the target |C_WORKER| for the new |C_JOB|
-and to customize other launch parameters. The detailed API description and the
-restrictions are in the :ref:`API details and restrictions` section.
+and to customize other launch parameters. The important details and usage
+restrictions of this functionality are described in the :ref:`API details and
+restrictions` section.
+
+For the detailed API specification, please refer to the |LANG| standard library
+documentation.
 
 .. index::
    launch
@@ -115,8 +121,7 @@ That means, the initial |C_JOB| and all the |C_JOBS| spawned by it will stay on
 this newly created |C_WORKER|, and no other |C_JOB| can be scheduled to this
 |C_WORKER|.
 
-The detailed API description and the restrictions are in the :ref:`API details
-and restrictions` section.
+Please refer to the standard library documentation to find out more information.
 
 .. index::
    EAWorker
@@ -136,8 +141,7 @@ combine them in groups and choose a complex execution order.
     The |C_COROS| created by the taskpool API can not be rescheduled to another 
     |C_WORKER| upon resumption.
 
-The detailed API description and other restrictions are in the :ref:`API details
-and restrictions` section.
+Please refer to the standard library documentation to find out more information.
 
 .. index::
    taskpool

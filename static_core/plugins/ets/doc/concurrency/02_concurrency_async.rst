@@ -124,7 +124,8 @@ Asynchronous Lambdas
 .. meta:
     frontend_status: Done
 
-A lambda can have the ``async`` modifier (see :ref:`Lambda Expressions`).
+A lambda can have the ``async`` modifier (see :ref:`Lambda Expressions` and
+:ref:`Trailing Lambdas`).
 
 With regard to concurrency, ``async`` lambdas have the same semantics and
 follow the same rules as :ref:`Async Functions`.

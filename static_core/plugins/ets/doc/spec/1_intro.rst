@@ -186,7 +186,7 @@ The |LANG| lexical notation defines a set of rules, or productions that specify
 the structure of the elementary language  parts called *tokens*. All tokens are
 defined in :ref:`Lexical Elements`. The set of tokens (identifiers, keywords,
 numbers/numeric literals, operator signs, delimiters), special characters
-(white spaces and line separators), and comments comprizes the language’s
+(white spaces and line separators), and comments comprises the language’s
 *alphabet*.
 
 .. index::
@@ -221,7 +221,7 @@ sequences of tokens can form syntactically correct programs.
    nonterminal
 
 Lexical and syntactic grammars are defined as a range of productions, and each
-production is comprized of the following:
+production is comprised of the following:
 
 - Abstract symbol (*nonterminal*) as its left-hand side,
 - Sequence of one or more *nonterminal* and *terminal* symbols as its
@@ -277,7 +277,7 @@ with terminal and nonterminal symbols:
 
 The metasymbols specify the structuring rules for terminal and nonterminal
 sequences. However, they are not part of terminal symbol sequences that
-comprize the resultant program text.
+comprise the resultant program text.
 
 The example below represents a production that specifies a list of expressions:
 
@@ -288,7 +288,7 @@ The example below represents a production that specifies a list of expressions:
       ;
 
 This production introduces the following structure defined by the
-nonterminal *expressionList*. The expression list must comprize a
+nonterminal *expressionList*. The expression list must comprise a
 sequence of *expressions* separated by the terminal symbol ``','``. The
 sequence must have at least one *expression*. The list is optionally
 terminated by the terminal symbol ``','``.
@@ -321,7 +321,7 @@ as used in other languages, application areas, or industries.
 
    compile-time warning
      -- a text message displayed by the compiler if a program code is found
-     to have some logical inconsistencies that require to reconsider design
+     to have some logical inconsistencies that require reconsidering design
      and actual coding.
 
    expression
@@ -400,7 +400,7 @@ as used in other languages, application areas, or industries.
      brackets, etc.
 
    literal
-     -- a representation of a value type.
+     -- a representation of a value of some type.
 
    comment
      -- a piece of text, insignificant for the syntactic grammar, that is
@@ -487,7 +487,7 @@ as used in other languages, application areas, or industries.
      -- a set of rules that describe what possible sequences of terminal and
      nonterminal symbols a programming language interprets as correct.
 
-     Grammar is a range of productions. Each production comprizes an
+     Grammar is a range of productions. Each production comprises an
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
      Each production contains the character ``':'`` as a separator between the
@@ -602,29 +602,30 @@ as used in other languages, application areas, or industries.
 
    concurrent execution
      -- :term:`asynchronous execution` or :term:`parallel execution` (see
-     :ref:`Execution model`).
+     :ref:`Execution Model`).
 
    parallel execution
-     -- a mode of execution when given |C_JOBS| run on different |C_WORKERS| and
-     hence can make forward progress simultaniously (see :ref:`Execution model`).
+     -- a mode of execution where certain |C_JOBS| run on different |C_WORKERS|,
+     and hence can make forward progress simultaneously (see :ref:`Execution
+     Model`).
 
    asynchronous execution
-     -- a mode of execution when several |C_JOBS| share the same |C_WORKER| (see
-     :ref:`Execution model`).
+     -- a mode of execution where several |C_JOBS| share a single |C_WORKER|
+     (see :ref:`Execution Model`).
 
    |C_WORKER|
-     -- an abstraction over platform provided unit of concurrency, for example
-     an OS thread (see :ref:`Execution model`).
+     -- an abstraction over a platform-provided unit of parallelism, e.g.,
+     an OS thread (see :ref:`Execution Model`).
 
    |C_JOB|
      -- a piece of code that can be executed concurrently with other |C_JOBS|
-     and communicate its return value via the language provided mechanism (see
-     :ref:`Execution model`). The 
+     to communicate its return value(s) via a language-provided mechanism (see
+     :ref:`Execution Model`). The 
 
    coroutine
-     -- a synonym for a |C_CORO|: a |C_JOB| with suspension points. Its
-     execution can be suspended and, later on, resumed (see :ref:`Execution
-     model`).
+     -- a synonym for a |C_CORO|, i.e., a |C_JOB| with suspension points. The
+     execution of a coroutine can be suspended and later resumed (see
+     :ref:`Execution Model`).
 
 .. narrowing conversion
      -- a conversion that causes a loss of information about the overall

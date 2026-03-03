@@ -151,7 +151,7 @@ The name of an *annotation* cannot coincide with the name of another entity:
 
     @interface Position {/*properties*/}
 
-    class Position {/*body*/} // compile-time error: duplicate identifier
+    class Position {/*body*/} // compile-time error, duplicate identifier
 
 An annotation declaration defines no type. No type alias can be applied to
 the annotation or used as an interface:
@@ -189,7 +189,6 @@ The choice of *types for annotation fields* is limited to the following:
 - Type ``boolean`` (see :ref:`Type boolean`);
 - :ref:`Type string`;
 - Enumeration types (see :ref:`Enumerations`);
-- Const Enumeration types (see :ref:`Const Enumerations`);
 - Array of the above types (e.g., ``string[]``), including arrays of arrays
   (e.g., ``string[][]``).
 
@@ -414,7 +413,6 @@ omitted after the annotation name:
    syntax
    array literal
    parentheses
-   property
    annotation name
 
 |
@@ -596,7 +594,7 @@ identical, including field initialization:
     export declare @interface NameAnno{name: string = ""}
 
     // a.ets
-    export @interface NameAnno{name: string = ""} // ok
+    export @interface NameAnno{name: string = ""} // OK
 
 The code in the example below is incorrect because the ambient declaration is
 not identical to the annotation declaration:
@@ -843,7 +841,6 @@ targets:
 
 -  Targets for :ref:`Interface Members`:
 
-    - INTERFACE_PROPERTY;
     - INTERFACE_METHOD;
     - INTERFACE_GETTER;
     - INTERFACE_SETTER.
@@ -870,7 +867,6 @@ targets:
    class method
    class getter
    class setter
-   interface property
    interface method
    interface getter
    interface setter
@@ -881,8 +877,8 @@ targets:
    type
    annotation
 
-A :index:`compile-time error` occurs if an enumeration constant is used more
-then once in an ``@Target`` annotation:
+A :index:`compile-time error` occurs if an enumeration member is used more
+than once in an ``@Target`` annotation:
 
 .. code-block:: typescript
    :linenos:

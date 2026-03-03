@@ -22,6 +22,7 @@ Language design lead:
 Contributors:
 
 - Bronnikov Georgy
+- Cherkashin Vyacheslav
 - Gavrin Evgeny
 - Grebenschikov Konstantin
 - Huo Qingyi

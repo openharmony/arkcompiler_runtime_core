@@ -26,7 +26,7 @@ A class body contains declarations and initializer blocks.
 Declarations can introduce class members (see :ref:`Class Members`) or class
 constructors (see :ref:`Constructor Declaration`).
 
-The body of the declaration of a member comprizes the scope of a
+The body of the declaration of a member comprises the scope of a
 declaration (see :ref:`Scopes`).
 
 Class members include:
@@ -190,7 +190,7 @@ instance of an abstract class:
       constructor (p: number) { this.field = p }
    }
    let x = new X(42)
-     // Compile-time error: Cannot create an instance of an abstract class.
+     // compile-time error, Cannot create an instance of an abstract class.
 
 Subclasses of an abstract class can be abstract or non-abstract.
 A non-abstract subclass of an abstract superclass can be instantiated. As a
@@ -234,7 +234,7 @@ occurs if a non-abstract class has an abstract method:
 
    class Y {
      abstract method (p: string)
-     /* Compile-time error: Abstract methods can only
+     /* compile-time error, Abstract methods can only
         be within an abstract class. */
    }
 
@@ -246,7 +246,7 @@ contains the modifiers ``final`` or ``override``.
 
    abstract class Y {
      final abstract method (p: string)
-     // Compile-time error: Abstract methods cannot be final
+     // compile-time error, Abstract methods cannot be final
    }
 
 
@@ -368,7 +368,7 @@ superclass.
          foo () {
            this.publicMethod()    // OK
            this.protectedMethod() // OK
-           this.privateMethod()   // compile-time error:
+           this.privateMethod()   // compile-time error,
                                   // the private method is inaccessible
          }
        }
@@ -427,7 +427,7 @@ If ``typeReference`` fails to name an accessible interface type (see
     interface I { } // Not exported
 
     // File2
-    class C implements I {} // Compile-time error I is not accessible
+    class C implements I {} // compile-time error I is not accessible
 
 If some interface is repeated as a direct superinterface in a single
 ``implements`` clause (even if that interface is named differently), then all
@@ -484,9 +484,15 @@ the following:
 
 A class *implements* all its superinterfaces.
 
-A :index:`compile-time error` occurs if a class implements
-two interface types that represent different instantiations of the same
-generic interface (see :ref:`Generics`).
+A :index:`compile-time error` occurs if:
+
+- Class implements two interface types
+  that represent different instantiations of the same
+  generic interface (see :ref:`Generics`);
+
+- Class field and a method inherited from one of
+  its superinterfaces have the same name, except
+  where either is static and the other is not.
 
 .. index::
    class type
@@ -500,69 +506,18 @@ generic interface (see :ref:`Generics`).
    instantiation
    generic interface
 
-If a class is not declared *abstract*, then:
+If a class is not *abstract*, then the following conditions must be met:
 
--  Any abstract method of each direct superinterface is implemented (see
-   :ref:`Inheritance`) by a declaration in that class.
--  The declaration of an existing method is inherited from a direct superclass,
-   or a direct superinterface.
+- Methods of a superinterface have implementation bodies
+  that can be defined either in the class itself, or in its superclass
+  or superinterface (see :ref:`Implementing Interface Methods`
+  for detail);
 
-A :index:`compile-time error` occurs if a class field has the same name as
-a method from one of superinterfaces implemented by the class, except when one
-is static and the other is not.
+- Required properties of superinterfaces are implemented
+  (see :ref:`Implementing Required Interface Properties`).
 
-.. index::
-   method
-   abstract method
-   superinterface
-   implementation
-   class field
-   class
-   static class
-   non-static class
-
-If a class has both an ``extends`` clause and an ``implements`` clause, and
-methods with the same name and the same or overload-equivalent signature (see
-:ref:`Overload-Equivalent Signatures`) but different method bodies
-are inherited from a superclass and at least one of superinterfaces,
-then a method from the superclass overrides all other methods.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-       foo () { console.log ("I.foo()") }
-    }
-    class C1 {
-       foo () { console.log ("C1.foo()") }
-    }
-    class C2 extends C1 implements I {} // Valid class
-
-    (new C2).foo()      // Will output "C1.foo()"
-    (new C2 as I).foo() // Will output "C1.foo()"
-
-
-If a class has an ``implements`` clause and methods with the same name and the
-same or overload-equivalent signature (see
-:ref:`Overload-Equivalent Signatures`) but different method bodies are
-inherited from several superinterfaces but not from the superclass, then a 
-:index:`compile-time error` occurs.
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I1 {
-       foo () { console.log ("I1.foo()") }
-    }
-    interface I2 {
-       foo () { console.log ("I2.foo()") }
-    }
-    class C1 {}
-    class C2 extends C1 implements I1, I2 {} // Compile-time error
-
-    abstract class C3 { abstract foo(): void }
-    class C4 extends C3 implements I1, I2 {} // Compile-time error
-
+An optional property from a superinterface can be implemented or implicitly
+defined (see :ref:`Implementing Optional Interface Properties`).
 
 |
 
@@ -571,17 +526,20 @@ inherited from several superinterfaces but not from the superclass, then a
 Implementing Interface Methods
 ==============================
 
-When superinterfaces have more then one default implementation (see
-:ref:`Default Interface Method Declarations`) for some method ``m``, then:
+If superinterfaces have one or more *override-compatible* methods ``m`` with
+default implementation (see :ref:`Default Interface Method Declarations`),
+then:
 
-- The class that implements these interfaces must have a method to override
-  ``m`` (see :ref:`Override-Compatible Signatures`);
+-  Class that implements the interfaces must have
+   a method (either defined or inherited from a
+   superclass) to override  ``m`` (see
+   :ref:`Override-Compatible Signatures`);
 
-- There must be a single interface method with default implementation
-  that overrides all other methods; or
+-  Single interface method with default implementation
+   must be present that overrides all other methods; or
 
-- All interface methods must refer to the same implementation, and
-  this default implementation must be the current class method.
+- All interface methods must refer to the same default implementation
+  that is used as the current class method.
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -602,11 +560,11 @@ Otherwise, a :index:`compile-time error` occurs.
     interface I1 { foo () {} }
     interface I2 { foo () {} }
     class C1 implements I1, I2 {
-       foo () {} // foo() from C1 overrides both foo() from I1 and foo() from I2
+       foo () {} // OK, foo() from C1 overrides both foo() from I1 and foo() from I2
     }
 
     class C2 implements I1, I2 {
-       // Compile-time error as foo() from I1 and foo() from I2 have different method bodies
+       // compile-time error as foo() from I1 and foo() from I2 have different method bodies
     }
 
     interface I3 extends I1 {}
@@ -617,31 +575,27 @@ Otherwise, a :index:`compile-time error` occurs.
 
     interface I5 extends I1 { foo() {} } // override method from I1
     class C4 implements I1, I5 {
-       // Compile-time error as foo() from I1 and foo() from I5 have different method bodies
+       // compile-time error as foo() from I1 and foo() from I5 have different method bodies
     }
 
-    class Base {}
-    class Derived extends Base {}
+The situation where a method inherited from
+a superclass overrides a method with default
+implementation inherited from a superinterface
+is represented in the example below:
 
-    interface IBase {
-        foo(p: Base) {}
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+       foo () { console.log ("I.foo") }
     }
-    interface IDerived {
-        foo(p: Derived) {}
+    class C1 {
+       foo () { console.log ("C1.foo") }
     }
-    class C implements IBase, IDerived {} // foo() from IBase overrides foo() from IDerived
-    new C().foo(new Base) // foo() from IBase is called
+    class C2 extends C1 implements I {} // OK
 
-
-A single method declaration in a class is allowed to implement methods of one
-or more superinterfaces.
-
-.. index::
-   method declaration
-   class
-   method
-   superinterface
-   implementation
+    (new C2).foo()      // output: C1.foo
+    (new C2 as I).foo() // output: C1.foo
 
 |
 
@@ -761,20 +715,20 @@ The errors are represented in the example below:
     interface I {
         n: number
     }
-    class A implements I { // compile-time error: setter is not defined
+    class A implements I { // compile-time error, setter is not defined
         get n(): number  { return 1 }
     }
-    class B implements I { // compile-time error: getter is not defined
+    class B implements I { // compile-time error, getter is not defined
         set n(x: number)  {}
     }
     class C implements I {
-        get n(): string { return "aa" } // compile-time error: wrong type
+        get n(): string { return "aa" } // compile-time error, wrong type
     }
 
     interface J {
         readonly r: string
     }
-    class D implements J { // compile-time error: getter is not defined
+    class D implements J { // compile-time error, getter is not defined
         set r(x: string) {}
     }
 
@@ -797,7 +751,7 @@ defined in the interface. The situation is represented below:
 
     function foo(i: I) {
       console.log(i.n) // OK, getter is used
-      i.n = 1 // compile-time error: setter is not defined
+      i.n = 1 // compile-time error, setter is not defined
     }
 
     interface J {
@@ -833,7 +787,7 @@ This situation is represented by the example below:
       set n(x: string)
     }
     class D implements J {
-        n: number = 1 // compile-time error: types mismatch
+        n: number = 1 // compile-time error, types mismatch
     }
 
 If a property defines both a getter and a setter of different types,
@@ -876,7 +830,7 @@ Such error situations are represented by the example below:
         n: number = 1
     }
     class C1 extends C {
-        get n(): number { return 1 } // compile-time error: 'n' cannot be overridden by an accessor
+        get n(): number { return 1 } // compile-time error, 'n' cannot be overridden by an accessor
     }
 
     class D implements I {
@@ -884,7 +838,7 @@ Such error situations are represented by the example below:
         set n(x: number) {}
     }
     class D1 extends D {
-        n: number = 2 // compile-time error: 'n' cannot be overridden by a field
+        n: number = 2 // compile-time error, 'n' cannot be overridden by a field
     }
 
 A field that implements an interface property can override a field of the same
@@ -900,7 +854,7 @@ type defined in a superclass:
         n: number = 1
     }
     class C extends A implements I {
-        n: number = 2 // ok, 'n' overrides 'n' from A and implements 'n' from I
+        n: number = 2 // OK, 'n' overrides 'n' from A and implements 'n' from I
     }
 
 If types mismatch as represented in the example below, then a
@@ -915,17 +869,17 @@ If types mismatch as represented in the example below, then a
     interface J {
         n: string
     }
-    class A implements I, J { // compile-time error: types mismatch
+    class A implements I, J { // compile-time error, types mismatch
     }
 
     class B {
         n: string = "aa"
     }
-    class C extends B implements I { // compile-time error: types mismatch
+    class C extends B implements I { // compile-time error, types mismatch
     }
 
     class C implements I {
-        get n(): string { return "aa" } // compile-time error: types mismatch
+        get n(): string { return "aa" } // compile-time error, types mismatch
     }
 
 If a property is defined as ``readonly``, then the implementation of
@@ -986,7 +940,7 @@ If no implementation for the property is provided, then a
     interface I {
         property: number
     }
-    class C implements I { // compile-time error: no implementation at all
+    class C implements I { // compile-time error, no implementation at all
     }
 
 
@@ -1182,6 +1136,15 @@ Members can be static or non-static as follows:
    name is accessible (see :ref:`Accessible`); and
 -  Non-static, or instance members that belong to any instance of the class.
 
+.. note::
+    Static members of a superclass are not inherited. The subclass which wants
+    to use static members of its superclass must use explicit qualification
+    using the superclass name. That applies to any kind of static members:
+
+    - static fields;
+    - static methods;
+    - static accessors. 
+
 Names of all *accessible* static and non-static entities in a class declaration
 scope (see :ref:`Scopes`) must be unique, i.e., fields, methods, and overloads
 with the same static or non-static status cannot have the same name.
@@ -1270,14 +1233,6 @@ Members can be as follows:
 -  Class fields (see :ref:`Field Declarations`),
 -  Methods (see :ref:`Method Declarations`), and
 -  Accessors (see :ref:`Class Accessor Declarations`).
-
-A *method* is defined by the following:
-
-#. *Type parameter*, i.e., the declaration of any type parameter of the
-   method member.
-#. *Argument type*, i.e., the list of types of arguments applicable to the
-   method member.
-#. *Return type*, i.e., the return type of the method member.
 
 .. index::
    class field
@@ -1369,23 +1324,23 @@ the following example:
       private count: number = 1
       private hello() {}
       getCount(): number {
-        return this.count // ok
+        return this.count // OK
       }
       sayHello() {
-        this.hello()  // ok
+        this.hello()  // OK
       }
     }
 
     function increment(c: C) {
-      c.sayHello()  // ok
-      c.hello()     //  compile-time error - 'hello()' is private
+      c.sayHello()  // OK
+      c.hello()     // compile-time error - 'hello()' is private
       c.count++     // compile-time error - 'count' is private
     }
 
     class D1 extends C {
       foo() {
-         this.getCount() // ok
-         this.sayHello() // ok
+         this.getCount() // OK
+         this.sayHello() // OK
          this.hello()    // compile-time error, private base method
          this.count++    // compile-time error, private base field
       }
@@ -1439,13 +1394,13 @@ class derived from ``C``:
     class C {
       protected count: number
        getCount(): number {
-         return this.count // ok
+         return this.count // OK
        }
     }
 
     class D extends C {
       increment() {
-        this.count++ // ok, D is derived from C
+        this.count++ // OK, D is derived from C
       }
     }
 
@@ -1594,11 +1549,11 @@ Otherwise, a :index:`compile-time error` occurs.
     interface II3 { f: B1 } // The same property 'f' type as in II1
 
     class CC1 implements II1, II2 {
-        f: B1  = new BB3 /* Compile-time error: field and all inherited properties
+        f: B1  = new BB3 /* compile-time error, field and all inherited properties
                             must be of the same type */
     }
     class CC2 implements II1, II3 {
-        f: B3 = new BB3 /* Compile-time error: field and all inherited properties
+        f: B3 = new BB3 /* compile-time error, field and all inherited properties
                            must be of the same type */
     }
     class CC3 implements II1, II3 {
@@ -1796,7 +1751,7 @@ any form:
 - ``this``.
 
 If the initializer expression contains one of the above patterns, then a
-:index:`compile-time error` occurs.
+:index:`compile-time warning` occurs.
 
 If allowed in the code, the above restrictions can break the consistency of
 class instances as shown in the following examples:
@@ -1822,9 +1777,9 @@ class instances as shown in the following examples:
    :linenos:
 
     class C {
-        a = this        // Compile-time error
+        a = this        // compile-time error
 
-        f1 = this.foo() // Compile-time error as 'this' method is invoked
+        f1 = this.foo() // compile-time error as 'this' method is invoked
 
         f2 = "a string field"
 
@@ -1839,7 +1794,7 @@ class instances as shown in the following examples:
     class B {}
     function foo (f: () => B) { return f() }
     class A {
-        field1 = foo(() => this.field2) // Compile-time error as this is used in the initializer code
+        field1 = foo(() => this.field2) // compile-time error as this is used in the initializer code
         field2 = new B
     }
 
@@ -1864,6 +1819,10 @@ Fields with Late Initialization
 
 .. meta:
     frontend_status: Done
+
+*Field with late initialization* ``f!: T = expr`` effectively means that the type
+of the field ``f``is ``T | undefined``, however for any form of an access the
+field behaves as a field of type ``T``.
 
 *Field with late initialization* must be an *instance field*. If it is defined
 as ``static``, then a :index:`compile-time error` occurs.
@@ -1909,7 +1868,7 @@ a :index:`runtime error` occurs:
 
     let x = new C()
     x.f = "aa"
-    console.log(x.f) // ok
+    console.log(x.f) // OK
 
     let y = new C()
     console.log(y.f) // runtime or compile-time error
@@ -1948,6 +1907,7 @@ Override Fields
 
 .. meta:
     frontend_status: None
+    todo: initialization must be explicit
 
 When extending a class, an instance field declared in a superclass can be
 overridden by a same-name, same-type field. The new declaration adds no new
@@ -1958,7 +1918,7 @@ keyword ``override`` is not required.
 
     Implementing interface properties by fields is discussed in detail
     in :ref:`Implementing Required Interface Properties` and
-    :ref:`Implementing Optional Interface Properties`. 
+    :ref:`Implementing Optional Interface Properties`.
 
 A :index:`compile-time error` occurs if:
 
@@ -1990,9 +1950,35 @@ A :index:`compile-time error` occurs if:
         field: number = 1
     }
     class D extends C {
-        field: string = "aa"     // compile-time error: type is not the same
-        override no_field = 1224 // compile-time error: no overridden field in the base class
-        static override field: string = "aa" // compile-time error: static cannot override
+        field: string = "aa"     // compile-time error, type is not the same
+        override no_field = 1224 // compile-time error, no overridden field in the base class
+        static override field: string = "aa" // compile-time error, static cannot override
+    }
+
+An overridden field must be initialized explicitly, either
+by using an initializer or in a constructor.
+Otherwise, :index:`compile-time error` occurs.
+Implicit initialization is not used, even though the type of the field has
+a default value (see :ref:`Default Values for Types`):
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        f1: number = 1
+        f2: Object = 2
+    }
+    class D extends C {
+        f1: number = 7 // OK
+        f2: Object     // OK, initialized in the constructor
+        constructor () {
+            super()
+            this.f2 = "abc"
+        }
+    }
+    class E extends C {
+        f1: number  // compile-time error, must be initialized explicitly
+        f2: Object  // compile-time error, must be initialized explicitly
     }
 
 Initializers of overridden fields are preserved for execution, and the
@@ -2002,8 +1988,8 @@ initialization is normally performed in the context of *superclass* constructors
    :linenos:
 
     class C {
-        field: number = this.init()
-        private init() {
+        field: number = C.init()
+        private static init() {
            console.log ("Field initialization in C")
            return 123
         }
@@ -2013,8 +1999,8 @@ initialization is normally performed in the context of *superclass* constructors
     }
 
     class D2 extends D1 {
-        field = this.init_in_derived()
-        private init_in_derived() {
+        field = D2.init_in_derived()
+        private static init_in_derived() {
            console.log ("Field initialization in Derived")
            return 42
         }
@@ -2050,7 +2036,6 @@ in a derived class must be the same as in the base class instantiated with a
 parameter of the same type as the type of the field in the derived class.
 
 The situation is represented in the example below:
-
 
 .. code-block:: typescript
    :linenos:
@@ -2135,6 +2120,14 @@ Method Declarations
     frontend_status: Done
 
 *Methods* declare executable code that can be called.
+
+A *method* is defined by the following:
+
+#. *Type parameter*, i.e., the declaration of any type parameter of the
+   method member.
+#. *Argument type*, i.e., the list of types of arguments applicable to the
+   method member.
+#. *Return type*, i.e., the return type of the method member.
 
 The syntax of *class method declarations* is presented below:
 
@@ -2248,9 +2241,9 @@ Static methods are not inherited from superclasses:
 
     Base.foo() // Output: static foo() from Base
     Base.bar() // Output: static foo() from Base
-    Derived.bar()           // compile-time error: there is no bar() in Derived
+    Derived.bar()           // compile-time error, there is no bar() in Derived
     Derived.foo("a string") // Output: static foo() from Derived
-    Derived.foo()           // compile-time error: there is no foo(p:string) in Derived
+    Derived.foo()           // compile-time error, there is no foo(p:string) in Derived
 
 
 .. note::
@@ -2717,11 +2710,11 @@ A :index:`compile-time error` occurs if:
     if (p.age > 30) { // getter is called
       // do something
     }
-    p.age(17) // Compile-time error: setter is used as a method
-    let x = p.age() // Compile-time error: getter is used as a method
+    p.age(17) // compile-time error, setter is used as a method
+    let x = p.age() // compile-time error, getter is used as a method
 
     class X {
-        set x (p?: Object) {} // Compile-time error: setter has optional parameter
+        set x (p?: Object) {} // compile-time error, setter has optional parameter
     }
 
 .. index::
@@ -2795,10 +2788,10 @@ occurs:
 
     class Person {
       name: string = ""
-      get name(): string { // Compile-time error: getter name clashes with the field name
+      get name(): string { // compile-time error, getter name clashes with the field name
           return this.name
       }
-      set name(a_name: string) { // Compile-time error: setter name clashes with the field name
+      set name(a_name: string) { // compile-time error, setter name clashes with the field name
           this.name = a_name
       }
     }
@@ -2881,7 +2874,7 @@ for a subtype, but is available for a call in all derived class constructors via
 
     class D1 extends C {
         constructor (n: number) {
-            super("" + n) // ok
+            super("" + n) // OK
         }
     }
 
@@ -2981,11 +2974,12 @@ Constructors have two variations:
    constructor
    instance field
 
-The high-level sequence of a *primary constructor* body includes the following:
+The high-level sequence of a *primary constructor* body includes
+the following: 
 
 1. Optional arbitrary code that uses neither ``this`` nor ``super``.
 
-2. Mandatory call to a superconstructor (see :ref:`Explicit Constructor Call`)
+2. Call to a superconstructor (see :ref:`Explicit Constructor Call`)
    if a class has an extension clause (see :ref:`Class Extension Clause`).
    A :index:`compile-time error` occurs if:
 
@@ -2994,21 +2988,61 @@ The high-level sequence of a *primary constructor* body includes the following:
    - An argument of the call uses ``this`` or ``super``.
 
 
-3. Mandatory execution of field initializers (if any) in the order they appear
-   in a class body implicitly added by the compiler.
+3. Implicit addition by the compiler: field initializers
+   (if any) are to be executed in the order they appear
+   in a class body.
 
-4. Optional arbitrary code that avoids using non-initialized fields.
+4. Code that either does not use ``this`` or accesses fields through ``this``
+   so the fields that are not expliclity initialized in the body of
+   body of *primiary constructor* or during the step 3 are not read.
 
-5. Code that ensures all object fields to be initialized.
+5. Arbitrary code after all the fields are initialized as defined in **item 4**.
 
-6. Optional arbitrary code.
+If the body has no call to a superconstructor (i.e., **item 2** above
+is omitted), then the compiler implicitly adds a superconstructor call
+with no arguments as the very first statement in the body.  
+If the superconstructor requires a non-empty list of arguments,  
+then a :index:`compile-time error` occurs as represented below:
 
-As step 4 above cannot be guaranteed at compile time in all possible cases, the
-following strategy is to be taken:
+.. code-block:: typescript
+   :linenos:
 
-  - Compiler can detect that a non-initialized field is accessed
-    during compilation, and if the check is possible in the current
-    compilation context, then a :index:`compile-time error` occurs;
+    class C1 {
+        constructor() {}
+    }
+    class D1 extends C1 {
+        constructor () {
+            // OK, call 'super()' is implicitly added
+            /* other code here */
+        } 
+    }
+
+    class C2 {
+        constructor(n: number) {}
+    }
+    class D2 extends C2 {
+        constructor () {
+            // compile-time error, call 'super()' cannot be implicitly added
+            /*other code here*/
+        }
+    }
+    
+    class C3 {
+        constructor(n?: number) {}
+    }
+    class D3 extends C3 {
+        constructor () {
+            // OK, call 'super()' is implicitly added
+            /*other code here*/
+        } 
+    }
+    
+Field initialization referred in **item 4** above cannot be guaranteed at compile time
+in all possible cases. The following strategy is taken: 
+
+  - If the compiler can detect that a non-initialized field is accessed
+    during compilation, then a :index:`compile-time error` occurs;
+  - If the limitation of the **item 4** is violated, a :index:`compile-time warning` occurs;
   - Otherwise, the execution-time behavior is determined by the implementation.
 
 .. code-block:: typescript
@@ -3018,13 +3052,16 @@ following strategy is to be taken:
       x: Object
       constructor() {
           this.x = new Object // Base object is fully initialized
-          crash_this (this)
+          crash_this (this)   // a compiler may issue a compile-time error
       }
     }
     class Derived extends Base {
       y: Object
       constructor () {
           super() // mandatory call to base class constructor
+          crash_this(this) // compile-time warning as this.y is not initialized yet
+                           // is guaranteed, however a compiler may issue a
+                           // compile-time error
           this.y = new Object
       }
     }

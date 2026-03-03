@@ -195,17 +195,17 @@ also non-nullish.
 
     let x = new G<Base>      // OK
     let y = new G<Derived>   // OK
-    let z = new G<SomeType>  // Compile-time : SomeType is not compatible with Base
+    let z = new G<SomeType>  // compile-time : SomeType is not compatible with Base
 
     class H<T extends Base|SomeType> {}
     let h1 = new H<Base>     // OK
     let h2 = new H<Derived>  // OK
     let h3 = new H<SomeType> // OK
-    let h4 = new H<Object>   // Compile-time : Object is not compatible with Base|SomeType
+    let h4 = new H<Object>   // compile-time : Object is not compatible with Base|SomeType
 
     class Exotic<T extends "aa"| "bb"> {}
     let e1 = new Exotic<"aa">   // OK
-    let e2 = new Exotic<"cc">  // Compile-time : "cc" is not compatible with "aa"| "bb"
+    let e2 = new Exotic<"cc">  // compile-time : "cc" is not compatible with "aa"| "bb"
 
     class A {
       f1: number = 0
@@ -214,10 +214,10 @@ also non-nullish.
     }
     class B <T extends keyof A> {}
     let b1 = new B<'f1'>    // OK
-    let b2 = new B<'f0'>    // Compile-time error as 'f0' does not fit the constraint
+    let b2 = new B<'f0'>    // compile-time error as 'f0' does not fit the constraint
     let b3 = new B<keyof A> // OK
 
-A type parameter of a generic can *depend* on another type parameter
+A type parameter of a generic can *depend* on an earlier type parameter
 of the same generic.
 
 .. index::
@@ -233,9 +233,9 @@ of the same generic.
     class Derived extends Base { }
     class SomeType { }
 
-    let x: G<Base, Derived>  // correct: the second argument directly
+    let x: G<Base, Derived>  // OK, the second argument directly
                              // depends on the first one
-    let y: G<Base, SomeType> // error: SomeType does not depend on Base
+    let y: G<Base, SomeType> // error, SomeType does not depend on Base
 
 A :index:`compile-time error` occurs if a type parameter in the type parameter
 section depends on itself directly or indirectly:
@@ -387,11 +387,11 @@ occur in any position.
 
        // T1 can be used in in-position only
        foo (p: T1) {}  // OK
-       foo1(p: T1): T1 { return p } // error: T1 in out-position
-       fldT1: T1 // error: T1 in invariant position
+       foo1(p: T1): T1 { return p } // error, T1 in out-position
+       fldT1: T1 // error, T1 in invariant position
 
       constructor (x: T2) { this.fldT2 = x } // OK
-      bar(x: T2) : T2 { return x }           // Compile-time error, x in in-position
+      bar(x: T2) : T2 { return x }           // compile-time error, x in in-position
       readonly fldT2: T2                     // OK
       bar1() : T2 { return this.fldT2 }      // OK
 
@@ -474,7 +474,7 @@ generic type in a type-safe manner:
                         // yet the type parameter is unknown
                         // The inferred type of obj is X<*>
 
-            bar(x)      // compile-time error: X<*> is not just X<Any>, and X<*> is not
+            bar(x)      // compile-time error, X<*> is not just X<Any>, and X<*> is not
                         // a subtype of X<Any>. The type parameter
                         // T is invariant, thus an arbitrary instantiation of
                         // X is not strictly an X<Any>.
@@ -533,9 +533,9 @@ Similarly, only type ``never`` guarantees type-safety in the *in-* position
 *Wildcard Type* never refers to *Type Parameters* of *out-variance* or
 *in-variance*because the notion of an *arbitrary* instantiation is
 effectively represented by one of the following:
- 
+
  - Instantiation with the corresponding *constraint* for *out-* variant *Type Parameter*; or
- 
+
  - Instantiation with type ``never`` for *in-* variant *Type Parameter*.
 
 For *out-* variance of a *Type Parameter*:
@@ -579,7 +579,7 @@ For *in-* variance of a *Type Parameter*:
     }
 
 Note: As required by :ref:`Subtyping`, a *Wildcard Type* for a certain
-*Type Parameter* is identical to itself:  
+*Type Parameter* is identical to itself:
 
 .. code-block:: typescript
    :linenos:
@@ -591,7 +591,7 @@ Note: As required by :ref:`Subtyping`, a *Wildcard Type* for a certain
 
     function foo(a: Any, b: Any) {
         if (a instanceof X && b instanceof X) {
-            let a1 = a // X<*> 
+            let a1 = a // X<*>
             let a2 = b // X<*>
             a1 = a2    // OK, inferred X<*> and X<*> types are identical
                        // Despite concrete type arguments are not known,
@@ -853,7 +853,7 @@ Different cases of type argument inference are represented in the examples below
     process (123, () => {}) // P is inferred as 'int', while R is 'void'
 
     function bar <T> (p: number) {}
-    bar (1) // Compile-time error: type argument cannot be inferred
+    bar (1) // compile-time error, type argument cannot be inferred
 
 Implicit instantiation is only possible for generic functions and methods.
 
@@ -896,578 +896,6 @@ This situation is represented in the example below:
    generic function
    method
    function
-
-|
-
-.. _Utility Types:
-
-Utility Types
-*************
-
-.. meta:
-    frontend_status: Done
-
-|LANG| supports several embedded types, called *utility* types. Utility types
-allow constructing new types by adjusting properties of initial types, for
-which purpose notations identical to generics are used. If the initial types
-are class or interface, then the resultant utility types are also handled as 
-class or interface types.
-All utility type names are accessible as simple names (see :ref:`Accessible`)
-in any module across all its scopes. Using these names as user-defined entities
-causes a :index:`compile-time error` in accordance with :ref:`Declarations`. An
-alphabetically sorted list of utility types is provided below.
-
-.. index::
-   embedded type
-   class
-   interface
-   accessibility
-   module
-   user-defined entity
-   declaration
-   utility type
-
-|
-
-.. _Awaited Utility Type:
-
-Awaited Utility Type
-====================
-
-.. meta:
-    frontend_status: None
-
-Type ``Awaited<T>`` constructs a type which includes no type ``Promise``. It
-is similar to ``await`` in ``async`` functions, or to the method ``.then()``
-in *Promises*. Any occurrence of type ``Promise`` is recursively removed until
-a generic, a function, an array, or a tuple type is detected. If type ``Promise``
-is not a part of a type ``T`` declaration, then ``Awaited<T>`` leaves ``T``
-intact.
-
-If ``T`` in ``Awaited<T>`` is a type parameter, then subtyping for ``Awaited<T>``
-is based on the subtyping for ``T``. In other words, ``Awaited<T>``
-is a subtype of ``Awaited<U>`` if ``T`` is a subtype of ``U``. The use of type
-``Awaited<T>`` is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    type A = Awaited<Promise<string>>           // type A is string
-
-    type B = Awaited<Promise<Promise<number>>>  // type B is number
-
-    type C = Awaited<boolean | Promise<number>> // type C is boolean | number
-
-    type D = Awaited <Object>                   // type D is Object
-
-    type E = Awaited<Promise<Promise<number>|Promise<string>|Promise<boolean>>>
-                                                // type E is number|string|boolean
-
-    type F = Awaited<Promise<(p: Promise<string>) => Promise<number>>> 
-                                                // type F is (p: Promise<string>) => Promise<number>>
-
-    type G = Awaited<Promise<Array<Promise<number>>>> 
-                                                // type F is Array<Promise<number>>
-
-    function foo <T extends SuperType> (p: Awaited<T>) {}
-    function bar <T extends SubType> (p: Awaited<T>) {
-        foo (p) // is a valid call as Awaited<T extends SubType> <: Awaited<T extends SuperType>
-    }
-
-
-.. index::
-   utility type
-   awaited
-   promise
-   async function
-   method
-
-|
-
-.. _NonNullable Utility Type:
-
-NonNullable Utility Type
-========================
-
-.. meta:
-    frontend_status: None
-
-Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
-types. Formally it can be expressed like this (see :ref:`Difference Types`)
-
-``NonNullable<T> = T - null - undefined``.
-
-This implies:
-
-- ``NonNullable<T>`` leaves ``T`` intact if type ``T`` contains neither ``null``
-  nor ``undefined``;
-- ``NonNullable<null>``,  ``NonNullable<undefined>`` or application of
-  ``NonNullable<>`` to the union of ``null`` and ``undefined`` returns ``never``;
-- ``NonNullable<Any> = Any - null - undefined``
-
-
-The use of type ``NonNullable<T>`` is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    type X = Object | null | undefined
-    type Y = NonNullable<X> // type of 'Y' is Object
-
-    class A <T> {
-      field: NonNullable<T> // This is a non-nullable version of the type parameter
-      constructor (field: NonNullable<T>) {
-        this.field = field
-      }
-    }
-
-    const a = new A<Object|null> (new Object)
-    a.field // type of field is Object
-
-.. index::
-   utility type
-   null type
-   undefined type
-   field
-
-|
-
-.. _Partial Utility Type:
-
-Partial Utility Type
-====================
-
-.. meta:
-    frontend_status: Done
-
-Type ``Partial<T>`` constructs a type with all fields (see
-:ref:`Field Declarations`) and properties in their field form (see
-:ref:`Interface Properties`) of ``T`` set to optional. ``T`` must be a class or
-an interface type. Otherwise, a :index:`compile-time error` occurs. No method
-(not even any getter or setter) of ``T`` is a part of the ``Partial<T>`` type.
-The use is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface Issue {
-        title: string
-        description: string
-    }
-
-    function process(issue: Partial<Issue>) {
-        if (issue.title != undefined) {
-            /* process title */
-        }
-    }
-
-    process({title: "aa"}) // description is undefined
-
-In the example above, type ``Partial<Issue>`` is transformed to a distinct but
-analogous type as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface /*some name*/ {
-        title?: string
-        description?: string
-    }
-
-.. index::
-   type
-   property
-   optional property
-   class type
-   interface type
-   method
-   getter
-   setter
-   distinct type
-
-Type ``T`` is not assignable to ``Partial<T>`` (see :ref:`Assignability`),
-and variables of ``Partial<T>`` are to be initialized with valid object
-literals.
-
-.. note::
-   If class ``T`` has a user-defined getter, setter, or both, then none of
-   those is called when object literal is used with ``Partial<T>`` variables.
-   Object literal has its own built-in getters and setters to modify its
-   variables. It is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface I {
-        property: number
-    }
-    class A implements I {
-        _property: number
-        set property(property: number) {
-            console.log ("Setter called")
-            this._property = property
-        }
-        get property(): number {
-            console.log ("Getter called");
-            return this._property
-        }
-    }
-
-    function foo (partial: Partial<A>) {
-        partial.property = 42 // setter to be called
-        console.log(partial.property) // getter to be called
-    }
-
-    foo ({property: 1}) // No getter or setter from class A is called
-    // 42 is printed as object literal has its own setter and getter
-
-.. index::
-   type
-   assignability
-   assignable type
-   variable
-   initialization
-   object literal
-   class
-   user-defined getter
-   built-in getter
-   getter
-   setter
-   user-defined setter
-   built-in setter
-   property
-
-|
-
-.. _Required Utility Type:
-
-Required Utility Type
-=====================
-
-.. meta:
-    frontend_status: Done
-
-Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
-all fields (see :ref:`Field Declarations`) and properties in their field form
-(see :ref:`Interface Properties`) of ``T`` set to required (i.e., not optional).
-``T`` must be a class or an interface type, otherwise a
-:index:`compile-time error` occurs. No method (not even any getter or setter)
-of ``T`` is part of the  ``Required<T>`` type. Its usage is represented in the
-example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface Issue {
-        title?: string
-        description?: string
-    }
-
-    let c: Required<Issue> = { // Compile-time error, 'description' should be defined
-        title: "aa"
-    }
-
-In the example above, type ``Required<Issue>`` is transformed to a distinct
-but analogous type as follows:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface /*some name*/ {
-        title: string
-        description: string
-    }
-
-Type ``T`` is not assignable (see :ref:`Assignability`) to
-``Required<T>``, and variables of ``Required<T>`` are to be initialized with
-valid object literals.
-
-.. index::
-   type
-   interface type
-   utility type
-   assignability
-   assignable type
-   property
-   required property
-   method
-   getter
-   setter
-   type
-   object literal
-   class type
-   interface type
-   distinct type
-   initialization
-   variable
-
-|
-
-.. _Readonly Utility Type:
-
-Readonly Utility Type
-=====================
-
-.. meta:
-    frontend_status: Done
-
-Type ``Readonly<T>`` constructs a type with all fields (see
-:ref:`Field Declarations`) and properties in their field form (see
-:ref:`Interface Properties`) of ``T`` set to ``readonly``. It means that such
-fields and properties of the constructed type cannot be reassigned. ``T`` must
-be a class or an interface type, otherwise a :index:`compile-time error`
-occurs. No method (not even any getter or setter) of ``T`` is part of the
-``Readonly<T>`` type. Its usage is represented in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface Issue {
-        title: string
-    }
-
-    const myIssue: Readonly<Issue> = {
-        title: "One"
-    };
-
-    myIssue.title = "Two" // compile-time error: readonly property
-
-.. index::
-   type
-   readonly type
-   utility type
-   type readonly
-   constructed value
-   method
-   reassignment
-   assignability
-   assignable type
-   property
-   interface type
-   getter
-   setter
-
-Type ``T`` is assignable (see :ref:`Assignability`) to ``Readonly<T>``,
-and allows assignments as a consequence:
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-       f1: string = ""
-       f2: number = 1
-       f3: boolean = true
-    }
-    let x = new A
-    let y: Readonly<A> = x // OK
-
-|
-
-.. _Record Utility Type:
-
-Record Utility Type
-===================
-
-.. meta:
-    frontend_status: Done
-
-Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
-to values of type ``V``.
-
-Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
-``string``, string literal types, and union types constructed from
-these types.
-
-A :index:`compile-time error` occurs if any other type, or literal of any other
-type is used in place of this type.
-
-Its usage is represented in the example below:
-
-.. index::
-   record utility type
-   utility type
-   value
-   container
-   restriction
-   union type
-   numeric type
-   string type
-   literal
-   string literal type
-   compile-time error
-   type
-   key
-   union type
-
-
-.. code-block:: typescript
-   :linenos:
-
-    type R1 = Record<number, Object>             // ok
-    type R2 = Record<boolean, Object>            // compile-time error
-    type R3 = Record<"salary" | "bonus", Object> // ok
-    type R4 = Record<"salary" | boolean, Object> // compile-time error
-    type R5 = Record<"salary" | number, Object>  // ok
-    type R6 = Record<string | number, Object>    // ok
-
-Type ``V`` has no restrictions.
-
-A special form of object literals is supported for instances of type ``Record``
-(see :ref:`Object Literal of Record Type`).
-
-Access to ``Record<K, V>`` values is performed by an *indexing expression* like
-*r[index]*, where *r* is an instance of type ``Record``, and *index* is the
-expression of type ``K`` (see :ref:`Record Indexing Expression` for detail).
-
-Variables of type ``Record<K, V>`` can be initialized by a valid object
-literal of Record type (see :ref:`Object Literal of Record Type`) where the
-literal is valid if the type of key expression is compatible with key type
-``K``, and the type of value expression is compatible with the value type ``V``.
-
-.. code-block:: typescript
-   :linenos:
-
-    type Keys = 'key1' | 'key2' | 'key3'
-
-    let x: Record<Keys, number> = {
-        'key1': 1,
-        'key2': 2,
-        'key3': 4,
-    }
-    console.log(x['key2']) // prints 2
-    x['key2'] = 8
-    console.log(x['key2']) // prints 8
-
-In the example above, ``K`` is a union of literal types and thus the result of
-an indexing expression is of type ``V``. In this case it is ``number``.
-
-.. index::
-   restriction
-   object literal
-   literal
-   instance
-   Record type
-   access
-   indexing expression
-   index expression
-   index
-   number
-   expression
-   variable
-   compatibility
-   value type
-   value
-
-|
-
-.. _ReturnType Utility Type:
-
-ReturnType Utility Type
-=======================
-
-.. meta:
-    frontend_status: None
-
-Type ``ReturnType<T>`` constructs a new type from the return type of a function
-type ``T`` (see :ref:`Function Types`). A :index:`compile-time error` occurs if
-a non-function type except type ``never`` is provided. The usage is represented
-in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   type MyString = ReturnType<()=> string> // OK
-   type Incorrect = ReturnType<string>     // Compile-time error
-
-   function foo<P extends Function, R = ReturnType<P>>() {} 
-   /* OK, default type for the second type parameter is the return type of 
-      the function type provided as the first type argument */
-
-   foo<()=>number>()  // R is number
-
-   type anAny = ReturnType<Function>  // anAny is Any
-   type aNever = Return Type<never>   // aNever is never
-
-
-|
-
-.. _Utility Type Private Fields:
-
-Utility Type Private Fields
-===========================
-
-.. meta:
-    frontend_status: Done
-
-Utility types are built on top of other types. Private fields of the initial
-type stay in the utility type but they are not accessible (see
-:ref:`Accessible`) and cannot be accessed in any way. It is represented in the
-example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(): string {  // Potentially some side effect
-      return "private field value"
-   }
-
-   class A {
-      public_field = 444
-      private private_field = foo()
-   }
-
-   function bar (part_a: Readonly<A>) {
-      console.log (part_a)
-   }
-
-   bar ({public_field: 777}) // OK, object literal has no field `private_field`
-   bar ({public_field: 777, private_field: ""}) // compile-time error, incorrect field name
-
-   bar (new A) // OK, object of type Readonly<A> has field `private_field`
-
-.. index::
-   utility type
-   private field
-   type
-   access
-   accessibility
-   field name
-
-|
-
-.. _Nesting Utility Types:
-
-Nesting Utility Types
-===========================
-
-.. meta:
-    frontend_status: Partly
-
-If more than one utility types are required then they can be nested as in example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   interface Issue {
-     title?: string
-   }
-
-   const myIssue: Required<Readonly<Issue>> = {
-      title: "One"
-   };
-   console.log(myIssue.title)  // safe: required property
-   myIssue.title = "Two" // compile-time error: readonly property
-
-.. index::
-   utility type
-   private field
-   nesting
-   readonly property
-   required property
-   type
-   access
-   accessibility
-
 
 .. raw:: pdf
 

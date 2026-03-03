@@ -175,9 +175,9 @@ String Operator Contexts
 -  An operand of type ``boolean`` is converted to type ``string`` with the
    values ``true`` or ``false``.
 
--  An operand of enumeration type (see :ref:`Enumerations`) or const enumeration type
-   (see :ref:`Const Enumerations`) is converted to type ``string`` with the value of
-   the corresponding enumeration constant if values of enumeration are of type ``string``.
+-  An operand of enumeration type (see :ref:`Enumerations`) is converted to
+   type ``string`` with the value of the corresponding enumeration member
+   if values of enumeration are of type ``string``.
 
 -  The operand of a nullish type that has a nullish value is converted as
    follows:
@@ -223,8 +223,10 @@ The target type in this context is always ``string``:
     console.log("value is " + 123) // prints "value is 123"
     console.log("BigInt is " + 123n) // prints "BigInt is 123"
     console.log(15 + " steps") // prints "15 steps"
-    let x: string | null = null
+    let x: string | null | undefined = null
     console.log("string is " + x) // prints "string is null"
+    x = undefined
+    console.log("string is " + x) // prints "string is undefined"
 
 |
 
@@ -242,9 +244,8 @@ Numeric contexts use numeric types conversions
 expression can be converted to target type ``T`` while the arithmetic
 operation for the values of type ``T`` is being defined.
 
-An operand of enumeration type (see :ref:`Enumerations` and
-:ref:`Enumeration with Explicit Type`) or const enumeration type
-(see :ref:`Const Enumerations`) can be used in a numeric context if enumeration
+An operand of enumeration type (see :ref:`Enumerations`) can be used in
+a numeric context if enumeration
 base type is a numeric type. The type of this operand is assumed to be the same
 as the enumeration base type.
 
@@ -436,7 +437,6 @@ is properly rounded to the integer value.
    round-to-nearest mode
    runtime error
    IEEE 754
-   enumeration constant
    widening
    numeric conversion
    rounding
@@ -453,7 +453,7 @@ Widening Numeric to a Union Type
 
 A numeric value ``v`` is converted to ``U``:sub:`i` of union type
 (``U``:sub:`1` ``| ... | U``:sub:`n`), if ``U``:sub:`i`
-is a single numeric type in the union that is larger then the value type.
+is a single numeric type in the union that is larger than the value type.
 Otherwise, a :index:`compile-time error` occurs.
 
 .. note::
@@ -477,21 +477,21 @@ All cases are represented in the following example:
    let s: short = 1
    let i: int = 2
 
-   let u: byte | int = 256 // ok, type inference for numeric literal
+   let u: byte | int = 256 // OK, type inference for numeric literal
    console.log(u instanceof int) // output: true
 
-   u = i // ok, subtyping
+   u = i // OK, subtyping
    console.log(u instanceof int) // output: true
 
-   u = s // ok, widening to union type, short => int conversion
+   u = s // OK, widening to union type, short => int conversion
    console.log(u instanceof int) // output: true
 
 |
 
-.. _Enumeration and Const Enumeration to Numeric Type Conversion:
+.. _Enumeration to Numeric Type Conversion:
 
-Enumeration and Const Enumeration to Numeric Type Conversion
-============================================================
+Enumeration to Numeric Type Conversion
+======================================
 
 .. meta:
     frontend_status: Done
@@ -501,7 +501,7 @@ type is converted to one of the following:
 
 -  Numeric type equal to or larger than the *enumeration base type*; or
 
--  Union type considering the value type of the *enumeration base type* (see
+-  Union type considering the *enumeration base type* (see
    :ref:`Widening Numeric to a Union Type`).
 
 This conversion never causes a :index:`runtime error`.
@@ -532,15 +532,15 @@ This conversion never causes a :index:`runtime error`.
 
 |
 
-.. _Enumeration and Const Enumeration to string Type Conversion:
+.. _Enumeration to string Type Conversion:
 
-Enumeration and Const Enumeration to ``string`` Type Conversion
-===============================================================
+Enumeration to ``string`` Type Conversion
+=========================================
 
 .. meta:
     frontend_status: Done
 
-A value of *enumeration* type with ``string`` constants is converted to type
+A value of *enumeration* with ``string`` base type is converted to type
 ``string`` or to a union type (see :ref:`Union Types`) that contains type ``string``.
 This conversion never causes a :index:`runtime error`.
 

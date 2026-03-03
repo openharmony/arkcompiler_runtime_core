@@ -40,7 +40,7 @@ program in accordance with the following rules:
 - All |C_JOBS| with the same priority are scheduled in the FIFO order;
 
 .. note::
-   These rules will be updated.
+   These rules are incomplete and will be updated.
 
 .. index::
    term1

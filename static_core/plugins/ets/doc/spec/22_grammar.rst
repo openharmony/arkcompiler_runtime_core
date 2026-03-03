@@ -88,7 +88,6 @@ Grammar Summary
         classDeclaration
         | interfaceDeclaration
         | enumDeclaration
-        | constEnumDeclaration
         | typeAlias
         ;
 
@@ -311,6 +310,10 @@ Grammar Summary
 
     argumentSequence:
         expression (',' expression)* ','?
+        ;
+
+    trailingLambda:
+        'async'? block
         ;
 
     indexingExpression:
@@ -738,19 +741,19 @@ Grammar Summary
         ;
 
     enumDeclaration:
-        'enum' identifier (':' type)? '{' enumConstantList? '}'
+        'const'? 'enum' identifier enumBaseType? '{' enumMemberList? '}'
         ;
 
-    enumConstantList:
-        enumConstant (',' enumConstant)* ','?
+    enumBaseType:
+        ':' type
         ;
 
-    enumConstant:
-        identifier ('=' constantExpression)?
+    enumMemberList:
+        enumMember (',' enumMember)* ','?
         ;
 
-    constEnumDeclaration:
-        'const' 'enum' identifier (':' type)? '{' enumConstantList? '}'
+    enumMember:
+        identifier initializer?
         ;
 
     moduleDeclaration:
@@ -863,13 +866,14 @@ Grammar Summary
         'declare'
         ( ambientConstantOrVariableDeclaration
         | ambientFunctionDeclaration
+        | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
+        | ambientEnumDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
         | ambientAccessorDeclaration
-        | 'const'? enumDeclaration
-        | typeAlias
+        | typeAlias        
         )
         ;
 
@@ -968,6 +972,22 @@ Grammar Summary
         'default'? identifier signature
         ;
 
+    ambientEnumDeclaration
+        : 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
+        | 'const' 'enum' identifier enumBaseType? '{' ambientConstEnumMemberList? '}'
+        ;
+
+    ambientEnumMemberList:
+        identifier (',' identifier)* ','?
+        ;
+
+    ambientConstEnumMemberList:
+        ambientConstEnumMember (',' ambientConstEnumMember)* ','?
+        ;
+
+    ambientConstEnumMember:
+        identifier '=' constExpression
+        ;
 
     ambientNamespaceDeclaration:
         'namespace' qualifiedName '{' ambientNamespaceElement* '}'
@@ -1042,13 +1062,6 @@ Grammar Summary
         annotationUsage?
         '(' receiverParameter (',' lambdaParameterList)? ')'
         returnType? '=>' lambdaBody
-        ;
-
-    trailingLambdaCall:
-        ( objectReference '.' identifier typeArguments?
-        | expression ('?.' | typeArguments)?
-        )
-        arguments block
         ;
 
     awaitExpression:
