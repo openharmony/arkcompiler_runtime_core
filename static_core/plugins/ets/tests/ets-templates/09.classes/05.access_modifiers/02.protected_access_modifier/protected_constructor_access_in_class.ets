@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,26 +14,26 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Check constructor with protected access modifier in class.
-assert: >-
+desc: >-
+    Check constructor with protected access modifier in class.
     Member or constructor with protected modifier can be accessed only within their declaring class
     and classes derived from their declaring class.
 ---*/
 
 final class A {
-  x: int;
-  y: int;
+    x: int;
+    y: int;
 
   protected constructor(x: int, y: int) {
-    this.x = x;
-    this.y = y;
+      this.x = x;
+      this.y = y;
   }
 
   public constructor(x: int) {
-    this(x, 1);
+      this(x, 1);
   }
 }
 
 function main(): void {
-  let instance: A = new A(2);
+    let instance: A = new A(2);
 }

@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,20 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for member in members %}
 /*---
-desc: Check members with private access modifier out class.
-assert: Member or constructor with private modifier can be accessed only within their declaring class.
-params: "{{member.body}}"
-tags: [negative, compile-only]
+desc: >-
+    Abstract method declaration.
+    The declaration of an abstract method m must appear directly within an abstract class;
+    otherwise a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
 class A {
-  private {{member.body}}
+    abstract run(): void;
 }
-
-function main(): void {
-  {{member.call}};
-}
-
-{% endfor %}

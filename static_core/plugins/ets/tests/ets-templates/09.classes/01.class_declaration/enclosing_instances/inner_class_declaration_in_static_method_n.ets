@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 
 /*---
-desc: Declaration inner class in static method and invoke him from another method.
-assert: >-
+desc: >-
+    Declaration inner class in static method and invoke him from another method.
     An instance of an inner class I whose declaration occurs in a static context has no lexically enclosing instances.
     However, if I is immediately declared within a static method or static initializer then I does have
     an enclosing block, which is the innermost block statement lexically enclosing the declaration of I.
@@ -23,15 +23,15 @@ tags: [compile-only, negative]
 ---*/
 
 class A {
-  public static foo(): void {
-    public inner class B {
-      public x: int;
+    public static foo(): void {
+        public inner class B {
+            public x: int;
+        }
+
+        let b: B = new B();
     }
 
-    let b: B = new B();
-  }
-
-  public static foo(y: int): void {
-    let b: B = new B();
-  }
+    public static foo(y: int): void {
+        let b: B = new B();
+    }
 }

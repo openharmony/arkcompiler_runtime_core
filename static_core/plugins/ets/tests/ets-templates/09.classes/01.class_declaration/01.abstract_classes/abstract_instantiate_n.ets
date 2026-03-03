@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,12 @@
  */
 
 /*---
-desc: Overriding abstract method.
-assert: >-
-    A compile-time error occurs if:
-    - Any non-abstract subclass of A (see Abstract Classes) does not provide
-    an implementation for m.
-tags: [compile-only, negative]
+desc: A compile-time error occurs if an attempt is made to create an instance of an abstract class
+tags: [negative, compile-only]
 ---*/
 
-abstract class A {
-  abstract run(): void;
-}
-
-class B extends A {
-}
+abstract class A {}
 
 function main(): void {
-  let c: B = new B();
+    let a = new A();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,21 @@
  */
 
 /*---
-desc: Abstract methods do not have bodies, i.e., they can be declared but not implemented
-tags: [negative, compile-only]
+desc: >-
+    Overriding abstract method.
+    A compile-time error occurs if:
+    - Any non-abstract subclass of A (see Abstract Classes) does not provide
+    an implementation for m.
+tags: [compile-only, negative]
 ---*/
 
 abstract class A {
-  abstract m(): void {}
+    abstract run(): void;
 }
 
-function main(): void {}
+class B extends A {
+}
+
+function main(): void {
+    let c: B = new B();
+}

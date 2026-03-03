@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,15 @@
  */
 
 /*---
-desc: Abstract method defined in non-abstract class.
-assert: A compile-time error must be thrown when a class contains an abstract method but is not marked abstract.
-tags: [negative, compile-only]
+desc: >- 
+    Declaration blank readonly field in inner class.
+    A blank readonly field of a lexically enclosing type declaration
+    may not be assigned within an inner class, or a compile-time error occurs.
+tags: [compile-only, negative]
 ---*/
 
-class B {
-    foo(): void {};
+class A {
+    public inner class B {
+        public readonly x: int;
+    }
 }
-
-class A extends B {
-    abstract foo(): void;
-}
-

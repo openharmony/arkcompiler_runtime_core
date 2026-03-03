@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,14 +16,14 @@ limitations under the License.
 {% for mod in modifiers %}
 
 /*---
-desc: Final method declaraion with '{{mod}}' keyword.
-assert: A compile-time error occurs if a method declaration contains keyword abstract or static along with the keyword final.
-params: {{mod}}
+desc: >-
+    Final method declaraion with '{{mod}}' keyword.
+    A compile-time error occurs if a method declaration contains keyword abstract or static along with the keyword final.
 tags: [compile-only]
 ---*/
 
 class A {
-  {{mod}} final run(): void;
+    {{mod}} final run(): void;
 }
 
 {% endfor %}

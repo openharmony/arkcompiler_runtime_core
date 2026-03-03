@@ -2143,9 +2143,6 @@
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/13_n.ets
 17.experimental_features/11.classes_experimental/03.named_constructors/this_in_args/14_n.ets
 
-#32096 no CTE class declares method with the same name as that of a private method in superinterface
-17.experimental_features/12.default_interface_method_declarations/private_interface_methods2.ets
-
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
 
@@ -2168,6 +2165,12 @@
 18.annotations/base_annotation_syntax_n_3.ets
 18.annotations/base_annotation_syntax_n_5.ets
 18.annotations/base_annotation_syntax_n_6.ets
+
+#33360
+18.annotations/06.runtime_access_to_annotations/runtime_access_0.ets
+18.annotations/06.runtime_access_to_annotations/runtime_access_1.ets
+18.annotations/06.runtime_access_to_annotations/runtime_access_2.ets
+18.annotations/06.runtime_access_to_annotations/runtime_access_3.ets
 
 #31690 review after merge
 07.expressions/16.instanceof_expression/instanceof_neg_35.ets

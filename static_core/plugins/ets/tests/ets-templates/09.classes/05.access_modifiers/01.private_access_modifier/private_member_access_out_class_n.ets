@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,19 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for test in tests %}
+{% for member in members %}
 /*---
-desc: Check members with protected access modifier out class.
-assert: >-
-    Member or constructor with protected modifier can be accessed only within their declaring class
-    and classes derived from their declaring class.
-    {{test.doc}}
+desc: >-
+    Check members with private access modifier out class.
+    Member or constructor with private modifier can be accessed only within their declaring class.
 tags: [negative, compile-only]
 ---*/
 
-{{test.decl}}
+class A {
+    private {{member.body}}
+}
 
 function main(): void {
- {{test.check}}
+    {{member.call}};
 }
+
 {% endfor %}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,11 @@
  */
 
 /*---
-desc: Declaration blank readonly field in inner class.
-assert: >-
-    A blank readonly field of a lexically enclosing type declaration may not be assigned within an inner class,
-    or a compile-time error occurs.
-tags: [compile-only, negative]
+desc: Class can't be both abstract and open
+tags: [negative, compile-only]
 ---*/
 
-class A {
-  public inner class B {
-    public readonly x: int;
-  }
-}
+abstract class A {}
+final abstract class B {}
+
+function main(): void {}

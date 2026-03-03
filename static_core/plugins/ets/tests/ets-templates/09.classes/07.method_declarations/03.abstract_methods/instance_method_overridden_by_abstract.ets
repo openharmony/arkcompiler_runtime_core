@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,17 +14,18 @@
  */
 
 /*---
-desc: Overriding abstract method.
-assert: An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
+desc: >-
+    Overriding abstract method.
+    An abstract method can also override non-abstract methods inherited from base classes or base inferfaces
 tags: [compile-only]
 ---*/
 
 class A {
-  run(): void {
-    let result = 5 + 5;
-  };
+    run(): void {
+        let result = 5 + 5;
+    };
 }
 
 abstract class B extends A {
-  abstract run(): void;
+    abstract run(): void;
 }
