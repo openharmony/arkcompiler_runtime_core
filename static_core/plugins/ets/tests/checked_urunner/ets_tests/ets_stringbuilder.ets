@@ -620,12 +620,12 @@ function encodePercentEncoding(str: string) {
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-enable-jit=false --interpreter-type=irtoc --compiler-enable-events \
-//!                         --compiler-events-path=./events.csv",
+//!                         --compiler-events-path=./events_compiler.csv",
 //!               entry: "ets_stringbuilder.ETSGLOBAL::main"
 
 //! CHECKER       INTERP-CPP, check StringBuilder::toString replacement
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-enable-jit=false --interpreter-type=cpp --compiler-enable-events \
-//!                         --compiler-events-path=./events.csv",
+//!                         --compiler-events-path=./events_compiler.csv",
 //!              entry: "ets_stringbuilder.ETSGLOBAL::main"

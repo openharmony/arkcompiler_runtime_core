@@ -1542,14 +1542,14 @@
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*[Cc]oncatLoop[0-9]*' --compiler-enable-jit=false \
-//!                         --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events.csv",
+//!                         --interpreter-type=irtoc --compiler-enable-events --compiler-events-path=./events_compiler.csv",
 //!               entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 //! CHECKER       INTERP-CPP, check String concatenation loop
 //! SKIP_IF       @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
 //! RUN           options: "--compiler-regex='.*[Cc]oncatLoop[0-9]*' --compiler-enable-jit=false \
-//!                         --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events.csv",
+//!                         --interpreter-type=cpp --compiler-enable-events --compiler-events-path=./events_compiler.csv",
 //!               entry: "ets_string_concat_loop.ETSGLOBAL::main"
 
 function concatLoop0(a: String, n: int): String {
