@@ -44,8 +44,6 @@ intl402/Collator/unicode-ext-seq-with-attribute.js
 intl402/Collator/unicode-ext-value-collation.js
 intl402/Collator/usage-de.js
 
-# Timeout #9968
-built-ins/String/prototype/toLocaleUpperCase/special_casing.js
 # Timeout #9967
 built-ins/String/prototype/toLocaleLowerCase/special_casing.js
 # Timeout #9960

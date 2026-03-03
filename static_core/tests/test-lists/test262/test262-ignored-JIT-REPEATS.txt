@@ -3653,7 +3653,7 @@ language/statements/class/elements/fields-computed-name-static-computed-var-prop
 
 # #9381
 language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val-array-prototype.js
-# #11968
+# #19922
 built-ins/Function/prototype/call/S15.3.4.4_A3_T9.js
 # #10036
 intl402/DateTimeFormat/constructor-no-instanceof.js
