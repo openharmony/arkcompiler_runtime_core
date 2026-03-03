@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@ desc: >-
 
     A compile-time error occurs if an attempt is made to do the following:
         • Override a private method of a superclass;
+
+tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
 let res: number = 0;
@@ -48,12 +51,5 @@ class Gen2<T,S> {
 }
 
 {{c.decl}}
-
-function main() {
-    res = 0
-    {{c.use|indent}}
-}
-
-{{c.expected_error}}
 
 {%- endfor %}

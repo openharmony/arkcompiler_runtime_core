@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,18 @@
  */
 
 /*---
-desc: Simultaneously overriding a field from a superclass and implements a property from a superinterface.
-assertion: Compile-time error occurs in case, where a field simultaneously overrides 
-           a field from a superclass and implements a property from a superinterface.
-tags: [compile-only, negative]
+desc: Rewriting of constants in the test class.
+assertion: A property can be implemented as a field in different combinations.
 ---*/
 
-class C {
-    num: number = 1
+interface G {
+    CONSTANT: string;
 }
 
-interface I {
-    num: number
+class A implements G {
+    CONSTANT: string = "X";
 }
 
-class D extends C implements I {
-    num: number = 2
+class B extends A {
+    CONSTANT: string = "X";
 }

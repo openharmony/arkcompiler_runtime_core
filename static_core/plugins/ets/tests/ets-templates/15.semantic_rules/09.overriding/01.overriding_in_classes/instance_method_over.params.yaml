@@ -66,6 +66,7 @@ cases:
     derived: "i: A[]"
     call: "[new B()]"
     res: 2
+
   # 20 using of contravariant relationship -> OK
   - base: "i: FixedArray<B>"
     derived: "i: FixedArray<A>"

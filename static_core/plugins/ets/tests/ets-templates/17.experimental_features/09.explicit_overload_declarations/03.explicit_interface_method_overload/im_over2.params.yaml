@@ -79,7 +79,7 @@ cases:
               m2(a: Error, ...b: Object[]): int { return 2 }
               m3(a: Error, b: Error, ...c: Object[]): int { return 3 }
               m4(a: Error, b: Object, c: Object, d: Object): int { return 4 }
-              overload m { m1, m2, m3, m4 }
+              overload m { m1, m4, m3, m2 }
           }
           class A implements J {}
       use: |-
