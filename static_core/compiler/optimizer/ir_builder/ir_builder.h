@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,7 @@ public:
           catchesPc_(graph->GetLocalAllocator()->Adapter()),
           tryBlocks_(graph->GetLocalAllocator()->Adapter()),
           openedTryBlocks_(graph->GetLocalAllocator()->Adapter()),
+          tryBlocksByThrowablePc_(graph->GetLocalAllocator()->Adapter()),
           catchHandlers_(graph->GetLocalAllocator()->Adapter()),
           instDefs_(graph->GetLocalAllocator()->Adapter()),
           method_(method),
@@ -141,6 +142,7 @@ private:
     IrBuilder::TryCodeBlock *InsertTryBlockInfo(const Boundaries &tryBoundaries);
     void TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, BasicBlock *targetBb,
                             BlocksConnectorInfo &info);
+    void CacheOpenedTryBlocksForThrowablePc(size_t pc);
     BasicBlock *GetBlockToJump(BytecodeInstruction *inst, size_t pc);
     BasicBlock *GetBlockForSaveStateDeoptimize(BasicBlock *block);
     void MarkTryCatchBlocks(Marker marker);
@@ -173,6 +175,7 @@ private:
     ArenaSet<uint32_t> catchesPc_;
     ArenaMultiMap<uint32_t, TryCodeBlock> tryBlocks_;
     ArenaList<TryCodeBlock *> openedTryBlocks_;
+    ArenaUnorderedMap<uint32_t, ArenaVector<TryCodeBlock *>> tryBlocksByThrowablePc_;
     ArenaUnorderedSet<BasicBlock *> catchHandlers_;
     InstVector instDefs_;
     RuntimeInterface::MethodPtr method_ = nullptr;
