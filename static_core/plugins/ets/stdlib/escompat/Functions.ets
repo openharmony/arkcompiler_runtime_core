@@ -23,6 +23,9 @@ package escompat;
 // initialized in _initializerBlock_.ets
 const hexChars: char[];
 
+// Pre-computed percent-encoded strings for all byte values (0-255)
+const percentEncoded: FixedArray<string>;
+
 function fillInCommonURI(): boolean[] {
     const arr = new boolean[128]
     for (let i = Char.toInt(c'a'); i <= Char.toInt(c'z'); i++) {
@@ -106,9 +109,7 @@ export function decodeURI(uri: string): string {
 
 function putByteAsHex(ret: StringBuilder, c: int): void {
     c &= 0xff
-    ret.append(c'%')
-    ret.append(hexChars[c / 16])
-    ret.append(hexChars[c % 16])
+    ret.append(percentEncoded[c])
 }
 
 function encodeCharAsHexUtf8(ret: StringBuilder, c: int): void {
@@ -143,32 +144,70 @@ function encodeCharAsHex(ret: StringBuilder, c: int): void {
 }
 
 function encodeURIImpl(uri: string, ok: boolean[]): string {
-    let ret = new StringBuilder()
-    let i = 0
-    while (i < uri.getLength()) {
-        let d: int
-        try {
-            d = uri.codePointAt(i)!
-        } catch (e) {
-            throw new URIError("malformed URI sequence")
-        }
-        const c: char = uri.charAt(i)
-        if (d != c) {
-            encodeCharAsHexUtf8(ret, d)
-            i += 2
+    let encodedBuilder = new StringBuilder()
+    let currentIndex = 0
+    const uriLength: int = uri.getLength()
+    
+    while (currentIndex < uriLength) {
+        const currentChar: char = uri.charAt(currentIndex)
+        const currentCharCode: int = currentChar.toInt()
+        
+        const isHighSurrogate: boolean = Char.isHighSurrogate(currentChar)
+        const isLowSurrogate: boolean = Char.isLowSurrogate(currentChar)
+        
+        let codePointToEncode: int
+        
+        // Handle high surrogate
+        if (isHighSurrogate) {
+            if (currentIndex + 1 >= uriLength) {
+                throw new URIError("malformed URI sequence")
+            }
+            
+            const nextChar: char = uri.charAt(currentIndex + 1)
+            const isNextLowSurrogate: boolean = Char.isLowSurrogate(nextChar)
+            
+            if (!isNextLowSurrogate) {
+                throw new URIError("malformed URI sequence")
+            }
+            
+            codePointToEncode = ((currentCharCode - Char.HIGH_SURROGATE_MIN.toInt()) << 10) +
+                                (nextChar.toInt() - Char.LOW_SURROGATE_MIN.toInt()) + 0x10000
+            
+            encodeCharAsHexUtf8(encodedBuilder, codePointToEncode)
+            currentIndex += 2
             continue
         }
-        if (Char.isLowSurrogate(c) || Char.isHighSurrogate(c)) {
+        
+        // Check isolated low surrogate
+        if (isLowSurrogate) {
             throw new URIError("malformed URI sequence")
         }
-        if (Char.toInt(c) < 128 && ok[Char.toInt(c)]) {
-            ret.append(c)
-        } else {
-            encodeCharAsHexUtf8(ret, d)
+        
+        // Batch process consecutive reserved characters: find consecutive reserved character blocks
+        if (currentCharCode < 128 && ok[currentCharCode]) {
+            let reservedBlockEnd: int = currentIndex + 1
+            while (reservedBlockEnd < uriLength) {
+                const nextChar: char = uri.charAt(reservedBlockEnd)
+                const nextValue: int = nextChar.toInt()
+                // Stop when encountering surrogate pair start or non-reserved character
+                if (Char.isHighSurrogate(nextChar) ||
+                    nextValue >= 128 || !ok[nextValue]) {
+                    break
+                }
+                reservedBlockEnd++
+            }
+            
+            encodedBuilder.append(uri.slice(currentIndex, reservedBlockEnd))
+            currentIndex = reservedBlockEnd
+            continue
         }
-        i += 1
+        
+        // UTF-8 encoding path
+        codePointToEncode = currentCharCode
+        encodeCharAsHexUtf8(encodedBuilder, codePointToEncode)
+        currentIndex += 1
     }
-    return ret.toString()
+    return encodedBuilder.toString()
 }
 
 /**
