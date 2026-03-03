@@ -1094,6 +1094,9 @@ void G1GC<LanguageConfig>::RunConcurrentGC(ark::GCTask &task, OnPauseMarker &pma
         } else {
             Remark<false>(task, pmarker);
         }
+        if (this->GetSettings()->AfterRemarkG1HeapVerification()) {
+            VerifyHeapAfterRemark();
+        }
         // Enable mixed GC
         PandaVector<Region *> emptyTenuredRegions;
         topGarbageRegions_.clear();
@@ -2227,10 +2230,21 @@ void G1GC<LanguageConfig>::SweepNonRegularVmRefs()
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::VerifyHeapBeforeConcurrent()
 {
-    trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier before concurrent");
+    trace::ScopedTrace beforeConcurHeapVerifierTrace("BeforeConcurrentG1HeapVerifier");
     size_t failCount = this->VerifyHeap();
     if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
-        LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
+        LOG(FATAL, GC) << "Heap corrupted before ConcurrentMark, HeapVerifier found " << failCount << " corruptions";
+    }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::VerifyHeapAfterRemark()
+{
+    trace::ScopedTrace AfterRemarkHeapVerifierTrace("AfterRemarkG1HeapVerifier");
+    size_t failCount = this->VerifyHeap();
+    if (this->GetSettings()->FailOnHeapVerification() && failCount > 0) {
+        LOG(FATAL, GC) << "Heap corrupted after ConcurrentMark + Remark, HeapVerifier found " << failCount
+                       << " corruptions";
     }
 }
 

@@ -25,102 +25,140 @@ namespace ark::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_HEAP_VERIFIER LOG(ERROR, GC) << "HEAP_VERIFIER: "
 
-template <LangTypeT LANG_TYPE>
-static Field *GetFieldFromOffsetForObject([[maybe_unused]] const ObjectHeader *object, Class *cls,
-                                          const uint32_t offset)
+static PandaString NameFromField(Field *f)
 {
-    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
-        UNREACHABLE();  // Dynamic classes do not provide info
+    if (f == nullptr) {
+        return "[nullptr field]";
     }
-    ASSERT(object != nullptr);
-    ASSERT(cls != nullptr);
-    ASSERT(!cls->IsDynamicClass());
+    return utf::Mutf8AsCString(f->GetName().data);
+}
+
+template <LangTypeT LANG_TYPE>
+static PandaString GetFieldInfoForArray(const coretypes::Array *array, const uint32_t offset)
+{
+    if constexpr (LANG_TYPE != LangTypeT::LANG_TYPE_STATIC) {
+        return "dynamic lang is not supported";
+    }
+
+    auto startOffset = array->GetDataOffset();
+    auto length = array->GetLength();
+    auto elementSize = coretypes::Array::GetElementSize<ObjectHeader *, false>();
+    PandaStringStream ss;
+    int32_t index = offset;
+    index -= startOffset;
+    if (elementSize > 0) {
+        index /= elementSize;
+    }
+    if (elementSize <= 0 || index < 0 || index >= static_cast<int32_t>(length) ||
+        (offset - startOffset) % elementSize != 0) {
+        ss << "bad index: " << std::dec << index << " (offset: " << offset << " startOffset: " << startOffset
+           << " length: " << length << " elemSize: " << elementSize << ")";
+    } else {
+        ss << "index: " << std::dec << index;
+    }
+    return ss.str();
+}
+
+template <LangTypeT LANG_TYPE>
+static PandaString GetFieldInfoForClass([[maybe_unused]] const Class *cls, [[maybe_unused]] const uint32_t offset)
+{
+    static_assert(ClassHelper::OBJECT_POINTER_SIZE != 0);
+    if constexpr (LANG_TYPE != LangTypeT::LANG_TYPE_STATIC) {
+        return "dynamic lang is not supported";
+    }
+
+    auto manObj = cls->GetManagedObject();
+    int64_t localI = offset + ToUintPtr(manObj);
+    localI -= ToUintPtr(cls) + cls->GetRefFieldsOffset<true>();
+    auto fields = cls->GetFields();
+    PandaStringStream ss;
+    if (localI < 0 || localI >= static_cast<int64_t>(fields.size() * ClassHelper::OBJECT_POINTER_SIZE) ||
+        localI % ClassHelper::OBJECT_POINTER_SIZE != 0) {
+        ss << "wrong static field offset: " << std::dec << offset << " (cls: " << std::hex << cls
+           << " managed object: " << manObj << " fields.size: " << fields.size()
+           << " objPoinSize: " << ClassHelper::OBJECT_POINTER_SIZE
+           << " fieldWrongIndex: " << localI / ClassHelper::OBJECT_POINTER_SIZE << ")";
+    } else {
+        ss << "static field: " << NameFromField(&fields[localI / ClassHelper::OBJECT_POINTER_SIZE]);
+    }
+    return ss.str();
+}
+
+template <LangTypeT LANG_TYPE>
+static PandaString GetFieldInfoForObject([[maybe_unused]] const ObjectHeader *object, Class *cls, const uint32_t offset)
+{
+    if constexpr (LANG_TYPE != LangTypeT::LANG_TYPE_STATIC) {
+        return "dynamic lang is not supported";
+    }
 
     while (cls != nullptr) {
         size_t refNum = cls->GetRefFieldsNum<false>();
-        int32_t localI = (static_cast<int32_t>(offset) - static_cast<int32_t>(cls->GetRefFieldsOffset<false>())) /
-                         ClassHelper::OBJECT_POINTER_SIZE;
-        if (localI < 0 || localI >= static_cast<int32_t>(refNum)) {
-            cls = cls->GetBase();
-            continue;
+        int64_t localI = offset;
+        localI -= cls->GetRefFieldsOffset<false>();
+        if (0 <= localI && localI < static_cast<int64_t>(refNum * ClassHelper::OBJECT_POINTER_SIZE)) {
+            if (localI % ClassHelper::OBJECT_POINTER_SIZE != 0) {
+                break;
+            }
+            auto fields = cls->GetFields();
+            return "field " + NameFromField(&fields[localI / ClassHelper::OBJECT_POINTER_SIZE]);
         }
-        auto fields = cls->GetFields();
-        ASSERT(fields.size() == refNum);
-        return &fields[localI];
+        cls = cls->GetBase();
     }
-    return nullptr;
-}
-
-template <LangTypeT LANG_TYPE>
-static uint32_t GetIndexFromOffsetForArray(const coretypes::Array *array, [[maybe_unused]] Class *cls,
-                                           [[maybe_unused]] const uint32_t offset)
-{
-    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
-        UNREACHABLE();  // Dynamic classes do not provide info
-    }
-    ASSERT(array != nullptr);
-    ASSERT(cls != nullptr);
-    ASSERT(!cls->IsDynamicClass());
-
-    uintptr_t arrayStart = ToUintPtr(array->GetBase<ObjectPointerType *>());
-    ASSERT(offset > arrayStart);
-    return static_cast<uint32_t>((offset - arrayStart) / coretypes::Array::GetElementSize<ObjectHeader *, false>());
-}
-
-template <LangTypeT LANG_TYPE>
-static Field *GetFieldFromOffsetForClass(const Class *cls, const uint32_t offset)
-{
-    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
-        UNREACHABLE();  // Dynamic classes do not provide info
-    }
-    ASSERT(cls != nullptr);
-    ASSERT(!cls->IsDynamicClass());
-    ObjectHeader *object = cls->GetManagedObject();
-    ASSERT(object != nullptr);
-    size_t localI = (offset - ToUintPtr(cls) + cls->GetRefFieldsOffset<true>() - ToUintPtr(object)) /
-                    ClassHelper::OBJECT_POINTER_SIZE;
-    auto fields = cls->GetFields();
-    ASSERT(localI < fields.size());
-    return &fields[localI];
-}
-
-template <LangTypeT LANG_TYPE>
-static std::variant<Field *, uint32_t> GetFieldFromOffset([[maybe_unused]] const ObjectHeader *objectHeader,
-                                                          [[maybe_unused]] const uint32_t offset)
-{
-    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
-        return nullptr;  // Dynamic classes do not provide info
-    }
-    auto *cls = objectHeader->ClassAddr<Class>();
-    ASSERT(cls != nullptr);
-
-    if (cls->IsObjectArrayClass()) {
-        return GetIndexFromOffsetForArray<LANG_TYPE>(static_cast<const coretypes::Array *>(objectHeader), cls, offset);
-    }
-    if (cls->IsClassClass()) {
-        auto objectCls = ark::Class::FromClassObject(objectHeader);
-        if (objectCls->IsInitializing() || objectCls->IsInitialized()) {
-            return GetFieldFromOffsetForClass<LANG_TYPE>(objectCls, offset);
-        }
-        return nullptr;
-    }
-    return GetFieldFromOffsetForObject<LANG_TYPE>(objectHeader, cls, offset);
+    PandaStringStream ss;
+    ss << "wrong offset field (offset: " << offset << " cls: " << std::hex << object->ClassAddr<Class *>() << ")";
+    return ss.str();
 }
 
 template <LangTypeT LANG_TYPE>
 static PandaString GetFieldInfo(const ObjectHeader *obj, const uint32_t offset)
 {
-    ASSERT(obj != nullptr);
-    std::variant<Field *, uint32_t> res = GetFieldFromOffset<LANG_TYPE>(obj, offset);
-    if (std::holds_alternative<uint32_t>(res)) {
-        return "index " + PandaString(std::to_string(std::get<uint32_t>(res)));
+    if (obj == nullptr) {
+        // This should not be possible, but check must be done
+        return "no info: nullptr object";
     }
-    Field *field = std::get<Field *>(res);
-    if (field == nullptr) {
-        return "unresolved field";
+    if constexpr (LANG_TYPE == LangTypeT::LANG_TYPE_DYNAMIC) {
+        return "no info: dynamic lang";
     }
-    auto fieldName = PandaString(utf::Mutf8AsCString(field->GetName().data));
-    return "field: " + fieldName;
+    auto cls = obj->ClassAddr<Class>();
+    if (cls == nullptr) {
+        // This should not be possible, but check must be done
+        return "no info: nullptr class";
+    }
+    if (cls->IsDynamicClass()) {
+        return "no info: dynamic lang class";
+    }
+    if (cls->IsObjectArrayClass()) {
+        return GetFieldInfoForArray<LANG_TYPE>(static_cast<const coretypes::Array *>(obj), offset);
+    }
+    if (cls->IsClassClass()) {
+        return GetFieldInfoForClass<LANG_TYPE>(ark::Class::FromClassObject(obj), offset);
+    }
+
+    return GetFieldInfoForObject<LANG_TYPE>(obj, cls, offset);
+}
+
+template <LangTypeT LANG_TYPE>
+static PandaString GetClassName(const ObjectHeader *obj)
+{
+    PandaStringStream ss;
+    if constexpr (LANG_TYPE == LANG_TYPE_STATIC) {
+        auto *cls = obj->template ClassAddr<Class>();
+        if (IsAddressInObjectsHeap(cls)) {
+            ss << cls->GetName() << "[" << std::hex << cls << "]";
+            return ss.str();
+        }
+        if (cls == nullptr) {
+            return "[nullptr class]";
+        }
+    }
+    ss << "unknown class for [" << std::hex << obj << "]";
+    return ss.str();
+}
+
+template <class LanguageConfig>
+static PandaString GetClassName(const ObjectHeader *obj)
+{
+    return GetClassName<LanguageConfig::LANG_TYPE>(obj);
 }
 
 // Should be called only with MutatorLock held
@@ -158,10 +196,10 @@ bool HeapReferenceVerifier<LANG_TYPE>::operator()(ObjectHeader *objectHeader, Ob
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                               << " references a dead object at " << referent;
         } else {
-            auto *cls = objectHeader->template ClassAddr<Class>();
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
-                              << " (class: " << cls->GetName() << ") references a dead object at " << referent
-                              << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
+                              << " (class: " << GetClassName<LANG_TYPE>(objectHeader)
+                              << ") references a dead object at " << referent << " with "
+                              << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
         }
         ++(*failCount_);
     } else if (referent->IsForwarded()) {
@@ -169,10 +207,10 @@ bool HeapReferenceVerifier<LANG_TYPE>::operator()(ObjectHeader *objectHeader, Ob
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object " << std::hex << objectHeader
                               << " references a forwarded object at " << referent;
         } else {
-            auto *cls = objectHeader->template ClassAddr<Class>();
             LOG_HEAP_VERIFIER << "Heap corruption found! Heap object at " << std::hex << objectHeader
-                              << " (class: " << cls->GetName() << ") references a forwarded object at " << referent
-                              << " with " << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
+                              << " (class: " << GetClassName<LANG_TYPE>(objectHeader)
+                              << ") references a forwarded object at " << referent << " with "
+                              << GetFieldInfo<LANG_TYPE>(objectHeader, offset);
         }
         ++(*failCount_);
     }
@@ -237,18 +275,6 @@ size_t HeapVerifier<LanguageConfig>::VerifyRoot() const
     });
 
     return failCount;
-}
-
-template <class LanguageConfig>
-static PandaString GetClassName(const ObjectHeader *obj)
-{
-    if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_STATIC) {
-        auto *cls = obj->template ClassAddr<Class>();
-        if (IsAddressInObjectsHeap(cls)) {
-            return cls->GetName().c_str();  // NOLINT(readability-redundant-string-cstr)
-        }
-    }
-    return "unknown class";
 }
 
 template <class LanguageConfig>
@@ -456,9 +482,8 @@ size_t HeapVerifierIntoGC<LanguageConfig>::VerifyAll(PandaVector<MemRange> &&ali
                     LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << " references a dead object "
                                       << referent << " after collection";
                 } else {
-                    auto *cls = objectHeader->template ClassAddr<Class>();
-                    ASSERT(cls != nullptr);
-                    LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader << "(class: " << cls->GetName()
+                    LOG_HEAP_VERIFIER << "Object " << std::hex << objectHeader
+                                      << "(class: " << GetClassName<LanguageConfig>(objectHeader)
                                       << ") references a dead object " << referent << " after collection (with "
                                       << GetFieldInfo<LanguageConfig::LANG_TYPE>(objectHeader, offset) << ")";
                 }
