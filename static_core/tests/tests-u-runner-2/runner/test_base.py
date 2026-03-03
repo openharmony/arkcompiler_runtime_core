@@ -22,6 +22,7 @@ import re
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path, PurePosixPath
+from threading import Lock
 from typing import Any, Literal, cast
 
 import pytz
@@ -29,7 +30,6 @@ import pytz
 from runner import utils
 from runner.common_exceptions import ParameterNotFound
 from runner.enum_types.base_enum import BaseEnum
-from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseFilter, VerboseKind
 from runner.logger import Log
 from runner.options.local_env import LocalEnv
@@ -38,6 +38,8 @@ from runner.options.options import IOptions
 from runner.options.options_general import GeneralOptions
 from runner.reports.report import ReportGenerator
 from runner.reports.report_format import ReportFormat
+from runner.types.test_env import TestEnv
+from runner.types.test_report import TestReport
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -87,6 +89,8 @@ class Test:
         self.repeat = 1
         self.path_to_expected = Path(f"{self.path}.expected")
         self.path_to_expected_err = Path(f"{self.path}.expected.err")
+        self.run_lock = Lock()
+        self.is_completed = False
 
     @property
     def has_expected(self) -> bool:
@@ -117,7 +121,8 @@ class Test:
         self.repeat = repeat
         self.reproduce = ''
 
-        result = self.do_run()
+        with self.run_lock:
+            result = self.do_run()
 
         finish = datetime.now(pytz.UTC)
         self.time = (finish - start).total_seconds()
@@ -158,7 +163,7 @@ class Test:
 
     def status_as_cstring(self) -> str:
         if self.excluded:
-            return TestStatus.EXCLUDED.value
+            return f"\033[1;95m{TestStatus.EXCLUDED.value}\033[0m"
         if self.passed:
             return f"\033[3;92m{TestStatus.PASSED_IGNORED.value}\033[0m" \
                 if self.ignored else f"\033[1;32m{TestStatus.PASSED.value}\033[0m"

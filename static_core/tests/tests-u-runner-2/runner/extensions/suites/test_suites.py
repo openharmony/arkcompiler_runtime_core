@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from runner.enum_types.params import TestEnv
 from runner.extensions.suites.test_suite_registry import ITestSuite, suite_registry
 from runner.suites.test_suite import GTestSuite, TestSuite
+from runner.types.test_env import TestEnv
 
 
 @suite_registry.register("ets")

@@ -21,10 +21,11 @@ from os import path
 from typing import TYPE_CHECKING, TypeAlias
 
 from runner.common_exceptions import InvalidConfiguration
-from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseFilter
 from runner.logger import Log
 from runner.reports.report_format import ReportFormat
+from runner.types.test_env import TestEnv
+from runner.types.test_report import TestReport
 from runner.utils import write_2_file
 
 if TYPE_CHECKING:

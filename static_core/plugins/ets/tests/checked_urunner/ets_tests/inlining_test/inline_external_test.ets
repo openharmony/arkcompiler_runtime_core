@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-  files: [external_file_1.ets, external_file_2.ets, external_file_3.ets]
----*/
-
 // Source file must be last in the compile list
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND            inputs: "external_file_1.ets", output: "inline_external_test_external_file_1.ets.abc"

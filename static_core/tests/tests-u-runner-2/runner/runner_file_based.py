@@ -23,7 +23,6 @@ from pathlib import Path
 import pytz
 
 from runner import common_exceptions
-from runner.enum_types.params import TestEnv
 from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 from runner.options.config import Config
@@ -38,6 +37,7 @@ from runner.suites.gtest_flow import GTestFlow
 from runner.suites.test_standard_flow import TestStandardFlow
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
+from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -119,6 +119,22 @@ class RunnerFileBased(Runner):
 
         return self.failed
 
+    def _process_failed(self, test_result: TestStandardFlow | GTestFlow, ignored_still_failed: list[Test],
+                        excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
+        if test_result.ignored and test_result.last_failure_check_passed:
+            self.ignored += 1
+            ignored_still_failed.append(test_result)
+        elif test_result.path in self.excluded_tests:
+            excluded_still_failed.append(test_result)
+            self.excluded += 1
+        else:
+            self.failed += 1
+            if test_result.fail_kind is None:
+                test_result.fail_kind = "<not set>"
+            if test_result.fail_kind not in fail_lists:
+                fail_lists[test_result.fail_kind] = []
+            fail_lists[test_result.fail_kind].append(test_result)
+
     def __results_analysis(self, results: list[Test]) -> \
             tuple[list[Test], list[Test], list[Test], list[Test], dict[str, list[Test]]]:
         self.failed = 0
@@ -135,7 +151,7 @@ class RunnerFileBased(Runner):
         for test_result in results:
             if not isinstance(test_result, TestStandardFlow) and not isinstance(test_result, GTestFlow):
                 raise ValueError(f"Incorrect type of test {type(test_result)}. "
-                                       f"Expected: TestStandardFlow or GTestFlow")
+                                 "Expected: TestStandardFlow or GTestFlow")
 
             if test_result.excluded:
                 self.excluded_after += 1
@@ -164,19 +180,3 @@ class RunnerFileBased(Runner):
                 self.work_dir.report,
                 self.config.general.detailed_report_file)
             detailed_report.populate_report()
-
-    def _process_failed(self, test_result: TestStandardFlow | GTestFlow, ignored_still_failed: list[Test],
-                        excluded_still_failed: list[Test], fail_lists: dict[str, list[Test]]) -> None:
-        if test_result.ignored and test_result.last_failure_check_passed:
-            self.ignored += 1
-            ignored_still_failed.append(test_result)
-        elif test_result.path in self.excluded_tests:
-            excluded_still_failed.append(test_result)
-            self.excluded += 1
-        else:
-            self.failed += 1
-            if test_result.fail_kind is None:
-                test_result.fail_kind = "<not set>"
-            if test_result.fail_kind not in fail_lists:
-                fail_lists[test_result.fail_kind] = []
-            fail_lists[test_result.fail_kind].append(test_result)

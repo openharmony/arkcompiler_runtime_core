@@ -16,29 +16,21 @@
 #
 
 from dataclasses import dataclass
-
-from runner.code_coverage.coverage_manager import CoverageManager
-from runner.options.config import Config
-from runner.reports.report_format import ReportFormat
-from runner.suites.work_dir import WorkDir
+from pathlib import Path
 
 
-@dataclass
-class TestEnv:
-    config: Config
+@dataclass(frozen=True)
+class BinaryParams:
+    timeout: int
+    executor: Path
+    flags: list[str]
+    env: dict[str, str]
+    step_filter: str = "*"
+    use_qemu: bool = False
+    cwd: str | None = None
+    stdout: Path | None = None
+    stderr: Path | None = None
 
-    cmd_prefix: list[str]
-    cmd_env: dict[str, str]
-
-    timestamp: int
-    report_formats: set[ReportFormat]
-    work_dir: WorkDir
-
-    coverage: CoverageManager
-
-
-@dataclass
-class TestReport:
-    output: str
-    error: str
-    return_code: int
+    @property
+    def component_name(self) -> str:
+        return self.executor.stem

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 import unittest
 from pathlib import Path
 
-from runner.enum_types.params import TestReport
 from runner.suites.test_metadata import TestMetadata
 from runner.suites.test_standard_flow import TestStandardFlow
+from runner.types.test_report import TestReport
 
 
 def get_test_instance(report_stdout: str, report_stderr: str,

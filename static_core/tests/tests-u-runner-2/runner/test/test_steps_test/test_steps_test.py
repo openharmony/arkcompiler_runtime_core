@@ -140,7 +140,7 @@ class TestStepsTest(TestCase):
             expected_types = [COMPILER_STEP, COMPILER_STEP, RUNTIME_STEP]
             expected_dependent_ets = "dependent_nat.ets"
             expected_main_ets = "imports_nat.ets"
-            expected_dependent_ets_abc = f"{INTERMEDIATE}/imports_nat_dependent_nat.ets.abc"
+            expected_dependent_ets_abc = f"{INTERMEDIATE}/dependent_nat.ets.abc"
             expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat.ets.abc"
             expected_stdlib = "stdlib"
 
@@ -188,7 +188,7 @@ class TestStepsTest(TestCase):
             expected_types = [COMPILER_STEP, COMPILER_STEP, RUNTIME_STEP]
             expected_dependent_ets = "dependent_nat_co.ets"
             expected_main_ets = "imports_nat_co1.ets"
-            expected_dependent_ets_abc = f"{INTERMEDIATE}/imports_nat_co1_dependent_nat_co.ets.abc"
+            expected_dependent_ets_abc = f"{INTERMEDIATE}/dependent_nat_co.ets.abc"
             expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat_co1.ets.abc"
             expected_stdlib = "stdlib"
 
@@ -238,15 +238,15 @@ class TestStepsTest(TestCase):
             expected_dependent2_ets = "dependent_nat_co.ets"
             expected_dependent1_ets = "imports_nat_co1.ets"
             expected_main_ets = "imports_nat_co2.ets"
-            expected_dependent2_ets_abc = f"{INTERMEDIATE}/imports_nat_co2_dependent_nat_co.ets.abc"
-            expected_dependent1_ets_abc = f"{INTERMEDIATE}/imports_nat_co2_imports_nat_co1.ets.abc"
+            expected_dependent2_ets_abc = f"{INTERMEDIATE}/dependent_nat_co.ets.abc"
+            expected_dependent1_ets_abc = f"{INTERMEDIATE}/imports_nat_co1.ets.abc"
             expected_main_ets_abc = f"{INTERMEDIATE}/imports_nat_co2.ets.abc"
             expected_stdlib = "stdlib"
 
             self.assertEqual(len(steps), len(expected_types))
             self.check_steps(steps, expected_types)
             self.check_names(steps, [expected_dependent2_ets, expected_dependent1_ets,
-                                    expected_main_ets, expected_main_ets])
+                                     expected_main_ets, expected_main_ets])
 
             self.check_args(steps[0], "--output=", [expected_dependent2_ets_abc])
             self.check_args(steps[1], "--output=", [expected_dependent1_ets_abc])
@@ -420,7 +420,6 @@ class TestStepsTest(TestCase):
         - exception should be raised
         """
         with patch('sys.argv', argv):
-
             self.assertRaises(InvalidConfiguration, self.prepare)
             work_dir = Path(os.environ["WORK_DIR"])
             shutil.rmtree(work_dir, ignore_errors=True)

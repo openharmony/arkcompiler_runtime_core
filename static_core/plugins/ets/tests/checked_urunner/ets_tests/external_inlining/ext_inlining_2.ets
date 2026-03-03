@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-/*---
-  files: [ext_funcs.ets, ext_funcs_1.ets]
----*/
-
 // Source file must be last in the compile list
 //! DEFINE_FRONTEND_OPTIONS            DEFAULT ARGS
 //! RUN_FRONTEND            inputs: "ext_funcs.ets", output: "ext_inlining_2_ext_funcs.ets.abc"

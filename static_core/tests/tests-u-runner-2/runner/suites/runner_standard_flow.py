@@ -25,14 +25,15 @@ from runner import utils
 from runner.code_coverage.coverage_manager import CoverageManager
 from runner.common_exceptions import InvalidConfiguration
 from runner.cpumask import CPUMask
-from runner.enum_types.params import TestEnv
 from runner.extensions.suites.test_suite_registry import suite_registry
 from runner.logger import Log
 from runner.options.config import Config
 from runner.options.options_step import StepKind
 from runner.runner_file_based import RunnerFileBased
+from runner.suites.tests_flow_registry import TestFlowRegistry
 from runner.suites.work_dir import WorkDir
 from runner.test_base import Test
+from runner.types.test_env import TestEnv
 
 _LOGGER = Log.get_logger(__file__)
 
@@ -55,6 +56,7 @@ class RunnerStandardFlow(RunnerFileBased):
             report_formats={self.config.general.report_format},
             work_dir=WorkDir(config, self.default_work_dir_root),
             coverage=CoverageManager(self.config.general.build, self.work_dir.coverage_dir, config.general.coverage),
+            test_flow_registry=TestFlowRegistry()
         )
 
         self.__remove_intermediate_files()

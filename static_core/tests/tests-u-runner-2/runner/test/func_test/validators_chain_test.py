@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,11 +57,11 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_compile_only_rt_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test1_compile_only.ets
         validators: check_return_code - FAIL
         expected result - test fails because return code = 1
-        '''
+        """
         test_utils.set_process_mock(mock_popen, return_code=1)
 
         test_result = self.run_test()
@@ -79,11 +79,11 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_compile_only_rt_stderr_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test1_compile_only.ets
         validators: check_return_code - OK, check_stderr - FAIL
         expected result - test fails as stderr is not empty
-        '''
+        """
         test_utils.set_process_mock(mock_popen, return_code=0, error_out="Error")
 
         test_result = self.run_test()
@@ -101,11 +101,11 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_compile_only_rt_stderr_pass(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test2_compile_only.ets
         validators: check_return_code - OK,check_stderr - OK
         expected result: test passed, stderr is compared with expected stderr output from test's metadata
-        '''
+        """
         test_utils.set_process_mock(mock_popen, return_code=0, error_out="Error")
 
         test_result = self.run_test()
@@ -129,11 +129,11 @@ class ValidatorsChainTest(unittest.TestCase):
                                          mock_check_stderr: MagicMock,
                                          mock_check_rt: MagicMock,
                                          mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test3_compile_only.ets
         validators: check_return_code - OK, check_stderr - OK, check_stdout - OK
         expected result: test passes
-        '''
+        """
         test_utils.set_process_mock(mock_popen, return_code=0, output="some text")
 
         test_result = self.run_test()
@@ -154,13 +154,13 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_pass(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test4_runtime.ets, stdout for compile step
         validators:
             - compile/verifier steps: check_return_code - OK, check_stderr - OK
             - runtime(runtime/aot) steps: check_return_code - OK, check_stderr - OK
         expected result: test passes, stdout is not compared as there is no data to compare with
-        '''
+        """
         test_utils.set_process_mock(mock_popen, return_code=0, output="some text")
 
         test_result = self.run_test()
@@ -178,13 +178,13 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_rt_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test4_runtime.ets
         validators:
             - compiler/ verifier: check_return_code - OK, check_stderr - OK
             - aot: check_return_code - FAIL
         expected result - test fails because AOT step return_code = 1
-        '''
+        """
         mock1 = MagicMock(name="popen1")
         mock2 = MagicMock(name="popen2")
 
@@ -210,13 +210,13 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_stdout_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test5_runtime.ets, stdout in aot step
         validators:
             - compiler/ verifier: check_return_code - OK, check_stderr - OK
             - aot: check_return_code - OK, check_stderr - OK, check_stdout - fail
         expected result: tests fails as a result of comparison of the stdout in aot step
-        '''
+        """
         mock1 = MagicMock(name="popen1")
         mock2 = MagicMock(name="popen2")
 
@@ -242,14 +242,14 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_stdout_last_step_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test5_runtime.ets, stdout in runtime step (last step)
         validators:
             - compiler/ verifier: check_return_code - OK, check_stderr - OK
             - aot: check_return_code - OK, check_stderr - OK
             - runtime: check_return_code - OK, check_stderr - OK, check_stdout - fail
         expected result: tests fails as a result of comparison of the stdout in the last step
-        '''
+        """
         mock1 = MagicMock(name="popen1")
         mock2 = MagicMock(name="popen2")
 
@@ -281,13 +281,13 @@ class ValidatorsChainTest(unittest.TestCase):
                                      mock_check_stderr: MagicMock,
                                      mock_check_rc: MagicMock,
                                      mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test5_runtime.ets, stdout in runtime step (last step), expected to fail on comparison
         actual fail on compile step
         validators:
             - compiler: check_return_code - fail
         expected result: tests fails as compile step fails
-        '''
+        """
         mock1 = MagicMock(name="popen1")
         mock2 = MagicMock(name="popen2")
 
@@ -316,14 +316,14 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_stdout_pass(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test5_runtime.ets, stdout in aot step
         validators:
             - compiler/ verifier: check_return_code - OK, check_stderr - OK
             - aot: check_return_code - OK, check_stderr - OK, check_stdout - OK
             - runtime: check_return_code - OK, check_stderr - OK
         expected result: tests passes
-        '''
+        """
         mock1 = MagicMock(name="popen1")
         mock2 = MagicMock(name="popen2")
 
@@ -349,14 +349,14 @@ class ValidatorsChainTest(unittest.TestCase):
     @patch('runner.options.local_env.LocalEnv.get_instance_id', get_instance_id)
     @patch("runner.suites.one_test_runner.subprocess.Popen")
     def test_runtime_no_stdout_fail(self, mock_popen: MagicMock) -> None:
-        '''
+        """
         test-file: test5_runtime.ets, no stdout, but expected comparison with stdout
         validators:
             - compiler/ verifier: check_return_code - OK, check_stderr - OK
             - aot: check_return_code - OK, check_stderr - OK, check_stdout - FAIL( but ignore as there is one more step)
             - runtime: check_return_code - OK, check_stderr - OK, check_stdout - FAIL
         expected result: tests fails
-        '''
+        """
         mock1 = MagicMock(name="popen1")
 
         mock1.__enter__.return_value = mock1
