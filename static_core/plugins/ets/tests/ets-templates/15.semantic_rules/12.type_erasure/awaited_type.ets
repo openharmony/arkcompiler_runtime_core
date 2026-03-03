@@ -36,6 +36,14 @@ class OutBox<out T extends Number> {
     }
 }
 
+class InvariantBox<T extends Number> {
+    readonly val: T
+    constructor(v: T) { this.val = v }
+    checkAwaited(p: Object): boolean {
+        return p instanceof Awaited<T>
+    }
+}
+
 function main(): int {
     let suite = new arktest.ArkTestsuite("AwaitedTypeErasure");
 
@@ -69,6 +77,12 @@ function main(): int {
     suite.addTest("out variance: Awaited<T> effective type is upperBound", () => {
         let box = new OutBox<Double>(48.0)
         arktest.assertTrue(box.checkAwaited(48.0))
+        arktest.assertFalse(box.checkAwaited("not a number"))
+    });
+
+    suite.addTest("no variance: Awaited<T> effective type is upperBound", () => {
+        let box = new InvariantBox<Double>(36.0)
+        arktest.assertTrue(box.checkAwaited(36.0))
         arktest.assertFalse(box.checkAwaited("not a number"))
     });
 
