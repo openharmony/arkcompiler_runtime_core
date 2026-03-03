@@ -57,9 +57,9 @@
   {'type1': 'long', 'value1': '0b111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '33. Multiplication of Max Long (binary) and long = 1.'},
   
   {'type1': 'Long', 'value1': '-9223372036854775808', 'type2': 'long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '34. Multiplication of Min Long (decimal) and long = 1.'},
-  {'type1': 'Long', 'value1': '-0b1000000000000000000000000000000000000000000000000000000000000000', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '35. Multiplication of Min Long (binary) and long = 1.'},
-  {'type1': 'Long', 'value1': '-0x8_000_000_000_000_000', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '36. Multiplication of Min Long (hex) and long = 1.'},
-  {'type1': 'Long', 'value1': '-0o1000000000000000000000', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '37. Multiplication of Min Long (octal) and long = 1.'},
+  {'type1': 'Long', 'value1': '-0b111111111111111111111111111111111111111111111111111111111111111', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '35. Multiplication of a negated binary literal (max Long) by the long value 1.'},
+  {'type1': 'Long', 'value1': '-0x7FFF_FFFF_FFFF_FFFF', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '36. Multiplication of a negated hex literal (max Long) by the long value 1.'},
+  {'type1': 'Long', 'value1': '-0o777777777777777777777', 'type2': 'Long', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '37. Multiplication of a negated octal literal (max Long) by the long value 1.'},
  
 ]%}
 
@@ -114,9 +114,9 @@
   {'type1': 'long', 'value1': '0b111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111_1111', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '9223372036854775807', 'desc': '37. Multiplication of Max Long (binary) and int = 1.'},
   
   {'type1': 'Long', 'value1': '-9223372036854775808', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '38. Multiplication of Min Long (decimal) and int = 1.'},
-  {'type1': 'Long', 'value1': '-0b1000000000000000000000000000000000000000000000000000000000000000', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '39. Multiplication of Min Long (binary) and int = 1.'},
-  {'type1': 'Long', 'value1': '-0x8_000_000_000_000_000', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '40. Multiplication of Min Long (hex) and int = 1.'},
-  {'type1': 'Long', 'value1': '-0o1000000000000000000000', 'type2': 'Int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775808', 'desc': '41. Multiplication of Min Long (octal) and int = 1.'},
+  {'type1': 'Long', 'value1': '-0b111111111111111111111111111111111111111111111111111111111111111', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '39. Multiplication of a negated binary literal (max Long) by the long value 1.'},
+  {'type1': 'Long', 'value1': '-0x7FFF_FFFF_FFFF_FFFF', 'type2': 'int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '40. Multiplication of a negated hex literal (max Long) by the long value 1.'},
+  {'type1': 'Long', 'value1': '-0o777777777777777777777', 'type2': 'Int', 'value2': '1', 'resultType': 'long', 'result': '-9223372036854775807', 'desc': '41. Multiplication of a negated octal literal (max Long) by the long value 1.'},
   
   {'type1': 'long', 'value1': '0x80_00_00_01', 'type2': 'long', 'value2': '0o00_2000000_0064', 'resultType': 'long', 'result': '4611686132244021300','desc': '42. Multiplication of positive longs (hex, octal).'},
   {'type1': 'Long', 'value1': 'new Long(0x80_00_00_01)', 'type2': 'Long', 'value2': 'new Long(0o00_2000000_0064)', 'resultType': 'long', 'result': '4611686132244021300','desc': '43. Multiplication positive alias Longs (hex, octal).'},

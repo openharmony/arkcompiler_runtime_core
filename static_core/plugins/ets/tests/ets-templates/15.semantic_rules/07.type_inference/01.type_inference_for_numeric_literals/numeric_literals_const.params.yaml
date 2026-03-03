@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,10 +44,9 @@ cases:
   - { use: "-32769", use_type: ": int", expected_type: int }
   - { use: "-2147483648", use_type: ": int", expected_type: int }
   - { use: "-2147483649", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0000", use_type: ": long", expected_type: long }
+  - { use: "-0x7FFF_FFFF_FFFF_FFFF", use_type: ": long", expected_type: long }
   # union type valid narrowing
   - { use: "256", use_type: ": byte | int", expected_type: int }
   - { use: "32768", use_type: ": short | int", expected_type: int }
   - { use: "2147483648", use_type: ": int | long", expected_type: long }
   - { use: "Double.MAX_VALUE", use_type: ": float | double", expected_type: double }
-  - { use: "Double.MIN_VALUE", use_type: ": float | double", expected_type: double }

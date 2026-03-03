@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,14 @@
 {% for c in cases %}
 /*---
 desc:
-    The type of expression of a numeric type for Constant Expressions is first evaluated from the expression.
-    The evaluated numeric result type can be inferred to a numeric target type from the context.
+    If the type of any operand is byte or short, then the operand is converted to int. 
+    If operands are of different integer types, then the operand of a smaller type is converted to a larger type by using Widening Numeric Conversions.
+tags: [compile-only, negative]
+expected_out: "{{c.expected}}"
 ---*/
 
 function main() {
-    let a: {{c.use_type}} = {{c.use}}
-    arktest.assertTrue(a instanceof {{c.expected_type}})
-    arktest.assertEQ(a, {{c.use}})
+    let a: {{c.overflow_type}} = {{c.use}}
 }
+
 {% endfor %}

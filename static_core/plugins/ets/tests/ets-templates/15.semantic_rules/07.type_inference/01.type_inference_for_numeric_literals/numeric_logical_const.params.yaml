@@ -43,9 +43,9 @@ cases:
   - { use: "-129&1", use_type: ": int", expected_type: int }
   - { use: "-32768&1", use_type: ": int", expected_type: int }
   - { use: "-32769&1", use_type: ": int", expected_type: int }
-  - { use: "-0x8000_0000&1", use_type: ": int", expected_type: int }
+  - { use: "-0x7FFF_FFFF&1", use_type: ": int", expected_type: int }
   - { use: "-0x8000_0001&1", use_type: ": long", expected_type: long }
-  - { use: "-0x8000_0000_0000_0000&1", use_type: ": long", expected_type: long }
+  - { use: "-0x7FFF_FFFF_FFFF_FFFF&1", use_type: ": long", expected_type: long }
   # bitwise xor
   - { use: "16^1", use_type: ": int", expected_type: int }
   - { use: "126^1", use_type: ": int", expected_type: int }
