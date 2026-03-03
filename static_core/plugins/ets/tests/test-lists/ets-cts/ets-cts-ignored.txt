@@ -836,6 +836,13 @@
 #31384
 14.ambient_declarations/06.namespace_declarations/01.impl_ambient_namespace/negative/namespace_usage_n_5.ets
 
+# 33423
+14.ambient_declarations/07.accessor_declarations/accessor_declarations.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_receiver.ets
+
+#33339
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_n.d.ets
+
 #33238
 15.semantic_rules/02.subtyping/04.subtyping_for_tuple_types/tuple_subtyping.ets
 

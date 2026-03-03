@@ -1711,6 +1711,15 @@
 14.ambient_declarations/bad_ambient_declarations_16.ets
 14.ambient_declarations/bad_ambient_declarations_3.ets
 14.ambient_declarations/bad_ambient_declarations_4.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations.d.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations1.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations1.d.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_n.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_receiver.d.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_receiver1.d.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_receiver1.ets
+14.ambient_declarations/07.accessor_declarations/accessor_declarations_n.d.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_function_types/positive_function_generic_0.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_function_types/positive_function_generic_1.ets
 15.semantic_rules/02.subtyping/06.subtyping_for_function_types/positive_function_generic_2.ets
