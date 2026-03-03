@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "ani_gtest.h"
 
-// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)
 namespace ark::ets::ani::testing {
 
 class CreateLocalScopeTest : public AniTest {};
@@ -490,6 +490,31 @@ TEST_F(CreateLocalScopeTest, destroy_escape_local_scope_invalid_result)
     ASSERT_EQ(env_->DestroyEscapeLocalScope(objectRef, nullptr), ANI_INVALID_ARGS);
 }
 
+TEST_F(CreateLocalScopeTest, create_local_scope_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ASSERT_EQ(env_->CreateLocalScope(REF_NUM), ANI_OK);
+    ASSERT_EQ(env_->DestroyLocalScope(), ANI_OK);
+}
+
+TEST_F(CreateLocalScopeTest, create_escape_local_scope_under_pending_error)
+{
+    std::string longString(10000U, 'a');
+    ani_string strRef {};
+    ASSERT_EQ(env_->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+    ani_ref anyStringRef {};
+    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+    ASSERT_EQ(env_->CreateEscapeLocalScope(REF_NUM), ANI_OK);
+    ani_ref result;
+    ASSERT_EQ(env_->DestroyEscapeLocalScope(strRef, &result), ANI_OK);
+}
+
 }  // namespace ark::ets::ani::testing
 
-// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays)
+// NOLINTEND(cppcoreguidelines-pro-type-vararg, modernize-avoid-c-arrays, readability-magic-numbers)

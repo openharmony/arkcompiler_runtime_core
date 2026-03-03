@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #include <thread>
 #include "ani_gtest.h"
+
+// NOLINTBEGIN(readability-magic-numbers)
 
 namespace ark::ets::ani::testing {
 using ThreadTestFunc = std::function<void(void)>;
@@ -76,4 +78,26 @@ TEST_F(DetachThreadTest, detach_three_times_disable)
     DoTest(this, fun);
 }
 
+TEST_F(DetachThreadTest, detach_thread_under_pending_error)
+{
+    ThreadTestFunc fun = [this]() {
+        ani_env *etsEnv {nullptr};
+        ani_option interopEnabled {"--interop=disable", nullptr};
+        ani_options aniArgs {1, &interopEnabled};
+        EXPECT_NE(vm_, nullptr) << "vm_ is nullptr";
+        EXPECT_EQ(vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv), ANI_OK);
+
+        std::string longString(10000U, 'a');
+        ani_string strRef {};
+        ASSERT_EQ(etsEnv->String_NewUTF8(longString.c_str(), longString.size(), &strRef), ANI_OK);
+        ani_ref anyStringRef {};
+        ASSERT_EQ(etsEnv->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+
+        EXPECT_EQ(vm_->DetachCurrentThread(), ANI_OK);
+    };
+    DoTest(this, fun);
+}
+
 }  // namespace ark::ets::ani::testing
+
+// NOLINTEND(readability-magic-numbers)

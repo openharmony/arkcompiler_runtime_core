@@ -49,15 +49,9 @@
 #define CHECK_PTR_ARG(arg) ANI_CHECK_RETURN_IF_EQ(arg, nullptr, ANI_INVALID_ARGS)
 
 // CC-OFFNXT(G.PRE.02) should be with define
-#define CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env)              \
-    do {                                                        \
-        ANI_CHECK_RETURN_IF_EQ(env, nullptr, ANI_INVALID_ARGS); \
-    } while (false)
-
-// CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_ENV(env)                                                                              \
     do {                                                                                            \
-        CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);                                                 \
+        CHECK_PTR_ARG(env);                                                                         \
         bool hasPendingException = ::ark::ets::PandaAniEnv::FromAniEnv(env)->HasPendingException(); \
         ANI_CHECK_RETURN_IF_EQ(hasPendingException, true, ANI_PENDING_ERROR);                       \
     } while (false)
@@ -592,7 +586,7 @@ static ani_status ClassCallMethodByName(ani_env *env, ani_class cls, const char 
 NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
 
     *result = ANI_VERSION_1;
@@ -602,7 +596,7 @@ NO_UB_SANITIZE static ani_status GetVersion(ani_env *env, uint32_t *result)
 ani_status GetVM(ani_env *env, ani_vm **result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(result);
 
     *result = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
@@ -1514,7 +1508,7 @@ NO_UB_SANITIZE static ani_status Class_BindStaticNativeMethods(ani_env *env, ani
 NO_UB_SANITIZE static ani_status Reference_Delete(ani_env *env, ani_ref lref)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.DelLocalRef(lref);
@@ -5573,7 +5567,7 @@ NO_UB_SANITIZE static ani_status Function_Call_Void(ani_env *env, ani_function f
 NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref ref, ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
@@ -5585,7 +5579,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Create(ani_env *env, ani_ref re
 NO_UB_SANITIZE static ani_status GlobalReference_Delete(ani_env *env, ani_ref gref)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(gref);
 
     ScopedManagedCodeFix s(env);
@@ -5596,7 +5590,7 @@ NO_UB_SANITIZE static ani_status GlobalReference_Delete(ani_env *env, ani_ref gr
 NO_UB_SANITIZE static ani_status WeakReference_Create(ani_env *env, ani_ref ref, ani_wref *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
@@ -5608,7 +5602,7 @@ NO_UB_SANITIZE static ani_status WeakReference_Create(ani_env *env, ani_ref ref,
 NO_UB_SANITIZE static ani_status WeakReference_Delete(ani_env *env, ani_wref wref)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.DelWeakRef(wref);
@@ -5619,7 +5613,7 @@ NO_UB_SANITIZE static ani_status WeakReference_GetReference(ani_env *env, ani_wr
                                                             ani_ref *refResult)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(wasReleasedResult);
     CHECK_PTR_ARG(refResult);
 
@@ -5689,7 +5683,7 @@ NO_UB_SANITIZE static ani_status ArrayBuffer_GetInfo(ani_env *env, ani_arraybuff
 NO_UB_SANITIZE static ani_status EnsureEnoughReferences(ani_env *env, ani_size nrRefs)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV_THAT_CAN_HAVE_PENDING_ERROR(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.EnsureLocalEnoughRefs(nrRefs);
@@ -5699,7 +5693,7 @@ NO_UB_SANITIZE static ani_status EnsureEnoughReferences(ani_env *env, ani_size n
 NO_UB_SANITIZE static ani_status CreateLocalScope(ani_env *env, ani_size nrRefs)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.CreateLocalScope(nrRefs);
@@ -5709,7 +5703,7 @@ NO_UB_SANITIZE static ani_status CreateLocalScope(ani_env *env, ani_size nrRefs)
 NO_UB_SANITIZE ani_status DestroyLocalScope(ani_env *env)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.DestroyLocalScope();
@@ -5719,7 +5713,7 @@ NO_UB_SANITIZE ani_status DestroyLocalScope(ani_env *env)
 NO_UB_SANITIZE static ani_status CreateEscapeLocalScope(ani_env *env, ani_size nrRefs)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
 
     ScopedManagedCodeFix s(env);
     return s.CreateEscapeLocalScope(nrRefs);
@@ -5729,7 +5723,7 @@ NO_UB_SANITIZE static ani_status CreateEscapeLocalScope(ani_env *env, ani_size n
 NO_UB_SANITIZE static ani_status DestroyEscapeLocalScope(ani_env *env, ani_ref ref, ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
-    CHECK_ENV(env);
+    CHECK_PTR_ARG(env);
     CHECK_PTR_ARG(ref);
     CHECK_PTR_ARG(result);
 
