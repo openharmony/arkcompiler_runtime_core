@@ -3,9 +3,9 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_989 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_974 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_985 
+_ESScopeNamesRecord_970 
 
 
 
@@ -19,13 +19,13 @@ _ESScopeNamesRecord_985
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallargs.ts _ESModuleRecord_989
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallargs.ts _ESModuleRecord_974
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallargs.ts _ESScopeNamesRecord_985
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-column-number/ReleaseEnableColumnNumberCallargs.ts _ESScopeNamesRecord_970
 }
 .record.source_file 
 
@@ -133,21 +133,21 @@ _ESScopeNamesRecord_985
  SlotNumber 16
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	mov v0, a0                               # line: 18446744073709551615           # column: 0
-	mov v1, a1                               # line: 18446744073709551615           # column: 0
-	mov v2, a2                               # line: 18446744073709551615           # column: 0
-	definefunc 0x0, .#*#callRange, 0x4       # line: 18446744073709551615           # column: 0
-	sta v3                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x1, .#*#callarg1, 0x1        # line: 18446744073709551615           # column: 0
-	sta v4                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x2, .#*#callargs2, 0x2       # line: 18446744073709551615           # column: 0
-	sta v5                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x3, .#*#callargs3, 0x3       # line: 18446744073709551615           # column: 0
-	sta v6                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x4, .#*#test, 0x0            # line: 18446744073709551615           # column: 0
-	sta v7                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x5, .#*#withRestParams, 0x0  # line: 18446744073709551615           # column: 0
-	sta v8                                   # line: 18446744073709551615           # column: 0
+	mov v0, a0                               # line: 4294967295           # column: 0
+	mov v1, a1                               # line: 4294967295           # column: 0
+	mov v2, a2                               # line: 4294967295           # column: 0
+	definefunc 0x0, .#*#callRange, 0x4       # line: 4294967295           # column: 0
+	sta v3                                   # line: 4294967295           # column: 0
+	definefunc 0x1, .#*#callarg1, 0x1        # line: 4294967295           # column: 0
+	sta v4                                   # line: 4294967295           # column: 0
+	definefunc 0x2, .#*#callargs2, 0x2       # line: 4294967295           # column: 0
+	sta v5                                   # line: 4294967295           # column: 0
+	definefunc 0x3, .#*#callargs3, 0x3       # line: 4294967295           # column: 0
+	sta v6                                   # line: 4294967295           # column: 0
+	definefunc 0x4, .#*#test, 0x0            # line: 4294967295           # column: 0
+	sta v7                                   # line: 4294967295           # column: 0
+	definefunc 0x5, .#*#withRestParams, 0x0  # line: 4294967295           # column: 0
+	sta v8                                   # line: 4294967295           # column: 0
 	lda v7                                   # line: 33           # column: 0
 	sta v10                                  # line: 33           # column: 0
 	lda v10                                  # line: 33           # column: 0
@@ -448,8 +448,8 @@ _ESScopeNamesRecord_985
 	sta v138                                 # line: 46           # column: 0
 	lda v10                                  # line: 33           # column: 0
 	wide.callrange 0x80, v11                 # line: 33           # column: 78
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	returnundefined                          # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	returnundefined                          # line: 4294967295           # column: 0
 }
 
 # ====================

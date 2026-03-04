@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -224,15 +224,16 @@ public:
         needs_emit_ = needs_emit;
     }
 
-    const std::list<IndexedItem *> &GetIndexDependencies() const
+    virtual bool HasDepsList()
     {
-        return index_deps_;
+        return false;
     }
 
-    void AddIndexDependency(IndexedItem *item)
+    virtual const std::vector<IndexedItem *> &GetIndexDependencies() const
     {
-        ASSERT(item != nullptr);
-        index_deps_.push_back(item);
+        UNREACHABLE();
+        static const std::vector<IndexedItem *> empty;
+        return empty;
     }
 
     void SetOrderIndex(uint32_t order)
@@ -259,7 +260,7 @@ public:
     virtual void Dump([[maybe_unused]] std::ostream &os) const {}
 
     virtual void Visit([[maybe_unused]] const VisitorCallBack &cb) {}
-
+#ifndef ETS_FRONTEND_USE
     void SetPGORank(uint32_t rank)
     {
         pgo_rank_ = rank;
@@ -279,6 +280,7 @@ public:
     {
         return original_rank_;
     }
+#endif
 
     void SetReLayoutRank(ItemRank rank)
     {
@@ -292,12 +294,13 @@ public:
 
 private:
     bool needs_emit_ {true};
+    ItemRank re_layout_rank_ {ItemRank::DEFAULT_RANK};
     uint32_t offset_ {0};
     uint32_t order_ {INVALID_INDEX};
-    std::list<IndexedItem *> index_deps_;
+#ifndef ETS_FRONTEND_USE
     uint32_t pgo_rank_ {0};
     uint32_t original_rank_ {0};
-    ItemRank re_layout_rank_ {ItemRank::DEFAULT_RANK};
+#endif
 };
 
 class IndexedItem : public BaseItem {
@@ -348,11 +351,6 @@ public:
         return IndexType::NONE;
     }
 
-    size_t GetIndexedItemCount() const
-    {
-        return item_global_index_;
-    }
-
 private:
     struct Index {
         const BaseItem *start;
@@ -392,7 +390,6 @@ private:
 
     std::vector<Index> indexes_;
     size_t ref_count_ {1};
-    size_t item_global_index_ {0};
 };
 
 class TypeItem : public IndexedItem {
@@ -474,7 +471,7 @@ public:
         return str_;
     }
 
-    size_t GetUtf16Len() const
+    uint32_t GetUtf16Len() const
     {
         return utf16_length_;
     }
@@ -489,8 +486,8 @@ public:
 
 private:
     std::string str_;
-    size_t utf16_length_;
-    size_t is_ascii_ = 0;
+    uint32_t utf16_length_;
+    uint8_t is_ascii_ = 0;
 };
 
 class AnnotationItem;
@@ -510,6 +507,20 @@ public:
     {
         return name_;
     }
+    const std::vector<IndexedItem *> &GetIndexDependencies() const override
+    {
+        return index_deps_;
+    }
+
+    void AddIndexDependency(IndexedItem *item)
+    {
+        ASSERT(item != nullptr);
+        index_deps_.push_back(item);
+    }
+    bool HasDepsList() override
+    {
+        return true;
+    }
 
     ~BaseFieldItem() override = default;
 
@@ -527,6 +538,7 @@ private:
     BaseClassItem *class_;
     StringItem *name_;
     TypeItem *type_;
+    std::vector<IndexedItem *> index_deps_;
 };
 
 class FieldItem : public BaseFieldItem {
@@ -542,24 +554,9 @@ public:
         return value_;
     }
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
-    {
-        runtime_annotations_.push_back(runtime_annotation);
-    }
-
     void AddAnnotation(AnnotationItem *annotation)
     {
         annotations_.push_back(annotation);
-    }
-
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
-    {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
-    }
-
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
-    {
-        type_annotations_.push_back(type_annotation);
     }
 
     size_t CalculateSize() const override;
@@ -571,24 +568,9 @@ public:
         return ItemTypes::FIELD_ITEM;
     }
 
-    std::vector<AnnotationItem *> *GetRuntimeAnnotations()
-    {
-        return &runtime_annotations_;
-    }
-
     std::vector<AnnotationItem *> *GetAnnotations()
     {
         return &annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetTypeAnnotations()
-    {
-        return &type_annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
-    {
-        return &runtime_type_annotations_;
     }
 
     DEFAULT_MOVE_SEMANTIC(FieldItem);
@@ -603,10 +585,7 @@ private:
 
     uint32_t access_flags_;
     ValueItem *value_;
-    std::vector<AnnotationItem *> runtime_annotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
 };
 
 class ProtoItem;
@@ -792,7 +771,20 @@ public:
         access_flags_ &= (FUNCTION_KIND_MASK | FLAG_MASK);
         access_flags_ |= (static_cast<uint32_t>(idx) << (FUNTION_KIND_WIDTH + FLAG_WIDTH));
     }
+    const std::vector<IndexedItem *> &GetIndexDependencies() const override
+    {
+        return index_deps_;
+    }
 
+    void AddIndexDependency(IndexedItem *item)
+    {
+        ASSERT(item != nullptr);
+        index_deps_.push_back(item);
+    }
+    bool HasDepsList() override
+    {
+        return true;
+    }
     ~BaseMethodItem() override = default;
 
     DEFAULT_MOVE_SEMANTIC(BaseMethodItem);
@@ -807,6 +799,7 @@ protected:
     bool Write(Writer *writer) override;
 
 private:
+    std::vector<IndexedItem *> index_deps_;
     BaseClassItem *class_;
     StringItem *name_;
     ProtoItem *proto_;
@@ -822,34 +815,14 @@ public:
     DEFAULT_MOVE_SEMANTIC(MethodParamItem);
     DEFAULT_COPY_SEMANTIC(MethodParamItem);
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
-    {
-        runtime_annotations_.push_back(runtime_annotation);
-    }
-
     void AddAnnotation(AnnotationItem *annotation)
     {
         annotations_.push_back(annotation);
     }
 
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
-    {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
-    }
-
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
-    {
-        type_annotations_.push_back(type_annotation);
-    }
-
     TypeItem *GetType() const
     {
         return type_;
-    }
-
-    const std::vector<AnnotationItem *> &GetRuntimeAnnotations() const
-    {
-        return runtime_annotations_;
     }
 
     const std::vector<AnnotationItem *> &GetAnnotations() const
@@ -864,15 +837,12 @@ public:
 
     bool HasRuntimeAnnotations() const
     {
-        return !runtime_annotations_.empty();
+        return false;
     }
 
 private:
     TypeItem *type_;
-    std::vector<AnnotationItem *> runtime_annotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
 };
 
 class ParamAnnotationsItem;
@@ -903,24 +873,9 @@ public:
         debug_info_ = debug_info;
     }
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
-    {
-        runtime_annotations_.push_back(runtime_annotation);
-    }
-
     void AddAnnotation(AnnotationItem *annotation)
     {
         annotations_.push_back(annotation);
-    }
-
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
-    {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
-    }
-
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
-    {
-        type_annotations_.push_back(type_annotation);
     }
 
     void SetRuntimeParamAnnotationItem(ParamAnnotationsItem *annotations)
@@ -969,24 +924,9 @@ public:
         return params_;
     }
 
-    std::vector<AnnotationItem *> *GetRuntimeAnnotations()
-    {
-        return &runtime_annotations_;
-    }
-
     std::vector<AnnotationItem *> *GetAnnotations()
     {
         return &annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetTypeAnnotations()
-    {
-        return &type_annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
-    {
-        return &runtime_type_annotations_;
     }
 
 private:
@@ -1001,10 +941,7 @@ private:
     SourceLang source_lang_;
     CodeItem *code_;
     DebugInfoItem *debug_info_;
-    std::vector<AnnotationItem *> runtime_annotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
     ParamAnnotationsItem *runtime_param_annotations_ {nullptr};
     ParamAnnotationsItem *param_annotations_ {nullptr};
 };
@@ -1046,6 +983,21 @@ public:
           container_(container)
     {
     }
+    const std::vector<IndexedItem *> &GetIndexDependencies() const override
+    {
+        return index_deps_;
+    }
+
+    void AddIndexDependency(IndexedItem *item)
+    {
+        ASSERT(item != nullptr);
+        index_deps_.push_back(item);
+    }
+
+    bool HasDepsList() override
+    {
+        return true;
+    }
 
     ~ClassItem() override = default;
 
@@ -1070,24 +1022,9 @@ public:
         ifaces_.push_back(iface);
     }
 
-    void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
-    {
-        runtime_annotations_.push_back(runtime_annotation);
-    }
-
     void AddAnnotation(AnnotationItem *annotation)
     {
         annotations_.push_back(annotation);
-    }
-
-    void AddRuntimeTypeAnnotation(AnnotationItem *runtime_type_annotation)
-    {
-        runtime_type_annotations_.push_back(runtime_type_annotation);
-    }
-
-    void AddTypeAnnotation(AnnotationItem *type_annotation)
-    {
-        type_annotations_.push_back(type_annotation);
     }
 
     template <class... Args>
@@ -1146,24 +1083,9 @@ public:
         VisitMethods(cb);
     }
 
-    std::vector<AnnotationItem *> *GetRuntimeAnnotations()
-    {
-        return &runtime_annotations_;
-    }
-
     std::vector<AnnotationItem *> *GetAnnotations()
     {
         return &annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetTypeAnnotations()
-    {
-        return &type_annotations_;
-    }
-
-    std::vector<AnnotationItem *> *GetRuntimeTypeAnnotations()
-    {
-        return &runtime_type_annotations_;
     }
 
     DEFAULT_MOVE_SEMANTIC(ClassItem);
@@ -1192,14 +1114,12 @@ private:
     uint32_t access_flags_;
     SourceLang source_lang_;
     std::vector<BaseClassItem *> ifaces_;
-    std::vector<AnnotationItem *> runtime_annotations_;
     std::vector<AnnotationItem *> annotations_;
-    std::vector<AnnotationItem *> type_annotations_;
-    std::vector<AnnotationItem *> runtime_type_annotations_;
     StringItem *source_file_;
     std::vector<std::unique_ptr<FieldItem>> fields_;
     std::multiset<std::unique_ptr<MethodItem>, MethodCompByName> methods_;
     ItemContainer *container_;
+    std::vector<IndexedItem *> index_deps_;
 };
 
 class ForeignClassItem : public BaseClassItem {
@@ -1322,6 +1242,20 @@ public:
     {
         return sizeof(uint16_t);
     }
+    const std::vector<IndexedItem *> &GetIndexDependencies() const override
+    {
+        return index_deps_;
+    }
+
+    void AddIndexDependency(IndexedItem *item)
+    {
+        ASSERT(item != nullptr);
+        index_deps_.push_back(item);
+    }
+    bool HasDepsList() override
+    {
+        return true;
+    }
 
 private:
     static constexpr size_t SHORTY_ELEM_SIZE = 4;
@@ -1330,6 +1264,7 @@ private:
 
     std::vector<uint16_t> shorty_;
     std::vector<TypeItem *> reference_types_;
+    std::vector<IndexedItem *> index_deps_;
 };
 
 class CodeItem : public BaseItem {
@@ -1490,11 +1425,11 @@ private:
 class ScalarValueItem;
 class ArrayValueItem;
 
-class ValueItem : public IndexedItem {
+class ValueItem : public BaseItem {
 public:
     enum class Type { INTEGER, LONG, FLOAT, DOUBLE, ID, ARRAY };
 
-    explicit ValueItem(Type type, ItemContainer *container) : IndexedItem(container), type_(type) {}
+    explicit ValueItem(Type type) : type_(type) {}
 
     ~ValueItem() override = default;
 
@@ -1531,15 +1466,15 @@ private:
 
 class ScalarValueItem : public ValueItem {
 public:
-    explicit ScalarValueItem(uint32_t v, ItemContainer *container) : ValueItem(Type::INTEGER, container), value_(v) {}
+    explicit ScalarValueItem(uint32_t v) : ValueItem(Type::INTEGER), value_(v) {}
 
-    explicit ScalarValueItem(uint64_t v, ItemContainer *container) : ValueItem(Type::LONG, container), value_(v) {}
+    explicit ScalarValueItem(uint64_t v) : ValueItem(Type::LONG), value_(v) {}
 
-    explicit ScalarValueItem(float v, ItemContainer *container) : ValueItem(Type::FLOAT, container), value_(v) {}
+    explicit ScalarValueItem(float v) : ValueItem(Type::FLOAT), value_(v) {}
 
-    explicit ScalarValueItem(double v, ItemContainer *container) : ValueItem(Type::DOUBLE, container), value_(v) {}
+    explicit ScalarValueItem(double v) : ValueItem(Type::DOUBLE), value_(v) {}
 
-    explicit ScalarValueItem(BaseItem *v, ItemContainer *container) : ValueItem(Type::ID, container), value_(v) {}
+    explicit ScalarValueItem(BaseItem *v) : ValueItem(Type::ID), value_(v) {}
 
     ~ScalarValueItem() override = default;
 
@@ -1576,7 +1511,7 @@ private:
 class ArrayValueItem : public ValueItem {
 public:
     ArrayValueItem(panda_file::Type component_type, std::vector<ScalarValueItem> items, ItemContainer *container)
-        : ValueItem(Type::ARRAY, container), component_type_(component_type), items_(std::move(items))
+        : ValueItem(Type::ARRAY), component_type_(component_type), items_(std::move(items))
     {
     }
 
@@ -1663,9 +1598,9 @@ private:
     std::variant<uint8_t, uint16_t, uint32_t, uint64_t, StringItem *, MethodItem *, LiteralArrayItem *> value_;
 };
 
-class LiteralArrayItem : public ValueItem {
+class LiteralArrayItem : public IndexedItem {
 public:
-    explicit LiteralArrayItem(ItemContainer *container) : ValueItem(Type::ARRAY, container) {}
+    explicit LiteralArrayItem(ItemContainer *container) : IndexedItem(container) {}
 
     ~LiteralArrayItem() override = default;
 
@@ -1785,11 +1720,25 @@ public:
     {
         tags_ = std::move(tags);
     }
+    const std::vector<IndexedItem *> &GetIndexDependencies() const override
+    {
+        return index_deps_;
+    }
 
+    void AddIndexDependency(IndexedItem *item)
+    {
+        ASSERT(item != nullptr);
+        index_deps_.push_back(item);
+    }
+    bool HasDepsList() override
+    {
+        return true;
+    }
 private:
     BaseClassItem *class_;
     std::vector<Elem> elements_;
     std::vector<Tag> tags_;
+    std::vector<IndexedItem *> index_deps_;
 };
 
 enum class MethodHandleType : uint8_t {

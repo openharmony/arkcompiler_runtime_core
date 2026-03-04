@@ -47,7 +47,11 @@ public:
 
     ClassItem *GetOrCreateClassItem(const std::string &str);
 
+    ClassItem *GetOrCreateClassItem(const std::string &key, const std::string &value);
+
     ForeignClassItem *GetOrCreateForeignClassItem(const std::string &str);
+
+    ForeignClassItem *GetOrCreateForeignClassItem(const std::string &key, const std::string &value);
 
     ScalarValueItem *GetOrCreateIntegerValueItem(uint32_t v);
 
@@ -61,7 +65,7 @@ public:
 
     ClassItem *GetOrCreateGlobalClassItem()
     {
-        return GetOrCreateClassItem("L_GLOBAL;");
+        return GetOrCreateClassItem("_GLOBAL", "L_GLOBAL;");
     }
 
     ProtoItem *GetOrCreateProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &params);
@@ -90,8 +94,7 @@ public:
 
         std::unique_ptr<T> ptr = nullptr;
         if constexpr (std::is_same_v<T, ForeignFieldItem> || std::is_same_v<T, ForeignMethodItem> ||
-            std::is_same_v<T, ScalarValueItem> || std::is_same_v<T, ArrayValueItem> ||
-            std::is_same_v<T, LiteralArrayItem>) {
+                      std::is_same_v<T, ArrayValueItem> || std::is_same_v<T, LiteralArrayItem>) {
             ptr = std::make_unique<T>(std::forward<Args>(args)..., this);
         } else {
             ptr = std::make_unique<T>(std::forward<Args>(args)...);
@@ -107,7 +110,10 @@ public:
     }
 
     void ReLayout();
+    void ComputeLayoutForReferencedItems();
+    uint32_t ComputelayoutForRest();
     uint32_t ComputeLayout();
+    size_t GetFileSize();
     bool Write(Writer *writer);
 
     std::map<std::string, size_t> GetStat();
@@ -122,6 +128,11 @@ public:
     std::unordered_map<std::string, StringItem *> *GetStringMap()
     {
         return &string_map_;
+    }
+
+    std::unordered_map<std::string, LiteralArrayItem *> *GetLiteralArrayItemMap()
+    {
+        return &literalarray_map_;
     }
 
     LiteralArrayItem *GetLiteralArrayItem(const std::string &key)
@@ -232,6 +243,21 @@ public:
         return ItemContainer::apiVersion;
     }
 
+    void InvalidateComputeLayout()
+    {
+        cur_offset_ = 0;
+        end_->SetOffset(0);
+    }
+
+    bool IsComputeLayoutFinished()
+    {
+        return end_->GetOffset() != 0;
+    }
+
+    bool IsComputeLayoutForReferencedItemsFinished()
+    {
+        return cur_offset_ != 0;
+    }
     static uint8_t apiVersion;
     static std::string subApiVersion;
 
@@ -239,7 +265,7 @@ private:
     template <class T>
     auto GetInsertPosition()
     {
-        if (std::is_same_v<T, CodeItem>) {
+        if (std::is_same_v<T, CodeItem> || std::is_same_v<T, AnnotationItem>) {
             return code_items_end_;
         }
 
@@ -341,7 +367,7 @@ private:
                     }
                 }
 
-                return item1->GetIndexedItemCount() < item2->GetIndexedItemCount();
+                return item1->GetOrderIndex() < item2->GetOrderIndex();
             }
         };
 
@@ -398,9 +424,9 @@ private:
             return ItemTypes::INDEX_HEADER;
         }
 
-        bool Add(const std::list<IndexedItem *> &items);
+        bool Add(const std::vector<IndexedItem *> &items);
 
-        void Remove(const std::list<IndexedItem *> &items);
+        void Remove(const std::vector<IndexedItem *> &items);
 
         void SetStart(BaseItem *item)
         {
@@ -610,6 +636,7 @@ private:
     std::unordered_map<std::string, size_t> items_round_up_size_;
     uint32_t foreign_item_roundup_size_ {0};
     uint32_t line_number_item_roundup_size_ {0};
+    uint32_t cur_offset_ {0};
 
     BaseItem *end_;
     size_t indexed_item_count_ {0};

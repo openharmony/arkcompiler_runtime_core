@@ -33,16 +33,16 @@ bool Parser::ParseOperands()
             case Token::Type::ID_OP_<%= insn.asm_token%>: {
 %  if insn.return? && !insn.properties.include?('dynamic')
 %    if insn.return_obj?
-                if (!curr_func_->return_type.IsObject()) {
+                if (!curr_func_->ReturnType().IsObject()) {
 %    elsif insn.return32?
-                if (!curr_func_->return_type.IsPrim32()) {
+                if (!curr_func_->ReturnType().IsPrim32()) {
 %    elsif insn.return64?
-                if (!curr_func_->return_type.IsPrim64()) {
+                if (!curr_func_->ReturnType().IsPrim64()) {
 %    elsif insn.return_void?
-                if (!curr_func_->return_type.IsVoid()) {
+                if (!curr_func_->ReturnType().IsVoid()) {
 %    end
                     GetWarning("Unexpected return type. Look at the return type in the function definition: " +
-                               curr_func_->return_type.GetName(),
+                               curr_func_->ReturnType().GetName(),
                                Error::ErrorType::WAR_UNEXPECTED_RETURN_TYPE);
                 }
 %  end

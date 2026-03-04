@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ HWTEST_F(ExcludedKeysTest, excluded_keys_001, testing::ext::TestSize.Level1)
     // Collect valid instructions
     std::vector<const panda::pandasm::Ins *> insns;
     for (const auto &in : func.ins) {
-        if (in->opcode != panda::pandasm::Opcode::INVALID) {
+        if (in->GetOpcode() != panda::pandasm::Opcode::INVALID) {
             insns.emplace_back(in.get());
         }
     }
@@ -140,7 +140,7 @@ HWTEST_F(ExcludedKeysTest, excluded_keys_001, testing::ext::TestSize.Level1)
     for (size_t i = 0; i < insns.size(); i++) {
         const auto &opt_ins = insns[i];
         const auto &expected_ins = expected_func.ins[i];
-        EXPECT_EQ(opt_ins->opcode, expected_ins->opcode);
+        EXPECT_EQ(opt_ins->GetOpcode(), expected_ins->GetOpcode());
 
         EXPECT_EQ(opt_ins->Imms().size(), expected_ins->Imms().size());
         for (size_t k = 0; k < opt_ins->Imms().size(); k++) {

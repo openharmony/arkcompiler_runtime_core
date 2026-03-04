@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,7 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
          * Instructions of invalid opcode will be removed during emitter, but kept within function assembly structure,
          * therefore these instructions need to be skipped here
          **/
-        if (ins->opcode == pandasm::Opcode::INVALID) {
+        if (ins->GetOpcode() == pandasm::Opcode::INVALID) {
             continue;
         }
         pc_ins_map->emplace(instructions.GetPc(*insn_iter), ins.get());

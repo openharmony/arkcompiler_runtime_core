@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,15 +35,15 @@ const OpcodeList PROPERTY_TYPE_LIST_NORMAL = {
 
 bool IsGetLdaStrPropertyIns(const panda::guard::InstructionInfo &info)
 {
-    return ((info.ins_->opcode == panda::pandasm::Opcode::STOBJBYVALUE) ||
-            (info.ins_->opcode == panda::pandasm::Opcode::STSUPERBYVALUE));
+    return ((info.ins_->GetOpcode() == panda::pandasm::Opcode::STOBJBYVALUE) ||
+            (info.ins_->GetOpcode() == panda::pandasm::Opcode::STSUPERBYVALUE));
 }
 }  // namespace
 
 bool panda::guard::Property::IsPropertyIns(const panda::guard::InstructionInfo &info)
 {
     return std::any_of(PROPERTY_TYPE_LIST_NORMAL.begin(), PROPERTY_TYPE_LIST_NORMAL.end(),
-                       [&](panda::pandasm::Opcode opcode) -> bool { return info.ins_->opcode == opcode; });
+                       [&](panda::pandasm::Opcode opcode) -> bool { return info.ins_->GetOpcode() == opcode; });
 }
 
 void panda::guard::Property::GetPropertyNameInfo(const InstructionInfo &info, InstructionInfo &nameInfo)

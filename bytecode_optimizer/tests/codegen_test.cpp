@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,7 @@ HWTEST_F(CodegenTest, codegen_test_001, TestSize.Level1)
     std::vector<InsPtr> result;
     DoLda(reg, result);
     EXPECT_EQ(result[0]->GetReg(0), reg);
-    EXPECT_EQ(result[0]->opcode, panda::pandasm::Opcode::LDA);
+    EXPECT_EQ(result[0]->GetOpcode(), panda::pandasm::Opcode::LDA);
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F(CodegenTest, codegen_test_002, TestSize.Level1)
     std::vector<InsPtr> result;
     DoSta(reg, result);
     EXPECT_EQ(result[0]->GetReg(0), reg);
-    EXPECT_EQ(result[0]->opcode, panda::pandasm::Opcode::STA);
+    EXPECT_EQ(result[0]->GetOpcode(), panda::pandasm::Opcode::STA);
 }
 
 /**
@@ -152,7 +152,7 @@ HWTEST_F(CodegenTest, codegen_test_004, TestSize.Level1)
                     BytecodeGen bc_gen(graph, function, interface, prog);
                     bc_gen.EmitJump(bb);
                     EXPECT_FALSE(bc_gen.GetResult().empty());
-                    EXPECT_EQ(bc_gen.GetResult().back()->opcode, panda::pandasm::Opcode::JMP);
+                    EXPECT_EQ(bc_gen.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::JMP);
                 }
             }
         }
@@ -198,7 +198,7 @@ HWTEST_F(CodegenTest, codegen_test_005, TestSize.Level1)
                 EXPECT_EQ(const_inst->GetDstReg(), reg);
                 BytecodeGen::VisitConstant(&graph_visitor, const_inst);
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
-                EXPECT_EQ(graph_visitor.GetResult().back()->opcode, panda::pandasm::Opcode::STA);
+                EXPECT_EQ(graph_visitor.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::STA);
 
                 ConstantInst *const_inst1 = inst->CastToConstant();
                 const_inst1->SetType(DataType::Type::FLOAT64);
@@ -207,7 +207,7 @@ HWTEST_F(CodegenTest, codegen_test_005, TestSize.Level1)
                 EXPECT_EQ(const_inst->GetDstReg(), reg);
                 BytecodeGen::VisitConstant(&graph_visitor, const_inst1);
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
-                EXPECT_EQ(graph_visitor.GetResult().back()->opcode, panda::pandasm::Opcode::STA);
+                EXPECT_EQ(graph_visitor.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::STA);
 
                 ConstantInst *const_inst2 = inst->CastToConstant();
                 const_inst2->SetType(DataType::Type::INT32);
@@ -216,7 +216,7 @@ HWTEST_F(CodegenTest, codegen_test_005, TestSize.Level1)
                 EXPECT_EQ(const_inst->GetDstReg(), reg);
                 BytecodeGen::VisitConstant(&graph_visitor, const_inst2);
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
-                EXPECT_EQ(graph_visitor.GetResult().back()->opcode, panda::pandasm::Opcode::STA);
+                EXPECT_EQ(graph_visitor.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::STA);
             }
         }
     });
@@ -252,7 +252,7 @@ HWTEST_F(CodegenTest, codegen_test_006, TestSize.Level1)
                 BytecodeGen bc_gen(graph, function, interface, prog);
                 bc_gen.EncodeSta(reg, DataType::Type::ANY);
                 EXPECT_FALSE(bc_gen.GetResult().empty());
-                EXPECT_EQ(bc_gen.GetResult().back()->opcode, panda::pandasm::Opcode::STA);
+                EXPECT_EQ(bc_gen.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::STA);
             }
         }
     });
@@ -304,13 +304,13 @@ HWTEST_F(CodegenTest, codegen_test_007, TestSize.Level1)
                 inst->SetDstReg(reg1);
                 BytecodeGen::VisitLoadString(&graph_visitor, inst);
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
-                EXPECT_EQ(graph_visitor.GetResult().back()->opcode, panda::pandasm::Opcode::LDA_STR);
+                EXPECT_EQ(graph_visitor.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::LDA_STR);
 
                 Register reg2 = INVALID_REG;
                 inst->SetDstReg(reg2);
                 BytecodeGen::VisitLoadString(&graph_visitor, inst);
                 EXPECT_FALSE(graph_visitor.GetResult().empty());
-                EXPECT_EQ(graph_visitor.GetResult().back()->opcode, panda::pandasm::Opcode::STA);
+                EXPECT_EQ(graph_visitor.GetResult().back()->GetOpcode(), panda::pandasm::Opcode::STA);
             }
         }
     });

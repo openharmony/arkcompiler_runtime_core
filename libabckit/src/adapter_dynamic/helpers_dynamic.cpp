@@ -123,8 +123,8 @@ size_t IterateRequestIdxSectionBeforeUpdate(ModuleIterateData *data)
 bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::InsPtr &inst)
 {
     if (updateData->isRegularImportsChange) {
-        if (inst->opcode == pandasm::Opcode::LDEXTERNALMODULEVAR ||
-            inst->opcode == pandasm::Opcode::WIDE_LDEXTERNALMODULEVAR) {
+        if (inst->GetOpcode() == pandasm::Opcode::LDEXTERNALMODULEVAR ||
+            inst->GetOpcode() == pandasm::Opcode::WIDE_LDEXTERNALMODULEVAR) {
             auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->GetImm(0)));
             auto foundIdx = updateData->regularImportsIdxMap.find(imm);
             if (foundIdx == updateData->regularImportsIdxMap.end()) {
@@ -143,7 +143,7 @@ bool CheckRegularImport(ModuleUpdateData *updateData, panda::pandasm::InsPtr &in
 bool CheckLocalExports(ModuleUpdateData *updateData, panda::pandasm::InsPtr &inst)
 {
     if (updateData->isLocalExportsChange) {
-        auto op = inst->opcode;
+        auto op = inst->GetOpcode();
         if (op == pandasm::Opcode::LDLOCALMODULEVAR || op == pandasm::Opcode::WIDE_LDLOCALMODULEVAR ||
             op == pandasm::Opcode::STMODULEVAR || op == pandasm::Opcode::WIDE_STMODULEVAR) {
             auto imm = static_cast<uint32_t>(std::get<int64_t>(inst->GetImm(0)));

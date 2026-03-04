@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -295,7 +295,7 @@ void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Fun
 
 void PandasmProgramDumper::DumpFunctionReturnType(std::ostream &os, const pandasm::Function &function) const
 {
-    os << function.return_type.GetPandasmName() << DUMP_CONTENT_SPACE;
+    os << function.ReturnType().GetPandasmName() << DUMP_CONTENT_SPACE;
 }
 
 void PandasmProgramDumper::DumpFunctionName(std::ostream &os, const pandasm::Function &function) const
@@ -514,15 +514,11 @@ void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm
     os << DUMP_CONTENT_LOCAL_VAR_TABLE;
     for (const auto &iter : local_variable_table) {
         const auto &variable_info = iter.second;
-        os << DUMP_CONTENT_TAB
-           << std::setw(START_WIDTH) << std::right << variable_info.start << DUMP_CONTENT_TRIPLE_SPACES;
+        os << DUMP_CONTENT_TAB << std::setw(START_WIDTH) << std::right << variable_info.start
+           << DUMP_CONTENT_TRIPLE_SPACES;
         os << std::setw(END_WIDTH) << std::right << variable_info.length << DUMP_CONTENT_DOUBLE_SPACES;
         os << std::setw(REG_WIDTH) << std::right << variable_info.reg << DUMP_CONTENT_DOUBLE_SPACES;
-        os << std::setw(NAME_WIDTH)
-           << std::right << variable_info.name << DUMP_CONTENT_NONUPLE_SPACES << variable_info.signature;
-        if (!variable_info.signature_type.empty() && variable_info.signature_type != variable_info.signature) {
-            os << " (" << variable_info.signature_type << ")";
-        }
+        os << std::setw(NAME_WIDTH) << std::right << variable_info.name << DUMP_CONTENT_NONUPLE_SPACES << "any";
         os << DUMP_CONTENT_SINGLE_ENDL;
     }
 }
@@ -535,11 +531,7 @@ void PandasmProgramDumper::UpdateLocalVarMap(const pandasm::Function &function,
         uint32_t original_end = variable_info.length + variable_info.start;
         uint32_t new_start = original_to_final_index_map_[original_start];
         uint32_t new_length = original_to_final_index_map_[original_end] - new_start;
-        panda::pandasm::debuginfo::LocalVariable local_var = {variable_info.name,
-                                                              variable_info.signature,
-                                                              variable_info.signature_type,
-                                                              variable_info.reg,
-                                                              new_start,
+        panda::pandasm::debuginfo::LocalVariable local_var = {variable_info.name, variable_info.reg, new_start,
                                                               new_length};
         local_variable_table[variable_info.reg] = local_var;
     }

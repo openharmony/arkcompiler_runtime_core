@@ -3,19 +3,19 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_1674 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
+_ESModuleRecord_1649 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
 
-_ESScopeNamesRecord_1650 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
+_ESScopeNamesRecord_1625 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
 
-_GLOBAL_1754 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1729 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1771 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_1746 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_1780 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1755 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_1802 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
+_GLOBAL_1777 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
 
-_GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1802, ]}
+_GLOBAL_1796 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1777, ]}
 
 
 
@@ -29,13 +29,13 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1664
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1649
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1640
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1625
 }
 .record.source_file 
 
@@ -68,12 +68,12 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 0
 .language ECMAScript
 .function any .#*#asyncArrowFunc(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
-	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
-	sta v0                                   # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
+	asyncfunctionenter                       # line: 4294967295           # column: 0
+	sta v0                                   # line: 4294967295           # column: 0
 	label@3:                                 # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	asyncfunctionresolve v0                  # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	asyncfunctionresolve v0                  # line: 4294967295           # column: 0
 	return                                   # line: 86           # column: 0
 	label@6:                                 # line: 0           # column: 0
 	sta v1                                   # line: 86           # column: 0
@@ -92,18 +92,18 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 4
 .language ECMAScript
 .function any .#*#asyncGenerateFunc(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
-	createasyncgeneratorobj a0               # line: 18446744073709551615           # column: 0
-	sta v0                                   # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
+	createasyncgeneratorobj a0               # line: 4294967295           # column: 0
+	sta v0                                   # line: 4294967295           # column: 0
 	label@3:                                 # line: 0           # column: 0
-	ldai 0x1                                 # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	suspendgenerator v0                      # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	resumegenerator                          # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	getresumemode                            # line: 18446744073709551615           # column: 0
+	ldai 0x1                                 # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	suspendgenerator v0                      # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	resumegenerator                          # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	getresumemode                            # line: 4294967295           # column: 0
 	lda.str hello                            # line: 83           # column: 0
 	asyncfunctionawaituncaught v0            # line: 83           # column: 0
 	suspendgenerator v0                      # line: 83           # column: 0
@@ -161,13 +161,13 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v3                                   # line: 83           # column: 0
 	throw                                    # line: 83           # column: 0
 	label@64:                                # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	ldtrue                                   # line: 18446744073709551615           # column: 0
-	sta v3                                   # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	setgeneratorstate 0x4                    # line: 18446744073709551615           # column: 0
-	asyncgeneratorresolve v0, v2, v3         # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	ldtrue                                   # line: 4294967295           # column: 0
+	sta v3                                   # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	setgeneratorstate 0x4                    # line: 4294967295           # column: 0
+	asyncgeneratorresolve v0, v2, v3         # line: 4294967295           # column: 0
 	return                                   # line: 84           # column: 0
 	label@72:                                # line: 0           # column: 0
 	sta v1                                   # line: 82           # column: 0
@@ -188,12 +188,12 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 0
 .language ECMAScript
 .function any .#*#asyncSendableFunction(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
-	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
-	sta v0                                   # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
+	asyncfunctionenter                       # line: 4294967295           # column: 0
+	sta v0                                   # line: 4294967295           # column: 0
 	label@3:                                 # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	asyncfunctionresolve v0                  # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	asyncfunctionresolve v0                  # line: 4294967295           # column: 0
 	return                                   # line: 100           # column: 0
 	label@6:                                 # line: 0           # column: 0
 	sta v1                                   # line: 98           # column: 0
@@ -319,33 +319,33 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 4
 .language ECMAScript
 .function any .#*#generateFunc(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
 	label@1:                                 # line: 0           # column: 0
-	ldai 0x0                                 # line: 18446744073709551615           # column: 0
-	sta v1                                   # line: 18446744073709551615           # column: 0
-	creategeneratorobj a0                    # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	suspendgenerator v2                      # line: 18446744073709551615           # column: 0
-	lda v2                                   # line: 18446744073709551615           # column: 0
-	resumegenerator                          # line: 18446744073709551615           # column: 0
-	sta v3                                   # line: 18446744073709551615           # column: 0
-	lda v2                                   # line: 18446744073709551615           # column: 0
-	getresumemode                            # line: 18446744073709551615           # column: 0
-	sta v4                                   # line: 18446744073709551615           # column: 0
-	lda v1                                   # line: 18446744073709551615           # column: 0
-	eq 0x0, v4                               # line: 18446744073709551615           # column: 0
-	jeqz label@18                            # line: 18446744073709551615           # column: 0
-	lda v3                                   # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
+	ldai 0x0                                 # line: 4294967295           # column: 0
+	sta v1                                   # line: 4294967295           # column: 0
+	creategeneratorobj a0                    # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	suspendgenerator v2                      # line: 4294967295           # column: 0
+	lda v2                                   # line: 4294967295           # column: 0
+	resumegenerator                          # line: 4294967295           # column: 0
+	sta v3                                   # line: 4294967295           # column: 0
+	lda v2                                   # line: 4294967295           # column: 0
+	getresumemode                            # line: 4294967295           # column: 0
+	sta v4                                   # line: 4294967295           # column: 0
+	lda v1                                   # line: 4294967295           # column: 0
+	eq 0x0, v4                               # line: 4294967295           # column: 0
+	jeqz label@18                            # line: 4294967295           # column: 0
+	lda v3                                   # line: 4294967295           # column: 0
+	return                                   # line: 4294967295           # column: 0
 	label@18:                                # line: 0           # column: 0
-	ldai 0x1                                 # line: 18446744073709551615           # column: 0
-	sta v5                                   # line: 18446744073709551615           # column: 0
-	lda v5                                   # line: 18446744073709551615           # column: 0
-	eq 0x1, v4                               # line: 18446744073709551615           # column: 0
-	jeqz label@25                            # line: 18446744073709551615           # column: 0
-	lda v3                                   # line: 18446744073709551615           # column: 0
-	throw                                    # line: 18446744073709551615           # column: 0
+	ldai 0x1                                 # line: 4294967295           # column: 0
+	sta v5                                   # line: 4294967295           # column: 0
+	lda v5                                   # line: 4294967295           # column: 0
+	eq 0x1, v4                               # line: 4294967295           # column: 0
+	jeqz label@25                            # line: 4294967295           # column: 0
+	lda v3                                   # line: 4294967295           # column: 0
+	throw                                    # line: 4294967295           # column: 0
 	label@25:                                # line: 0           # column: 0
 	lda.str hello                            # line: 79           # column: 0
 	sta v3                                   # line: 79           # column: 0
@@ -371,7 +371,7 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v3                                   # line: 79           # column: 0
 	throw                                    # line: 79           # column: 0
 	label@47:                                # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
 	return                                   # line: 80           # column: 0
 	label@49:                                # line: 0           # column: 0
 	sta v0                                   # line: 78           # column: 0
@@ -399,7 +399,7 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
-	createobjectwithbuffer 0x1, _GLOBAL_1754 # line: 72           # column: 0
+	createobjectwithbuffer 0x1, _GLOBAL_1729 # line: 72           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
 
@@ -416,23 +416,23 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 0
 .language ECMAScript
 .function any .#*@3*#method(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
-	createasyncgeneratorobj a0               # line: 18446744073709551615           # column: 0
-	sta v0                                   # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
+	createasyncgeneratorobj a0               # line: 4294967295           # column: 0
+	sta v0                                   # line: 4294967295           # column: 0
 	label@3:                                 # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	suspendgenerator v0                      # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	resumegenerator                          # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	getresumemode                            # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	ldtrue                                   # line: 18446744073709551615           # column: 0
-	sta v3                                   # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	setgeneratorstate 0x4                    # line: 18446744073709551615           # column: 0
-	asyncgeneratorresolve v0, v2, v3         # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	suspendgenerator v0                      # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	resumegenerator                          # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	getresumemode                            # line: 4294967295           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	ldtrue                                   # line: 4294967295           # column: 0
+	sta v3                                   # line: 4294967295           # column: 0
+	lda v0                                   # line: 4294967295           # column: 0
+	setgeneratorstate 0x4                    # line: 4294967295           # column: 0
+	asyncgeneratorresolve v0, v2, v3         # line: 4294967295           # column: 0
 	return                                   # line: 72           # column: 0
 	label@17:                                # line: 0           # column: 0
 	sta v1                                   # line: 72           # column: 0
@@ -475,31 +475,31 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 2
 .language ECMAScript
 .function any .#~@1>#lit(any a0, any a1, any a2) {
-	nop                                      # line: 18446744073709551615           # column: 0
+	nop                                      # line: 4294967295           # column: 0
 	label@1:                                 # line: 0           # column: 0
-	creategeneratorobj a0                    # line: 18446744073709551615           # column: 0
-	sta v1                                   # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
-	suspendgenerator v1                      # line: 18446744073709551615           # column: 0
-	lda v1                                   # line: 18446744073709551615           # column: 0
-	resumegenerator                          # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	lda v1                                   # line: 18446744073709551615           # column: 0
-	getresumemode                            # line: 18446744073709551615           # column: 0
-	sta v1                                   # line: 18446744073709551615           # column: 0
-	ldai 0x0                                 # line: 18446744073709551615           # column: 0
-	eq 0x0, v1                               # line: 18446744073709551615           # column: 0
-	jeqz label@16                            # line: 18446744073709551615           # column: 0
-	lda v2                                   # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
+	creategeneratorobj a0                    # line: 4294967295           # column: 0
+	sta v1                                   # line: 4294967295           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
+	suspendgenerator v1                      # line: 4294967295           # column: 0
+	lda v1                                   # line: 4294967295           # column: 0
+	resumegenerator                          # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	lda v1                                   # line: 4294967295           # column: 0
+	getresumemode                            # line: 4294967295           # column: 0
+	sta v1                                   # line: 4294967295           # column: 0
+	ldai 0x0                                 # line: 4294967295           # column: 0
+	eq 0x0, v1                               # line: 4294967295           # column: 0
+	jeqz label@16                            # line: 4294967295           # column: 0
+	lda v2                                   # line: 4294967295           # column: 0
+	return                                   # line: 4294967295           # column: 0
 	label@16:                                # line: 0           # column: 0
-	ldai 0x1                                 # line: 18446744073709551615           # column: 0
-	eq 0x1, v1                               # line: 18446744073709551615           # column: 0
-	jeqz label@21                            # line: 18446744073709551615           # column: 0
-	lda v2                                   # line: 18446744073709551615           # column: 0
-	throw                                    # line: 18446744073709551615           # column: 0
+	ldai 0x1                                 # line: 4294967295           # column: 0
+	eq 0x1, v1                               # line: 4294967295           # column: 0
+	jeqz label@21                            # line: 4294967295           # column: 0
+	lda v2                                   # line: 4294967295           # column: 0
+	throw                                    # line: 4294967295           # column: 0
 	label@21:                                # line: 0           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
+	ldundefined                              # line: 4294967295           # column: 0
 	return                                   # line: 26           # column: 0
 	label@23:                                # line: 0           # column: 0
 	sta v0                                   # line: 26           # column: 0
@@ -538,30 +538,30 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 30
 .language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	definefunc 0x0, .#*#asyncGenerateFunc, 0x0 # line: 18446744073709551615           # column: 0
-	definefunc 0x1, .#*#asyncSendableFunction, 0x0 # line: 18446744073709551615           # column: 0
-	definefunc 0x2, .#*#foo, 0x0             # line: 18446744073709551615           # column: 0
-	sta v0                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x3, .#*#generateFunc, 0x0    # line: 18446744073709551615           # column: 0
-	definefunc 0x4, .#*#goo, 0x0             # line: 18446744073709551615           # column: 0
-	sta v1                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x5, .#*#hoo, 0x0             # line: 18446744073709551615           # column: 0
-	sta v2                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x6, .#*#sendableFunction, 0x0 # line: 18446744073709551615           # column: 0
-	getmodulenamespace 0x1                   # line: 18446744073709551615           # column: 0
+	definefunc 0x0, .#*#asyncGenerateFunc, 0x0 # line: 4294967295           # column: 0
+	definefunc 0x1, .#*#asyncSendableFunction, 0x0 # line: 4294967295           # column: 0
+	definefunc 0x2, .#*#foo, 0x0             # line: 4294967295           # column: 0
+	sta v0                                   # line: 4294967295           # column: 0
+	definefunc 0x3, .#*#generateFunc, 0x0    # line: 4294967295           # column: 0
+	definefunc 0x4, .#*#goo, 0x0             # line: 4294967295           # column: 0
+	sta v1                                   # line: 4294967295           # column: 0
+	definefunc 0x5, .#*#hoo, 0x0             # line: 4294967295           # column: 0
+	sta v2                                   # line: 4294967295           # column: 0
+	definefunc 0x6, .#*#sendableFunction, 0x0 # line: 4294967295           # column: 0
+	getmodulenamespace 0x1                   # line: 4294967295           # column: 0
 	ldundefined                              # line: 17           # column: 0
 	stmodulevar 0x0                          # line: 17           # column: 0
 	ldhole                                   # line: 21           # column: 0
 	sta v3                                   # line: 21           # column: 0
-	defineclasswithbuffer 0x7, .#~@0=#HelloWorld, _GLOBAL_1771, 0x0, v3 # line: 21           # column: 0
+	defineclasswithbuffer 0x7, .#~@0=#HelloWorld, _GLOBAL_1746, 0x0, v3 # line: 21           # column: 0
 	ldobjbyname 0x8, prototype               # line: 21           # column: 0
 	ldhole                                   # line: 25           # column: 0
 	sta v3                                   # line: 25           # column: 0
-	defineclasswithbuffer 0xa, .#~@1=#Lit, _GLOBAL_1780, 0x0, v3 # line: 25           # column: 0
+	defineclasswithbuffer 0xa, .#~@1=#Lit, _GLOBAL_1755, 0x0, v3 # line: 25           # column: 0
 	ldobjbyname 0xb, prototype               # line: 25           # column: 0
 	ldhole                                   # line: 29           # column: 0
 	sta v3                                   # line: 29           # column: 0
-	callruntime.definesendableclass 0xd, .#~@2=#NestedLiteralArray, _GLOBAL_1821, 0x0, v3 # line: 29           # column: 0
+	callruntime.definesendableclass 0xd, .#~@2=#NestedLiteralArray, _GLOBAL_1796, 0x0, v3 # line: 29           # column: 0
 	lda.str                                  # line: 37           # column: 0
 	trystglobalbyname 0xe, string            # line: 37           # column: 0
 	definefunc 0xf, .#*#add, 0x2             # line: 75           # column: 0
@@ -585,7 +585,7 @@ _GLOBAL_1821 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	callarg1 0x1a, v1                        # line: 90           # column: 0
 	lda v2                                   # line: 92           # column: 0
 	callarg0 0x1c                            # line: 92           # column: 0
-	returnundefined                          # line: 18446744073709551615           # column: 0
+	returnundefined                          # line: 4294967295           # column: 0
 }
 
 # ====================

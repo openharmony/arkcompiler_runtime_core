@@ -32,7 +32,7 @@ TEST(parsertests, test1)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::MOV);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[1], 2) << "2 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
@@ -51,7 +51,7 @@ TEST(parsertests, test2)
 
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].label, "label") << "label expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].set_label, true) << "true expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::INVALID) << "NONE expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::INVALID) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -88,7 +88,7 @@ TEST(parsertests, test5)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ADDI) << "IMM expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::ADDI) << "IMM expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(1))) << "1 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -104,7 +104,7 @@ TEST(parsertests, test6)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ADDI) << "IMM expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::ADDI) << "IMM expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(12345))) << "12345 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -143,9 +143,9 @@ TEST(parsertests, test9)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::LDA) << "V expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::LDA) << "V expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].opcode, Opcode::MOVI) << "V_IMM expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetOpcode(), Opcode::MOVI) << "V_IMM expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].regs[0], 10) << "10 expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].imms[0], Ins::IType(int64_t(1001))) << "1001 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
@@ -164,7 +164,7 @@ TEST(parsertests, test10)
     const auto sig_main = GetFunctionSignatureFromName("main", {});
     const auto sig_nain = GetFunctionSignatureFromName("nain", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::CALL_SHORT) << "V_V_ID expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::CALL_SHORT) << "V_V_ID expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].ids[0], sig_nain) << "nain expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 1) << "1 expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[1], 2) << "2 expected";
@@ -182,7 +182,7 @@ TEST(parsertests, test11)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::I64TOF64) << "NONE expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::I64TOF64) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -208,7 +208,7 @@ TEST(parsertests, test13)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::JMP) << "ID expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::JMP) << "ID expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].ids[0], "l123") << "l123 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE";
 }
@@ -246,7 +246,7 @@ TEST(parsertests, test17)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::LDARR_8) << "V expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::LDARR_8) << "V expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 120) << "120 expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
@@ -262,7 +262,7 @@ TEST(parsertests, test18)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::RETURN) << "NONE expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::RETURN) << "NONE expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
 }
 
@@ -310,7 +310,7 @@ TEST(parsertests, test22)
 
     const auto sig_main = GetFunctionSignatureFromName("main", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::ASHR2_64) << "V expected";
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::ASHR2_64) << "V expected";
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].regs[0], 12) << "12 expected";
 }
@@ -349,42 +349,42 @@ TEST(parsertests, test23)
     ASSERT_EQ(item.Value().function_table.at(sig_m123).GetParamsNum(), 2U);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).params[0].type.GetId(), panda::panda_file::Type::TypeId::U1);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).params[1].type.GetId(), panda::panda_file::Type::TypeId::F32);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::U8);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).return_type.GetId(), panda::panda_file::Type::TypeId::F64);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ReturnType().GetId(), panda::panda_file::Type::TypeId::U8);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ReturnType().GetId(), panda::panda_file::Type::TypeId::F64);
     ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label1").file_location->line_number, 2U);
     ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label1").file_location->is_defined, true);
     ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label2").file_location->line_number, 3U);
     ASSERT_EQ(item.Value().function_table.at(sig_main).label_table.at("label2").file_location->is_defined, true);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->line_number, 11U);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).label_table.at("la1").file_location->is_defined, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].opcode, Opcode::INVALID);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].label, "label1");
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].opcode, Opcode::JLE);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->GetOpcode(), Opcode::INVALID);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0]->Label(), "label1");
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1]->GetOpcode(), Opcode::JLE);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].regs[0], 0);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].ids[0], "label2");
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].opcode, Opcode::MOVI);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2]->GetOpcode(), Opcode::MOVI);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].regs[0], 15);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].imms[0], Ins::IType(int64_t(26)));
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[2].set_label, false);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3]->GetOpcode(), Opcode::MOV);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].regs[0], 0);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].regs[1], 1);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].label, "label2");
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[3].set_label, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].opcode, Opcode::CALL);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4]->GetOpcode(), Opcode::CALL);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[0], 2);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[1], 6);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[2], 3);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].regs[3], 4);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[4].ids[0], sig_m123);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0].opcode, Opcode::LDA);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0].regs[0], 10);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1].opcode, Opcode::STA);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1].regs[0], 11);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].opcode, Opcode::INVALID);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].label, "la1");
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2].set_label, true);
-    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].opcode, Opcode::JLE);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0]->GetOpcode(), Opcode::LDA);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[0]->Regs()[0], 10);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1]->GetOpcode(), Opcode::STA);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[1]->Regs()[0], 11);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2]->GetOpcode(), Opcode::INVALID);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2]->Label(), "la1");
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[2]->IsLabel(), true);
+    ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3]->GetOpcode(), Opcode::JLE);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].regs[0], 12);
     ASSERT_EQ(item.Value().function_table.at(sig_m123).ins[3].ids[0], "la1");
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
@@ -419,7 +419,7 @@ TEST(parsertests, test24_functions)
     const auto sig_main = GetFunctionSignatureFromName("main", {});
     const auto sig_niam = GetFunctionSignatureFromName("niam", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::VOID);
+    ASSERT_EQ(item.Value().function_table.at(sig_main).ReturnType().GetId(), panda::panda_file::Type::TypeId::VOID);
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[0].imms[0], Ins::IType(int64_t(256))) << "256 expected";
     ASSERT_EQ(item.Value().function_table.at(sig_main).ins[1].imms[0], Ins::IType(int64_t(4294967295)))
         << "4294967295 expected";
@@ -878,18 +878,18 @@ TEST(parsertests, test35_functions_bracket)
     ASSERT_EQ(item.Value().function_table.at(sig_nain10).name, sig_nain10);
     ASSERT_EQ(item.Value().function_table.at(sig_nain11).name, sig_nain11);
 
-    ASSERT_EQ(item.Value().function_table.at(sig_nain1).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain2).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain3).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain4).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain5).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain6).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain7).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain8).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain9).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain10).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain11).ins[0].opcode, Opcode::MOV);
-    ASSERT_EQ(item.Value().function_table.at(sig_nain12).ins[0].opcode, Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain1).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain2).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain3).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain4).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain5).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain6).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain7).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain8).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain9).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain10).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain11).ins[0]->GetOpcode(), Opcode::MOV);
+    ASSERT_EQ(item.Value().function_table.at(sig_nain12).ins[0]->GetOpcode(), Opcode::MOV);
 }
 
 TEST(parsertests, test36_records_bracket)
@@ -953,12 +953,12 @@ TEST(parsertests, test37_operand_type_print)
     params.emplace_back(Type {"i64", 0}, language);
     const auto sig_nain1 = GetFunctionSignatureFromName("nain1", params);
 
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[0].opcode), "reg_reg");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[1].opcode), "reg_imm");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[2].opcode), "label");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[3].opcode), "reg");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[4].opcode), "none");
-    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[5].opcode), "call_reg_reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[0]->GetOpcode()), "reg_reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[1]->GetOpcode()), "reg_imm");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[2]->GetOpcode()), "label");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[3]->GetOpcode()), "reg");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[4]->GetOpcode()), "none");
+    ASSERT_EQ(OperandTypePrint(item.Value().function_table.at(sig_nain1).ins[5]->GetOpcode()), "call_reg_reg");
 }
 
 TEST(parsertests, test38_record_invalid_field)
@@ -1829,11 +1829,11 @@ TEST(parsertests, array_type)
         ASSERT_EQ(item.Value().record_table.at("R").field_list[0].type.GetComponentName(), "R");
         ASSERT_EQ(item.Value().record_table.at("R").field_list[0].type.GetDescriptor(), "[[LR;");
 
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).return_type.IsArray());
-        ASSERT_TRUE(item.Value().function_table.at(sig_f).return_type.IsObject());
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetName(), "R[]");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetComponentName(), "R");
-        ASSERT_EQ(item.Value().function_table.at(sig_f).return_type.GetDescriptor(), "[LR;");
+        ASSERT_TRUE(item.Value().function_table.at(sig_f).ReturnType().IsArray());
+        ASSERT_TRUE(item.Value().function_table.at(sig_f).ReturnType().IsObject());
+        ASSERT_EQ(item.Value().function_table.at(sig_f).ReturnType().GetName(), "R[]");
+        ASSERT_EQ(item.Value().function_table.at(sig_f).ReturnType().GetComponentName(), "R");
+        ASSERT_EQ(item.Value().function_table.at(sig_f).ReturnType().GetDescriptor(), "[LR;");
 
         ASSERT_EQ(item.Value().function_table.at(sig_f).params.size(), 1U);
         ASSERT_TRUE(item.Value().function_table.at(sig_f).params[0].type.IsArray());
@@ -3977,10 +3977,10 @@ TEST(parsertests, test_array_string_use)
 
     const auto sig_f = GetFunctionSignatureFromName("f", {});
 
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].opcode, Opcode::LDA_CONST);
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0].ids[0], "array");
+    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0]->GetOpcode(), Opcode::LDA_CONST);
+    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[0]->Ids()[0], "array");
 
-    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].opcode, Opcode::LDA_CONST);
+    ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1]->GetOpcode(), Opcode::LDA_CONST);
     ASSERT_EQ(item.Value().function_table.at(sig_f).ins[1].ids[0], "array_static");
 }
 

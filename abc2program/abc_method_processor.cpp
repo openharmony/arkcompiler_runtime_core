@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,6 @@ void AbcMethodProcessor::FillProto()
     }
 
     pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
-    function_.return_type = any_type;
     for (uint32_t i = 0; i < params_num; i++) {
         function_.params.emplace_back(
             pandasm::Function::Parameter(any_type, function_.language)

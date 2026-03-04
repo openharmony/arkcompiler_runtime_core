@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,7 @@ const OpcodeList METHOD_NAME_INDIRECT_LIST = {
 
 bool InOpcodeList(const panda::guard::InstructionInfo &info, const OpcodeList &list)
 {
-    return std::any_of(list.begin(), list.end(), [&](const auto &elem) { return elem == info.ins_->opcode; });
+    return std::any_of(list.begin(), list.end(), [&](const auto &elem) { return elem == info.ins_->GetOpcode(); });
 }
 
 void UpdateScopeNamesLiteralArray(panda::pandasm::LiteralArray &literalArray)
@@ -338,7 +338,7 @@ void panda::guard::Node::CreateClass(const InstructionInfo &info, Scope scope)
         clazz->component_ = GraphAnalyzer::IsComponentClass(info);
     }
     clazz->scope_ = scope;
-    if (info.ins_->opcode == pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
+    if (info.ins_->GetOpcode() == pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS) {
         clazz->callRunTimeInst_ = true;
     }
     clazz->Create();

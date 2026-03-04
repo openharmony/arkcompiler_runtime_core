@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -628,12 +628,12 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_imm_of_FLDAI, TestSize.Leve
     EXPECT_EQ(hoo.ins.size(), INS_SIZE_OF_FUNCTION_HOO);
     pandasm::Ins *ins_fldai;
     for (auto &ins : hoo.ins) {
-        if (ins->opcode == pandasm::Opcode::FLDAI) {
+        if (ins->GetOpcode() == pandasm::Opcode::FLDAI) {
             ins_fldai = ins.get();
             break;
         }
     }
-    EXPECT_TRUE(ins_fldai->opcode == pandasm::Opcode::FLDAI);
+    EXPECT_TRUE(ins_fldai->GetOpcode() == pandasm::Opcode::FLDAI);
     // check imm of FLDAI
     EXPECT_EQ(ins_fldai->Imms().size(), IMMS_SIZE_OF_OPCODE_FLDAI);
     auto imm = ins_fldai->GetImm(0);
@@ -795,8 +795,6 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_local_vari
     const pandasm::Function &function = *foo_function_;
     EXPECT_FALSE(function.local_variable_debug.empty());
     EXPECT_TRUE(function.local_variable_debug[0].name.find("4funcObj") != std::string::npos);
-    EXPECT_TRUE(function.local_variable_debug[0].signature.find("any") != std::string::npos);
-    EXPECT_TRUE(function.local_variable_debug[0].signature_type.find("any") != std::string::npos);
     EXPECT_TRUE(function.local_variable_debug[0].reg == 0);
     EXPECT_TRUE(function.local_variable_debug[0].start == 3);
     EXPECT_TRUE(function.local_variable_debug[0].length == 88);

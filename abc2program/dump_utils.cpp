@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,13 +83,13 @@ std::string PandasmDumperUtils::LiteralTagToString(const panda_file::LiteralTag 
 
 bool PandasmDumperUtils::IsMatchLiteralId(const pandasm::InsPtr &pa_ins)
 {
-    auto it = opcode_literal_id_index_map_.find(pa_ins->opcode);
+    auto it = opcode_literal_id_index_map_.find(pa_ins->GetOpcode());
     return (it != opcode_literal_id_index_map_.end());
 }
 
 size_t PandasmDumperUtils::GetLiteralIdIndex4Ins(const pandasm::InsPtr &pa_ins)
 {
-    auto it = opcode_literal_id_index_map_.find(pa_ins->opcode);
+    auto it = opcode_literal_id_index_map_.find(pa_ins->GetOpcode());
     ASSERT(it != opcode_literal_id_index_map_.end());
     return it->second;
 }

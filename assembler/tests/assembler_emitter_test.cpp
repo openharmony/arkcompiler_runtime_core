@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file EXPECT in compliance with the License.
  * You may obtain a copy of the License at
@@ -438,20 +438,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_005, TestSize.Level1)
         auto pf = AsmEmitter::Emit(res.Value());
         EXPECT_EQ(pf, nullptr);
         EXPECT_EQ(AsmEmitter::GetLastError(), "Function A.b is bound to undefined record A");
-    }
-
-    {
-        Parser p;
-        auto source = R"(
-            .function A b() {}
-        )";
-
-        auto res = p.Parse(source);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-
-        auto pf = AsmEmitter::Emit(res.Value());
-        EXPECT_EQ(pf, nullptr);
-        EXPECT_EQ(AsmEmitter::GetLastError(), "Function b has undefined return type");
     }
 
     {
@@ -1146,8 +1132,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_019, TestSize.Level1)
     program.Value().function_table.at("f:(i8)").metadata->SetAttribute("external");
     panda::pandasm::debuginfo::LocalVariable local;
     local.name = "test";
-    local.signature = "test";
-    local.signature_type = "test";
     program.Value().function_table.at("f:(i8)").local_variable_debug.push_back(local);
     EXPECT_EQ(par.ShowError().err, Error::ErrorType::ERR_NONE);
     auto success = AsmEmitter::Emit(program.Value());

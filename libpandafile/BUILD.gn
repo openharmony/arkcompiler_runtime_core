@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,10 @@ config("arkfile_public_config") {
   }
 }
 
+config("arkfile_frontend_public_config") {
+  defines = [ "ETS_FRONTEND_USE "]
+}
+
 if (!ark_standalone_build && !is_arkui_x) {
   ohos_shared_headers("arkfile_public_headers") {
     include_dirs = [
@@ -35,6 +39,7 @@ if (!ark_standalone_build && !is_arkui_x) {
       "$target_gen_dir",
       "$target_gen_dir/include",
     ]
+
     part_name = "runtime_core"
     subsystem_name = "arkcompiler"
   }
@@ -98,6 +103,26 @@ libarkfile_sources = [
   "method_handle_data_accessor.cpp",
   "module_data_accessor.cpp",
   "pgo.cpp",
+  "util/collect_util.cpp",
+]
+
+libarkfile_frontend_sources = [
+  "annotation_data_accessor.cpp",
+  "bytecode_emitter.cpp",
+  "class_data_accessor.cpp",
+  "code_data_accessor.cpp",
+  "debug_data_accessor.cpp",
+  "debug_info_extractor.cpp",
+  "field_data_accessor.cpp",
+  "file.cpp",
+  "file_format_version.cpp",
+  "file_item_container.cpp",
+  "file_items.cpp",
+  "file_writer.cpp",
+  "literal_data_accessor.cpp",
+  "method_data_accessor.cpp",
+  "method_handle_data_accessor.cpp",
+  "module_data_accessor.cpp",
   "util/collect_util.cpp",
 ]
 
@@ -297,10 +322,11 @@ ohos_shared_library("libarkfile") {
 }
 
 ohos_source_set("libarkfile_frontend_set_static") {
-  sources = libarkfile_sources
+  sources = libarkfile_frontend_sources
 
   public_configs = libarkfile_configs
   public_configs += [ "$ark_root:ark_config" ]
+  public_configs += [ ":arkfile_frontend_public_config" ]
 
   deps = [
     ":arkfile_header_deps",
@@ -335,6 +361,11 @@ ohos_source_set("libarkfile_frontend_set_static") {
 ohos_static_library("libarkfile_frontend_static") {
   stack_protector_ret = false
   deps = [ ":libarkfile_frontend_set_static" ]
+
+  public_configs = [
+    ":arkfile_public_config",
+    ":arkfile_frontend_public_config",
+  ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
